@@ -27,8 +27,19 @@ MODEL_TOKEN_LIMITS = {
 }
 
 
-# Fonction de traduction adaptée pour utiliser soit OpenAI soit Mistral AI
 def translate(text, client, args, use_mistral=False):
+    """
+    Fonction de traduction adaptée pour utiliser soit OpenAI soit Mistral AI.
+
+    Args:
+        text (str): Texte à traduire.
+        client: Objet client de traduction.
+        args: Arguments supplémentaires pour la traduction.
+        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
+
+    Returns:
+        str: Texte traduit.
+    """
     # Détecter et stocker les blocs de code
     code_blocks = re.findall(r'(^```[a-zA-Z]*\n.*?\n^```)', text, flags=re.MULTILINE | re.DOTALL)
     placeholders = [f"#CODEBLOCK{index}#" for index, _ in enumerate(code_blocks)]
@@ -60,13 +71,37 @@ def translate(text, client, args, use_mistral=False):
 
 
 def add_translation_note(client, args, use_mistral):
+    """
+    Ajoute une note de traduction.
+
+    Args:
+        client: Objet client de traduction.
+        args: Arguments supplémentaires pour la traduction.
+        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
+
+    Returns:
+        str: Note de traduction.
+    """
     translation_note_fr = "Ce document a été traduit de la version française du blog par le modèle "
     translated_note = translate(translation_note_fr + args.model, client, args, use_mistral)
     return f"\n\n**{translated_note}**\n\n"
 
 
-# Traitement des fichiers Markdown
 def translate_markdown_file(file_path, output_path, client, args, use_mistral):
+    """
+    Traduit un fichier Markdown.
+
+    Args:
+        file_path (str): Chemin vers le fichier d'entrée.
+        output_path (str): Chemin vers le fichier de sortie.
+        client: Objet client de traduction.
+        args: Arguments supplémentaires pour la traduction.
+        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
+
+    Returns:
+        None
+    """
+    # Afficher le fichier en cours de traitement
     print(f"Traitement du fichier : {file_path}")
     start_time = time.time()
 
@@ -94,6 +129,7 @@ def translate_directory(input_dir, output_dir, client, args, use_mistral):
         output_dir (str): Chemin vers le répertoire de sortie.
         client: Objet client de traduction.
         args: Arguments supplémentaires pour la traduction.
+        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
 
     Returns:
         None
