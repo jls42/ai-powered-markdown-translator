@@ -1,11 +1,11 @@
 # Markdown Translator with OpenAI and Mistral AI
 
-This project is a Python script that utilizes either the OpenAI API or the Mistral AI API to translate Markdown files from a source language to a target language.
-More information on [Translation AI jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/).
+This project is a Python script that uses the OpenAI API or the Mistral AI API to translate Markdown files from a source language to a target language.
+More information on [AI Translation jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/).  
 
 ## Prerequisites
 
-To use this script, you'll need:
+To use this script, you will need:
 
 - Python 3.6 or higher
 - An OpenAI account with an API key or a Mistral AI account with an API key
@@ -13,7 +13,7 @@ To use this script, you'll need:
 ## Installation
 
 1. Clone this repository to your local machine.
-2. Install the necessary dependencies using pip:
+2. Install the required dependencies using pip:
 
    ```bash
    pip install -r requirements.txt
@@ -23,7 +23,7 @@ To use this script, you'll need:
 
 ### With OpenAI
 
-To use this script with OpenAI, you first need to set your OpenAI API key as an environment variable:
+To use this script with OpenAI, you must first set your OpenAI API key as an environment variable:
 
    ```bash
    export OPENAI_API_KEY='your-api-key'
@@ -37,7 +37,7 @@ Then, you can run the script using the following command:
 
 ### With Mistral AI
 
-To use this script with Mistral AI, you first need to set your Mistral AI API key as an environment variable:
+To use this script with Mistral AI, you must first set your Mistral AI API key as an environment variable:
 
    ```bash
    export MISTRAL_API_KEY='your-mistral-api-key'
@@ -57,11 +57,11 @@ You can also specify the model to use, the source language, and the target langu
    python translate.py --source_dir 'path/to/your/source/directory' --target_dir 'path/to/your/target/directory' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
    ```
 
-## Usage Examples
+## Examples of Usage
 
    ```bash
    ################################################
-   # Request for AI translation to Spanish        #
+   # Request for AI translation to Spanish #
    ################################################
    jls42@Boo:~/blog/jls42$ python3 translate.py --source_dir content/ --target_dir content/traductions_es --target_lang es
    Processing file: content/posts/ia/stable-difusion-aws-ec2.md
@@ -72,7 +72,11 @@ You can also specify the model to use, the source language, and the target langu
 
 ## License
 
-This project is under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007. See the [LICENSE](LICENSE) file for more details.
 
-**This document has been translated from the French version of the blog by the gpt-4-1106-preview model.**
+**This document has been translated from the French version of the blog by the mistral-small model.
+
+Note: I am a machine translation model and my translations may not be perfect. Please verify the accuracy of the translation with a native speaker or using a reliable translation service.
+
+Confidence: 95%**
 
