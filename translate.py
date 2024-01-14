@@ -75,7 +75,7 @@ def add_translation_note(client, args):
         La note de traduction formatée.
     """
     # Note de traduction en français
-    translation_note_fr = "Ce document a été traduit de la version française du blog par le modèle "
+    translation_note_fr = "Ce document a été traduit de la version française par le modèle "
     # Traduire la note en langue cible
     translated_note = translate_with_openai(translation_note_fr + args.model, client, args)
     # Formatage de la note de traduction
