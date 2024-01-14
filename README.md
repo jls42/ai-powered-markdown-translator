@@ -3,7 +3,7 @@ Voici le contenu du README en Markdown pour votre script de traduction :
 # Traducteur de Markdown avec OpenAI
 
 Ce projet est un script Python qui utilise l'API OpenAI pour traduire des fichiers Markdown d'une langue source vers une langue cible.
-Plus d'information sur ![Traduction IA jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/).  
+Plus d'information sur [Traduction IA jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/).  
 
 ## Prérequis
 
