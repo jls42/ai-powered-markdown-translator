@@ -1,89 +1,78 @@
-以下是用Markdown写成的README文件内容，用于您的翻译脚本：
+# 使用OpenAI和Mistral AI进行Markdown翻译的脚本
 
-# OpenAI Markdown翻译器
+该项目是一个Python脚本，它使用OpenAI或Mistral AI的API来将Markdown文件从源语言翻译成目标语言。
+更多信息请参见[人工智能翻译 jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/)。
 
-这个项目是一个Python脚本，它使用OpenAI的API来将Markdown文件从源语言翻译成目标语言。
-更多关于[人工智能翻译 jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/)的信息。
+## 先决条件
 
-## 前提条件
-
-要使用这个脚本，您需要：
+要使用此脚本，您需要：
 
 - Python 3.6 或更高版本
-- 一个带有API密钥的OpenAI账户
+- 一个带有API密钥的OpenAI账户或一个带有API密钥的Mistral AI账户
 
 ## 安装
 
-1. 克隆此存储库到您的本地机器。
-2. 使用pip安装所需依赖项：
+1. 克隆此仓库到您的本地机器。
+2. 使用pip安装必要的依赖：
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## 使用方法
+## 使用
 
-在使用这个脚本之前，您首先需要将您的OpenAI API密钥设为环境变量：
+### 使用OpenAI
 
-```bash
-export OPENAI_API_KEY='votre-clé-api'
-```
+要使用OpenAI的脚本，您首先需要将您的OpenAI API密钥设置为环境变量：
 
+   ```bash
+   export OPENAI_API_KEY='您的api密钥'
+   ```
 
-然后，您可以使用以下命令来运行脚本：
+然后，您可以使用以下命令运行脚本：
 
-```bash
-python translate.py --source_dir 'chemin/vers/votre/répertoire/source' --target_dir 'chemin/vers/votre/répertoire/cible'
-```
+   ```bash
+   python translate.py --source_dir '源目录/路径' --target_dir '目标目录/路径'
+   ```
 
-您还可以指定模型、源语言和目标语言：
+### 使用Mistral AI
 
-```bash
-python translate.py --source_dir 'chemin/vers/votre/répertoire/source' --target_dir 'chemin/vers/votre/répertoire/cible' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
-```
+要使用Mistral AI的脚本，您首先需要将您的Mistral AI API密钥设置为环境变量：
+
+   ```bash
+   export MISTRAL_API_KEY='您的mistral-api密钥'
+   ```
+
+然后，使用`--use_mistral`选项运行脚本：
+
+   ```bash
+   python translate.py --use_mistral --source_dir '源目录/路径' --target_dir '目标目录/路径' --model 'mistral-small'
+   ```
+
+### 通用选项
+
+您还可以指定要使用的模型，源语言和目标语言：
+
+   ```bash
+   python translate.py --source_dir '源目录/路径' --target_dir '目标目录/路径' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
+   ```
 
 ## 使用示例
 
-```bash
-################################################
-# Demande de traduction à l'IA vers l'espagnol #
-################################################
-jls42@Boo:~/blog/jls42$ python3 translate.py --source_dir content/ --target_dir content/traductions_es --target_lang es
-Traitement du fichier : content/posts/ia/stable-difusion-aws-ec2.md
-Traduction terminée en 33.19 secondes.
-Fichier 'stable-difusion-aws-ec2.md' traité.
-Traitement du fichier : content/posts/ia/poc-openai-api-gpt4.md
-Traduction terminée en 25.24 secondes.
-Fichier 'poc-openai-api-gpt4.md' traité.
-Traitement du fichier : content/posts/ia/poc-mistral-ai-mixtral.md
-Traduction terminée en 58.78 secondes.
-Fichier 'poc-mistral-ai-mixtral.md' traité.
-Traitement du fichier : content/posts/raspberry-pi/installation-de-kubernetes-sur-raspberry-pi-via-ansible.md
-Traduction terminée en 17.64 secondes.
-Fichier 'installation-de-kubernetes-sur-raspberry-pi-via-ansible.md' traité.
-Traitement du fichier : content/posts/raspberry-pi/installation-de-docker-sur-raspberry-pi-via-ansible.md
-Traduction terminée en 19.60 secondes.
-Fichier 'installation-de-docker-sur-raspberry-pi-via-ansible.md' traité.
-Traitement du fichier : content/posts/raspberry-pi/initialisation-auto-de-raspbian-sur-raspberry-pi.md
-Traduction terminée en 37.12 secondes.
-Fichier 'initialisation-auto-de-raspbian-sur-raspberry-pi.md' traité.
-Traitement du fichier : content/posts/blog/nouveau-theme-logo.md
-Traduction terminée en 18.91 secondes.
-Fichier 'nouveau-theme-logo.md' traité.
-Traitement du fichier : content/posts/infrastructure/infrastruture-as-code-serverless-ha-jls42-org.md
-Traduction terminée en 30.73 secondes.
-Fichier 'infrastruture-as-code-serverless-ha-jls42-org.md' traité.
-Traitement du fichier : content/mentions/mentions-legales.md
-Traduction terminée en 13.14 secondes.
-Fichier 'mentions-legales.md' traité.
-Traitement du fichier : content/about/a-propos-du-blog-jls42.md
-Traduction terminée en 11.24 secondes.
-Fichier 'a-propos-du-blog-jls42.md' traité.
-```
+   ```bash
+   ################################################
+   # 向人工智能请求翻译成西班牙语 #
+   ################################################
+   jls42@Boo:~/blog/jls42$ python3 translate.py --source_dir content/ --target_dir content/traductions_es --target_lang es
+   处理文件：content/posts/ia/stable-difusion-aws-ec2.md
+   翻译完成时间：33.19秒。
+   文件'stable-difusion-aws-ec2.md'已处理。
+   # ... 其他结果行 ...
+   ```
 
 ## 许可证
 
-该项目在GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007下授权。更多详情见[LICENSE](LICENSE)文件。
+该项目采用GNU GENERAL PUBLIC LICENSE 版本3，2007年6月29日。更多详细信息，请查阅 [LICENSE](LICENSE) 文件。
 
-**这份文档是由 gpt-4-1106-preview 模型从法语博客的版本翻译过来的。**
+**此文件已由 gpt-4-1106-preview 模型从博客的法文版本翻译。**
 
