@@ -37,7 +37,7 @@ def translate_with_openai(text, client, args):
         str : Le texte traduit.
     """
     # Détecter et stocker les blocs de code
-    code_blocks = re.findall(r'(```.*?```)', text, flags=re.DOTALL)
+    code_blocks = re.findall(r'(^```[a-zA-Z]*\n.*?\n^```)', text, flags=re.MULTILINE | re.DOTALL)
     placeholders = [f"#CODEBLOCK{index}#" for index, _ in enumerate(code_blocks)]
     
     # Remplacer les blocs de code par des placeholders
