@@ -5,6 +5,9 @@ import argparse
 import time
 from openai import OpenAI
 import re
+from mistralai.client import MistralClient
+from mistralai.models.chat_completion import ChatMessage
+
 
 # Initialisation de la configuration avec les valeurs par défaut
 DEFAULT_API_KEY = 'votre-clé-api-par-défaut'
@@ -23,88 +26,91 @@ MODEL_TOKEN_LIMITS = {
     "gpt-4-32k-0613": 32768
 }
 
-# Fonction de traduction
-def translate_with_openai(text, client, args):
+
+def translate(text, client, args, use_mistral=False):
     """
-    Traduit le texte donné du langage source au langage cible en utilisant l'API OpenAI.
-    
+    Fonction de traduction adaptée pour utiliser soit OpenAI soit Mistral AI.
+
     Args:
-        text (str) : Le texte à traduire.
-        client : L'objet client OpenAI.
-        args : Les arguments contenant les informations sur le langage source, le langage cible et le modèle.
-        
+        text (str): Texte à traduire.
+        client: Objet client de traduction.
+        args: Arguments supplémentaires pour la traduction.
+        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
+
     Returns:
-        str : Le texte traduit.
+        str: Texte traduit.
     """
     # Détecter et stocker les blocs de code
     code_blocks = re.findall(r'(^```[a-zA-Z]*\n.*?\n^```)', text, flags=re.MULTILINE | re.DOTALL)
     placeholders = [f"#CODEBLOCK{index}#" for index, _ in enumerate(code_blocks)]
-    
+
     # Remplacer les blocs de code par des placeholders
     for placeholder, code_block in zip(placeholders, code_blocks):
         text = text.replace(code_block, placeholder)
-    
-    # Création du message pour l'API
-    messages = [
-        {"role": "system", "content": f"Translate the following text from {args.source_lang} to {args.target_lang}, ensuring that elements such as URLs, image paths, and code blocks (delimited by ```) are not translated. Leave these elements unchanged."},
-        {"role": "user", "content": text}
-    ]
-    
-    # Envoi de la demande de traduction
-    response = client.chat.completions.create(
-        model=args.model,
-        messages=messages
-    )
-    
-    # Obtenir le texte traduit et remplacer les placeholders par les blocs de code originaux
-    translated_text = response.choices[0].message.content.strip()
+
+    if use_mistral:
+        messages = [ChatMessage(role="user", content=f"Translate the following text from {args.source_lang} to {args.target_lang}, ensuring that elements such as URLs, image paths, and code blocks (delimited by ```) are not translated. Leave these elements unchanged. : '{text}'")]
+        response = client.chat(model=args.model, messages=messages)
+        translated_text = response.choices[0].message.content.strip()
+    else:
+        messages = [
+            {"role": "system", "content": f"Translate the following text from {args.source_lang} to {args.target_lang}, ensuring that elements such as URLs, image paths, and code blocks (delimited by ```) are not translated. Leave these elements unchanged."},
+            {"role": "user", "content": text}
+        ]
+        response = client.chat.completions.create(
+            model=args.model,
+            messages=messages
+        )
+        translated_text = response.choices[0].message.content.strip()
+
+    # Remplacer les placeholders par les blocs de code originaux
     for placeholder, code_block in zip(placeholders, code_blocks):
         translated_text = translated_text.replace(placeholder, code_block)
 
     return translated_text
 
-def add_translation_note(client, args):
+
+def add_translation_note(client, args, use_mistral):
     """
-    Ajoute une note de traduction à un document.
+    Ajoute une note de traduction.
 
     Args:
-        client : Le client de traduction.
-        args : Arguments supplémentaires.
+        client: Objet client de traduction.
+        args: Arguments supplémentaires pour la traduction.
+        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
 
     Returns:
-        La note de traduction formatée.
+        str: Note de traduction.
     """
-    # Note de traduction en français
-    translation_note_fr = "Ce document a été traduit de la version française par le modèle "
-    # Traduire la note en langue cible
-    translated_note = translate_with_openai(translation_note_fr + args.model, client, args)
-    # Formatage de la note de traduction
+    translation_note_fr = "Ce document a été traduit de la version française du blog par le modèle "
+    translated_note = translate(translation_note_fr + args.model, client, args, use_mistral)
     return f"\n\n**{translated_note}**\n\n"
 
-# Traitement des fichiers Markdown
-def translate_markdown_file(file_path, output_path, client, args):
+
+def translate_markdown_file(file_path, output_path, client, args, use_mistral):
     """
-    Traduit le contenu d'un fichier markdown en utilisant l'API de traduction OpenAI et écrit le contenu traduit dans un nouveau fichier.
+    Traduit un fichier Markdown.
 
     Args:
-        file_path (str): Chemin vers le fichier markdown d'entrée.
-        output_path (str): Chemin vers le fichier de sortie où le contenu traduit sera écrit.
-        client: Client de traduction OpenAI.
-        args: Arguments supplémentaires pour le processus de traduction.
+        file_path (str): Chemin vers le fichier d'entrée.
+        output_path (str): Chemin vers le fichier de sortie.
+        client: Objet client de traduction.
+        args: Arguments supplémentaires pour la traduction.
+        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
 
     Returns:
         None
     """
+    # Afficher le fichier en cours de traitement
     print(f"Traitement du fichier : {file_path}")
     start_time = time.time()
 
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    translated_content = translate_with_openai(content, client, args)
+    translated_content = translate(content, client, args, use_mistral)
     
-    # Ajouter la note de traduction à la fin du contenu traduit
-    translation_note = add_translation_note(client, args)
+    translation_note = add_translation_note(client, args, use_mistral)
     translated_content_with_note = translated_content + translation_note
 
     with open(output_path, 'w', encoding='utf-8') as f:
@@ -113,7 +119,8 @@ def translate_markdown_file(file_path, output_path, client, args):
     end_time = time.time()
     print(f"Traduction terminée en {end_time - start_time:.2f} secondes.")
 
-def translate_directory(input_dir, output_dir, client, args):
+
+def translate_directory(input_dir, output_dir, client, args, use_mistral):
     """
     Traduit tous les fichiers markdown dans le répertoire d'entrée et ses sous-répertoires.
 
@@ -122,6 +129,7 @@ def translate_directory(input_dir, output_dir, client, args):
         output_dir (str): Chemin vers le répertoire de sortie.
         client: Objet client de traduction.
         args: Arguments supplémentaires pour la traduction.
+        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
 
     Returns:
         None
@@ -142,33 +150,35 @@ def translate_directory(input_dir, output_dir, client, args):
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
                 if not os.path.exists(output_path):
-                    translate_markdown_file(file_path, output_path, client, args)
+                    translate_markdown_file(file_path, output_path, client, args, use_mistral)
                     print(f"Fichier '{file}' traité.")
 
 
 def main():
-    """
-    Fonction principale pour traduire les fichiers Markdown.
-
-    Args:
-        --source_dir (str): Répertoire source contenant les fichiers Markdown.
-        --target_dir (str): Répertoire cible pour sauvegarder les traductions.
-        --model (str): Modèle GPT à utiliser.
-        --target_lang (str): Langue cible pour la traduction.
-        --source_lang (str): Langue source pour la traduction.
-    """
     parser = argparse.ArgumentParser(description="Traduit les fichiers Markdown.")
     parser.add_argument('--source_dir', type=str, default=DEFAULT_SOURCE_DIR, help='Répertoire source contenant les fichiers Markdown')
     parser.add_argument('--target_dir', type=str, default=DEFAULT_TARGET_DIR, help='Répertoire cible pour sauvegarder les traductions')
     parser.add_argument('--model', type=str, default=DEFAULT_MODEL, help='Modèle GPT à utiliser')
     parser.add_argument('--target_lang', type=str, default=DEFAULT_TARGET_LANG, help='Langue cible pour la traduction')
     parser.add_argument('--source_lang', type=str, default=DEFAULT_SOURCE_LANG, help='Langue source pour la traduction')
+    parser.add_argument('--use_mistral', action='store_true', help="Utiliser l'API Mistral AI pour la traduction")
 
     args = parser.parse_args()
 
-    openai_api_key = os.getenv('OPENAI_API_KEY', DEFAULT_API_KEY)
-    with OpenAI(api_key=openai_api_key) as client:
-        translate_directory(args.source_dir, args.target_dir, client, args)
+    if args.use_mistral:
+        api_key = os.getenv('MISTRAL_API_KEY', 'votre-clé-api-mistral')
+        client = MistralClient(api_key=api_key)
+    else:
+        openai_api_key = os.getenv('OPENAI_API_KEY', DEFAULT_API_KEY)
+        client = OpenAI(api_key=openai_api_key)
+
+    translate_directory(args.source_dir, args.target_dir, client, args, args.use_mistral)
+
+    if args.use_mistral:
+        try:
+            del client
+        except TypeError:
+            pass
 
 if __name__ == "__main__":
     main()
