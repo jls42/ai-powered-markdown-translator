@@ -1,89 +1,76 @@
-Aquí está el contenido del README en Markdown para su script de traducción:
+# Traductor de Markdown Potenciado por IA con OpenAI y Mistral AI
 
-# Traductor de Markdown con OpenAI
+Este proyecto es un script avanzado de Python que utiliza la API de OpenAI o la API de Mistral AI para traducir archivos Markdown de un idioma fuente a un idioma objetivo. Está diseñado para ser flexible y fácil de usar, ofreciendo opciones adicionales como la adición de una nota de traducción y el soporte de varios idiomas y modelos de traducción.
 
-Este proyecto es un script de Python que utiliza la API de OpenAI para traducir archivos Markdown de un idioma fuente a un idioma objetivo.
-Más información en [Traducción IA jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/).
+Para una demostración y explicaciones detalladas, visite [Traducción IA jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/) o en versión traducida: [English](/traductions_en/), [Español](/traductions_es/) y [中文中文](/traductions_zh/).
 
-## Prerrequisitos
+## Características Principales
 
-Para utilizar este script, necesitará:
+- **Traducción Potenciada por IA**: Utilice las últimas tecnologías de IA para la traducción de sus documentos.
+- **Soporte Multilingüe**: Traduzca sus documentos en varios idiomas con soporte para diferentes modelos de lenguaje.
+- **Segmentación Inteligente**: Gestione de manera eficiente textos largos gracias a una segmentación automatizada.
+- **Nota de Traducción**: Añada automáticamente una nota de traducción para informar a los lectores sobre el proceso utilizado.
+- **Flexible y Extensible**: El código está estructurado para permitir una fácil adición de nuevas funcionalidades.
 
-- Python 3.6 o superior
-- Una cuenta de OpenAI con una clave API
+## Requisitos Previos
+
+- Python 3.6 o una versión posterior.
+- Una clave API válida para OpenAI o Mistral AI.
 
 ## Instalación
 
-1. Clone este repositorio en su máquina local.
-2. Instale las dependencias necesarias utilizando pip:
+1. Clone el repositorio Git:
+   ```
+   git clone https://github.com/votre-repertoire/translate-markdown.git
+   ```
+2. Instale las dependencias necesarias:
+   ```
+   pip install -r requirements.txt
+   ```
 
-```bash
-pip install -r requirements.txt
-```
+## Configuración
+
+Antes de ejecutar el script, configure su entorno:
+
+- **OpenAI**: Establezca su clave API de OpenAI como variable de entorno:
+  ```
+  export OPENAI_API_KEY='su-clave-api-openai'
+  ```
+- **Mistral AI**: Establezca su clave API de Mistral AI como variable de entorno:
+  ```
+  export MISTRAL_API_KEY='su-clave-api-mistral'
+  ```
 
 ## Uso
 
-Para usar este script, primero debe definir su clave API de OpenAI como variable de entorno:
+Para traducir archivos Markdown:
 
-```bash
-export OPENAI_API_KEY='votre-clé-api'
-```
+- **Con OpenAI**:
+  ```
+  python translate.py --source_dir 'ruta/fuente' --target_dir 'ruta/destino'
+  ```
+- **Con Mistral AI** (y opción de nota de traducción):
+  ```
+  python translate.py --use_mistral --source_dir 'ruta/fuente' --target_dir 'ruta/destino' --model 'mistral-small' --add_translation_note
+  ```
 
+### Opciones Comunes
 
-Luego, puede ejecutar el script utilizando el siguiente comando:
+- Especifique el modelo, el idioma fuente y el idioma objetivo:
+  ```
+  python translate.py --source_dir 'ruta/fuente' --target_dir 'ruta/destino' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
+  ```
 
-```bash
-python translate.py --source_dir 'chemin/vers/votre/répertoire/source' --target_dir 'chemin/vers/votre/répertoire/cible'
-```
+## Ejemplos de Uso
 
-También puede especificar el modelo a usar, el idioma fuente y el idioma objetivo:
-
-```bash
-python translate.py --source_dir 'chemin/vers/votre/répertoire/source' --target_dir 'chemin/vers/votre/répertoire/cible' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
-```
-
-## Ejemplos de uso
-
-```bash
-################################################
-# Demande de traduction à l'IA vers l'espagnol #
-################################################
-jls42@Boo:~/blog/jls42$ python3 translate.py --source_dir content/ --target_dir content/traductions_es --target_lang es
-Traitement du fichier : content/posts/ia/stable-difusion-aws-ec2.md
-Traduction terminée en 33.19 secondes.
-Fichier 'stable-difusion-aws-ec2.md' traité.
-Traitement du fichier : content/posts/ia/poc-openai-api-gpt4.md
-Traduction terminée en 25.24 secondes.
-Fichier 'poc-openai-api-gpt4.md' traité.
-Traitement du fichier : content/posts/ia/poc-mistral-ai-mixtral.md
-Traduction terminée en 58.78 secondes.
-Fichier 'poc-mistral-ai-mixtral.md' traité.
-Traitement du fichier : content/posts/raspberry-pi/installation-de-kubernetes-sur-raspberry-pi-via-ansible.md
-Traduction terminée en 17.64 secondes.
-Fichier 'installation-de-kubernetes-sur-raspberry-pi-via-ansible.md' traité.
-Traitement du fichier : content/posts/raspberry-pi/installation-de-docker-sur-raspberry-pi-via-ansible.md
-Traduction terminée en 19.60 secondes.
-Fichier 'installation-de-docker-sur-raspberry-pi-via-ansible.md' traité.
-Traitement du fichier : content/posts/raspberry-pi/initialisation-auto-de-raspbian-sur-raspberry-pi.md
-Traduction terminée en 37.12 secondes.
-Fichier 'initialisation-auto-de-raspbian-sur-raspberry-pi.md' traité.
-Traitement du fichier : content/posts/blog/nouveau-theme-logo.md
-Traduction terminée en 18.91 secondes.
-Fichier 'nouveau-theme-logo.md' traité.
-Traitement du fichier : content/posts/infrastructure/infrastruture-as-code-serverless-ha-jls42-org.md
-Traduction terminée en 30.73 secondes.
-Fichier 'infrastruture-as-code-serverless-ha-jls42-org.md' traité.
-Traitement du fichier : content/mentions/mentions-legales.md
-Traduction terminée en 13.14 secondes.
-Fichier 'mentions-legales.md' traité.
-Traitement du fichier : content/about/a-propos-du-blog-jls42.md
-Traduction terminée en 11.24 secondes.
-Fichier 'a-propos-du-blog-jls42.md' traité.
-```
+- Ejemplo de solicitud de traducción al español:
+  ```
+  python translate.py --source_dir content/ --target_dir content/traducciones_es --target_lang es
+  ```
 
 ## Licencia
 
 Este proyecto está bajo la licencia GNU GENERAL PUBLIC LICENSE Versión 3, 29 de junio de 2007. Vea el archivo [LICENSE](LICENSE) para más detalles.
 
-**Este documento ha sido traducido de la versión francesa del blog por el modelo gpt-4-1106-preview**
+**Este documento ha sido traducido de la versión fr por el modelo gpt-4-1106-preview.**
 
