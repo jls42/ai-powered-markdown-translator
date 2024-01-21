@@ -1,74 +1,72 @@
-# Traducteur de Markdown avec OpenAI et Mistral AI
+# Traducteur de Markdown AI-Powered avec OpenAI et Mistral AI
 
-Ce projet est un script Python qui utilise l'API OpenAI ou l'API Mistral AI pour traduire des fichiers Markdown d'une langue source vers une langue cible.
-Plus d'information sur [Traduction IA jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/).  
+Ce projet est un script Python avancé qui utilise l'API OpenAI ou l'API Mistral AI pour traduire des fichiers Markdown d'une langue source vers une langue cible. Il est conçu pour être flexible et facile à utiliser, offrant des options supplémentaires telles que l'ajout d'une note de traduction et le support de plusieurs langues et modèles de traduction.
+
+Pour une démonstration et des explications détaillées, visitez [Traduction IA jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/) ou en version traduite : [English](/traductions_en/), [Español](/traductions_en/) et [中文中文](/traductions_zh/).
+
+## Caractéristiques Principales
+
+- **Traduction AI-Powered**: Utilisez les dernières technologies d'IA pour la traduction de vos documents.
+- **Support Multilingue**: Traduisez vos documents dans plusieurs langues avec support pour différents modèles de langage.
+- **Segmentation Intelligente**: Gérez efficacement les textes longs grâce à une segmentation automatisée.
+- **Note de Traduction**: Ajoutez automatiquement une note de traduction pour informer les lecteurs sur le processus utilisé.
+- **Flexible et Extensible**: Le code est structuré pour permettre une facilité d'ajout de nouvelles fonctionnalités.
 
 ## Prérequis
 
-Pour utiliser ce script, vous aurez besoin de :
-
-- Python 3.6 ou supérieur
-- Un compte OpenAI avec une clé API ou un compte Mistral AI avec une clé API
+- Python 3.6 ou version ultérieure.
+- Une clé API valide pour OpenAI ou Mistral AI.
 
 ## Installation
 
-1. Clonez ce dépôt sur votre machine locale.
-2. Installez les dépendances nécessaires en utilisant pip :
-
-   ```bash
+1. Clonez le dépôt Git :
+   ```
+   git clone https://github.com/votre-repertoire/translate-markdown.git
+   ```
+2. Installez les dépendances nécessaires :
+   ```
    pip install -r requirements.txt
    ```
 
+## Configuration
+
+Avant de lancer le script, configurez votre environnement :
+
+- **OpenAI** : Définissez votre clé API OpenAI comme variable d'environnement :
+  ```
+  export OPENAI_API_KEY='votre-clé-api-openai'
+  ```
+- **Mistral AI** : Définissez votre clé API Mistral AI comme variable d'environnement :
+  ```
+  export MISTRAL_API_KEY='votre-clé-api-mistral'
+  ```
+
 ## Utilisation
 
-### Avec OpenAI
+Pour traduire des fichiers Markdown :
 
-Pour utiliser ce script avec OpenAI, vous devez d'abord définir votre clé API OpenAI comme variable d'environnement :
-
-   ```bash
-   export OPENAI_API_KEY='votre-clé-api'
-   ```
-
-Ensuite, vous pouvez exécuter le script en utilisant la commande suivante :
-
-   ```bash
-   python translate.py --source_dir 'chemin/vers/votre/répertoire/source' --target_dir 'chemin/vers/votre/répertoire/cible'
-   ```
-
-### Avec Mistral AI
-
-Pour utiliser ce script avec Mistral AI, vous devez d'abord définir votre clé API Mistral AI comme variable d'environnement :
-
-   ```bash
-   export MISTRAL_API_KEY='votre-clé-api-mistral'
-   ```
-
-Ensuite, exécutez le script avec l'option `--use_mistral` :
-
-   ```bash
-   python translate.py --use_mistral --source_dir 'chemin/vers/votre/répertoire/source' --target_dir 'chemin/vers/votre/répertoire/cible' --model 'mistral-small'
-   ```
+- **Avec OpenAI** :
+  ```
+  python translate.py --source_dir 'source/path' --target_dir 'target/path'
+  ```
+- **Avec Mistral AI** (et option de note de traduction) :
+  ```
+  python translate.py --use_mistral --source_dir 'source/path' --target_dir 'target/path' --model 'mistral-small' --add_translation_note
+  ```
 
 ### Options Communes
 
-Vous pouvez également spécifier le modèle à utiliser, la langue source et la langue cible :
-
-   ```bash
-   python translate.py --source_dir 'chemin/vers/votre/répertoire/source' --target_dir 'chemin/vers/votre/répertoire/cible' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
-   ```
+- Spécifiez le modèle, la langue source, et la langue cible :
+  ```
+  python translate.py --source_dir 'source/path' --target_dir 'target/path' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
+  ```
 
 ## Exemples d'usage
 
-   ```bash
-   ################################################
-   # Demande de traduction à l'IA vers l'espagnol #
-   ################################################
-   jls42@Boo:~/blog/jls42$ python3 translate.py --source_dir content/ --target_dir content/traductions_es --target_lang es
-   Traitement du fichier : content/posts/ia/stable-difusion-aws-ec2.md
-   Traduction terminée en 33.19 secondes.
-   Fichier 'stable-difusion-aws-ec2.md' traité.
-   # ... autres lignes de résultat ...
-   ```
+- Exemple de demande de traduction en espagnol :
+  ```
+  python translate.py --source_dir content/ --target_dir content/traductions_es --target_lang es
+  ```
 
 ## Licence
 
