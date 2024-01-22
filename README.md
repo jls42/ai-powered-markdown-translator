@@ -2,7 +2,7 @@
 
 Ce projet est un script Python avancé qui utilise l'API OpenAI ou l'API Mistral AI pour traduire des fichiers Markdown d'une langue source vers une langue cible. Il est conçu pour être flexible et facile à utiliser, offrant des options supplémentaires telles que l'ajout d'une note de traduction et le support de plusieurs langues et modèles de traduction.
 
-Pour une démonstration et des explications détaillées, visitez [Traduction IA jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/) ou en version traduite : [English](/traductions_en/), [Español](/traductions_en/) et [中文中文](/traductions_zh/).
+Pour une démonstration et des explications détaillées, visitez [jls42.org](https://jls42.org/) ou en version traduite : [jls42.org English](https://jls42.org/traductions_en/), [jls42.org Español](https://jls42.org/traductions_en/) et [jls42.org 中文中文](https://jls42.org/traductions_zh/).
 
 ## Caractéristiques Principales
 
