@@ -2,17 +2,17 @@
 
 This project is an advanced Python script that uses the OpenAI API or the Mistral AI API to translate Markdown files from a source language to a target language. It is designed to be flexible and easy to use, offering additional options such as adding a translation note and supporting multiple languages and translation models.
 
-For a demonstration and detailed explanations, visit [AI Translation jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/) or the translated version: [English](/traductions_en/), [Español](/traductions_en/), and [中文中文](/traductions_zh/).
+For a demonstration and detailed explanations, visit [jls42.org](https://jls42.org/) or in translated versions: [jls42.org English](https://jls42.org/traductions_en/), [jls42.org Español](https://jls42.org/traductions_en/), and [jls42.org 中文中文](https://jls42.org/traductions_zh/).
 
 ## Main Features
 
-- **AI-Powered Translation**: Use the latest AI technologies for translating your documents.
-- **Multilingual Support**: Translate your documents into several languages with support for different language models.
-- **Intelligent Segmentation**: Efficiently manage long texts with automated segmentation.
+- **AI-Powered Translation**: Use the latest AI technology for document translation.
+- **Multilingual Support**: Translate your documents into multiple languages with support for different language models.
+- **Intelligent Segmentation**: Manage long texts efficiently through automatic segmentation.
 - **Translation Note**: Automatically add a translation note to inform readers about the process used.
 - **Flexible and Extensible**: The code is structured to allow easy addition of new features.
 
-## Requirements
+## Prerequisites
 
 - Python 3.6 or later.
 - A valid API key for OpenAI or Mistral AI.
@@ -21,7 +21,7 @@ For a demonstration and detailed explanations, visit [AI Translation jls42.org](
 
 1. Clone the Git repository:
    ```
-   git clone https://github.com/your-repository/translate-markdown.git
+   git clone https://github.com/your-directory/translate-markdown.git
    ```
 2. Install the necessary dependencies:
    ```
@@ -72,5 +72,5 @@ To translate Markdown files:
 
 This project is licensed under GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007. See the [LICENSE](LICENSE) file for more details.
 
-**This document was translated from the fr version by the mistral-medium model.**
+**This document has been translated from the fr version by the mistral-medium model.**
 

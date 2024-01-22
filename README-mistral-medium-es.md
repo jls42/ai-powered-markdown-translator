@@ -1,27 +1,27 @@
-# Traductores de Markdown impulsados por IA con OpenAI y Mistral AI
+# Traductor de Markdown impulsado por IA con OpenAI y Mistral AI
 
-Este proyecto es un script avanzado de Python que utiliza la API de OpenAI o la API de Mistral AI para traducir archivos Markdown de un idioma fuente a un idioma objetivo. Está diseñado para ser flexible y fácil de usar, ofreciendo opciones adicionales como la adición de una nota de traducción y el soporte de varios idiomas y modelos de traducción.
+Este proyecto es un script de Python avanzado que usa la API de OpenAI o la API de Mistral AI para traducir archivos Markdown de un idioma fuente a un idioma objetivo. Está diseñado para ser flexible y fácil de usar, ofreciendo opciones adicionales como la adición de una nota de traducción y el soporte de varios idiomas y modelos de traducción.
 
-Para una demostración y explicaciones detalladas, visite [Traducción IA jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/) o en versión traducida: [English](/traductions_en/), [Español](/traductions_en/) y [中文中文](/traductions_zh/).
+Para una demostración y explicaciones detalladas, visite [jls42.org](https://jls42.org/) o en versión traducida: [jls42.org English](https://jls42.org/traducciones_en/), [jls42.org Español](https://jls42.org/traducciones_en/) y [jls42.org 中文中文](https://jls42.org/traducciones_zh/).
 
 ## Características Principales
 
 - **Traducción impulsada por IA**: Utilice las últimas tecnologías de IA para la traducción de sus documentos.
 - **Soporte Multilingüe**: Traduzca sus documentos a varios idiomas con soporte para diferentes modelos de idioma.
-- **Segmentación Inteligente**: Administre eficazmente los textos largos gracias a una segmentación automatizada.
+- **Segmentación Inteligente**: Administre eficazmente los textos largos mediante una segmentación automatizada.
 - **Nota de Traducción**: Agregue automáticamente una nota de traducción para informar a los lectores sobre el proceso utilizado.
 - **Flexible y Extensible**: El código está estructurado para permitir una fácil adición de nuevas funciones.
 
-## Requisitos Previos
+## Requisitos previos
 
-- Python 3.6 o versión posterior.
+- Python 3.6 o versiones posteriores.
 - Una clave API válida para OpenAI o Mistral AI.
 
 ## Instalación
 
-1. Clone el repositorio Git:
+1. Clone el repositorio de Git:
    ```
-   git clone https://github.com/tu-directorio/translate-markdown.git
+   git clone https://github.com/your-repository/translate-markdown.git
    ```
 2. Instale las dependencias necesarias:
    ```
@@ -34,11 +34,11 @@ Antes de ejecutar el script, configure su entorno:
 
 - **OpenAI**: Defina su clave API de OpenAI como variable de entorno:
   ```
-  export OPENAI_API_KEY='tu-clave-api-openai'
+  export OPENAI_API_KEY='your-openai-api-key'
   ```
 - **Mistral AI**: Defina su clave API de Mistral AI como variable de entorno:
   ```
-  export MISTRAL_API_KEY='tu-clave-api-mistral'
+  export MISTRAL_API_KEY='your-mistral-api-key'
   ```
 
 ## Uso
@@ -47,25 +47,25 @@ Para traducir archivos Markdown:
 
 - **Con OpenAI**:
   ```
-  python translate.py --source_dir 'ruta/fuente' --target_dir 'ruta/objetivo'
+  python translate.py --source_dir 'source/path' --target_dir 'target/path'
   ```
 - **Con Mistral AI** (y opción de nota de traducción):
   ```
-  python translate.py --use_mistral --source_dir 'ruta/fuente' --target_dir 'ruta/objetivo' --model 'mistral-small' --add_translation_note
+  python translate.py --use_mistral --source_dir 'source/path' --target_dir 'target/path' --model 'mistral-small' --add_translation_note
   ```
 
 ### Opciones Comunes
 
 - Especifique el modelo, el idioma fuente y el idioma objetivo:
   ```
-  python translate.py --source_dir 'ruta/fuente' --target_dir 'ruta/objetivo' --model 'gpt-4-1106-preview' --source_lang 'es' --target_lang 'en'
+  python translate.py --source_dir 'source/path' --target_dir 'target/path' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
   ```
 
-## Ejemplos de Uso
+## Ejemplos de uso
 
-- Ejemplo de solicitud de traducción al español:
+- Ejemplo de solicitud de traducción en español:
   ```
-  python translate.py --source_dir contenido/ --target_dir contenido/traducciones\_es --target\_lang es
+  python translate.py --source_dir content/ --target_dir content/traducciones_es --target_lang es
   ```
 
 ## Licencia

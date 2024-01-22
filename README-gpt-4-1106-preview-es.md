@@ -1,16 +1,16 @@
-# Traductor de Markdown Potenciado por IA con OpenAI y Mistral AI
+# Traductor de Markdown con IA de OpenAI y Mistral AI
 
-Este proyecto es un script avanzado de Python que utiliza la API de OpenAI o la API de Mistral AI para traducir archivos Markdown de un idioma fuente a un idioma objetivo. Está diseñado para ser flexible y fácil de usar, ofreciendo opciones adicionales como la adición de una nota de traducción y el soporte de varios idiomas y modelos de traducción.
+Este proyecto es un script de Python avanzado que utiliza la API de OpenAI o la API de Mistral AI para traducir archivos Markdown de un idioma de origen a un idioma objetivo. Está diseñado para ser flexible y fácil de usar, ofreciendo opciones adicionales como la inclusión de una nota de traducción y soporte para varios idiomas y modelos de traducción.
 
-Para una demostración y explicaciones detalladas, visite [Traducción IA jls42.org](https://jls42.org/posts/ia/automatisation-traduction-ia/) o en versión traducida: [English](/traductions_en/), [Español](/traductions_es/) y [中文中文](/traductions_zh/).
+Para una demostración y explicaciones detalladas, visite [jls42.org](https://jls42.org/) o en versión traducida: [jls42.org English](https://jls42.org/traductions_en/), [jls42.org Español](https://jls42.org/traductions_en/) y [jls42.org 中文中文](https://jls42.org/traductions_zh/).
 
 ## Características Principales
 
-- **Traducción Potenciada por IA**: Utilice las últimas tecnologías de IA para la traducción de sus documentos.
-- **Soporte Multilingüe**: Traduzca sus documentos en varios idiomas con soporte para diferentes modelos de lenguaje.
-- **Segmentación Inteligente**: Gestione de manera eficiente textos largos gracias a una segmentación automatizada.
+- **Traducción potenciada por IA**: Utilice las últimas tecnologías de IA para la traducción de sus documentos.
+- **Soporte Multilingüe**: Traduzca sus documentos a varios idiomas con soporte para diferentes modelos de lenguaje.
+- **Segmentación Inteligente**: Maneje textos largos de manera eficiente gracias a una segmentación automatizada.
 - **Nota de Traducción**: Añada automáticamente una nota de traducción para informar a los lectores sobre el proceso utilizado.
-- **Flexible y Extensible**: El código está estructurado para permitir una fácil adición de nuevas funcionalidades.
+- **Flexible y Extensible**: El código está estructurado para permitir la facilidad de agregar nuevas características.
 
 ## Requisitos Previos
 
@@ -32,13 +32,13 @@ Para una demostración y explicaciones detalladas, visite [Traducción IA jls42.
 
 Antes de ejecutar el script, configure su entorno:
 
-- **OpenAI**: Establezca su clave API de OpenAI como variable de entorno:
+- **OpenAI**: Defina su clave API de OpenAI como una variable de entorno:
   ```
-  export OPENAI_API_KEY='su-clave-api-openai'
+  export OPENAI_API_KEY='votre-clé-api-openai'
   ```
-- **Mistral AI**: Establezca su clave API de Mistral AI como variable de entorno:
+- **Mistral AI**: Defina su clave API de Mistral AI como una variable de entorno:
   ```
-  export MISTRAL_API_KEY='su-clave-api-mistral'
+  export MISTRAL_API_KEY='votre-clé-api-mistral'
   ```
 
 ## Uso
@@ -47,30 +47,30 @@ Para traducir archivos Markdown:
 
 - **Con OpenAI**:
   ```
-  python translate.py --source_dir 'ruta/fuente' --target_dir 'ruta/destino'
+  python translate.py --source_dir 'source/path' --target_dir 'target/path'
   ```
-- **Con Mistral AI** (y opción de nota de traducción):
+- **Con Mistral AI** (y la opción de nota de traducción):
   ```
-  python translate.py --use_mistral --source_dir 'ruta/fuente' --target_dir 'ruta/destino' --model 'mistral-small' --add_translation_note
+  python translate.py --use_mistral --source_dir 'source/path' --target_dir 'target/path' --model 'mistral-small' --add_translation_note
   ```
 
 ### Opciones Comunes
 
-- Especifique el modelo, el idioma fuente y el idioma objetivo:
+- Especifique el modelo, el idioma de origen y el idioma objetivo:
   ```
-  python translate.py --source_dir 'ruta/fuente' --target_dir 'ruta/destino' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
+  python translate.py --source_dir 'source/path' --target_dir 'target/path' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
   ```
 
 ## Ejemplos de Uso
 
 - Ejemplo de solicitud de traducción al español:
   ```
-  python translate.py --source_dir content/ --target_dir content/traducciones_es --target_lang es
+  python translate.py --source_dir content/ --target_dir content/traductions_es --target_lang es
   ```
 
 ## Licencia
 
-Este proyecto está bajo la licencia GNU GENERAL PUBLIC LICENSE Versión 3, 29 de junio de 2007. Vea el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la licencia GNU GENERAL PUBLIC LICENSE Versión 3, 29 de junio de 2007. Consulte el archivo [LICENSE](LICENSE) para obtener más detalles.
 
 **Este documento ha sido traducido de la versión fr por el modelo gpt-4-1106-preview.**
 
