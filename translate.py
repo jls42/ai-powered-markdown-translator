@@ -143,7 +143,7 @@ def add_translation_note(client, args, use_mistral):
             response = client.chat.completions.create(
                 model=args.model, messages=messages
             )
-            translated_note = response.choices[0].essage.content.strip()
+            translated_note = response.choices[0].message.content.strip()
 
         return f"\n\n**{translated_note}**\n\n"
     except Exception as e:
