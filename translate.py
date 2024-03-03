@@ -7,6 +7,8 @@ from openai import OpenAI
 import re
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
+import glob
+
 
 EXCLUDE_PATTERNS = ["traductions_"]
 
@@ -20,6 +22,7 @@ DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
 MODEL_TOKEN_LIMITS = {
+    "gpt-4-turbo-preview": 4096,
     "gpt-4-1106-preview": 4096,
     "gpt-4-vision-preview": 4096,
     "gpt-4": 8192,
@@ -89,8 +92,7 @@ def translate(text, client, args, use_mistral=False, is_translation_note=False):
             if is_translation_note:
                 prompt_message = f"Translate this exact sentence to {args.target_lang}, without any additions or explanations: '{segment}'"
             else:
-                prompt_message = f"Please translate this text from {args.source_lang} to {args.target_lang}, and do not translate or change URLs, image paths, and code blocks (delimited by ```) : {segment}"
-
+                prompt_message = f"Please translate this text from {args.source_lang} to {args.target_lang}, and do not translate or change URLs, image paths, special characters such as dashes (---) and code blocks (delimited by ```) : {segment}"
             if use_mistral:
                 messages = [ChatMessage(role="user", content=prompt_message)]
                 response = client.chat(model=args.model, messages=messages)
@@ -111,47 +113,14 @@ def translate(text, client, args, use_mistral=False, is_translation_note=False):
     return " ".join(translated_segments)
 
 
-def add_translation_note(client, args, use_mistral):
-    """
-    Génère et traduit une note de traduction.
-
-    Args:
-        client: Objet client de traduction.
-        args: Arguments contenant les informations de langue source et cible, et le modèle utilisé.
-        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
-
-    Returns:
-        str: Note de traduction traduite.
-    """
-    translation_note_src = f"Ce document a été traduit de la version {args.source_lang} par le modèle {args.model}."
-    try:
-        # Utiliser un prompt très spécifique pour Mistral AI
-        if use_mistral:
-            prompt_message = f"Translate this exact sentence to {args.target_lang}, without any additions or explanations: '{translation_note_src}'"
-            messages = [ChatMessage(role="user", content=prompt_message)]
-            response = client.chat(model=args.model, messages=messages)
-            translated_note = response.choices[0].message.content.strip()
-        else:
-            # Pour OpenAI
-            messages = [
-                {
-                    "role": "system",
-                    "content": f"Translate this exact sentence to {args.target_lang}, without any additions or explanations: '{translation_note_src}'",
-                },
-                {"role": "user", "content": translation_note_src},
-            ]
-            response = client.chat.completions.create(
-                model=args.model, messages=messages
-            )
-            translated_note = response.choices[0].message.content.strip()
-
-        return f"\n\n**{translated_note}**\n\n"
-    except Exception as e:
-        raise RuntimeError(f"Erreur lors de l'ajout de la note de traduction : {e}")
-
-
 def translate_markdown_file(
-    file_path, output_path, client, args, use_mistral, add_translation_note=False
+    file_path,
+    output_path,
+    client,
+    args,
+    use_mistral,
+    add_translation_note=False,
+    force=False,
 ):
     """
     Traduit un fichier Markdown en utilisant les modèles de traitement du langage naturel de OpenAI ou Mistral AI.
@@ -163,6 +132,7 @@ def translate_markdown_file(
         args: Arguments supplémentaires pour la traduction.
         use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
         add_translation_note (bool): Indique si une note de traduction doit être ajoutée.
+        force (bool): Indique si la traduction doit être forcée même si une traduction existe déjà.
 
     Returns:
         None
@@ -183,10 +153,19 @@ def translate_markdown_file(
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # Extraction et remplacement temporaire des blocs de code pour éviter leur traduction
-        code_blocks = re.findall(
-            r"(^```[a-zA-Z]*\n.*?\n^```)", content, flags=re.MULTILINE | re.DOTALL
+        if not content:
+            print(
+                f"Le fichier '{relative_file_path}' est vide, aucune traduction n'est effectuée."
+            )
+            return
+
+        # Extraction des blocs de code
+        # Utilisation de placeholders pour préserver les blocs de code lors de la traduction
+        regex = re.compile(
+            r"(?P<start>^```(?P<block_language>(\w|-)+)\n)(?P<code>.*?\n)(?P<end>```)",
+            re.DOTALL | re.MULTILINE,
         )
+        code_blocks = [match.group("code") for match in regex.finditer(content)]
         placeholders = [f"#CODEBLOCK{index}#" for index, _ in enumerate(code_blocks)]
         for placeholder, code_block in zip(placeholders, code_blocks):
             content = content.replace(code_block, placeholder)
@@ -203,9 +182,11 @@ def translate_markdown_file(
             translation_note = translate(
                 "Ce document a été traduit de la version "
                 + args.source_lang
-                + " par le modèle "
+                + " vers la langue "
+                + args.target_lang
+                + " en utilisant le modèle "
                 + args.model
-                + ".",
+                + ". Pour plus d'informations sur le processus de traduction, consultez https://gitlab.com/jls42/ai-powered-markdown-translator",
                 client,
                 args,
                 use_mistral,
@@ -215,6 +196,11 @@ def translate_markdown_file(
 
         # Écriture du contenu traduit dans le fichier de sortie
         clean_output_path = os.path.normpath(output_path)
+        if os.path.exists(clean_output_path) and not force:
+            print(
+                f"Le fichier '{relative_output_path}' existe déjà, aucune traduction n'est effectuée."
+            )
+            return
         with open(clean_output_path, "w", encoding="utf-8") as f:
             f.write(translated_content)
 
@@ -245,13 +231,13 @@ def is_excluded(path):
         bool: True si le chemin correspond à l'un des motifs d'exclusion, False sinon.
     """
     for pattern in EXCLUDE_PATTERNS:
-        if pattern in path:
+        if os.path.join(path, pattern) in path:
             return True
     return False
 
 
 def translate_directory(
-    input_dir, output_dir, client, args, use_mistral, add_translation_note
+    input_dir, output_dir, client, args, use_mistral, add_translation_note, force
 ):
     """
     Traduit tous les fichiers markdown dans le répertoire d'entrée et ses sous-répertoires.
@@ -263,6 +249,7 @@ def translate_directory(
         args: Arguments supplémentaires pour la traduction.
         use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
         add_translation_note (bool): Indique si une note de traduction doit être ajoutée.
+        force (bool): Indique si la traduction doit être forcée même si une traduction existe déjà.
 
     Returns:
         None
@@ -289,13 +276,22 @@ def translate_directory(
             if file.endswith(".md") and not is_excluded(file):
                 file_path = os.path.join(root, file)
                 base, _ = os.path.splitext(file)
-                output_file = f"{base}-{args.model}-{args.target_lang}.md"
+                output_file = f"{base}-{args.target_lang}-{args.model}.md"  # Inversion du modèle et de la langue
                 relative_path = os.path.relpath(root, input_dir)
                 output_path = os.path.join(output_dir, relative_path, output_file)
 
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-                if not os.path.exists(output_path):
+                # Vérification si une traduction existe déjà, peu importe le modèle
+                target_language_files = glob.glob(
+                    f"{output_dir}/**/{base}-{args.target_lang}*.md", recursive=True
+                ) + glob.glob(
+                    f"{output_dir}/**/{base}-*{args.target_lang}.md", recursive=True
+                )
+                existing_translation = any(
+                    [os.path.exists(file) for file in target_language_files]
+                )
+                if not existing_translation or force:
                     translate_markdown_file(
                         file_path,
                         output_path,
@@ -303,8 +299,13 @@ def translate_directory(
                         args,
                         use_mistral,
                         add_translation_note,
+                        force,
                     )
                     print(f"Fichier '{file}' traité.")
+                elif not force:
+                    print(
+                        f"La traduction de '{file}' existe déjà, aucune action effectuée."
+                    )
 
 
 def main():
@@ -325,6 +326,11 @@ def main():
     --add_translation_note: Indicateur pour ajouter une note de traduction au contenu traduit.
     """
     parser = argparse.ArgumentParser(description="Traduit les fichiers Markdown.")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Forcer la traduction même si une traduction existe déjà",
+    )
     parser.add_argument(
         "--source_dir",
         type=str,
@@ -377,13 +383,13 @@ def main():
         api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
         if not api_key:
             raise ValueError("Clé API Mistral non spécifiée.")
-        client = MistralClient(api_key=api_key)
+        client = MistralClient(api_key=api_key)  # Supprimez l'argument model_limit
     else:
         args.model = args.model if args.model else DEFAULT_MODEL_OPENAI
         openai_api_key = os.getenv("OPENAI_API_KEY", DEFAULT_OPENAI_API_KEY)
         if not openai_api_key:
             raise ValueError("Clé API OpenAI non spécifiée.")
-        client = OpenAI(api_key=openai_api_key)
+        client = OpenAI(api_key=openai_api_key)  # Supprimez l'argument model_limit
 
     translate_directory(
         args.source_dir,
@@ -392,6 +398,7 @@ def main():
         args,
         args.use_mistral,
         args.add_translation_note,
+        args.force,
     )
 
     if args.use_mistral:
