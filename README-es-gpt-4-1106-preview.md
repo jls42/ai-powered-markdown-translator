@@ -1,92 +1,90 @@
-# Traductor de Markdown Potenciado por IA con OpenAI y Mistral AI
+# Traductor de Markdown con IA de OpenAI, Mistral AI y Claude de Anthropic
 
-Este proyecto es un script avanzado de Python que utiliza la API de OpenAI o la API de Mistral AI para traducir archivos Markdown de un idioma fuente a un idioma objetivo. Está diseñado para ser flexible y fácil de usar, ofreciendo opciones adicionales como la inclusión de una nota de traducción, una mejor gestión de archivos de salida, la detección de archivos existentes y el soporte para múltiples idiomas y modelos de traducción.
+Este proyecto es un guion de Python avanzado que utiliza las API de OpenAI, Mistral AI o Claude de Anthropic para traducir archivos Markdown de un idioma fuente a un idioma objetivo. Está diseñado para ser flexible y fácil de usar, ofreciendo opciones adicionales como añadir una nota de traducción, una mejor gestión de los archivos de salida, detección de archivos existentes y soporte para múltiples idiomas y modelos de traducción.
 
-Para una demostración y explicaciones detalladas, visite [jls42.org](https://jls42.org/) o en versión traducida: [jls42.org English](https://jls42.org/traductions_en/), [jls42.org Español](https://jls42.org/traductions_en/) y [jls42.org 中文](https://jls42.org/traductions_zh/).
+Para una demostración y explicaciones detalladas, visite [jls42.org](https://jls42.org/) o en versión traducida: [jls42.org English](https://jls42.org/traductions_en/), [jls42.org Español](https://jls42.org/traductions_es/) y [jls42.org 中文](https://jls42.org/traductions_zh/).
 
 ## Características Principales
 
-- **Traducción Potenciada por IA**: Utiliza las últimas tecnologías de IA para la traducción de tus documentos.
-- **Soporte Multilingüe**: Traduce tus documentos en múltiples idiomas con soporte para diferentes modelos de lenguaje.
-- **Segmentación Inteligente**: Administra eficientemente textos largos gracias a una segmentación automatizada.
-- **Nota de Traducción**: Añade automáticamente una nota de traducción para informar a los lectores sobre el proceso utilizado.
-- **Mejor Gestión de Archivos de Salida**: Verifica si una traducción ya existe antes de iniciar la traducción.
-- **Mejora en la Detección de Archivos Existentes**: Busca archivos correspondientes al nombre base del archivo original y al idioma objetivo.
-- **Flexible y Extensible**: El código está estructurado para facilitar la adición de nuevas características.
+- **Traducción con IA**: Utilice las últimas tecnologías de inteligencia artificial para traducir sus documentos con OpenAI, Mistral AI o Claude de Anthropic.
+- **Soporte Multilingüe**: Traduzca sus documentos en varios idiomas con soporte para diferentes modelos de lenguaje.
+- **Segmentación Inteligente**: Administre eficazmente textos largos gracias a una segmentación automatizada.
+- **Nota de Traducción**: Añada automáticamente una nota de traducción para informar a los lectores sobre el proceso utilizado.
+- **Mejora en la Gestión de Archivos de Salida**: Verifique si ya existe una traducción antes de comenzar a traducir.
+- **Detección Mejorada de Archivos Existentes**: Busque archivos que coincidan con el nombre base del archivo original y el idioma objetivo.
+- **Flexible y Extensible**: El código está estructurado para permitir una fácil adición de nuevas funcionalidades.
 
-## Prerrequisitos
+## Requisitos Previos
 
-- Python 3.6 o versiones posteriores.
-- Una clave API válida para OpenAI o Mistral AI.
+- Python 3.6 o versión posterior.
+- Una clave API válida para OpenAI, Mistral AI o Claude de Anthropic.
 
 ## Instalación
 
-1. Clona el repositorio Git:
+1. Clone el repositorio Git:
 ```
-git clone https://github.com/tu-repositorio/translate-markdown.git
+git clone https://gitlab.com/jls42/ai-powered-markdown-translator.git
 ```
-2. Instala las dependencias requeridas:
+2. Instale las dependencias necesarias:
 ```
 pip install -r requirements.txt
 ```
 
 ## Configuración
 
-Antes de ejecutar el script, configura tu entorno:
+Configure su entorno definiendo las variables de ambiente para las claves API necesarias:
 
-- **OpenAI**: Define tu clave API de OpenAI como una variable de entorno:
-```
-export OPENAI_API_KEY='tu-clave-api-openai'
-```
-- **Mistral AI**: Define tu clave API de Mistral AI como una variable de entorno:
-```
-export MISTRAL_API_KEY='tu-clave-api-mistral'
-```
+- **OpenAI**:
+    ```
+    export OPENAI_API_KEY='su-clave-api-openai'
+    ```
+- **Mistral AI**:
+    ```
+    export MISTRAL_API_KEY='su-clave-api-mistral'
+    ```
+- **Claude de Anthropic**:
+    ```
+    export ANTHROPIC_API_KEY='su-clave-api-anthropic'
+    ```
 
 ## Uso
 
-Para traducir archivos Markdown:
+El guion ofrece varias opciones para personalizar el proceso de traducción:
 
-- **Con OpenAI**:
-```
-python translate.py --source_dir 'ruta/origen' --target_dir 'ruta/destino'
-```
-- **Con Mistral AI** (y opción de nota de traducción):
-```
-python translate.py --use_mistral --source_dir 'ruta/origen' --target_dir 'ruta/destino' --model 'mistral-small' --add_translation_note
-```
+### Opciones Generales
 
-### Opciones Comunes
+- `--source_dir`: Directorio que contiene los archivos Markdown a traducir.
+- `--target_dir`: Directorio de salida para los archivos traducidos.
+- `--model`: Modelo de traducción GPT a utilizar. El modelo predeterminado depende de la API seleccionada.
+- `--source_lang`: Idioma fuente de los documentos. Importante en particular para añadir notas de traducción.
+- `--target_lang`: Idioma objetivo para la traducción. Por defecto, es inglés.
+- `--force`: Forzar la traducción incluso si ya existe una traducción para el archivo.
 
-- Especifica el modelo, el idioma fuente y el idioma objetivo:
-```
-python translate.py --source_dir 'ruta/origen' --target_dir 'ruta/destino' --model 'gpt-4-1106-preview' --source_lang 'fr' --target_lang 'en'
-```
+### Opciones Específicas de la API
 
-### Nuevas Opciones
+- `--use_mistral`: Utilizar la API de Mistral AI para la traducción.
+- `--use_claude`: Utilizar la API de Claude de Anthropic para la traducción.
+- `--add_translation_note`: Añadir una nota de traducción al contenido traducido, especificando el método y las herramientas utilizadas.
 
-- Forzar la traducción incluso si ya existe una traducción:
-```
-python translate.py --source_dir 'ruta/origen' --target_dir 'ruta/destino' --force
-```
+### Ejemplos de Uso
 
-## Ejemplos de Uso
-
-- Ejemplo de solicitud de traducción al español:
-```
-python translate.py --source_dir contenido/ --target_dir contenido/traducciones_es --target_lang es
-```
-
+- Traducir del francés al inglés con OpenAI, añadiendo una nota de traducción:
+    ```
+    python translate.py --use_openai --source_dir 'content/fr' --target_dir 'content/en' --add_translation_note --source_lang 'fr'
+    ```
+- Traducir del francés al español con Mistral AI, sin nota de traducción:
+    ```
+    python translate.py --use_mistral --source_dir 'content/fr' --target_dir 'content/es' --target_lang 'es'
+    ```
 
 ## Autor
 
 Julien LE SAUX  
-Email: contact@jls42.org
-
+Correo electrónico: contact@jls42.org
 
 ## Licencia
 
-Este proyecto está bajo la licencia GNU GENERAL PUBLIC LICENSE Versión 3, 29 de junio de 2007. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la licencia GNU GENERAL PUBLIC LICENSE Versión 3, 29 de junio de 2007. Vea el archivo [LICENSE](LICENSE) para más detalles.
 
 **Este documento ha sido traducido de la versión fr a la lengua es utilizando el modelo gpt-4-1106-preview. Para más información sobre el proceso de traducción, consulte https://gitlab.com/jls42/ai-powered-markdown-translator**
 
