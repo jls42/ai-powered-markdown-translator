@@ -8,7 +8,7 @@ import re
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
 import glob
-
+import anthropic
 
 EXCLUDE_PATTERNS = ["traductions_"]
 
@@ -17,6 +17,7 @@ DEFAULT_OPENAI_API_KEY = "votre-clé-api-openai-par-défaut"
 DEFAULT_MISTRAL_API_KEY = "votre-clé-api-mistral-par-défaut"
 DEFAULT_MODEL_OPENAI = "gpt-4-1106-preview"
 DEFAULT_MODEL_MISTRAL = "mistral-medium"
+DEFAULT_MODEL_CLAUDE = "claude-3-opus-20240229"
 DEFAULT_SOURCE_LANG = "fr"
 DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
@@ -44,6 +45,7 @@ def segment_text(text, max_length):
     Returns:
         list[str]: Liste des segments de texte Markdown.
     """
+
     segments = []
     while text:
         if len(text) <= max_length:
@@ -64,38 +66,46 @@ def segment_text(text, max_length):
 
     return segments
 
-
-def translate(text, client, args, use_mistral=False, is_translation_note=False):
+def translate(text, client, args, use_mistral=False, use_claude=False, is_translation_note=False):
     """
-    Traduit un texte en utilisant les services de traduction d'OpenAI ou Mistral AI.
+    Traduit un texte à l'aide de l'API OpenAI, Mistral AI ou Claude, selon les paramètres spécifiés.
     Cette fonction segmente d'abord le texte pour s'assurer qu'il respecte la limite de tokens du modèle.
     Elle utilise un argument optionnel 'is_translation_note' pour gérer différemment les notes de traduction.
 
     Args:
         text (str): Texte à traduire.
-        client: Client de l'API de traduction (OpenAI ou Mistral AI).
-        args: Arguments contenant les informations de configuration.
-        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée (True) ou l'API OpenAI (False).
-        is_translation_note (bool): Indique si le texte est une note de traduction, ce qui nécessite un traitement spécial.
+        client: Objet client de l'API de traduction (OpenAI, Mistral AI ou Claude).
+        args: Objet argparse contenant les arguments de la ligne de commande.
+        use_mistral (bool): Si True, utilise l'API Mistral AI pour la traduction.
+        use_claude (bool): Si True, utilise l'API Claude pour la traduction.
+        is_translation_note (bool): Si True, le texte est une note de traduction.
 
     Returns:
         str: Texte traduit.
     """
+
     model_limit = MODEL_TOKEN_LIMITS.get(args.model, 4096)
 
     segments = segment_text(text, model_limit)
     translated_segments = []
-
     for segment in segments:
         try:
             prompt_message = ""
             if is_translation_note:
-                prompt_message = f"Translate this exact sentence to {args.target_lang}, without any additions or explanations: '{segment}'"
+                prompt_message = "Directly translate to {} without any additions, ensuring that elements such as URLs, image paths and code blocks are not translated. Leave these elements unchanged. : '{}'".format(args.target_lang, segment)
             else:
-                prompt_message = f"Please translate this text from {args.source_lang} to {args.target_lang}, and do not translate or change URLs, image paths, special characters such as dashes (---) and code blocks (delimited by ```) : {segment}"
+                prompt_message = f"Perform a direct translation from {args.source_lang} to {args.target_lang}, without altering URLs. Begin the translation immediately without any introduction or added notes, and ensure not to include any additional information or context beyond the requested translation: '{segment}'. Strictly follow the source text without adding, modifying, or omitting elements that are not explicitly present."
             if use_mistral:
                 messages = [ChatMessage(role="user", content=prompt_message)]
                 response = client.chat(model=args.model, messages=messages)
+                translated_text = response.choices[0].message.content.strip()
+            elif use_claude:
+                messages = [{"role": "user", "content": prompt_message}]
+                response = client.messages.create(model=args.model, max_tokens=4096, messages=messages)
+                # Extraire le texte de chaque ContentBlock dans la liste de réponses
+                translated_texts = [block.text.strip() for block in response.content]  # Assurez-vous que .content est la liste des ContentBlock
+                translated_text = " ".join(translated_texts)
+
             else:
                 messages = [
                     {"role": "system", "content": prompt_message},
@@ -104,7 +114,7 @@ def translate(text, client, args, use_mistral=False, is_translation_note=False):
                 response = client.chat.completions.create(
                     model=args.model, messages=messages
                 )
-            translated_text = response.choices[0].message.content.strip()
+                translated_text = response.choices[0].message.content.strip()
         except Exception as e:
             raise RuntimeError(f"Erreur lors de la traduction : {e}")
 
@@ -112,18 +122,18 @@ def translate(text, client, args, use_mistral=False, is_translation_note=False):
 
     return " ".join(translated_segments)
 
-
 def translate_markdown_file(
     file_path,
     output_path,
     client,
     args,
     use_mistral,
+    use_claude,
     add_translation_note=False,
     force=False,
 ):
     """
-    Traduit un fichier Markdown en utilisant les modèles de traitement du langage naturel de OpenAI ou Mistral AI.
+    Traduit un fichier Markdown en utilisant les modèles de traitement du langage naturel de OpenAI, Mistral AI ou Claude.
 
     Args:
         file_path (str): Chemin complet vers le fichier d'entrée.
@@ -131,12 +141,15 @@ def translate_markdown_file(
         client: Objet client de traduction.
         args: Arguments supplémentaires pour la traduction.
         use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
+        use_claude (bool): Indique si l'API Claude doit être utilisée pour la traduction.
         add_translation_note (bool): Indique si une note de traduction doit être ajoutée.
         force (bool): Indique si la traduction doit être forcée même si une traduction existe déjà.
 
     Returns:
-        None
+        None. Le résultat de la traduction est écrit dans le fichier de sortie spécifié.
+        En cas d'échec, un message est imprimé pour indiquer une erreur et suggérer de relancer le traitement.
     """
+
     try:
         # Calcul des chemins relatifs pour un affichage plus lisible
         relative_file_path = os.path.join(
@@ -159,8 +172,7 @@ def translate_markdown_file(
             )
             return
 
-        # Extraction des blocs de code
-        # Utilisation de placeholders pour préserver les blocs de code lors de la traduction
+        # Extraction et remplacement des blocs de code pour les préserver pendant la traduction
         regex = re.compile(
             r"(?P<start>^```(?P<block_language>(\w|-)+)\n)(?P<code>.*?\n)(?P<end>```)",
             re.DOTALL | re.MULTILINE,
@@ -171,7 +183,7 @@ def translate_markdown_file(
             content = content.replace(code_block, placeholder)
 
         # Traduction du contenu
-        translated_content = translate(content, client, args, use_mistral)
+        translated_content = translate(content, client, args, use_mistral, use_claude)
 
         # Restauration des blocs de code dans le contenu traduit
         for placeholder, code_block in zip(placeholders, code_blocks):
@@ -190,6 +202,7 @@ def translate_markdown_file(
                 client,
                 args,
                 use_mistral,
+                use_claude,
                 True,
             )
             translated_content += "\n\n**" + translation_note + "**\n\n"
@@ -212,8 +225,10 @@ def translate_markdown_file(
         print(f"Erreur lors du traitement du fichier '{relative_file_path}': {e}")
     except Exception as e:
         print(
-            f"Une erreur inattendue est survenue lors de la traduction du fichier '{relative_file_path}': {e}"
+            f"Une erreur inattendue est survenue lors de la traduction du fichier '{relative_file_path}': {e}\n"
+            "Veuillez relancer le traitement pour ce fichier."
         )
+
 
 
 def is_excluded(path):
@@ -230,14 +245,15 @@ def is_excluded(path):
     Returns:
         bool: True si le chemin correspond à l'un des motifs d'exclusion, False sinon.
     """
+
     for pattern in EXCLUDE_PATTERNS:
-        if os.path.join(path, pattern) in path:
+        if pattern in path:
             return True
     return False
 
 
 def translate_directory(
-    input_dir, output_dir, client, args, use_mistral, add_translation_note, force
+    input_dir, output_dir, client, args, use_mistral, use_claude, add_translation_note, force
 ):
     """
     Traduit tous les fichiers markdown dans le répertoire d'entrée et ses sous-répertoires.
@@ -248,12 +264,14 @@ def translate_directory(
         client: Objet client de traduction.
         args: Arguments supplémentaires pour la traduction.
         use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
+        use_claude (bool): Indique si l'API Claude doit être utilisée pour la traduction.
         add_translation_note (bool): Indique si une note de traduction doit être ajoutée.
         force (bool): Indique si la traduction doit être forcée même si une traduction existe déjà.
 
     Returns:
         None
     """
+
     input_dir = os.path.abspath(input_dir)
     output_dir = os.path.abspath(output_dir)
 
@@ -298,6 +316,7 @@ def translate_directory(
                         client,
                         args,
                         use_mistral,
+                        use_claude,
                         add_translation_note,
                         force,
                     )
@@ -307,13 +326,12 @@ def translate_directory(
                         f"La traduction de '{file}' existe déjà, aucune action effectuée."
                     )
 
-
 def main():
     """
     Point d'entrée principal du script de traduction de fichiers Markdown.
 
     Ce script traduit des fichiers Markdown d'une langue source à une langue cible en utilisant
-    les services de traduction de l'API OpenAI ou Mistral AI. Il prend en charge la segmentation
+    les services de traduction de l'API OpenAI, Mistral AI ou Claude. Il prend en charge la segmentation
     des textes longs et peut également ajouter une note de traduction en fin de document.
 
     Arguments du script:
@@ -323,8 +341,10 @@ def main():
     --target_lang: Langue cible pour la traduction.
     --source_lang: Langue source des documents.
     --use_mistral: Indicateur pour utiliser l'API Mistral AI pour la traduction.
+    --use_claude: Indicateur pour utiliser l'API Claude pour la traduction.
     --add_translation_note: Indicateur pour ajouter une note de traduction au contenu traduit.
     """
+
     parser = argparse.ArgumentParser(description="Traduit les fichiers Markdown.")
     parser.add_argument(
         "--force",
@@ -344,7 +364,9 @@ def main():
         help="Répertoire cible pour sauvegarder les traductions",
     )
     parser.add_argument(
-        "--model", type=str, help="Modèle GPT à utiliser pour la traduction"
+        "--model",
+        type=str,
+        help="Modèle GPT à utiliser pour la traduction, la valeur par défaut dépend de l'API sélectionnée",
     )
     parser.add_argument(
         "--target_lang",
@@ -364,6 +386,11 @@ def main():
         help="Utiliser l'API Mistral AI pour la traduction",
     )
     parser.add_argument(
+        "--use_claude",
+        action="store_true",
+        help="Utiliser l'API Claude d'Anthropic pour la traduction",
+    )
+    parser.add_argument(
         "--add_translation_note",
         action="store_true",
         help="Ajouter une note de traduction au contenu traduit",
@@ -372,9 +399,7 @@ def main():
     args = parser.parse_args()
 
     if not os.path.isdir(args.source_dir):
-        raise ValueError(
-            f"Le répertoire source spécifié n'existe pas : {args.source_dir}"
-        )
+        raise ValueError(f"Le répertoire source spécifié n'existe pas : {args.source_dir}")
     if not os.path.exists(args.target_dir):
         os.makedirs(args.target_dir)
 
@@ -383,13 +408,19 @@ def main():
         api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
         if not api_key:
             raise ValueError("Clé API Mistral non spécifiée.")
-        client = MistralClient(api_key=api_key)  # Supprimez l'argument model_limit
+        client = MistralClient(api_key=api_key)
+    elif args.use_claude:
+        args.model = args.model if args.model else DEFAULT_MODEL_CLAUDE
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("Clé API Claude non spécifiée.")
+        client = anthropic.Anthropic(api_key=api_key)
     else:
         args.model = args.model if args.model else DEFAULT_MODEL_OPENAI
         openai_api_key = os.getenv("OPENAI_API_KEY", DEFAULT_OPENAI_API_KEY)
         if not openai_api_key:
             raise ValueError("Clé API OpenAI non spécifiée.")
-        client = OpenAI(api_key=openai_api_key)  # Supprimez l'argument model_limit
+        client = OpenAI(api_key=openai_api_key)
 
     translate_directory(
         args.source_dir,
@@ -397,11 +428,12 @@ def main():
         client,
         args,
         args.use_mistral,
+        args.use_claude, 
         args.add_translation_note,
         args.force,
     )
 
-    if args.use_mistral:
+    if args.use_mistral or args.use_claude:
         try:
             del client
         except TypeError:

@@ -1,10 +1,14 @@
-Note de version : 
-- 1.0 Version initiale - Support l'API de OpenAI
+Note de version :
+- 1.0 Version initiale - Support de l'API OpenAI
 - 1.1 Ajout du support de l'API Mistral IA
-- 1.2 fix du changelog
+- 1.2 Fix du changelog
 - 1.3 Améliorations et nouvelles fonctionnalités :
     - Gestion améliorée des blocs de code
     - Gestion améliorée des fichiers de sortie
     - Détection de fichiers existants améliorée
     - Option --force pour forcer la traduction
     - Inversion du modèle et de la langue dans le nom du fichier de sortie
+- 1.4 Nouveautés :
+    - Support de l'API Claude d'Anthropic pour la traduction.
+    - Optimisation des prompts pour une clarté et efficacité accrues.
+    - Ajustements mineurs pour améliorer la maintenance du code.
