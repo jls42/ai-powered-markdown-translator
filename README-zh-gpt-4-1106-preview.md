@@ -70,7 +70,7 @@ pip install -r requirements.txt
 
 - 使用OpenAI将法语翻译成英语，并添加翻译注释：
     ```
-    python translate.py --use_openai --source_dir 'content/fr' --target_dir 'content/en' --add_translation_note --source_lang 'fr'
+    python translate.py --source_dir 'content/fr' --target_dir 'content/en' --add_translation_note --source_lang 'fr'
     ```
 - 使用Mistral AI将法语翻译成西班牙语，不添加翻译注释：
     ```

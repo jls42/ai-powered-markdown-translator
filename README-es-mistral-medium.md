@@ -70,7 +70,7 @@ El script ofrece varias opciones para personalizar el proceso de traducción:
 
 - Traducir del francés al inglés con OpenAI, agregando una nota de traducción:
     ```
-    python translate.py --use_openai --source_dir 'content/fr' --target_dir 'content/en' --add_translation_note --source_lang 'fr'
+    python translate.py --source_dir 'content/fr' --target_dir 'content/en' --add_translation_note --source_lang 'fr'
     ```
 - Traducir del francés al español con Mistral AI, sin nota de traducción:
     ```

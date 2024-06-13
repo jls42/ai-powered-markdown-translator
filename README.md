@@ -70,7 +70,7 @@ Le script offre plusieurs options pour personnaliser le processus de traduction 
 
 - Traduire du français vers l'anglais avec OpenAI, en ajoutant une note de traduction :
     ```
-    python translate.py --use_openai --source_dir 'content/fr' --target_dir 'content/en' --add_translation_note --source_lang 'fr'
+    python translate.py --source_dir 'content/fr' --target_dir 'content/en' --add_translation_note --source_lang 'fr'
     ```
 - Traduire du français vers l'espagnol avec Mistral AI, sans note de traduction :
     ```
