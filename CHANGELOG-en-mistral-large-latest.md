@@ -29,3 +29,6 @@
     - **Améliorations diverses :**
         - Nettoyage du code en supprimant les lignes vides inutiles.
         - Ajustements mineurs pour améliorer la structure et la lisibilité du script.
+
+**This document has been translated from the fr version to the en language using the mistral-large-latest model. For more information about the translation process, see https://gitlab.com/jls42/ai-powered-markdown-translator.**
+

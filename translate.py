@@ -3,33 +3,34 @@
 import os
 import argparse
 import time
-from openai import OpenAI
 import re
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
 import glob
+
+from openai import OpenAI
 import anthropic
+from mistralai import Mistral
 
 EXCLUDE_PATTERNS = ["traductions_"]
 
 # Initialisation de la configuration avec les valeurs par défaut
-DEFAULT_OPENAI_API_KEY = "votre-clé-api-openai-par-défaut"
-DEFAULT_MISTRAL_API_KEY = "votre-clé-api-mistral-par-défaut"
-DEFAULT_MODEL_OPENAI = "gpt-4-1106-preview"
-DEFAULT_MODEL_MISTRAL = "mistral-medium"
-DEFAULT_MODEL_CLAUDE = "claude-3-opus-20240229"
+DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
+DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
+DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"
+DEFAULT_MODEL_OPENAI = "gpt-4o"
+DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
+DEFAULT_MODEL_CLAUDE = "claude-3-5-sonnet-20240620"
 DEFAULT_SOURCE_LANG = "fr"
 DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
 MODEL_TOKEN_LIMITS = {
-    "gpt-4-turbo-preview": 4096,
-    "gpt-4-1106-preview": 4096,
-    "gpt-4-vision-preview": 4096,
+    "gpt-4o": 4096,
     "gpt-4": 8192,
     "gpt-4-32k": 32768,
     "gpt-4-0613": 8192,
     "gpt-4-32k-0613": 32768,
+    "mistral-large-latest": 4096,
+    "claude-3-5-sonnet-20240620": 8192,
 }
 
 
@@ -66,7 +67,10 @@ def segment_text(text, max_length):
 
     return segments
 
-def translate(text, client, args, use_mistral=False, use_claude=False, is_translation_note=False):
+
+def translate(
+    text, client, args, use_mistral=False, use_claude=False, is_translation_note=False
+):
     """
     Traduit un texte à l'aide de l'API OpenAI, Mistral AI ou Claude, selon les paramètres spécifiés.
     Cette fonction segmente d'abord le texte pour s'assurer qu'il respecte la limite de tokens du modèle.
@@ -92,20 +96,36 @@ def translate(text, client, args, use_mistral=False, use_claude=False, is_transl
         try:
             prompt_message = ""
             if is_translation_note:
-                prompt_message = "Directly translate to {} without any additions, ensuring that elements such as URLs, image paths and code blocks are not translated. Leave these elements unchanged. : '{}'".format(args.target_lang, segment)
+                prompt_message = (
+                    f"Directly translate to {args.target_lang} without any additions, ensuring that elements such as URLs, image paths, code blocks, "
+                    "and specifically 'front matter' metadata (like 'title', 'date', 'categories', 'tags', 'draft') are not translated. "
+                    "The 'front matter' is a block of metadata used at the beginning of some file formats like Markdown for static site generators "
+                    "such as Hugo. These metadata should remain unchanged. Additionally, any specific file formatting or markup language elements "
+                    "(e.g., special tags, preprocessing directives) should also be left unchanged. Here is the text to translate: "
+                    f"'{segment}'."
+                )
             else:
-                prompt_message = f"Perform a direct translation from {args.source_lang} to {args.target_lang}, without altering URLs. Begin the translation immediately without any introduction or added notes, and ensure not to include any additional information or context beyond the requested translation: '{segment}'. Strictly follow the source text without adding, modifying, or omitting elements that are not explicitly present."
+                prompt_message = (
+                    f"Perform a direct translation from {args.source_lang} to {args.target_lang}, without altering URLs. "
+                    f"Begin the translation immediately without any introduction or added notes, and ensure not to include any additional "
+                    f"information or context beyond the requested translation: '{segment}'. Strictly follow the source text without adding, "
+                    f"modifying, or omitting elements that are not explicitly present."
+                )
+
             if use_mistral:
-                messages = [ChatMessage(role="user", content=prompt_message)]
-                response = client.chat(model=args.model, messages=messages)
+                messages = [{"role": "user", "content": prompt_message}]
+                response = client.chat.complete(model=args.model, messages=messages)
                 translated_text = response.choices[0].message.content.strip()
             elif use_claude:
                 messages = [{"role": "user", "content": prompt_message}]
-                response = client.messages.create(model=args.model, max_tokens=4096, messages=messages)
+                response = client.messages.create(
+                    model=args.model, max_tokens=4096, messages=messages
+                )
                 # Extraire le texte de chaque ContentBlock dans la liste de réponses
-                translated_texts = [block.text.strip() for block in response.content]  # Assurez-vous que .content est la liste des ContentBlock
+                translated_texts = [
+                    block.text.strip() for block in response.content
+                ]  # Assurez-vous que .content est la liste des ContentBlock
                 translated_text = " ".join(translated_texts)
-
             else:
                 messages = [
                     {"role": "system", "content": prompt_message},
@@ -121,6 +141,7 @@ def translate(text, client, args, use_mistral=False, use_claude=False, is_transl
         translated_segments.append(translated_text)
 
     return " ".join(translated_segments)
+
 
 def translate_markdown_file(
     file_path,
@@ -230,7 +251,6 @@ def translate_markdown_file(
         )
 
 
-
 def is_excluded(path):
     """
     Vérifie si le chemin donné correspond à l'un des motifs d'exclusion.
@@ -253,7 +273,14 @@ def is_excluded(path):
 
 
 def translate_directory(
-    input_dir, output_dir, client, args, use_mistral, use_claude, add_translation_note, force
+    input_dir,
+    output_dir,
+    client,
+    args,
+    use_mistral,
+    use_claude,
+    add_translation_note,
+    force,
 ):
     """
     Traduit tous les fichiers markdown dans le répertoire d'entrée et ses sous-répertoires.
@@ -325,6 +352,7 @@ def translate_directory(
                     print(
                         f"La traduction de '{file}' existe déjà, aucune action effectuée."
                     )
+
 
 def main():
     """
@@ -399,7 +427,9 @@ def main():
     args = parser.parse_args()
 
     if not os.path.isdir(args.source_dir):
-        raise ValueError(f"Le répertoire source spécifié n'existe pas : {args.source_dir}")
+        raise ValueError(
+            f"Le répertoire source spécifié n'existe pas : {args.source_dir}"
+        )
     if not os.path.exists(args.target_dir):
         os.makedirs(args.target_dir)
 
@@ -408,10 +438,10 @@ def main():
         api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
         if not api_key:
             raise ValueError("Clé API Mistral non spécifiée.")
-        client = MistralClient(api_key=api_key)
+        client = Mistral(api_key=api_key)
     elif args.use_claude:
         args.model = args.model if args.model else DEFAULT_MODEL_CLAUDE
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = os.getenv("ANTHROPIC_API_KEY", DEFAULT_ANTHROPIC_API_KEY)
         if not api_key:
             raise ValueError("Clé API Claude non spécifiée.")
         client = anthropic.Anthropic(api_key=api_key)
@@ -428,7 +458,7 @@ def main():
         client,
         args,
         args.use_mistral,
-        args.use_claude, 
+        args.use_claude,
         args.add_translation_note,
         args.force,
     )

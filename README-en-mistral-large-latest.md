@@ -1,17 +1,17 @@
-# AI-Powered Markdown Translator with OpenAI, Mistral AI, and Claude from Anthropic
+# AI-Powered Markdown Translator with OpenAI, Mistral AI and Claude from Anthropic
 
-This project is an advanced Python script that uses the OpenAI, Mistral AI, or Claude from Anthropic APIs to translate Markdown files from a source language to a target language. It is designed to be flexible and easy to use, offering additional options such as adding a translation note, improved output file management, existing file detection, and support for multiple languages and translation models.
+This project is an advanced Python script that uses OpenAI, Mistral AI, or Claude from Anthropic APIs to translate Markdown files from a source language to a target language. It is designed to be flexible and easy to use, offering additional options such as adding a translation note, improved output file management, detection of existing files, and support for multiple languages and translation models.
 
-For a demonstration and detailed explanations, visit [jls42.org](https://jls42.org/) or in translated version: [jls42.org English](https://jls42.org/traductions_en/), [jls42.org Español](https://jls42.org/traductions_es/) and [jls42.org 中文](https://jls42.org/traductions_zh/).
+For a demonstration and detailed explanations, visit [jls42.org](https://jls42.org/) or in translated versions: [jls42.org English](https://jls42.org/traductions_en/), [jls42.org Español](https://jls42.org/traductions_es/) and [jls42.org 中文](https://jls42.org/traductions_zh/).
 
-## Key Features
+## Main Features
 
-- **AI-Powered Translation**: Use the latest AI technologies for the translation of your documents with OpenAI, Mistral AI, or Claude from Anthropic.
+- **AI-Powered Translation**: Use the latest AI technologies for translating your documents with OpenAI, Mistral AI, or Claude from Anthropic.
 - **Multilingual Support**: Translate your documents into multiple languages with support for different language models.
 - **Intelligent Segmentation**: Efficiently manage long texts with automated segmentation.
 - **Translation Note**: Automatically add a translation note to inform readers about the process used.
 - **Improved Output File Management**: Check if a translation already exists before starting the translation.
-- **Enhanced Existing File Detection**: Look for files matching the base name of the original file and the target language.
+- **Improved Existing File Detection**: Search for files matching the base name of the original file and the target language.
 - **Flexible and Extensible**: The code is structured to allow easy addition of new features.
 
 ## Prerequisites
@@ -32,7 +32,7 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Set up your environment by defining the environment variables for the necessary API keys:
+Configure your environment by setting the environment variables for the necessary API keys:
 
 - **OpenAI**:
     ```
@@ -53,17 +53,17 @@ The script offers several options to customize the translation process:
 
 ### General Options
 
-- `--source_dir`: Directory containing the Markdown files to translate.
+- `--source_dir`: Directory containing the Markdown files to be translated.
 - `--target_dir`: Output directory for the translated files.
 - `--model`: GPT translation model to use. The default model depends on the selected API.
-- `--source_lang`: Source language of the documents. Particularly important for the addition of translation notes.
-- `--target_lang`: Target language for the translation. By default, it's English.
+- `--source_lang`: Source language of the documents. Important especially for adding translation notes.
+- `--target_lang`: Target language for the translation. Default is English.
 - `--force`: Force translation even if a translation already exists for the file.
 
-### API Specific Options
+### API-Specific Options
 
-- `--use_mistral`: Use the Mistral AI API for the translation.
-- `--use_claude`: Use the Claude from Anthropic API for the translation.
+- `--use_mistral`: Use Mistral AI API for translation.
+- `--use_claude`: Use Claude from Anthropic API for translation.
 - `--add_translation_note`: Add a translation note to the translated content, specifying the method and tools used.
 
 ### Usage Examples
@@ -84,7 +84,7 @@ Email: contact@jls42.org
 
 ## License
 
-This project is licensed under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007. See the file [LICENSE](LICENSE) for more details.
+This project is under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007. See the [LICENSE](LICENSE) file for more details.
 
-**This document has been translated from the fr version to the en language using the gpt-4-1106-preview model. For more information about the translation process, visit https://gitlab.com/jls42/ai-powered-markdown-translator**
+**Ce document a été traduit de la version fr vers la langue en en utilisant le modèle mistral-large-latest. Pour plus d'informations sur le processus de traduction, consultez https://gitlab.com/jls42/ai-powered-markdown-translator.**
 
