@@ -16,7 +16,7 @@ EXCLUDE_PATTERNS = ["traductions_"]
 DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
 DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
 DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"
-DEFAULT_MODEL_OPENAI = "gpt-4o"
+DEFAULT_MODEL_OPENAI = "gpt-4o-2024-08-06"
 DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
 DEFAULT_MODEL_CLAUDE = "claude-3-5-sonnet-20240620"
 DEFAULT_SOURCE_LANG = "fr"
@@ -25,6 +25,7 @@ DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
 MODEL_TOKEN_LIMITS = {
     "gpt-4o": 128000,
+    "gpt-4o-2024-08-06": 128000,
     "gpt-4": 8192,
     "gpt-4-32k": 32768,
     "gpt-4-0613": 8192,
