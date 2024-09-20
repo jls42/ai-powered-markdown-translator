@@ -24,7 +24,7 @@ DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
 MODEL_TOKEN_LIMITS = {
-    "gpt-4o": 4096,
+    "gpt-4o": 128000,
     "gpt-4": 8192,
     "gpt-4-32k": 32768,
     "gpt-4-0613": 8192,
