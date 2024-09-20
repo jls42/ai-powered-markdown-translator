@@ -26,6 +26,7 @@ DEFAULT_TARGET_DIR = "traductions_en"
 MODEL_TOKEN_LIMITS = {
     "gpt-4o": 128000,
     "gpt-4o-2024-08-06": 128000,
+    "chatgpt-4o-latest": 128000,
     "gpt-4": 8192,
     "gpt-4-32k": 32768,
     "gpt-4-0613": 8192,
