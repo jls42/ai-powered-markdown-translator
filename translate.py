@@ -24,13 +24,13 @@ DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
 MODEL_TOKEN_LIMITS = {
-    "gpt-4o": 128000,
-    "gpt-4o-2024-08-06": 128000,
-    "chatgpt-4o-latest": 128000,
+    "chatgpt-4o-latest": 16384,
+    "o1-preview": 32768,
+    "o1-mini": 65536,
+    "gpt-4o": 4096,
+    "gpt-4o-2024-08-06": 16384,
     "gpt-4": 8192,
-    "gpt-4-32k": 32768,
     "gpt-4-0613": 8192,
-    "gpt-4-32k-0613": 32768,
     "mistral-large-latest": 4096,
     "claude-3-5-sonnet-20240620": 8192,
 }
