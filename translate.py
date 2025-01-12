@@ -10,13 +10,14 @@ from openai import OpenAI
 import anthropic
 from mistralai import Mistral
 
-EXCLUDE_PATTERNS = ["traductions_"]
+EXCLUDE_PATTERNS = ["traductions_", "venv"]
 
 # Initialisation de la configuration avec les valeurs par défaut
 DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
 DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
 DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"
-DEFAULT_MODEL_OPENAI = "gpt-4o-2024-08-06"
+# DEFAULT_MODEL_OPENAI = "gpt-4o-2024-08-06"
+DEFAULT_MODEL_OPENAI = "o1-preview"
 DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
 DEFAULT_MODEL_CLAUDE = "claude-3-5-sonnet-20240620"
 DEFAULT_SOURCE_LANG = "fr"
@@ -92,6 +93,9 @@ def translate(
 
     model_limit = MODEL_TOKEN_LIMITS.get(args.model, 4096)
 
+    # Liste pour repérer les modèles de la série o1 : "o1", "o1-mini", "o1-preview"
+    o1_series = ["o1", "o1-mini", "o1-preview"]
+
     segments = segment_text(text, model_limit)
     translated_segments = []
     for segment in segments:
@@ -115,10 +119,13 @@ def translate(
                 )
 
             if use_mistral:
+                # Mistral
                 messages = [{"role": "user", "content": prompt_message}]
                 response = client.chat.complete(model=args.model, messages=messages)
                 translated_text = response.choices[0].message.content.strip()
+
             elif use_claude:
+                # Claude
                 messages = [{"role": "user", "content": prompt_message}]
                 response = client.messages.create(
                     model=args.model, max_tokens=4096, messages=messages
@@ -128,11 +135,22 @@ def translate(
                     block.text.strip() for block in response.content
                 ]  # Assurez-vous que .content est la liste des ContentBlock
                 translated_text = " ".join(translated_texts)
+
             else:
-                messages = [
-                    {"role": "system", "content": prompt_message},
-                    {"role": "user", "content": segment},
-                ]
+                # OpenAI (ChatGPT, o1, etc.)
+                # Si on utilise un modèle de la série o1, on ne peut pas avoir de 'system'
+                if args.model in o1_series:
+                    messages = [
+                        {"role": "user", "content": prompt_message},
+                        {"role": "user", "content": segment},
+                    ]
+                else:
+                    # Modèle GPT classique, on inclut le rôle system
+                    messages = [
+                        {"role": "system", "content": prompt_message},
+                        {"role": "user", "content": segment},
+                    ]
+
                 response = client.chat.completions.create(
                     model=args.model, messages=messages
                 )
