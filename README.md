@@ -1,87 +1,103 @@
-# Traducteur de Markdown AI-Powered avec OpenAI, Mistral AI et Claude d'Anthropic
+# Traducteur de Markdown AI-Powered
 
-Ce projet est un script Python avancé qui utilise les API OpenAI, Mistral AI ou Claude d'Anthropic pour traduire des fichiers Markdown d'une langue source vers une langue cible. Il est conçu pour être flexible et facile à utiliser, offrant des options supplémentaires telles que l'ajout d'une note de traduction, la gestion améliorée des fichiers de sortie, la détection de fichiers existants, et le support de plusieurs langues et modèles de traduction.
+🌍 [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
 
-Pour une démonstration et des explications détaillées, visitez [jls42.org](https://jls42.org/) ou en version traduite : [jls42.org English](https://jls42.org/traductions_en/), [jls42.org Español](https://jls42.org/traductions_es/) et [jls42.org 中文](https://jls42.org/traductions_zh/).
+Traducteur de fichiers Markdown utilisant **OpenAI**, **Mistral AI**, **Claude (Anthropic)** et **Google Gemini**.
+
+Ce script Python traduit des fichiers Markdown d'une langue source vers une langue cible tout en préservant le formatage, les blocs de code et les métadonnées front matter.
 
 ## Caractéristiques Principales
 
-- **Traduction AI-Powered**: Utilisez les dernières technologies d'IA pour la traduction de vos documents avec OpenAI, Mistral AI ou Claude d'Anthropic.
-- **Support Multilingue**: Traduisez vos documents dans plusieurs langues avec support pour différents modèles de langage.
-- **Segmentation Intelligente**: Gérez efficacement les textes longs grâce à une segmentation automatisée.
-- **Note de Traduction**: Ajoutez automatiquement une note de traduction pour informer les lecteurs sur le processus utilisé.
-- **Gestion Améliorée des Fichiers de Sortie**: Vérifiez si une traduction existe déjà avant de lancer la traduction.
-- **Détection de Fichiers Existants Améliorée**: Recherchez des fichiers correspondants au nom de base du fichier d'origine et à la langue cible.
-- **Flexible et Extensible**: Le code est structuré pour permettre une facilité d'ajout de nouvelles fonctionnalités.
-
-## Prérequis
-
-- Python 3.6 ou version ultérieure.
-- Une clé API valide pour OpenAI, Mistral AI ou Claude d'Anthropic.
+- **Multi-Provider**: Support de 4 APIs (OpenAI, Mistral, Claude, Gemini)
+- **Modèles 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
+- **Mode Économique**: Option `--eco` pour utiliser des modèles plus rapides et moins coûteux
+- **Fichier Unique**: Option `--file` pour traduire un seul fichier
+- **Segmentation Intelligente**: Gestion des textes longs avec limites de tokens par modèle
+- **Préservation du Code**: Les blocs de code ne sont pas traduits
+- **Note de Traduction**: Ajout optionnel d'une note en fin de document
 
 ## Installation
 
-1. Clonez le dépôt Git :
-```
+```bash
 git clone https://gitlab.com/jls42/ai-powered-markdown-translator.git
-```
-2. Installez les dépendances nécessaires :
-```
+cd ai-powered-markdown-translator
 pip install -r requirements.txt
 ```
 
 ## Configuration
 
-Configurez votre environnement en définissant les variables d'environnement pour les clés API nécessaires :
+Définissez la variable d'environnement pour l'API que vous souhaitez utiliser :
 
-- **OpenAI** :
-    ```
-    export OPENAI_API_KEY='votre-clé-api-openai'
-    ```
-- **Mistral AI** :
-    ```
-    export MISTRAL_API_KEY='votre-clé-api-mistral'
-    ```
-- **Claude d'Anthropic** :
-    ```
-    export ANTHROPIC_API_KEY='votre-clé-api-anthropic'
-    ```
+```bash
+export OPENAI_API_KEY='votre-clé-api-openai'
+export MISTRAL_API_KEY='votre-clé-api-mistral'
+export ANTHROPIC_API_KEY='votre-clé-api-anthropic'
+export GOOGLE_API_KEY='votre-clé-api-google'
+```
 
 ## Utilisation
 
-Le script offre plusieurs options pour personnaliser le processus de traduction :
+### Traduire un fichier unique
 
-### Options Générales
+```bash
+python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
+```
 
-- `--source_dir` : Répertoire contenant les fichiers Markdown à traduire.
-- `--target_dir` : Répertoire de sortie pour les fichiers traduits.
-- `--model` : Modèle de traduction GPT à utiliser. Le modèle par défaut dépend de l'API sélectionnée.
-- `--source_lang` : Langue source des documents. Importante notamment pour l'ajout de notes de traduction.
-- `--target_lang` : Langue cible pour la traduction. Par défaut, c'est l'anglais.
-- `--force` : Forcer la traduction même si une traduction existe déjà pour le fichier.
+### Traduire un répertoire
 
-### Options API Spécifiques
+```bash
+# Avec OpenAI (défaut: gpt-5)
+python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
-- `--use_mistral` : Utiliser l'API Mistral AI pour la traduction.
-- `--use_claude` : Utiliser l'API Claude d'Anthropic pour la traduction.
-- `--add_translation_note` : Ajouter une note de traduction au contenu traduit, spécifiant la méthode et les outils utilisés.
+# Avec Mistral AI
+python translate.py --use_mistral --source_dir 'content/fr' --target_dir 'content/es' --target_lang 'es'
 
-### Exemples d'Utilisation
+# Avec Claude
+python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content/de' --target_lang 'de'
 
-- Traduire du français vers l'anglais avec OpenAI, en ajoutant une note de traduction :
-    ```
-    python translate.py --source_dir 'content/fr' --target_dir 'content/en' --add_translation_note --source_lang 'fr'
-    ```
-- Traduire du français vers l'espagnol avec Mistral AI, sans note de traduction :
-    ```
-    python translate.py --use_mistral --source_dir 'content/fr' --target_dir 'content/es' --target_lang 'es'
-    ```
+# Avec Gemini
+python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
+```
+
+### Mode économique
+
+Utilise des modèles plus rapides et moins coûteux (gpt-5-mini, claude-haiku, gemini-flash) :
+
+```bash
+python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
+```
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `--file` | Fichier Markdown unique à traduire |
+| `--source_dir` | Répertoire source contenant les fichiers Markdown |
+| `--target_dir` | Répertoire de sortie pour les fichiers traduits |
+| `--source_lang` | Langue source (défaut: `fr`) |
+| `--target_lang` | Langue cible (défaut: `en`) |
+| `--model` | Modèle spécifique à utiliser |
+| `--eco` | Utiliser les modèles économiques |
+| `--use_mistral` | Utiliser l'API Mistral AI |
+| `--use_claude` | Utiliser l'API Claude |
+| `--use_gemini` | Utiliser l'API Gemini |
+| `--force` | Forcer la re-traduction |
+| `--add_translation_note` | Ajouter une note de traduction |
+
+### Modèles par défaut (2026)
+
+| Provider | Qualité (défaut) | Économique (`--eco`) |
+|----------|------------------|----------------------|
+| OpenAI | `gpt-5` | `gpt-5-mini` |
+| Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
+| Mistral | `mistral-large-latest` | `mistral-small-latest` |
+| Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
 ## Auteur
 
-Julien LE SAUX  
+Julien LE SAUX
 Email : contact@jls42.org
 
 ## Licence
 
-Ce projet est sous licence GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+GNU GENERAL PUBLIC LICENSE Version 3. Voir [LICENSE](LICENSE).
