@@ -9,31 +9,82 @@ import glob
 from openai import OpenAI
 import anthropic
 from mistralai import Mistral
+import google.generativeai as genai
 
-EXCLUDE_PATTERNS = ["traductions_", "venv"]
+EXCLUDE_PATTERNS = ["traductions_", "venv", "PRIVACY.md"]
 
 # Initialisation de la configuration avec les valeurs par défaut
 DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
 DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
 DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"
-# DEFAULT_MODEL_OPENAI = "gpt-4o-2024-08-06"
-DEFAULT_MODEL_OPENAI = "o1-preview"
+DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"
+# Modèles par défaut (mis à jour 2026) - Qualité
+DEFAULT_MODEL_OPENAI = "gpt-5"
 DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
-DEFAULT_MODEL_CLAUDE = "claude-3-5-sonnet-20240620"
+DEFAULT_MODEL_CLAUDE = "claude-sonnet-4-5-20250929"
+DEFAULT_MODEL_GEMINI = "gemini-3-pro-preview"
+
+# Modèles économiques (--eco)
+ECO_MODEL_OPENAI = "gpt-5-mini"
+ECO_MODEL_MISTRAL = "mistral-small-latest"
+ECO_MODEL_CLAUDE = "claude-haiku-4-5-20251001"
+ECO_MODEL_GEMINI = "gemini-3-flash-preview"
+
+# Limite de tokens par défaut pour les modèles non listés
+DEFAULT_TOKEN_LIMIT = 128000
+
 DEFAULT_SOURCE_LANG = "fr"
 DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
 MODEL_TOKEN_LIMITS = {
-    "chatgpt-4o-latest": 16384,
-    "o1-preview": 32768,
-    "o1-mini": 65536,
-    "gpt-4o": 4096,
-    "gpt-4o-2024-08-06": 16384,
-    "gpt-4": 8192,
-    "gpt-4-0613": 8192,
-    "mistral-large-latest": 4096,
-    "claude-3-5-sonnet-20240620": 8192,
+    # OpenAI GPT-5 series (2026)
+    "gpt-5.2": 400000,
+    "gpt-5.1": 400000,
+    "gpt-5": 400000,
+    "gpt-5-mini": 400000,
+    "gpt-5-nano": 400000,
+    "gpt-5.2-pro": 400000,
+    "gpt-5-pro": 400000,
+    # OpenAI GPT-4.1 series (1M context)
+    "gpt-4.1": 1000000,
+    "gpt-4.1-mini": 1000000,
+    "gpt-4.1-nano": 1000000,
+    # OpenAI O-series reasoning
+    "o3": 200000,
+    "o3-pro": 200000,
+    "o3-mini": 200000,
+    "o4-mini": 200000,
+    "o1": 200000,
+    "o1-pro": 200000,
+    "o1-mini": 128000,
+    "o1-preview": 128000,
+    # OpenAI GPT-4o (legacy)
+    "gpt-4o": 128000,
+    "gpt-4o-mini": 128000,
+    "chatgpt-4o-latest": 128000,
+    # Anthropic Claude 4.5 (2026)
+    "claude-opus-4-5-20251101": 200000,
+    "claude-sonnet-4-5-20250929": 200000,
+    "claude-haiku-4-5-20251001": 200000,
+    # Anthropic Claude 4.x
+    "claude-opus-4-1-20250805": 200000,
+    "claude-sonnet-4-20250514": 200000,
+    # Anthropic Claude 3.x (legacy)
+    "claude-3-5-sonnet-20240620": 200000,
+    "claude-3-7-sonnet-20250219": 200000,
+    # Mistral (2026)
+    "mistral-large-latest": 128000,
+    "mistral-small-latest": 128000,
+    "magistral-medium-latest": 40000,
+    "magistral-small-latest": 40000,
+    # Google Gemini (2026)
+    "gemini-3-pro-preview": 1000000,
+    "gemini-3-flash-preview": 1000000,
+    "gemini-2.5-pro": 1000000,
+    "gemini-2.5-flash": 1000000,
+    "gemini-2.0-flash": 1000000,
+    "gemini-2.0-pro-exp-02-05": 1000000,
 }
 
 
@@ -72,26 +123,27 @@ def segment_text(text, max_length):
 
 
 def translate(
-    text, client, args, use_mistral=False, use_claude=False, is_translation_note=False
+    text, client, args, use_mistral=False, use_claude=False, use_gemini=False, is_translation_note=False
 ):
     """
-    Traduit un texte à l'aide de l'API OpenAI, Mistral AI ou Claude, selon les paramètres spécifiés.
+    Traduit un texte à l'aide de l'API OpenAI, Mistral AI, Claude ou Gemini, selon les paramètres spécifiés.
     Cette fonction segmente d'abord le texte pour s'assurer qu'il respecte la limite de tokens du modèle.
     Elle utilise un argument optionnel 'is_translation_note' pour gérer différemment les notes de traduction.
 
     Args:
         text (str): Texte à traduire.
-        client: Objet client de l'API de traduction (OpenAI, Mistral AI ou Claude).
+        client: Objet client de l'API de traduction (OpenAI, Mistral AI, Claude ou Gemini).
         args: Objet argparse contenant les arguments de la ligne de commande.
         use_mistral (bool): Si True, utilise l'API Mistral AI pour la traduction.
         use_claude (bool): Si True, utilise l'API Claude pour la traduction.
+        use_gemini (bool): Si True, utilise l'API Gemini pour la traduction.
         is_translation_note (bool): Si True, le texte est une note de traduction.
 
     Returns:
         str: Texte traduit.
     """
 
-    model_limit = MODEL_TOKEN_LIMITS.get(args.model, 4096)
+    model_limit = MODEL_TOKEN_LIMITS.get(args.model, DEFAULT_TOKEN_LIMIT)
 
     # Liste pour repérer les modèles de la série o1 : "o1", "o1-mini", "o1-preview"
     o1_series = ["o1", "o1-mini", "o1-preview"]
@@ -135,6 +187,12 @@ def translate(
                     block.text.strip() for block in response.content
                 ]  # Assurez-vous que .content est la liste des ContentBlock
                 translated_text = " ".join(translated_texts)
+                
+            elif use_gemini:
+                # Gemini
+                model = client.GenerativeModel(args.model)
+                response = model.generate_content(prompt_message)
+                translated_text = response.text.strip()
 
             else:
                 # OpenAI (ChatGPT, o1, etc.)
@@ -170,11 +228,12 @@ def translate_markdown_file(
     args,
     use_mistral,
     use_claude,
+    use_gemini,
     add_translation_note=False,
     force=False,
 ):
     """
-    Traduit un fichier Markdown en utilisant les modèles de traitement du langage naturel de OpenAI, Mistral AI ou Claude.
+    Traduit un fichier Markdown en utilisant les modèles de traitement du langage naturel de OpenAI, Mistral AI, Claude ou Gemini.
 
     Args:
         file_path (str): Chemin complet vers le fichier d'entrée.
@@ -183,6 +242,7 @@ def translate_markdown_file(
         args: Arguments supplémentaires pour la traduction.
         use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
         use_claude (bool): Indique si l'API Claude doit être utilisée pour la traduction.
+        use_gemini (bool): Indique si l'API Gemini doit être utilisée pour la traduction.
         add_translation_note (bool): Indique si une note de traduction doit être ajoutée.
         force (bool): Indique si la traduction doit être forcée même si une traduction existe déjà.
 
@@ -224,7 +284,7 @@ def translate_markdown_file(
             content = content.replace(code_block, placeholder)
 
         # Traduction du contenu
-        translated_content = translate(content, client, args, use_mistral, use_claude)
+        translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
 
         # Restauration des blocs de code dans le contenu traduit
         for placeholder, code_block in zip(placeholders, code_blocks):
@@ -244,6 +304,7 @@ def translate_markdown_file(
                 args,
                 use_mistral,
                 use_claude,
+                use_gemini,
                 True,
             )
             translated_content += "\n\n**" + translation_note + "**\n\n"
@@ -299,6 +360,7 @@ def translate_directory(
     args,
     use_mistral,
     use_claude,
+    use_gemini,
     add_translation_note,
     force,
 ):
@@ -312,6 +374,7 @@ def translate_directory(
         args: Arguments supplémentaires pour la traduction.
         use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
         use_claude (bool): Indique si l'API Claude doit être utilisée pour la traduction.
+        use_gemini (bool): Indique si l'API Gemini doit être utilisée pour la traduction.
         add_translation_note (bool): Indique si une note de traduction doit être ajoutée.
         force (bool): Indique si la traduction doit être forcée même si une traduction existe déjà.
 
@@ -341,7 +404,11 @@ def translate_directory(
             if file.endswith(".md") and not is_excluded(file):
                 file_path = os.path.join(root, file)
                 base, _ = os.path.splitext(file)
-                output_file = f"{base}-{args.target_lang}-{args.model}.md"  # Inversion du modèle et de la langue
+                # Pattern de nommage: {base}-{lang}.md par défaut, ou {base}-{lang}-{model}.md avec --include_model
+                if args.include_model:
+                    output_file = f"{base}-{args.target_lang}-{args.model}.md"
+                else:
+                    output_file = f"{base}-{args.target_lang}.md"
                 relative_path = os.path.relpath(root, input_dir)
                 output_path = os.path.join(output_dir, relative_path, output_file)
 
@@ -364,6 +431,7 @@ def translate_directory(
                         args,
                         use_mistral,
                         use_claude,
+                        use_gemini,
                         add_translation_note,
                         force,
                     )
@@ -379,17 +447,18 @@ def main():
     Point d'entrée principal du script de traduction de fichiers Markdown.
 
     Ce script traduit des fichiers Markdown d'une langue source à une langue cible en utilisant
-    les services de traduction de l'API OpenAI, Mistral AI ou Claude. Il prend en charge la segmentation
+    les services de traduction de l'API OpenAI, Mistral AI, Claude ou Gemini. Il prend en charge la segmentation
     des textes longs et peut également ajouter une note de traduction en fin de document.
 
     Arguments du script:
     --source_dir: Répertoire contenant les fichiers Markdown à traduire.
     --target_dir: Répertoire de destination pour les fichiers traduits.
-    --model: Modèle de traduction GPT à utiliser.
+    --model: Modèle de traduction à utiliser.
     --target_lang: Langue cible pour la traduction.
     --source_lang: Langue source des documents.
     --use_mistral: Indicateur pour utiliser l'API Mistral AI pour la traduction.
     --use_claude: Indicateur pour utiliser l'API Claude pour la traduction.
+    --use_gemini: Indicateur pour utiliser l'API Gemini pour la traduction.
     --add_translation_note: Indicateur pour ajouter une note de traduction au contenu traduit.
     """
 
@@ -398,6 +467,11 @@ def main():
         "--force",
         action="store_true",
         help="Forcer la traduction même si une traduction existe déjà",
+    )
+    parser.add_argument(
+        "--file",
+        type=str,
+        help="Fichier Markdown unique à traduire (alternative à --source_dir)",
     )
     parser.add_argument(
         "--source_dir",
@@ -439,14 +513,33 @@ def main():
         help="Utiliser l'API Claude d'Anthropic pour la traduction",
     )
     parser.add_argument(
+        "--use_gemini",
+        action="store_true",
+        help="Utiliser l'API Gemini de Google pour la traduction",
+    )
+    parser.add_argument(
         "--add_translation_note",
         action="store_true",
         help="Ajouter une note de traduction au contenu traduit",
     )
+    parser.add_argument(
+        "--eco",
+        action="store_true",
+        help="Utiliser les modèles économiques (mini/flash) au lieu des modèles qualité",
+    )
+    parser.add_argument(
+        "--include_model",
+        action="store_true",
+        help="Inclure le nom du modèle dans le fichier de sortie (ex: README-en-gpt-5.md)",
+    )
 
     args = parser.parse_args()
 
-    if not os.path.isdir(args.source_dir):
+    # Validation des sources
+    if args.file:
+        if not os.path.isfile(args.file):
+            raise ValueError(f"Le fichier spécifié n'existe pas : {args.file}")
+    elif not os.path.isdir(args.source_dir):
         raise ValueError(
             f"Le répertoire source spécifié n'existe pas : {args.source_dir}"
         )
@@ -454,34 +547,71 @@ def main():
         os.makedirs(args.target_dir)
 
     if args.use_mistral:
-        args.model = args.model if args.model else DEFAULT_MODEL_MISTRAL
+        default_model = ECO_MODEL_MISTRAL if args.eco else DEFAULT_MODEL_MISTRAL
+        args.model = args.model if args.model else default_model
         api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
         if not api_key:
             raise ValueError("Clé API Mistral non spécifiée.")
         client = Mistral(api_key=api_key)
     elif args.use_claude:
-        args.model = args.model if args.model else DEFAULT_MODEL_CLAUDE
+        default_model = ECO_MODEL_CLAUDE if args.eco else DEFAULT_MODEL_CLAUDE
+        args.model = args.model if args.model else default_model
         api_key = os.getenv("ANTHROPIC_API_KEY", DEFAULT_ANTHROPIC_API_KEY)
         if not api_key:
             raise ValueError("Clé API Claude non spécifiée.")
         client = anthropic.Anthropic(api_key=api_key)
+    elif args.use_gemini:
+        default_model = ECO_MODEL_GEMINI if args.eco else DEFAULT_MODEL_GEMINI
+        args.model = args.model if args.model else default_model
+        api_key = os.getenv("GOOGLE_API_KEY", DEFAULT_GEMINI_API_KEY)
+        if not api_key:
+            raise ValueError("Clé API Gemini non spécifiée.")
+        genai.configure(api_key=api_key)
+        client = genai
     else:
-        args.model = args.model if args.model else DEFAULT_MODEL_OPENAI
+        default_model = ECO_MODEL_OPENAI if args.eco else DEFAULT_MODEL_OPENAI
+        args.model = args.model if args.model else default_model
         openai_api_key = os.getenv("OPENAI_API_KEY", DEFAULT_OPENAI_API_KEY)
         if not openai_api_key:
             raise ValueError("Clé API OpenAI non spécifiée.")
         client = OpenAI(api_key=openai_api_key)
 
-    translate_directory(
-        args.source_dir,
-        args.target_dir,
-        client,
-        args,
-        args.use_mistral,
-        args.use_claude,
-        args.add_translation_note,
-        args.force,
-    )
+    # Avertissement pour les modèles non listés
+    if args.model not in MODEL_TOKEN_LIMITS:
+        print(f"⚠ Modèle '{args.model}' non listé, utilisation de la limite par défaut ({DEFAULT_TOKEN_LIMIT} tokens)")
+
+    if args.file:
+        # Traduction d'un fichier unique
+        base = os.path.splitext(os.path.basename(args.file))[0]
+        if args.include_model:
+            output_file = f"{base}-{args.target_lang}-{args.model}.md"
+        else:
+            output_file = f"{base}-{args.target_lang}.md"
+        output_path = os.path.join(args.target_dir, output_file)
+        translate_markdown_file(
+            args.file,
+            output_path,
+            client,
+            args,
+            args.use_mistral,
+            args.use_claude,
+            args.use_gemini,
+            args.add_translation_note,
+            args.force,
+        )
+    else:
+        # Traduction d'un répertoire
+        translate_directory(
+            args.source_dir,
+            args.target_dir,
+            client,
+            args,
+            args.use_mistral,
+            args.use_claude,
+            args.use_gemini,
+            args.add_translation_note,
+            args.force,
+        )
 
     if args.use_mistral or args.use_claude:
         try:
