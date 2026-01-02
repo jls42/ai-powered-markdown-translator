@@ -1,0 +1,45 @@
+### Changelog
+
+🌍 [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+
+- **1.6** Nieuwe functies :
+    - Ondersteuning voor de Google Gemini-API voor vertaling (`--use_gemini`)
+    - Update van de standaardmodellen voor 2026 :
+        - OpenAI : `gpt-5` (kwaliteit), `gpt-5-mini` (eco)
+        - Claude : `claude-sonnet-4-5` (kwaliteit), `claude-haiku-4-5` (eco)
+        - Gemini : `gemini-3-pro-preview` (kwaliteit), `gemini-3-flash-preview` (eco)
+    - Eco-modus (`--eco`) om snellere en goedkopere modellen te gebruiken
+    - Vertaling van één enkel bestand (`--file`) zonder een map te doorlopen
+    - Nieuw vereenvoudigd naamgevingspatroon : `{base}-{lang}.md`
+    - Optie `--include_model` om het oude formaat met de modelnaam te behouden
+    - Ondersteuning voor niet-vermelde modellen met een standaard tokenlimiet (128k)
+    - README vertaald in 14 talen
+- **1.5** Verbeteringen :
+    - **Bijwerking van API-sleutels en standaardmodellen :**
+        - **OpenAI :** `DEFAULT_MODEL_OPENAI` bijgewerkt naar `"gpt-4o"`.
+        - **Mistral AI :** `DEFAULT_MODEL_MISTRAL` bijgewerkt naar `"mistral-large-latest"`.
+        - **Claude van Anthropic :** Toevoeging van `DEFAULT_ANTHROPIC_API_KEY` en bijwerking van `DEFAULT_MODEL_CLAUDE` naar `"claude-3-5-sonnet-20240620"`.
+    - **Optimalisatie van vertaalprompts :**
+        - De prompts voor rechtstreekse vertalingen en vertaalnotities zijn uitgebreid voor meer duidelijkheid en efficiëntie, met gedetailleerde instructies over het behouden van metadata en specifieke opmaakelementen.
+    - **Code-refactorisatie :**
+        - Vervanging van `MistralClient` door de klasse `Mistral` voor de initialisatie van de Mistral AI-client.
+        - Herorganisatie van imports voor betere leesbaarheid en onderhoud.
+        - Verbeterde segmentatie van teksten en behandeling van codeblokken om de oorspronkelijke opmaak bij de vertaling te behouden.
+    - **Beheer van uitvoerbestanden :**
+        - Omkering van model en taal in de naam van de uitvoerbestanden (bijvoorbeeld, `f"{base}-{args.target_lang}-{args.model}.md"`), wat de organisatie en het terugvinden van vertalingen vergemakkelijkt.
+    - **Diverse verbeteringen :**
+        - Opschonen van de code door onnodige lege regels te verwijderen.
+        - Kleine aanpassingen om de structuur en leesbaarheid van het script te verbeteren.
+- **1.4** Nieuwe functies :
+    - Ondersteuning voor de Claude-API van Anthropic voor vertaling
+    - Optimalisatie van prompts voor meer duidelijkheid en efficiëntie
+    - Kleine aanpassingen om het onderhoud van de code te verbeteren
+- **1.3** Verbeteringen en nieuwe functies :
+    - Verbeterde behandeling van codeblokken
+    - Verbeterd beheer van uitvoerbestanden
+    - Verbeterde detectie van bestaande bestanden
+    - Optie `--force` om de vertaling te forceren
+    - Omkering van model en taal in de naam van het uitvoerbestand
+- **1.2** Fix van de changelog
+- **1.1** Toevoeging van ondersteuning voor de Mistral AI-API
+- **1.0** Initiële versie - Ondersteuning voor de OpenAI-API

@@ -1,18 +1,19 @@
 ### Changelog
 
-- **1.0** Version initiale - Support de l'API OpenAI
-- **1.1** Ajout du support de l'API Mistral IA
-- **1.2** Fix du changelog
-- **1.3** Améliorations et nouvelles fonctionnalités :
-    - Gestion améliorée des blocs de code
-    - Gestion améliorée des fichiers de sortie
-    - Détection de fichiers existants améliorée
-    - Option `--force` pour forcer la traduction
-    - Inversion du modèle et de la langue dans le nom du fichier de sortie
-- **1.4** Nouveautés :
-    - Support de l'API Claude d'Anthropic pour la traduction
-    - Optimisation des prompts pour une clarté et efficacité accrues
-    - Ajustements mineurs pour améliorer la maintenance du code
+🌍 [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+
+- **1.6** Nouveautés :
+    - Support de l'API Google Gemini pour la traduction (`--use_gemini`)
+    - Mise à jour des modèles par défaut 2026 :
+        - OpenAI : `gpt-5` (qualité), `gpt-5-mini` (éco)
+        - Claude : `claude-sonnet-4-5` (qualité), `claude-haiku-4-5` (éco)
+        - Gemini : `gemini-3-pro-preview` (qualité), `gemini-3-flash-preview` (éco)
+    - Mode économique (`--eco`) pour utiliser des modèles plus rapides et moins coûteux
+    - Traduction de fichier unique (`--file`) sans parcourir un répertoire
+    - Nouveau pattern de nommage simplifié : `{base}-{lang}.md`
+    - Option `--include_model` pour conserver l'ancien format avec le nom du modèle
+    - Support des modèles non listés avec limite de tokens par défaut (128k)
+    - README traduit en 14 langues
 - **1.5** Améliorations :
     - **Mise à jour des clés API et des modèles par défaut :**
         - **OpenAI :** Mise à jour de `DEFAULT_MODEL_OPENAI` à `"gpt-4o"`.
@@ -29,3 +30,16 @@
     - **Améliorations diverses :**
         - Nettoyage du code en supprimant les lignes vides inutiles.
         - Ajustements mineurs pour améliorer la structure et la lisibilité du script.
+- **1.4** Nouveautés :
+    - Support de l'API Claude d'Anthropic pour la traduction
+    - Optimisation des prompts pour une clarté et efficacité accrues
+    - Ajustements mineurs pour améliorer la maintenance du code
+- **1.3** Améliorations et nouvelles fonctionnalités :
+    - Gestion améliorée des blocs de code
+    - Gestion améliorée des fichiers de sortie
+    - Détection de fichiers existants améliorée
+    - Option `--force` pour forcer la traduction
+    - Inversion du modèle et de la langue dans le nom du fichier de sortie
+- **1.2** Fix du changelog
+- **1.1** Ajout du support de l'API Mistral IA
+- **1.0** Version initiale - Support de l'API OpenAI

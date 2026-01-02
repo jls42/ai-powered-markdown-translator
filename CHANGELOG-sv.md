@@ -1,0 +1,45 @@
+### Ändringslogg
+
+🌍 [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+
+- **1.6** Nyheter :
+    - Stöd för Google Gemini API för översättning (`--use_gemini`)
+    - Uppdatering av standardmodellerna 2026 :
+        - OpenAI : `gpt-5` (kvalitet), `gpt-5-mini` (eko)
+        - Claude : `claude-sonnet-4-5` (kvalitet), `claude-haiku-4-5` (eko)
+        - Gemini : `gemini-3-pro-preview` (kvalitet), `gemini-3-flash-preview` (eko)
+    - Ekonomiläge (`--eco`) för att använda snabbare och billigare modeller
+    - Översättning av enskild fil (`--file`) utan att gå igenom en katalog
+    - Nytt förenklat namngivningsmönster: `{base}-{lang}.md`
+    - Alternativet `--include_model` för att behålla det gamla formatet med modellnamnet
+    - Stöd för icke-listade modeller med standardgräns för tokens (128k)
+    - README översatt till 14 språk
+- **1.5** Förbättringar :
+    - **Uppdatering av API-nycklar och standardmodeller :**
+        - **OpenAI :** Uppdatering av `DEFAULT_MODEL_OPENAI` till `"gpt-4o"`.
+        - **Mistral AI :** Uppdatering av `DEFAULT_MODEL_MISTRAL` till `"mistral-large-latest"`.
+        - **Claude från Anthropic :** Tillägg av `DEFAULT_ANTHROPIC_API_KEY` och uppdatering av `DEFAULT_MODEL_CLAUDE` till `"claude-3-5-sonnet-20240620"`.
+    - **Optimering av översättningsprompter :**
+        - Prompterna för direkta översättningar och översättningsanteckningar har utökats för bättre tydlighet och effektivitet, inklusive detaljerade instruktioner om bevarande av metadata och specifika formateringselement.
+    - **Refaktorering av koden :**
+        - Ersättning av `MistralClient` med klassen `Mistral` för initiering av Mistral AI-klienten.
+        - Omorganisering av importer för bättre läsbarhet och underhåll.
+        - Förbättrad textsegmentering och hantering av kodblock för att bevara originalformateringen vid översättning.
+    - **Hantering av utdatafiler :**
+        - Omvändning av modell och språk i namnet på utdatafilerna (t.ex. `f"{base}-{args.target_lang}-{args.model}.md"`), vilket underlättar organisering och sökning av översättningar.
+    - **Diverse förbättringar :**
+        - Kodstädning genom att ta bort onödiga tomrader.
+        - Mindre justeringar för att förbättra skriptets struktur och läsbarhet.
+- **1.4** Nyheter :
+    - Stöd för Anthropics Claude-API för översättning
+    - Optimering av prompts för ökad tydlighet och effektivitet
+    - Mindre justeringar för att förbättra kodunderhållet
+- **1.3** Förbättringar och nya funktioner :
+    - Förbättrad hantering av kodblock
+    - Förbättrad hantering av utdatafiler
+    - Förbättrad upptäckt av befintliga filer
+    - Alternativet `--force` för att tvinga översättning
+    - Omvändning av modell och språk i namnet på utdatafilen
+- **1.2** Fix av ändringsloggen
+- **1.1** Tillägg av stöd för Mistral AI:s API
+- **1.0** Första versionen - Stöd för OpenAIs API

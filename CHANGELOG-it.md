@@ -1,0 +1,45 @@
+### Changelog
+
+🌍 [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+
+- **1.6** Novità :
+    - Supporto dell'API Google Gemini per la traduzione (`--use_gemini`)
+    - Aggiornamento dei modelli predefiniti 2026 :
+        - OpenAI : `gpt-5` (qualità), `gpt-5-mini` (eco)
+        - Claude : `claude-sonnet-4-5` (qualità), `claude-haiku-4-5` (eco)
+        - Gemini : `gemini-3-pro-preview` (qualità), `gemini-3-flash-preview` (eco)
+    - Modalità economica (`--eco`) per utilizzare modelli più veloci e meno costosi
+    - Traduzione di singolo file (`--file`) senza percorrere una directory
+    - Nuovo pattern di denominazione semplificato : `{base}-{lang}.md`
+    - Opzione `--include_model` per conservare il vecchio formato con il nome del modello
+    - Supporto dei modelli non elencati con limite di token predefinito (128k)
+    - README tradotto in 14 lingue
+- **1.5** Miglioramenti :
+    - **Aggiornamento delle chiavi API e dei modelli predefiniti :**
+        - **OpenAI :** Aggiornamento di `DEFAULT_MODEL_OPENAI` a `"gpt-4o"`.
+        - **Mistral AI :** Aggiornamento di `DEFAULT_MODEL_MISTRAL` a `"mistral-large-latest"`.
+        - **Claude di Anthropic :** Aggiunta di `DEFAULT_ANTHROPIC_API_KEY` e aggiornamento di `DEFAULT_MODEL_CLAUDE` a `"claude-3-5-sonnet-20240620"`.
+    - **Ottimizzazione dei prompt di traduzione :**
+        - I prompt per le traduzioni dirette e le note di traduzione sono stati arricchiti per una maggiore chiarezza ed efficacia, includendo istruzioni dettagliate sulla preservazione dei metadati e degli elementi di formattazione specifici.
+    - **Refactoring del codice :**
+        - Sostituzione di `MistralClient` con la classe `Mistral` per l'inizializzazione del client Mistral AI.
+        - Riorganizzazione degli import per una migliore leggibilità e manutenzione.
+        - Miglioramento della segmentazione dei testi e gestione dei blocchi di codice per preservare la formattazione originale durante la traduzione.
+    - **Gestione dei file di output :**
+        - Inversione del modello e della lingua nel nome dei file di output (ad esempio, `f"{base}-{args.target_lang}-{args.model}.md"`), facilitando così l'organizzazione e la ricerca delle traduzioni.
+    - **Miglioramenti vari :**
+        - Pulizia del codice rimuovendo le righe vuote inutili.
+        - Piccoli aggiustamenti per migliorare la struttura e la leggibilità dello script.
+- **1.4** Novità :
+    - Supporto dell'API Claude di Anthropic per la traduzione
+    - Ottimizzazione dei prompt per una maggiore chiarezza ed efficacia
+    - Piccoli aggiustamenti per migliorare la manutenzione del codice
+- **1.3** Miglioramenti e nuove funzionalità :
+    - Gestione migliorata dei blocchi di codice
+    - Gestione migliorata dei file di output
+    - Rilevamento migliorato dei file esistenti
+    - Opzione `--force` per forzare la traduzione
+    - Inversione del modello e della lingua nel nome del file di output
+- **1.2** Correzione del changelog
+- **1.1** Aggiunta del supporto dell'API Mistral IA
+- **1.0** Versione iniziale - Supporto dell'API OpenAI

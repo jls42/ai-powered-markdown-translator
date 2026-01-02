@@ -1,0 +1,45 @@
+### 変更履歴
+
+🌍 [英語](CHANGELOG-en.md) | [スペイン語](CHANGELOG-es.md) | [中国語](CHANGELOG-zh.md) | [ドイツ語](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [韓国語](CHANGELOG-ko.md) | [アラビア語](CHANGELOG-ar.md) | [ヒンディー語](CHANGELOG-hi.md) | [イタリア語](CHANGELOG-it.md) | [オランダ語](CHANGELOG-nl.md) | [ポーランド語](CHANGELOG-pl.md) | [ポルトガル語](CHANGELOG-pt.md) | [ルーマニア語](CHANGELOG-ro.md) | [スウェーデン語](CHANGELOG-sv.md)
+
+- **1.6** 新機能:
+    - 翻訳用の Google Gemini API をサポート（`--use_gemini`）
+    - 2026年のデフォルトモデルを更新:
+        - OpenAI: `gpt-5`（高品質）、`gpt-5-mini`（エコ）
+        - Claude: `claude-sonnet-4-5`（高品質）、`claude-haiku-4-5`（エコ）
+        - Gemini: `gemini-3-pro-preview`（高品質）、`gemini-3-flash-preview`（エコ）
+    - より高速で低コストなモデルを使用するためのエコモード（`--eco`）
+    - ディレクトリを走査せずに単一ファイルの翻訳（`--file`）
+    - 新しい簡素化された命名パターン: `{base}-{lang}.md`
+    - モデル名を含む旧フォーマットを保持するためのオプション `--include_model`
+    - 既定のトークン上限（128k）で未掲載モデルをサポート
+    - README を14言語に翻訳
+- **1.5** 改善:
+    - **API キーとデフォルトモデルの更新:**
+        - **OpenAI:** `DEFAULT_MODEL_OPENAI` を `"gpt-4o"` に更新。
+        - **Mistral AI:** `DEFAULT_MODEL_MISTRAL` を `"mistral-large-latest"` に更新。
+        - **Anthropic の Claude:** `DEFAULT_ANTHROPIC_API_KEY` を追加し、`DEFAULT_MODEL_CLAUDE` を `"claude-3-5-sonnet-20240620"` に更新。
+    - **翻訳プロンプトの最適化:**
+        - 直接翻訳および翻訳ノート用のプロンプトを強化し、メタデータや特定の書式要素の保持に関する詳細な指示を含めて、明瞭性と効率を向上。
+    - **コードのリファクタリング:**
+        - Mistral AI クライアントの初期化で `MistralClient` をクラス `Mistral` に置き換え。
+        - 可読性と保守性向上のためにインポートを再構成。
+        - 翻訳時に元の書式を保持するため、テキストの分割とコードブロックの扱いを改善。
+    - **出力ファイルの管理:**
+        - 出力ファイル名でモデルと言語の順序を反転（例: `f"{base}-{args.target_lang}-{args.model}.md"`）し、翻訳の整理と検索を容易に。
+    - **その他の改善:**
+        - 不要な空行の削除によるコードのクリーンアップ。
+        - スクリプトの構造と可読性を高めるための軽微な調整。
+- **1.4** 新機能:
+    - 翻訳のための Anthropic の Claude API サポート
+    - 明瞭性と効率を高めるためのプロンプト最適化
+    - コード保守性を高めるための軽微な調整
+- **1.3** 改善と新機能:
+    - コードブロックの取り扱いを改善
+    - 出力ファイルの取り扱いを改善
+    - 既存ファイルの検出を改善
+    - 翻訳を強制するオプション `--force`
+    - 出力ファイル名でモデルと言語の順序を反転
+- **1.2** 変更履歴の修正
+- **1.1** Mistral AI の API サポートを追加
+- **1.0** 初期バージョン - OpenAI API のサポート

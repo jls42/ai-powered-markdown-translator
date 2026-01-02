@@ -1,0 +1,45 @@
+### 更新日志
+
+🌍 [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+
+- **1.6** 新增：
+    - 支持用于翻译的 Google Gemini API（`--use_gemini`）
+    - 2026 年默认模型更新：
+        - OpenAI：`gpt-5`（高质量），`gpt-5-mini`（经济）
+        - Claude：`claude-sonnet-4-5`（高质量），`claude-haiku-4-5`（经济）
+        - Gemini：`gemini-3-pro-preview`（高质量），`gemini-3-flash-preview`（经济）
+    - 经济模式（`--eco`），使用更快且更低成本的模型
+    - 单个文件翻译（`--file`），无需遍历目录
+    - 新的简化命名模式：`{base}-{lang}.md`
+    - 选项 `--include_model` 可保留带有模型名称的旧格式
+    - 支持未列出的模型，默认 token 限制（128k）
+    - README 已翻译为 14 种语言
+- **1.5** 改进：
+    - 更新 API 密钥和默认模型：
+        - OpenAI：将 `DEFAULT_MODEL_OPENAI` 更新为 `"gpt-4o"`。
+        - Mistral AI：将 `DEFAULT_MODEL_MISTRAL` 更新为 `"mistral-large-latest"`。
+        - Anthropic 的 Claude：新增 `DEFAULT_ANTHROPIC_API_KEY`，并将 `DEFAULT_MODEL_CLAUDE` 更新为 `"claude-3-5-sonnet-20240620"`。
+    - 优化翻译提示词：
+        - 针对直接翻译和翻译注释的提示词已增强，以提高清晰度和效率，包含有关保留元数据和特定格式元素的详细说明。
+    - 代码重构：
+        - 将用于初始化 Mistral AI 客户端的 `MistralClient` 替换为 `Mistral` 类。
+        - 重新组织导入以提升可读性和可维护性。
+        - 改进文本分段和代码块处理，以在翻译时保留原始格式。
+    - 输出文件管理：
+        - 在输出文件名中交换模型与语言的位置（例如，`f"{base}-{args.target_lang}-{args.model}.md"`），从而便于组织和查找翻译。
+    - 其他改进：
+        - 通过删除不必要的空行来清理代码。
+        - 进行小幅调整以改进脚本的结构和可读性。
+- **1.4** 新增：
+    - 支持 Anthropic 的 Claude API 用于翻译
+    - 优化提示词以提高清晰度和效率
+    - 小幅调整以提升代码的可维护性
+- **1.3** 改进和新功能：
+    - 改进对代码块的处理
+    - 改进对输出文件的处理
+    - 改进对现有文件的检测
+    - 选项 `--force` 用于强制翻译
+    - 在输出文件名中交换模型与语言的位置
+- **1.2** 修复更新日志
+- **1.1** 增加对 Mistral AI API 的支持
+- **1.0** 初始版本 - 支持 OpenAI API
