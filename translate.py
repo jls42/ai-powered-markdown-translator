@@ -6,10 +6,14 @@ import time
 import re
 import glob
 
+from dotenv import load_dotenv
 from openai import OpenAI
 import anthropic
 from mistralai import Mistral
 import google.generativeai as genai
+
+# Charger les variables d'environnement depuis .env si présent
+load_dotenv()
 
 EXCLUDE_PATTERNS = ["traductions_", "venv", "PRIVACY.md"]
 
@@ -148,64 +152,68 @@ def translate(
     # Liste pour repérer les modèles de la série o1 : "o1", "o1-mini", "o1-preview"
     o1_series = ["o1", "o1-mini", "o1-preview"]
 
-    segments = segment_text(text, model_limit)
+    # Limite de segmentation raisonnable (16k caractères pour fiabilité)
+    segments = segment_text(text, min(16000, model_limit))
     translated_segments = []
+
     for segment in segments:
         try:
-            prompt_message = ""
+            # FIX: Séparation des instructions (system) et du contenu (user)
+            # Avant: le segment était inclus dans prompt_message ET envoyé en user (doublon)
             if is_translation_note:
-                prompt_message = (
-                    f"Directly translate to {args.target_lang} without any additions, ensuring that elements such as URLs, image paths, code blocks, "
-                    "and specifically 'front matter' metadata (like 'title', 'date', 'categories', 'tags', 'draft') are not translated. "
-                    "The 'front matter' is a block of metadata used at the beginning of some file formats like Markdown for static site generators "
-                    "such as Hugo. These metadata should remain unchanged. Additionally, any specific file formatting or markup language elements "
-                    "(e.g., special tags, preprocessing directives) should also be left unchanged. Here is the text to translate: "
-                    f"'{segment}'."
+                system_instructions = (
+                    f"Translate directly to {args.target_lang} without any additions. "
+                    "Do NOT modify URLs or image paths. "
+                    "Output only the translation, nothing else."
                 )
             else:
-                prompt_message = (
-                    f"Perform a direct translation from {args.source_lang} to {args.target_lang}, without altering URLs. "
-                    f"Begin the translation immediately without any introduction or added notes, and ensure not to include any additional "
-                    f"information or context beyond the requested translation: '{segment}'. Strictly follow the source text without adding, "
-                    f"modifying, or omitting elements that are not explicitly present."
+                system_instructions = (
+                    f"Translate from {args.source_lang} to {args.target_lang}. "
+                    "IMPORTANT RULES: "
+                    "1) In YAML front matter (between ---): translate 'title' and 'description' values, "
+                    f"change 'locale' to '{args.target_lang}'. Use double quotes for strings with apostrophes. "
+                    "2) For Markdown links [text](url): translate link text, keep URL unchanged. "
+                    "3) Do NOT modify: URLs, image paths, code blocks (including comments inside code). "
+                    "4) Do NOT add translator notes, comments, or explanations. "
+                    "5) Keep template variables like {variable} exactly as they are (inside backticks if present). "
+                    "Preserve Markdown structure. Output ONLY the translation, nothing else."
                 )
 
             if use_mistral:
-                # Mistral
-                messages = [{"role": "user", "content": prompt_message}]
+                # Mistral - instructions + segment dans un seul message user
+                messages = [{"role": "user", "content": system_instructions + "\n\n" + segment}]
                 response = client.chat.complete(model=args.model, messages=messages)
                 translated_text = response.choices[0].message.content.strip()
 
             elif use_claude:
-                # Claude
-                messages = [{"role": "user", "content": prompt_message}]
+                # Claude - instructions + segment dans un seul message user
+                messages = [{"role": "user", "content": system_instructions + "\n\n" + segment}]
                 response = client.messages.create(
                     model=args.model, max_tokens=4096, messages=messages
                 )
-                # Extraire le texte de chaque ContentBlock dans la liste de réponses
                 translated_texts = [
                     block.text.strip() for block in response.content
-                ]  # Assurez-vous que .content est la liste des ContentBlock
+                ]
                 translated_text = " ".join(translated_texts)
-                
+
             elif use_gemini:
-                # Gemini
+                # Gemini - instructions + segment
                 model = client.GenerativeModel(args.model)
-                response = model.generate_content(prompt_message)
+                response = model.generate_content(system_instructions + "\n\n" + segment)
                 translated_text = response.text.strip()
 
             else:
                 # OpenAI (ChatGPT, o1, etc.)
-                # Si on utilise un modèle de la série o1, on ne peut pas avoir de 'system'
+                # FIX: Le segment n'est plus inclus dans system_instructions (évite le doublon)
                 if args.model in o1_series:
+                    # Modèles o1 ne supportent pas le rôle system
                     messages = [
-                        {"role": "user", "content": prompt_message},
-                        {"role": "user", "content": segment},
+                        {"role": "user", "content": system_instructions + "\n\n" + segment},
                     ]
                 else:
-                    # Modèle GPT classique, on inclut le rôle system
+                    # Modèle GPT classique: system pour instructions, user pour contenu
                     messages = [
-                        {"role": "system", "content": prompt_message},
+                        {"role": "system", "content": system_instructions},
                         {"role": "user", "content": segment},
                     ]
 
@@ -274,20 +282,33 @@ def translate_markdown_file(
             return
 
         # Extraction et remplacement des blocs de code pour les préserver pendant la traduction
-        regex = re.compile(
-            r"(?P<start>^```(?P<block_language>(\w|-)+)\n)(?P<code>.*?\n)(?P<end>```)",
+        # 1) Blocs de code fencés (``` ... ```)
+        fenced_regex = re.compile(
+            r"(^```(?:[\w-]*)?\n)(.*?)(^```$)",
             re.DOTALL | re.MULTILINE,
         )
-        code_blocks = [match.group("code") for match in regex.finditer(content)]
-        placeholders = [f"#CODEBLOCK{index}#" for index, _ in enumerate(code_blocks)]
-        for placeholder, code_block in zip(placeholders, code_blocks):
+        code_blocks = [match.group(0) for match in fenced_regex.finditer(content)]
+        block_placeholders = [f"#CODEBLOCK{index}#" for index, _ in enumerate(code_blocks)]
+        for placeholder, code_block in zip(block_placeholders, code_blocks):
             content = content.replace(code_block, placeholder)
+
+        # 2) Code inline (` ... `) - protège aussi les backticks
+        # Regex: matche `contenu` mais pas les blocs déjà remplacés ni les doubles backticks ``
+        inline_regex = re.compile(r"(?<!`)(`[^`\n]+?`)(?!`)")
+        inline_codes = [match.group(0) for match in inline_regex.finditer(content)]
+        inline_placeholders = [f"#INLINECODE{index}#" for index, _ in enumerate(inline_codes)]
+        for placeholder, inline_code in zip(inline_placeholders, inline_codes):
+            content = content.replace(inline_code, placeholder, 1)  # Replace one at a time to handle duplicates
 
         # Traduction du contenu
         translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
 
-        # Restauration des blocs de code dans le contenu traduit
-        for placeholder, code_block in zip(placeholders, code_blocks):
+        # Restauration des blocs de code et code inline dans le contenu traduit
+        # 1) Restaurer le code inline d'abord (ordre inverse de l'extraction)
+        for placeholder, inline_code in zip(inline_placeholders, inline_codes):
+            translated_content = translated_content.replace(placeholder, inline_code)
+        # 2) Restaurer les blocs fencés
+        for placeholder, code_block in zip(block_placeholders, code_blocks):
             translated_content = translated_content.replace(placeholder, code_block)
 
         # Ajout de la note de traduction si nécessaire
@@ -401,11 +422,14 @@ def translate_directory(
             continue
 
         for file in files:
-            if file.endswith(".md") and not is_excluded(file):
+            if (file.endswith(".md") or file.endswith(".mdx")) and not is_excluded(file):
                 file_path = os.path.join(root, file)
-                base, _ = os.path.splitext(file)
-                # Pattern de nommage: {base}-{lang}.md par défaut, ou {base}-{lang}-{model}.md avec --include_model
-                if args.include_model:
+                base, ext = os.path.splitext(file)
+                # Pattern de nommage selon les options
+                if args.keep_filename:
+                    # Conserver le nom et l'extension originaux
+                    output_file = file
+                elif args.include_model:
                     output_file = f"{base}-{args.target_lang}-{args.model}.md"
                 else:
                     output_file = f"{base}-{args.target_lang}.md"
@@ -414,15 +438,18 @@ def translate_directory(
 
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-                # Vérification si une traduction existe déjà, peu importe le modèle
-                target_language_files = glob.glob(
-                    f"{output_dir}/**/{base}-{args.target_lang}*.md", recursive=True
-                ) + glob.glob(
-                    f"{output_dir}/**/{base}-*{args.target_lang}.md", recursive=True
-                )
-                existing_translation = any(
-                    [os.path.exists(file) for file in target_language_files]
-                )
+                # Vérification si une traduction existe déjà
+                if args.keep_filename:
+                    existing_translation = os.path.exists(output_path)
+                else:
+                    target_language_files = glob.glob(
+                        f"{output_dir}/**/{base}-{args.target_lang}*.md", recursive=True
+                    ) + glob.glob(
+                        f"{output_dir}/**/{base}-*{args.target_lang}.md", recursive=True
+                    )
+                    existing_translation = any(
+                        [os.path.exists(file) for file in target_language_files]
+                    )
                 if not existing_translation or force:
                     translate_markdown_file(
                         file_path,
@@ -532,6 +559,11 @@ def main():
         action="store_true",
         help="Inclure le nom du modèle dans le fichier de sortie (ex: README-en-gpt-5.md)",
     )
+    parser.add_argument(
+        "--keep_filename",
+        action="store_true",
+        help="Conserver le nom et l'extension du fichier original (pour Astro, Hugo, etc.)",
+    )
 
     args = parser.parse_args()
 
@@ -582,11 +614,15 @@ def main():
 
     if args.file:
         # Traduction d'un fichier unique
-        base = os.path.splitext(os.path.basename(args.file))[0]
-        if args.include_model:
-            output_file = f"{base}-{args.target_lang}-{args.model}.md"
+        if args.keep_filename:
+            # Conserver le nom et l'extension originaux
+            output_file = os.path.basename(args.file)
         else:
-            output_file = f"{base}-{args.target_lang}.md"
+            base = os.path.splitext(os.path.basename(args.file))[0]
+            if args.include_model:
+                output_file = f"{base}-{args.target_lang}-{args.model}.md"
+            else:
+                output_file = f"{base}-{args.target_lang}.md"
         output_path = os.path.join(args.target_dir, output_file)
         translate_markdown_file(
             args.file,
