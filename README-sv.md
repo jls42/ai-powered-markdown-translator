@@ -103,7 +103,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Projekt som använder detta skript
 
-- **[jls42.org](https://jls42.org)** - Personlig blogg översatt till 15 språk (364 filer, 22 artiklar + 4 projekt)
+- **[jls42.org](https://jls42.org)** - Personlig blogg översatt till 15 språk 
 
 ## Författare
 

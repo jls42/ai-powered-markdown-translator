@@ -103,7 +103,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## المشاريع التي تستخدم هذا السكربت
 
-- **[jls42.org](https://jls42.org)** - مدونة شخصية مترجمة إلى 15 لغة (364 ملفًا، 22 مقالة + 4 مشاريع)
+- **[jls42.org](https://jls42.org)** - مدونة شخصية مترجمة إلى 15 لغة 
 
 ## المؤلف
 
