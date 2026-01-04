@@ -1,20 +1,22 @@
 # KI-gestützter Markdown-Übersetzer
 
-🌍 [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
+🌍 [Englisch](README-en.md) | [Spanisch](README-es.md) | [Chinesisch](README-zh.md) | [Deutsch](README-de.md) | [Japanisch](README-ja.md) | [Koreanisch](README-ko.md) | [Arabisch](README-ar.md) | [Hindi](README-hi.md) | [Italienisch](README-it.md) | [Niederländisch](README-nl.md) | [Polnisch](README-pl.md) | [Portugiesisch](README-pt.md) | [Rumänisch](README-ro.md) | [Schwedisch](README-sv.md)
 
-Übersetzer für Markdown-Dateien unter Verwendung von **OpenAI**, **Mistral AI**, **Claude (Anthropic)** und **Google Gemini**.
+Übersetzer für Markdown-Dateien, der **OpenAI**, **Mistral AI**, **Claude (Anthropic)** und **Google Gemini** verwendet.
 
-Dieses Python-Skript übersetzt Markdown-Dateien von einer Ausgangssprache in eine Zielsprache, wobei Formatierung, Codeblöcke und Front-Matter-Metadaten erhalten bleiben.
+Dieses Python-Skript übersetzt Markdown-Dateien von einer Quellsprache in eine Zielsprache und bewahrt dabei Formatierung, Codeblöcke und Front-Matter-Metadaten.
 
 ## Hauptfunktionen
 
-- **Multi-Provider**: Unterstützung für 4 APIs (OpenAI, Mistral, Claude, Gemini)
+- **Multi-Anbieter**: Unterstützung für 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **Modelle 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Sparmodus**: Option `--eco`, um schnellere und kostengünstigere Modelle zu verwenden
-- **Einzeldatei**: Option `--file`, um eine einzelne Datei zu übersetzen
-- **Intelligente Segmentierung**: Handhabung langer Texte mit Token-Grenzen pro Modell
-- **Code-Beibehaltung**: Codeblöcke werden nicht übersetzt
-- **Übersetzungshinweis**: Optionaler Hinweis am Ende des Dokuments
+- **Sparmodus**: Option `--eco` zur Verwendung schnellerer und kostengünstigerer Modelle
+- **Einzeldatei**: Option `--file` zum Übersetzen einer einzigen Datei
+- **Intelligente Segmentierung**: Handhabung langer Texte mit Token-Limits pro Modell
+- **Erhaltung des Codes**: Codeblöcke UND Inline-Code (`` `...` ``) werden bewahrt
+- **Dateiname**: Option `--keep_filename` zum Beibehalten des Originalnamens
+- **.env-Konfiguration**: Unterstützung der `.env`-Datei für API-Schlüssel
+- **Übersetzungsnotiz**: Optionale Hinzufügung einer Notiz am Ende des Dokuments
 
 ## Installation
 
@@ -26,13 +28,17 @@ pip install -r requirements.txt
 
 ## Konfiguration
 
-Legen Sie die Umgebungsvariable für die API fest, die Sie verwenden möchten :
+Erstellen Sie eine Datei `.env` im Stammverzeichnis des Projekts oder setzen Sie die Umgebungsvariablen:
 
 ```bash
+# Fichier .env (recommandé)
+OPENAI_API_KEY=votre-clé-api-openai
+MISTRAL_API_KEY=votre-clé-api-mistral
+ANTHROPIC_API_KEY=votre-clé-api-anthropic
+GOOGLE_API_KEY=votre-clé-api-google
+
+# Ou via export
 export OPENAI_API_KEY='votre-clé-api-openai'
-export MISTRAL_API_KEY='votre-clé-api-mistral'
-export ANTHROPIC_API_KEY='votre-clé-api-anthropic'
-export GOOGLE_API_KEY='votre-clé-api-google'
 ```
 
 ## Verwendung
@@ -61,7 +67,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Sparmodus
 
-Verwendet schnellere und kostengünstigere Modelle (gpt-5-mini, claude-haiku, gemini-flash) :
+Verwendet schnellere und kostengünstigere Modelle (gpt-5-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -70,34 +76,43 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 ### Optionen
 
 | Option | Beschreibung |
-|--------|--------------|
-| `--file` | Einzelne zu übersetzende Markdown-Datei |
-| `--source_dir` | Quellverzeichnis mit den Markdown-Dateien |
+|--------|-------------|
+| `--file` | Einzelne Markdown-Datei zum Übersetzen |
+| `--source_dir` | Quellverzeichnis mit Markdown-Dateien |
 | `--target_dir` | Ausgabeverzeichnis für die übersetzten Dateien |
-| `--source_lang` | Ausgangssprache (Standard: `fr`) |
+| `--source_lang` | Quellsprache (Standard: `fr`) |
 | `--target_lang` | Zielsprache (Standard: `en`) |
-| `--model` | Zu verwendendes spezifisches Modell |
-| `--eco` | Kostengünstige Modelle verwenden |
-| `--use_mistral` | Mistral-AI-API verwenden |
-| `--use_claude` | Claude-API verwenden |
-| `--use_gemini` | Gemini-API verwenden |
-| `--force` | Neuübersetzung erzwingen |
-| `--add_translation_note` | Übersetzungshinweis hinzufügen |
+| `--model` | Spezifisches Modell zur Verwendung |
+| `--eco` | Ökonomische Modelle verwenden |
+| `--use_mistral` | Mistral AI API verwenden |
+| `--use_claude` | Claude API verwenden |
+| `--use_gemini` | Gemini API verwenden |
+| `--force` | Neukonvertierung erzwingen |
+| `--keep_filename` | Original-Dateinamen beibehalten |
+| `--add_translation_note` | Übersetzungsnotiz hinzufügen |
+| `--include_model` | Modellname in der Ausgabedatei einschließen |
 
 ### Standardmodelle (2026)
 
-| Provider | Qualität (Standard) | Kostengünstig (`--eco`) |
-|----------|---------------------|-------------------------|
+| Anbieter | Qualität (Standard) | Ökonomisch (`--eco`) |
+|----------|---------------------|-----------------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
+## Projekte, die dieses Skript verwenden
+
+- **[jls42.org](https://jls42.org)** - Persönlicher Blog, übersetzt in 15 Sprachen (364 Dateien, 22 Artikel + 4 Projekte)
+
 ## Autor
 
-Julien LE SAUX
-E-Mail : contact@jls42.org
+Julien LE SAUX  
+E-Mail: contact@jls42.org
 
 ## Lizenz
 
-GNU GENERAL PUBLIC LICENSE Version 3. Siehe [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Version 3. Siehe [LIZENZ](LICENSE).
+
+**Dieses Dokument wurde von der fr-Version in die Sprache en unter Verwendung des Modells gpt-5-mini übersetzt. Für weitere Informationen zum Übersetzungsprozess konsultieren Sie https://gitlab.com/jls42/ai-powered-markdown-translator**
+

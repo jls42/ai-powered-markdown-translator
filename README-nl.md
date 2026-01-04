@@ -1,20 +1,22 @@
-# AI-aangedreven Markdown-vertaler
+# AI-gestuurde Markdownvertaler
 
-🌍 [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
+🌍 [Engels](README-en.md) | [Spaans](README-es.md) | [Chinees](README-zh.md) | [Duits](README-de.md) | [Japans](README-ja.md) | [Koreaans](README-ko.md) | [Arabisch](README-ar.md) | [Hindi](README-hi.md) | [Italiaans](README-it.md) | [Nederlands](README-nl.md) | [Pools](README-pl.md) | [Portugees](README-pt.md) | [Roemeens](README-ro.md) | [Zweeds](README-sv.md)
 
-Vertaler van Markdown-bestanden die **OpenAI**, **Mistral AI**, **Claude (Anthropic)** en **Google Gemini** gebruikt.
+Vertaler voor Markdown-bestanden die **OpenAI**, **Mistral AI**, **Claude (Anthropic)** en **Google Gemini** gebruikt.
 
-Dit Python-script vertaalt Markdown-bestanden van een brontaal naar een doeltaal, terwijl het de opmaak, codeblokken en front matter-metagegevens behoudt.
+Dit Python-script vertaalt Markdown-bestanden van een brontaal naar een doeltaal terwijl het de opmaak, codeblokken en front matter-metadata behoudt.
 
-## Belangrijkste Kenmerken
+## Belangrijkste kenmerken
 
-- **Multi-provider**: Ondersteuning voor 4 API's (OpenAI, Mistral, Claude, Gemini)
+- **Multi-Provider**: Ondersteuning voor 4 API's (OpenAI, Mistral, Claude, Gemini)
 - **Modellen 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Economische modus**: Optie `--eco` om snellere en goedkopere modellen te gebruiken
-- **Eén enkel bestand**: Optie `--file` om één enkel bestand te vertalen
-- **Intelligente segmentatie**: Beheer van lange teksten met tokenlimieten per model
-- **Codebehoud**: Codeblokken worden niet vertaald
-- **Vertaalnotitie**: Optioneel toevoegen van een notitie aan het einde van het document
+- **Economymodus**: Optie `--eco` om snellere en goedkopere modellen te gebruiken
+- **Enkel bestand**: Optie `--file` om één enkel bestand te vertalen
+- **Slimme segmentatie**: Beheer van lange teksten met tokenlimieten per model
+- **Behoud van code**: Zowel codeblokken ALS inline-code (`` `...` ``) blijven behouden
+- **Bestandsnaam**: Optie `--keep_filename` om de originele naam te behouden
+- **.env-configuratie**: Ondersteuning voor het bestand `.env` voor API-sleutels
+- **Vertaalnotitie**: Optionele toevoeging van een notitie aan het einde van het document
 
 ## Installatie
 
@@ -26,18 +28,22 @@ pip install -r requirements.txt
 
 ## Configuratie
 
-Stel de omgevingsvariabele in voor de API die u wilt gebruiken:
+Maak een bestand `.env` aan in de projectroot of stel de omgevingsvariabelen in :
 
 ```bash
+# Fichier .env (recommandé)
+OPENAI_API_KEY=votre-clé-api-openai
+MISTRAL_API_KEY=votre-clé-api-mistral
+ANTHROPIC_API_KEY=votre-clé-api-anthropic
+GOOGLE_API_KEY=votre-clé-api-google
+
+# Ou via export
 export OPENAI_API_KEY='votre-clé-api-openai'
-export MISTRAL_API_KEY='votre-clé-api-mistral'
-export ANTHROPIC_API_KEY='votre-clé-api-anthropic'
-export GOOGLE_API_KEY='votre-clé-api-google'
 ```
 
 ## Gebruik
 
-### Een enkel bestand vertalen
+### Vertaal één enkel bestand
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
@@ -59,9 +65,9 @@ python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content
 python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
 ```
 
-### Economische modus
+### Economymodus
 
-Gebruikt snellere en goedkopere modellen (gpt-5-mini, claude-haiku, gemini-flash):
+Gebruikt snellere en goedkopere modellen (gpt-5-mini, claude-haiku, gemini-flash) :
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -70,34 +76,43 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 ### Opties
 
 | Optie | Beschrijving |
-|--------|--------------|
-| `--file` | Een enkel Markdown-bestand om te vertalen |
-| `--source_dir` | Bronmap met de Markdown-bestanden |
+|--------|-------------|
+| `--file` | Enkel Markdown-bestand om te vertalen |
+| `--source_dir` | Bronmap met Markdown-bestanden |
 | `--target_dir` | Doelmap voor de vertaalde bestanden |
 | `--source_lang` | Brontaal (standaard: `fr`) |
 | `--target_lang` | Doeltaal (standaard: `en`) |
-| `--model` | Specifiek te gebruiken model |
-| `--eco` | Economische modellen gebruiken |
-| `--use_mistral` | De Mistral AI-API gebruiken |
-| `--use_claude` | De Claude-API gebruiken |
-| `--use_gemini` | De Gemini-API gebruiken |
-| `--force` | Opnieuw vertalen forceren |
-| `--add_translation_note` | Een vertaalnotitie toevoegen |
+| `--model` | Specifiek model om te gebruiken |
+| `--eco` | Gebruik zuinige modellen |
+| `--use_mistral` | Gebruik de Mistral AI API |
+| `--use_claude` | Gebruik de Claude API |
+| `--use_gemini` | Gebruik de Gemini API |
+| `--force` | Forceer hervertaling |
+| `--keep_filename` | Behoud de originele bestandsnaam |
+| `--add_translation_note` | Voeg een vertaalnotitie toe |
+| `--include_model` | Neem de modelnaam op in het uitvoerbestand |
 
 ### Standaardmodellen (2026)
 
-| Provider | Kwaliteit (standaard) | Economisch (`--eco`) |
-|----------|------------------------|----------------------|
+| Provider | Kwaliteit (standaard) | Zuinig (`--eco`) |
+|----------|------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
+## Projecten die dit script gebruiken
+
+- **[jls42.org](https://jls42.org)** - Persoonlijke blog vertaald in 15 talen (364 bestanden, 22 artikelen + 4 projecten)
+
 ## Auteur
 
-Julien LE SAUX
+Julien LE SAUX  
 E-mail : contact@jls42.org
 
 ## Licentie
 
-GNU GENERAL PUBLIC LICENSE Versie 3. Zie [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Versie 3. Zie [Licentie](LICENSE).
+
+**Dit document is vertaald van de Franse versie naar de Nederlandse taal met behulp van het model gpt-5-mini. Voor meer informatie over het vertaalproces, raadpleeg https://gitlab.com/jls42/ai-powered-markdown-translator**
+

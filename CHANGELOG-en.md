@@ -1,45 +1,57 @@
 ### Changelog
 
-🌍 [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+🌍 [English](CHANGELOG-en.md) | [Spanish](CHANGELOG-es.md) | [Chinese](CHANGELOG-zh.md) | [German](CHANGELOG-de.md) | [Japanese](CHANGELOG-ja.md) | [Korean](CHANGELOG-ko.md) | [Arabic](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italian](CHANGELOG-it.md) | [Dutch](CHANGELOG-nl.md) | [Polish](CHANGELOG-pl.md) | [Portuguese](CHANGELOG-pt.md) | [Romanian](CHANGELOG-ro.md) | [Swedish](CHANGELOG-sv.md)
 
-- **1.6** New features :
+- **1.7** New features:
+    - Option `--keep_filename` to preserve the original filename during translation
+    - Support for the `.env` file to automatically load API keys
+    - **Inline code preservation**: backticks (`` `...` ``) are now protected during translation
+    - System prompt improvements:
+        - Better handling of quotes in the YAML frontmatter
+        - Protection of template variables `{variable}`
+        - Disallowing unsolicited translator notes
+    - Successfully tested on 364 files (migration of jls42.org blog)
+- **1.6** New features:
     - Support for the Google Gemini API for translation (`--use_gemini`)
-    - Update of the 2026 default models :
+    - Updated default models for 2026:
         - OpenAI: `gpt-5` (quality), `gpt-5-mini` (eco)
         - Claude: `claude-sonnet-4-5` (quality), `claude-haiku-4-5` (eco)
         - Gemini: `gemini-3-pro-preview` (quality), `gemini-3-flash-preview` (eco)
-    - Economy mode (`--eco`) to use faster and less expensive models
-    - Single-file translation (`--file`) without traversing a directory
+    - Economy mode (`--eco`) to use faster and cheaper models
+    - Single-file translation (`--file`) without scanning a directory
     - New simplified naming pattern: `{base}-{lang}.md`
     - Option `--include_model` to keep the old format with the model name
-    - Support for unlisted models with default token limit (128k)
+    - Support for unlisted models with a default token limit (128k)
     - README translated into 14 languages
-- **1.5** Improvements :
+- **1.5** Improvements:
     - **Update of API keys and default models:**
-        - **OpenAI:** Updated `DEFAULT_MODEL_OPENAI` to `"gpt-4o"`.
-        - **Mistral AI:** Updated `DEFAULT_MODEL_MISTRAL` to `"mistral-large-latest"`.
-        - **Anthropic Claude:** Added `DEFAULT_ANTHROPIC_API_KEY` and updated `DEFAULT_MODEL_CLAUDE` to `"claude-3-5-sonnet-20240620"`.
+        - **OpenAI:** Updated from `DEFAULT_MODEL_OPENAI` to `"gpt-4o"`.
+        - **Mistral AI:** Updated from `DEFAULT_MODEL_MISTRAL` to `"mistral-large-latest"`.
+        - **Anthropic's Claude:** Added `DEFAULT_ANTHROPIC_API_KEY` and updated `DEFAULT_MODEL_CLAUDE` to `"claude-3-5-sonnet-20240620"`.
     - **Optimization of translation prompts:**
         - Prompts for direct translations and translation notes have been enhanced for better clarity and efficiency, including detailed instructions on preserving metadata and specific formatting elements.
     - **Code refactoring:**
         - Replaced `MistralClient` with the `Mistral` class for initializing the Mistral AI client.
         - Reorganized imports for better readability and maintainability.
-        - Improved text segmentation and handling of code blocks to preserve the original formatting during translation.
-    - **Output file handling:**
-        - Inversion of the model and the language in the output file names (for example, `f"{base}-{args.target_lang}-{args.model}.md"`), thereby making it easier to organize and search the translations.
+        - Improved text segmentation and code block handling to preserve original formatting during translation.
+    - **Output file management:**
+        - Swapped the model and language in output filenames (for example, `f"{base}-{args.target_lang}-{args.model}.md"`), making organization and searching of translations easier.
     - **Miscellaneous improvements:**
-        - Code cleanup by removing unnecessary blank lines.
+        - Code cleanup by removing unnecessary empty lines.
         - Minor adjustments to improve the script's structure and readability.
-- **1.4** New features :
+- **1.4** New features:
     - Support for Anthropic's Claude API for translation
-    - Optimization of prompts for increased clarity and efficiency
+    - Prompt optimizations for increased clarity and efficiency
     - Minor adjustments to improve code maintainability
-- **1.3** Improvements and new features :
+- **1.3** Improvements and new features:
     - Improved handling of code blocks
-    - Improved handling of output files
-    - Improved detection of existing files
+    - Improved output file handling
+    - Improved existing file detection
     - Option `--force` to force translation
-    - Inversion of the model and the language in the output file name
+    - Swapping the model and language in the output filename
 - **1.2** Changelog fix
 - **1.1** Added support for the Mistral AI API
-- **1.0** Initial version - Support for the OpenAI API
+- **1.0** Initial release - Support for the OpenAI API
+
+**This document was translated from the fr version into the en language using the gpt-5-mini model. For more information on the translation process, consult https://gitlab.com/jls42/ai-powered-markdown-translator**
+

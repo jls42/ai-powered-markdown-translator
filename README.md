@@ -13,7 +13,9 @@ Ce script Python traduit des fichiers Markdown d'une langue source vers une lang
 - **Mode Économique**: Option `--eco` pour utiliser des modèles plus rapides et moins coûteux
 - **Fichier Unique**: Option `--file` pour traduire un seul fichier
 - **Segmentation Intelligente**: Gestion des textes longs avec limites de tokens par modèle
-- **Préservation du Code**: Les blocs de code ne sont pas traduits
+- **Préservation du Code**: Les blocs de code ET le code inline (`` `...` ``) sont préservés
+- **Nom de Fichier**: Option `--keep_filename` pour conserver le nom original
+- **Configuration .env**: Support du fichier `.env` pour les clés API
 - **Note de Traduction**: Ajout optionnel d'une note en fin de document
 
 ## Installation
@@ -26,13 +28,17 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Définissez la variable d'environnement pour l'API que vous souhaitez utiliser :
+Créez un fichier `.env` à la racine du projet ou définissez les variables d'environnement :
 
 ```bash
+# Fichier .env (recommandé)
+OPENAI_API_KEY=votre-clé-api-openai
+MISTRAL_API_KEY=votre-clé-api-mistral
+ANTHROPIC_API_KEY=votre-clé-api-anthropic
+GOOGLE_API_KEY=votre-clé-api-google
+
+# Ou via export
 export OPENAI_API_KEY='votre-clé-api-openai'
-export MISTRAL_API_KEY='votre-clé-api-mistral'
-export ANTHROPIC_API_KEY='votre-clé-api-anthropic'
-export GOOGLE_API_KEY='votre-clé-api-google'
 ```
 
 ## Utilisation
@@ -82,7 +88,9 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_claude` | Utiliser l'API Claude |
 | `--use_gemini` | Utiliser l'API Gemini |
 | `--force` | Forcer la re-traduction |
+| `--keep_filename` | Conserver le nom de fichier original |
 | `--add_translation_note` | Ajouter une note de traduction |
+| `--include_model` | Inclure le nom du modèle dans le fichier de sortie |
 
 ### Modèles par défaut (2026)
 
@@ -92,6 +100,10 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
+
+## Projets utilisant ce script
+
+- **[jls42.org](https://jls42.org)** - Blog personnel traduit en 15 langues (364 fichiers, 22 articles + 4 projets)
 
 ## Auteur
 

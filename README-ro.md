@@ -1,19 +1,21 @@
-# Traducător Markdown bazat pe AI
+# Traducător de Markdown alimentat de IA
 
-🌍 [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
+🌍 [Engleză](README-en.md) | [Spaniolă](README-es.md) | [Chineză](README-zh.md) | [Germană](README-de.md) | [Japoneză](README-ja.md) | [Coreeană](README-ko.md) | [Arabă](README-ar.md) | [Hindi](README-hi.md) | [Italiană](README-it.md) | [Olandeză](README-nl.md) | [Poloneză](README-pl.md) | [Portugheză](README-pt.md) | [Română](README-ro.md) | [Suedeză](README-sv.md)
 
-Traducător de fișiere Markdown care utilizează **OpenAI**, **Mistral AI**, **Claude (Anthropic)** și **Google Gemini**.
+Traducător de fișiere Markdown folosind **OpenAI**, **Mistral AI**, **Claude (Anthropic)** și **Google Gemini**.
 
-Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă, păstrând formatarea, blocurile de cod și metadatele front matter.
+Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă păstrând formatarea, blocurile de cod și metadatele front matter.
 
 ## Caracteristici principale
 
-- **Multi-Provider**: Suport pentru 4 API-uri (OpenAI, Mistral, Claude, Gemini)
+- **Multi-furnizor**: Suport pentru 4 API-uri (OpenAI, Mistral, Claude, Gemini)
 - **Modele 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Mod economic**: Opțiunea `--eco` pentru a utiliza modele mai rapide și mai puțin costisitoare
+- **Mod economic**: Opțiunea `--eco` pentru a folosi modele mai rapide și mai ieftine
 - **Fișier unic**: Opțiunea `--file` pentru a traduce un singur fișier
 - **Segmentare inteligentă**: Gestionarea textelor lungi cu limite de tokeni per model
-- **Păstrarea codului**: Blocurile de cod nu sunt traduse
+- **Păstrarea codului**: Blocurile de cod ȘI codul inline (`` `...` ``) sunt păstrate
+- **Nume fișier**: Opțiunea `--keep_filename` pentru a păstra numele original
+- **Configurare .env**: Suport pentru fișierul `.env` pentru cheile API
 - **Notă de traducere**: Adăugare opțională a unei note la sfârșitul documentului
 
 ## Instalare
@@ -26,18 +28,22 @@ pip install -r requirements.txt
 
 ## Configurare
 
-Definiți variabila de mediu pentru API-ul pe care doriți să îl utilizați :
+Creați un fișier `.env` în rădăcina proiectului sau definiți variabilele de mediu :
 
 ```bash
+# Fichier .env (recommandé)
+OPENAI_API_KEY=votre-clé-api-openai
+MISTRAL_API_KEY=votre-clé-api-mistral
+ANTHROPIC_API_KEY=votre-clé-api-anthropic
+GOOGLE_API_KEY=votre-clé-api-google
+
+# Ou via export
 export OPENAI_API_KEY='votre-clé-api-openai'
-export MISTRAL_API_KEY='votre-clé-api-mistral'
-export ANTHROPIC_API_KEY='votre-clé-api-anthropic'
-export GOOGLE_API_KEY='votre-clé-api-google'
 ```
 
 ## Utilizare
 
-### Traduceți un singur fișier
+### Traduceți un fișier unic
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
@@ -61,7 +67,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Mod economic
 
-Utilizează modele mai rapide și mai puțin costisitoare (gpt-5-mini, claude-haiku, gemini-flash) :
+Folosește modele mai rapide și mai ieftine (gpt-5-mini, claude-haiku, gemini-flash) :
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -74,15 +80,17 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--file` | Fișier Markdown unic de tradus |
 | `--source_dir` | Director sursă care conține fișierele Markdown |
 | `--target_dir` | Director de ieșire pentru fișierele traduse |
-| `--source_lang` | Limbă sursă (implicit: `fr`) |
-| `--target_lang` | Limbă țintă (implicit: `en`) |
+| `--source_lang` | Limba sursă (implicit: `fr`) |
+| `--target_lang` | Limba țintă (implicit: `en`) |
 | `--model` | Model specific de utilizat |
 | `--eco` | Utilizați modelele economice |
 | `--use_mistral` | Utilizați API-ul Mistral AI |
 | `--use_claude` | Utilizați API-ul Claude |
 | `--use_gemini` | Utilizați API-ul Gemini |
-| `--force` | Forțați retraducerea |
+| `--force` | Forțați re-traducerea |
+| `--keep_filename` | Păstrați numele fișierului original |
 | `--add_translation_note` | Adăugați o notă de traducere |
+| `--include_model` | Includeți numele modelului în fișierul de ieșire |
 
 ### Modele implicite (2026)
 
@@ -93,11 +101,18 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
+## Proiecte care folosesc acest script
+
+- **[jls42.org](https://jls42.org)** - Blog personal tradus în 15 limbi (364 fișiere, 22 articole + 4 proiecte)
+
 ## Autor
 
-Julien LE SAUX
-Email : contact@jls42.org
+Julien LE SAUX  
+Email: contact@jls42.org
 
 ## Licență
 
-GNU GENERAL PUBLIC LICENSE Versiunea 3. Consultați [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Versiunea 3. Vezi [LICENSE](LICENSE).
+
+**Acest document a fost tradus din versiunea fr în limba ro folosind modelul gpt-5-mini. Pentru mai multe informații despre procesul de traducere, consultați https://gitlab.com/jls42/ai-powered-markdown-translator**
+
