@@ -1,20 +1,22 @@
-# Traduttore di Markdown potenziato dall'IA
+# Traduttore Markdown alimentato dall'IA
 
-🌍 [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
+🌍 [Inglese](README-en.md) | [Spagnolo](README-es.md) | [Cinese](README-zh.md) | [Tedesco](README-de.md) | [Giapponese](README-ja.md) | [Coreano](README-ko.md) | [Arabo](README-ar.md) | [Hindi](README-hi.md) | [Italiano](README-it.md) | [Olandese](README-nl.md) | [Polacco](README-pl.md) | [Portoghese](README-pt.md) | [Rumeno](README-ro.md) | [Svedese](README-sv.md)
 
 Traduttore di file Markdown che utilizza **OpenAI**, **Mistral AI**, **Claude (Anthropic)** e **Google Gemini**.
 
-Questo script Python traduce file Markdown da una lingua sorgente a una lingua di destinazione preservando la formattazione, i blocchi di codice e i metadati front matter.
+Questo script Python traduce file Markdown da una lingua sorgente a una lingua di destinazione preservando il formato, i blocchi di codice e i metadati front matter.
 
 ## Caratteristiche principali
 
-- **Multi-provider**: supporto di 4 API (OpenAI, Mistral, Claude, Gemini)
+- **Multi-provider**: Supporto di 4 API (OpenAI, Mistral, Claude, Gemini)
 - **Modelli 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Modalità economica**: opzione `--eco` per utilizzare modelli più veloci e meno costosi
-- **File singolo**: opzione `--file` per tradurre un solo file
-- **Segmentazione intelligente**: gestione dei testi lunghi con limiti di token per modello
-- **Preservazione del codice**: i blocchi di codice non vengono tradotti
-- **Nota di traduzione**: aggiunta opzionale di una nota alla fine del documento
+- **Modalità economica**: Opzione `--eco` per utilizzare modelli più veloci e meno costosi
+- **File singolo**: Opzione `--file` per tradurre un singolo file
+- **Segmentazione intelligente**: Gestione di testi lunghi con limiti di token per modello
+- **Conservazione del codice**: I blocchi di codice E il codice inline (`` `...` ``) sono preservati
+- **Nome del file**: Opzione `--keep_filename` per conservare il nome originale
+- **Supporto .env**: Supporto per il file `.env` per le chiavi API
+- **Nota di traduzione**: Aggiunta opzionale di una nota alla fine del documento
 
 ## Installazione
 
@@ -26,24 +28,28 @@ pip install -r requirements.txt
 
 ## Configurazione
 
-Definisci la variabile d'ambiente per l'API che desideri utilizzare :
+Crea un file `.env` nella radice del progetto o imposta le variabili d'ambiente:
 
 ```bash
+# Fichier .env (recommandé)
+OPENAI_API_KEY=votre-clé-api-openai
+MISTRAL_API_KEY=votre-clé-api-mistral
+ANTHROPIC_API_KEY=votre-clé-api-anthropic
+GOOGLE_API_KEY=votre-clé-api-google
+
+# Ou via export
 export OPENAI_API_KEY='votre-clé-api-openai'
-export MISTRAL_API_KEY='votre-clé-api-mistral'
-export ANTHROPIC_API_KEY='votre-clé-api-anthropic'
-export GOOGLE_API_KEY='votre-clé-api-google'
 ```
 
 ## Utilizzo
 
-### Tradurre un file singolo
+### Tradurre un singolo file
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### Tradurre un directory
+### Tradurre una directory
 
 ```bash
 # Avec OpenAI (défaut: gpt-5)
@@ -61,7 +67,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Modalità economica
 
-Utilizza modelli più veloci e meno costosi (gpt-5-mini, claude-haiku, gemini-flash) :
+Utilizza modelli più rapidi e meno costosi (gpt-5-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -73,7 +79,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 |--------|-------------|
 | `--file` | File Markdown singolo da tradurre |
 | `--source_dir` | Directory sorgente contenente i file Markdown |
-| `--target_dir` | Directory di destinazione per i file tradotti |
+| `--target_dir` | Directory di output per i file tradotti |
 | `--source_lang` | Lingua sorgente (predefinita: `fr`) |
 | `--target_lang` | Lingua di destinazione (predefinita: `en`) |
 | `--model` | Modello specifico da utilizzare |
@@ -81,8 +87,10 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_mistral` | Usare l'API Mistral AI |
 | `--use_claude` | Usare l'API Claude |
 | `--use_gemini` | Usare l'API Gemini |
-| `--force` | Forzare la ritraduzione |
+| `--force` | Forzare la retraduzione |
+| `--keep_filename` | Conservare il nome file originale |
 | `--add_translation_note` | Aggiungere una nota di traduzione |
+| `--include_model` | Includere il nome del modello nel file di output |
 
 ### Modelli predefiniti (2026)
 
@@ -93,6 +101,10 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
+## Progetti che utilizzano questo script
+
+- **[jls42.org](https://jls42.org)** - Blog personale tradotto in 15 lingue (364 file, 22 articoli + 4 progetti)
+
 ## Autore
 
 Julien LE SAUX
@@ -100,4 +112,7 @@ Email : contact@jls42.org
 
 ## Licenza
 
-GNU GENERAL PUBLIC LICENSE Versione 3. Vedi [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Versione 3. Vedi [LICENZA](LICENSE).
+
+**Questo documento è stato tradotto dalla versione fr alla lingua it utilizzando il modello gpt-5-mini. Per maggiori informazioni sul processo di traduzione, consultare https://gitlab.com/jls42/ai-powered-markdown-translator**
+

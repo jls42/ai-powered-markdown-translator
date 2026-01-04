@@ -2,6 +2,15 @@
 
 🌍 [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.7** Nouveautés :
+    - Option `--keep_filename` pour conserver le nom de fichier original lors de la traduction
+    - Support du fichier `.env` pour charger les clés API automatiquement
+    - **Préservation du code inline** : les backticks (`` `...` ``) sont maintenant protégés pendant la traduction
+    - Amélioration du prompt système :
+        - Meilleure gestion des guillemets dans le YAML frontmatter
+        - Protection des variables template `{variable}`
+        - Interdiction des notes de traducteur non demandées
+    - Testé avec succès sur 364 fichiers (migration blog jls42.org)
 - **1.6** Nouveautés :
     - Support de l'API Google Gemini pour la traduction (`--use_gemini`)
     - Mise à jour des modèles par défaut 2026 :
