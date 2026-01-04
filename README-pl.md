@@ -2,21 +2,21 @@
 
 🌍 [Angielski](README-en.md) | [Hiszpański](README-es.md) | [Chiński](README-zh.md) | [Niemiecki](README-de.md) | [Japoński](README-ja.md) | [Koreański](README-ko.md) | [Arabski](README-ar.md) | [Hindi](README-hi.md) | [Włoski](README-it.md) | [Niderlandzki](README-nl.md) | [Polski](README-pl.md) | [Portugalski](README-pt.md) | [Rumuński](README-ro.md) | [Szwedzki](README-sv.md)
 
-Tłumacz plików Markdown korzystający z **OpenAI**, **Mistral AI**, **Claude (Anthropic)** i **Google Gemini**.
+Tłumacz plików Markdown wykorzystujący **OpenAI**, **Mistral AI**, **Claude (Anthropic)** i **Google Gemini**.
 
 Ten skrypt Pythona tłumaczy pliki Markdown z języka źródłowego na język docelowy, zachowując formatowanie, bloki kodu i metadane front matter.
 
 ## Główne cechy
 
-- **Wielu dostawców**: Obsługa 4 API (OpenAI, Mistral, Claude, Gemini)
+- **Multi-Provider**: Obsługa 4 API (OpenAI, Mistral, Claude, Gemini)
 - **Modele 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Tryb ekonomiczny**: Opcja `--eco` do używania szybszych i tańszych modeli
-- **Pojedynczy plik**: Opcja `--file` do tłumaczenia jednego pliku
+- **Tryb ekonomiczny**: Opcja `--eco` do użycia szybszych i tańszych modeli
+- **Pojedynczy plik**: Opcja `--file` do tłumaczenia pojedynczego pliku
 - **Inteligentna segmentacja**: Obsługa długich tekstów z limitami tokenów dla modeli
 - **Zachowanie kodu**: Bloki kodu ORAZ kod inline (`` `...` ``) są zachowane
 - **Nazwa pliku**: Opcja `--keep_filename` do zachowania oryginalnej nazwy
-- **Obsługa .env**: Wsparcie pliku `.env` dla kluczy API
-- **Notatka tłumaczeniowa**: Opcjonalne dodanie notatki na końcu dokumentu
+- **Konfiguracja .env**: Obsługa pliku `.env` dla kluczy API
+- **Notatka tłumaczenia**: Opcjonalne dodanie notatki na końcu dokumentu
 
 ## Instalacja
 
@@ -28,7 +28,7 @@ pip install -r requirements.txt
 
 ## Konfiguracja
 
-Utwórz plik `.env` w katalogu głównym projektu lub ustaw zmienne środowiskowe:
+Utwórz plik `.env` w katalogu głównym projektu lub ustaw zmienne środowiskowe :
 
 ```bash
 # Fichier .env (recommandé)
@@ -82,19 +82,19 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--target_dir` | Katalog wyjściowy dla przetłumaczonych plików |
 | `--source_lang` | Język źródłowy (domyślnie: `fr`) |
 | `--target_lang` | Język docelowy (domyślnie: `en`) |
-| `--model` | Konkretne do użycia model |
-| `--eco` | Użyj modeli ekonomicznych |
-| `--use_mistral` | Użyj API Mistral AI |
-| `--use_claude` | Użyj API Claude |
-| `--use_gemini` | Użyj API Gemini |
-| `--force` | Wymuś ponowne tłumaczenie |
-| `--keep_filename` | Zachowaj oryginalną nazwę pliku |
-| `--add_translation_note` | Dodaj notatkę tłumaczenia |
-| `--include_model` | Dołącz nazwę modelu w pliku wyjściowym |
+| `--model` | Wskazanie konkretnego modelu do użycia |
+| `--eco` | Używanie modeli ekonomicznych |
+| `--use_mistral` | Korzystanie z API Mistral AI |
+| `--use_claude` | Korzystanie z API Claude |
+| `--use_gemini` | Korzystanie z API Gemini |
+| `--force` | Wymuszenie ponownego tłumaczenia |
+| `--keep_filename` | Zachowanie oryginalnej nazwy pliku |
+| `--add_translation_note` | Dodanie notatki tłumaczeniowej |
+| `--include_model` | Dołączenie nazwy modelu do pliku wyjściowego |
 
 ### Domyślne modele (2026)
 
-| Dostawca | Jakość (domyślna) | Ekonomiczny (`--eco`) |
+| Dostawca | Jakość (domyślnie) | Ekonomiczny (`--eco`) |
 |----------|------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
@@ -103,7 +103,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Projekty wykorzystujące ten skrypt
 
-- **[jls42.org](https://jls42.org)** - Blog osobisty przetłumaczony na 15 języków (364 pliki, 22 artykuły + 4 projekty)
+- **[jls42.org](https://jls42.org)** - Blog osobisty wielojęzyczny (15 języków)
 
 ## Autor
 

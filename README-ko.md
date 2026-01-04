@@ -4,18 +4,18 @@
 
 OpenAI, Mistral AI, Claude (Anthropic) 및 Google Gemini를 사용하는 Markdown 파일 번역기입니다.
 
-이 Python 스크립트는 원본 언어에서 대상 언어로 Markdown 파일을 번역하면서 서식, 코드 블록 및 front matter 메타데이터를 보존합니다.
+이 Python 스크립트는 형식, 코드 블록 및 front matter 메타데이터를 보존하면서 소스 언어에서 대상 언어로 Markdown 파일을 번역합니다.
 
-## 주요 특징
+## 주요 기능
 
-- **Multi-Provider**: 4개 API 지원 (OpenAI, Mistral, Claude, Gemini)
+- **멀티 제공자**: 4개의 API 지원(OpenAI, Mistral, Claude, Gemini)
 - **2026 모델**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **저비용 모드**: 더 빠르고 저렴한 모델을 사용하기 위한 옵션 `--eco`
+- **절약 모드**: 더 빠르고 저렴한 모델을 사용하기 위한 옵션 `--eco`
 - **단일 파일**: 단일 파일을 번역하기 위한 옵션 `--file`
-- **스마트 분할**: 모델별 토큰 제한에 맞춘 긴 텍스트 처리
-- **코드 보존**: 코드 블록 및 인라인 코드 (`` `...` ``) 보존
-- **파일 이름**: 원본 파일 이름을 유지하는 옵션 `--keep_filename`
-- **.env 구성**: API 키용 `.env` 파일 지원
+- **스마트 분할**: 모델별 토큰 한도를 고려한 긴 텍스트 처리
+- **코드 보존**: 코드 블록과 인라인 코드(`` `...` ``)가 보존됩니다
+- **파일명**: 원본 이름을 유지하는 옵션 `--keep_filename`
+- **.env 구성**: API 키를 위한 파일 `.env` 지원
 - **번역 메모**: 문서 끝에 선택적으로 번역 메모 추가
 
 ## 설치
@@ -49,7 +49,7 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### 디렉터리 번역
+### 디렉토리 번역
 
 ```bash
 # Avec OpenAI (défaut: gpt-5)
@@ -65,7 +65,7 @@ python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content
 python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
 ```
 
-### 저비용 모드
+### 절약 모드
 
 더 빠르고 저렴한 모델(gpt-5-mini, claude-haiku, gemini-flash)을 사용합니다 :
 
@@ -78,32 +78,32 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | 옵션 | 설명 |
 |--------|-------------|
 | `--file` | 번역할 단일 Markdown 파일 |
-| `--source_dir` | 소스 Markdown 파일을 포함한 디렉터리 |
-| `--target_dir` | 번역된 파일의 출력 디렉터리 |
-| `--source_lang` | 소스 언어 (기본: `fr`) |
-| `--target_lang` | 대상 언어 (기본: `en`) |
+| `--source_dir` | 원본 Markdown 파일이 있는 디렉토리 |
+| `--target_dir` | 번역된 파일을 출력할 디렉토리 |
+| `--source_lang` | 소스 언어(기본값: `fr`) |
+| `--target_lang` | 대상 언어(기본값: `en`) |
 | `--model` | 사용할 특정 모델 |
-| `--eco` | 저비용 모델 사용 |
+| `--eco` | 절약형 모델 사용 |
 | `--use_mistral` | Mistral AI API 사용 |
 | `--use_claude` | Claude API 사용 |
 | `--use_gemini` | Gemini API 사용 |
 | `--force` | 재번역 강제 |
-| `--keep_filename` | 원본 파일 이름 유지 |
+| `--keep_filename` | 원본 파일명 유지 |
 | `--add_translation_note` | 번역 메모 추가 |
 | `--include_model` | 출력 파일에 모델 이름 포함 |
 
 ### 기본 모델 (2026)
 
-| 제공자 | 품질 (기본) | 경제적 (`--eco`) |
+| 제공자 | 품질(기본) | 절약형 (`--eco`) |
 |----------|------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
-## 이 스크립트를 사용하는 프로젝트
+## 이 스크립트를 사용하는 프로젝트들
 
-- **[jls42.org](https://jls42.org)** - 개인 블로그, 15개 언어로 번역됨 (364 파일, 게시물 22개 + 프로젝트 4개)
+- **[jls42.org](https://jls42.org)** - 개인 다국어 블로그 (15개 언어)
 
 ## 저자
 
@@ -112,7 +112,7 @@ Julien LE SAUX
 
 ## 라이선스
 
-GNU GENERAL PUBLIC LICENSE Version 3. 자세한 내용은 [라이선스](LICENSE)를 참조하세요.
+GNU GENERAL PUBLIC LICENSE 버전 3. 자세한 내용은 [라이선스](LICENSE)를 참조하세요.
 
 **이 문서는 gpt-5-mini 모델을 사용하여 fr 버전에서 ko 언어로 번역되었습니다. 번역 과정에 대한 자세한 정보는 https://gitlab.com/jls42/ai-powered-markdown-translator 를 참조하세요.**
 

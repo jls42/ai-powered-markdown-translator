@@ -2,20 +2,20 @@
 
 🌍 [الإنجليزية](README-en.md) | [الإسبانية](README-es.md) | [الصينية](README-zh.md) | [الألمانية](README-de.md) | [اليابانية](README-ja.md) | [الكورية](README-ko.md) | [العربية](README-ar.md) | [الهندية](README-hi.md) | [الإيطالية](README-it.md) | [الهولندية](README-nl.md) | [البولندية](README-pl.md) | [البرتغالية](README-pt.md) | [الرومانية](README-ro.md) | [السويدية](README-sv.md)
 
-مترجم لملفات Markdown يستخدم **OpenAI**، **Mistral AI**، **Claude (Anthropic)** و **Google Gemini**.
+مترجم ملفات Markdown باستخدام **OpenAI**، **Mistral AI**، **Claude (Anthropic)** و **Google Gemini**.
 
-يقوم هذا السكربت بلغة بايثون بترجمة ملفات Markdown من لغة المصدر إلى لغة الهدف مع الحفاظ على التنسيق، وكتل الشيفرة وبيانات front matter.
+يقوم هذا السكربت بلغة Python بترجمة ملفات Markdown من لغة مصدر إلى لغة هدف مع الحفاظ على التنسيق وكتل الشيفرة والبيانات الوصفية front matter.
 
 ## الميزات الرئيسية
 
 - **متعدد المزودين**: دعم 4 واجهات برمجة تطبيقات (OpenAI، Mistral، Claude، Gemini)
 - **نماذج 2026**: GPT-5، Claude Sonnet 4.5، Gemini 3 Pro
-- **الوضع الاقتصادي**: خيار `--eco` لاستخدام نماذج أسرع وأرخص
+- **الوضع الاقتصادي**: خيار `--eco` لاستخدام نماذج أسرع وأقل تكلفة
 - **ملف واحد**: خيار `--file` لترجمة ملف واحد
-- **التجزئة الذكية**: معالجة النصوص الطويلة مع حدود التوكن لكل نموذج
-- **الحفاظ على الشيفرة**: كتل الشيفرة وكود inline (`` `...` ``) محفوظان
+- **التقسيم الذكي**: إدارة النصوص الطويلة مع حدود توكن لكل نموذج
+- **الحفاظ على الشيفرة**: يتم الحفاظ على كتل الشيفرة وأيضًا الشيفرة المضمنة (`` `...` ``)
 - **اسم الملف**: خيار `--keep_filename` للاحتفاظ بالاسم الأصلي
-- **تكوين .env**: دعم الملف `.env` لمفاتيح API
+- **تكوين .env**: دعم ملف `.env` لمفاتيح API
 - **ملاحظة الترجمة**: إضافة اختيارية لملاحظة في نهاية المستند
 
 ## التثبيت
@@ -28,7 +28,7 @@ pip install -r requirements.txt
 
 ## الإعداد
 
-أنشئ ملف `.env` في جذر المشروع أو قم بتعيين متغيرات البيئة :
+قم بإنشاء ملف `.env` في جذر المشروع أو قم بتعيين متغيرات البيئة:
 
 ```bash
 # Fichier .env (recommandé)
@@ -49,7 +49,7 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### ترجمة دليل
+### ترجمة مجلد
 
 ```bash
 # Avec OpenAI (défaut: gpt-5)
@@ -67,7 +67,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### الوضع الاقتصادي
 
-يستخدم نماذج أسرع وأرخص (gpt-5-mini، claude-haiku، gemini-flash) :
+يستخدم نماذج أسرع وأقل تكلفة (gpt-5-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -78,11 +78,11 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | الخيار | الوصف |
 |--------|-------------|
 | `--file` | ملف Markdown واحد للترجمة |
-| `--source_dir` | دليل المصدر الذي يحتوي على ملفات Markdown |
-| `--target_dir` | دليل الإخراج للملفات المترجمة |
+| `--source_dir` | مجلد المصدر الذي يحتوي على ملفات Markdown |
+| `--target_dir` | مجلد الإخراج للملفات المترجمة |
 | `--source_lang` | لغة المصدر (الافتراضي: `fr`) |
 | `--target_lang` | لغة الهدف (الافتراضي: `en`) |
-| `--model` | نموذج محدد للاستخدام |
+| `--model` | النموذج المحدد للاستخدام |
 | `--eco` | استخدام النماذج الاقتصادية |
 | `--use_mistral` | استخدام واجهة برمجة تطبيقات Mistral AI |
 | `--use_claude` | استخدام واجهة برمجة تطبيقات Claude |
@@ -94,25 +94,25 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### النماذج الافتراضية (2026)
 
-| المزود | الجودة (الافتراضي) | اقتصادي (`--eco`) |
+| المزود | الجودة (افتراضي) | اقتصادي (`--eco`) |
 |----------|------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
-## المشاريع التي تستخدم هذا السكربت
+## المشاريع التي تستخدم هذا البرنامج النصي
 
-- **[jls42.org](https://jls42.org)** - مدونة شخصية مترجمة إلى 15 لغة (364 ملفًا، 22 مقالة + 4 مشاريع)
+- **[jls42.org](https://jls42.org)** - مدونة شخصية متعددة اللغات (15 لغة)
 
 ## المؤلف
 
 Julien LE SAUX  
-البريد الإلكتروني: contact@jls42.org
+البريد الإلكتروني : contact@jls42.org
 
 ## الرخصة
 
-رخصة جنو العمومية الإصدار 3. راجع [الرخصة](LICENSE).
+رخصة جنو العمومية العامة الإصدار 3. انظر [الرخصة](LICENSE).
 
-**تمت ترجمة هذا المستند من النسخة fr إلى اللغة ar باستخدام نموذج gpt-5-mini. لمزيد من المعلومات حول عملية الترجمة، راجع https://gitlab.com/jls42/ai-powered-markdown-translator**
+**تمت ترجمة هذا المستند من النسخة الفرنسية إلى اللغة العربية باستخدام النموذج gpt-5-mini. لمزيد من المعلومات حول عملية الترجمة، راجع https://gitlab.com/jls42/ai-powered-markdown-translator**
 

@@ -1,22 +1,22 @@
-# Traductor de Markdown con IA
+# Traductor de Markdown impulsado por IA
 
 🌍 [Inglés](README-en.md) | [Español](README-es.md) | [Chino](README-zh.md) | [Alemán](README-de.md) | [Japonés](README-ja.md) | [Coreano](README-ko.md) | [Árabe](README-ar.md) | [Hindi](README-hi.md) | [Italiano](README-it.md) | [Neerlandés](README-nl.md) | [Polaco](README-pl.md) | [Portugués](README-pt.md) | [Rumano](README-ro.md) | [Sueco](README-sv.md)
 
 Traductor de archivos Markdown que utiliza **OpenAI**, **Mistral AI**, **Claude (Anthropic)** y **Google Gemini**.
 
-Este script Python traduce archivos Markdown desde un idioma fuente hacia un idioma destino mientras preserva el formato, los bloques de código y los metadatos front matter.
+Este script en Python traduce archivos Markdown de un idioma origen a un idioma destino mientras preserva el formato, los bloques de código y los metadatos del front matter.
 
 ## Características principales
 
-- **Multi-proveedor**: Soporte para 4 APIs (OpenAI, Mistral, Claude, Gemini)
+- **Multi-Provider**: Soporte para 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **Modelos 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
 - **Modo económico**: Opción `--eco` para usar modelos más rápidos y menos costosos
 - **Archivo único**: Opción `--file` para traducir un solo archivo
 - **Segmentación inteligente**: Gestión de textos largos con límites de tokens por modelo
 - **Preservación del código**: Los bloques de código Y el código inline (`` `...` ``) se preservan
 - **Nombre de archivo**: Opción `--keep_filename` para conservar el nombre original
-- **Configuración .env**: Soporte para el archivo `.env` para las claves API
-- **Nota de traducción**: Opción para añadir una nota al final del documento
+- **Configuración .env**: Soporte del archivo `.env` para las claves API
+- **Nota de traducción**: Añadir opcionalmente una nota al final del documento
 
 ## Instalación
 
@@ -67,7 +67,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Modo económico
 
-Utiliza modelos más rápidos y menos costosos (gpt-5-mini, claude-haiku, gemini-flash) :
+Usa modelos más rápidos y más económicos (gpt-5-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -80,10 +80,10 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--file` | Archivo Markdown único a traducir |
 | `--source_dir` | Directorio fuente que contiene los archivos Markdown |
 | `--target_dir` | Directorio de salida para los archivos traducidos |
-| `--source_lang` | Idioma fuente (predeterminado: `fr`) |
-| `--target_lang` | Idioma destino (predeterminado: `en`) |
-| `--model` | Modelo específico a usar |
-| `--eco` | Usar modelos económicos |
+| `--source_lang` | Idioma fuente (por defecto: `fr`) |
+| `--target_lang` | Idioma destino (por defecto: `en`) |
+| `--model` | Modelo específico a utilizar |
+| `--eco` | Usar los modelos económicos |
 | `--use_mistral` | Usar la API de Mistral AI |
 | `--use_claude` | Usar la API de Claude |
 | `--use_gemini` | Usar la API de Gemini |
@@ -92,18 +92,18 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--add_translation_note` | Añadir una nota de traducción |
 | `--include_model` | Incluir el nombre del modelo en el archivo de salida |
 
-### Modelos predeterminados (2026)
+### Modelos por defecto (2026)
 
-| Proveedor | Calidad (predeterminado) | Económico (`--eco`) |
-|----------|--------------------------|----------------------------|
+| Proveedor | Calidad (predeterm.) | Económico (`--eco`) |
+|----------|----------------------|----------------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
-## Proyectos que usan este script
+## Proyectos que utilizan este script
 
-- **[jls42.org](https://jls42.org)** - Blog personal traducido a 15 idiomas (364 archivos, 22 artículos + 4 proyectos)
+- **[jls42.org](https://jls42.org)** - Blog personal multilingüe (15 idiomas)
 
 ## Autor
 
@@ -114,5 +114,5 @@ Correo electrónico: contact@jls42.org
 
 LICENCIA PÚBLICA GENERAL GNU Versión 3. Ver [LICENCIA](LICENSE).
 
-**Este documento ha sido traducido de la versión fr al idioma es usando el modelo gpt-5-mini. Para más información sobre el proceso de traducción, consulte https://gitlab.com/jls42/ai-powered-markdown-translator**
+**Este documento ha sido traducido de la versión fr al idioma es utilizando el modelo gpt-5-mini. Para más información sobre el proceso de traducción, consulte https://gitlab.com/jls42/ai-powered-markdown-translator**
 
