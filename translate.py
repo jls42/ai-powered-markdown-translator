@@ -169,10 +169,14 @@ def translate(
             else:
                 system_instructions = (
                     f"Translate from {args.source_lang} to {args.target_lang}. "
-                    "IMPORTANT: In the YAML front matter (between ---), translate 'title' and 'description' values, "
-                    f"and change 'locale' value to '{args.target_lang}'. Keep other metadata keys unchanged. "
-                    "Do NOT modify URLs, image paths, or code blocks. "
-                    "Preserve Markdown structure. Output only the translation, nothing else."
+                    "IMPORTANT RULES: "
+                    "1) In YAML front matter (between ---): translate 'title' and 'description' values, "
+                    f"change 'locale' to '{args.target_lang}'. Use double quotes for strings with apostrophes. "
+                    "2) For Markdown links [text](url): translate link text, keep URL unchanged. "
+                    "3) Do NOT modify: URLs, image paths, code blocks (including comments inside code). "
+                    "4) Do NOT add translator notes, comments, or explanations. "
+                    "5) Keep template variables like {variable} exactly as they are (inside backticks if present). "
+                    "Preserve Markdown structure. Output ONLY the translation, nothing else."
                 )
 
             if use_mistral:
@@ -278,26 +282,33 @@ def translate_markdown_file(
             return
 
         # Extraction et remplacement des blocs de code pour les préserver pendant la traduction
-        # ANCIEN REGEX (ne matchait que les blocs avec langage):
-        # regex = re.compile(
-        #     r"(?P<start>^```(?P<block_language>(\w|-)+)\n)(?P<code>.*?\n)(?P<end>```)",
-        #     re.DOTALL | re.MULTILINE,
-        # )
-        # NOUVEAU REGEX: matche aussi les blocs sans langage (```)
-        regex = re.compile(
+        # 1) Blocs de code fencés (``` ... ```)
+        fenced_regex = re.compile(
             r"(^```(?:[\w-]*)?\n)(.*?)(^```$)",
             re.DOTALL | re.MULTILINE,
         )
-        code_blocks = [match.group(0) for match in regex.finditer(content)]
-        placeholders = [f"#CODEBLOCK{index}#" for index, _ in enumerate(code_blocks)]
-        for placeholder, code_block in zip(placeholders, code_blocks):
+        code_blocks = [match.group(0) for match in fenced_regex.finditer(content)]
+        block_placeholders = [f"#CODEBLOCK{index}#" for index, _ in enumerate(code_blocks)]
+        for placeholder, code_block in zip(block_placeholders, code_blocks):
             content = content.replace(code_block, placeholder)
+
+        # 2) Code inline (` ... `) - protège aussi les backticks
+        # Regex: matche `contenu` mais pas les blocs déjà remplacés ni les doubles backticks ``
+        inline_regex = re.compile(r"(?<!`)(`[^`\n]+?`)(?!`)")
+        inline_codes = [match.group(0) for match in inline_regex.finditer(content)]
+        inline_placeholders = [f"#INLINECODE{index}#" for index, _ in enumerate(inline_codes)]
+        for placeholder, inline_code in zip(inline_placeholders, inline_codes):
+            content = content.replace(inline_code, placeholder, 1)  # Replace one at a time to handle duplicates
 
         # Traduction du contenu
         translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
 
-        # Restauration des blocs de code dans le contenu traduit
-        for placeholder, code_block in zip(placeholders, code_blocks):
+        # Restauration des blocs de code et code inline dans le contenu traduit
+        # 1) Restaurer le code inline d'abord (ordre inverse de l'extraction)
+        for placeholder, inline_code in zip(inline_placeholders, inline_codes):
+            translated_content = translated_content.replace(placeholder, inline_code)
+        # 2) Restaurer les blocs fencés
+        for placeholder, code_block in zip(block_placeholders, code_blocks):
             translated_content = translated_content.replace(placeholder, code_block)
 
         # Ajout de la note de traduction si nécessaire
