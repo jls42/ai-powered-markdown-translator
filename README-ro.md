@@ -1,18 +1,18 @@
-# Traducător de Markdown alimentat de IA
+# Traducător Markdown alimentat de AI
 
 🌍 [Engleză](README-en.md) | [Spaniolă](README-es.md) | [Chineză](README-zh.md) | [Germană](README-de.md) | [Japoneză](README-ja.md) | [Coreeană](README-ko.md) | [Arabă](README-ar.md) | [Hindi](README-hi.md) | [Italiană](README-it.md) | [Olandeză](README-nl.md) | [Poloneză](README-pl.md) | [Portugheză](README-pt.md) | [Română](README-ro.md) | [Suedeză](README-sv.md)
 
-Traducător de fișiere Markdown folosind **OpenAI**, **Mistral AI**, **Claude (Anthropic)** și **Google Gemini**.
+Traducător de fișiere Markdown care utilizează **OpenAI**, **Mistral AI**, **Claude (Anthropic)** și **Google Gemini**.
 
-Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă păstrând formatarea, blocurile de cod și metadatele front matter.
+Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă păstrând formatul, blocurile de cod și metadatele front matter.
 
 ## Caracteristici principale
 
-- **Multi-furnizor**: Suport pentru 4 API-uri (OpenAI, Mistral, Claude, Gemini)
+- **Multi-provider**: Suport pentru 4 API-uri (OpenAI, Mistral, Claude, Gemini)
 - **Modele 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
 - **Mod economic**: Opțiunea `--eco` pentru a folosi modele mai rapide și mai ieftine
 - **Fișier unic**: Opțiunea `--file` pentru a traduce un singur fișier
-- **Segmentare inteligentă**: Gestionarea textelor lungi cu limite de tokeni per model
+- **Segmentare inteligentă**: Gestionarea textelor lungi cu limite de tokeni pe model
 - **Păstrarea codului**: Blocurile de cod ȘI codul inline (`` `...` ``) sunt păstrate
 - **Nume fișier**: Opțiunea `--keep_filename` pentru a păstra numele original
 - **Configurare .env**: Suport pentru fișierul `.env` pentru cheile API
@@ -43,13 +43,13 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 ## Utilizare
 
-### Traduceți un fișier unic
+### Traducerea unui fișier unic
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### Traduceți un director
+### Traducerea unui director
 
 ```bash
 # Avec OpenAI (défaut: gpt-5)
@@ -67,7 +67,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Mod economic
 
-Folosește modele mai rapide și mai ieftine (gpt-5-mini, claude-haiku, gemini-flash) :
+Folosește modele mai rapide și mai ieftine (gpt-5-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -78,19 +78,19 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Opțiune | Descriere |
 |--------|-------------|
 | `--file` | Fișier Markdown unic de tradus |
-| `--source_dir` | Director sursă care conține fișierele Markdown |
-| `--target_dir` | Director de ieșire pentru fișierele traduse |
+| `--source_dir` | Directorul sursă conținând fișierele Markdown |
+| `--target_dir` | Directorul de ieșire pentru fișierele traduse |
 | `--source_lang` | Limba sursă (implicit: `fr`) |
 | `--target_lang` | Limba țintă (implicit: `en`) |
 | `--model` | Model specific de utilizat |
-| `--eco` | Utilizați modelele economice |
-| `--use_mistral` | Utilizați API-ul Mistral AI |
-| `--use_claude` | Utilizați API-ul Claude |
-| `--use_gemini` | Utilizați API-ul Gemini |
-| `--force` | Forțați re-traducerea |
-| `--keep_filename` | Păstrați numele fișierului original |
-| `--add_translation_note` | Adăugați o notă de traducere |
-| `--include_model` | Includeți numele modelului în fișierul de ieșire |
+| `--eco` | Folosește modelele economice |
+| `--use_mistral` | Folosește API-ul Mistral AI |
+| `--use_claude` | Folosește API-ul Claude |
+| `--use_gemini` | Folosește API-ul Gemini |
+| `--force` | Forțează re-traducerea |
+| `--keep_filename` | Păstrează numele fișierului original |
+| `--add_translation_note` | Adaugă o notă de traducere |
+| `--include_model` | Include numele modelului în fișierul de ieșire |
 
 ### Modele implicite (2026)
 
@@ -103,16 +103,16 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Proiecte care folosesc acest script
 
-- **[jls42.org](https://jls42.org)** - Blog personal tradus în 15 limbi 
+- **[jls42.org](https://jls42.org)** - Blog personal multilingv (15 limbi)
 
 ## Autor
 
-Julien LE SAUX  
-Email: contact@jls42.org
+Julien LE SAUX
+Email : contact@jls42.org
 
 ## Licență
 
-GNU GENERAL PUBLIC LICENSE Versiunea 3. Vezi [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Versiunea 3. Vezi [LICENȚĂ](LICENSE).
 
 **Acest document a fost tradus din versiunea fr în limba ro folosind modelul gpt-5-mini. Pentru mai multe informații despre procesul de traducere, consultați https://gitlab.com/jls42/ai-powered-markdown-translator**
 

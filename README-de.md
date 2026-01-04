@@ -2,21 +2,21 @@
 
 🌍 [Englisch](README-en.md) | [Spanisch](README-es.md) | [Chinesisch](README-zh.md) | [Deutsch](README-de.md) | [Japanisch](README-ja.md) | [Koreanisch](README-ko.md) | [Arabisch](README-ar.md) | [Hindi](README-hi.md) | [Italienisch](README-it.md) | [Niederländisch](README-nl.md) | [Polnisch](README-pl.md) | [Portugiesisch](README-pt.md) | [Rumänisch](README-ro.md) | [Schwedisch](README-sv.md)
 
-Übersetzer für Markdown-Dateien, der **OpenAI**, **Mistral AI**, **Claude (Anthropic)** und **Google Gemini** verwendet.
+Übersetzer für Markdown-Dateien, der **OpenAI**, **Mistral AI**, **Claude (Anthropic)** und **Google Gemini** nutzt.
 
 Dieses Python-Skript übersetzt Markdown-Dateien von einer Quellsprache in eine Zielsprache und bewahrt dabei Formatierung, Codeblöcke und Front-Matter-Metadaten.
 
-## Hauptfunktionen
+## Hauptmerkmale
 
-- **Multi-Anbieter**: Unterstützung für 4 APIs (OpenAI, Mistral, Claude, Gemini)
+- **Mehrere Anbieter**: Unterstützung für 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **Modelle 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Sparmodus**: Option `--eco` zur Verwendung schnellerer und kostengünstigerer Modelle
-- **Einzeldatei**: Option `--file` zum Übersetzen einer einzigen Datei
-- **Intelligente Segmentierung**: Handhabung langer Texte mit Token-Limits pro Modell
-- **Erhaltung des Codes**: Codeblöcke UND Inline-Code (`` `...` ``) werden bewahrt
+- **Sparmodus**: Option `--eco` zur Nutzung schnellerer und kostengünstigerer Modelle
+- **Einzeldatei**: Option `--file` zum Übersetzen einer einzelnen Datei
+- **Intelligente Segmentierung**: Handhabung langer Texte mit Token-Limits je Modell
+- **Erhaltung des Codes**: Sowohl Codeblöcke als auch Inline-Code (`` `...` ``) werden bewahrt
 - **Dateiname**: Option `--keep_filename` zum Beibehalten des Originalnamens
-- **.env-Konfiguration**: Unterstützung der `.env`-Datei für API-Schlüssel
-- **Übersetzungsnotiz**: Optionale Hinzufügung einer Notiz am Ende des Dokuments
+- **Unterstützung .env**: Unterstützung der Datei `.env` für API-Schlüssel
+- **Übersetzungshinweis**: Optionales Hinzufügen einer Anmerkung am Ende des Dokuments
 
 ## Installation
 
@@ -28,7 +28,7 @@ pip install -r requirements.txt
 
 ## Konfiguration
 
-Erstellen Sie eine Datei `.env` im Stammverzeichnis des Projekts oder setzen Sie die Umgebungsvariablen:
+Erstellen Sie eine Datei `.env` im Projektstamm oder setzen Sie die Umgebungsvariablen:
 
 ```bash
 # Fichier .env (recommandé)
@@ -67,7 +67,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Sparmodus
 
-Verwendet schnellere und kostengünstigere Modelle (gpt-5-mini, claude-haiku, gemini-flash):
+Verwendet schnellere und günstigere Modelle (gpt-5-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -78,23 +78,23 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Option | Beschreibung |
 |--------|-------------|
 | `--file` | Einzelne Markdown-Datei zum Übersetzen |
-| `--source_dir` | Quellverzeichnis mit Markdown-Dateien |
+| `--source_dir` | Quellverzeichnis mit den Markdown-Dateien |
 | `--target_dir` | Ausgabeverzeichnis für die übersetzten Dateien |
-| `--source_lang` | Quellsprache (Standard: `fr`) |
+| `--source_lang` | Ausgangssprache (Standard: `fr`) |
 | `--target_lang` | Zielsprache (Standard: `en`) |
-| `--model` | Spezifisches Modell zur Verwendung |
-| `--eco` | Ökonomische Modelle verwenden |
+| `--model` | Zu verwendendes spezifisches Modell |
+| `--eco` | Sparmodelle verwenden |
 | `--use_mistral` | Mistral AI API verwenden |
 | `--use_claude` | Claude API verwenden |
 | `--use_gemini` | Gemini API verwenden |
-| `--force` | Neukonvertierung erzwingen |
-| `--keep_filename` | Original-Dateinamen beibehalten |
-| `--add_translation_note` | Übersetzungsnotiz hinzufügen |
+| `--force` | Übersetzung erzwingen (erneut) |
+| `--keep_filename` | Originaldateinamen beibehalten |
+| `--add_translation_note` | Übersetzungshinweis hinzufügen |
 | `--include_model` | Modellname in der Ausgabedatei einschließen |
 
 ### Standardmodelle (2026)
 
-| Anbieter | Qualität (Standard) | Ökonomisch (`--eco`) |
+| Anbieter | Qualität (Standard) | Sparversion (`--eco`) |
 |----------|---------------------|-----------------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
@@ -103,16 +103,16 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Projekte, die dieses Skript verwenden
 
-- **[jls42.org](https://jls42.org)** - Persönlicher Blog, übersetzt in 15 Sprachen 
+- **[jls42.org](https://jls42.org)** - Mehrsprachiger persönlicher Blog (15 Sprachen)
 
 ## Autor
 
-Julien LE SAUX  
+Julien LE SAUX
 E-Mail: contact@jls42.org
 
 ## Lizenz
 
-GNU GENERAL PUBLIC LICENSE Version 3. Siehe [LIZENZ](LICENSE).
+GNU GENERAL PUBLIC LICENSE Version 3. Siehe [LICENSE](LICENSE).
 
-**Dieses Dokument wurde von der fr-Version in die Sprache en unter Verwendung des Modells gpt-5-mini übersetzt. Für weitere Informationen zum Übersetzungsprozess konsultieren Sie https://gitlab.com/jls42/ai-powered-markdown-translator**
+**Dieses Dokument wurde aus der fr-Version in die Sprache en mithilfe des Modells gpt-5-mini übersetzt. Für weitere Informationen zum Übersetzungsprozess konsultieren Sie https://gitlab.com/jls42/ai-powered-markdown-translator**
 

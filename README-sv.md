@@ -1,21 +1,21 @@
-# AI-drivet Markdown-översättningsverktyg
+# AI-drivet Markdown-översättare
 
 🌍 [Engelska](README-en.md) | [Spanska](README-es.md) | [Kinesiska](README-zh.md) | [Tyska](README-de.md) | [Japanska](README-ja.md) | [Koreanska](README-ko.md) | [Arabiska](README-ar.md) | [Hindi](README-hi.md) | [Italienska](README-it.md) | [Nederländska](README-nl.md) | [Polska](README-pl.md) | [Portugisiska](README-pt.md) | [Rumänska](README-ro.md) | [Svenska](README-sv.md)
 
-Markdown-filöversättare som använder **OpenAI**, **Mistral AI**, **Claude (Anthropic)** och **Google Gemini**.
+Översättare av Markdown-filer som använder **OpenAI**, **Mistral AI**, **Claude (Anthropic)** och **Google Gemini**.
 
-Detta Python-skript översätter Markdown-filer från ett källspråk till ett målspråk samtidigt som formatering, kodblock och front matter-metadata bevaras.
+Detta Python-skript översätter Markdown-filer från ett källspråk till ett målspråk samtidigt som formateringen, kodblocken och front matter-metadata bevaras.
 
 ## Huvudfunktioner
 
-- **Flera leverantörer**: Stöd för 4 API:er (OpenAI, Mistral, Claude, Gemini)
+- **Multi-Provider**: Stöd för 4 API:er (OpenAI, Mistral, Claude, Gemini)
 - **Modeller 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Sparläge**: Alternativet `--eco` för att använda snabbare och billigare modeller
+- **Ekonomiskt läge**: Alternativ `--eco` för att använda snabbare och billigare modeller
 - **Enskild fil**: Alternativ `--file` för att översätta en enda fil
-- **Intelligent segmentering**: Hantering av långa texter med tokengränser per modell
-- **Bevarande av kod**: Kodblock OCH inline-kod (`` `...` ``) bevaras
-- **Filnamn**: Alternativ `--keep_filename` för att behålla ursprungligt namn
-- **.env-konfiguration**: Stöd för filen `.env` för API-nycklar
+- **Intelligent segmentering**: Hantering av långa texter med token-gränser per modell
+- **Bevarande av koden**: Kodblock OCH inline-kod (`` `...` ``) bevaras
+- **Filnamn**: Alternativ `--keep_filename` för att behålla det ursprungliga namnet
+- **Stöd för .env**: Stöd för filen `.env` för API-nycklar
 - **Översättningsanteckning**: Valfritt tillägg av en anteckning i slutet av dokumentet
 
 ## Installation
@@ -43,13 +43,13 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 ## Användning
 
-### Översätta en enskild fil
+### Översätta en enstaka fil
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### Översätta en mapp
+### Översätta en katalog
 
 ```bash
 # Avec OpenAI (défaut: gpt-5)
@@ -65,7 +65,7 @@ python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content
 python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
 ```
 
-### Sparläge
+### Ekonomiskt läge
 
 Använder snabbare och billigare modeller (gpt-5-mini, claude-haiku, gemini-flash):
 
@@ -76,26 +76,26 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 ### Alternativ
 
 | Alternativ | Beskrivning |
-|-----------|-------------|
-| `--file` | En enskild Markdown-fil som ska översättas |
-| `--source_dir` | Källmapp som innehåller Markdown-filerna |
-| `--target_dir` | Utdatakatalog för de översatta filerna |
+|--------|-------------|
+| `--file` | Enskild Markdown-fil att översätta |
+| `--source_dir` | Källkatalog som innehåller Markdown-filerna |
+| `--target_dir` | Utmatningskatalog för de översatta filerna |
 | `--source_lang` | Källspråk (standard: `fr`) |
 | `--target_lang` | Målspråk (standard: `en`) |
 | `--model` | Specifik modell att använda |
-| `--eco` | Använd sparmodeller |
+| `--eco` | Använd ekonomiska modeller |
 | `--use_mistral` | Använd Mistral AI API |
 | `--use_claude` | Använd Claude API |
 | `--use_gemini` | Använd Gemini API |
-| `--force` | Tvinga omöversättning |
-| `--keep_filename` | Behåll originalfilnamnet |
+| `--force` | Tvinga om-översättning |
+| `--keep_filename` | Behåll det ursprungliga filnamnet |
 | `--add_translation_note` | Lägg till en översättningsanteckning |
 | `--include_model` | Inkludera modellnamnet i utdatafilen |
 
 ### Standardmodeller (2026)
 
-| Leverantör | Kvalitet (standard) | Sparläge (`--eco`) |
-|-----------|---------------------|---------------------------|
+| Leverantör | Kvalitet (standard) | Ekonomisk (`--eco`) |
+|----------|------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
@@ -103,7 +103,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Projekt som använder detta skript
 
-- **[jls42.org](https://jls42.org)** - Personlig blogg översatt till 15 språk 
+- **[jls42.org](https://jls42.org)** - Personlig flerspråkig blogg (15 språk)
 
 ## Författare
 
@@ -114,5 +114,5 @@ E-post: contact@jls42.org
 
 GNU GENERAL PUBLIC LICENSE Version 3. Se [LICENS](LICENSE).
 
-**Detta dokument har översatts från fr till sv med modellen gpt-5-mini. För mer information om översättningsprocessen, se https://gitlab.com/jls42/ai-powered-markdown-translator**
+**Detta dokument har översatts från fr-versionen till språket sv med hjälp av modellen gpt-5-mini. För mer information om översättningsprocessen, se https://gitlab.com/jls42/ai-powered-markdown-translator**
 
