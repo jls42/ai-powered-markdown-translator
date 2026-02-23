@@ -1,22 +1,23 @@
 # Traducător Markdown alimentat de AI
 
-🌍 [Engleză](README-en.md) | [Spaniolă](README-es.md) | [Chineză](README-zh.md) | [Germană](README-de.md) | [Japoneză](README-ja.md) | [Coreeană](README-ko.md) | [Arabă](README-ar.md) | [Hindi](README-hi.md) | [Italiană](README-it.md) | [Olandeză](README-nl.md) | [Poloneză](README-pl.md) | [Portugheză](README-pt.md) | [Română](README-ro.md) | [Suedeză](README-sv.md)
+🌍 [Franceză](README.md) | [Engleză](README-en.md) | [Spaniolă](README-es.md) | [Chineză](README-zh.md) | [Germană](README-de.md) | [Japoneză](README-ja.md) | [Coreeană](README-ko.md) | [Arabă](README-ar.md) | [Hindi](README-hi.md) | [Italiană](README-it.md) | [Olandeză](README-nl.md) | [Poloneză](README-pl.md) | [Portugheză](README-pt.md) | [Română](README-ro.md) | [Suedeză](README-sv.md)
 
-Traducător de fișiere Markdown care utilizează **OpenAI**, **Mistral AI**, **Claude (Anthropic)** și **Google Gemini**.
+Traducător de fișiere Markdown care folosește **OpenAI**, **Mistral AI**, **Claude (Anthropic)** și **Google Gemini**.
 
-Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă păstrând formatul, blocurile de cod și metadatele front matter.
+Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă păstrând formatarea, blocurile de cod și metadatele din front matter.
 
 ## Caracteristici principale
 
-- **Multi-provider**: Suport pentru 4 API-uri (OpenAI, Mistral, Claude, Gemini)
+- **Multi-Provider**: Suport pentru 4 API-uri (OpenAI, Mistral, Claude, Gemini)
 - **Modele 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Mod economic**: Opțiunea `--eco` pentru a folosi modele mai rapide și mai ieftine
-- **Fișier unic**: Opțiunea `--file` pentru a traduce un singur fișier
-- **Segmentare inteligentă**: Gestionarea textelor lungi cu limite de tokeni pe model
-- **Păstrarea codului**: Blocurile de cod ȘI codul inline (`` `...` ``) sunt păstrate
-- **Nume fișier**: Opțiunea `--keep_filename` pentru a păstra numele original
+- **Mod Economic**: Opțiune `--eco` pentru a folosi modele mai rapide și mai ieftine
+- **Fișier Unic**: Opțiune `--file` pentru a traduce un singur fișier
+- **Segmentare Inteligentă**: Gestionarea textelor lungi cu limite de token pe model
+- **Păstrarea Codului**: Blocurile de cod ȘI codul inline (`` `...` ``) sunt păstrate
+- **Nume de Fișier**: Opțiune `--keep_filename` pentru a păstra numele original
+- **Mod Știri**: Opțiune `--news` pentru a proteja citatele în EN și a gestiona steagurile în articolele de știri
 - **Configurare .env**: Suport pentru fișierul `.env` pentru cheile API
-- **Notă de traducere**: Adăugare opțională a unei note la sfârșitul documentului
+- **Notă de Traducere**: Adăugare opțională a unei note la sfârșitul documentului
 
 ## Instalare
 
@@ -28,7 +29,7 @@ pip install -r requirements.txt
 
 ## Configurare
 
-Creați un fișier `.env` în rădăcina proiectului sau definiți variabilele de mediu :
+Creează un fișier `.env` la rădăcina proiectului sau definește variabilele de mediu:
 
 ```bash
 # Fichier .env (recommandé)
@@ -78,17 +79,18 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Opțiune | Descriere |
 |--------|-------------|
 | `--file` | Fișier Markdown unic de tradus |
-| `--source_dir` | Directorul sursă conținând fișierele Markdown |
-| `--target_dir` | Directorul de ieșire pentru fișierele traduse |
-| `--source_lang` | Limba sursă (implicit: `fr`) |
-| `--target_lang` | Limba țintă (implicit: `en`) |
+| `--source_dir` | Director sursă ce conține fișiere Markdown |
+| `--target_dir` | Director de ieșire pentru fișierele traduse |
+| `--source_lang` | Limbă sursă (implicit: `fr`) |
+| `--target_lang` | Limbă țintă (implicit: `en`) |
 | `--model` | Model specific de utilizat |
 | `--eco` | Folosește modelele economice |
 | `--use_mistral` | Folosește API-ul Mistral AI |
 | `--use_claude` | Folosește API-ul Claude |
 | `--use_gemini` | Folosește API-ul Gemini |
-| `--force` | Forțează re-traducerea |
-| `--keep_filename` | Păstrează numele fișierului original |
+| `--force` | Forțează retraducerea |
+| `--keep_filename` | Păstrează numele de fișier original |
+| `--news` | Mod știri: protejează citatele EN, gestionează steagurile pe limbă |
 | `--add_translation_note` | Adaugă o notă de traducere |
 | `--include_model` | Include numele modelului în fișierul de ieșire |
 
@@ -108,7 +110,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 ## Autor
 
 Julien LE SAUX
-Email : contact@jls42.org
+Email: contact@jls42.org
 
 ## Licență
 

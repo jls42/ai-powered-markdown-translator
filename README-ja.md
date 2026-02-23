@@ -1,22 +1,23 @@
-# AI搭載Markdown翻訳ツール
+# AI搭載 Markdown 翻訳ツール
 
-🌍 [英語](README-en.md) | [スペイン語](README-es.md) | [中国語](README-zh.md) | [ドイツ語](README-de.md) | [日本語](README-ja.md) | [韓国語](README-ko.md) | [アラビア語](README-ar.md) | [ヒンディー語](README-hi.md) | [イタリア語](README-it.md) | [オランダ語](README-nl.md) | [ポーランド語](README-pl.md) | [ポルトガル語](README-pt.md) | [ルーマニア語](README-ro.md) | [スウェーデン語](README-sv.md)
+🌍 [フランス語](README.md) | [英語](README-en.md) | [スペイン語](README-es.md) | [中国語](README-zh.md) | [ドイツ語](README-de.md) | [日本語](README-ja.md) | [韓国語](README-ko.md) | [アラビア語](README-ar.md) | [ヒンディー語](README-hi.md) | [イタリア語](README-it.md) | [オランダ語](README-nl.md) | [ポーランド語](README-pl.md) | [ポルトガル語](README-pt.md) | [ルーマニア語](README-ro.md) | [スウェーデン語](README-sv.md)
 
-OpenAI、Mistral AI、Claude（Anthropic）、Google Gemini を使用する Markdown ファイル翻訳ツール。
+OpenAI、Mistral AI、Claude（Anthropic）、Google Geminiを利用するMarkdownファイルの翻訳ツール。
 
-この Python スクリプトは、ソース言語からターゲット言語へ Markdown ファイルを翻訳し、フォーマット、コードブロック、フロントマターのメタデータを保持します。
+このPythonスクリプトは、フォーマット、コードブロック、フロントマターのメタデータを保持したまま、ソース言語からターゲット言語へMarkdownファイルを翻訳します。
 
 ## 主な特徴
 
-- **マルチプロバイダー**: 4つのAPIをサポート（OpenAI、Mistral、Claude、Gemini）
+- **マルチプロバイダー**: 4つのAPI（OpenAI、Mistral、Claude、Gemini）をサポート
 - **2026年モデル**: GPT-5、Claude Sonnet 4.5、Gemini 3 Pro
-- **省コストモード**: より高速で安価なモデルを使用するためのオプション `--eco`
-- **単一ファイル**: 1つのファイルを翻訳するためのオプション `--file`
-- **スマート分割**: モデルごとのトークン制限に対応した長文処理
-- **コードの保持**: コードブロックとインラインコード（`` `...` ``）は保持されます
-- **ファイル名**: 元の名前を保持するためのオプション `--keep_filename`
-- **.env 設定**: API キー用のファイル `.env` をサポート
-- **翻訳注記**: ドキュメント末尾への注記の任意追加
+- **エコノミーモード**: より高速で低コストなモデルを使用するオプション `--eco`
+- **単一ファイル**: 単一ファイルを翻訳するオプション `--file`
+- **スマートセグメンテーション**: モデルごとのトークン制限に対応した長文の処理
+- **コードの保持**: コードブロックおよびインラインコード（`` `...` ``）は保持されます
+- **ファイル名**: 元の名前を保持するオプション `--keep_filename`
+- **ニュースモード**: 英語の引用を保護し、ニュース記事内のフラグを言語ごとに処理するオプション `--news`
+- **.env 設定**: APIキー用のファイル `.env` をサポート
+- **翻訳ノート**: ドキュメント末尾に翻訳ノートを任意で追加
 
 ## インストール
 
@@ -28,7 +29,7 @@ pip install -r requirements.txt
 
 ## 設定
 
-プロジェクトのルートに `.env` ファイルを作成するか、環境変数を設定してください :
+プロジェクトルートに `.env` ファイルを作成するか、環境変数を設定してください：
 
 ```bash
 # Fichier .env (recommandé)
@@ -43,13 +44,13 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 ## 使い方
 
-### 単一ファイルを翻訳する
+### 単一ファイルを翻訳
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### ディレクトリを翻訳する
+### ディレクトリを翻訳
 
 ```bash
 # Avec OpenAI (défaut: gpt-5)
@@ -65,9 +66,9 @@ python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content
 python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
 ```
 
-### 省コストモード
+### エコノミーモード
 
-より高速で安価なモデル（gpt-5-mini、claude-haiku、gemini-flash）を使用します :
+より高速で低コストなモデル（gpt-5-mini、claude-haiku、gemini-flash）を使用します：
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -79,40 +80,41 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 |--------|-------------|
 | `--file` | 翻訳する単一のMarkdownファイル |
 | `--source_dir` | Markdownファイルを含むソースディレクトリ |
-| `--target_dir` | 翻訳済みファイルの出力ディレクトリ |
+| `--target_dir` | 翻訳後ファイルの出力ディレクトリ |
 | `--source_lang` | ソース言語（デフォルト: `fr`） |
-| `--target_lang` | 対象言語（デフォルト: `en`） |
-| `--model` | 使用する特定モデル |
-| `--eco` | 省コストモデルを使用 |
-| `--use_mistral` | Mistral AI API を使用 |
-| `--use_claude` | Claude API を使用 |
-| `--use_gemini` | Gemini API を使用 |
+| `--target_lang` | ターゲット言語（デフォルト: `en`） |
+| `--model` | 使用する特定のモデル |
+| `--eco` | エコノミーモデルを使用 |
+| `--use_mistral` | Mistral AI APIを使用 |
+| `--use_claude` | Claude APIを使用 |
+| `--use_gemini` | Gemini APIを使用 |
 | `--force` | 再翻訳を強制 |
 | `--keep_filename` | 元のファイル名を保持 |
-| `--add_translation_note` | 翻訳注記を追加 |
+| `--news` | ニュースモード：英語の引用を保護し、言語ごとにフラグを管理 |
+| `--add_translation_note` | 翻訳ノートを追加 |
 | `--include_model` | 出力ファイルにモデル名を含める |
 
-### デフォルトモデル（2026）
+### デフォルトモデル (2026)
 
-| プロバイダー | 品質（デフォルト） | 省コスト（`--eco`） |
+| プロバイダー | 品質（デフォルト） | エコノミー（`--eco`） |
 |----------|------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
-## このスクリプトを使用しているプロジェクト
+## 本スクリプトを使用しているプロジェクト
 
 - **[jls42.org](https://jls42.org)** - 多言語個人ブログ（15言語）
 
-## 作者
+## 著者
 
 Julien LE SAUX  
 メール : contact@jls42.org
 
 ## ライセンス
 
-GNU GENERAL PUBLIC LICENSE バージョン 3。詳細は [ライセンス](LICENSE) を参照。
+GNU GENERAL PUBLIC LICENSE バージョン3。参照 [ライセンス](LICENSE).
 
-**この文書は gpt-5-mini モデルを使用して fr バージョンから ja 言語に翻訳されました。翻訳プロセスの詳細については https://gitlab.com/jls42/ai-powered-markdown-translator をご覧ください。**
+**この文書は gpt-5-mini モデルを使用して fr バージョンから ja 言語へ翻訳されました。翻訳プロセスの詳細については、https://gitlab.com/jls42/ai-powered-markdown-translator をご覧ください。**
 
