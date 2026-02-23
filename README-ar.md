@@ -1,21 +1,22 @@
 # مترجم Markdown مدعوم بالذكاء الاصطناعي
 
-🌍 [الإنجليزية](README-en.md) | [الإسبانية](README-es.md) | [الصينية](README-zh.md) | [الألمانية](README-de.md) | [اليابانية](README-ja.md) | [الكورية](README-ko.md) | [العربية](README-ar.md) | [الهندية](README-hi.md) | [الإيطالية](README-it.md) | [الهولندية](README-nl.md) | [البولندية](README-pl.md) | [البرتغالية](README-pt.md) | [الرومانية](README-ro.md) | [السويدية](README-sv.md)
+🌍 [الفرنسية](README.md) | [الإنجليزية](README-en.md) | [الإسبانية](README-es.md) | [الصينية](README-zh.md) | [الألمانية](README-de.md) | [اليابانية](README-ja.md) | [الكورية](README-ko.md) | [العربية](README-ar.md) | [الهندية](README-hi.md) | [الإيطالية](README-it.md) | [الهولندية](README-nl.md) | [البولندية](README-pl.md) | [البرتغالية](README-pt.md) | [الرومانية](README-ro.md) | [السويدية](README-sv.md)
 
-مترجم ملفات Markdown باستخدام **OpenAI**، **Mistral AI**، **Claude (Anthropic)** و **Google Gemini**.
+مترجم ملفات Markdown يستخدم **OpenAI**، **Mistral AI**، **Claude (Anthropic)** و**Google Gemini**.
 
-يقوم هذا السكربت بلغة Python بترجمة ملفات Markdown من لغة مصدر إلى لغة هدف مع الحفاظ على التنسيق وكتل الشيفرة والبيانات الوصفية front matter.
+يقوم هذا السكربت بلغة Python بترجمة ملفات Markdown من لغة مصدر إلى لغة هدف مع الحفاظ على التنسيق وكتل الشيفرة وبيانات الـ front matter.
 
 ## الميزات الرئيسية
 
-- **متعدد المزودين**: دعم 4 واجهات برمجة تطبيقات (OpenAI، Mistral، Claude، Gemini)
+- **دعم عدة مزودين**: يدعم 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **نماذج 2026**: GPT-5، Claude Sonnet 4.5، Gemini 3 Pro
-- **الوضع الاقتصادي**: خيار `--eco` لاستخدام نماذج أسرع وأقل تكلفة
-- **ملف واحد**: خيار `--file` لترجمة ملف واحد
-- **التقسيم الذكي**: إدارة النصوص الطويلة مع حدود توكن لكل نموذج
-- **الحفاظ على الشيفرة**: يتم الحفاظ على كتل الشيفرة وأيضًا الشيفرة المضمنة (`` `...` ``)
-- **اسم الملف**: خيار `--keep_filename` للاحتفاظ بالاسم الأصلي
-- **تكوين .env**: دعم ملف `.env` لمفاتيح API
+- **الوضع الاقتصادي**: الخيار `--eco` لاستخدام نماذج أسرع وأقل تكلفة
+- **ملف واحد**: الخيار `--file` لترجمة ملف واحد
+- **التجزئة الذكية**: إدارة النصوص الطويلة مع حدود التوكن لكل نموذج
+- **الحفاظ على الشيفرة**: كتل الشيفرة وكذلك الشيفرة داخل السطر (`` `...` ``) محفوظة
+- **اسم الملف**: الخيار `--keep_filename` للاحتفاظ بالاسم الأصلي
+- **وضع الأخبار**: الخيار `--news` لحماية الاقتباسات الإنجليزية وإدارة الأعلام في المقالات الإخبارية
+- **تكوين .env**: دعم الملف `.env` لمفاتيح API
 - **ملاحظة الترجمة**: إضافة اختيارية لملاحظة في نهاية المستند
 
 ## التثبيت
@@ -28,7 +29,7 @@ pip install -r requirements.txt
 
 ## الإعداد
 
-قم بإنشاء ملف `.env` في جذر المشروع أو قم بتعيين متغيرات البيئة:
+أنشئ ملفًا `.env` في جذر المشروع أو قم بتعيين متغيرات البيئة :
 
 ```bash
 # Fichier .env (recommandé)
@@ -67,7 +68,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### الوضع الاقتصادي
 
-يستخدم نماذج أسرع وأقل تكلفة (gpt-5-mini, claude-haiku, gemini-flash):
+يستخدم نماذج أسرع وأقل تكلفة (gpt-5-mini، claude-haiku، gemini-flash) :
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -80,28 +81,29 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--file` | ملف Markdown واحد للترجمة |
 | `--source_dir` | مجلد المصدر الذي يحتوي على ملفات Markdown |
 | `--target_dir` | مجلد الإخراج للملفات المترجمة |
-| `--source_lang` | لغة المصدر (الافتراضي: `fr`) |
-| `--target_lang` | لغة الهدف (الافتراضي: `en`) |
-| `--model` | النموذج المحدد للاستخدام |
+| `--source_lang` | اللغة المصدر (الافتراضي: `fr`) |
+| `--target_lang` | اللغة الهدف (الافتراضي: `en`) |
+| `--model` | نموذج محدد للاستخدام |
 | `--eco` | استخدام النماذج الاقتصادية |
-| `--use_mistral` | استخدام واجهة برمجة تطبيقات Mistral AI |
-| `--use_claude` | استخدام واجهة برمجة تطبيقات Claude |
-| `--use_gemini` | استخدام واجهة برمجة تطبيقات Gemini |
-| `--force` | إجبار إعادة الترجمة |
+| `--use_mistral` | استخدام API الخاصة بـ Mistral AI |
+| `--use_claude` | استخدام API الخاصة بـ Claude |
+| `--use_gemini` | استخدام API الخاصة بـ Gemini |
+| `--force` | فرض إعادة الترجمة |
 | `--keep_filename` | الاحتفاظ باسم الملف الأصلي |
+| `--news` | وضع الأخبار: يحمي الاقتباسات بالإنجليزية، ويتعامل مع الأعلام حسب اللغة |
 | `--add_translation_note` | إضافة ملاحظة ترجمة |
 | `--include_model` | تضمين اسم النموذج في ملف الإخراج |
 
 ### النماذج الافتراضية (2026)
 
-| المزود | الجودة (افتراضي) | اقتصادي (`--eco`) |
+| المزود | الجودة (افتراضي) | الوضع الاقتصادي (`--eco`) |
 |----------|------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
-## المشاريع التي تستخدم هذا البرنامج النصي
+## المشاريع التي تستخدم هذا السكربت
 
 - **[jls42.org](https://jls42.org)** - مدونة شخصية متعددة اللغات (15 لغة)
 
@@ -112,7 +114,7 @@ Julien LE SAUX
 
 ## الرخصة
 
-رخصة جنو العمومية العامة الإصدار 3. انظر [الرخصة](LICENSE).
+رخصة جنو العمومية الإصدار 3. انظر [الرخصة](LICENSE).
 
 **تمت ترجمة هذا المستند من النسخة الفرنسية إلى اللغة العربية باستخدام النموذج gpt-5-mini. لمزيد من المعلومات حول عملية الترجمة، راجع https://gitlab.com/jls42/ai-powered-markdown-translator**
 

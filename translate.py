@@ -17,6 +17,13 @@ load_dotenv()
 
 EXCLUDE_PATTERNS = ["traductions_", "venv", "PRIVACY.md"]
 
+# Mapping langue → emoji drapeau pour les citations news (--news)
+LANG_FLAGS = {
+    "en": "🇬🇧", "es": "🇪🇸", "de": "🇩🇪", "it": "🇮🇹", "pt": "🇵🇹",
+    "nl": "🇳🇱", "pl": "🇵🇱", "sv": "🇸🇪", "ro": "🇷🇴", "ja": "🇯🇵",
+    "ko": "🇰🇷", "zh": "🇨🇳", "ar": "🇸🇦", "hi": "🇮🇳", "fr": "🇫🇷",
+}
+
 # Initialisation de la configuration avec les valeurs par défaut
 DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
 DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
@@ -179,6 +186,34 @@ def translate(
                     "Preserve Markdown structure. Output ONLY the translation, nothing else."
                 )
 
+            # Ajout des instructions news si --news actif
+            if not is_translation_note and args.news:
+                target_flag = LANG_FLAGS.get(args.target_lang, "")
+                if args.target_lang == "en":
+                    news_rules = (
+                        "\n\nNEWS CITATION RULES (CRITICAL — follow exactly): "
+                        "- Placeholders like #NEWSQUOTE0#, #NEWSQUOTE1# etc. MUST remain EXACTLY as-is (do not translate, modify, or remove them). "
+                        "- For citation blocks containing a #NEWSQUOTE placeholder followed by a flag+translation line (line starting with > and a flag emoji like 🇫🇷): "
+                        "REMOVE the blank blockquote line (>) and the entire flag+translation line. "
+                        "Keep ONLY the #NEWSQUOTE placeholder and the attribution line (> — [...](...)). "
+                        "- Result format:\n#NEWSQUOTEn#\n> — [attribution text translated](url unchanged)"
+                    )
+                else:
+                    news_rules = (
+                        f"\n\nNEWS CITATION RULES (CRITICAL — follow exactly): "
+                        f"- Placeholders like #NEWSQUOTE0#, #NEWSQUOTE1# etc. MUST remain EXACTLY as-is (do not translate, modify, or remove them). "
+                        f"- For citation blocks containing a #NEWSQUOTE placeholder followed by a flag+translation line: "
+                        f"Replace the flag emoji with {target_flag} and translate the italic text COMPLETELY to {args.target_lang}. "
+                        f"COMPLETE means: same number of sentences, all concepts included, no truncation or summarization. "
+                        f"Translate from the meaning of the text (the placeholder represents the original English quote). "
+                        f"- Result format:\n#NEWSQUOTEn#\n>\n> {target_flag} _translated text in {args.target_lang}_\n> — [attribution text translated](url unchanged)"
+                    )
+                news_common = (
+                    "\n- Keep English tech terms unchanged: Claude, API, CLI, SDK, MCP, benchmark, token, plugin"
+                    "\n- Do NOT modify these frontmatter fields: pubDate, author, canonicalSlug, tags, draft, heroVideo, heroVideoMuted, heroImage"
+                )
+                system_instructions += news_rules + news_common
+
             if use_mistral:
                 # Mistral - instructions + segment dans un seul message user
                 messages = [{"role": "user", "content": system_instructions + "\n\n" + segment}]
@@ -300,6 +335,33 @@ def translate_markdown_file(
         for placeholder, inline_code in zip(inline_placeholders, inline_codes):
             content = content.replace(inline_code, placeholder, 1)  # Replace one at a time to handle duplicates
 
+        # 3) Citations news (--news mode) : protéger les quotes EN originales
+        original_quotes = []
+        attribution_urls = []
+        if args.news:
+            # Pattern: > "EN quote" \n > \n > FLAG _translation_ \n > — [@account](url)
+            citation_regex = re.compile(
+                r'(^> ".+?")[ \t]*\n'             # Groupe 1: citation EN (entre guillemets)
+                r'>[ \t]*\n'                        # ligne blockquote vide
+                r'(^> .+_)[ \t]*\n'                # Groupe 2: drapeau + traduction italique
+                r'(^> — \[.+?\]\(.+?\))[ \t]*$',   # Groupe 3: ligne d'attribution
+                re.MULTILINE,
+            )
+
+            def citation_replacer(match):
+                idx = len(original_quotes)
+                original_quotes.append(match.group(1))
+                # Extraire l'URL d'attribution pour validation
+                url_match = re.search(r'\((.+?)\)', match.group(3))
+                if url_match:
+                    attribution_urls.append(url_match.group(1))
+                # Remplacer la quote EN par un placeholder, garder le reste pour le LLM
+                return f"#NEWSQUOTE{idx}#\n>\n{match.group(2)}\n{match.group(3)}"
+
+            content = citation_regex.sub(citation_replacer, content)
+            if original_quotes:
+                print(f"  → {len(original_quotes)} citation(s) EN protégée(s)")
+
         # Traduction du contenu
         translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
 
@@ -310,6 +372,35 @@ def translate_markdown_file(
         # 2) Restaurer les blocs fencés
         for placeholder, code_block in zip(block_placeholders, code_blocks):
             translated_content = translated_content.replace(placeholder, code_block)
+
+        # 3) Validation AVANT restauration : vérifier que les placeholders sont intacts
+        if args.news and original_quotes:
+            for idx in range(len(original_quotes)):
+                placeholder = f"#NEWSQUOTE{idx}#"
+                if placeholder not in translated_content:
+                    print(f"  ⚠ VALIDATION: Placeholder {placeholder} manquant dans la traduction (le LLM l'a supprimé)")
+
+        # 4) Restaurer les citations EN news
+        for idx, quote in enumerate(original_quotes):
+            translated_content = translated_content.replace(f"#NEWSQUOTE{idx}#", quote)
+
+        # 5) Validation post-restauration des citations news
+        if args.news and original_quotes:
+            for url in attribution_urls:
+                if url not in translated_content:
+                    print(f"  ⚠ VALIDATION: URL d'attribution '{url}' manquante dans la traduction")
+            if args.target_lang == "en":
+                for lang_code, flag in LANG_FLAGS.items():
+                    if lang_code != "en" and flag in translated_content:
+                        print(f"  ⚠ VALIDATION: Drapeau {flag} ({lang_code}) trouvé dans la traduction EN (devrait être absent)")
+                        break
+            else:
+                target_flag = LANG_FLAGS.get(args.target_lang)
+                if target_flag:
+                    flag_count = translated_content.count(target_flag)
+                    expected = len(original_quotes)
+                    if flag_count != expected:
+                        print(f"  ⚠ VALIDATION: Drapeau {target_flag} trouvé {flag_count} fois (attendu: {expected})")
 
         # Ajout de la note de traduction si nécessaire
         if add_translation_note:
@@ -563,6 +654,11 @@ def main():
         "--keep_filename",
         action="store_true",
         help="Conserver le nom et l'extension du fichier original (pour Astro, Hugo, etc.)",
+    )
+    parser.add_argument(
+        "--news",
+        action="store_true",
+        help="Active les règles de traduction des citations news (drapeaux + quotes EN protégées)",
     )
 
     args = parser.parse_args()

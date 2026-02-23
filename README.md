@@ -1,6 +1,6 @@
 # Traducteur de Markdown AI-Powered
 
-🌍 [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
+🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
 
 Traducteur de fichiers Markdown utilisant **OpenAI**, **Mistral AI**, **Claude (Anthropic)** et **Google Gemini**.
 
@@ -15,6 +15,7 @@ Ce script Python traduit des fichiers Markdown d'une langue source vers une lang
 - **Segmentation Intelligente**: Gestion des textes longs avec limites de tokens par modèle
 - **Préservation du Code**: Les blocs de code ET le code inline (`` `...` ``) sont préservés
 - **Nom de Fichier**: Option `--keep_filename` pour conserver le nom original
+- **Mode News**: Option `--news` pour protéger les citations anglaises et gérer les drapeaux dans les articles d'actualité
 - **Configuration .env**: Support du fichier `.env` pour les clés API
 - **Note de Traduction**: Ajout optionnel d'une note en fin de document
 
@@ -89,6 +90,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_gemini` | Utiliser l'API Gemini |
 | `--force` | Forcer la re-traduction |
 | `--keep_filename` | Conserver le nom de fichier original |
+| `--news` | Mode actualités : protège les citations EN, gère les drapeaux par langue |
 | `--add_translation_note` | Ajouter une note de traduction |
 | `--include_model` | Inclure le nom du modèle dans le fichier de sortie |
 

@@ -1,7 +1,16 @@
 #!/bin/bash
+set -e
 # Regenerate README and CHANGELOG translations in parallel (10 jobs max)
-cd /home/haxix/git/ai/ai-powered-markdown-translator
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 source venv/bin/activate
+
+if [ ! -f translate.py ]; then
+  echo "ERROR: translate.py not found in $SCRIPT_DIR" >&2
+  exit 1
+fi
 
 MAX_JOBS=10
 LANGS="ar de en es hi it ja ko nl pl pt ro sv zh"

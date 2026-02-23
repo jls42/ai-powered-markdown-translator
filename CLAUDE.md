@@ -42,6 +42,9 @@ python translate.py --force --source_dir 'content/fr' --target_dir 'content/en'
 
 # Add translation note at end of document
 python translate.py --add_translation_note --source_dir 'content/fr' --target_dir 'content/en'
+
+# News mode: protect EN quotes, manage flags per language
+python translate.py --news --file 'article.md' --target_dir 'output/' --target_lang 'es'
 ```
 
 ### Install dependencies
@@ -57,6 +60,7 @@ pip install -r requirements.txt
 - **API clients**: OpenAI, Mistral, Claude (Anthropic), and Gemini are initialized based on CLI flags
 - **Text segmentation**: `segment_text()` splits long documents at natural breakpoints (sentences, paragraphs, headers) respecting model token limits defined in `MODEL_TOKEN_LIMITS`
 - **Code preservation**: Regex extracts fenced code blocks AND inline code (`` `...` ``) before translation, replaces with placeholders, restores after
+- **News mode**: `--news` protects English quotes with `#NEWSQUOTE{n}#` placeholders, validates placeholder integrity before restoration, manages flag emojis per target language
 - **Directory traversal**: `translate_directory()` walks source directory, skips patterns in `EXCLUDE_PATTERNS`, checks for existing translations
 
 **Output naming**:
