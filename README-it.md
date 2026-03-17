@@ -1,23 +1,23 @@
-# Traduttore di Markdown alimentato dall'AI
+# Traduttore di Markdown AI-Powered
 
-🌍 [Francese](README.md) | [Inglese](README-en.md) | [Spagnolo](README-es.md) | [Cinese](README-zh.md) | [Tedesco](README-de.md) | [Giapponese](README-ja.md) | [Coreano](README-ko.md) | [Arabo](README-ar.md) | [Hindi](README-hi.md) | [Italiano](README-it.md) | [Olandese](README-nl.md) | [Polacco](README-pl.md) | [Portoghese](README-pt.md) | [Rumeno](README-ro.md) | [Svedese](README-sv.md)
+🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
 
 Traduttore di file Markdown che utilizza **OpenAI**, **Mistral AI**, **Claude (Anthropic)** e **Google Gemini**.
 
-Questo script Python traduce file Markdown da una lingua sorgente a una lingua di destinazione preservando il formato, i blocchi di codice e i metadati del front matter.
+Questo script Python traduce file Markdown da una lingua sorgente a una lingua di destinazione preservando la formattazione, i blocchi di codice e i metadati front matter.
 
-## Caratteristiche principali
+## Caratteristiche Principali
 
-- **Multi-Provider**: Supporto per 4 API (OpenAI, Mistral, Claude, Gemini)
-- **Modelli 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Modalità economica**: Opzione `--eco` per utilizzare modelli più veloci e meno costosi
-- **File unico**: Opzione `--file` per tradurre un singolo file
-- **Segmentazione intelligente**: Gestione di testi lunghi con limiti di token per modello
-- **Preservazione del codice**: I blocchi di codice E il codice inline (`` `...` ``) sono preservati
-- **Nome del file**: Opzione `--keep_filename` per mantenere il nome originale
-- **Modalità News**: Opzione `--news` per proteggere le citazioni in inglese e gestire le bandiere negli articoli di cronaca
-- **Configurazione .env**: Supporto per il file `.env` per le chiavi API
-- **Nota di traduzione**: Aggiunta opzionale di una nota alla fine del documento
+- **Multi-Provider**: Supporto di 4 API (OpenAI, Mistral, Claude, Gemini)
+- **Modelli 2026**: GPT-5.4, Claude Sonnet 4.5, Gemini 3.1 Pro
+- **Modalità Economica**: Opzione `--eco` per utilizzare modelli più veloci e meno costosi
+- **File Singolo**: Opzione `--file` per tradurre un singolo file
+- **Segmentazione Intelligente**: Gestione dei testi lunghi con limiti di token per modello
+- **Preservazione del Codice**: I blocchi di codice E il codice inline (`` `...` ``) sono preservati
+- **Nome del File**: Opzione `--keep_filename` per conservare il nome originale
+- **Modalità News**: Opzione `--news` per proteggere le citazioni inglesi e gestire le bandiere negli articoli di attualità
+- **Configurazione .env**: Supporto del file `.env` per le chiavi API
+- **Nota di Traduzione**: Aggiunta opzionale di una nota alla fine del documento
 
 ## Installazione
 
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## Configurazione
 
-Crea un file `.env` nella radice del progetto o imposta le variabili d'ambiente:
+Create un file `.env` alla radice del progetto oppure definite le variabili d'ambiente :
 
 ```bash
 # Fichier .env (recommandé)
@@ -53,7 +53,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Tradurre una directory
 
 ```bash
-# Avec OpenAI (défaut: gpt-5)
+# Avec OpenAI (défaut: gpt-5.4)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -68,7 +68,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Modalità economica
 
-Utilizza modelli più veloci ed economici (gpt-5-mini, claude-haiku, gemini-flash):
+Utilizza modelli più veloci e meno costosi (gpt-5-mini, claude-haiku, gemini-flash) :
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -76,7 +76,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Opzioni
 
-| Opzione | Descrizione |
+| Option | Description |
 |--------|-------------|
 | `--file` | File Markdown singolo da tradurre |
 | `--source_dir` | Directory sorgente contenente i file Markdown |
@@ -84,20 +84,20 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--source_lang` | Lingua sorgente (predefinita: `fr`) |
 | `--target_lang` | Lingua di destinazione (predefinita: `en`) |
 | `--model` | Modello specifico da utilizzare |
-| `--eco` | Usare i modelli economici |
-| `--use_mistral` | Usare l'API Mistral AI |
-| `--use_claude` | Usare l'API Claude |
-| `--use_gemini` | Usare l'API Gemini |
-| `--force` | Forzare la retraduzione |
-| `--keep_filename` | Conservare il nome file originale |
+| `--eco` | Utilizzare i modelli economici |
+| `--use_mistral` | Utilizzare l'API Mistral AI |
+| `--use_claude` | Utilizzare l'API Claude |
+| `--use_gemini` | Utilizzare l'API Gemini |
+| `--force` | Forzare la ri-traduzione |
+| `--keep_filename` | Conservare il nome del file originale |
 | `--news` | Modalità notizie: protegge le citazioni EN, gestisce le bandiere per lingua |
 | `--add_translation_note` | Aggiungere una nota di traduzione |
 | `--include_model` | Includere il nome del modello nel file di output |
 
 ### Modelli predefiniti (2026)
 
-| Provider | Qualità (predefinita) | Economico (`--eco`) |
-|----------|------------------|----------------------|
+| Provider | Qualità (predefinita) | Economica (`--eco`) |
+|----------|----------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
@@ -109,12 +109,9 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Autore
 
-Julien LE SAUX  
-Email: contact@jls42.org
+Julien LE SAUX
+Email : contact@jls42.org
 
 ## Licenza
 
-GNU GENERAL PUBLIC LICENSE Versione 3. Vedi [LICENZA](LICENSE).
-
-**Questo documento è stato tradotto dalla versione fr alla lingua it utilizzando il modello gpt-5-mini. Per maggiori informazioni sul processo di traduzione, consultare https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+GNU GENERAL PUBLIC LICENSE Version 3. Vedere [LICENSE](LICENSE).

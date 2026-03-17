@@ -1,57 +1,59 @@
 ### 変更履歴
 
-🌍 [フランス語](CHANGELOG.md) | [英語](CHANGELOG-en.md) | [スペイン語](CHANGELOG-es.md) | [中国語](CHANGELOG-zh.md) | [ドイツ語](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [韓国語](CHANGELOG-ko.md) | [アラビア語](CHANGELOG-ar.md) | [ヒンディー語](CHANGELOG-hi.md) | [イタリア語](CHANGELOG-it.md) | [オランダ語](CHANGELOG-nl.md) | [ポーランド語](CHANGELOG-pl.md) | [ポルトガル語](CHANGELOG-pt.md) | [ルーマニア語](CHANGELOG-ro.md) | [スウェーデン語](CHANGELOG-sv.md)
+🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7** 新機能 :
-    - オプション `--keep_filename` により翻訳時に元のファイル名を保持
-    - `.env` ファイルのサポートにより API キーを自動読み込み
-    - **インラインコードの保持** : バックティック（`` `...` ``）は翻訳中に保護されます
-    - システムプロンプトの改善 :
-        - YAML フロントマター内の引用符の扱いの改善
+- **1.7.1** OpenAIモデルの更新：
+    - デフォルトモデルをGPT-5.4（2026年3月）に更新：
+        - 高品質：`gpt-5` → `gpt-5.4`
+        - 低コスト：`gpt-5-mini` → `gpt-5.4-mini`
+    - `gpt-5.4`、`gpt-5.4-mini`、`gpt-5.4-nano` のトークン上限を追加（400k）
+- **1.7** 新機能：
+    - 翻訳時に元のファイル名を保持するための `--keep_filename` オプション
+    - APIキーを自動的に読み込むための `.env` ファイルのサポート
+    - **インラインコードの保持**：バッククォート（`` `...` ``）は翻訳中に保護されるようになりました
+    - システムプロンプトの改善：
+        - YAMLフロントマター内の引用符の扱いを改善
         - テンプレート変数 `{variable}` の保護
-        - 要求されていない翻訳者注の禁止
-    - 364 ファイルでのテストに成功（ブログ移行 jls42.org）
-- **1.6** 新機能 :
-    - 翻訳用 Google Gemini API のサポート（`--use_gemini`）
-    - 2026 年デフォルトモデルの更新 :
-        - OpenAI : `gpt-5`（高品質）、`gpt-5-mini`（エコ）
-        - Claude : `claude-sonnet-4-5`（高品質）、`claude-haiku-4-5`（エコ）
-        - Gemini : `gemini-3-pro-preview`（高品質）、`gemini-3-flash-preview`（エコ）
-    - 省コストモード（`--eco`）によりより高速で低コストなモデルを使用
+        - 要求されていない翻訳者メモの禁止
+    - jls42.org のブログ移行で364ファイルの処理に成功
+- **1.6** 新機能：
+    - 翻訳用のGoogle Gemini APIのサポート（`--use_gemini`）
+    - 2026年のデフォルトモデルを更新：
+        - OpenAI：`gpt-5`（高品質）、`gpt-5-mini`（低コスト）
+        - Claude：`claude-sonnet-4-5`（高品質）、`claude-haiku-4-5`（低コスト）
+        - Gemini：`gemini-3-pro-preview`（高品質）、`gemini-3-flash-preview`（低コスト）
+    - より高速で低コストなモデルを使用するための低コストモード（`--eco`）
     - ディレクトリを走査せずに単一ファイルを翻訳（`--file`）
-    - 新しい簡素化された命名パターン : `{base}-{lang}.md`
-    - モデル名を含む旧形式を保持するオプション : `--include_model`
-    - デフォルト（128k）のトークン制限で未リストのモデルをサポート
-    - README を 14 言語に翻訳
-- **1.5** 改善 :
-    - **API キーとデフォルトモデルの更新 :**
-        - **OpenAI :** `DEFAULT_MODEL_OPENAI` から `"gpt-4o"` へ更新。
-        - **Mistral AI :** `DEFAULT_MODEL_MISTRAL` から `"mistral-large-latest"` へ更新。
-        - **Anthropic の Claude :** `DEFAULT_ANTHROPIC_API_KEY` を追加し、`DEFAULT_MODEL_CLAUDE` を `"claude-3-5-sonnet-20240620"` に更新。
-    - **翻訳プロンプトの最適化 :**
-        - 直接翻訳および翻訳メモのプロンプトを明確さと効率のために強化し、メタデータや特定のフォーマット要素の保持に関する詳細な指示を含めました。
-    - **コードのリファクタリング :**
-        - Mistral AI クライアント初期化で `MistralClient` をクラス `Mistral` に置換。
-        - 可読性と保守性を向上させるための import 再編成。
-        - 翻訳時に元のフォーマットを保持するためのテキスト分割とコードブロック管理の改善。
-    - **出力ファイルの管理 :**
-        - 出力ファイル名でモデルと言語の順序を逆に（例：`f"{base}-{args.target_lang}-{args.model}.md"`）、翻訳の整理と検索を容易に。
-    - **その他の改善 :**
-        - 不要な空行の削除によるコードのクリーンアップ。
-        - スクリプトの構造と可読性を向上させるための小さな調整。
-- **1.4** 新機能 :
-    - Anthropic の Claude API を翻訳にサポート
-    - 明確さと効率を高めるためのプロンプトの最適化
-    - 保守性向上のための小さな調整
-- **1.3** 改善と新機能 :
-    - コードブロックの管理を改善
-    - 出力ファイルの管理を改善
-    - 既存ファイルの検出機能を改善
-    - 強制翻訳オプション `--force`
-    - 出力ファイル名でモデルと言語の順序を逆に
-- **1.2** チェンジログの修正
-- **1.1** Mistral AI API のサポートを追加
-- **1.0** 初期バージョン - OpenAI API のサポート
-
-**この文書は gpt-5-mini モデルを使用して fr バージョンから ja 言語に翻訳されました。翻訳プロセスの詳細については https://gitlab.com/jls42/ai-powered-markdown-translator をご覧ください。**
-
+    - 新しい簡略化された命名パターン：`{base}-{lang}.md`
+    - モデル名を含む旧フォーマットを保持するための `--include_model` オプション
+    - デフォルトのトークン上限（128k）を持つ未一覧のモデルのサポート
+    - 14言語に翻訳されたREADME
+- **1.5** 改善：
+    - **APIキーとデフォルトモデルの更新：**
+        - **OpenAI：** `DEFAULT_MODEL_OPENAI` から `"gpt-4o"` に更新。
+        - **Mistral AI：** `DEFAULT_MODEL_MISTRAL` から `"mistral-large-latest"` に更新。
+        - **AnthropicのClaude：** `DEFAULT_ANTHROPIC_API_KEY` を追加し、`DEFAULT_MODEL_CLAUDE` から `"claude-3-5-sonnet-20240620"` に更新。
+    - **翻訳プロンプトの最適化：**
+        - 直接翻訳と翻訳メモのプロンプトを、メタデータや特定のフォーマット要素の保持に関する詳細な指示を含めて拡充し、より明確で効率的にしました。
+    - **コードのリファクタリング：**
+        - Mistral AIクライアントの初期化に `MistralClient` を `Mistral` クラスへ置き換え。
+        - 可読性と保守性を高めるためにインポートを再構成。
+        - 翻訳時に元のフォーマットを保持するため、テキストの分割とコードブロックの処理を改善。
+    - **出力ファイルの管理：**
+        - 出力ファイル名内のモデルと言語を逆順に変更（例：`f"{base}-{args.target_lang}-{args.model}.md"`）。これにより、翻訳結果の整理と検索がしやすくなりました。
+    - **その他の改善：**
+        - 不要な空行を削除してコードを整理。
+        - スクリプトの構造と可読性を向上させるための細かな調整。
+- **1.4** 新機能：
+    - 翻訳用のAnthropic Claude APIのサポート
+    - より高い明瞭性と効率のためのプロンプト最適化
+    - コード保守性を向上させるための細かな調整
+- **1.3** 改善と新機能：
+    - コードブロックの処理を改善
+    - 出力ファイルの処理を改善
+    - 既存ファイルの検出を改善
+    - 翻訳を強制するための `--force` オプション
+    - 出力ファイル名におけるモデルと言語の順序を逆に変更
+- **1.2** 変更履歴の修正
+- **1.1** Mistral AI APIのサポートを追加
+- **1.0** 初期バージョン - OpenAI APIのサポート

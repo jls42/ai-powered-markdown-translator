@@ -1,21 +1,21 @@
 # AI-driven Markdown-översättare
 
-🌍 [Franska](README.md) | [Engelska](README-en.md) | [Spanska](README-es.md) | [Kinesiska](README-zh.md) | [Tyska](README-de.md) | [Japanska](README-ja.md) | [Koreanska](README-ko.md) | [Arabiska](README-ar.md) | [Hindi](README-hi.md) | [Italienska](README-it.md) | [Nederländska](README-nl.md) | [Polska](README-pl.md) | [Portugisiska](README-pt.md) | [Rumänska](README-ro.md) | [Svenska](README-sv.md)
+🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
 
-Översättare av Markdown-filer som använder **OpenAI**, **Mistral AI**, **Claude (Anthropic)** och **Google Gemini**.
+Markdown-fileröversättare som använder **OpenAI**, **Mistral AI**, **Claude (Anthropic)** och **Google Gemini**.
 
 Detta Python-skript översätter Markdown-filer från ett källspråk till ett målspråk samtidigt som formatering, kodblock och front matter-metadata bevaras.
 
 ## Huvudfunktioner
 
-- **Flera leverantörer**: Stöd för 4 API:er (OpenAI, Mistral, Claude, Gemini)
-- **Modeller 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
-- **Ekonomiläge**: Option `--eco` för att använda snabbare och billigare modeller
-- **Enskild fil**: Option `--file` för att översätta en enstaka fil
-- **Intelligent segmentering**: Hantering av långa texter med tokenbegränsningar per modell
-- **Bevarande av kod**: Kodblock OCH inline-kod (`` `...` ``) bevaras
-- **Filnamn**: Option `--keep_filename` för att behålla det ursprungliga namnet
-- **Nyhetsläge**: Option `--news` för att skydda engelska citat och hantera flaggor i nyhetsartiklar
+- **Multi-Provider**: Stöd för 4 API:er (OpenAI, Mistral, Claude, Gemini)
+- **Modeller 2026**: GPT-5.4, Claude Sonnet 4.5, Gemini 3.1 Pro
+- **Ekonomiläge**: Alternativ `--eco` för att använda snabbare och billigare modeller
+- **Enskild fil**: Alternativ `--file` för att översätta en enda fil
+- **Intelligent segmentering**: Hantering av långa texter med modellernas tokenbegränsningar
+- **Kodbevarande**: Kodblock OCH inline-kod (`` `...` ``) bevaras
+- **Filnamn**: Alternativ `--keep_filename` för att behålla originalnamnet
+- **Nyhetsläge**: Alternativ `--news` för att skydda engelska citat och hantera flaggor i nyhetsartiklar
 - **.env-konfiguration**: Stöd för filen `.env` för API-nycklar
 - **Översättningsnot**: Valfri tillägg av en not i slutet av dokumentet
 
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## Konfiguration
 
-Skapa en fil `.env` i projektets rot eller ange miljövariablerna:
+Skapa en fil `.env` i projektets rotkatalog eller definiera miljövariablerna:
 
 ```bash
 # Fichier .env (recommandé)
@@ -44,16 +44,16 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 ## Användning
 
-### Översätta en enskild fil
+### Översätt en enskild fil
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### Översätta en katalog
+### Översätt en katalog
 
 ```bash
-# Avec OpenAI (défaut: gpt-5)
+# Avec OpenAI (défaut: gpt-5.4)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -68,7 +68,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Ekonomiläge
 
-Använder snabbare och billigare modeller (gpt-5-mini, claude-haiku, gemini-flash):
+Använder snabbare och billigare modeller (gpt-5-mini, claude-haiku, gemini-flash) :
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -78,25 +78,25 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 | Alternativ | Beskrivning |
 |--------|-------------|
-| `--file` | Enstaka Markdown-fil att översätta |
-| `--source_dir` | Källmapp som innehåller Markdown-filer |
-| `--target_dir` | Utmatningsmapp för de översatta filerna |
+| `--file` | En enda Markdown-fil att översätta |
+| `--source_dir` | Källkatalog som innehåller Markdown-filerna |
+| `--target_dir` | Utdatakatalog för de översatta filerna |
 | `--source_lang` | Källspråk (standard: `fr`) |
 | `--target_lang` | Målspråk (standard: `en`) |
 | `--model` | Specifik modell att använda |
-| `--eco` | Använd ekonomimodeller |
-| `--use_mistral` | Använd Mistral AI API |
-| `--use_claude` | Använd Claude API |
-| `--use_gemini` | Använd Gemini API |
+| `--eco` | Använd ekonomimodellerna |
+| `--use_mistral` | Använd Mistral AI:s API |
+| `--use_claude` | Använd Claude-API:t |
+| `--use_gemini` | Använd Gemini-API:t |
 | `--force` | Tvinga omöversättning |
-| `--keep_filename` | Behåll originalfilnamn |
-| `--news` | Nyhetsläge: skyddar engelska citat, hanterar flaggor per språk |
-| `--add_translation_note` | Lägg till en översättningsanteckning |
-| `--include_model` | Inkludera modellnamnet i utdatafilen |
+| `--keep_filename` | Behåll originalfilnamnet |
+| `--news` | Nyhetsläge: skyddar EN-citat, hanterar flaggor per språk |
+| `--add_translation_note` | Lägg till en översättningsnot |
+| `--include_model` | Inkludera modellens namn i utdatafilen |
 
 ### Standardmodeller (2026)
 
-| Leverantör | Kvalitet (standard) | Ekonomisk (`--eco`) |
+| Provider | Kvalitet (standard) | Ekonomi (`--eco`) |
 |----------|------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
@@ -105,16 +105,13 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Projekt som använder detta skript
 
-- **[jls42.org](https://jls42.org)** - Personlig flerspråkig blogg (15 språk)
+- **[jls42.org](https://jls42.org)** - Flerspråkig personlig blogg (15 språk)
 
 ## Författare
 
-Julien LE SAUX  
+Julien LE SAUX
 E-post: contact@jls42.org
 
 ## Licens
 
-GNU GENERAL PUBLIC LICENSE Version 3. Se [LICENS](LICENSE).
-
-**Detta dokument har översatts från franska till svenska med modellen gpt-5-mini. För mer information om översättningsprocessen, se https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+GNU GENERAL PUBLIC LICENSE Version 3. Se [LICENSE](LICENSE).

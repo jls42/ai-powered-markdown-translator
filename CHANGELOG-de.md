@@ -1,27 +1,32 @@
 ### Änderungsprotokoll
 
-🌍 [Französisch](CHANGELOG.md) | [Englisch](CHANGELOG-en.md) | [Spanisch](CHANGELOG-es.md) | [Chinesisch](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [Japanisch](CHANGELOG-ja.md) | [Koreanisch](CHANGELOG-ko.md) | [Arabisch](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italienisch](CHANGELOG-it.md) | [Niederländisch](CHANGELOG-nl.md) | [Polnisch](CHANGELOG-pl.md) | [Portugiesisch](CHANGELOG-pt.md) | [Rumänisch](CHANGELOG-ro.md) | [Schwedisch](CHANGELOG-sv.md)
+🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.7.1** OpenAI-Modelle aktualisiert:
+    - Standardmodelle auf GPT-5.4 (März 2026) aktualisiert:
+        - Qualität: `gpt-5` → `gpt-5.4`
+        - Wirtschaftlich: `gpt-5-mini` → `gpt-5.4-mini`
+    - Tokenlimits für `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) hinzugefügt
 - **1.7** Neuheiten:
-    - Option `--keep_filename` zum Beibehalten des Originaldateinamens während der Übersetzung
-    - Unterstützung der Datei `.env` zum automatischen Laden der API-Schlüssel
-    - **Inline-Code-Erhaltung**: die Backticks (`` `...` ``) sind jetzt während der Übersetzung geschützt
-    - Verbesserung des System-Prompts:
+    - Option `--keep_filename`, um den ursprünglichen Dateinamen bei der Übersetzung beizubehalten
+    - Unterstützung der Datei `.env`, um API-Schlüssel automatisch zu laden
+    - **Inline-Code-Erhaltung**: Backticks (`` `...` ``) sind jetzt während der Übersetzung geschützt
+    - Verbesserter System-Prompt:
         - Bessere Handhabung von Anführungszeichen im YAML-Frontmatter
-        - Schutz der Template-Variablen `{variable}`
-        - Verbot nicht angeforderter Übersetzerhinweise
-    - Erfolgreich an 364 Dateien getestet (Blog-Migration jls42.org)
+        - Schutz von Template-Variablen `{variable}`
+        - Verbot nicht angeforderter Übersetzer-Notizen
+    - Erfolgreich mit 364 Dateien getestet (Blog-Migration jls42.org)
 - **1.6** Neuheiten:
-    - Unterstützung der Google Gemini API für Übersetzungen (`--use_gemini`)
-    - Aktualisierung der Standardmodelle 2026:
-        - OpenAI: `gpt-5` (Qualität), `gpt-5-mini` (Öko)
-        - Claude: `claude-sonnet-4-5` (Qualität), `claude-haiku-4-5` (Öko)
-        - Gemini: `gemini-3-pro-preview` (Qualität), `gemini-3-flash-preview` (Öko)
-    - Kostensparmodus (`--eco`) zur Verwendung schnellerer und kostengünstigerer Modelle
-    - Einzeldatei-Übersetzung (`--file`) ohne Durchlaufen eines Verzeichnisses
-    - Neues vereinfachtes Namensgebungsmuster: `{base}-{lang}.md`
-    - Option `--include_model` zum Beibehalten des alten Formats mit Modellnamen
-    - Unterstützung nicht gelisteter Modelle mit Standard-Token-Limit (128k)
+    - Unterstützung der Google-Gemini-API für Übersetzungen (`--use_gemini`)
+    - Aktualisierte Standardmodelle 2026:
+        - OpenAI: `gpt-5` (Qualität), `gpt-5-mini` (Economy)
+        - Claude: `claude-sonnet-4-5` (Qualität), `claude-haiku-4-5` (Economy)
+        - Gemini: `gemini-3-pro-preview` (Qualität), `gemini-3-flash-preview` (Economy)
+    - Economy-Modus (`--eco`), um schnellere und kostengünstigere Modelle zu verwenden
+    - Übersetzung einzelner Dateien (`--file`) ohne Durchlaufen eines Verzeichnisses
+    - Neues vereinfachtes Benennungsschema: `{base}-{lang}.md`
+    - Option `--include_model`, um das alte Format mit dem Modellnamen beizubehalten
+    - Unterstützung nicht gelisteter Modelle mit standardmäßigem Tokenlimit (128k)
     - README in 14 Sprachen übersetzt
 - **1.5** Verbesserungen:
     - **Aktualisierung der API-Schlüssel und Standardmodelle:**
@@ -29,29 +34,26 @@
         - **Mistral AI:** Aktualisierung von `DEFAULT_MODEL_MISTRAL` auf `"mistral-large-latest"`.
         - **Claude von Anthropic:** Hinzufügen von `DEFAULT_ANTHROPIC_API_KEY` und Aktualisierung von `DEFAULT_MODEL_CLAUDE` auf `"claude-3-5-sonnet-20240620"`.
     - **Optimierung der Übersetzungs-Prompts:**
-        - Die Prompts für direkte Übersetzungen und Übersetzungsanmerkungen wurden erweitert für bessere Klarheit und Effizienz, einschließlich detaillierter Anweisungen zur Erhaltung von Metadaten und spezifischen Formatierungselementen.
-    - **Refaktorisierung des Codes:**
+        - Die Prompts für direkte Übersetzungen und Übersetzungsnotizen wurden für bessere Klarheit und Effizienz erweitert, einschließlich detaillierter Anweisungen zur Erhaltung von Metadaten und spezifischen Formatierungselementen.
+    - **Code-Refactoring:**
         - Ersetzung von `MistralClient` durch die Klasse `Mistral` für die Initialisierung des Mistral-AI-Clients.
-        - Neuorganisation der Imports für bessere Lesbarkeit und Wartbarkeit.
-        - Verbesserung der Textsegmentierung und Verwaltung von Codeblöcken, um das ursprüngliche Format während der Übersetzung zu bewahren.
+        - Neuordnung der Imports für bessere Lesbarkeit und Wartbarkeit.
+        - Verbesserte Textsegmentierung und Codeblock-Verwaltung, um die ursprüngliche Formatierung bei der Übersetzung zu erhalten.
     - **Verwaltung der Ausgabedateien:**
-        - Vertauschung von Modell und Sprache im Namen der Ausgabedateien (z. B. `f"{base}-{args.target_lang}-{args.model}.md"`), was die Organisation und das Auffinden der Übersetzungen erleichtert.
-    - **Verschiedenes:**
+        - Umkehrung von Modell und Sprache im Namen der Ausgabedateien (zum Beispiel `f"{base}-{args.target_lang}-{args.model}.md"`), um die Organisation und Suche nach Übersetzungen zu erleichtern.
+    - **Verschiedene Verbesserungen:**
         - Bereinigung des Codes durch Entfernen unnötiger Leerzeilen.
-        - Kleinere Anpassungen zur Verbesserung der Struktur und Lesbarkeit des Skripts.
+        - Kleine Anpassungen zur Verbesserung der Struktur und Lesbarkeit des Skripts.
 - **1.4** Neuheiten:
     - Unterstützung der Claude-API von Anthropic für Übersetzungen
     - Optimierung der Prompts für mehr Klarheit und Effizienz
-    - Kleinere Anpassungen zur Verbesserung der Wartbarkeit des Codes
+    - Kleine Anpassungen zur Verbesserung der Wartbarkeit des Codes
 - **1.3** Verbesserungen und neue Funktionen:
     - Verbesserte Verwaltung von Codeblöcken
-    - Verbesserte Verwaltung der Ausgabedateien
+    - Verbesserte Verwaltung von Ausgabedateien
     - Verbesserte Erkennung vorhandener Dateien
-    - Option `--force` zum Erzwingen der Übersetzung
-    - Vertauschung von Modell und Sprache im Namen der Ausgabedatei
-- **1.2** Changelog-Fix
-- **1.1** Unterstützung der Mistral-IA-API hinzugefügt
-- **1.0** Erstversion - Unterstützung der OpenAI-API
-
-**Dieses Dokument wurde von der fr-Version in die Sprache en unter Verwendung des Modells gpt-5-mini übersetzt. Für weitere Informationen zum Übersetzungsprozess konsultieren Sie https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+    - Option `--force`, um die Übersetzung zu erzwingen
+    - Umkehrung von Modell und Sprache im Namen der Ausgabedatei
+- **1.2** Fehlerbehebung im Changelog
+- **1.1** Unterstützung für die Mistral-AI-API hinzugefügt
+- **1.0** Erstveröffentlichung - Unterstützung der OpenAI-API

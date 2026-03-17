@@ -2,6 +2,11 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.7.1** Mise à jour modèles OpenAI :
+    - Modèles par défaut mis à jour vers GPT-5.4 (mars 2026) :
+        - Qualité : `gpt-5` → `gpt-5.4`
+        - Économique : `gpt-5-mini` → `gpt-5.4-mini`
+    - Ajout des limites de tokens pour `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
 - **1.7** Nouveautés :
     - Option `--keep_filename` pour conserver le nom de fichier original lors de la traduction
     - Support du fichier `.env` pour charger les clés API automatiquement

@@ -2,21 +2,21 @@
 
 🌍 [Francês](README.md) | [Inglês](README-en.md) | [Espanhol](README-es.md) | [Chinês](README-zh.md) | [Alemão](README-de.md) | [Japonês](README-ja.md) | [Coreano](README-ko.md) | [Árabe](README-ar.md) | [Hindi](README-hi.md) | [Italiano](README-it.md) | [Holandês](README-nl.md) | [Polonês](README-pl.md) | [Português](README-pt.md) | [Romeno](README-ro.md) | [Sueco](README-sv.md)
 
-Tradutor de arquivos Markdown que utiliza **OpenAI**, **Mistral AI**, **Claude (Anthropic)** e **Google Gemini**.
+Tradutor de arquivos Markdown usando **OpenAI**, **Mistral AI**, **Claude (Anthropic)** e **Google Gemini**.
 
-Este script Python traduz arquivos Markdown de uma língua de origem para uma língua de destino, preservando a formatação, os blocos de código e os metadados do front matter.
+Este script Python traduz arquivos Markdown de um idioma de origem para um idioma de destino, preservando a formatação, os blocos de código e os metadados front matter.
 
-## Principais Recursos
+## Principais Funcionalidades
 
-- **Multi-Provider**: Suporte para 4 APIs (OpenAI, Mistral, Claude, Gemini)
-- **Modelos 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
+- **Multi-Provider**: Suporte a 4 APIs (OpenAI, Mistral, Claude, Gemini)
+- **Modelos 2026**: GPT-5.4, Claude Sonnet 4.5, Gemini 3.1 Pro
 - **Modo Econômico**: Opção `--eco` para usar modelos mais rápidos e mais baratos
 - **Arquivo Único**: Opção `--file` para traduzir um único arquivo
-- **Segmentação Inteligente**: Gerenciamento de textos longos com limites de tokens por modelo
-- **Preservação de Código**: Os blocos de código E o código inline (`` `...` ``) são preservados
+- **Segmentação Inteligente**: Tratamento de textos longos com limites de tokens por modelo
+- **Preservação do Código**: Os blocos de código E o código inline (`` `...` ``) são preservados
 - **Nome do Arquivo**: Opção `--keep_filename` para manter o nome original
-- **Modo Notícias**: Opção `--news` para proteger citações em inglês e gerenciar bandeiras em artigos de notícias
-- **Configuração .env**: Suporte ao arquivo `.env` para chaves de API
+- **Modo News**: Opção `--news` para proteger citações em inglês e gerenciar bandeiras em artigos de notícias
+- **Configuração .env**: Suporte ao arquivo `.env` para as chaves de API
 - **Nota de Tradução**: Adição opcional de uma nota no final do documento
 
 ## Instalação
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## Configuração
 
-Crie um arquivo `.env` na raiz do projeto ou defina as variáveis de ambiente :
+Crie um arquivo `.env` na raiz do projeto ou defina as variáveis de ambiente:
 
 ```bash
 # Fichier .env (recommandé)
@@ -44,7 +44,7 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 ## Uso
 
-### Traduzir um único arquivo
+### Traduzir um arquivo único
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
@@ -53,7 +53,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Traduzir um diretório
 
 ```bash
-# Avec OpenAI (défaut: gpt-5)
+# Avec OpenAI (défaut: gpt-5.4)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -83,38 +83,35 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--target_dir` | Diretório de saída para os arquivos traduzidos |
 | `--source_lang` | Idioma de origem (padrão: `fr`) |
 | `--target_lang` | Idioma de destino (padrão: `en`) |
-| `--model` | Modelo específico a ser usado |
-| `--eco` | Usar modelos econômicos |
+| `--model` | Modelo específico a usar |
+| `--eco` | Usar os modelos econômicos |
 | `--use_mistral` | Usar a API Mistral AI |
 | `--use_claude` | Usar a API Claude |
 | `--use_gemini` | Usar a API Gemini |
-| `--force` | Forçar a re-tradução |
-| `--keep_filename` | Manter o nome de arquivo original |
-| `--news` | Modo notícias: protege citações em EN, gerencia bandeiras por idioma |
+| `--force` | Forçar a retradução |
+| `--keep_filename` | Manter o nome original do arquivo |
+| `--news` | Modo notícias: protege citações EN, gerencia bandeiras por idioma |
 | `--add_translation_note` | Adicionar uma nota de tradução |
 | `--include_model` | Incluir o nome do modelo no arquivo de saída |
 
 ### Modelos padrão (2026)
 
-| Provedor | Qualidade (padrão) | Econômico (`--eco`) |
-|----------|------------------|----------------------|
+| Provider | Qualidade (padrão) | Econômico (`--eco`) |
+|----------|--------------------|--------------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
 | Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
 
-## Projetos usando este script
+## Projetos que usam este script
 
 - **[jls42.org](https://jls42.org)** - Blog pessoal multilíngue (15 idiomas)
 
 ## Autor
 
-Julien LE SAUX  
-Email: contact@jls42.org
+Julien LE SAUX
+Email : contact@jls42.org
 
 ## Licença
 
-GNU GENERAL PUBLIC LICENSE Versão 3. Ver [LICENÇA](LICENSE).
-
-**Este documento foi traduzido da versão fr para a língua pt usando o modelo gpt-5-mini. Para mais informações sobre o processo de tradução, consulte https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+GNU GENERAL PUBLIC LICENSE Version 3. Veja [LICENSE](LICENSE).
