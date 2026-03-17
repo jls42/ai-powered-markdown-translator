@@ -9,7 +9,7 @@ Ce script Python traduit des fichiers Markdown d'une langue source vers une lang
 ## Caractéristiques Principales
 
 - **Multi-Provider**: Support de 4 APIs (OpenAI, Mistral, Claude, Gemini)
-- **Modèles 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
+- **Modèles 2026**: GPT-5.4, Claude Sonnet 4.5, Gemini 3.1 Pro
 - **Mode Économique**: Option `--eco` pour utiliser des modèles plus rapides et moins coûteux
 - **Fichier Unique**: Option `--file` pour traduire un seul fichier
 - **Segmentation Intelligente**: Gestion des textes longs avec limites de tokens par modèle
@@ -53,7 +53,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Traduire un répertoire
 
 ```bash
-# Avec OpenAI (défaut: gpt-5)
+# Avec OpenAI (défaut: gpt-5.4)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI

@@ -1,16 +1,21 @@
 ### Registro delle modifiche
 
-🌍 [Francese](CHANGELOG.md) | [Inglese](CHANGELOG-en.md) | [Spagnolo](CHANGELOG-es.md) | [Cinese](CHANGELOG-zh.md) | [Tedesco](CHANGELOG-de.md) | [Giapponese](CHANGELOG-ja.md) | [Coreano](CHANGELOG-ko.md) | [Arabo](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Olandese](CHANGELOG-nl.md) | [Polacco](CHANGELOG-pl.md) | [Portoghese](CHANGELOG-pt.md) | [Rumeno](CHANGELOG-ro.md) | [Svedese](CHANGELOG-sv.md)
+🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.7.1** Aggiornamento dei modelli OpenAI :
+    - Modelli predefiniti aggiornati a GPT-5.4 (marzo 2026) :
+        - Qualità : `gpt-5` → `gpt-5.4`
+        - Economico : `gpt-5-mini` → `gpt-5.4-mini`
+    - Aggiunti i limiti di token per `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
 - **1.7** Novità :
-    - Opzione `--keep_filename` per conservare il nome file originale durante la traduzione
+    - Opzione `--keep_filename` per mantenere il nome file originale durante la traduzione
     - Supporto del file `.env` per caricare automaticamente le chiavi API
-    - Preservazione del codice inline : i backtick (`` `...` ``) sono ora protetti durante la traduzione
+    - **Conservazione del codice inline** : i backtick (`` `...` ``) sono ora protetti durante la traduzione
     - Miglioramento del prompt di sistema :
         - Migliore gestione delle virgolette nel frontmatter YAML
         - Protezione delle variabili template `{variable}`
         - Divieto di note del traduttore non richieste
-    - Testato con successo su 364 file (migrazione blog jls42.org)
+    - Testato con successo su 364 file (migrazione del blog jls42.org)
 - **1.6** Novità :
     - Supporto dell'API Google Gemini per la traduzione (`--use_gemini`)
     - Aggiornamento dei modelli predefiniti 2026 :
@@ -18,30 +23,30 @@
         - Claude : `claude-sonnet-4-5` (qualità), `claude-haiku-4-5` (eco)
         - Gemini : `gemini-3-pro-preview` (qualità), `gemini-3-flash-preview` (eco)
     - Modalità economica (`--eco`) per usare modelli più veloci e meno costosi
-    - Traduzione di singolo file (`--file`) senza scansionare una directory
-    - Nuovo schema di denominazione semplificato : `{base}-{lang}.md`
+    - Traduzione di un singolo file (`--file`) senza attraversare una directory
+    - Nuovo pattern di denominazione semplificato : `{base}-{lang}.md`
     - Opzione `--include_model` per mantenere il vecchio formato con il nome del modello
-    - Supporto dei modelli non elencati con limite di token predefinita (128k)
+    - Supporto dei modelli non elencati con limite di token predefinito (128k)
     - README tradotto in 14 lingue
 - **1.5** Miglioramenti :
     - **Aggiornamento delle chiavi API e dei modelli predefiniti :**
-        - **OpenAI :** aggiornamento da `DEFAULT_MODEL_OPENAI` a `"gpt-4o"`.
-        - **Mistral AI :** aggiornamento da `DEFAULT_MODEL_MISTRAL` a `"mistral-large-latest"`.
-        - **Claude di Anthropic :** aggiunta di `DEFAULT_ANTHROPIC_API_KEY` e aggiornamento da `DEFAULT_MODEL_CLAUDE` a `"claude-3-5-sonnet-20240620"`.
+        - **OpenAI :** Aggiornamento da `DEFAULT_MODEL_OPENAI` a `"gpt-4o"`.
+        - **Mistral AI :** Aggiornamento da `DEFAULT_MODEL_MISTRAL` a `"mistral-large-latest"`.
+        - **Claude di Anthropic :** Aggiunta di `DEFAULT_ANTHROPIC_API_KEY` e aggiornamento da `DEFAULT_MODEL_CLAUDE` a `"claude-3-5-sonnet-20240620"`.
     - **Ottimizzazione dei prompt di traduzione :**
-        - I prompt per le traduzioni dirette e le note di traduzione sono stati arricchiti per una migliore chiarezza ed efficacia, includendo istruzioni dettagliate sulla preservazione dei metadati e degli elementi di formattazione specifici.
-    - **Refactorizzazione del codice :**
+        - I prompt per le traduzioni dirette e le note di traduzione sono stati arricchiti per una migliore chiarezza ed efficienza, includendo istruzioni dettagliate sulla conservazione dei metadati e degli elementi di formattazione specifici.
+    - **Refactoring del codice :**
         - Sostituzione di `MistralClient` con la classe `Mistral` per l'inizializzazione del client Mistral AI.
-        - Riorganizzazione delle importazioni per una migliore leggibilità e manutenzione.
-        - Miglioramento della segmentazione dei testi e gestione dei blocchi di codice per preservare il formato originale durante la traduzione.
+        - Riorganizzazione degli import per una migliore leggibilità e manutenzione.
+        - Miglioramento della segmentazione dei testi e della gestione dei blocchi di codice per preservare la formattazione originale durante la traduzione.
     - **Gestione dei file di output :**
-        - Inversione del modello e della lingua nel nome dei file di output (per esempio, `f"{base}-{args.target_lang}-{args.model}.md"`), facilitando così l'organizzazione e la ricerca delle traduzioni.
-    - **Varie migliorie :**
-        - Pulizia del codice eliminando le righe vuote inutili.
+        - Inversione del modello e della lingua nel nome dei file di output (ad esempio, `f"{base}-{args.target_lang}-{args.model}.md"`), facilitando così l'organizzazione e la ricerca delle traduzioni.
+    - **Miglioramenti vari :**
+        - Pulizia del codice rimuovendo le righe vuote non necessarie.
         - Piccoli aggiustamenti per migliorare la struttura e la leggibilità dello script.
 - **1.4** Novità :
     - Supporto dell'API Claude di Anthropic per la traduzione
-    - Ottimizzazione dei prompt per una maggiore chiarezza ed efficacia
+    - Ottimizzazione dei prompt per una maggiore chiarezza ed efficienza
     - Piccoli aggiustamenti per migliorare la manutenzione del codice
 - **1.3** Miglioramenti e nuove funzionalità :
     - Gestione migliorata dei blocchi di codice
@@ -50,8 +55,5 @@
     - Opzione `--force` per forzare la traduzione
     - Inversione del modello e della lingua nel nome del file di output
 - **1.2** Correzione del changelog
-- **1.1** Aggiunta del supporto per l'API Mistral AI
+- **1.1** Aggiunto il supporto dell'API Mistral IA
 - **1.0** Versione iniziale - Supporto dell'API OpenAI
-
-**Questo documento è stato tradotto dalla versione fr alla lingua it utilizzando il modello gpt-5-mini. Per maggiori informazioni sul processo di traduzione, consultare https://gitlab.com/jls42/ai-powered-markdown-translator**
-

@@ -4,17 +4,17 @@
 
 Markdown file translator using **OpenAI**, **Mistral AI**, **Claude (Anthropic)** and **Google Gemini**.
 
-This Python script translates Markdown files from a source language to a target language while preserving formatting, code blocks and front matter metadata.
+This Python script translates Markdown files from a source language to a target language while preserving formatting, code blocks, and front matter metadata.
 
 ## Main Features
 
 - **Multi-Provider**: Support for 4 APIs (OpenAI, Mistral, Claude, Gemini)
-- **2026 Models**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
+- **2026 Models**: GPT-5.4, Claude Sonnet 4.5, Gemini 3.1 Pro
 - **Economy Mode**: Option `--eco` to use faster and less expensive models
 - **Single File**: Option `--file` to translate a single file
-- **Smart Segmentation**: Handles long texts with token limits per model
+- **Intelligent Segmentation**: Handles long texts with model token limits
 - **Code Preservation**: Code blocks AND inline code (`` `...` ``) are preserved
-- **Filename**: Option `--keep_filename` to keep the original name
+- **File Name**: Option `--keep_filename` to keep the original name
 - **News Mode**: Option `--news` to protect English quotations and handle flags in news articles
 - **.env Configuration**: Support for the `.env` file for API keys
 - **Translation Note**: Optional addition of a note at the end of the document
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Create a `.env` file at the project root or set environment variables:
+Create a `.env` file at the root of the project or define the environment variables:
 
 ```bash
 # Fichier .env (recommandé)
@@ -53,7 +53,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Translate a directory
 
 ```bash
-# Avec OpenAI (défaut: gpt-5)
+# Avec OpenAI (défaut: gpt-5.4)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -89,12 +89,12 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_claude` | Use the Claude API |
 | `--use_gemini` | Use the Gemini API |
 | `--force` | Force re-translation |
-| `--keep_filename` | Keep original filename |
-| `--news` | News mode: protects EN quotations, handles flags by language |
+| `--keep_filename` | Keep the original file name |
+| `--news` | News mode: protects EN quotes, handles flags by language |
 | `--add_translation_note` | Add a translation note |
 | `--include_model` | Include the model name in the output file |
 
-### Default models (2026)
+### Default Models (2026)
 
 | Provider | Quality (default) | Economy (`--eco`) |
 |----------|------------------|----------------------|
@@ -115,6 +115,3 @@ Email: contact@jls42.org
 ## License
 
 GNU GENERAL PUBLIC LICENSE Version 3. See [LICENSE](LICENSE).
-
-**This document was translated from the French (fr) version into English (en) using the gpt-5-mini model. For more information about the translation process, see https://gitlab.com/jls42/ai-powered-markdown-translator**
-

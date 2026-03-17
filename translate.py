@@ -29,14 +29,14 @@ DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
 DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
 DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"
 DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"
-# Modèles par défaut (mis à jour 2026) - Qualité
-DEFAULT_MODEL_OPENAI = "gpt-5"
+# Modèles par défaut (mis à jour mars 2026) - Qualité
+DEFAULT_MODEL_OPENAI = "gpt-5.4"
 DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
 DEFAULT_MODEL_CLAUDE = "claude-sonnet-4-5-20250929"
-DEFAULT_MODEL_GEMINI = "gemini-3-pro-preview"
+DEFAULT_MODEL_GEMINI = "gemini-3.1-pro-preview"
 
 # Modèles économiques (--eco)
-ECO_MODEL_OPENAI = "gpt-5-mini"
+ECO_MODEL_OPENAI = "gpt-5.4-mini"
 ECO_MODEL_MISTRAL = "mistral-small-latest"
 ECO_MODEL_CLAUDE = "claude-haiku-4-5-20251001"
 ECO_MODEL_GEMINI = "gemini-3-flash-preview"
@@ -49,6 +49,10 @@ DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
 MODEL_TOKEN_LIMITS = {
+    # OpenAI GPT-5.4 series (mars 2026)
+    "gpt-5.4": 400000,
+    "gpt-5.4-mini": 400000,
+    "gpt-5.4-nano": 400000,
     # OpenAI GPT-5 series (2026)
     "gpt-5.2": 400000,
     "gpt-5.1": 400000,
@@ -90,6 +94,7 @@ MODEL_TOKEN_LIMITS = {
     "magistral-medium-latest": 40000,
     "magistral-small-latest": 40000,
     # Google Gemini (2026)
+    "gemini-3.1-pro-preview": 1000000,
     "gemini-3-pro-preview": 1000000,
     "gemini-3-flash-preview": 1000000,
     "gemini-2.5-pro": 1000000,

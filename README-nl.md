@@ -1,23 +1,23 @@
-# AI-gestuurde Markdown-vertaler
+# AI-aangedreven Markdown-vertaler
 
-🌍 [Frans](README.md) | [Engels](README-en.md) | [Spaans](README-es.md) | [Chinees](README-zh.md) | [Duits](README-de.md) | [Japans](README-ja.md) | [Koreaans](README-ko.md) | [Arabisch](README-ar.md) | [Hindi](README-hi.md) | [Italiaans](README-it.md) | [Nederlands](README-nl.md) | [Pools](README-pl.md) | [Portugees](README-pt.md) | [Roemeens](README-ro.md) | [Zweeds](README-sv.md)
+🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
 
-Vertaler voor Markdown-bestanden die **OpenAI**, **Mistral AI**, **Claude (Anthropic)** en **Google Gemini** gebruikt.
+Markdown-bestandsvertaler met **OpenAI**, **Mistral AI**, **Claude (Anthropic)** en **Google Gemini**.
 
-Dit Python-script vertaalt Markdown-bestanden van een brontaal naar een doeltaal, terwijl opmaak, codeblokken en front matter-metadata behouden blijven.
+Dit Python-script vertaalt Markdown-bestanden van een brontaal naar een doeltaal, terwijl de opmaak, codeblokken en front matter-metagegevens behouden blijven.
 
 ## Belangrijkste kenmerken
 
 - **Multi-Provider**: Ondersteuning voor 4 API's (OpenAI, Mistral, Claude, Gemini)
-- **Modellen 2026**: GPT-5, Claude Sonnet 4.5, Gemini 3 Pro
+- **Modellen 2026**: GPT-5.4, Claude Sonnet 4.5, Gemini 3.1 Pro
 - **Economische modus**: Optie `--eco` om snellere en goedkopere modellen te gebruiken
-- **Single-file**: Optie `--file` om één enkel bestand te vertalen
-- **Slimme segmentering**: Beheer van lange teksten met tokenlimieten per model
-- **Codebehoud**: Codeblokken EN inline-code (`` `...` ``) worden behouden
-- **Bestandsnaam**: Optie `--keep_filename` om de originele bestandsnaam te behouden
-- **Nieuwsmodus**: Optie `--news` om Engelse citaten te beschermen en vlaggen in nieuwsartikelen per taal te beheren
-- **.env-configuratie**: Ondersteuning voor het `.env` bestand voor API-sleutels
-- **Vertaalopmerking**: Optionele toevoeging van een opmerking aan het einde van het document
+- **Enkel bestand**: Optie `--file` om één enkel bestand te vertalen
+- **Intelligente segmentatie**: Verwerking van lange teksten met tokenlimieten per model
+- **Behoud van code**: Codeblokken EN inline code (`` `...` ``) blijven behouden
+- **Bestandsnaam**: Optie `--keep_filename` om de originele naam te behouden
+- **Nieuwsmodus**: Optie `--news` om Engelse citaten te beschermen en vlaggen in nieuwsartikelen te beheren
+- **.env-configuratie**: Ondersteuning voor het bestand `.env` voor API-sleutels
+- **Vertaalnotitie**: Optionele toevoeging van een notitie aan het einde van het document
 
 ## Installatie
 
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## Configuratie
 
-Maak een `.env` bestand in de root van het project of stel de omgevingsvariabelen in:
+Maak een bestand `.env` aan in de hoofdmap van het project of definieer de omgevingsvariabelen:
 
 ```bash
 # Fichier .env (recommandé)
@@ -44,7 +44,7 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 ## Gebruik
 
-### Een enkel bestand vertalen
+### Eén bestand vertalen
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
@@ -53,7 +53,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Een map vertalen
 
 ```bash
-# Avec OpenAI (défaut: gpt-5)
+# Avec OpenAI (défaut: gpt-5.4)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -84,20 +84,20 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--source_lang` | Brontaal (standaard: `fr`) |
 | `--target_lang` | Doeltaal (standaard: `en`) |
 | `--model` | Specifiek model om te gebruiken |
-| `--eco` | Gebruik de economische modellen |
-| `--use_mistral` | Gebruik de Mistral AI API |
-| `--use_claude` | Gebruik de Claude API |
-| `--use_gemini` | Gebruik de Gemini API |
-| `--force` | Forceer hertaling |
-| `--keep_filename` | Behoud originele bestandsnaam |
-| `--news` | Nieuwsmodus: bescherm EN-citaten, beheer vlaggen per taal |
-| `--add_translation_note` | Voeg een vertaalopmerking toe |
-| `--include_model` | Neem de modelnaam op in het uitvoerbestand |
+| `--eco` | Economische modellen gebruiken |
+| `--use_mistral` | De Mistral AI-API gebruiken |
+| `--use_claude` | De Claude-API gebruiken |
+| `--use_gemini` | De Gemini-API gebruiken |
+| `--force` | Hertoekennen forceren |
+| `--keep_filename` | De originele bestandsnaam behouden |
+| `--news` | Nieuwsmodus: beschermt EN-citaten, beheert vlaggen per taal |
+| `--add_translation_note` | Een vertaalnotitie toevoegen |
+| `--include_model` | De modelnaam in het uitvoerbestand opnemen |
 
 ### Standaardmodellen (2026)
 
 | Provider | Kwaliteit (standaard) | Economisch (`--eco`) |
-|----------|-----------------------|-----------------------------|
+|----------|----------------------|----------------------|
 | OpenAI | `gpt-5` | `gpt-5-mini` |
 | Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
@@ -105,16 +105,13 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Projecten die dit script gebruiken
 
-- **[jls42.org](https://jls42.org)** - Persoonlijke meertalige blog (15 talen)
+- **[jls42.org](https://jls42.org)** - Meertalige persoonlijke blog (15 talen)
 
 ## Auteur
 
-Julien LE SAUX  
-E-mail: contact@jls42.org
+Julien LE SAUX
+Email : contact@jls42.org
 
 ## Licentie
 
-GNU GENERAL PUBLIC LICENSE Versie 3. Zie [LICENTIE](LICENSE).
-
-**Dit document is vertaald van de Franse versie naar het Nederlands met behulp van het model gpt-5-mini. Voor meer informatie over het vertaalproces, zie https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+GNU GENERAL PUBLIC LICENSE versie 3. Zie [LICENSE](LICENSE).
