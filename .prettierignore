@@ -1,0 +1,8 @@
+README-*.md
+CHANGELOG-*.md
+traductions_*/
+tests/fixtures/
+LICENSE
+venv/
+node_modules/
+.secrets.baseline
