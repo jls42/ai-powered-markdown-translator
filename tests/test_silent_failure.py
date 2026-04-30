@@ -357,6 +357,39 @@ locale: 'pl'
             self.assertEqual(status, "failure")
             self.assertFalse(os.path.exists(dst))
 
+    def test_translation_note_ends_with_single_newline(self):
+        """La note de traduction ne doit pas ajouter de ligne vide finale."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = os.path.join(tmpdir, "input.md")
+            dst = os.path.join(tmpdir, "input-en.md")
+            with open(src, "w", encoding="utf-8") as f:
+                f.write("Contenu source.\n")
+
+            mock_client = MagicMock()
+            mock_client.chat.completions.create.side_effect = [
+                _make_openai_response("Translated content.\n"),
+                _make_openai_response("This document was translated."),
+            ]
+            args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
+
+            status = translate_markdown_file(
+                src,
+                dst,
+                mock_client,
+                args,
+                use_mistral=False,
+                use_claude=False,
+                use_gemini=False,
+                add_translation_note=True,
+                force=False,
+            )
+
+            self.assertEqual(status, "success")
+            with open(dst, encoding="utf-8") as f:
+                out = f.read()
+            self.assertTrue(out.endswith("**This document was translated.**\n"))
+            self.assertFalse(out.endswith("\n\n"))
+
 
 class TestStructuralLineLanguageBar(unittest.TestCase):
     """Le validateur post-traduction extrait des "fenêtres source" et vérifie

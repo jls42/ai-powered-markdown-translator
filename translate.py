@@ -836,7 +836,9 @@ def translate_markdown_file(
                 use_gemini,
                 True,
             )
-            translated_content += "\n\n**" + translation_note + "**\n\n"
+            translated_content = (
+                translated_content.rstrip("\n") + "\n\n**" + translation_note.strip() + "**\n"
+            )
 
         # Écriture du contenu traduit dans le fichier de sortie
         clean_output_path = os.path.normpath(output_path)
