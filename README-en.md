@@ -2,19 +2,19 @@
 
 🌍 [French](README.md) | [English](README-en.md) | [Spanish](README-es.md) | [Chinese](README-zh.md) | [German](README-de.md) | [Japanese](README-ja.md) | [Korean](README-ko.md) | [Arabic](README-ar.md) | [Hindi](README-hi.md) | [Italian](README-it.md) | [Dutch](README-nl.md) | [Polish](README-pl.md) | [Portuguese](README-pt.md) | [Romanian](README-ro.md) | [Swedish](README-sv.md)
 
-Markdown file translator using **OpenAI**, **Mistral AI**, **Claude (Anthropic)**, and **Google Gemini**.
+Markdown file translator using **OpenAI**, **Mistral AI**, **Claude (Anthropic)** and **Google Gemini**.
 
 This Python script translates Markdown files from a source language to a target language while preserving formatting, code blocks, and front matter metadata.
 
-## Key Features
+## Main Features
 
 - **Multi-Provider**: Support for 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **2026 Models**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
 - **Economy Mode**: Option `--eco` to use faster and less expensive models
 - **Single File**: Option `--file` to translate a single file
-- **Intelligent Segmentation**: Handles long texts with model token limits
+- **Intelligent Segmentation**: Handling long texts with token limits per model
 - **Code Preservation**: Code blocks AND inline code (`` `...` ``) are preserved
-- **Filename**: Option `--keep_filename` to keep the original name
+- **File Name**: Option `--keep_filename` to keep the original name
 - **News Mode**: Option `--news` to protect English quotes and handle flags in news articles
 - **.env Configuration**: Support for the `.env` file for API keys
 - **Translation Note**: Optional addition of a note at the end of the document
@@ -22,7 +22,7 @@ This Python script translates Markdown files from a source language to a target 
 ## Installation
 
 ```bash
-git clone https://gitlab.com/jls42/ai-powered-markdown-translator.git
+git clone https://github.com/jls42/ai-powered-markdown-translator.git
 cd ai-powered-markdown-translator
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -30,7 +30,7 @@ pip install -r requirements.txt
 
 ### Quality tooling (optional but recommended)
 
-The project uses [`pre-commit`](https://pre-commit.com) to prevent committing badly formatted, vulnerable, or secret-containing code. Installation:
+The project uses [`pre-commit`](https://pre-commit.com) to prevent committing poorly formatted, vulnerable, or secret-containing code. Installation:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -38,11 +38,11 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Active hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexity), detect-secrets (API keys), mypy (progressive typing), Opengrep (SAST), pip-audit (CVE deps), unittest. See section `CLAUDE.md` _Quality / pre-commit_ for details.
+Active hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexity), detect-secrets (API keys), mypy (progressive typing), Opengrep (SAST), pip-audit (CVE deps), unittest. See `CLAUDE.md` section _Quality / pre-commit_ for details.
 
 ## Configuration
 
-Create a `.env` file at the root of the project or define the environment variables:
+Create a `.env` file at the root of the project or define environment variables:
 
 ```bash
 # Fichier .env (recommandé)
@@ -92,7 +92,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Option                   | Description                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
 | `--file`                 | Single Markdown file to translate                                       |
-| `--source_dir`           | Source directory containing Markdown files                                |
+| `--source_dir`           | Source directory containing Markdown files                        |
 | `--target_dir`           | Output directory for translated files                          |
 | `--source_lang`          | Source language (default: `fr`)                                             |
 | `--target_lang`          | Target language (default: `en`)                                              |
@@ -116,7 +116,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`   |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
 
-> **Recommendation for long-form translations**: `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3-flash-preview`) tends to better preserve Markdown structure on non-Latin scripts (PL, JA, ZH, AR, HI), especially in `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
+> **Long-form translation recommendation**: `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3-flash-preview`) tends to better preserve markdown structure on non-Latin scripts (PL, JA, ZH, AR, HI), especially in `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
 
 ## Projects using this script
 
@@ -131,5 +131,4 @@ Email: contact@jls42.org
 
 GNU GENERAL PUBLIC LICENSE Version 3. See [LICENSE](LICENSE).
 
-**This document has been translated from the fr version into the en language using the gpt-5.4-mini model. For more information about the translation process, see https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+**This document was translated from the fr version into the en language using the gpt-5.4-mini model. For more information about the translation process, see https://github.com/jls42/ai-powered-markdown-translator**

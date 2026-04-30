@@ -4,25 +4,25 @@
 
 Tradutor de arquivos Markdown usando **OpenAI**, **Mistral AI**, **Claude (Anthropic)** e **Google Gemini**.
 
-Este script Python traduz arquivos Markdown de um idioma de origem para um idioma de destino, preservando a formatação, os blocos de código e os metadados do front matter.
+Este script Python traduz arquivos Markdown de um idioma de origem para um idioma de destino, preservando a formatação, os blocos de código e os metadados front matter.
 
-## Funcionalidades Principais
+## Características Principais
 
 - **Multi-Provider**: Suporte a 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **Modelos 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
 - **Modo Econômico**: Opção `--eco` para usar modelos mais rápidos e menos caros
 - **Arquivo Único**: Opção `--file` para traduzir um único arquivo
-- **Segmentação Inteligente**: Gestão de textos longos com limites de tokens por modelo
+- **Segmentação Inteligente**: Gerenciamento de textos longos com limites de tokens por modelo
 - **Preservação do Código**: Os blocos de código E o código inline (`` `...` ``) são preservados
 - **Nome do Arquivo**: Opção `--keep_filename` para manter o nome original
 - **Modo Notícias**: Opção `--news` para proteger citações em inglês e gerenciar bandeiras em artigos de notícias
-- **Configuração .env**: Suporte ao arquivo `.env` para as chaves de API
+- **Configuração .env**: Suporte ao arquivo `.env` para chaves de API
 - **Nota de Tradução**: Adição opcional de uma nota no final do documento
 
 ## Instalação
 
 ```bash
-git clone https://gitlab.com/jls42/ai-powered-markdown-translator.git
+git clone https://github.com/jls42/ai-powered-markdown-translator.git
 cd ai-powered-markdown-translator
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -38,7 +38,7 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Hooks ativos: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexidade), detect-secrets (chaves API), mypy (tipagem progressiva), Opengrep (SAST), pip-audit (CVE deps), unittest. Veja a seção `CLAUDE.md` _Quality / pre-commit_ para os detalhes.
+Hooks ativos: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexidade), detect-secrets (chaves de API), mypy (tipagem progressiva), Opengrep (SAST), pip-audit (CVE deps), unittest. Veja a seção `CLAUDE.md` _Quality / pre-commit_ para detalhes.
 
 ## Configuração
 
@@ -55,9 +55,9 @@ GOOGLE_API_KEY=votre-clé-api-google
 export OPENAI_API_KEY='votre-clé-api-openai'
 ```
 
-## Utilização
+## Uso
 
-### Traduzir um único arquivo
+### Traduzir um arquivo único
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
@@ -89,23 +89,23 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Opções
 
-| Opção                    | Descrição                                                              |
+| Opção                   | Descrição                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Arquivo Markdown único a traduzir                                        |
+| `--file`                 | Arquivo Markdown único a traduzir                                       |
 | `--source_dir`           | Diretório de origem contendo os arquivos Markdown                        |
 | `--target_dir`           | Diretório de saída para os arquivos traduzidos                          |
 | `--source_lang`          | Idioma de origem (padrão: `fr`)                                             |
 | `--target_lang`          | Idioma de destino (padrão: `en`)                                              |
-| `--model`                | Modelo específico a ser usado                                            |
-| `--eco`                  | Usar os modelos econômicos                                               |
-| `--use_mistral`          | Usar a API Mistral AI                                                   |
-| `--use_claude`           | Usar a API Claude                                                       |
-| `--use_gemini`           | Usar a API Gemini                                                       |
-| `--force`                | Forçar a retradução                                                     |
-| `--keep_filename`        | Manter o nome original do arquivo                                       |
-| `--news`                 | Modo notícias: protege citações EN, gerencia bandeiras por idioma        |
-| `--add_translation_note` | Adicionar uma nota de tradução                                           |
-| `--include_model`        | Incluir o nome do modelo no arquivo de saída                            |
+| `--model`                | Modelo específico a ser usado                                             |
+| `--eco`                  | Usar os modelos econômicos                                         |
+| `--use_mistral`          | Usar a API Mistral AI                                                |
+| `--use_claude`           | Usar a API Claude                                                    |
+| `--use_gemini`           | Usar a API Gemini                                                    |
+| `--force`                | Forçar a retradução                                                  |
+| `--keep_filename`        | Manter o nome original do arquivo                                     |
+| `--news`                 | Modo notícias: protege citações em inglês, gerencia bandeiras por idioma |
+| `--add_translation_note`        | Adicionar uma nota de tradução                                           |
+| `--include_model`        | Incluir o nome do modelo no arquivo de saída                       |
 
 ### Modelos padrão (2026)
 
@@ -116,7 +116,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`   |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
 
-> **Recomendação para traduções long-form** : `--use_gemini` (padrão = `gemini-3.1-pro-preview` qualidade, `--eco` = `gemini-3-flash-preview`) tende a preservar melhor a estrutura markdown em scripts não latinos (PL, JA, ZH, AR, HI), especialmente no modo `--news` onde a fidelidade dos placeholders importa. OpenAI continua sendo o padrão por compatibilidade retroativa.
+> **Recomendação para traduções long-form** : `--use_gemini` (padrão = `gemini-3.1-pro-preview` qualidade, `--eco` = `gemini-3-flash-preview`) tende a preservar melhor a estrutura markdown em scripts não latinos (PL, JA, ZH, AR, HI), especialmente no modo `--news` em que a fidelidade dos placeholders conta. OpenAI continua sendo o padrão para retrocompatibilidade.
 
 ## Projetos usando este script
 
@@ -131,5 +131,4 @@ Email : contact@jls42.org
 
 GNU GENERAL PUBLIC LICENSE Version 3. Veja [LICENSE](LICENSE).
 
-**Este documento foi traduzido da versão fr para o idioma pt usando o modelo gpt-5.4-mini. Para mais informações sobre o processo de tradução, consulte https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+**Este documento foi traduzido da versão fr para o idioma pt usando o modelo gpt-5.4-mini. Para mais informações sobre o processo de tradução, consulte https://github.com/jls42/ai-powered-markdown-translator**

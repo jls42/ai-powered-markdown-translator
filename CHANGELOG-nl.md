@@ -1,41 +1,41 @@
-### Changelog
+### Wijzigingslog
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7.3** Kwaliteits-voor-commit toolchain (2026-04-30) :
+- **1.7.3** Kwaliteitstooling pre-commit (2026-04-30) :
   - Setup `pre-commit` "volledige EurekAI-type" : 14 hooks verdeeld over twee stages (snelle pre-commit + zware pre-push)
-  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 beschermde API-sleutels), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
-  - Pre-push : mypy (geleidelijke losse modus), Opengrep SAST (translate.py + scripts/), pip-audit (initiële rapportagemodus), unittest discover (tests/ + scripts/tests/)
-  - Lokale wrappers in `scripts/` die `./venv/bin/python` gebruiken (het systeem heeft niet `python` kaal buiten venv)
-  - `scripts/audit_verdict.py` : JSON-parser voor pip-audit met 11 unittest-tests, aangepaste Python-port van de jls42-astro-parser
-  - 7 eerste ruff-overtredingen gecorrigeerd : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 beschermde API-sleutels), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, enz.)
+  - Pre-push : mypy (geleidelijke lax-modus), Opengrep SAST (translate.py + scripts/), pip-audit (initiële rapportagemodus), unittest discover (tests/ + scripts/tests/)
+  - Lokale wrappers in `scripts/` die `./venv/bin/python` gebruiken (het systeem heeft geen `python` buiten venv)
+  - `scripts/audit_verdict.py` : JSON-parser pip-audit met 11 unittest-tests, aangepaste Python-port van de jls42-astro-parser
+  - 7 aanvankelijke ruff-schendingen gecorrigeerd : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
   - Documentatie : README.md (FR) + CLAUDE.md (gedetailleerde workflow), 28 opnieuw gegenereerde vertalingen
-  - Lizard sluit tijdelijk `translate.py` uit (4 functies met CCN 21-47, refactor gepland in een aparte PR) — strikte gate op scripts/ om regressies te voorkomen
-- **1.7.2** Silent-failure-fix op lange vertalingen (2026-04-28) :
-  - Taalvalidatie na vertaling op alle providers (OpenAI, Mistral, Claude, Gemini) : deterministische laag (bronfragment teruggevonden als letterlijke tekst) + probabilistische laag (`langdetect`)
-  - `finish_reason` / `stop_reason` whitelist : `RuntimeError` op elke status buiten de whitelist (truncation, content_filter, enz.)
+  - Lizard sluit tijdelijk `translate.py` uit (4 functies met CCN 21-47, refactor gepland in een dedicated PR) — strikte gate op scripts/ om regressies te vermijden
+- **1.7.2** Stille-fout fix op lange vertalingen (2026-04-28) :
+  - Taalvalidatie na vertaling op alle providers (OpenAI, Mistral, Claude, Gemini) : deterministische laag (bronfragment teruggevonden als exact citaat) + probabilistische laag (`langdetect`)
+  - Whitelist `finish_reason` / `stop_reason` : `RuntimeError` op elke status buiten de whitelist gooien (truncation, content_filter, enz.)
   - `max_tokens` Claude : `4096` → `16384` (voorkomt latente truncatie op segmenten van 16k tekens)
-  - Heading-aware segmentatie : prioriteit voor H2/H3 in de tweede helft van het segment (elk segment begint met een volledige semantische sectie)
-  - Foutdoorvoer tot aan een niet-nul exit code : `translate_markdown_file` geeft een getypeerde status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` als ten minste één bestand is mislukt (single-file en batch)
-  - Afhankelijkheid `langdetect==1.0.9` toegevoegd
-  - Regressietests (`tests/test_silent_failure.py`, `unittest` stdlib) die de zes schakels van de foutketen afdekken
+  - Heading-aware segmentatie: prioriteit voor H2/H3 in de tweede helft van het segment (elk segment begint met een volledige semantische sectie)
+  - Foutdoorvoering tot aan een niet-nul exitcode : `translate_markdown_file` geeft een getypeerde status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` als minstens één bestand is mislukt (single-file en batch)
+  - Afhankelijke `langdetect==1.0.9` toegevoegd
+  - Regressietests (`tests/test_silent_failure.py`, `unittest` stdlib) die de zes schakels van de foutketen dekken
 - **1.7.1** Update van OpenAI-modellen :
   - Standaardmodellen bijgewerkt naar GPT-5.4 (maart 2026) :
     - Kwaliteit : `gpt-5` → `gpt-5.4`
     - Economisch : `gpt-5-mini` → `gpt-5.4-mini`
   - Tokenlimieten toegevoegd voor `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
-- **1.7** Nieuw :
-  - Optie `--keep_filename` om de originele bestandsnaam te behouden bij vertaling
-  - Ondersteuning voor het bestand `.env` om API-sleutels automatisch te laden
-  - **Behoud van inline code** : backticks (`` `...` ``) zijn nu beschermd tijdens de vertaling
+- **1.7** Nieuwigheden :
+  - Optie `--keep_filename` om de originele bestandsnaam te behouden tijdens het vertalen
+  - Ondersteuning voor het `.env`-bestand om API-sleutels automatisch te laden
+  - **Behouden van inline code** : backticks (`` `...` ``) zijn nu beschermd tijdens het vertalen
   - Verbetering van de systeemprompt :
-    - Betere behandeling van aanhalingstekens in YAML frontmatter
+    - Betere afhandeling van aanhalingstekens in de YAML frontmatter
     - Bescherming van templatevariabelen `{variable}`
     - Verbod op ongevraagde vertalersnotities
   - Succesvol getest op 364 bestanden (blogmigratie jls42.org)
-- **1.6** Nieuw :
+- **1.6** Nieuwigheden :
   - Ondersteuning voor de Google Gemini API voor vertaling (`--use_gemini`)
-  - Update van standaardmodellen 2026 :
+  - Update van de standaardmodellen 2026 :
     - OpenAI : `gpt-5` (kwaliteit), `gpt-5-mini` (eco)
     - Claude : `claude-sonnet-4-5` (kwaliteit), `claude-haiku-4-5` (eco)
     - Gemini : `gemini-3-pro-preview` (kwaliteit), `gemini-3-flash-preview` (eco)
@@ -43,37 +43,36 @@
   - Vertaling van één enkel bestand (`--file`) zonder een map te doorlopen
   - Nieuw vereenvoudigd naamgevingspatroon : `{base}-{lang}.md`
   - Optie `--include_model` om het oude formaat met de modelnaam te behouden
-  - Ondersteuning voor niet-gelijste modellen met standaard tokenlimiet (128k)
+  - Ondersteuning voor niet-vermelde modellen met standaard tokenlimiet (128k)
   - README vertaald in 14 talen
 - **1.5** Verbeteringen :
-  - **Update van API-sleutels en standaardmodellen :**
+  - **Update van API-sleutels en standaardmodellen:**
     - **OpenAI :** Update van `DEFAULT_MODEL_OPENAI` naar `"gpt-4o"`.
     - **Mistral AI :** Update van `DEFAULT_MODEL_MISTRAL` naar `"mistral-large-latest"`.
     - **Claude van Anthropic :** Toevoeging van `DEFAULT_ANTHROPIC_API_KEY` en update van `DEFAULT_MODEL_CLAUDE` naar `"claude-3-5-sonnet-20240620"`.
   - **Optimalisatie van vertaalprompts :**
-    - De prompts voor directe vertalingen en vertaalnotities zijn verrijkt voor meer duidelijkheid en efficiëntie, inclusief gedetailleerde instructies over het behoud van metadata en specifieke opmaakelementen.
-  - **Code-refactorisatie :**
+    - De prompts voor directe vertalingen en vertaalnotities zijn verrijkt voor meer duidelijkheid en efficiëntie, inclusief gedetailleerde instructies over het behouden van metadata en specifieke opmaakelementen.
+  - **Code-refactoring :**
     - Vervanging van `MistralClient` door de klasse `Mistral` voor de initialisatie van de Mistral AI-client.
-    - Herordening van imports voor betere leesbaarheid en onderhoudbaarheid.
-    - Verbetering van tekstsegmentatie en beheer van codeblokken om de oorspronkelijke opmaak tijdens vertaling te behouden.
+    - Herschikking van imports voor betere leesbaarheid en onderhoudbaarheid.
+    - Verbetering van tekstsegmentatie en beheer van codeblokken om de oorspronkelijke opmaak tijdens het vertalen te behouden.
   - **Beheer van uitvoerbestanden :**
-    - Omkering van model en taal in de naam van uitvoerbestanden (bijvoorbeeld, `f"{base}-{args.target_lang}-{args.model}.md"`), wat de organisatie en het terugvinden van vertalingen vergemakkelijkt.
+    - Omkering van het model en de taal in de naam van uitvoerbestanden (bijvoorbeeld `f"{base}-{args.target_lang}-{args.model}.md"`), wat de organisatie en het terugvinden van vertalingen vergemakkelijkt.
   - **Diverse verbeteringen :**
-    - Opschonen van de code door onnodige lege regels te verwijderen.
+    - Opschoning van de code door onnodige lege regels te verwijderen.
     - Kleine aanpassingen om de structuur en leesbaarheid van het script te verbeteren.
-- **1.4** Nieuw :
-  - Ondersteuning voor de Claude API van Anthropic voor vertaling
+- **1.4** Nieuwigheden :
+  - Ondersteuning van de Claude API van Anthropic voor vertaling
   - Optimalisatie van prompts voor meer duidelijkheid en efficiëntie
   - Kleine aanpassingen om het onderhoud van de code te verbeteren
-- **1.3** Verbeteringen en nieuwe functies :
+- **1.3** Verbeteringen en nieuwe functionaliteiten :
   - Verbeterd beheer van codeblokken
   - Verbeterd beheer van uitvoerbestanden
   - Verbeterde detectie van bestaande bestanden
   - Optie `--force` om vertaling af te dwingen
-  - Omkering van model en taal in de naam van het uitvoerbestand
-- **1.2** Changelog-fix
+  - Omkering van het model en de taal in de naam van het uitvoerbestand
+- **1.2** Fix van het wijzigingslog
 - **1.1** Toevoeging van ondersteuning voor de Mistral AI API
-- **1.0** Eerste versie - Ondersteuning voor de OpenAI API
+- **1.0** Initiële versie - Ondersteuning van de OpenAI API
 
-**Dit document is vertaald van de fr-versie naar de nl-taal met behulp van het model gpt-5.4-mini. Voor meer informatie over het vertaalproces, raadpleeg https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+**Dit document is vertaald van de fr-versie naar de taal nl met behulp van het model gpt-5.4-mini. Voor meer informatie over het vertaalproces, raadpleeg https://github.com/jls42/ai-powered-markdown-translator**

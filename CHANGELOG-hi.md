@@ -2,78 +2,77 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7.3** प्री-कमिट गुणवत्ता टूलिंग (2026-04-30) :
-  - सेटअप `pre-commit` "type EurekAI complet" : दो चरणों में वितरित 14 हुक (तेज़ pre-commit + भारी pre-push)
-  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 संरक्षित API कुंजियाँ), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, आदि)
-  - Pre-push : mypy (प्रगतिशील ढीला मोड), Opengrep SAST (translate.py + scripts/), pip-audit (प्रारंभिक रिपोर्टिंग मोड), unittest discover (tests/ + scripts/tests/)
-  - `scripts/` में स्थानीय wrappers जो `./venv/bin/python` का उपयोग करते हैं (venv के बाहर सिस्टम के पास `python` नहीं है)
-  - `scripts/audit_verdict.py` : 11 unittest परीक्षणों के साथ pip-audit JSON parser, jls42-astro parser का अनुकूलित Python पोर्ट
-  - 7 प्रारंभिक ruff उल्लंघन सुधारे गए : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
-  - दस्तावेज़ीकरण : README.md (FR) + CLAUDE.md (विस्तृत workflow), 28 अनुवाद पुनर्जनित
-  - Lizard अस्थायी रूप से `translate.py` को बाहर करता है (4 फ़ंक्शन CCN 21-47 के साथ, समर्पित PR में refactor योजनाबद्ध) — scripts/ पर सख्त gate ताकि regression से बचा जा सके
-- **1.7.2** लंबे अनुवादों पर silent-failure सुधार (2026-04-28) :
-  - सभी providers (OpenAI, Mistral, Claude, Gemini) पर अनुवाद के बाद भाषा सत्यापन : deterministic layer (स्रोत अंश verbatim मिला) + probabilistic layer (`langdetect`)
-  - Whitelist `finish_reason` / `stop_reason` : whitelist से बाहर किसी भी स्थिति (truncation, content_filter, आदि) पर `RuntimeError` फेंकें
+- **1.7.3** pre-commit गुणवत्ता टूलिंग (2026-04-30) :
+  - Setup `pre-commit` "type EurekAI complet" : दो चरणों में फैले 14 hooks (तेज़ pre-commit + भारी pre-push)
+  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 API keys protected), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, आदि)
+  - Pre-push : mypy (क्रमिक लचीला mode), Opengrep SAST (translate.py + scripts/), pip-audit (प्रारंभिक reporting mode), unittest discover (tests/ + scripts/tests/)
+  - स्थानीय wrappers `scripts/` में जो `./venv/bin/python` का उपयोग करते हैं (सिस्टम में venv के बाहर bare `python` नहीं है)
+  - `scripts/audit_verdict.py` : 11 unittest tests के साथ pip-audit JSON parser, jls42-astro parser का अनुकूलित Python port
+  - 7 प्रारंभिक ruff उल्लंघन ठीक किए गए : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+  - दस्तावेज़ीकरण : README.md (FR) + CLAUDE.md (विस्तृत workflow), 28 पुनर्जनित अनुवाद
+  - Lizard अस्थायी रूप से `translate.py` को बाहर करता है (CCN 21-47 पर 4 functions, refactor एक समर्पित PR में नियोजित) — प्रतिगमन से बचने के लिए scripts/ पर सख्त gate
+- **1.7.2** लंबे अनुवादों पर silent-failure का सुधार (2026-04-28) :
+  - सभी providers (OpenAI, Mistral, Claude, Gemini) पर अनुवाद के बाद भाषा validation : deterministic layer (स्रोत अंश verbatim मिला) + probabilistic layer (`langdetect`)
+  - `finish_reason` / `stop_reason` whitelist : whitelist के बाहर किसी भी state पर `RuntimeError` उठाएँ (truncation, content_filter, आदि)
   - `max_tokens` Claude : `4096` → `16384` (16k chars वाले segments पर latent truncation से बचता है)
-  - Heading-aware segmentation : segment के दूसरे आधे में H2/H3 को प्राथमिकता (प्रत्येक segment एक पूर्ण semantic section से शुरू होता है)
-  - त्रुटियों का propagation गैर-शून्य exit code तक : `translate_markdown_file` typed status `success` / `failure` / `skipped` लौटाता है, `main()` यदि कम-से-कम एक फ़ाइल विफल हुई तो `sys.exit(1)` (single-file और batch)
-  - निर्भरता `langdetect==1.0.9` जोड़ी गई
-  - त्रुटि श्रृंखला के छह कड़ियों को कवर करने वाले regression tests (`tests/test_silent_failure.py`, `unittest` stdlib)
+  - heading-aware segmentation : segment के दूसरे आधे में H2/H3 को प्राथमिकता (हर segment एक पूर्ण semantic section से शुरू होता है)
+  - errors का exit code non-zero तक propagation : `translate_markdown_file` typed status `success` / `failure` / `skipped` लौटाता है, `main()` `sys.exit(1)` यदि कम से कम एक फ़ाइल विफल हो (single-file और batch)
+  - dependency `langdetect==1.0.9` जोड़ी गई
+  - regression tests (`tests/test_silent_failure.py`, `unittest` stdlib) error chain के छह links को कवर करते हैं
 - **1.7.1** OpenAI मॉडल अपडेट :
-  - डिफ़ॉल्ट मॉडल GPT-5.4 (मार्च 2026) तक अपडेट किए गए :
-    - गुणवत्ता : `gpt-5` → `gpt-5.4`
-    - किफायती : `gpt-5-mini` → `gpt-5.4-mini`
-  - `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) के लिए token सीमाएँ जोड़ी गईं
+  - डिफ़ॉल्ट मॉडल मार्च 2026 के GPT-5.4 तक अपडेट किए गए :
+    - Quality : `gpt-5` → `gpt-5.4`
+    - Economy : `gpt-5-mini` → `gpt-5.4-mini`
+  - `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` के लिए token limits जोड़ी गईं (400k)
 - **1.7** नई सुविधाएँ :
-  - अनुवाद के दौरान मूल फ़ाइल नाम बनाए रखने के लिए विकल्प `--keep_filename`
-  - API कुंजियाँ स्वचालित रूप से लोड करने के लिए `.env` फ़ाइल का समर्थन
-  - **inline code संरक्षण** : backticks (`` `...` ``) अब अनुवाद के दौरान सुरक्षित हैं
-  - सिस्टम prompt में सुधार :
-    - YAML frontmatter में उद्धरण चिह्नों का बेहतर प्रबंधन
+  - अनुवाद के दौरान मूल फ़ाइल नाम बनाए रखने के लिए `--keep_filename` विकल्प
+  - API keys को स्वचालित रूप से लोड करने के लिए `.env` फ़ाइल का समर्थन
+  - **inline code preservation** : backticks (`` `...` ``) अब अनुवाद के दौरान सुरक्षित हैं
+  - system prompt में सुधार :
+    - YAML frontmatter में quotes का बेहतर handling
     - template variables `{variable}` की सुरक्षा
     - अनचाहे translator notes पर प्रतिबंध
-  - 364 फ़ाइलों पर सफलतापूर्वक परीक्षण (jls42.org ब्लॉग migration)
+  - 364 फ़ाइलों पर सफलतापूर्वक परीक्षण (jls42.org blog migration)
 - **1.6** नई सुविधाएँ :
   - अनुवाद के लिए Google Gemini API का समर्थन (`--use_gemini`)
-  - डिफ़ॉल्ट मॉडल 2026 अपडेट :
-    - OpenAI : `gpt-5` (गुणवत्ता), `gpt-5-mini` (किफायती)
-    - Claude : `claude-sonnet-4-5` (गुणवत्ता), `claude-haiku-4-5` (किफायती)
-    - Gemini : `gemini-3-pro-preview` (गुणवत्ता), `gemini-3-flash-preview` (किफायती)
-  - तेज़ और कम महंगे मॉडल उपयोग करने के लिए किफायती मोड (`--eco`)
-  - directory को देखे बिना single-file translation (`--file`)
+  - 2026 default models का अपडेट :
+    - OpenAI : `gpt-5` (quality), `gpt-5-mini` (eco)
+    - Claude : `claude-sonnet-4-5` (quality), `claude-haiku-4-5` (eco)
+    - Gemini : `gemini-3-pro-preview` (quality), `gemini-3-flash-preview` (eco)
+  - economy mode (`--eco`) ताकि तेज़ और कम लागत वाले models का उपयोग हो सके
+  - single file translation (`--file`) बिना directory traverse किए
   - नया सरल नामकरण pattern : `{base}-{lang}.md`
-  - पुराने format को मॉडल नाम के साथ बनाए रखने के लिए विकल्प `--include_model`
-  - गैर-सूचीबद्ध मॉडलों के लिए डिफ़ॉल्ट token सीमा (128k) का समर्थन
-  - README 14 भाषाओं में अनूदित
+  - पुराने format को model नाम के साथ बनाए रखने के लिए `--include_model` विकल्प
+  - non-listed models के लिए default token limit (128k) का समर्थन
+  - README 14 भाषाओं में अनुवादित
 - **1.5** सुधार :
-  - **API कुंजियों और डिफ़ॉल्ट मॉडलों का अपडेट :**
+  - **API keys और default models का अपडेट :**
     - **OpenAI :** `DEFAULT_MODEL_OPENAI` से `"gpt-4o"` तक अपडेट।
     - **Mistral AI :** `DEFAULT_MODEL_MISTRAL` से `"mistral-large-latest"` तक अपडेट।
-    - **Anthropic Claude :** `DEFAULT_ANTHROPIC_API_KEY` जोड़ा गया और `DEFAULT_MODEL_CLAUDE` से `"claude-3-5-sonnet-20240620"` तक अपडेट।
-  - **अनुवाद prompts का अनुकूलन :**
-    - प्रत्यक्ष अनुवादों और translation notes के लिए prompts को बेहतर स्पष्टता और दक्षता हेतु समृद्ध किया गया, जिसमें metadata और विशिष्ट formatting तत्वों को संरक्षित रखने के विस्तृत निर्देश शामिल हैं।
-  - **कोड refactorisation :**
+    - **Claude d'Anthropic :** `DEFAULT_ANTHROPIC_API_KEY` जोड़ा गया और `DEFAULT_MODEL_CLAUDE` से `"claude-3-5-sonnet-20240620"` तक अपडेट।
+  - **अनुवाद prompts का optimization :**
+    - direct translations और translation notes के लिए prompts को बेहतर स्पष्टता और दक्षता हेतु समृद्ध किया गया, जिसमें metadata और विशिष्ट formatting elements को बनाए रखने पर विस्तृत निर्देश शामिल हैं।
+  - **कोड refactoring :**
     - Mistral AI client initialization के लिए `MistralClient` को `Mistral` class से बदला गया।
-    - बेहतर पठनीयता और रखरखाव के लिए imports का पुनर्गठन।
-    - अनुवाद के दौरान मूल formatting बनाए रखने के लिए texts के segmentation और code blocks के प्रबंधन में सुधार।
-  - **आउटपुट फ़ाइलों का प्रबंधन :**
-    - आउटपुट फ़ाइल नामों में model और language का उलटाव (उदाहरण के लिए, `f"{base}-{args.target_lang}-{args.model}.md"`), जिससे अनुवादों का संगठन और खोज आसान हुई।
+    - बेहतर readability और maintenance के लिए imports का पुनर्गठन।
+    - मूल formatting को अनुवाद के दौरान बनाए रखने हेतु text segmentation और code block handling में सुधार।
+  - **output file management :**
+    - output file नाम में model और language का उल्टा क्रम (उदाहरण के लिए, `f"{base}-{args.target_lang}-{args.model}.md"`), जिससे translations का संगठन और खोज आसान हो जाती है।
   - **विविध सुधार :**
-    - अनावश्यक खाली पंक्तियाँ हटाकर code सफ़ाई।
-    - script की संरचना और पठनीयता सुधारने के लिए छोटे समायोजन।
+    - अनावश्यक खाली lines हटाकर code cleanup।
+    - script की संरचना और readability सुधारने के लिए छोटे adjustments।
 - **1.4** नई सुविधाएँ :
-  - अनुवाद के लिए Anthropic Claude API का समर्थन
-  - अधिक स्पष्टता और दक्षता के लिए prompts का अनुकूलन
-  - कोड रखरखाव सुधारने के लिए छोटे समायोजन
+  - अनुवाद के लिए Claude d'Anthropic API का समर्थन
+  - अधिक स्पष्टता और दक्षता के लिए prompts का optimization
+  - code maintenance सुधारने के लिए छोटे adjustments
 - **1.3** सुधार और नई सुविधाएँ :
-  - code blocks का बेहतर प्रबंधन
-  - आउटपुट फ़ाइलों का बेहतर प्रबंधन
-  - मौजूदा फ़ाइलों की बेहतर detection
-  - अनुवाद को बाध्य करने के लिए विकल्प `--force`
-  - आउटपुट फ़ाइल नाम में model और language का उलटाव
-- **1.2** changelog का सुधार
-- **1.1** Mistral IA API के समर्थन का जोड़
-- **1.0** प्रारंभिक संस्करण - OpenAI API का समर्थन
+  - code blocks का बेहतर handling
+  - output files का बेहतर handling
+  - existing files की बेहतर detection
+  - अनुवाद को बाध्य करने के लिए `--force` विकल्प
+  - output file नाम में model और language का उल्टा क्रम
+- **1.2** changelog सुधार
+- **1.1** Mistral IA API समर्थन जोड़ा गया
+- **1.0** प्रारंभिक संस्करण - OpenAI API समर्थन
 
-**यह दस्तावेज़ fr संस्करण से hi भाषा में gpt-5.4-mini मॉडल का उपयोग करके अनुवादित किया गया है। अनुवाद प्रक्रिया के बारे में अधिक जानकारी के लिए, https://gitlab.com/jls42/ai-powered-markdown-translator देखें**
-
+**यह दस्तावेज़ fr संस्करण से hi भाषा में gpt-5.4-mini मॉडल का उपयोग करके अनुवादित किया गया था। अनुवाद प्रक्रिया के बारे में अधिक जानकारी के लिए, https://github.com/jls42/ai-powered-markdown-translator देखें**

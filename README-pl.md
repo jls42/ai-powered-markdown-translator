@@ -4,25 +4,25 @@
 
 Tłumacz plików Markdown wykorzystujący **OpenAI**, **Mistral AI**, **Claude (Anthropic)** i **Google Gemini**.
 
-Ten skrypt Pythona tłumaczy pliki Markdown z języka źródłowego na język docelowy, zachowując formatowanie, bloki kodu i metadane front matter.
+Ten skrypt w Pythonie tłumaczy pliki Markdown z języka źródłowego na język docelowy, zachowując formatowanie, bloki kodu i metadane front matter.
 
 ## Główne funkcje
 
 - **Wielu dostawców**: Obsługa 4 API (OpenAI, Mistral, Claude, Gemini)
 - **Modele 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **Tryb ekonomiczny**: Opcja `--eco` do korzystania z szybszych i tańszych modeli
-- **Jeden plik**: Opcja `--file` do tłumaczenia pojedynczego pliku
+- **Tryb ekonomiczny**: Opcja `--eco` do używania szybszych i tańszych modeli
+- **Pojedynczy plik**: Opcja `--file` do tłumaczenia jednego pliku
 - **Inteligentna segmentacja**: Obsługa długich tekstów z limitami tokenów zależnymi od modelu
 - **Zachowanie kodu**: Bloki kodu ORAZ kod inline (`` `...` ``) są zachowywane
 - **Nazwa pliku**: Opcja `--keep_filename` do zachowania oryginalnej nazwy
 - **Tryb news**: Opcja `--news` do ochrony angielskich cytatów i obsługi flag w artykułach informacyjnych
 - **Konfiguracja .env**: Obsługa pliku `.env` dla kluczy API
-- **Notatka tłumaczeniowa**: Opcjonalne dodanie notatki na końcu dokumentu
+- **Uwaga dotycząca tłumaczenia**: Opcjonalne dodanie notatki na końcu dokumentu
 
 ## Instalacja
 
 ```bash
-git clone https://gitlab.com/jls42/ai-powered-markdown-translator.git
+git clone https://github.com/jls42/ai-powered-markdown-translator.git
 cd ai-powered-markdown-translator
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -30,7 +30,7 @@ pip install -r requirements.txt
 
 ### Narzędzia jakości (opcjonalne, ale zalecane)
 
-Projekt używa [`pre-commit`](https://pre-commit.com), aby zapobiegać commitowaniu kodu źle sformatowanego, podatnego na ataki lub zawierającego sekret. Instalacja:
+Projekt używa [`pre-commit`](https://pre-commit.com), aby zapobiec commitowaniu kodu źle sformatowanego, podatnego na błędy lub zawierającego sekret. Instalacja:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -42,7 +42,7 @@ Aktywne hooki: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/js
 
 ## Konfiguracja
 
-Utwórz plik `.env` w katalogu głównym projektu lub ustaw zmienne środowiskowe:
+Utwórz plik `.env` w katalogu głównym projektu lub zdefiniuj zmienne środowiskowe:
 
 ```bash
 # Fichier .env (recommandé)
@@ -89,34 +89,34 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Opcje
 
-| Opcja                   | Opis                                                                    |
+| Opcja                   | Opis                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Pojedynczy plik Markdown do przetłumaczenia                              |
-| `--source_dir`           | Katalog źródłowy zawierający pliki Markdown                              |
-| `--target_dir`           | Katalog wyjściowy dla przetłumaczonych plików                            |
+| `--file`                 | Pojedynczy plik Markdown do tłumaczenia                                       |
+| `--source_dir`           | Katalog źródłowy zawierający pliki Markdown                        |
+| `--target_dir`           | Katalog wyjściowy dla przetłumaczonych plików                          |
 | `--source_lang`          | Język źródłowy (domyślnie: `fr`)                                             |
 | `--target_lang`          | Język docelowy (domyślnie: `en`)                                              |
-| `--model`                | Konkretny model do użycia                                                |
-| `--eco`                  | Użyj modeli ekonomicznych                                                |
-| `--use_mistral`          | Użyj API Mistral AI                                                      |
-| `--use_claude`           | Użyj API Claude                                                          |
-| `--use_gemini`           | Użyj API Gemini                                                          |
-| `--force`                | Wymuś ponowne tłumaczenie                                                |
-| `--keep_filename`        | Zachowaj oryginalną nazwę pliku                                          |
-| `--news`                 | Tryb news: chroni cytaty EN, obsługuje flagi według języka               |
-| `--add_translation_note` | Dodaj notatkę tłumaczeniową                                               |
-| `--include_model`        | Uwzględnij nazwę modelu w pliku wyjściowym                                |
+| `--model`                | Konkretne używane modele                                             |
+| `--eco`                  | Używaj modeli ekonomicznych                                         |
+| `--use_mistral`          | Użyj API Mistral AI                                                |
+| `--use_claude`           | Użyj API Claude                                                    |
+| `--use_gemini`           | Użyj API Gemini20#                                                            |
+| `--force`                | Wymuś ponowne tłumaczenie                                                  |
+| `--keep_filename`        | Zachowaj oryginalną nazwę pliku                                     |
+| `--news`                 | Tryb wiadomości: chroni cytaty EN, obsługuje flagi według języka |
+| `--add_translation_note` | Dodaj notatkę tłumaczeniową                                           |
+| `--include_model`        | Dołącz nazwę modelu w pliku wyjściowym                       |
 
 ### Domyślne modele (2026)
 
-| Dostawca | Jakość (domyślnie)       | Ekonomiczny (`--eco`)   |
+| Dostawca | Jakość (domyślnie)         | Ekonomiczny (`--eco`)     |
 | -------- | ------------------------ | ------------------------ |
 | OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`           |
 | Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5`       |
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`   |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
 
-> **Rekomendacja dla tłumaczeń long-form**: `--use_gemini` (domyślnie = `gemini-3.1-pro-preview` jakości, `--eco` = `gemini-3-flash-preview`) ma tendencję do lepszego zachowania struktury markdown w skryptach niełacińskich (PL, JA, ZH, AR, HI), zwłaszcza w trybie `--news`, gdzie liczy się wierność placeholderów. OpenAI pozostaje domyślnym wyborem dla zachowania zgodności wstecznej.
+> **Rekomendacja dla tłumaczeń long-form**: `--use_gemini` (domyślnie = `gemini-3.1-pro-preview` jakości, `--eco` = `gemini-3-flash-preview`) ma tendencję do lepszego zachowania struktury Markdown w skryptach niełacińskich (PL, JA, ZH, AR, HI), zwłaszcza w trybie `--news`, gdzie liczy się wierność placeholderów. OpenAI pozostaje domyślny ze względu na zgodność wsteczną.
 
 ## Projekty korzystające z tego skryptu
 
@@ -124,12 +124,11 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Autor
 
-Julien LE SAUX  
+Julien LE SAUX
 Email : contact@jls42.org
 
 ## Licencja
 
-GNU GENERAL PUBLIC LICENSE wersja 3. Zobacz [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Version 3. Zobacz [LICENSE](LICENSE).
 
-**Ten dokument został przetłumaczony z wersji fr na język pl przy użyciu modelu gpt-5.4-mini. Aby uzyskać więcej informacji o procesie tłumaczenia, zobacz https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+**Ten dokument został przetłumaczony z wersji fr na język pl przy użyciu modelu gpt-5.4-mini. Aby uzyskać więcej informacji o procesie tłumaczenia, zapoznaj się z https://github.com/jls42/ai-powered-markdown-translator**

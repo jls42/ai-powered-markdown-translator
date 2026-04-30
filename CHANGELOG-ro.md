@@ -1,24 +1,24 @@
-### Changelog
+### Jurnal de modificări
 
-🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+🌍 [Franceză](CHANGELOG.md) | [Engleză](CHANGELOG-en.md) | [Spaniolă](CHANGELOG-es.md) | [Chineză](CHANGELOG-zh.md) | [Germană](CHANGELOG-de.md) | [Japoneză](CHANGELOG-ja.md) | [Coreeană](CHANGELOG-ko.md) | [Arabă](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italiană](CHANGELOG-it.md) | [Olandeză](CHANGELOG-nl.md) | [Poloneză](CHANGELOG-pl.md) | [Portugheză](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Suedeză](CHANGELOG-sv.md)
 
 - **1.7.3** Instrumentare calitate pre-commit (2026-04-30) :
-  - Configurare `pre-commit` "tip EurekAI complet" : 14 hook-uri repartizate pe două etape (pre-commit rapid + pre-push greu)
-  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 chei API protejate), Lizard (CCN ≤ 12), pre-commit-hooks v5 (spații albe, EOF, fișiere mari, shebang-uri etc.)
-  - Pre-push : mypy (mod lax progresiv), Opengrep SAST (translate.py + scripts/), pip-audit (mod raportare inițial), unittest discover (tests/ + scripts/tests/)
-  - Wrappere locale în `scripts/` care folosesc `./venv/bin/python` (sistemul nu are `python` pur în afara venv)
-  - `scripts/audit_verdict.py` : parser JSON pip-audit cu 11 teste unittest, port Python adaptat după parserul jls42-astro
+  - Configurare `pre-commit` „type EurekAI complet” : 14 hook-uri repartizate pe două etape (pre-commit rapid + pre-push greu)
+  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 chei API protejate), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
+  - Pre-push : mypy (mod lax progresiv), Opengrep SAST (translate.py + scripts/), pip-audit (mod raportare inițială), unittest discover (tests/ + scripts/tests/)
+  - Wrappere locale în `scripts/` care folosesc `./venv/bin/python` (sistemul nu are `python` gol în afara venv)
+  - `scripts/audit_verdict.py` : parser JSON pip-audit cu 11 teste unittest, port Python adaptat al parserului jls42-astro
   - 7 încălcări ruff inițiale corectate : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
-  - Documentație : README.md (FR) + CLAUDE.md (workflow detaliat), 28 traduceri regenerate
-  - Lizard exclude temporar `translate.py` (4 funcții cu CCN 21-47, refactorizarea planificată într-un PR dedicat) — gate strict pe scripts/ pentru a evita regresiile
-- **1.7.2** Corectare silent-failure pe traduceri lungi (2026-04-28) :
-  - Validare limbă post-traducere pe toți providerii (OpenAI, Mistral, Claude, Gemini) : strat determinist (extrasul sursă regăsit verbatim) + strat probabilistic (`langdetect`)
-  - Whitelist `finish_reason` / `stop_reason` : aruncare `RuntimeError` pentru orice stare în afara whitelist-ului (truncare, content_filter etc.)
+  - Documentație : README.md (FR) + CLAUDE.md (workflow detaliat), 28 de traduceri regenerat
+  - Lizard exclude temporar `translate.py` (4 funcții cu CCN 21-47, refactor planificat într-un PR dedicat) — gate strict pe scripts/ pentru a evita regresiile
+- **1.7.2** Remediere eșec silențios la traduceri lungi (2026-04-28) :
+  - Validare limbă post-traducere pe toți furnizorii (OpenAI, Mistral, Claude, Gemini) : strat determinist (extrasul sursă regăsit verbatim) + strat probabilistic (`langdetect`)
+  - Whitelist `finish_reason` / `stop_reason` : aruncă `RuntimeError` pentru orice stare în afara whitelist-ului (truncation, content_filter, etc.)
   - `max_tokens` Claude : `4096` → `16384` (evită truncarea latentă pe segmente de 16k caractere)
-  - Segmentare conștientă de heading-uri : prioritate H2/H3 în a doua jumătate a segmentului (fiecare segment începe cu o secțiune semantică completă)
-  - Propagarea erorilor până la exit code non-zero : `translate_markdown_file` returnează un statut tipat `success` / `failure` / `skipped`, `main()` `sys.exit(1)` dacă cel puțin un fișier a eșuat (single-file și batch)
+  - Segmentare orientată pe heading-uri : prioritate H2/H3 în a doua jumătate a segmentului (fiecare segment începe cu o secțiune semantică completă)
+  - Propagarea erorilor până la cod de ieșire non-zero : `translate_markdown_file` returnează un statut tipat `success` / `failure` / `skipped`, `main()` `sys.exit(1)` dacă cel puțin un fișier a eșuat (single-file și batch)
   - Adăugare dependență `langdetect==1.0.9`
-  - Teste de regresie (`tests/test_silent_failure.py`, `unittest` stdlib) care acoperă cele șase verigi ale lanțului de eroare
+  - Teste de regresie (`tests/test_silent_failure.py`, `unittest` stdlib) care acoperă cele șase verigi ale lanțului de erori
 - **1.7.1** Actualizare modele OpenAI :
   - Modelele implicite actualizate la GPT-5.4 (martie 2026) :
     - Calitate : `gpt-5` → `gpt-5.4`
@@ -30,8 +30,8 @@
   - **Păstrarea codului inline** : backtick-urile (`` `...` ``) sunt acum protejate în timpul traducerii
   - Îmbunătățirea promptului de sistem :
     - Gestionare mai bună a ghilimelelor în YAML frontmatter
-    - Protecția variabilelor de template `{variable}`
-    - Interdicția notelor de traducător nedorite
+    - Protejarea variabilelor de șablon `{variable}`
+    - Interdicția notelor de traducător necerute
   - Testat cu succes pe 364 de fișiere (migrare blog jls42.org)
 - **1.6** Noutăți :
   - Suport pentru API-ul Google Gemini pentru traducere (`--use_gemini`)
@@ -39,9 +39,9 @@
     - OpenAI : `gpt-5` (calitate), `gpt-5-mini` (eco)
     - Claude : `claude-sonnet-4-5` (calitate), `claude-haiku-4-5` (eco)
     - Gemini : `gemini-3-pro-preview` (calitate), `gemini-3-flash-preview` (eco)
-  - Mod economic (`--eco`) pentru a folosi modele mai rapide și mai puțin costisitoare
+  - Mod economic (`--eco`) pentru a utiliza modele mai rapide și mai puțin costisitoare
   - Traducere de fișier unic (`--file`) fără a parcurge un director
-  - Nou model de denumire simplificat : `{base}-{lang}.md`
+  - Nou pattern de denumire simplificat : `{base}-{lang}.md`
   - Opțiune `--include_model` pentru a păstra vechiul format cu numele modelului
   - Suport pentru modelele nelistate cu limită implicită de tokeni (128k)
   - README tradus în 14 limbi
@@ -51,11 +51,11 @@
     - **Mistral AI :** Actualizare de la `DEFAULT_MODEL_MISTRAL` la `"mistral-large-latest"`.
     - **Claude de la Anthropic :** Adăugare `DEFAULT_ANTHROPIC_API_KEY` și actualizare de la `DEFAULT_MODEL_CLAUDE` la `"claude-3-5-sonnet-20240620"`.
   - **Optimizarea prompturilor de traducere :**
-    - Prompturile pentru traducerile directe și notele de traducere au fost îmbogățite pentru mai multă claritate și eficiență, incluzând instrucțiuni detaliate privind păstrarea metadatelor și a elementelor specifice de formatare.
+    - Prompturile pentru traducerile directe și notele de traducere au fost îmbogățite pentru o mai bună claritate și eficiență, incluzând instrucțiuni detaliate privind păstrarea metadatelor și a elementelor specifice de formatare.
   - **Refactorizarea codului :**
-    - Înlocuirea lui `MistralClient` cu clasa `Mistral` pentru inițializarea clientului Mistral AI.
-    - Reorganizarea importurilor pentru o mai bună lizibilitate și întreținere.
-    - Îmbunătățirea segmentării textelor și a gestionării blocurilor de cod pentru a păstra formatul original în timpul traducerii.
+    - Înlocuirea `MistralClient` cu clasa `Mistral` pentru inițializarea clientului Mistral AI.
+    - Reorganizarea importurilor pentru o mai bună lizibilitate și mentenanță.
+    - Îmbunătățirea segmentării textelor și a gestionării blocurilor de cod pentru a păstra formatarea originală la traducere.
   - **Gestionarea fișierelor de ieșire :**
     - Inversarea modelului și a limbii în numele fișierelor de ieșire (de exemplu, `f"{base}-{args.target_lang}-{args.model}.md"`), facilitând astfel organizarea și căutarea traducerilor.
   - **Îmbunătățiri diverse :**
@@ -63,17 +63,16 @@
     - Ajustări minore pentru a îmbunătăți structura și lizibilitatea scriptului.
 - **1.4** Noutăți :
   - Suport pentru API-ul Claude de la Anthropic pentru traducere
-  - Optimizarea prompturilor pentru mai multă claritate și eficiență
-  - Ajustări minore pentru a îmbunătăți întreținerea codului
+  - Optimizarea prompturilor pentru o claritate și eficiență sporite
+  - Ajustări minore pentru a îmbunătăți mentenanța codului
 - **1.3** Îmbunătățiri și funcționalități noi :
   - Gestionare îmbunătățită a blocurilor de cod
   - Gestionare îmbunătățită a fișierelor de ieșire
   - Detectare îmbunătățită a fișierelor existente
   - Opțiune `--force` pentru a forța traducerea
   - Inversarea modelului și a limbii în numele fișierului de ieșire
-- **1.2** Corectare changelog
-- **1.1** Adăugarea suportului pentru API-ul Mistral IA
-- **1.0** Versiunea inițială - Suport pentru API-ul OpenAI
+- **1.2** Remediere jurnal de modificări
+- **1.1** Adăugare suport pentru API-ul Mistral IA
+- **1.0** Versiune inițială - Suport pentru API-ul OpenAI
 
-**Acest document a fost tradus din versiunea fr în limba ro folosind modelul gpt-5.4-mini. Pentru mai multe informații despre procesul de traducere, consultați https://gitlab.com/jls42/ai-powered-markdown-translator**
-
+**Acest document a fost tradus din versiunea fr în limba ro folosind modelul gpt-5.4-mini. Pentru mai multe informații despre procesul de traducere, consultați https://github.com/jls42/ai-powered-markdown-translator**

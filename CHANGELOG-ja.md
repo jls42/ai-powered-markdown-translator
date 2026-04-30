@@ -2,78 +2,77 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7.3** pre-commit 品質ツール整備（2026-04-30）:
-  - Setup `pre-commit` 「EurekAI 完全版型」: 2つのステージに分かれた14個のフック（高速 pre-commit + 重めの pre-push）
-  - Pre-commit: ruff（lint+format）、shellcheck、prettier（md/yaml/json）、detect-secrets（保護された4つのAPIキー）、Lizard（CCN ≤ 12）、pre-commit-hooks v5（whitespace、EOF、large-files、shebangs など）
-  - Pre-push: mypy（段階的に緩いモード）、Opengrep SAST（translate.py + scripts/）、pip-audit（初期レポートモード）、unittest discover（tests/ + scripts/tests/）
-  - `scripts/` 内のローカルラッパーは `./venv/bin/python` を使用（システムには venv 外で生の `python` がない）
-  - `scripts/audit_verdict.py` : unittest 11件で pip-audit の JSON パーサーを実装、jls42-astro のパーサーを移植した Python 版
-  - 7件の初期 ruff 違反を修正: B904（raise from）×2、B007（未使用 dirs）、C408（dict literal）、C419（list-comp）、SIM105（contextlib.suppress）、SIM110（any()）
-  - ドキュメント: README.md（FR）+ CLAUDE.md（詳細なワークフロー）、28件の翻訳を再生成
-  - Lizard は一時的に `translate.py` を除外（CCN 21-47 の4関数、専用PRでリファクタ予定）— scripts/ には厳格なゲートを適用し、回帰を防止
-- **1.7.2** 長文翻訳のサイレント失敗を修正（2026-04-28）:
-  - すべてのプロバイダ（OpenAI、Mistral、Claude、Gemini）で翻訳後の言語検証を実施: 決定論的レイヤー（ソース抜粋を verbatim で復元） + 確率的レイヤー（`langdetect`）
-  - `finish_reason` / `stop_reason` のホワイトリスト: ホワイトリスト外の状態（truncation、content_filter など）では `RuntimeError` を送出
-  - `max_tokens` Claude: `4096` → `16384`（16k文字セグメントでの潜在的な truncation を回避）
-  - 見出し対応のセグメンテーション: セグメント後半では H2/H3 を優先（各セグメントは完全な意味的セクションから開始）
-  - エラーを非ゼロ終了コードまで伝播: `translate_markdown_file` は型付きステータス `success` / `failure` / `skipped` を返し、`main()` は少なくとも1ファイルが失敗した場合に `sys.exit(1)`（単一ファイル・バッチ両対応）
+- **1.7.3** pre-commit品質ツール整備 (2026-04-30) :
+  - `pre-commit` 「完全な EurekAI 型」セットアップ : 2 つのステージに分かれた 14 個のフック（高速 pre-commit + 重い pre-push）
+  - Pre-commit : ruff（lint+format）、shellcheck、prettier（md/yaml/json）、detect-secrets（保護された 4 つの API キー）、Lizard（CCN ≤ 12）、pre-commit-hooks v5（whitespace、EOF、large-files、shebangs など）
+  - Pre-push : mypy（段階的な緩和モード）、Opengrep SAST（translate.py + scripts/）、pip-audit（初期レポートモード）、unittest discover（tests/ + scripts/tests/）
+  - `scripts/` 内のローカルラッパーは `./venv/bin/python` を使用（venv 外ではシステムに `python` 素の形では存在しない）
+  - `scripts/audit_verdict.py` : 11 個の unittest テストを備えた pip-audit JSON パーサー、jls42-astro のパーサーを移植した Python 版
+  - 初期の 7 件の ruff 違反を修正 : B904（raise from）×2、B007（unused dirs）、C408（dict literal）、C419（list-comp）、SIM105（contextlib.suppress）、SIM110（any()）
+  - ドキュメント : README.md（FR）+ CLAUDE.md（詳細ワークフロー）、28 個の翻訳を再生成
+  - Lizard は一時的に `translate.py` を除外（CCN 21-47 の 4 関数、リファクタは専用 PR で予定）— 回帰を防ぐため scripts/ に対して厳格なゲート
+- **1.7.2** 長文翻訳での silent-failure 修正 (2026-04-28) :
+  - すべてのプロバイダ（OpenAI、Mistral、Claude、Gemini）で翻訳後の言語検証：決定論的層（ソース抜粋を verbatim で再検出）+ 確率的層（`langdetect`）
+  - `finish_reason` / `stop_reason` ホワイトリスト：ホワイトリスト外の状態（truncation、content_filter など）では `RuntimeError` を発生させる
+  - `max_tokens` Claude : `4096` → `16384`（16k 文字セグメントでの潜在的な truncation を回避）
+  - 見出しを意識したセグメンテーション：セグメントの後半で H2/H3 を優先（各セグメントは完全な意味単位のセクションで始まる）
+  - エラーを非ゼロ終了コードまで伝播：`translate_markdown_file` は型付きステータス `success` / `failure` / `skipped` を返し、少なくとも 1 ファイルが失敗した場合は `main()` `sys.exit(1)`（単一ファイルおよびバッチ）
   - 依存関係 `langdetect==1.0.9` を追加
-  - エラーチェーンの6つの要素をカバーする回帰テスト（`tests/test_silent_failure.py`、`unittest` stdlib）
-- **1.7.1** OpenAI モデル更新:
-  - デフォルトモデルを GPT-5.4（2026年3月）に更新:
-    - 品質: `gpt-5` → `gpt-5.4`
-    - 経済版: `gpt-5-mini` → `gpt-5.4-mini`
-  - `gpt-5.4`、`gpt-5.4-mini`、`gpt-5.4-nano` にトークン上限を追加（400k）
-- **1.7** 新機能:
+  - エラー連鎖の 6 つの段階をカバーする回帰テスト（`tests/test_silent_failure.py`、`unittest` stdlib）
+- **1.7.1** OpenAI モデルの更新 :
+  - デフォルトモデルを GPT-5.4（2026年3月）へ更新：
+    - 品質 : `gpt-5` → `gpt-5.4`
+    - 経済的 : `gpt-5-mini` → `gpt-5.4-mini`
+  - `gpt-5.4`、`gpt-5.4-mini`、`gpt-5.4-nano` のトークン上限を追加（400k）
+- **1.7** 新機能：
   - 翻訳時に元のファイル名を保持するための `--keep_filename` オプション
-  - APIキーを自動的に読み込む `.env` ファイルのサポート
-  - **インラインコードの保持**: バッククォート（`` `...` ``）が翻訳中に保護されるようになりました
-  - システムプロンプトの改善:
-    - YAML frontmatter での引用符の扱いを改善
+  - API キーを自動で読み込むための `.env` ファイルのサポート
+  - **インラインコードの保持**：バッククォート（`` `...` ``）は翻訳中に保護されるようになりました
+  - システムプロンプトの改善：
+    - YAML frontmatter 内の引用符の扱いを改善
     - テンプレート変数 `{variable}` の保護
     - 要求されていない翻訳者メモの禁止
-  - jls42.org ブログ移行で364ファイルを対象に正常にテスト済み
-- **1.6** 新機能:
-  - 翻訳用 Google Gemini API をサポート（`--use_gemini`）
-  - 2026年のデフォルトモデルを更新:
-    - OpenAI: `gpt-5`（品質）、`gpt-5-mini`（エコ）
-    - Claude: `claude-sonnet-4-5`（品質）、`claude-haiku-4-5`（エコ）
-    - Gemini: `gemini-3-pro-preview`（品質）、`gemini-3-flash-preview`（エコ）
-  - より高速で低コストなモデルを使うための経済モード（`--eco`）
-  - ディレクトリを走査せずに単一ファイルを翻訳（`--file`）
-  - 新しい簡略命名パターン: `{base}-{lang}.md`
-  - モデル名付きの旧形式を保持するための `--include_model` オプション
-  - 既定のトークン上限を持つ未一覧モデルのサポート（128k）
-  - README を14言語に翻訳
-- **1.5** 改善:
-  - **APIキーとデフォルトモデルの更新:**
-    - **OpenAI:** `DEFAULT_MODEL_OPENAI` を `"gpt-4o"` に更新。
-    - **Mistral AI:** `DEFAULT_MODEL_MISTRAL` を `"mistral-large-latest"` に更新。
-    - **Anthropic Claude:** `DEFAULT_ANTHROPIC_API_KEY` を追加し、`DEFAULT_MODEL_CLAUDE` を `"claude-3-5-sonnet-20240620"` に更新。
-  - **翻訳プロンプトの最適化:**
-    - 直接翻訳と翻訳メモ用のプロンプトを強化し、メタデータや特定の書式要素の保持に関する詳細な指示を追加することで、より明確で効率的になりました。
-  - **コードのリファクタリング:**
-    - Mistral AI クライアント初期化のために `MistralClient` を `Mistral` クラスへ置き換え。
+  - jls42.org ブログ移行で 364 ファイルに対して正常にテスト済み
+- **1.6** 新機能：
+  - 翻訳用の Google Gemini API をサポート (`--use_gemini`)
+  - 2026 年のデフォルトモデルを更新：
+    - OpenAI : `gpt-5`（品質）、`gpt-5-mini`（低コスト）
+    - Claude : `claude-sonnet-4-5`（品質）、`claude-haiku-4-5`（低コスト）
+    - Gemini : `gemini-3-pro-preview`（品質）、`gemini-3-flash-preview`（低コスト）
+  - より高速で低コストなモデルを使用するための低コストモード (`--eco`)
+  - ディレクトリを走査せずに単一ファイルを翻訳 (`--file`)
+  - 新しい簡略化された命名パターン：`{base}-{lang}.md`
+  - モデル名付きの旧形式を維持するための `--include_model` オプション
+  - デフォルトのトークン上限付きで未掲載モデルをサポート（128k）
+  - README を 14 言語に翻訳
+- **1.5** 改善：
+  - **API キーとデフォルトモデルの更新：**
+    - **OpenAI :** `DEFAULT_MODEL_OPENAI` から `"gpt-4o"` に更新。
+    - **Mistral AI :** `DEFAULT_MODEL_MISTRAL` から `"mistral-large-latest"` に更新。
+    - **Anthropic Claude :** `DEFAULT_ANTHROPIC_API_KEY` を追加し、`DEFAULT_MODEL_CLAUDE` から `"claude-3-5-sonnet-20240620"` に更新。
+  - **翻訳プロンプトの最適化：**
+    - 直接翻訳と翻訳メモ用のプロンプトを拡充し、メタデータや特定のフォーマット要素の保持に関する詳細な指示を含めることで、より明確で効果的にしました。
+  - **コードのリファクタリング：**
+    - Mistral AI クライアント初期化のために `MistralClient` を `Mistral` クラスに置き換え。
     - 可読性と保守性を高めるために import を再整理。
-    - 翻訳時に元の書式を保持するため、テキストのセグメンテーションとコードブロックの処理を改善。
-  - **出力ファイルの管理:**
-    - 出力ファイル名におけるモデルと言語の順序を逆にし（例: `f"{base}-{args.target_lang}-{args.model}.md"`）、翻訳の整理と検索を容易にしました。
-  - **その他の改善:**
+    - 翻訳時に元のフォーマットを保持するため、テキストのセグメンテーションとコードブロックの処理を改善。
+  - **出力ファイルの管理：**
+    - 出力ファイル名でモデルと言語の順序を逆転（例：`f"{base}-{args.target_lang}-{args.model}.md"`）し、翻訳の整理と検索を容易にしました。
+  - **その他の改善：**
     - 不要な空行を削除してコードを整理。
-    - スクリプトの構造と可読性を改善するための小規模な調整。
-- **1.4** 新機能:
+    - スクリプトの構造と可読性を向上させるための細かな調整。
+- **1.4** 新機能：
   - 翻訳用の Anthropic Claude API をサポート
-  - より明確で効率的なプロンプト最適化
-  - コード保守性を改善するための小規模な調整
-- **1.3** 改善と新機能:
-  - コードブロック処理の改善
-  - 出力ファイル処理の改善
+  - より高い明確さと効率のためにプロンプトを最適化
+  - コード保守性向上のための細かな調整
+- **1.3** 改善と新機能：
+  - コードブロック管理の改善
+  - 出力ファイル管理の改善
   - 既存ファイル検出の改善
-  - 翻訳を強制する `--force` オプション
-  - 出力ファイル名におけるモデルと言語の順序を逆転
+  - 翻訳を強制するための `--force` オプション
+  - 出力ファイル名でモデルと言語の順序を逆転
 - **1.2** 変更履歴の修正
-- **1.1** Mistral IA API のサポートを追加
-- **1.0** 初期バージョン - OpenAI API のサポート
+- **1.1** Mistral IA API サポートを追加
+- **1.0** 初期バージョン - OpenAI API サポート
 
-**この文書は、gpt-5.4-mini モデルを使用して fr 版から ja 言語へ翻訳されました。翻訳プロセスの詳細については、https://gitlab.com/jls42/ai-powered-markdown-translator をご覧ください。**
-
+**この文書は、モデル gpt-5.4-mini を使用して fr 版から ja 言語へ翻訳されました。翻訳プロセスの詳細については、https://github.com/jls42/ai-powered-markdown-translator を参照してください。**
