@@ -300,6 +300,66 @@ locale: 'pl'
             self.assertNotIn("<NEWSQUOTE", out)
             self.assertIn("🇵🇱", out)
 
+    def test_news_xml_placeholder_restores_quote_without_attribution(self):
+        """Les anciens articles news peuvent avoir une citation sans ligne `> — ...`."""
+        source_news = """---
+title: Test
+locale: 'fr'
+---
+
+## Project Vend
+
+> The gap between 'capable' and 'completely robust' remains wide.
+>
+> 🇫🇷 _L'écart entre « capable » et « complètement robuste » reste important._
+"""
+        translated_news = """---
+title: Test
+locale: 'pl'
+---
+
+## Project Vend
+
+<NEWSQUOTE id="0"/>
+>
+> 🇵🇱 _Różnica między „zdolny” a „w pełni solidny” pozostaje duża._
+"""
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = os.path.join(tmpdir, "input.mdx")
+            dst = os.path.join(tmpdir, "input-pl.mdx")
+            with open(src, "w", encoding="utf-8") as f:
+                f.write(source_news)
+
+            mock_client = MagicMock()
+            mock_client.chat.completions.create.return_value = _make_openai_response(
+                translated_news
+            )
+            args = _base_args(
+                source_dir=tmpdir,
+                target_dir=tmpdir,
+                target_lang="pl",
+                news=True,
+            )
+
+            status = translate_markdown_file(
+                src,
+                dst,
+                mock_client,
+                args,
+                use_mistral=False,
+                use_claude=False,
+                use_gemini=False,
+                add_translation_note=False,
+                force=False,
+            )
+
+            self.assertEqual(status, "success")
+            with open(dst, encoding="utf-8") as f:
+                out = f.read()
+            self.assertIn("> The gap between 'capable' and 'completely robust' remains wide.", out)
+            self.assertNotIn("<NEWSQUOTE", out)
+
     def test_news_missing_xml_placeholder_is_failure(self):
         """Un placeholder news supprimé par le modèle doit bloquer l'écriture."""
         source_news = """---

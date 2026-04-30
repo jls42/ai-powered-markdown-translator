@@ -661,13 +661,14 @@ def translate_markdown_file(
         original_quotes = []
         attribution_urls = []
         if args.news:
-            # Pattern: > EN quote \n > \n > FLAG _translation_ \n > — [@account](url)
+            # Pattern: > EN quote \n > \n > FLAG _translation_ \n optional attribution
             # La citation EN peut être entre guillemets ou non selon la source X/blog.
+            # Les anciens articles n'ont pas toujours une ligne `> — ...` après la traduction.
             citation_regex = re.compile(
                 r"(^> (?!— ).+?)[ \t]*\n"  # Groupe 1: citation EN brute
                 r">[ \t]*\n"  # ligne blockquote vide
-                r"(^> .+_)[ \t]*\n"  # Groupe 2: drapeau + traduction italique
-                r"(^> — .+?)[ \t]*$",  # Groupe 3: ligne d'attribution
+                r"(^> .+_)[ \t]*"  # Groupe 2: drapeau + traduction italique
+                r"(?:\n(^> — .+?)[ \t]*)?$",  # Groupe 3: ligne d'attribution optionnelle
                 re.MULTILINE,
             )
 
@@ -675,11 +676,16 @@ def translate_markdown_file(
                 idx = len(original_quotes)
                 original_quotes.append(match.group(1))
                 # Extraire l'URL d'attribution pour validation
-                url_match = re.search(r"\((.+?)\)", match.group(3))
-                if url_match:
-                    attribution_urls.append(url_match.group(1))
+                attribution = match.group(3)
+                if attribution:
+                    url_match = re.search(r"\((.+?)\)", attribution)
+                    if url_match:
+                        attribution_urls.append(url_match.group(1))
                 # Remplacer la quote EN par un placeholder, garder le reste pour le LLM
-                return f"{news_quote_placeholder(idx)}\n>\n{match.group(2)}\n{match.group(3)}"
+                protected = f"{news_quote_placeholder(idx)}\n>\n{match.group(2)}"
+                if attribution:
+                    protected += f"\n{attribution}"
+                return protected
 
             content = citation_regex.sub(citation_replacer, content)
             if original_quotes:
