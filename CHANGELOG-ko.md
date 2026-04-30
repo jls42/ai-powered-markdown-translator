@@ -2,58 +2,78 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7.1** OpenAI 모델 업데이트:
-    - 기본 모델이 GPT-5.4(2026년 3월)로 업데이트됨:
-        - 품질: `gpt-5` → `gpt-5.4`
-        - 경제형: `gpt-5-mini` → `gpt-5.4-mini`
-    - `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`에 대한 토큰 한도 추가(400k)
-- **1.7** 새로운 기능:
-    - 번역 시 원본 파일명을 유지하는 `--keep_filename` 옵션
-    - API 키를 자동으로 불러오기 위한 `.env` 파일 지원
-    - **인라인 코드 보존**: 백틱(`` `...` ``)이 이제 번역 중 보호됩니다
-    - 시스템 프롬프트 개선:
-        - YAML frontmatter의 따옴표 처리 개선
-        - 템플릿 변수 `{variable}` 보호
-        - 요청되지 않은 번역자 노트 금지
-    - 364개 파일에서 성공적으로 테스트됨(jls42.org 블로그 이전)
-- **1.6** 새로운 기능:
-    - 번역을 위한 Google Gemini API 지원(`--use_gemini`)
-    - 2026 기본 모델 업데이트:
-        - OpenAI: `gpt-5`(품질), `gpt-5-mini`(경제형)
-        - Claude: `claude-sonnet-4-5`(품질), `claude-haiku-4-5`(경제형)
-        - Gemini: `gemini-3-pro-preview`(품질), `gemini-3-flash-preview`(경제형)
-    - 더 빠르고 저렴한 모델을 사용하는 경제 모드(`--eco`)
-    - 디렉터리를 탐색하지 않는 단일 파일 번역(`--file`)
-    - 새롭고 단순화된 파일명 패턴: `{base}-{lang}.md`
-    - 모델명을 포함한 이전 형식을 유지하는 `--include_model` 옵션
-    - 기본 토큰 제한(128k)이 있는 목록에 없는 모델 지원
-    - 14개 언어로 번역된 README
-- **1.5** 개선 사항:
-    - **API 키 및 기본 모델 업데이트:**
-        - **OpenAI:** `DEFAULT_MODEL_OPENAI`에서 `"gpt-4o"`로 업데이트.
-        - **Mistral AI:** `DEFAULT_MODEL_MISTRAL`에서 `"mistral-large-latest"`로 업데이트.
-        - **Anthropic의 Claude:** `DEFAULT_ANTHROPIC_API_KEY` 추가 및 `DEFAULT_MODEL_CLAUDE`에서 `"claude-3-5-sonnet-20240620"`로 업데이트.
-    - **번역 프롬프트 최적화:**
-        - 직접 번역 및 번역 노트용 프롬프트를 더 명확하고 효율적으로 개선했으며, 메타데이터와 특정 서식 요소 보존에 대한 자세한 지침을 포함함.
-    - **코드 리팩터링:**
-        - Mistral AI 클라이언트 초기화를 위해 `MistralClient`을 `Mistral` 클래스로 교체.
-        - 가독성과 유지보수성을 높이기 위해 import 재구성.
-        - 번역 시 원본 서식을 보존하기 위해 텍스트 분할 및 코드 블록 처리를 개선.
-    - **출력 파일 관리:**
-        - 출력 파일 이름에서 모델과 언어의 순서를 반전함(예: `f"{base}-{args.target_lang}-{args.model}.md"`)으로써 번역 정리와 검색을 더 쉽게 함.
-    - **기타 개선 사항:**
-        - 불필요한 빈 줄을 제거하여 코드 정리.
-        - 스크립트의 구조와 가독성을 향상하기 위한 사소한 조정.
-- **1.4** 새로운 기능:
-    - 번역을 위한 Anthropic의 Claude API 지원
-    - 더 높은 명확성과 효율성을 위한 프롬프트 최적화
-    - 코드 유지보수 개선을 위한 사소한 조정
-- **1.3** 개선 사항 및 새로운 기능:
-    - 코드 블록 처리 개선
-    - 출력 파일 처리 개선
-    - 기존 파일 감지 개선
-    - 번역을 강제하는 `--force` 옵션
-    - 출력 파일 이름에서 모델과 언어의 순서 반전
+- **1.7.3** pre-commit 품질 도구 (2026-04-30) :
+  - `pre-commit` "완전한 EurekAI 유형" 설정: 두 단계에 분산된 14개 훅(빠른 pre-commit + 무거운 pre-push)
+  - Pre-commit: ruff(lint+format), shellcheck, prettier(md/yaml/json), detect-secrets(보호된 4개 API 키), Lizard(CCN ≤ 12), pre-commit-hooks v5(whitespace, EOF, large-files, shebangs 등)
+  - Pre-push: mypy(점진적 느슨한 모드), Opengrep SAST(translate.py + scripts/), pip-audit(초기 보고 모드), unittest discover(tests/ + scripts/tests/)
+  - `scripts/`의 로컬 래퍼는 `./venv/bin/python`를 사용함(시스템에는 venv 밖의 `python` 순수 버전이 없음)
+  - `scripts/audit_verdict.py` : 11개의 unittest 테스트가 있는 pip-audit JSON 파서, jls42-astro 파서의 Python 포팅 버전
+  - 초기 ruff 위반 7개 수정: B904(raise from) ×2, B007(unused dirs), C408(dict literal), C419(list-comp), SIM105(contextlib.suppress), SIM110(any())
+  - 문서화: README.md(FR) + CLAUDE.md(상세 워크플로), 28개 번역 재생성
+  - Lizard가 일시적으로 `translate.py`를 제외함(CCN 21-47의 함수 4개, 전용 PR에서 리팩터 예정) — 회귀 방지를 위해 scripts/에 엄격한 게이트 적용
+- **1.7.2** 긴 번역에서의 silent-failure 수정 (2026-04-28) :
+  - 모든 제공자(OpenAI, Mistral, Claude, Gemini)에 대해 번역 후 언어 검증: 결정론적 계층(소스 발췌를 그대로 복원) + 확률론적 계층(`langdetect`)
+  - `finish_reason` / `stop_reason` 화이트리스트: 화이트리스트 밖의 모든 상태(truncation, content_filter 등)에 대해 `RuntimeError` 발생
+  - `max_tokens` Claude: `4096` → `16384` (16k 문자 세그먼트에서 잠재적 truncation 방지)
+  - 헤딩 인식 세그먼ენტ화: 세그먼트의 후반부에서 H2/H3 우선순위(각 세그먼트는 완전한 의미 단위 섹션으로 시작)
+  - 오류를 non-zero exit code까지 전파: `translate_markdown_file`이 유형화된 상태 `success` / `failure` / `skipped`를 반환하며, 최소 하나의 파일이 실패하면 `main()`가 `sys.exit(1)`(single-file 및 batch)
+  - `langdetect==1.0.9` 의존성 추가
+  - 오류 체인의 6개 연결 고리를 다루는 회귀 테스트(`tests/test_silent_failure.py`, `unittest` stdlib)
+- **1.7.1** OpenAI 모델 업데이트 :
+  - 기본 모델을 GPT-5.4(2026년 3월)로 업데이트:
+    - 품질: `gpt-5` → `gpt-5.4`
+    - 경제형: `gpt-5-mini` → `gpt-5.4-mini`
+  - `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`에 대한 토큰 제한 추가(400k)
+- **1.7** 새로운 기능 :
+  - 번역 시 원본 파일명을 유지하는 `--keep_filename` 옵션
+  - API 키를 자동으로 불러오기 위한 `.env` 파일 지원
+  - **인라인 코드 보존**: 백틱(`` `...` ``)이 이제 번역 중 보호됨
+  - 시스템 프롬프트 개선:
+    - YAML frontmatter에서 따옴표 처리 개선
+    - 템플릿 변수 `{variable}` 보호
+    - 요청되지 않은 번역자 메모 금지
+  - jls42.org 블로그 마이그레이션의 364개 파일에서 성공적으로 테스트됨
+- **1.6** 새로운 기능 :
+  - 번역용 Google Gemini API 지원(`--use_gemini`)
+  - 2026 기본 모델 업데이트:
+    - OpenAI: `gpt-5`(품질), `gpt-5-mini`(경제형)
+    - Claude: `claude-sonnet-4-5`(품질), `claude-haiku-4-5`(경제형)
+    - Gemini: `gemini-3-pro-preview`(품질), `gemini-3-flash-preview`(경제형)
+  - 더 빠르고 저렴한 모델을 사용하기 위한 경제형 모드(`--eco`)
+  - 디렉터리를 순회하지 않는 단일 파일 번역(`--file`)
+  - 새로 단순화된 명명 패턴: `{base}-{lang}.md`
+  - 모델 이름이 포함된 기존 형식을 유지하는 `--include_model` 옵션
+  - 기본 토큰 제한(128k)이 있는 미등록 모델 지원
+  - 14개 언어로 번역된 README
+- **1.5** 개선 사항 :
+  - **API 키 및 기본 모델 업데이트:**
+    - **OpenAI:** `DEFAULT_MODEL_OPENAI`를 `"gpt-4o"`로 업데이트.
+    - **Mistral AI:** `DEFAULT_MODEL_MISTRAL`를 `"mistral-large-latest"`로 업데이트.
+    - **Anthropic의 Claude:** `DEFAULT_ANTHROPIC_API_KEY`를 추가하고 `DEFAULT_MODEL_CLAUDE`를 `"claude-3-5-sonnet-20240620"`로 업데이트.
+  - **번역 프롬프트 최적화:**
+    - 직접 번역 및 번역 메모용 프롬프트가 메타데이터와 특정 서식 요소 보존에 대한 상세 지침을 포함하여 더 명확하고 효율적이도록 강화됨.
+  - **코드 리팩터링:**
+    - Mistral AI 클라이언트 초기화를 위해 `MistralClient`을 `Mistral` 클래스로 교체.
+    - 가독성과 유지보수성을 높이기 위한 import 재구성.
+    - 번역 시 원래 서식을 보존하도록 텍스트 세그먼ენტ화와 코드 블록 처리를 개선.
+  - **출력 파일 관리:**
+    - 출력 파일 이름에서 모델과 언어의 순서를 반대로 함(예: `f"{base}-{args.target_lang}-{args.model}.md"`), 번역 정리와 검색이 쉬워짐.
+  - **기타 개선 사항:**
+    - 불필요한 빈 줄을 제거하여 코드 정리.
+    - 스크립트의 구조와 가독성을 높이기 위한 사소한 조정.
+- **1.4** 새로운 기능 :
+  - 번역을 위한 Anthropic의 Claude API 지원
+  - 더 높은 명확성과 효율성을 위한 프롬프트 최적화
+  - 코드 유지보수성을 높이기 위한 사소한 조정
+- **1.3** 개선 사항 및 새 기능 :
+  - 코드 블록 처리 개선
+  - 출력 파일 처리 개선
+  - 기존 파일 감지 개선
+  - 번역 강제를 위한 `--force` 옵션
+  - 출력 파일 이름에서 모델과 언어 순서 반전
 - **1.2** 변경 로그 수정
 - **1.1** Mistral IA API 지원 추가
 - **1.0** 초기 버전 - OpenAI API 지원
+
+**이 문서는 fr 버전에서 gpt-5.4-mini 모델을 사용하여 ko 언어로 번역되었습니다. 번역 과정에 대한 자세한 정보는 https://gitlab.com/jls42/ai-powered-markdown-translator를 참조하세요.**
+

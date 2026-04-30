@@ -358,17 +358,60 @@ locale: 'pl'
             self.assertFalse(os.path.exists(dst))
 
 
+class TestStructuralLineLanguageBar(unittest.TestCase):
+    """Le validateur post-traduction extrait des "fenêtres source" et vérifie
+    qu'elles n'apparaissent pas verbatim dans la sortie. Les barres de langues
+    markdown (`[français](README.md) | [english](README-en.md) | ...`) ont
+    leurs paths conservés à l'identique entre les langues par design — sans
+    cette exception, le validateur leverait un faux positif systématique.
+    """
+
+    def test_language_bar_with_globe_emoji_is_structural(self):
+        """README.md / CHANGELOG.md commencent par une ligne `🌍 [Français](...)`."""
+        line = "🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md)"
+        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+
+    def test_language_bar_without_emoji_is_structural(self):
+        line = "[français](readme.md) | [english](readme-en.md) | [中文](readme-zh.md)"
+        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+
+    def test_long_real_language_bar_is_structural(self):
+        """La barre complète à 14 langues du README/CHANGELOG actuel."""
+        line = (
+            "🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | "
+            "[中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md)"
+        )
+        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+
+    def test_blog_prose_with_two_links_is_NOT_structural(self):
+        """La phrase `Voici les [docs](a.md) | [tutorial](b.md) à consulter.` du blog
+        ne doit pas être prise pour une barre de langues : le `$` final du pattern
+        empêche le faux positif quand il y a du texte après le dernier lien.
+        """
+        line = "Voici les [docs](a.md) | [tutorial](b.md) à consulter."
+        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+
+    def test_single_link_is_NOT_structural(self):
+        line = "Voir la [doc](docs.md) pour plus d'info."
+        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+
+    def test_comma_separated_links_is_NOT_structural(self):
+        """Séparateur autre que `|` → pas une barre de langues."""
+        line = "Voir aussi : [a](a.md), [b](b.md)"
+        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+
+
 REGEN_SCRIPT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "regen_translations.sh")
 )
 
 
 class TestDetectProvider(unittest.TestCase):
-    """Teste detect_provider() de regen_translations.sh dans 4 conditions :
-    1. .env absent → fallback OpenAI
-    2. .env avec placeholder → fallback OpenAI
-    3. .env avec vraie clé GOOGLE → Gemini
-    4. Variable exportée GOOGLE_API_KEY pré-source → Gemini
+    """Teste detect_provider() de regen_translations.sh.
+
+    Comportement : OpenAI gpt-5.4-mini par défaut. Fallback Gemini Flash si
+    OPENAI_API_KEY absent/placeholder mais GOOGLE_API_KEY valide. Override
+    explicite via REGEN_PROVIDER=openai|gemini.
     """
 
     def _run_detect(self, env_content=None, exported_env=None):
@@ -385,7 +428,9 @@ class TestDetectProvider(unittest.TestCase):
             wrapper = f'source "{REGEN_SCRIPT}"; detect_provider'
 
             env = os.environ.copy()
-            env.pop("GOOGLE_API_KEY", None)  # baseline propre
+            # Baseline propre : retirer toutes les clés API du shell parent
+            for var in ("OPENAI_API_KEY", "GOOGLE_API_KEY", "GEMINI_API_KEY", "REGEN_PROVIDER"):
+                env.pop(var, None)
             if exported_env:
                 env.update(exported_env)
 
@@ -398,46 +443,79 @@ class TestDetectProvider(unittest.TestCase):
             )
             return result.stdout.strip(), result.stderr.strip(), result.returncode
 
-    def test_no_env_file_falls_back_to_openai(self):
-        """Cas 1 : pas de .env, pas de GOOGLE_API_KEY exportée → --eco (OpenAI)"""
+    # Note: aucune des chaînes ci-dessous n'est une vraie clé. detect_provider()
+    # ne valide pas le format, seulement non-vide ET != placeholders connus.
+    _FAKE_OPENAI_KEY = "fixture-fake-openai-key-do-not-use-aaaaaaaaaaaaaaaa"
+    _FAKE_GEMINI_KEY = "fixture-fake-gemini-key-do-not-use-bbbbbbbbbbbbbbbb"
+
+    def test_no_env_file_no_keys_emits_error(self):
+        """Pas de .env, pas de clés exportées → --eco par défaut + ERROR sur stderr."""
         stdout, stderr, rc = self._run_detect(env_content=None)
         self.assertEqual(rc, 0)
         self.assertEqual(stdout, "--eco")
-        self.assertIn("WARNING", stderr)
-        self.assertIn("fallback OpenAI", stderr)
+        self.assertIn("ERROR", stderr)
 
-    def test_placeholder_in_env_falls_back_to_openai(self):
-        """Cas 2 : .env avec placeholder exact → --eco (OpenAI)"""
+    def test_openai_key_picks_openai(self):
+        """OPENAI_API_KEY valide dans .env → --eco (OpenAI gpt-5.4-mini par défaut)."""
         stdout, stderr, rc = self._run_detect(
-            env_content="GOOGLE_API_KEY=votre-cle-api-gemini-par-defaut\n"
+            env_content=f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n"
         )
         self.assertEqual(rc, 0)
         self.assertEqual(stdout, "--eco")
-        self.assertIn("WARNING", stderr)
+        self.assertIn("OpenAI gpt-5.4-mini", stderr)
 
-    # Note: aucune des chaînes ci-dessous n'est une vraie clé. detect_provider()
-    # ne valide pas le format, seulement non-vide ET != placeholders connus. On
-    # évite délibérément le préfixe officiel "AIzaSy" pour ne pas déclencher de
-    # secret scanner sur la fixture (la fonction n'en a pas besoin).
-    _FAKE_KEY_FILE = "fixture-fake-key-not-real-do-not-use-aaaaaaaaaaaaaaaa"
-    _FAKE_KEY_EXPORT = "fixture-fake-key-from-exported-env-do-not-use-bbbbbbb"
-
-    def test_real_key_in_env_picks_gemini(self):
-        """Cas 3 : .env avec une chaîne non-placeholder → --use_gemini --eco"""
-        stdout, stderr, rc = self._run_detect(env_content=f"GOOGLE_API_KEY={self._FAKE_KEY_FILE}\n")
-        self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--use_gemini --eco")
-        self.assertIn("Gemini Flash détecté", stderr)
-
-    def test_exported_env_var_picks_gemini(self):
-        """Cas 4 : pas de .env, mais GOOGLE_API_KEY exportée non-placeholder → --use_gemini --eco"""
+    def test_both_keys_prefers_openai(self):
+        """OPENAI et GOOGLE valides → OpenAI par défaut (priorité OpenAI)."""
         stdout, stderr, rc = self._run_detect(
-            env_content=None,
-            exported_env={"GOOGLE_API_KEY": self._FAKE_KEY_EXPORT},
+            env_content=(
+                f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n"
+                f"GOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n"
+            )
+        )
+        self.assertEqual(rc, 0)
+        self.assertEqual(stdout, "--eco")
+        self.assertIn("OpenAI", stderr)
+
+    def test_only_gemini_falls_back_to_gemini(self):
+        """OPENAI absent mais GOOGLE valide → fallback Gemini Flash."""
+        stdout, stderr, rc = self._run_detect(
+            env_content=f"GOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n"
         )
         self.assertEqual(rc, 0)
         self.assertEqual(stdout, "--use_gemini --eco")
-        self.assertIn("Gemini Flash détecté", stderr)
+        self.assertIn("fallback Gemini", stderr)
+
+    def test_both_placeholders_emits_error(self):
+        """Les deux clés en placeholder → --eco + ERROR."""
+        stdout, stderr, rc = self._run_detect(
+            env_content=(
+                "OPENAI_API_KEY=votre-cle-api-openai-par-defaut\n"
+                "GOOGLE_API_KEY=votre-cle-api-gemini-par-defaut\n"
+            )
+        )
+        self.assertEqual(rc, 0)
+        self.assertEqual(stdout, "--eco")
+        self.assertIn("ERROR", stderr)
+
+    def test_regen_provider_override_openai(self):
+        """REGEN_PROVIDER=openai force OpenAI même si seul Gemini est valide."""
+        stdout, stderr, rc = self._run_detect(
+            env_content=f"GOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n",
+            exported_env={"REGEN_PROVIDER": "openai"},
+        )
+        self.assertEqual(rc, 0)
+        self.assertEqual(stdout, "--eco")
+        self.assertIn("REGEN_PROVIDER=openai", stderr)
+
+    def test_regen_provider_override_gemini(self):
+        """REGEN_PROVIDER=gemini force Gemini même si OpenAI est dispo."""
+        stdout, stderr, rc = self._run_detect(
+            env_content=f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n",
+            exported_env={"REGEN_PROVIDER": "gemini"},
+        )
+        self.assertEqual(rc, 0)
+        self.assertEqual(stdout, "--use_gemini --eco")
+        self.assertIn("REGEN_PROVIDER=gemini", stderr)
 
 
 if __name__ == "__main__":

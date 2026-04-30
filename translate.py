@@ -152,6 +152,12 @@ def news_quote_placeholder_regex(index):
 # blockquotes (> …) car les citations protégées par --news y sont conservées
 # verbatim source/cible, et continuations de liste/dict YAML (crochets, accolades,
 # strings 'item' ou 'item', sur leur propre ligne après reformatage prettier).
+# Inclut aussi les barres de langues markdown (README/CHANGELOG/blog multilingue) :
+# une ligne qui ne contient QUE des liens [label](file.md) séparés par `|`, avec
+# un préfixe optionnel court (emoji 🌍, etc.). Les paths sont conservés à
+# l'identique entre les langues par design, donc la ligne reste verbatim source
+# dans la sortie traduite — ce qui ferait échouer le validateur sans cette
+# exception. Le `$` final empêche le faux positif sur "Voir [a](x.md) | [b](y.md) ici."
 _STRUCTURAL_LINE = re.compile(
     r"^\s*(?:"
     r"```"  # code fence
@@ -163,6 +169,7 @@ _STRUCTURAL_LINE = re.compile(
     r"|>"  # blockquote
     r"|[\[\]{}]"  # YAML list/dict bracket on own line
     r"|['\"][^'\"\n]+['\"]\s*,?\s*$"  # YAML string item ('item' or "item", possibly with trailing comma)
+    r"|(?:\S+\s+)?\[[^\]]+\]\([^)]+\.md\)(?:\s*\|\s*\[[^\]]+\]\([^)]+\.md\))+\s*$"  # markdown language/nav bar
     r")"
 )
 # Préfixes Markdown inline → à STRIPPER (on garde le texte derrière)

@@ -2,58 +2,78 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.7.3** Kvalitetsverktyg för pre-commit (2026-04-30) :
+  - Konfiguration `pre-commit` "komplett EurekAI-typ" : 14 hooks fördelade över två steg (snabb pre-commit + tung pre-push)
+  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 skyddade API-nycklar), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
+  - Pre-push : mypy (progressivt lax läge), Opengrep SAST (translate.py + scripts/), pip-audit (inledande rapporteringsläge), unittest discover (tests/ + scripts/tests/)
+  - Lokala wrappers i `scripts/` som använder `./venv/bin/python` (systemet har inte `python` rå utan venv)
+  - `scripts/audit_verdict.py` : JSON-parser för pip-audit med 11 unittest-tester, Python-port av jls42-astro-parsern
+  - 7 initiala ruff-överträdelser åtgärdade : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+  - Dokumentation : README.md (FR) + CLAUDE.md (detaljerat arbetsflöde), 28 översättningar regenererade
+  - Lizard exkluderar tillfälligt `translate.py` (4 funktioner med CCN 21-47, refaktorering planerad i en dedikerad PR) — strikt grind på scripts/ för att undvika regressioner
+- **1.7.2** Felsäkring vid tyst misslyckande för långa översättningar (2026-04-28) :
+  - Språkvalidering efter översättning för alla providers (OpenAI, Mistral, Claude, Gemini) : deterministiskt lager (källutdrag återfunnet ordagrant) + probabilistiskt lager (`langdetect`)
+  - Whitelist `finish_reason` / `stop_reason` : kasta `RuntimeError` för varje tillstånd utanför whitelist:en (truncation, content_filter, etc.)
+  - `max_tokens` Claude : `4096` → `16384` (undviker latent truncation på segment på 16k tecken)
+  - Huvudrubrikmedveten segmentering: prioritet H2/H3 i den andra halvan av segmentet (varje segment börjar med en komplett semantisk sektion)
+  - Spridning av fel till exitkod som inte är noll: `translate_markdown_file` returnerar en typad status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` om minst en fil har misslyckats (enkel fil och batch)
+  - Tillagd beroende `langdetect==1.0.9`
+  - Regressionstester (`tests/test_silent_failure.py`, `unittest` stdlib) som täcker de sex länkarna i felkedjan
 - **1.7.1** Uppdatering av OpenAI-modeller:
-    - Standardmodeller uppdaterade till GPT-5.4 (mars 2026):
-        - Kvalitet: `gpt-5` → `gpt-5.4`
-        - Ekonomi: `gpt-5-mini` → `gpt-5.4-mini`
-    - Lagt till token-gränser för `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
-- **1.7** Nyheter:
-    - Alternativet `--keep_filename` för att behålla det ursprungliga filnamnet vid översättning
-    - Stöd för filen `.env` för att automatiskt ladda API-nycklar
-    - **Bevarande av inlinekod**: backticks (`` `...` ``) skyddas nu under översättningen
-    - Förbättring av systemprompten:
-        - Bättre hantering av citattecken i YAML-frontmatter
-        - Skydd av mallvariabler `{variable}`
-        - Förbud mot oönskade översättaranteckningar
-    - Testat med framgång på 364 filer (bloggmigrering jls42.org)
-- **1.6** Nyheter:
-    - Stöd för Google Gemini-API:t för översättning (`--use_gemini`)
-    - Uppdatering av standardmodeller 2026:
-        - OpenAI: `gpt-5` (kvalitet), `gpt-5-mini` (ekonomi)
-        - Claude: `claude-sonnet-4-5` (kvalitet), `claude-haiku-4-5` (ekonomi)
-        - Gemini: `gemini-3-pro-preview` (kvalitet), `gemini-3-flash-preview` (ekonomi)
-    - Ekonomiskt läge (`--eco`) för att använda snabbare och billigare modeller
-    - Översättning av en enda fil (`--file`) utan att gå igenom en katalog
-    - Ny förenklad namngivningsmall: `{base}-{lang}.md`
-    - Alternativet `--include_model` för att behålla det gamla formatet med modellnamnet
-    - Stöd för modeller som inte listas med standard token-gräns (128k)
-    - README översatt till 14 språk
-- **1.5** Förbättringar:
-    - **Uppdatering av API-nycklar och standardmodeller:**
-        - **OpenAI:** Uppdatering från `DEFAULT_MODEL_OPENAI` till `"gpt-4o"`.
-        - **Mistral AI:** Uppdatering från `DEFAULT_MODEL_MISTRAL` till `"mistral-large-latest"`.
-        - **Anthropics Claude:** Tillagd `DEFAULT_ANTHROPIC_API_KEY` och uppdatering från `DEFAULT_MODEL_CLAUDE` till `"claude-3-5-sonnet-20240620"`.
-    - **Optimering av översättningsprompter:**
-        - Prompterna för direkta översättningar och översättningsnoter har utökats för bättre tydlighet och effektivitet, inklusive detaljerade instruktioner om bevarande av metadata och specifika formateringselement.
-    - **Kodrefaktorisering:**
-        - Ersättning av `MistralClient` med klassen `Mistral` för initiering av Mistral AI-klienten.
-        - Omorganisation av imports för bättre läsbarhet och underhåll.
-        - Förbättring av textssegmentering och hantering av kodblock för att bevara originalformateringen under översättning.
-    - **Hantering av utdatafiler:**
-        - Omvändning av modell och språk i namnet på utdatafilerna (till exempel, `f"{base}-{args.target_lang}-{args.model}.md"`), vilket underlättar organisering och sökning av översättningar.
-    - **Diverse förbättringar:**
-        - Kodrensning genom att ta bort onödiga tomma rader.
-        - Mindre justeringar för att förbättra skriptets struktur och läsbarhet.
-- **1.4** Nyheter:
-    - Stöd för Anthropics Claude-API för översättning
-    - Optimering av prompter för ökad tydlighet och effektivitet
-    - Mindre justeringar för att förbättra kodens underhållbarhet
-- **1.3** Förbättringar och nya funktioner:
-    - Förbättrad hantering av kodblock
-    - Förbättrad hantering av utdatafiler
-    - Förbättrad detektering av befintliga filer
-    - Alternativ `--force` för att tvinga översättning
-    - Omvändning av modell och språk i namnet på utdatafilen
-- **1.2** Buggfix i ändringsloggen
-- **1.1** Lagt till stöd för Mistral AI-API:t
-- **1.0** Första versionen - Stöd för OpenAI-API:t
+  - Standardmodeller uppdaterade till GPT-5.4 (mars 2026) :
+    - Kvalitet : `gpt-5` → `gpt-5.4`
+    - Ekonomi : `gpt-5-mini` → `gpt-5.4-mini`
+  - Tillagda tokenbegränsningar för `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
+- **1.7** Nyheter :
+  - Alternativ `--keep_filename` för att behålla det ursprungliga filnamnet vid översättning
+  - Stöd för filen `.env` för att automatiskt läsa in API-nycklar
+  - **Bevarande av inline-kod** : backticks (`` `...` ``) skyddas nu under översättning
+  - Förbättring av systemprompten :
+    - Bättre hantering av citattecken i YAML frontmatter
+    - Skydd av template-variabler `{variable}`
+    - Förbud mot oönskade översättaranteckningar
+  - Testat framgångsrikt på 364 filer (bloggmigrering jls42.org)
+- **1.6** Nyheter :
+  - Stöd för Google Gemini API för översättning (`--use_gemini`)
+  - Uppdatering av standardmodeller 2026 :
+    - OpenAI : `gpt-5` (kvalitet), `gpt-5-mini` (eko)
+    - Claude : `claude-sonnet-4-5` (kvalitet), `claude-haiku-4-5` (eko)
+    - Gemini : `gemini-3-pro-preview` (kvalitet), `gemini-3-flash-preview` (eko)
+  - Ekonomiskt läge (`--eco`) för att använda snabbare och billigare modeller
+  - Översättning av enskild fil (`--file`) utan att gå igenom en katalog
+  - Ny förenklad namngivningspattern : `{base}-{lang}.md`
+  - Alternativ `--include_model` för att behålla det gamla formatet med modellnamnet
+  - Stöd för modeller som inte listas med standardtokenbegränsning (128k)
+  - README översatt till 14 språk
+- **1.5** Förbättringar :
+  - **Uppdatering av API-nycklar och standardmodeller :**
+    - **OpenAI :** Uppdatering från `DEFAULT_MODEL_OPENAI` till `"gpt-4o"`.
+    - **Mistral AI :** Uppdatering från `DEFAULT_MODEL_MISTRAL` till `"mistral-large-latest"`.
+    - **Claude från Anthropic :** Tillägg av `DEFAULT_ANTHROPIC_API_KEY` och uppdatering från `DEFAULT_MODEL_CLAUDE` till `"claude-3-5-sonnet-20240620"`.
+  - **Optimering av översättningsprompter :**
+    - Prompter för direkta översättningar och översättaranteckningar har utökats för bättre tydlighet och effektivitet, inklusive detaljerade instruktioner om bevarande av metadata och specifika formateringselement.
+  - **Kodrefaktorering :**
+    - Ersättning av `MistralClient` med klassen `Mistral` för initialisering av Mistral AI-klienten.
+    - Omorganisering av imports för bättre läsbarhet och underhåll.
+    - Förbättring av textsegmentering och hantering av kodblock för att bevara originalformateringen under översättning.
+  - **Hantering av utdatafiler :**
+    - Inversion av modell och språk i namnet på utdatafilerna (till exempel `f"{base}-{args.target_lang}-{args.model}.md"`), vilket underlättar organisering och sökning av översättningar.
+  - **Diverse förbättringar :**
+    - Kodstädning genom att ta bort onödiga tomma rader.
+    - Mindre justeringar för att förbättra skriptets struktur och läsbarhet.
+- **1.4** Nyheter :
+  - Stöd för Anthropic Claudes API för översättning
+  - Optimering av prompter för ökad tydlighet och effektivitet
+  - Mindre justeringar för att förbättra kodens underhållbarhet
+- **1.3** Förbättringar och nya funktioner :
+  - Förbättrad hantering av kodblock
+  - Förbättrad hantering av utdatafiler
+  - Förbättrad upptäckt av befintliga filer
+  - Alternativ `--force` för att tvinga översättning
+  - Inversion av modell och språk i namnet på utdatafilen
+- **1.2** Fixa changeloggen
+- **1.1** Tillagt stöd för Mistral IA API
+- **1.0** Initial version - Stöd för OpenAI API
+
+**Detta dokument har översatts från versionen fr till språket sv med hjälp av modellen gpt-5.4-mini. För mer information om översättningsprocessen, se https://gitlab.com/jls42/ai-powered-markdown-translator**
+

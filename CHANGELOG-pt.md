@@ -2,58 +2,78 @@
 
 🌍 [Francês](CHANGELOG.md) | [Inglês](CHANGELOG-en.md) | [Espanhol](CHANGELOG-es.md) | [Chinês](CHANGELOG-zh.md) | [Alemão](CHANGELOG-de.md) | [Japonês](CHANGELOG-ja.md) | [Coreano](CHANGELOG-ko.md) | [Árabe](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Neerlandês](CHANGELOG-nl.md) | [Polonês](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Romeno](CHANGELOG-ro.md) | [Sueco](CHANGELOG-sv.md)
 
-- **1.7.1** Atualização dos modelos OpenAI:
-    - Modelos padrão atualizados para GPT-5.4 (março de 2026):
-        - Qualidade: `gpt-5` → `gpt-5.4`
-        - Econômico: `gpt-5-mini` → `gpt-5.4-mini`
-    - Adicionados limites de tokens para `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
-- **1.7** Novidades:
-    - Opção `--keep_filename` para manter o nome original do arquivo durante a tradução
-    - Suporte ao arquivo `.env` para carregar automaticamente as chaves API
-    - **Preservação de código inline**: os backticks (`` `...` ``) agora são protegidos durante a tradução
-    - Melhoria do prompt do sistema:
-        - Melhor tratamento de aspas no YAML frontmatter
-        - Proteção das variáveis de modelo `{variable}`
-        - Proibição de notas de tradutor não solicitadas
-    - Testado com sucesso em 364 arquivos (migração do blog jls42.org)
-- **1.6** Novidades:
-    - Suporte à API Google Gemini para tradução (`--use_gemini`)
-    - Atualização dos modelos padrão 2026:
-        - OpenAI: `gpt-5` (qualidade), `gpt-5-mini` (econômico)
-        - Claude: `claude-sonnet-4-5` (qualidade), `claude-haiku-4-5` (econômico)
-        - Gemini: `gemini-3-pro-preview` (qualidade), `gemini-3-flash-preview` (econômico)
-    - Modo econômico (`--eco`) para usar modelos mais rápidos e menos caros
-    - Tradução de arquivo único (`--file`) sem percorrer um diretório
-    - Novo padrão de nomeação simplificado: `{base}-{lang}.md`
-    - Opção `--include_model` para manter o formato antigo com o nome do modelo
-    - Suporte a modelos não listados com limite padrão de tokens (128k)
-    - README traduzido em 14 idiomas
-- **1.5** Melhorias:
-    - **Atualização das chaves API e dos modelos padrão:**
-        - **OpenAI:** Atualização de `DEFAULT_MODEL_OPENAI` para `"gpt-4o"`.
-        - **Mistral AI:** Atualização de `DEFAULT_MODEL_MISTRAL` para `"mistral-large-latest"`.
-        - **Claude da Anthropic:** Adição de `DEFAULT_ANTHROPIC_API_KEY` e atualização de `DEFAULT_MODEL_CLAUDE` para `"claude-3-5-sonnet-20240620"`.
-    - **Otimização dos prompts de tradução:**
-        - Os prompts para traduções diretas e notas de tradução foram enriquecidos para maior clareza e eficiência, incluindo instruções detalhadas sobre a preservação de metadados e de elementos específicos de formatação.
-    - **Refatoração do código:**
-        - Substituição de `MistralClient` pela classe `Mistral` para a inicialização do cliente Mistral AI.
-        - Reorganização dos imports para melhor legibilidade e manutenção.
-        - Melhoria da segmentação dos textos e do gerenciamento dos blocos de código para preservar a formatação original durante a tradução.
-    - **Gestão dos arquivos de saída:**
-        - Inversão do modelo e do idioma no nome dos arquivos de saída (por exemplo, `f"{base}-{args.target_lang}-{args.model}.md"`), facilitando assim a organização e a busca das traduções.
-    - **Melhorias diversas:**
-        - Limpeza do código removendo linhas em branco desnecessárias.
-        - Ajustes menores para melhorar a estrutura e a legibilidade do script.
-- **1.4** Novidades:
-    - Suporte à API Claude da Anthropic para tradução
-    - Otimização dos prompts para maior clareza e eficiência
-    - Ajustes menores para melhorar a manutenção do código
-- **1.3** Melhorias e novas funcionalidades:
-    - Gerenciamento aprimorado dos blocos de código
-    - Gerenciamento aprimorado dos arquivos de saída
-    - Detecção aprimorada de arquivos existentes
-    - Opção `--force` para forçar a tradução
-    - Inversão do modelo e do idioma no nome do arquivo de saída
+- **1.7.3** Ferramentas de qualidade pre-commit (2026-04-30) :
+  - Configuração `pre-commit` "tipo EurekAI completo" : 14 hooks distribuídos em dois estágios (pre-commit rápido + pre-push pesado)
+  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 chaves API protegidas), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
+  - Pre-push : mypy (modo lax progressivo), Opengrep SAST (translate.py + scripts/), pip-audit (modo de relatório inicial), unittest discover (tests/ + scripts/tests/)
+  - Wrappers locais em `scripts/` que usam `./venv/bin/python` (o sistema não tem `python` puro fora do venv)
+  - `scripts/audit_verdict.py` : parser JSON pip-audit com 11 testes unittest, porta Python adaptada do parser jls42-astro
+  - 7 violações ruff iniciais corrigidas : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+  - Documentação : README.md (FR) + CLAUDE.md (workflow detalhado), 28 traduções regeneradas
+  - Lizard exclui temporariamente `translate.py` (4 funções com CCN 21-47, refatoração planeada numa PR dedicada) — gate estrito em scripts/ para evitar regressões
+- **1.7.2** Correção de falha silenciosa em traduções longas (2026-04-28) :
+  - Validação de idioma pós-tradução em todos os provedores (OpenAI, Mistral, Claude, Gemini) : camada determinística (trecho fonte encontrado verbatim) + camada probabilística (`langdetect`)
+  - Whitelist `finish_reason` / `stop_reason` : lançar `RuntimeError` em qualquer estado fora da whitelist (truncation, content_filter, etc.)
+  - `max_tokens` Claude : `4096` → `16384` (evita truncation latente em segmentos de 16k chars)
+  - Segmentação com consciência de headings : prioridade para H2/H3 na 2.ª metade do segmento (cada segmento começa com uma secção semântica completa)
+  - Propagação dos erros até um código de saída não-zero : `translate_markdown_file` devolve um estado tipado `success` / `failure` / `skipped`, `main()` `sys.exit(1)` se pelo menos um ficheiro falhou (single-file e batch)
+  - Adição da dependência `langdetect==1.0.9`
+  - Testes de regressão (`tests/test_silent_failure.py`, `unittest` stdlib) cobrindo os seis elos da cadeia de erro
+- **1.7.1** Atualização de modelos OpenAI :
+  - Modelos predefinidos atualizados para GPT-5.4 (março de 2026) :
+    - Qualidade : `gpt-5` → `gpt-5.4`
+    - Económico : `gpt-5-mini` → `gpt-5.4-mini`
+  - Adição dos limites de tokens para `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
+- **1.7** Novidades :
+  - Opção `--keep_filename` para manter o nome original do ficheiro durante a tradução
+  - Suporte ao ficheiro `.env` para carregar as chaves API automaticamente
+  - **Preservação do código inline** : os backticks (`` `...` ``) estão agora protegidos durante a tradução
+  - Melhoria do prompt do sistema :
+    - Melhor gestão das aspas no YAML frontmatter
+    - Proteção das variáveis template `{variable}`
+    - Proibição de notas de tradutor não solicitadas
+  - Testado com sucesso em 364 ficheiros (migração do blog jls42.org)
+- **1.6** Novidades :
+  - Suporte à API Google Gemini para tradução (`--use_gemini`)
+  - Atualização dos modelos predefinidos 2026 :
+    - OpenAI : `gpt-5` (qualidade), `gpt-5-mini` (eco)
+    - Claude : `claude-sonnet-4-5` (qualidade), `claude-haiku-4-5` (eco)
+    - Gemini : `gemini-3-pro-preview` (qualidade), `gemini-3-flash-preview` (eco)
+  - Modo económico (`--eco`) para usar modelos mais rápidos e menos caros
+  - Tradução de ficheiro único (`--file`) sem percorrer um diretório
+  - Novo padrão de nomenclatura simplificado : `{base}-{lang}.md`
+  - Opção `--include_model` para manter o antigo formato com o nome do modelo
+  - Suporte para modelos não listados com limite de tokens predefinido (128k)
+  - README traduzido em 14 idiomas
+- **1.5** Melhorias :
+  - **Atualização das chaves API e dos modelos predefinidos :**
+    - **OpenAI :** Atualização de `DEFAULT_MODEL_OPENAI` para `"gpt-4o"`.
+    - **Mistral AI :** Atualização de `DEFAULT_MODEL_MISTRAL` para `"mistral-large-latest"`.
+    - **Claude da Anthropic :** Adição de `DEFAULT_ANTHROPIC_API_KEY` e atualização de `DEFAULT_MODEL_CLAUDE` para `"claude-3-5-sonnet-20240620"`.
+  - **Otimização dos prompts de tradução :**
+    - Os prompts para traduções diretas e notas de tradução foram enriquecidos para maior clareza e eficiência, incluindo instruções detalhadas sobre a preservação de metadados e de elementos específicos de formatação.
+  - **Refatoração do código :**
+    - Substituição de `MistralClient` pela classe `Mistral` para a inicialização do cliente Mistral AI.
+    - Reorganização dos imports para melhor legibilidade e manutenção.
+    - Melhoria da segmentação dos textos e da gestão dos blocos de código para preservar a formatação original durante a tradução.
+  - **Gestão dos ficheiros de saída :**
+    - Inversão do modelo e do idioma no nome dos ficheiros de saída (por exemplo, `f"{base}-{args.target_lang}-{args.model}.md"`), facilitando assim a organização e a pesquisa das traduções.
+  - **Melhorias diversas :**
+    - Limpeza do código removendo linhas vazias desnecessárias.
+    - Ajustes menores para melhorar a estrutura e a legibilidade do script.
+- **1.4** Novidades :
+  - Suporte à API Claude da Anthropic para tradução
+  - Otimização dos prompts para maior clareza e eficiência
+  - Ajustes menores para melhorar a manutenção do código
+- **1.3** Melhorias e novas funcionalidades :
+  - Gestão melhorada dos blocos de código
+  - Gestão melhorada dos ficheiros de saída
+  - Deteção melhorada de ficheiros existentes
+  - Opção `--force` para forçar a tradução
+  - Inversão do modelo e do idioma no nome do ficheiro de saída
 - **1.2** Correção do changelog
 - **1.1** Adição do suporte à API Mistral IA
 - **1.0** Versão inicial - Suporte à API OpenAI
+
+**Este documento foi traduzido da versão fr para o idioma pt usando o modelo gpt-5.4-mini. Para mais informações sobre o processo de tradução, consulte https://gitlab.com/jls42/ai-powered-markdown-translator**
+

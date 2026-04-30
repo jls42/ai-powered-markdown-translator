@@ -13,9 +13,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Détection du provider de traduction selon les clés d'API disponibles.
-# Stdout : flags à injecter dans `python translate.py` (ex: "--use_gemini --eco" ou "--eco").
+# Stdout : flags à injecter dans `python translate.py` (ex: "--eco" ou "--use_gemini --eco").
 # Stderr : message de log (info ou warning).
 # Le caller utilise: PROVIDER_FLAGS=$(detect_provider)
+#
+# Priorité par défaut : OpenAI gpt-5.4-mini (--eco). Fallback Gemini Flash si
+# OPENAI_API_KEY absente/placeholder mais GOOGLE_API_KEY valide. L'utilisateur
+# peut forcer Gemini avec REGEN_PROVIDER=gemini./regen_translations.sh.
 detect_provider() {
   # Charge .env si présent. set -a/+a exporte toutes les variables assignées
   # pour qu'elles soient héritées par les sous-processus (python translate.py).
@@ -26,16 +30,36 @@ detect_provider() {
     set +a
   fi
 
-  # Placeholder exact défini dans translate.py (DEFAULT_GEMINI_API_KEY)
-  local placeholder="votre-cle-api-gemini-par-defaut"
-  local key="${GOOGLE_API_KEY:-}"
+  # Placeholders exacts définis dans translate.py (DEFAULT_*_API_KEY)
+  local openai_placeholder="votre-cle-api-openai-par-defaut"
+  local gemini_placeholder="votre-cle-api-gemini-par-defaut"
+  local openai_key="${OPENAI_API_KEY:-}"
+  local gemini_key="${GOOGLE_API_KEY:-}"
 
-  if [[ -n "$key" ]] && [[ "$key" != "$placeholder" ]] && [[ "$key" != "your-google-api-key" ]]; then
+  # Override explicite via REGEN_PROVIDER=gemini ou REGEN_PROVIDER=openai
+  case "${REGEN_PROVIDER:-}" in
+    gemini)
+      echo "--use_gemini --eco"
+      echo "[regen] REGEN_PROVIDER=gemini → --use_gemini --eco (Gemini Flash)" >&2
+      return
+      ;;
+    openai)
+      echo "--eco"
+      echo "[regen] REGEN_PROVIDER=openai → --eco (OpenAI gpt-5.4-mini)" >&2
+      return
+      ;;
+  esac
+
+  # Auto-détection : OpenAI par défaut, fallback Gemini si OPENAI absent
+  if [[ -n "$openai_key" ]] && [[ "$openai_key" != "$openai_placeholder" ]]; then
+    echo "--eco"
+    echo "[regen] OpenAI gpt-5.4-mini détecté → --eco (par défaut)" >&2
+  elif [[ -n "$gemini_key" ]] && [[ "$gemini_key" != "$gemini_placeholder" ]] && [[ "$gemini_key" != "your-google-api-key" ]]; then
     echo "--use_gemini --eco"
-    echo "[regen] Gemini Flash détecté → --use_gemini --eco" >&2
+    echo "[regen] WARNING: OPENAI_API_KEY absent → fallback Gemini Flash --use_gemini --eco" >&2
   else
     echo "--eco"
-    echo "[regen] WARNING: GOOGLE_API_KEY absent ou placeholder dans .env/env → fallback OpenAI gpt-5.4-mini" >&2
+    echo "[regen] ERROR: ni OPENAI_API_KEY ni GOOGLE_API_KEY valide dans .env/env" >&2
   fi
 }
 
