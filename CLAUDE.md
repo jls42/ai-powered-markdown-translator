@@ -7,6 +7,92 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Commits**: Utiliser le skill `/helping-with-commits` pour tous les commits
 - **Recherche web**: Utiliser l'agent `web-research-specialist:web-research-specialist` pour les recherches de documentation (évite de polluer le contexte principal)
 
+## Quality / pre-commit (workflow)
+
+Le projet utilise le framework [`pre-commit`](https://pre-commit.com) avec un setup "type EurekAI complet" (cf. `.pre-commit-config.yaml`). Tous les hooks tournent localement avant chaque commit (rapides) ou avant chaque push (lourds, réseau).
+
+### Bootstrap (une fois après clone)
+
+```bash
+source venv/bin/activate
+pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
+pre-commit install                    # hooks pre-commit (rapides)
+pre-commit install --hook-type pre-push  # hooks pre-push (mypy, SAST, audit, tests)
+```
+
+Le premier `pre-commit run --all-files` télécharge les environnements des hooks (~1-2 min, en cache après).
+
+### Hooks actifs
+
+| Stage      | Hook                           | Rôle                                                                            |
+| ---------- | ------------------------------ | ------------------------------------------------------------------------------- |
+| pre-commit | shellcheck                     | Lint des `.sh` (release.sh, regen_translations.sh, scripts/)                    |
+| pre-commit | ruff + ruff-format             | Lint + format Python (rapide, --fix automatique)                                |
+| pre-commit | prettier                       | Format JSON/YAML/MD (28 traductions exclues)                                    |
+| pre-commit | pre-commit-hooks v5            | Trailing-whitespace, EOF, check-yaml/toml, large-files, merge-conflict, shebang |
+| pre-commit | detect-secrets                 | Détection de fuites d'API keys (4 providers utilisés)                           |
+| pre-commit | check-complexity (Lizard)      | CCN <= 12, scope `scripts/` (translate.py exclu, refactor TODO)                 |
+| pre-push   | mypy (lax)                     | Type-checking des fonctions déjà annotées (durcissement progressif)             |
+| pre-push   | check-security-sast (Opengrep) | SAST sur translate.py + scripts/ (graceful skip si binaire absent)              |
+| pre-push   | check-pip-audit                | Audit deps (mode reporting initial, durcir après bump)                          |
+| pre-push   | unittest                       | Tests `tests/` + `scripts/tests/`                                               |
+
+### Lancer manuellement
+
+```bash
+pre-commit run --all-files                         # tous les hooks pre-commit
+pre-commit run --hook-stage pre-push --all-files   # tous les hooks pre-push
+pre-commit run ruff --all-files                    # un hook précis
+```
+
+### Échappatoires (à utiliser sciemment)
+
+```bash
+git commit --no-verify   # skip les hooks pre-commit
+git push --no-verify     # skip les hooks pre-push
+```
+
+### Stratégie mypy progressive
+
+mypy est en mode **Lax** au démarrage (`disallow_untyped_defs = false`, `check_untyped_defs = false`). Concrètement, mypy ne vérifie que les fonctions déjà annotées avec des types ; les autres sont ignorées silencieusement.
+
+Trajectoire :
+
+1. **Phase 1 (actuel)** : mypy lax, 0 effort initial. Filet de sécurité quand on ajoute des annotations.
+2. **Phase 2** : annoter les fonctions critiques de `translate.py` (`segment_text`, `translate`, `translate_markdown_file`). Bumper `check_untyped_defs = true`.
+3. **Phase 3** : `disallow_untyped_defs = true` (mypy strict). Tout le code annoté.
+
+### Lizard CCN — refactor planifié de translate.py
+
+Le seuil est 12 (futur 8). 4 fonctions de `translate.py` dépassent : `translate` (CCN 25), `translate_markdown_file` (CCN 47), `translate_directory` (CCN 21), `main` (CCN 32). Le fichier est temporairement exclu de Lizard via `-x "translate.py"` dans `scripts/check-complexity.sh`. Le refactor est un travail dédié à mener dans une PR séparée ; le gate s'applique strictement aux nouveaux scripts pour empêcher la régression.
+
+### Gestion du baseline detect-secrets
+
+```bash
+# Régénérer le baseline (après ajout de nouveaux fichiers, par exemple)
+git ls-files --cached -z | xargs -0 detect-secrets scan \
+  --exclude-files '(README|CHANGELOG)-[a-z]{2}\.md' \
+  --exclude-files 'traductions_.*' \
+  --exclude-files 'tests/fixtures/.*' \
+  --exclude-files 'venv/.*' \
+  --exclude-files '\.secrets\.baseline' \
+  > .secrets.baseline
+
+# Auditer manuellement les findings (interactif)
+detect-secrets audit .secrets.baseline
+```
+
+Findings actuels (tous faux positifs attendus) : 4 placeholders `votre-cle-api-*-par-defaut` dans translate.py (OpenAI/Anthropic/Mistral/Google), 1 exemple dans README.md, 1 fixture dans tests/test_silent_failure.py. À auditer ponctuellement pour passer `is_secret: false`.
+
+### Pré-requis lors du clone sur une autre machine
+
+Les wrappers locaux (`scripts/run-*.sh`, `scripts/check-*.sh`) requièrent `./venv/bin/python`. Si le venv n'existe pas, ils renvoient un message explicite avec les commandes d'install. Sur CI ou autre poste de dev :
+
+```bash
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+```
+
 ### Release / Tag workflow (2 phases)
 
 Le script `release.sh` est conçu pour un workflow en **deux phases** : avant merge (prépare la MR sans tagger) et après merge (tag sur main + GitLab Release).

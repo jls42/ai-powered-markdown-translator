@@ -2,6 +2,15 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.7.3** Outillage qualité pre-commit (2026-04-30) :
+  - Setup `pre-commit` "type EurekAI complet" : 14 hooks répartis sur deux stages (pre-commit rapide + pre-push lourd)
+  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 API keys protégées), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
+  - Pre-push : mypy (mode lax progressif), Opengrep SAST (translate.py + scripts/), pip-audit (mode reporting initial), unittest discover (tests/ + scripts/tests/)
+  - Wrappers locaux dans `scripts/` qui utilisent `./venv/bin/python` (le système n'a pas `python` nu hors venv)
+  - `scripts/audit_verdict.py` : parser JSON pip-audit avec 11 tests unittest, port Python adapté du parser jls42-astro
+  - 7 violations ruff initiales corrigées : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+  - Documentation : README.md (FR) + CLAUDE.md (workflow détaillé), 28 traductions régénérées
+  - Lizard exclut temporairement `translate.py` (4 fonctions à CCN 21-47, refactor planifié dans une PR dédiée) — gate strict sur scripts/ pour éviter les régressions
 - **1.7.2** Fix silent-failure sur traductions longues (2026-04-28) :
   - Validation langue post-traduction sur tous les providers (OpenAI, Mistral, Claude, Gemini) : couche déterministe (extrait source retrouvé verbatim) + couche probabiliste (`langdetect`)
   - Whitelist `finish_reason` / `stop_reason` : lever `RuntimeError` sur tout état hors de la whitelist (truncation, content_filter, etc.)

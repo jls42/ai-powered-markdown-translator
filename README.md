@@ -24,8 +24,21 @@ Ce script Python traduit des fichiers Markdown d'une langue source vers une lang
 ```bash
 git clone https://gitlab.com/jls42/ai-powered-markdown-translator.git
 cd ai-powered-markdown-translator
+python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+### Outillage qualité (optionnel mais recommandé)
+
+Le projet utilise [`pre-commit`](https://pre-commit.com) pour empêcher de committer du code mal formaté, vulnérable ou contenant un secret. Installation :
+
+```bash
+pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
+pre-commit install                    # hooks rapides à chaque commit
+pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
+```
+
+Hooks actifs : ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexité), detect-secrets (clés API), mypy (typage progressif), Opengrep (SAST), pip-audit (CVE deps), unittest. Voir `CLAUDE.md` section _Quality / pre-commit_ pour les détails.
 
 ## Configuration
 
