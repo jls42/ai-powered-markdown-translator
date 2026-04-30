@@ -95,7 +95,7 @@ pip install -r requirements.txt -r requirements-dev.txt
 
 ### Release / Tag workflow (2 phases)
 
-Le script `release.sh` est conçu pour un workflow en **deux phases** : avant merge (prépare la MR sans tagger) et après merge (tag sur main + GitLab Release).
+Le script `release.sh` est conçu pour un workflow en **deux phases** : avant merge (prépare la PR sans tagger) et après merge (tag sur main + GitHub Release).
 
 Quand l'utilisateur demande "release", "tag", "publie cette version" :
 
@@ -105,32 +105,32 @@ Quand l'utilisateur demande "release", "tag", "publie cette version" :
 ./release.sh --auto
 ```
 
-Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env`) → push branche → MR via `glab` (si auth OK).
+Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env`) → push branche → PR via `gh` (si auth OK).
 
 **Pas de tag à ce stade.** Le tag est créé en phase 2 pour qu'il pointe sur le commit de merge dans `main` (pas sur la branche feature).
 
-#### Phase 2 — Après merge MR
+#### Phase 2 — Après merge PR
 
 ```bash
 ./release.sh --tag-only --yes
 ```
 
-Effectue : checkout main → pull → vérifie cohérence CHANGELOG → tag annoté `v$VERSION` sur HEAD de main → push tag → GitLab Release via `glab` (si auth OK).
+Effectue : checkout main → pull → vérifie cohérence CHANGELOG → tag annoté `v$VERSION` sur HEAD de main → push tag → GitHub Release via `gh` (si auth OK).
 
 #### Variantes
 
-- `--with-tag` : tag avant merge (workflow fast-forward / squash uniquement). À éviter si la MR génère un merge commit.
+- `--with-tag` : tag avant merge (workflow fast-forward / squash uniquement). À éviter si la PR génère un merge commit.
 - `--local-only` : tout en local, pas de push (test/preview).
 - `--dry-run` : simule sans rien toucher.
-- `--no-mr` / `--no-gitlab-release` / `--no-push` : opt-out fins.
+- `--no-pr` / `--no-github-release` / `--no-push` : opt-out fins.
 
-#### Gestion glab token
+#### Gestion gh token
 
-Le script vérifie l'auth glab en parsant la sortie de `glab api user` (le simple exit code de `glab auth status` n'est pas fiable : il retourne 0 même sur 401). Si le token est expiré :
+Le script vérifie l'auth gh en parsant la sortie de `gh api user` (le simple exit code de `gh auth status` n'est pas toujours fiable : on parse donc la sortie pour détecter `"error"` / `HTTP 4xx-5xx`). Si le token est expiré :
 
-- Warn + skip MR / GitLab Release
+- Warn + skip PR / GitHub Release
 - Affiche les commandes manuelles
-- Pour réauthentifier : `glab auth login`
+- Pour réauthentifier : `gh auth login`
 
 #### Régénération seule (sans release)
 

@@ -834,7 +834,7 @@ def translate_markdown_file(
                 + args.target_lang
                 + " en utilisant le modèle "
                 + args.model
-                + ". Pour plus d'informations sur le processus de traduction, consultez https://gitlab.com/jls42/ai-powered-markdown-translator",
+                + ". Pour plus d'informations sur le processus de traduction, consultez https://github.com/jls42/ai-powered-markdown-translator",
                 client,
                 args,
                 use_mistral,

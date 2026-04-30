@@ -22,7 +22,7 @@ Ce script Python traduit des fichiers Markdown d'une langue source vers une lang
 ## Installation
 
 ```bash
-git clone https://gitlab.com/jls42/ai-powered-markdown-translator.git
+git clone https://github.com/jls42/ai-powered-markdown-translator.git
 cd ai-powered-markdown-translator
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
