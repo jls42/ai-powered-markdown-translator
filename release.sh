@@ -4,17 +4,17 @@
 # === Workflow recommandé (2 phases) ===
 #
 #   Phase 1 (avant merge) sur la branche feature:
-#     ./release.sh --auto              # régénère + commit + push branche + MR (sans tag)
+#     ./release.sh --auto              # régénère + commit + push branche + PR (sans tag)
 #
-#   Phase 2 (après merge MR) :
-#     ./release.sh --tag-only --yes    # checkout main + pull + tag + push tag + GitLab Release
+#   Phase 2 (après merge PR) :
+#     ./release.sh --tag-only --yes    # checkout main + pull + tag + push tag + GitHub Release
 #
 # === Modes d'usage ===
 #
-#   ./release.sh                 # interactif : régénère + commit + push + MR (prompts)
-#   ./release.sh --auto          # NON-INTERACTIF Phase 1 : régénère + commit + push + MR (PAS de tag)
+#   ./release.sh                 # interactif : régénère + commit + push + PR (prompts)
+#   ./release.sh --auto          # NON-INTERACTIF Phase 1 : régénère + commit + push + PR (PAS de tag)
 #   ./release.sh --local-only    # NON-INTERACTIF : régénère + commit local. Pas de push.
-#   ./release.sh --tag-only      # Phase 2 : checkout main, pull, tag main, push tag, GitLab Release
+#   ./release.sh --tag-only      # Phase 2 : checkout main, pull, tag main, push tag, GitHub Release
 #   ./release.sh --dry-run       # affiche tout ce qui serait fait, ne touche à rien
 #
 # === Flags fins (composables) ===
@@ -24,8 +24,8 @@
 #   --skip-regen          # ne pas régénérer les 28 traductions
 #   --skip-tests          # ne pas lancer la suite unittest (déconseillé)
 #   --with-tag            # opt-in: tagger AVANT merge (workflow fast-forward uniquement)
-#   --no-mr               # ne pas créer la MR
-#   --no-gitlab-release   # ne pas créer la GitLab Release
+#   --no-pr               # ne pas créer la PR
+#   --no-github-release   # ne pas créer la GitHub Release
 #   --no-push             # ne pas push (utile pour tester)
 #   --yes                 # confirmer toutes les questions automatiquement
 #
@@ -34,7 +34,7 @@
 # - Working directory = repo racine
 # - venv/ présent avec dépendances installées
 # - SSH config OK pour git push origin
-# - Pour --create-mr / --gitlab-release : glab auth status doit être OK.
+# - Pour --create-pr / --github-release : gh auth status doit être OK.
 #   Si le token est expiré : warn + skip gracieux, instructions affichées.
 #
 # === Utilisation par Claude (auto mode) ===
@@ -57,8 +57,8 @@ TAG=""
 SKIP_REGEN=false
 SKIP_TESTS=false
 DO_PUSH=true
-DO_MR=true
-DO_GITLAB_RELEASE=true       # actif uniquement en mode --tag-only
+DO_PR=true
+DO_GITHUB_RELEASE=true       # actif uniquement en mode --tag-only
 WITH_TAG=false               # opt-in: tagger AVANT merge (workflow fast-forward)
 ASSUME_YES=false
 DRY_RUN=false
@@ -70,7 +70,7 @@ while [[ $# -gt 0 ]]; do
       MODE="auto"; ASSUME_YES=true
       shift ;;
     --local-only)
-      MODE="local-only"; ASSUME_YES=true; DO_PUSH=false; DO_MR=false; DO_GITLAB_RELEASE=false
+      MODE="local-only"; ASSUME_YES=true; DO_PUSH=false; DO_PR=false; DO_GITHUB_RELEASE=false
       shift ;;
     --tag-only)
       MODE="tag-only"; SKIP_REGEN=true
@@ -82,9 +82,9 @@ while [[ $# -gt 0 ]]; do
     --tag)                 TAG="$2"; shift 2 ;;
     --skip-regen)          SKIP_REGEN=true; shift ;;
     --skip-tests)          SKIP_TESTS=true; shift ;;
-    --no-mr)               DO_MR=false; shift ;;
-    --no-gitlab-release)   DO_GITLAB_RELEASE=false; shift ;;
-    --no-push)             DO_PUSH=false; DO_MR=false; DO_GITLAB_RELEASE=false; shift ;;
+    --no-pr)               DO_PR=false; shift ;;
+    --no-github-release)   DO_GITHUB_RELEASE=false; shift ;;
+    --no-push)             DO_PUSH=false; DO_PR=false; DO_GITHUB_RELEASE=false; shift ;;
     --with-tag)            WITH_TAG=true; shift ;;
     --yes|-y)              ASSUME_YES=true; shift ;;
     -h|--help)             sed -n '2,42p' "$0"; exit 0 ;;
@@ -116,16 +116,16 @@ run() {
   fi
 }
 
-# Vérifie que glab est utilisable avec le token courant.
-# Note: `glab auth status` et `glab api user` retournent exit 0 même avec un token expiré
-# (sortie contient "error":"invalid_token" mais exit code = 0). On parse donc la sortie.
-check_glab_auth() {
-  if ! command -v glab >/dev/null 2>&1; then
+# Vérifie que gh est utilisable avec le token courant.
+# Note: on parse la sortie de `gh api user` (fail-closed) pour ne pas faire confiance
+# au seul exit code — un token expiré peut renvoyer un payload d'erreur.
+check_gh_auth() {
+  if ! command -v gh >/dev/null 2>&1; then
     return 1
   fi
   local output
-  output=$(glab api user 2>&1) || return 1
-  if echo "$output" | grep -qE '"error"|HTTP 4[0-9]{2}|HTTP 5[0-9]{2}'; then
+  output=$(gh api user 2>&1) || return 1
+  if echo "$output" | grep -qE '"message":\s*"Bad credentials"|"error"|HTTP 4[0-9]{2}|HTTP 5[0-9]{2}'; then
     return 1
   fi
   return 0
@@ -153,7 +153,7 @@ fi
 source venv/bin/activate
 
 # === MODE TAG-ONLY ===
-# Post-merge : checkout main, pull, tag, push tag, GitLab Release
+# Post-merge : checkout main, pull, tag, push tag, GitHub Release
 if [[ "$MODE" == "tag-only" ]]; then
   log "Mode tag-only : tag post-merge sur main"
 
@@ -172,7 +172,7 @@ if [[ "$MODE" == "tag-only" ]]; then
   [[ -z "$VERSION" ]] && VERSION="$CHANGELOG_VERSION"
   if [[ "$VERSION" != "$CHANGELOG_VERSION" ]]; then
     err "Discordance: --version=$VERSION mais CHANGELOG sur main = $CHANGELOG_VERSION"
-    err "La MR n'est probablement pas mergée. Annulé."
+    err "La PR n'est probablement pas mergée. Annulé."
     exit 1
   fi
   [[ -z "$TAG" ]] && TAG="v$VERSION"
@@ -202,21 +202,21 @@ if [[ "$MODE" == "tag-only" ]]; then
     warn "Tag créé localement seulement (--no-push). Push manuel: git push origin $TAG"
   fi
 
-  if $DO_GITLAB_RELEASE; then
-    if ! command -v glab >/dev/null 2>&1; then
-      warn "glab non installé — skip GitLab Release"
-    elif ! check_glab_auth; then
-      warn "glab non authentifié (token expiré ?) — skip GitLab Release."
-      warn "Reconnecte: glab auth login"
+  if $DO_GITHUB_RELEASE; then
+    if ! command -v gh >/dev/null 2>&1; then
+      warn "gh non installé — skip GitHub Release"
+    elif ! check_gh_auth; then
+      warn "gh non authentifié (token expiré ?) — skip GitHub Release."
+      warn "Reconnecte: gh auth login"
       warn "Puis: ./release.sh --tag-only --skip-tests --version $VERSION (re-create) ou commande manuelle:"
-      warn "  echo \"\$(awk ... CHANGELOG.md)\" | glab release create $TAG --name v$VERSION --notes-file -"
+      warn "  echo \"\$(awk ... CHANGELOG.md)\" | gh release create $TAG --title v$VERSION --notes-file -"
     else
-      log "Création GitLab Release..."
+      log "Création GitHub Release..."
       if $DRY_RUN; then
-        log "[dry-run] glab release create $TAG --name v$VERSION (notes depuis CHANGELOG)"
+        log "[dry-run] gh release create $TAG --title v$VERSION (notes depuis CHANGELOG)"
       else
-        echo "$RELEASE_NOTES" | glab release create "$TAG" --name "v$VERSION" --notes-file -
-        ok "GitLab Release v$VERSION créée"
+        echo "$RELEASE_NOTES" | gh release create "$TAG" --title "v$VERSION" --notes-file -
+        ok "GitHub Release v$VERSION créée"
       fi
     fi
   fi
@@ -396,61 +396,60 @@ else
   ok "Branche poussée sur origin (tag différé : à créer post-merge via --tag-only)"
 fi
 
-# === Étape 7: GitLab MR + Release ===
-GLAB_OK=false
-if check_glab_auth; then
-  GLAB_OK=true
+# === Étape 7: GitHub PR + Release ===
+GH_OK=false
+if check_gh_auth; then
+  GH_OK=true
 else
-  if ! command -v glab >/dev/null 2>&1; then
-    warn "glab non installé. MR + GitLab Release à créer manuellement."
+  if ! command -v gh >/dev/null 2>&1; then
+    warn "gh non installé. PR + GitHub Release à créer manuellement."
   else
-    warn "glab non authentifié ou token expiré. MR + GitLab Release seront à créer manuellement."
-    warn "Pour réauthentifier: glab auth login"
+    warn "gh non authentifié ou token expiré. PR + GitHub Release seront à créer manuellement."
+    warn "Pour réauthentifier: gh auth login"
   fi
 fi
 
-if $DO_MR; then
-  if $GLAB_OK; then
-    log "Création de la MR..."
-    MR_TITLE="$COMMIT_TITLE"
-    MR_BODY=$(printf "%s\n\n---\n\n_MR créée automatiquement par release.sh_" "$RELEASE_NOTES")
+if $DO_PR; then
+  if $GH_OK; then
+    log "Création de la PR..."
+    PR_TITLE="$COMMIT_TITLE"
+    PR_BODY=$(printf "%s\n\n---\n\n_PR créée automatiquement par release.sh_" "$RELEASE_NOTES")
     if $DRY_RUN; then
-      log "[dry-run] glab mr create --title '$MR_TITLE' --target-branch main"
+      log "[dry-run] gh pr create --base main --head $CURRENT_BRANCH --title '$PR_TITLE'"
     else
-      echo "$MR_BODY" | glab mr create \
-        --title "$MR_TITLE" \
-        --description "$(cat)" \
-        --target-branch main \
-        --source-branch "$CURRENT_BRANCH" \
-        --remove-source-branch \
-        --yes 2>&1 || warn "Échec création MR (peut-être déjà existante)"
-      ok "MR créée"
+      gh pr create \
+        --base main \
+        --head "$CURRENT_BRANCH" \
+        --title "$PR_TITLE" \
+        --body "$PR_BODY" \
+        2>&1 || warn "Échec création PR (peut-être déjà existante)"
+      ok "PR créée"
     fi
   else
     echo ""
-    warn "MR à créer manuellement:"
-    echo "  glab mr create --title \"$COMMIT_TITLE\" --target-branch main --source-branch $CURRENT_BRANCH"
-    echo "  ou via l'interface GitLab"
+    warn "PR à créer manuellement:"
+    echo "  gh pr create --base main --head $CURRENT_BRANCH --title \"$COMMIT_TITLE\""
+    echo "  ou via l'interface GitHub"
   fi
 fi
 
-if $DO_GITLAB_RELEASE && $WITH_TAG; then
-  if $GLAB_OK; then
-    log "Création GitLab Release..."
+if $DO_GITHUB_RELEASE && $WITH_TAG; then
+  if $GH_OK; then
+    log "Création GitHub Release..."
     if $DRY_RUN; then
-      log "[dry-run] glab release create $TAG --name v$VERSION (notes depuis CHANGELOG)"
+      log "[dry-run] gh release create $TAG --title v$VERSION (notes depuis CHANGELOG)"
     else
-      echo "$RELEASE_NOTES" | glab release create "$TAG" --name "v$VERSION" --notes-file - \
-        2>&1 || warn "Échec création GitLab Release (peut-être déjà existante)"
-      ok "GitLab Release v$VERSION créée"
+      echo "$RELEASE_NOTES" | gh release create "$TAG" --title "v$VERSION" --notes-file - \
+        2>&1 || warn "Échec création GitHub Release (peut-être déjà existante)"
+      ok "GitHub Release v$VERSION créée"
     fi
   else
     echo ""
-    warn "GitLab Release à créer manuellement:"
-    echo "  echo \"\$(awk ... CHANGELOG.md)\" | glab release create $TAG --name v$VERSION --notes-file -"
+    warn "GitHub Release à créer manuellement:"
+    echo "  echo \"\$(awk ... CHANGELOG.md)\" | gh release create $TAG --title v$VERSION --notes-file -"
   fi
-elif $DO_GITLAB_RELEASE; then
-  log "GitLab Release reportée au mode --tag-only (tag pas encore créé)"
+elif $DO_GITHUB_RELEASE; then
+  log "GitHub Release reportée au mode --tag-only (tag pas encore créé)"
 fi
 
 # === Récap final ===
@@ -461,15 +460,15 @@ echo "État:"
 echo "  - Commit créé sur '$CURRENT_BRANCH'"
 echo "  - Branche poussée sur origin"
 $WITH_TAG && echo "  - Tag $TAG créé et poussé"
-if $DO_MR && $GLAB_OK; then
-  echo "  - MR créée automatiquement"
+if $DO_PR && $GH_OK; then
+  echo "  - PR créée automatiquement"
 fi
 echo ""
 echo "Prochaines étapes:"
-echo "  1. Reviewer la MR sur GitLab et la merger"
+echo "  1. Reviewer la PR sur GitHub et la merger"
 if ! $WITH_TAG; then
   echo "  2. Une fois mergée, lancer:  ./release.sh --tag-only --yes"
-  echo "     (crée le tag $TAG sur le HEAD de main + push tag + GitLab Release)"
+  echo "     (crée le tag $TAG sur le HEAD de main + push tag + GitHub Release)"
 else
   echo "  2. Le tag $TAG pointe sur le commit de release sur '$CURRENT_BRANCH'."
   echo "     Si tu veux qu'il pointe sur le merge commit après merge:"
