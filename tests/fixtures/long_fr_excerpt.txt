@@ -1,0 +1,171 @@
+# Article de test : panorama technologique 2026
+
+L'intelligence artificielle a profondément transformé le paysage industriel au cours de la dernière décennie, modifiant la manière dont les entreprises conçoivent leurs produits, gèrent leurs chaînes logistiques et interagissent avec leurs clients. Cette évolution, longtemps confinée aux laboratoires de recherche, irrigue désormais les processus de décision les plus quotidiens.
+
+Les grandes plateformes de cloud computing rivalisent d'ingéniosité pour proposer des services de calcul accélérés par GPU, et la concurrence pour attirer les développeurs s'intensifie chaque trimestre. Les opérateurs européens cherchent à se positionner face aux acteurs américains et asiatiques, dans un contexte réglementaire qui privilégie la souveraineté numérique.
+
+## Les nouveaux modèles génératifs
+
+Sur le terrain des modèles de langage, la course aux paramètres a laissé place à une course à l'efficacité, où l'on cherche désormais à obtenir des résultats équivalents avec une fraction des ressources nécessaires auparavant. Les techniques de distillation et de quantification ont permis d'embarquer des modèles puissants directement sur des appareils mobiles, ouvrant la voie à des usages totalement déconnectés du cloud.
+
+Plusieurs équipes de recherche académique ont publié des résultats remarquables sur la robustesse des modèles face aux entrées adverses, démontrant que les architectures actuelles restent vulnérables à des perturbations imperceptibles pour l'œil humain. Cette fragilité soulève des questions importantes pour les déploiements en environnement critique.
+
+### Les enjeux de l'évaluation
+
+Mesurer la qualité d'un modèle reste un exercice délicat tant les benchmarks classiques montrent leurs limites. Les chercheurs proposent désormais des protocoles d'évaluation dynamiques qui adaptent les questions au niveau démontré par le système, à la manière des tests psychométriques utilisés dans l'éducation depuis plusieurs décennies.
+
+- Les benchmarks traditionnels saturent rapidement et perdent leur pouvoir discriminant.
+- Les évaluations humaines coûtent cher et sont sujettes à des biais.
+- Les évaluations automatiques par modèles juges introduisent leurs propres biais.
+- La question de la contamination des données d'entraînement reste épineuse.
+
+> La transparence sur les jeux de données d'évaluation devient un enjeu majeur pour la communauté scientifique, qui peine à reproduire les résultats publiés dans des conditions identiques.
+
+## Climat et numérique : une équation complexe
+
+L'empreinte carbone des centres de données suscite une attention renouvelée alors que les gouvernements négocient les prochaines étapes des accords climatiques. La consommation électrique des infrastructures numériques pourrait représenter une part significative de la demande mondiale d'ici la fin de la décennie, ce qui pose la question de la soutenabilité du modèle actuel.
+
+Les opérateurs ont multiplié les annonces concernant l'utilisation d'énergies renouvelables, mais les calculs sont rendus complexes par la nécessité d'assurer une continuité de service vingt-quatre heures sur vingt-quatre. Les batteries de stockage à grande échelle constituent une réponse partielle, encore limitée par leur coût et la disponibilité des matières premières nécessaires à leur fabrication.
+
+### Initiatives industrielles notables
+
+Plusieurs constructeurs de processeurs ont annoncé des feuilles de route ambitieuses visant à diviser par trois la consommation énergétique de leurs puces à performances équivalentes. Les techniques utilisées combinent une réduction de la finesse de gravure, une optimisation des flux de données internes et l'introduction de cœurs spécialisés pour les opérations les plus fréquentes.
+
+Du côté logiciel, les frameworks d'apprentissage automatique intègrent désormais des outils de profilage énergétique qui permettent aux développeurs d'identifier les portions de code les plus coûteuses. Cette transparence accrue facilite l'optimisation et change progressivement la culture de l'ingénierie logicielle.
+
+## Santé numérique et données personnelles
+
+Le secteur de la santé connaît une transformation profonde portée par l'analyse massive de données cliniques anonymisées. Les modèles entraînés sur de très grandes cohortes parviennent à détecter précocement certaines pathologies en identifiant des signaux faibles que l'œil humain peinerait à repérer dans le flux d'examens quotidiens.
+
+Cette promesse s'accompagne de défis considérables en matière de protection des données personnelles. Les techniques de calcul homomorphe et d'apprentissage fédéré progressent rapidement et permettent d'envisager des architectures où les données ne quittent jamais l'infrastructure de l'établissement de santé qui les héberge.
+
+> Les régulateurs européens continuent d'imposer un cadre strict, qui sert de référence dans de nombreuses régions du monde et façonne les pratiques industrielles bien au-delà des frontières de l'Union.
+
+### Cas d'usage en cardiologie
+
+L'analyse automatisée des électrocardiogrammes représente l'une des applications les plus matures de l'apprentissage profond en médecine. Les algorithmes parviennent à détecter des arythmies subtiles avec une sensibilité comparable à celle des cardiologues les plus expérimentés, sur des volumes de tracés qu'aucune équipe humaine ne pourrait examiner manuellement.
+
+Les premières études prospectives sont particulièrement encourageantes et démontrent un bénéfice clinique significatif sur des populations à risque. Les autorités sanitaires de plusieurs pays ont commencé à élaborer des cadres d'évaluation spécifiques pour ces dispositifs médicaux d'un genre nouveau, dont les performances peuvent évoluer avec les mises à jour logicielles.
+
+## Mobilité et villes intelligentes
+
+L'urbanisation croissante pousse les municipalités à repenser entièrement la gestion des flux de mobilité. Les capteurs déployés dans l'espace public alimentent en continu des modèles prédictifs qui permettent d'anticiper les pics de fréquentation, d'adapter les feux de signalisation et de proposer des itinéraires optimisés aux usagers des transports en commun.
+
+Cette numérisation de l'espace urbain soulève des questions d'éthique et d'acceptabilité sociale. Les associations de défense des libertés individuelles rappellent régulièrement que la collecte massive de données comportementales, même anonymisées, peut faciliter des usages détournés et qu'il convient d'instaurer des garde-fous robustes dès la conception des systèmes.
+
+
+# Article de test : panorama technologique 2026 (suite)
+
+L'intelligence artificielle a profondément transformé le paysage industriel au cours de la dernière décennie, modifiant la manière dont les entreprises conçoivent leurs produits, gèrent leurs chaînes logistiques et interagissent avec leurs clients. Cette évolution, longtemps confinée aux laboratoires de recherche, irrigue désormais les processus de décision les plus quotidiens.
+
+Les grandes plateformes de cloud computing rivalisent d'ingéniosité pour proposer des services de calcul accélérés par GPU, et la concurrence pour attirer les développeurs s'intensifie chaque trimestre. Les opérateurs européens cherchent à se positionner face aux acteurs américains et asiatiques, dans un contexte réglementaire qui privilégie la souveraineté numérique.
+
+## Les nouveaux modèles génératifs
+
+Sur le terrain des modèles de langage, la course aux paramètres a laissé place à une course à l'efficacité, où l'on cherche désormais à obtenir des résultats équivalents avec une fraction des ressources nécessaires auparavant. Les techniques de distillation et de quantification ont permis d'embarquer des modèles puissants directement sur des appareils mobiles, ouvrant la voie à des usages totalement déconnectés du cloud.
+
+Plusieurs équipes de recherche académique ont publié des résultats remarquables sur la robustesse des modèles face aux entrées adverses, démontrant que les architectures actuelles restent vulnérables à des perturbations imperceptibles pour l'œil humain. Cette fragilité soulève des questions importantes pour les déploiements en environnement critique.
+
+### Les enjeux de l'évaluation
+
+Mesurer la qualité d'un modèle reste un exercice délicat tant les benchmarks classiques montrent leurs limites. Les chercheurs proposent désormais des protocoles d'évaluation dynamiques qui adaptent les questions au niveau démontré par le système, à la manière des tests psychométriques utilisés dans l'éducation depuis plusieurs décennies.
+
+- Les benchmarks traditionnels saturent rapidement et perdent leur pouvoir discriminant.
+- Les évaluations humaines coûtent cher et sont sujettes à des biais.
+- Les évaluations automatiques par modèles juges introduisent leurs propres biais.
+- La question de la contamination des données d'entraînement reste épineuse.
+
+> La transparence sur les jeux de données d'évaluation devient un enjeu majeur pour la communauté scientifique, qui peine à reproduire les résultats publiés dans des conditions identiques.
+
+## Climat et numérique : une équation complexe
+
+L'empreinte carbone des centres de données suscite une attention renouvelée alors que les gouvernements négocient les prochaines étapes des accords climatiques. La consommation électrique des infrastructures numériques pourrait représenter une part significative de la demande mondiale d'ici la fin de la décennie, ce qui pose la question de la soutenabilité du modèle actuel.
+
+Les opérateurs ont multiplié les annonces concernant l'utilisation d'énergies renouvelables, mais les calculs sont rendus complexes par la nécessité d'assurer une continuité de service vingt-quatre heures sur vingt-quatre. Les batteries de stockage à grande échelle constituent une réponse partielle, encore limitée par leur coût et la disponibilité des matières premières nécessaires à leur fabrication.
+
+### Initiatives industrielles notables
+
+Plusieurs constructeurs de processeurs ont annoncé des feuilles de route ambitieuses visant à diviser par trois la consommation énergétique de leurs puces à performances équivalentes. Les techniques utilisées combinent une réduction de la finesse de gravure, une optimisation des flux de données internes et l'introduction de cœurs spécialisés pour les opérations les plus fréquentes.
+
+Du côté logiciel, les frameworks d'apprentissage automatique intègrent désormais des outils de profilage énergétique qui permettent aux développeurs d'identifier les portions de code les plus coûteuses. Cette transparence accrue facilite l'optimisation et change progressivement la culture de l'ingénierie logicielle.
+
+## Santé numérique et données personnelles
+
+Le secteur de la santé connaît une transformation profonde portée par l'analyse massive de données cliniques anonymisées. Les modèles entraînés sur de très grandes cohortes parviennent à détecter précocement certaines pathologies en identifiant des signaux faibles que l'œil humain peinerait à repérer dans le flux d'examens quotidiens.
+
+Cette promesse s'accompagne de défis considérables en matière de protection des données personnelles. Les techniques de calcul homomorphe et d'apprentissage fédéré progressent rapidement et permettent d'envisager des architectures où les données ne quittent jamais l'infrastructure de l'établissement de santé qui les héberge.
+
+> Les régulateurs européens continuent d'imposer un cadre strict, qui sert de référence dans de nombreuses régions du monde et façonne les pratiques industrielles bien au-delà des frontières de l'Union.
+
+### Cas d'usage en cardiologie
+
+L'analyse automatisée des électrocardiogrammes représente l'une des applications les plus matures de l'apprentissage profond en médecine. Les algorithmes parviennent à détecter des arythmies subtiles avec une sensibilité comparable à celle des cardiologues les plus expérimentés, sur des volumes de tracés qu'aucune équipe humaine ne pourrait examiner manuellement.
+
+Les premières études prospectives sont particulièrement encourageantes et démontrent un bénéfice clinique significatif sur des populations à risque. Les autorités sanitaires de plusieurs pays ont commencé à élaborer des cadres d'évaluation spécifiques pour ces dispositifs médicaux d'un genre nouveau, dont les performances peuvent évoluer avec les mises à jour logicielles.
+
+## Mobilité et villes intelligentes
+
+L'urbanisation croissante pousse les municipalités à repenser entièrement la gestion des flux de mobilité. Les capteurs déployés dans l'espace public alimentent en continu des modèles prédictifs qui permettent d'anticiper les pics de fréquentation, d'adapter les feux de signalisation et de proposer des itinéraires optimisés aux usagers des transports en commun.
+
+Cette numérisation de l'espace urbain soulève des questions d'éthique et d'acceptabilité sociale. Les associations de défense des libertés individuelles rappellent régulièrement que la collecte massive de données comportementales, même anonymisées, peut faciliter des usages détournés et qu'il convient d'instaurer des garde-fous robustes dès la conception des systèmes.
+
+
+# Article de test : panorama technologique 2026 (compléments)
+
+L'intelligence artificielle a profondément transformé le paysage industriel au cours de la dernière décennie, modifiant la manière dont les entreprises conçoivent leurs produits, gèrent leurs chaînes logistiques et interagissent avec leurs clients. Cette évolution, longtemps confinée aux laboratoires de recherche, irrigue désormais les processus de décision les plus quotidiens.
+
+Les grandes plateformes de cloud computing rivalisent d'ingéniosité pour proposer des services de calcul accélérés par GPU, et la concurrence pour attirer les développeurs s'intensifie chaque trimestre. Les opérateurs européens cherchent à se positionner face aux acteurs américains et asiatiques, dans un contexte réglementaire qui privilégie la souveraineté numérique.
+
+## Les nouveaux modèles génératifs
+
+Sur le terrain des modèles de langage, la course aux paramètres a laissé place à une course à l'efficacité, où l'on cherche désormais à obtenir des résultats équivalents avec une fraction des ressources nécessaires auparavant. Les techniques de distillation et de quantification ont permis d'embarquer des modèles puissants directement sur des appareils mobiles, ouvrant la voie à des usages totalement déconnectés du cloud.
+
+Plusieurs équipes de recherche académique ont publié des résultats remarquables sur la robustesse des modèles face aux entrées adverses, démontrant que les architectures actuelles restent vulnérables à des perturbations imperceptibles pour l'œil humain. Cette fragilité soulève des questions importantes pour les déploiements en environnement critique.
+
+### Les enjeux de l'évaluation
+
+Mesurer la qualité d'un modèle reste un exercice délicat tant les benchmarks classiques montrent leurs limites. Les chercheurs proposent désormais des protocoles d'évaluation dynamiques qui adaptent les questions au niveau démontré par le système, à la manière des tests psychométriques utilisés dans l'éducation depuis plusieurs décennies.
+
+- Les benchmarks traditionnels saturent rapidement et perdent leur pouvoir discriminant.
+- Les évaluations humaines coûtent cher et sont sujettes à des biais.
+- Les évaluations automatiques par modèles juges introduisent leurs propres biais.
+- La question de la contamination des données d'entraînement reste épineuse.
+
+> La transparence sur les jeux de données d'évaluation devient un enjeu majeur pour la communauté scientifique, qui peine à reproduire les résultats publiés dans des conditions identiques.
+
+## Climat et numérique : une équation complexe
+
+L'empreinte carbone des centres de données suscite une attention renouvelée alors que les gouvernements négocient les prochaines étapes des accords climatiques. La consommation électrique des infrastructures numériques pourrait représenter une part significative de la demande mondiale d'ici la fin de la décennie, ce qui pose la question de la soutenabilité du modèle actuel.
+
+Les opérateurs ont multiplié les annonces concernant l'utilisation d'énergies renouvelables, mais les calculs sont rendus complexes par la nécessité d'assurer une continuité de service vingt-quatre heures sur vingt-quatre. Les batteries de stockage à grande échelle constituent une réponse partielle, encore limitée par leur coût et la disponibilité des matières premières nécessaires à leur fabrication.
+
+### Initiatives industrielles notables
+
+Plusieurs constructeurs de processeurs ont annoncé des feuilles de route ambitieuses visant à diviser par trois la consommation énergétique de leurs puces à performances équivalentes. Les techniques utilisées combinent une réduction de la finesse de gravure, une optimisation des flux de données internes et l'introduction de cœurs spécialisés pour les opérations les plus fréquentes.
+
+Du côté logiciel, les frameworks d'apprentissage automatique intègrent désormais des outils de profilage énergétique qui permettent aux développeurs d'identifier les portions de code les plus coûteuses. Cette transparence accrue facilite l'optimisation et change progressivement la culture de l'ingénierie logicielle.
+
+## Santé numérique et données personnelles
+
+Le secteur de la santé connaît une transformation profonde portée par l'analyse massive de données cliniques anonymisées. Les modèles entraînés sur de très grandes cohortes parviennent à détecter précocement certaines pathologies en identifiant des signaux faibles que l'œil humain peinerait à repérer dans le flux d'examens quotidiens.
+
+Cette promesse s'accompagne de défis considérables en matière de protection des données personnelles. Les techniques de calcul homomorphe et d'apprentissage fédéré progressent rapidement et permettent d'envisager des architectures où les données ne quittent jamais l'infrastructure de l'établissement de santé qui les héberge.
+
+> Les régulateurs européens continuent d'imposer un cadre strict, qui sert de référence dans de nombreuses régions du monde et façonne les pratiques industrielles bien au-delà des frontières de l'Union.
+
+### Cas d'usage en cardiologie
+
+L'analyse automatisée des électrocardiogrammes représente l'une des applications les plus matures de l'apprentissage profond en médecine. Les algorithmes parviennent à détecter des arythmies subtiles avec une sensibilité comparable à celle des cardiologues les plus expérimentés, sur des volumes de tracés qu'aucune équipe humaine ne pourrait examiner manuellement.
+
+Les premières études prospectives sont particulièrement encourageantes et démontrent un bénéfice clinique significatif sur des populations à risque. Les autorités sanitaires de plusieurs pays ont commencé à élaborer des cadres d'évaluation spécifiques pour ces dispositifs médicaux d'un genre nouveau, dont les performances peuvent évoluer avec les mises à jour logicielles.
+
+## Mobilité et villes intelligentes
+
+L'urbanisation croissante pousse les municipalités à repenser entièrement la gestion des flux de mobilité. Les capteurs déployés dans l'espace public alimentent en continu des modèles prédictifs qui permettent d'anticiper les pics de fréquentation, d'adapter les feux de signalisation et de proposer des itinéraires optimisés aux usagers des transports en commun.
+
+Cette numérisation de l'espace urbain soulève des questions d'éthique et d'acceptabilité sociale. Les associations de défense des libertés individuelles rappellent régulièrement que la collecte massive de données comportementales, même anonymisées, peut faciliter des usages détournés et qu'il convient d'instaurer des garde-fous robustes dès la conception des systèmes.
+
+## Conclusion provisoire
+
+L'ensemble de ces évolutions dessine un paysage technologique en mutation rapide, où les questions techniques se mêlent étroitement à des considérations économiques, écologiques et sociétales. La capacité à produire des analyses transversales devient un enjeu stratégique pour les organisations comme pour les pouvoirs publics, qui doivent arbitrer entre des impératifs parfois contradictoires.
+

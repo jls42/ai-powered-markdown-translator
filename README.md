@@ -9,7 +9,7 @@ Ce script Python traduit des fichiers Markdown d'une langue source vers une lang
 ## Caractéristiques Principales
 
 - **Multi-Provider**: Support de 4 APIs (OpenAI, Mistral, Claude, Gemini)
-- **Modèles 2026**: GPT-5.4, Claude Sonnet 4.5, Gemini 3.1 Pro
+- **Modèles 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
 - **Mode Économique**: Option `--eco` pour utiliser des modèles plus rapides et moins coûteux
 - **Fichier Unique**: Option `--file` pour traduire un seul fichier
 - **Segmentation Intelligente**: Gestion des textes longs avec limites de tokens par modèle
@@ -53,7 +53,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Traduire un répertoire
 
 ```bash
-# Avec OpenAI (défaut: gpt-5.4)
+# Avec OpenAI (défaut: gpt-5.5)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -68,7 +68,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Mode économique
 
-Utilise des modèles plus rapides et moins coûteux (gpt-5-mini, claude-haiku, gemini-flash) :
+Utilise des modèles plus rapides et moins coûteux (gpt-5.4-mini, claude-haiku, gemini-flash) :
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -98,10 +98,12 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 | Provider | Qualité (défaut) | Économique (`--eco`) |
 |----------|------------------|----------------------|
-| OpenAI | `gpt-5` | `gpt-5-mini` |
-| Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
+| OpenAI | `gpt-5.5` | `gpt-5.4-mini` |
+| Claude | `claude-sonnet-4-6` | `claude-haiku-4-5` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
-| Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
+| Gemini | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
+
+> **Recommandation traductions long-form** : `--use_gemini` (défaut = `gemini-3.1-pro-preview` qualité, `--eco` = `gemini-3-flash-preview`) tend à mieux préserver la structure markdown sur les scripts non-latins (PL, JA, ZH, AR, HI), notamment en mode `--news` où la fidélité des placeholders compte. OpenAI reste le défaut pour la rétrocompatibilité.
 
 ## Projets utilisant ce script
 

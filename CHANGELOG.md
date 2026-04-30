@@ -2,6 +2,14 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.7.2** Fix silent-failure sur traductions longues (2026-04-28) :
+    - Validation langue post-traduction sur tous les providers (OpenAI, Mistral, Claude, Gemini) : couche déterministe (extrait source retrouvé verbatim) + couche probabiliste (`langdetect`)
+    - Whitelist `finish_reason` / `stop_reason` : lever `RuntimeError` sur tout état hors de la whitelist (truncation, content_filter, etc.)
+    - `max_tokens` Claude : `4096` → `16384` (évite truncation latente sur segments de 16k chars)
+    - Segmentation heading-aware : priorité H2/H3 dans la 2nde moitié du segment (chaque segment commence par une section sémantique complète)
+    - Propagation des erreurs jusqu'à exit code non-zéro : `translate_markdown_file` retourne un statut typé `success` / `failure` / `skipped`, `main()` `sys.exit(1)` si au moins un fichier a échoué (single-file et batch)
+    - Ajout dépendance `langdetect==1.0.9`
+    - Tests de régression (`tests/test_silent_failure.py`, `unittest` stdlib) couvrant les six maillons de la chaîne d'erreur
 - **1.7.1** Mise à jour modèles OpenAI :
     - Modèles par défaut mis à jour vers GPT-5.4 (mars 2026) :
         - Qualité : `gpt-5` → `gpt-5.4`

@@ -7,6 +7,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Commits**: Utiliser le skill `/helping-with-commits` pour tous les commits
 - **Recherche web**: Utiliser l'agent `web-research-specialist:web-research-specialist` pour les recherches de documentation (évite de polluer le contexte principal)
 
+### Release / Tag workflow (2 phases)
+
+Le script `release.sh` est conçu pour un workflow en **deux phases** : avant merge (prépare la MR sans tagger) et après merge (tag sur main + GitLab Release).
+
+Quand l'utilisateur demande "release", "tag", "publie cette version" :
+
+#### Phase 1 — Avant merge (depuis la branche feature)
+
+```bash
+./release.sh --auto
+```
+
+Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env`) → push branche → MR via `glab` (si auth OK).
+
+**Pas de tag à ce stade.** Le tag est créé en phase 2 pour qu'il pointe sur le commit de merge dans `main` (pas sur la branche feature).
+
+#### Phase 2 — Après merge MR
+
+```bash
+./release.sh --tag-only --yes
+```
+
+Effectue : checkout main → pull → vérifie cohérence CHANGELOG → tag annoté `v$VERSION` sur HEAD de main → push tag → GitLab Release via `glab` (si auth OK).
+
+#### Variantes
+
+- `--with-tag` : tag avant merge (workflow fast-forward / squash uniquement). À éviter si la MR génère un merge commit.
+- `--local-only` : tout en local, pas de push (test/preview).
+- `--dry-run` : simule sans rien toucher.
+- `--no-mr` / `--no-gitlab-release` / `--no-push` : opt-out fins.
+
+#### Gestion glab token
+
+Le script vérifie l'auth glab en parsant la sortie de `glab api user` (le simple exit code de `glab auth status` n'est pas fiable : il retourne 0 même sur 401). Si le token est expiré :
+- Warn + skip MR / GitLab Release
+- Affiche les commandes manuelles
+- Pour réauthentifier : `glab auth login`
+
+#### Régénération seule (sans release)
+
+```bash
+./regen_translations.sh --force   # réécrit les 28 traductions
+./regen_translations.sh           # skip celles qui existent déjà
+```
+
 ## Project Overview
 
 AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), and Google Gemini APIs to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
@@ -22,10 +67,10 @@ source venv/bin/activate
 # Translate a single file
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 
-# Translate a directory with OpenAI (default: gpt-5)
+# Translate a directory with OpenAI (default: gpt-5.5)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
-# Use economic models (--eco): gpt-5-mini, claude-haiku, gemini-flash
+# Use economic models (--eco): gpt-5.4-mini, claude-haiku, gemini-flash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 # Translate with Mistral AI
@@ -83,7 +128,7 @@ For batch translations (README, CHANGELOG, blog articles), use `--eco` mode:
 python translate.py --file README.md --target_dir . --source_lang fr --target_lang en --eco --add_translation_note
 ```
 
-This uses faster/cheaper models (gpt-5-mini) which are sufficient for documentation translation.
+This uses faster/cheaper models (gpt-5.4-mini) which are sufficient for documentation translation.
 
 ## Key Constants
 
@@ -94,7 +139,9 @@ This uses faster/cheaper models (gpt-5-mini) which are sufficient for documentat
 
 | Provider | Quality (default) | Economic (`--eco`) |
 |----------|-------------------|-------------------|
-| OpenAI | `gpt-5` | `gpt-5-mini` |
-| Claude | `claude-sonnet-4-5-20250929` | `claude-haiku-4-5-20251001` |
+| OpenAI | `gpt-5.5` | `gpt-5.4-mini` |
+| Claude | `claude-sonnet-4-6` | `claude-haiku-4-5-20251001` |
 | Mistral | `mistral-large-latest` | `mistral-small-latest` |
-| Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
+| Gemini | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
+
+> **Recommendation for long-form translations** : `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3-flash-preview`) tends to produce more reliable structure preservation on non-Latin scripts (PL, JA, ZH, AR, HI), particularly for `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
