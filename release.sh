@@ -327,6 +327,17 @@ fi
 run git add CHANGELOG.md CLAUDE.md README.md requirements.txt translate.py .gitignore
 run git add tests/test_silent_failure.py tests/fixtures/long_fr_excerpt.txt
 run git add regen_translations.sh release.sh
+
+# Quality tooling files (pre-commit, ruff, mypy, lizard, detect-secrets, etc.)
+# Listés explicitement (jamais de répertoire) pour cohérence avec la règle ci-dessus.
+run git add .pre-commit-config.yaml pyproject.toml .prettierrc .prettierignore
+run git add .secrets.baseline requirements-dev.txt
+run git add scripts/__init__.py scripts/_venv_python.sh
+run git add scripts/check-complexity.sh scripts/check-security-sast.sh
+run git add scripts/check-pip-audit.sh scripts/audit_verdict.py
+run git add scripts/run-mypy.sh scripts/run-unittest.sh
+run git add scripts/tests/test_audit_verdict.py
+
 for lang in $LANGS; do
   run git add "README-${lang}.md" "CHANGELOG-${lang}.md"
 done
