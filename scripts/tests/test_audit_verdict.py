@@ -75,14 +75,10 @@ class TestAuditVerdict(unittest.TestCase):
         self.assertEqual(compute_audit_verdict('{"dependencies": "oops"}'), "no-metadata")
 
     def test_parse_error_dep_not_object(self) -> None:
-        self.assertEqual(
-            compute_audit_verdict('{"dependencies": ["not-a-dict"]}'), "parse-error"
-        )
+        self.assertEqual(compute_audit_verdict('{"dependencies": ["not-a-dict"]}'), "parse-error")
 
     def test_parse_error_vulns_not_list(self) -> None:
-        payload = json.dumps(
-            {"dependencies": [{"name": "x", "vulns": "not-a-list"}]}
-        )
+        payload = json.dumps({"dependencies": [{"name": "x", "vulns": "not-a-list"}]})
         self.assertEqual(compute_audit_verdict(payload), "parse-error")
 
 

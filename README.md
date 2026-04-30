@@ -76,32 +76,32 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Options
 
-| Option | Description |
-|--------|-------------|
-| `--file` | Fichier Markdown unique à traduire |
-| `--source_dir` | Répertoire source contenant les fichiers Markdown |
-| `--target_dir` | Répertoire de sortie pour les fichiers traduits |
-| `--source_lang` | Langue source (défaut: `fr`) |
-| `--target_lang` | Langue cible (défaut: `en`) |
-| `--model` | Modèle spécifique à utiliser |
-| `--eco` | Utiliser les modèles économiques |
-| `--use_mistral` | Utiliser l'API Mistral AI |
-| `--use_claude` | Utiliser l'API Claude |
-| `--use_gemini` | Utiliser l'API Gemini |
-| `--force` | Forcer la re-traduction |
-| `--keep_filename` | Conserver le nom de fichier original |
-| `--news` | Mode actualités : protège les citations EN, gère les drapeaux par langue |
-| `--add_translation_note` | Ajouter une note de traduction |
-| `--include_model` | Inclure le nom du modèle dans le fichier de sortie |
+| Option                   | Description                                                              |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `--file`                 | Fichier Markdown unique à traduire                                       |
+| `--source_dir`           | Répertoire source contenant les fichiers Markdown                        |
+| `--target_dir`           | Répertoire de sortie pour les fichiers traduits                          |
+| `--source_lang`          | Langue source (défaut: `fr`)                                             |
+| `--target_lang`          | Langue cible (défaut: `en`)                                              |
+| `--model`                | Modèle spécifique à utiliser                                             |
+| `--eco`                  | Utiliser les modèles économiques                                         |
+| `--use_mistral`          | Utiliser l'API Mistral AI                                                |
+| `--use_claude`           | Utiliser l'API Claude                                                    |
+| `--use_gemini`           | Utiliser l'API Gemini                                                    |
+| `--force`                | Forcer la re-traduction                                                  |
+| `--keep_filename`        | Conserver le nom de fichier original                                     |
+| `--news`                 | Mode actualités : protège les citations EN, gère les drapeaux par langue |
+| `--add_translation_note` | Ajouter une note de traduction                                           |
+| `--include_model`        | Inclure le nom du modèle dans le fichier de sortie                       |
 
 ### Modèles par défaut (2026)
 
-| Provider | Qualité (défaut) | Économique (`--eco`) |
-|----------|------------------|----------------------|
-| OpenAI | `gpt-5.5` | `gpt-5.4-mini` |
-| Claude | `claude-sonnet-4-6` | `claude-haiku-4-5` |
-| Mistral | `mistral-large-latest` | `mistral-small-latest` |
-| Gemini | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
+| Provider | Qualité (défaut)         | Économique (`--eco`)     |
+| -------- | ------------------------ | ------------------------ |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`           |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5`       |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`   |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
 
 > **Recommandation traductions long-form** : `--use_gemini` (défaut = `gemini-3.1-pro-preview` qualité, `--eco` = `gemini-3-flash-preview`) tend à mieux préserver la structure markdown sur les scripts non-latins (PL, JA, ZH, AR, HI), notamment en mode `--news` où la fidélité des placeholders compte. OpenAI reste le défaut pour la rétrocompatibilité.
 

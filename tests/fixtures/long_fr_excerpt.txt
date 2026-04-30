@@ -168,4 +168,3 @@ Cette numérisation de l'espace urbain soulève des questions d'éthique et d'ac
 ## Conclusion provisoire
 
 L'ensemble de ces évolutions dessine un paysage technologique en mutation rapide, où les questions techniques se mêlent étroitement à des considérations économiques, écologiques et sociétales. La capacité à produire des analyses transversales devient un enjeu stratégique pour les organisations comme pour les pouvoirs publics, qui doivent arbitrer entre des impératifs parfois contradictoires.
-

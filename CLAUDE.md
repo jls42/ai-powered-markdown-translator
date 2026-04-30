@@ -41,6 +41,7 @@ Effectue : checkout main → pull → vérifie cohérence CHANGELOG → tag anno
 #### Gestion glab token
 
 Le script vérifie l'auth glab en parsant la sortie de `glab api user` (le simple exit code de `glab auth status` n'est pas fiable : il retourne 0 même sur 401). Si le token est expiré :
+
 - Warn + skip MR / GitLab Release
 - Affiche les commandes manuelles
 - Pour réauthentifier : `glab auth login`
@@ -109,6 +110,7 @@ pip install -r requirements.txt
 - **Directory traversal**: `translate_directory()` walks source directory, skips patterns in `EXCLUDE_PATTERNS`, checks for existing translations
 
 **Output naming**:
+
 - Default: `{base}-{target_lang}.md` (e.g., `README-en.md`)
 - With `--include_model`: `{base}-{target_lang}-{model}.md`
 - With `--keep_filename`: original filename (for destination folder workflows)
@@ -116,6 +118,7 @@ pip install -r requirements.txt
 ## Environment Variables
 
 Required API keys (set one based on which API you use). Use `.env` file or export:
+
 - `OPENAI_API_KEY`
 - `MISTRAL_API_KEY`
 - `ANTHROPIC_API_KEY`
@@ -124,6 +127,7 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 ## Recommended Usage
 
 For batch translations (README, CHANGELOG, blog articles), use `--eco` mode:
+
 ```bash
 python translate.py --file README.md --target_dir . --source_lang fr --target_lang en --eco --add_translation_note
 ```
@@ -137,11 +141,11 @@ This uses faster/cheaper models (gpt-5.4-mini) which are sufficient for document
 
 ### Default Models (2026)
 
-| Provider | Quality (default) | Economic (`--eco`) |
-|----------|-------------------|-------------------|
-| OpenAI | `gpt-5.5` | `gpt-5.4-mini` |
-| Claude | `claude-sonnet-4-6` | `claude-haiku-4-5-20251001` |
-| Mistral | `mistral-large-latest` | `mistral-small-latest` |
-| Gemini | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
+| Provider | Quality (default)        | Economic (`--eco`)          |
+| -------- | ------------------------ | --------------------------- |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`              |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001` |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`      |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview`    |
 
 > **Recommendation for long-form translations** : `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3-flash-preview`) tends to produce more reliable structure preservation on non-Latin scripts (PL, JA, ZH, AR, HI), particularly for `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.

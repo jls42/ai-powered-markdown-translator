@@ -22,9 +22,9 @@ from unittest.mock import MagicMock, patch
 # Permet d'importer translate.py depuis le parent
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import translate  # noqa: E402
-from translate import segment_text, translate as translate_fn, translate_markdown_file  # noqa: E402
-
+import translate
+from translate import segment_text, translate_markdown_file
+from translate import translate as translate_fn
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "fixtures", "long_fr_excerpt.txt")
 
@@ -44,13 +44,13 @@ def _make_openai_response(content, finish_reason="stop"):
 
 def _base_args(**overrides):
     """Namespace minimal pour translate(). Override pour ajouter des attributs si besoin."""
-    defaults = dict(
-        model="gpt-5.4-mini",
-        source_lang="fr",
-        target_lang="en",
-        news=False,
-        reasoning_effort="medium",
-    )
+    defaults = {
+        "model": "gpt-5.4-mini",
+        "source_lang": "fr",
+        "target_lang": "en",
+        "news": False,
+        "reasoning_effort": "medium",
+    }
     defaults.update(overrides)
     return Namespace(**defaults)
 
@@ -109,16 +109,20 @@ class TestSilentFailure(unittest.TestCase):
                 if i == 1:
                     responses.append(_make_openai_response(seg))  # FR brut
                 else:
-                    responses.append(_make_openai_response(
-                        "Translated content placeholder. " * 20
-                    ))
+                    responses.append(_make_openai_response("Translated content placeholder. " * 20))
             mock_client.chat.completions.create.side_effect = responses
 
             args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
             status = translate_markdown_file(
-                src, dst, mock_client, args,
-                use_mistral=False, use_claude=False, use_gemini=False,
-                add_translation_note=False, force=False,
+                src,
+                dst,
+                mock_client,
+                args,
+                use_mistral=False,
+                use_claude=False,
+                use_gemini=False,
+                add_translation_note=False,
+                force=False,
             )
             self.assertEqual(status, "failure")
             self.assertFalse(
@@ -159,11 +163,13 @@ class TestSilentFailure(unittest.TestCase):
 
     def test_main_exits_nonzero_on_failure_single_file(self):
         """main() avec --file doit sys.exit(1) quand translate_markdown_file retourne 'failure'."""
-        with patch("translate.translate_markdown_file", return_value="failure"), \
-             patch("translate.OpenAI"), \
-             patch("os.path.isfile", return_value=True), \
-             patch("os.path.exists", return_value=True), \
-             patch("sys.argv", ["translate.py", "--file", "/tmp/fake.md", "--target_dir", "/tmp"]):
+        with (
+            patch("translate.translate_markdown_file", return_value="failure"),
+            patch("translate.OpenAI"),
+            patch("os.path.isfile", return_value=True),
+            patch("os.path.exists", return_value=True),
+            patch("sys.argv", ["translate.py", "--file", "/tmp/fake.md", "--target_dir", "/tmp"]),
+        ):
             with self.assertRaises(SystemExit) as cm:
                 translate.main()
             self.assertEqual(cm.exception.code, 1)
@@ -171,16 +177,25 @@ class TestSilentFailure(unittest.TestCase):
     def test_main_exits_nonzero_on_failure_directory(self):
         """main() avec --source_dir doit sys.exit(1) quand translate_directory rapporte
         au moins un fichier en échec."""
-        with patch(
-            "translate.translate_directory",
-            return_value={"failed": ["a.md"], "skipped": []},
-        ), \
-             patch("translate.OpenAI"), \
-             patch("os.path.isdir", return_value=True), \
-             patch("os.path.exists", return_value=True), \
-             patch("sys.argv", [
-                 "translate.py", "--source_dir", "/tmp/src", "--target_dir", "/tmp/dst",
-             ]):
+        with (
+            patch(
+                "translate.translate_directory",
+                return_value={"failed": ["a.md"], "skipped": []},
+            ),
+            patch("translate.OpenAI"),
+            patch("os.path.isdir", return_value=True),
+            patch("os.path.exists", return_value=True),
+            patch(
+                "sys.argv",
+                [
+                    "translate.py",
+                    "--source_dir",
+                    "/tmp/src",
+                    "--target_dir",
+                    "/tmp/dst",
+                ],
+            ),
+        ):
             with self.assertRaises(SystemExit) as cm:
                 translate.main()
             self.assertEqual(cm.exception.code, 1)
@@ -265,15 +280,23 @@ locale: 'pl'
             )
 
             status = translate_markdown_file(
-                src, dst, mock_client, args,
-                use_mistral=False, use_claude=False, use_gemini=False,
-                add_translation_note=False, force=False,
+                src,
+                dst,
+                mock_client,
+                args,
+                use_mistral=False,
+                use_claude=False,
+                use_gemini=False,
+                add_translation_note=False,
+                force=False,
             )
 
             self.assertEqual(status, "success")
             with open(dst, encoding="utf-8") as f:
                 out = f.read()
-            self.assertIn("> A decade in the making, the chips for the agentic era have arrived.", out)
+            self.assertIn(
+                "> A decade in the making, the chips for the agentic era have arrived.", out
+            )
             self.assertNotIn("<NEWSQUOTE", out)
             self.assertIn("🇵🇱", out)
 
@@ -320,13 +343,20 @@ locale: 'pl'
             )
 
             status = translate_markdown_file(
-                src, dst, mock_client, args,
-                use_mistral=False, use_claude=False, use_gemini=False,
-                add_translation_note=False, force=False,
+                src,
+                dst,
+                mock_client,
+                args,
+                use_mistral=False,
+                use_claude=False,
+                use_gemini=False,
+                add_translation_note=False,
+                force=False,
             )
 
             self.assertEqual(status, "failure")
             self.assertFalse(os.path.exists(dst))
+
 
 REGEN_SCRIPT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "regen_translations.sh")
@@ -394,9 +424,7 @@ class TestDetectProvider(unittest.TestCase):
 
     def test_real_key_in_env_picks_gemini(self):
         """Cas 3 : .env avec une chaîne non-placeholder → --use_gemini --eco"""
-        stdout, stderr, rc = self._run_detect(
-            env_content=f"GOOGLE_API_KEY={self._FAKE_KEY_FILE}\n"
-        )
+        stdout, stderr, rc = self._run_detect(env_content=f"GOOGLE_API_KEY={self._FAKE_KEY_FILE}\n")
         self.assertEqual(rc, 0)
         self.assertEqual(stdout, "--use_gemini --eco")
         self.assertIn("Gemini Flash détecté", stderr)
