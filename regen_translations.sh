@@ -48,6 +48,12 @@ detect_provider() {
       echo "[regen] REGEN_PROVIDER=openai → --eco (OpenAI gpt-5.4-mini)" >&2
       return
       ;;
+    "")
+      # Pas d'override → tomber dans l'auto-détection ci-dessous
+      ;;
+    *)
+      echo "[regen] WARNING: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: gemini|openai), auto-détection" >&2
+      ;;
   esac
 
   # Auto-détection : OpenAI par défaut, fallback Gemini si OPENAI absent
@@ -75,7 +81,7 @@ main() {
   # shellcheck disable=SC1091
   source venv/bin/activate
 
-  if [ ! -f translate.py ]; then
+  if [[ ! -f translate.py ]]; then
     echo "ERROR: translate.py not found in $SCRIPT_DIR" >&2
     exit 1
   fi
@@ -106,7 +112,7 @@ main() {
     echo "[CHANGELOG] -> $lang"
     run_one CHANGELOG.md "$lang" &
 
-    while [ "$(jobs -r | wc -l)" -ge "$max_jobs" ]; do
+    while [[ "$(jobs -r | wc -l)" -ge "$max_jobs" ]]; do
       sleep 1
     done
   done
