@@ -55,6 +55,58 @@ def _base_args(**overrides):
     return Namespace(**defaults)
 
 
+def _run_markdown_file_translation(
+    source_text,
+    mock_response,
+    *,
+    target_lang="en",
+    news=False,
+    add_translation_note=False,
+    ext="md",
+):
+    """Scaffolding partagé pour invoquer translate_markdown_file dans un tempdir.
+
+    `mock_response` accepte un seul mock OpenAI ou une liste (pour side_effect).
+    Retourne (status, output_text_or_None, dst_path).
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        src = os.path.join(tmpdir, f"input.{ext}")
+        dst = os.path.join(tmpdir, f"input-{target_lang}.{ext}")
+        with open(src, "w", encoding="utf-8") as f:
+            f.write(source_text)
+
+        mock_client = MagicMock()
+        if isinstance(mock_response, list):
+            mock_client.chat.completions.create.side_effect = mock_response
+        else:
+            mock_client.chat.completions.create.return_value = mock_response
+
+        args = _base_args(
+            source_dir=tmpdir,
+            target_dir=tmpdir,
+            target_lang=target_lang,
+            news=news,
+        )
+
+        status = translate_markdown_file(
+            src,
+            dst,
+            mock_client,
+            args,
+            use_mistral=False,
+            use_claude=False,
+            use_gemini=False,
+            add_translation_note=add_translation_note,
+            force=False,
+        )
+
+        output = None
+        if os.path.exists(dst):
+            with open(dst, encoding="utf-8") as f:
+                output = f.read()
+        return status, output, dst
+
+
 class TestSilentFailure(unittest.TestCase):
     def test_silent_failure_raises_on_french_output(self):
         """Le 2e segment retourné en FR brut (verbatim source) doit lever RuntimeError.
@@ -262,43 +314,18 @@ locale: 'pl'
 > — [@GoogleAI na X](https://x.com/GoogleAI/status/1)
 """
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            src = os.path.join(tmpdir, "input.mdx")
-            dst = os.path.join(tmpdir, "input-pl.mdx")
-            with open(src, "w", encoding="utf-8") as f:
-                f.write(source_news)
-
-            mock_client = MagicMock()
-            mock_client.chat.completions.create.return_value = _make_openai_response(
-                translated_news
-            )
-            args = _base_args(
-                source_dir=tmpdir,
-                target_dir=tmpdir,
-                target_lang="pl",
-                news=True,
-            )
-
-            status = translate_markdown_file(
-                src,
-                dst,
-                mock_client,
-                args,
-                use_mistral=False,
-                use_claude=False,
-                use_gemini=False,
-                add_translation_note=False,
-                force=False,
-            )
-
-            self.assertEqual(status, "success")
-            with open(dst, encoding="utf-8") as f:
-                out = f.read()
-            self.assertIn(
-                "> A decade in the making, the chips for the agentic era have arrived.", out
-            )
-            self.assertNotIn("<NEWSQUOTE", out)
-            self.assertIn("🇵🇱", out)
+        status, out, _ = _run_markdown_file_translation(
+            source_news,
+            _make_openai_response(translated_news),
+            target_lang="pl",
+            news=True,
+            ext="mdx",
+        )
+        self.assertEqual(status, "success")
+        self.assertIsNotNone(out)
+        self.assertIn("> A decade in the making, the chips for the agentic era have arrived.", out)
+        self.assertNotIn("<NEWSQUOTE", out)
+        self.assertIn("🇵🇱", out)
 
     def test_news_xml_placeholder_restores_quote_without_attribution(self):
         """Les anciens articles news peuvent avoir une citation sans ligne `> — ...`."""
@@ -325,40 +352,17 @@ locale: 'pl'
 > 🇵🇱 _Różnica między „zdolny” a „w pełni solidny” pozostaje duża._
 """
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            src = os.path.join(tmpdir, "input.mdx")
-            dst = os.path.join(tmpdir, "input-pl.mdx")
-            with open(src, "w", encoding="utf-8") as f:
-                f.write(source_news)
-
-            mock_client = MagicMock()
-            mock_client.chat.completions.create.return_value = _make_openai_response(
-                translated_news
-            )
-            args = _base_args(
-                source_dir=tmpdir,
-                target_dir=tmpdir,
-                target_lang="pl",
-                news=True,
-            )
-
-            status = translate_markdown_file(
-                src,
-                dst,
-                mock_client,
-                args,
-                use_mistral=False,
-                use_claude=False,
-                use_gemini=False,
-                add_translation_note=False,
-                force=False,
-            )
-
-            self.assertEqual(status, "success")
-            with open(dst, encoding="utf-8") as f:
-                out = f.read()
-            self.assertIn("> The gap between 'capable' and 'completely robust' remains wide.", out)
-            self.assertNotIn("<NEWSQUOTE", out)
+        status, out, _ = _run_markdown_file_translation(
+            source_news,
+            _make_openai_response(translated_news),
+            target_lang="pl",
+            news=True,
+            ext="mdx",
+        )
+        self.assertEqual(status, "success")
+        self.assertIsNotNone(out)
+        self.assertIn("> The gap between 'capable' and 'completely robust' remains wide.", out)
+        self.assertNotIn("<NEWSQUOTE", out)
 
     def test_news_missing_xml_placeholder_is_failure(self):
         """Un placeholder news supprimé par le modèle doit bloquer l'écriture."""
@@ -385,70 +389,32 @@ locale: 'pl'
 > — [@claudeai na X](https://x.com/claudeai/status/1)
 """
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            src = os.path.join(tmpdir, "input.mdx")
-            dst = os.path.join(tmpdir, "input-pl.mdx")
-            with open(src, "w", encoding="utf-8") as f:
-                f.write(source_news)
-
-            mock_client = MagicMock()
-            mock_client.chat.completions.create.return_value = _make_openai_response(
-                translated_without_placeholder
-            )
-            args = _base_args(
-                source_dir=tmpdir,
-                target_dir=tmpdir,
-                target_lang="pl",
-                news=True,
-            )
-
-            status = translate_markdown_file(
-                src,
-                dst,
-                mock_client,
-                args,
-                use_mistral=False,
-                use_claude=False,
-                use_gemini=False,
-                add_translation_note=False,
-                force=False,
-            )
-
-            self.assertEqual(status, "failure")
-            self.assertFalse(os.path.exists(dst))
+        status, out, dst = _run_markdown_file_translation(
+            source_news,
+            _make_openai_response(translated_without_placeholder),
+            target_lang="pl",
+            news=True,
+            ext="mdx",
+        )
+        self.assertEqual(status, "failure")
+        self.assertIsNone(out)
+        self.assertFalse(os.path.exists(dst))
 
     def test_translation_note_ends_with_single_newline(self):
         """La note de traduction ne doit pas ajouter de ligne vide finale."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            src = os.path.join(tmpdir, "input.md")
-            dst = os.path.join(tmpdir, "input-en.md")
-            with open(src, "w", encoding="utf-8") as f:
-                f.write("Contenu source.\n")
-
-            mock_client = MagicMock()
-            mock_client.chat.completions.create.side_effect = [
+        status, out, _ = _run_markdown_file_translation(
+            "Contenu source.\n",
+            [
                 _make_openai_response("Translated content.\n"),
                 _make_openai_response("This document was translated."),
-            ]
-            args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
-
-            status = translate_markdown_file(
-                src,
-                dst,
-                mock_client,
-                args,
-                use_mistral=False,
-                use_claude=False,
-                use_gemini=False,
-                add_translation_note=True,
-                force=False,
-            )
-
-            self.assertEqual(status, "success")
-            with open(dst, encoding="utf-8") as f:
-                out = f.read()
-            self.assertTrue(out.endswith("**This document was translated.**\n"))
-            self.assertFalse(out.endswith("\n\n"))
+            ],
+            target_lang="en",
+            add_translation_note=True,
+        )
+        self.assertEqual(status, "success")
+        self.assertIsNotNone(out)
+        self.assertTrue(out.endswith("**This document was translated.**\n"))
+        self.assertFalse(out.endswith("\n\n"))
 
 
 class TestStructuralLineLanguageBar(unittest.TestCase):

@@ -179,6 +179,37 @@ _URL_OR_PLACEHOLDER = re.compile(
 )
 
 
+def _find_last_h2_h3_match(segment, min_pos):
+    """Retourne le dernier match \\n## ou \\n### à partir de min_pos, ou None."""
+    last = None
+    for m in re.finditer(r"\n#{2,3} ", segment):
+        if m.start() >= min_pos:
+            last = m
+    return last
+
+
+def _find_segment_breakpoint(segment, max_length):
+    """Index de coupure dans la 2nde moitié du segment.
+
+    Priorité : H2/H3, paragraphe, heading quelconque, fin de phrase, hard cut.
+    """
+    min_pos = max_length // 2
+
+    heading_match = _find_last_h2_h3_match(segment, min_pos)
+    if heading_match:
+        return heading_match.start() + 1
+
+    for candidate in (
+        segment.rfind("\n\n"),
+        segment.rfind("\n#"),
+        segment.rfind(". "),
+    ):
+        if candidate >= min_pos:
+            return candidate + 1
+
+    return max_length
+
+
 def segment_text(text, max_length):
     """
     Divise un texte Markdown en segments ne dépassant pas la longueur maximale spécifiée.
@@ -197,39 +228,14 @@ def segment_text(text, max_length):
     Returns:
         list[str]: Liste des segments de texte Markdown.
     """
-
     segments = []
     while text:
         if len(text) <= max_length:
             segments.append(text)
             break
-        segment = text[:max_length]
-        next_index = max_length
-        # Seuil pour éviter coupures trop précoces
-        min_pos = max_length // 2
-
-        # Priorité 1: dernier heading H2/H3 dans la 2nde moitié
-        heading_match = None
-        for m in re.finditer(r"\n#{2,3} ", segment):
-            if m.start() >= min_pos:
-                heading_match = m
-        if heading_match:
-            next_index = heading_match.start() + 1
-        else:
-            # Priorité 2-4: paragraphe, heading quelconque, fin de phrase
-            for candidate in (
-                segment.rfind("\n\n"),
-                segment.rfind("\n#"),
-                segment.rfind(". "),
-            ):
-                if candidate >= min_pos:
-                    next_index = candidate + 1
-                    break
-            # else: hard cut à max_length (next_index inchangé)
-
+        next_index = _find_segment_breakpoint(text[:max_length], max_length)
         segments.append(text[:next_index])
         text = text[next_index:]
-
     return segments
 
 
@@ -312,6 +318,258 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
         )
 
 
+_O1_SERIES = ("o1", "o1-mini", "o1-preview")
+
+
+def _build_translation_note_prompt(args):
+    return (
+        f"Translate directly to {args.target_lang} without any additions. "
+        "Do NOT modify URLs or image paths. "
+        "Output only the translation, nothing else."
+    )
+
+
+def _build_base_markdown_prompt(args):
+    return (
+        f"Translate this Markdown document from {args.source_lang} to {args.target_lang}. "
+        "Output ONLY the translated Markdown, with no comments or explanations. "
+        "Preserve the complete Markdown structure: headings, lists, tables, blockquotes, "
+        "front matter, MDX/HTML tags, directives, comments, and blank-line separation. "
+        "For Markdown links [text](url), translate the visible link text and keep the URL unchanged. "
+        "For Markdown tables, preserve pipes, separator rows, alignment markers, numbers, units, "
+        "IDs, and model/product names; translate human-readable headers and cell labels. "
+        "Do NOT modify URLs, image paths, anchors, IDs, slugs, code blocks, inline code, "
+        "template variables like {variable}, or placeholders. "
+        "In YAML/TOML/JSON front matter, preserve keys, nesting, arrays, booleans, numbers, "
+        "dates, paths, file references, identifiers, and tag-like taxonomies. Translate only "
+        "human-readable prose string values. If a locale/lang/language field already exists "
+        f"and contains a language code, update that value to {args.target_lang}; do not add such "
+        "a field if it is absent. Use valid quoting when translated strings contain apostrophes."
+    )
+
+
+def _build_news_rules_en(placeholder_example):
+    return (
+        '\n\n<news_citation_contract version="4">'
+        "\n<placeholder_rule>"
+        f"\nNews quote placeholders are XML self-closing tags like `{placeholder_example}`."
+        "\nThey are protected technical tags, not translatable text."
+        '\nCopy every `<NEWSQUOTE id="N"/>` tag exactly, preserving the Latin tag name, id number, quotes, and slash.'
+        "\nDo not replace the XML tag with quote text. Do not translate, localize, rename, delete, or reorder it."
+        "\nAcceptable formatting is only the exact input tag; do not add explanations around it."
+        "\n</placeholder_rule>"
+        '\n<citation_rule target="en">'
+        "\nFor each citation block, REMOVE the empty blockquote line (`>`) and REMOVE the whole source-translation line `> 🇫🇷 _..._`."
+        '\nKeep only the `<NEWSQUOTE id="N"/>` tag and the attribution line `> — [...](url)`.'
+        "\nTranslate attribution link text only; keep URL unchanged."
+        "\n</citation_rule>"
+        "\n<correct_output_shape>"
+        '\n<NEWSQUOTE id="N"/>'
+        "\n> — [translated attribution text](url unchanged)"
+        "\n</correct_output_shape>"
+        "\n</news_citation_contract>"
+    )
+
+
+def _build_news_rules_other(args, target_flag, placeholder_example):
+    return (
+        '\n\n<news_citation_contract version="4">'
+        "\nThese rules are CRITICAL and override ordinary translation instincts."
+        "\n"
+        "\n<placeholder_rule>"
+        f"\nNews quote placeholders are XML self-closing tags like `{placeholder_example}`."
+        "\nThey are protected technical tags, not words and not content."
+        '\nEach `<NEWSQUOTE id="N"/>` tag MUST appear in output with the same id number, in the same citation position.'
+        "\nDo not translate the tag name. Do not localize NEWSQUOTE into Polish, Chinese, Korean, Arabic, Hindi, or any other language."
+        "\nDo not replace the XML tag with the quote text. Do not delete it. Do not wrap it in code fences."
+        "\nBefore finalizing output: count `<NEWSQUOTE` tags in the output. The count MUST equal the source input."
+        "\n</placeholder_rule>"
+        "\n"
+        "\n<flag_rule>"
+        f"For each citation block: replace the source flag 🇫🇷 with {target_flag} and translate the italic text COMPLETELY to {args.target_lang}."
+        "\nCOMPLETE = same number of sentences, all concepts included, no truncation or summarization. The placeholder represents the original English quote — translate FROM its meaning."
+        f"\nThe {target_flag} emoji MUST ONLY appear inside blockquote citation lines (starting with `> `), and ONLY ONCE per citation."
+        "\n</flag_rule>"
+        "\n"
+        "\n<examples>"
+        "\nExample 1 — Polish target (PL):"
+        "\nINPUT:"
+        '\n<NEWSQUOTE id="0"/>'
+        "\n>"
+        "\n> 🇫🇷 _Une décennie de travail._"
+        "\n> — [@GoogleAI sur X](https://x.com/google)"
+        "\nCORRECT OUTPUT:"
+        '\n<NEWSQUOTE id="0"/>'
+        "\n>"
+        "\n> 🇵🇱 _Dekada pracy._"
+        "\n> — [@GoogleAI na X](https://x.com/google)"
+        "\n"
+        "\nExample 2 — Chinese target (ZH), tag MUST stay in Latin script:"
+        "\nINPUT:"
+        '\n<NEWSQUOTE id="0"/>'
+        "\n>"
+        "\n> 🇫🇷 _Une décennie de travail._"
+        "\n> — [@GoogleAI sur X](https://x.com/google)"
+        "\nCORRECT OUTPUT:"
+        '\n<NEWSQUOTE id="0"/>'
+        "\n>"
+        "\n> 🇨🇳 _十年磨一剑。_"
+        "\n> — [@GoogleAI 在 X 上](https://x.com/google)"
+        '\nWRONG: `<新闻引用 id="0"/>`, `<QUOTE id="0"/>`, or replacing the tag with the quote.'
+        "\n"
+        "\nExample 3 — Korean target (KO):"
+        "\nINPUT:"
+        '\n<NEWSQUOTE id="0"/>'
+        "\n>"
+        "\n> 🇫🇷 _Une décennie de travail._"
+        "\n> — [@GoogleAI sur X](https://x.com/google)"
+        "\nCORRECT OUTPUT:"
+        '\n<NEWSQUOTE id="0"/>'
+        "\n>"
+        "\n> 🇰🇷 _10년간의 작업._"
+        "\n> — [@GoogleAI X에서](https://x.com/google)"
+        '\nWRONG: `<뉴스인용 id="0"/>` or any Korean tag name.'
+        "\n"
+        "\nExample 4 — Arabic/Hindi scripts:"
+        "\nCORRECT OUTPUT tag line:"
+        '\n<NEWSQUOTE id="0"/>'
+        "\nWRONG: translating NEWSQUOTE, changing quotes, changing id, or removing the slash."
+        "\n</examples>"
+        "\n"
+        f'\nResult format for {args.target_lang} target:\n<NEWSQUOTE id="N"/>\n>\n> {target_flag} _translated italic text in {args.target_lang}_\n> — [attribution text translated](url unchanged)'
+        "\n</news_citation_contract>"
+    )
+
+
+_NEWS_COMMON_CONTRACT = (
+    "\n\n<markdown_translation_contract>"
+    "\n<completion_rules>"
+    "\n- The output MUST include EVERY part of the source document."
+    "\n- Preserve ALL headings (any level: `#`, `##`, `###`, `####`, etc.) at the SAME level and in the SAME order as the source."
+    "\n- Preserve ALL paragraphs, lists, code blocks, tables, and blockquotes from the source."
+    "\n- Translate the document FROM start TO end. The output must reach the same final element as the source (last paragraph, last list item, last section)."
+    "\n- DO NOT truncate, summarize, merge, or skip any element."
+    "\n</completion_rules>"
+    "\n<markdown_structure_rules>"
+    "\n- ALWAYS preserve a blank line between a horizontal rule `---` and any heading. They MUST NEVER be on the same line."
+    "\n  ❌ WRONG: '--- ## My Heading' (collapsed on single line)"
+    "\n  ✅ RIGHT: '---' on its own line, blank line, then '## My Heading' on its own line"
+    "\n- Same rule for inline links: a markdown link `](url)` must NEVER be on the same line as a following heading."
+    "\n- In Markdown tables, preserve pipes, separator rows, alignment markers, numbers, units, IDs, and product/model names. Translate human-readable table headers and cell labels."
+    "\n- Keep technical terms, acronyms, brand names, programming jargon, and product names in their original language (do not translate them)."
+    "\n- In front matter, translate only human-readable prose string values. Keep technical or structural fields unchanged: dates, slugs, paths, file references, tag arrays, ids, booleans, numbers, and identifier-like values. Update an existing locale/lang/language code to the target language; do not add one if absent."
+    "\n</markdown_structure_rules>"
+    "\n<final_checklist>"
+    "\nBefore returning, verify silently: all headings are present; all `<NEWSQUOTE` tags are present; all URLs are unchanged; the target flag count is correct; no source flag remains; the final section is complete."
+    "\nReturn ONLY the translated Markdown. No checklist, no commentary."
+    "\n</final_checklist>"
+    "\n</markdown_translation_contract>"
+)
+
+
+def _build_news_addendum(args):
+    target_flag = LANG_FLAGS.get(args.target_lang, "")
+    placeholder_example = news_quote_placeholder(0)
+    if args.target_lang == "en":
+        rules = _build_news_rules_en(placeholder_example)
+    else:
+        rules = _build_news_rules_other(args, target_flag, placeholder_example)
+    return rules + _NEWS_COMMON_CONTRACT
+
+
+def _build_system_instructions(args, is_translation_note):
+    if is_translation_note:
+        return _build_translation_note_prompt(args)
+    base = _build_base_markdown_prompt(args)
+    if args.news:
+        base += _build_news_addendum(args)
+    return base
+
+
+def _call_mistral(client, args, prompt, segment):
+    messages = [{"role": "user", "content": prompt + "\n\n" + segment}]
+    response = client.chat.complete(model=args.model, messages=messages)
+    finish = _reason_name(response.choices[0].finish_reason)
+    if finish not in ("stop", "STOP", None):
+        raise RuntimeError(f"Mistral abnormal finish_reason={finish!r} (model={args.model})")
+    return response.choices[0].message.content.strip()
+
+
+def _call_claude(client, args, prompt, segment):
+    messages = [{"role": "user", "content": prompt + "\n\n" + segment}]
+    response = client.messages.create(model=args.model, max_tokens=16384, messages=messages)
+    stop = _reason_name(response.stop_reason)
+    if stop not in ("end_turn", "stop_sequence", None):
+        raise RuntimeError(f"Claude abnormal stop_reason={stop!r} (model={args.model})")
+    return " ".join(block.text.strip() for block in response.content)
+
+
+def _call_gemini(client, args, prompt, segment):
+    model = client.GenerativeModel(args.model)
+    response = model.generate_content(prompt + "\n\n" + segment)
+    candidates = getattr(response, "candidates", None) or []
+    if candidates:
+        fr_name = _reason_name(getattr(candidates[0], "finish_reason", None))
+        if fr_name not in ("STOP", "FINISH_REASON_STOP", None):
+            raise RuntimeError(f"Gemini abnormal finish_reason={fr_name!r} (model={args.model})")
+    try:
+        return response.text.strip()
+    except (ValueError, AttributeError) as e:
+        raise RuntimeError(
+            f"Gemini response has no text (likely blocked or empty, model={args.model}): {e}"
+        ) from e
+
+
+def _build_openai_messages(args, prompt, segment):
+    if args.model in _O1_SERIES:
+        return [{"role": "user", "content": prompt + "\n\n" + segment}]
+    return [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": segment},
+    ]
+
+
+def _openai_extra_kwargs(args, is_translation_note):
+    # reasoning_effort sur GPT-5.x ; default medium pour rester pas cher.
+    if args.model.startswith("gpt-5") and not is_translation_note:
+        return {"reasoning_effort": getattr(args, "reasoning_effort", "medium")}
+    return {}
+
+
+def _openai_create_with_fallback(client, args, messages, extra_kwargs):
+    try:
+        return client.chat.completions.create(model=args.model, messages=messages, **extra_kwargs)
+    except TypeError:
+        # Vieille version SDK qui ne connaît pas reasoning_effort.
+        return client.chat.completions.create(model=args.model, messages=messages)
+    except Exception as e:
+        if "reasoning_effort" in str(e) and extra_kwargs:
+            return client.chat.completions.create(model=args.model, messages=messages)
+        raise
+
+
+def _call_openai(client, args, prompt, segment, is_translation_note):
+    messages = _build_openai_messages(args, prompt, segment)
+    extra_kwargs = _openai_extra_kwargs(args, is_translation_note)
+    response = _openai_create_with_fallback(client, args, messages, extra_kwargs)
+    finish = _reason_name(response.choices[0].finish_reason)
+    if finish not in ("stop", "STOP", None):
+        raise RuntimeError(f"OpenAI abnormal finish_reason={finish!r} (model={args.model})")
+    return response.choices[0].message.content.strip()
+
+
+def _dispatch_provider_call(
+    client, args, prompt, segment, use_mistral, use_claude, use_gemini, is_translation_note
+):
+    if use_mistral:
+        return _call_mistral(client, args, prompt, segment)
+    if use_claude:
+        return _call_claude(client, args, prompt, segment)
+    if use_gemini:
+        return _call_gemini(client, args, prompt, segment)
+    return _call_openai(client, args, prompt, segment, is_translation_note)
+
+
 def translate(
     text,
     client,
@@ -338,251 +596,282 @@ def translate(
     Returns:
         str: Texte traduit.
     """
-
     model_limit = MODEL_TOKEN_LIMITS.get(args.model, DEFAULT_TOKEN_LIMIT)
-
-    # Liste pour repérer les modèles de la série o1 : "o1", "o1-mini", "o1-preview"
-    o1_series = ["o1", "o1-mini", "o1-preview"]
-
-    # Limite de segmentation raisonnable (16k caractères pour fiabilité)
     segments = segment_text(text, min(16000, model_limit))
-    translated_segments = []
+    system_instructions = _build_system_instructions(args, is_translation_note)
 
+    translated_segments = []
     for segment in segments:
         try:
-            # FIX: Séparation des instructions (system) et du contenu (user)
-            # Avant: le segment était inclus dans prompt_message ET envoyé en user (doublon)
-            if is_translation_note:
-                system_instructions = (
-                    f"Translate directly to {args.target_lang} without any additions. "
-                    "Do NOT modify URLs or image paths. "
-                    "Output only the translation, nothing else."
-                )
-            else:
-                system_instructions = (
-                    f"Translate this Markdown document from {args.source_lang} to {args.target_lang}. "
-                    "Output ONLY the translated Markdown, with no comments or explanations. "
-                    "Preserve the complete Markdown structure: headings, lists, tables, blockquotes, "
-                    "front matter, MDX/HTML tags, directives, comments, and blank-line separation. "
-                    "For Markdown links [text](url), translate the visible link text and keep the URL unchanged. "
-                    "For Markdown tables, preserve pipes, separator rows, alignment markers, numbers, units, "
-                    "IDs, and model/product names; translate human-readable headers and cell labels. "
-                    "Do NOT modify URLs, image paths, anchors, IDs, slugs, code blocks, inline code, "
-                    "template variables like {variable}, or placeholders. "
-                    "In YAML/TOML/JSON front matter, preserve keys, nesting, arrays, booleans, numbers, "
-                    "dates, paths, file references, identifiers, and tag-like taxonomies. Translate only "
-                    "human-readable prose string values. If a locale/lang/language field already exists "
-                    f"and contains a language code, update that value to {args.target_lang}; do not add such "
-                    "a field if it is absent. Use valid quoting when translated strings contain apostrophes."
-                )
-
-            # Ajout des instructions news si --news actif
-            if not is_translation_note and args.news:
-                target_flag = LANG_FLAGS.get(args.target_lang, "")
-                placeholder_example = news_quote_placeholder(0)
-                if args.target_lang == "en":
-                    news_rules = (
-                        '\n\n<news_citation_contract version="4">'
-                        "\n<placeholder_rule>"
-                        f"\nNews quote placeholders are XML self-closing tags like `{placeholder_example}`."
-                        "\nThey are protected technical tags, not translatable text."
-                        '\nCopy every `<NEWSQUOTE id="N"/>` tag exactly, preserving the Latin tag name, id number, quotes, and slash.'
-                        "\nDo not replace the XML tag with quote text. Do not translate, localize, rename, delete, or reorder it."
-                        "\nAcceptable formatting is only the exact input tag; do not add explanations around it."
-                        "\n</placeholder_rule>"
-                        '\n<citation_rule target="en">'
-                        "\nFor each citation block, REMOVE the empty blockquote line (`>`) and REMOVE the whole source-translation line `> 🇫🇷 _..._`."
-                        '\nKeep only the `<NEWSQUOTE id="N"/>` tag and the attribution line `> — [...](url)`.'
-                        "\nTranslate attribution link text only; keep URL unchanged."
-                        "\n</citation_rule>"
-                        "\n<correct_output_shape>"
-                        '\n<NEWSQUOTE id="N"/>'
-                        "\n> — [translated attribution text](url unchanged)"
-                        "\n</correct_output_shape>"
-                        "\n</news_citation_contract>"
-                    )
-                else:
-                    news_rules = (
-                        '\n\n<news_citation_contract version="4">'
-                        "\nThese rules are CRITICAL and override ordinary translation instincts."
-                        "\n"
-                        "\n<placeholder_rule>"
-                        f"\nNews quote placeholders are XML self-closing tags like `{placeholder_example}`."
-                        "\nThey are protected technical tags, not words and not content."
-                        '\nEach `<NEWSQUOTE id="N"/>` tag MUST appear in output with the same id number, in the same citation position.'
-                        "\nDo not translate the tag name. Do not localize NEWSQUOTE into Polish, Chinese, Korean, Arabic, Hindi, or any other language."
-                        "\nDo not replace the XML tag with the quote text. Do not delete it. Do not wrap it in code fences."
-                        "\nBefore finalizing output: count `<NEWSQUOTE` tags in the output. The count MUST equal the source input."
-                        "\n</placeholder_rule>"
-                        "\n"
-                        "\n<flag_rule>"
-                        f"For each citation block: replace the source flag 🇫🇷 with {target_flag} and translate the italic text COMPLETELY to {args.target_lang}."
-                        "\nCOMPLETE = same number of sentences, all concepts included, no truncation or summarization. The placeholder represents the original English quote — translate FROM its meaning."
-                        f"\nThe {target_flag} emoji MUST ONLY appear inside blockquote citation lines (starting with `> `), and ONLY ONCE per citation."
-                        "\n</flag_rule>"
-                        "\n"
-                        "\n<examples>"
-                        "\nExample 1 — Polish target (PL):"
-                        "\nINPUT:"
-                        '\n<NEWSQUOTE id="0"/>'
-                        "\n>"
-                        "\n> 🇫🇷 _Une décennie de travail._"
-                        "\n> — [@GoogleAI sur X](https://x.com/google)"
-                        "\nCORRECT OUTPUT:"
-                        '\n<NEWSQUOTE id="0"/>'
-                        "\n>"
-                        "\n> 🇵🇱 _Dekada pracy._"
-                        "\n> — [@GoogleAI na X](https://x.com/google)"
-                        "\n"
-                        "\nExample 2 — Chinese target (ZH), tag MUST stay in Latin script:"
-                        "\nINPUT:"
-                        '\n<NEWSQUOTE id="0"/>'
-                        "\n>"
-                        "\n> 🇫🇷 _Une décennie de travail._"
-                        "\n> — [@GoogleAI sur X](https://x.com/google)"
-                        "\nCORRECT OUTPUT:"
-                        '\n<NEWSQUOTE id="0"/>'
-                        "\n>"
-                        "\n> 🇨🇳 _十年磨一剑。_"
-                        "\n> — [@GoogleAI 在 X 上](https://x.com/google)"
-                        '\nWRONG: `<新闻引用 id="0"/>`, `<QUOTE id="0"/>`, or replacing the tag with the quote.'
-                        "\n"
-                        "\nExample 3 — Korean target (KO):"
-                        "\nINPUT:"
-                        '\n<NEWSQUOTE id="0"/>'
-                        "\n>"
-                        "\n> 🇫🇷 _Une décennie de travail._"
-                        "\n> — [@GoogleAI sur X](https://x.com/google)"
-                        "\nCORRECT OUTPUT:"
-                        '\n<NEWSQUOTE id="0"/>'
-                        "\n>"
-                        "\n> 🇰🇷 _10년간의 작업._"
-                        "\n> — [@GoogleAI X에서](https://x.com/google)"
-                        '\nWRONG: `<뉴스인용 id="0"/>` or any Korean tag name.'
-                        "\n"
-                        "\nExample 4 — Arabic/Hindi scripts:"
-                        "\nCORRECT OUTPUT tag line:"
-                        '\n<NEWSQUOTE id="0"/>'
-                        "\nWRONG: translating NEWSQUOTE, changing quotes, changing id, or removing the slash."
-                        "\n</examples>"
-                        "\n"
-                        f'\nResult format for {args.target_lang} target:\n<NEWSQUOTE id="N"/>\n>\n> {target_flag} _translated italic text in {args.target_lang}_\n> — [attribution text translated](url unchanged)'
-                        "\n</news_citation_contract>"
-                    )
-                news_common = (
-                    "\n\n<markdown_translation_contract>"
-                    "\n<completion_rules>"
-                    "\n- The output MUST include EVERY part of the source document."
-                    "\n- Preserve ALL headings (any level: `#`, `##`, `###`, `####`, etc.) at the SAME level and in the SAME order as the source."
-                    "\n- Preserve ALL paragraphs, lists, code blocks, tables, and blockquotes from the source."
-                    "\n- Translate the document FROM start TO end. The output must reach the same final element as the source (last paragraph, last list item, last section)."
-                    "\n- DO NOT truncate, summarize, merge, or skip any element."
-                    "\n</completion_rules>"
-                    "\n<markdown_structure_rules>"
-                    "\n- ALWAYS preserve a blank line between a horizontal rule `---` and any heading. They MUST NEVER be on the same line."
-                    "\n  ❌ WRONG: '--- ## My Heading' (collapsed on single line)"
-                    "\n  ✅ RIGHT: '---' on its own line, blank line, then '## My Heading' on its own line"
-                    "\n- Same rule for inline links: a markdown link `](url)` must NEVER be on the same line as a following heading."
-                    "\n- In Markdown tables, preserve pipes, separator rows, alignment markers, numbers, units, IDs, and product/model names. Translate human-readable table headers and cell labels."
-                    "\n- Keep technical terms, acronyms, brand names, programming jargon, and product names in their original language (do not translate them)."
-                    "\n- In front matter, translate only human-readable prose string values. Keep technical or structural fields unchanged: dates, slugs, paths, file references, tag arrays, ids, booleans, numbers, and identifier-like values. Update an existing locale/lang/language code to the target language; do not add one if absent."
-                    "\n</markdown_structure_rules>"
-                    "\n<final_checklist>"
-                    "\nBefore returning, verify silently: all headings are present; all `<NEWSQUOTE` tags are present; all URLs are unchanged; the target flag count is correct; no source flag remains; the final section is complete."
-                    "\nReturn ONLY the translated Markdown. No checklist, no commentary."
-                    "\n</final_checklist>"
-                    "\n</markdown_translation_contract>"
-                )
-                system_instructions += news_rules + news_common
-
-            if use_mistral:
-                messages = [{"role": "user", "content": system_instructions + "\n\n" + segment}]
-                response = client.chat.complete(model=args.model, messages=messages)
-                finish = _reason_name(response.choices[0].finish_reason)
-                if finish not in ("stop", "STOP", None):
-                    raise RuntimeError(
-                        f"Mistral abnormal finish_reason={finish!r} (model={args.model})"
-                    )
-                translated_text = response.choices[0].message.content.strip()
-
-            elif use_claude:
-                messages = [{"role": "user", "content": system_instructions + "\n\n" + segment}]
-                response = client.messages.create(
-                    model=args.model, max_tokens=16384, messages=messages
-                )
-                stop = _reason_name(response.stop_reason)
-                if stop not in ("end_turn", "stop_sequence", None):
-                    raise RuntimeError(f"Claude abnormal stop_reason={stop!r} (model={args.model})")
-                translated_texts = [block.text.strip() for block in response.content]
-                translated_text = " ".join(translated_texts)
-
-            elif use_gemini:
-                model = client.GenerativeModel(args.model)
-                response = model.generate_content(system_instructions + "\n\n" + segment)
-                candidates = getattr(response, "candidates", None) or []
-                if candidates:
-                    fr_name = _reason_name(getattr(candidates[0], "finish_reason", None))
-                    if fr_name not in ("STOP", "FINISH_REASON_STOP", None):
-                        raise RuntimeError(
-                            f"Gemini abnormal finish_reason={fr_name!r} (model={args.model})"
-                        )
-                try:
-                    translated_text = response.text.strip()
-                except (ValueError, AttributeError) as e:
-                    raise RuntimeError(
-                        f"Gemini response has no text (likely blocked or empty, model={args.model}): {e}"
-                    ) from e
-
-            else:
-                # OpenAI (ChatGPT, o1, etc.)
-                if args.model in o1_series:
-                    messages = [
-                        {"role": "user", "content": system_instructions + "\n\n" + segment},
-                    ]
-                else:
-                    messages = [
-                        {"role": "system", "content": system_instructions},
-                        {"role": "user", "content": segment},
-                    ]
-
-                # Active reasoning_effort pour la famille GPT-5.x. Le défaut medium
-                # garde le coût bas ; le wrapper news peut demander high pour un retry
-                # cheap-first avant fallback premium.
-                # Fallback silencieux si le paramètre n'est pas supporté par le modèle.
-                extra_kwargs = {}
-                if args.model.startswith("gpt-5") and not is_translation_note:
-                    extra_kwargs["reasoning_effort"] = getattr(args, "reasoning_effort", "medium")
-                try:
-                    response = client.chat.completions.create(
-                        model=args.model, messages=messages, **extra_kwargs
-                    )
-                except TypeError:
-                    # Vieille version SDK qui ne connaît pas reasoning_effort.
-                    response = client.chat.completions.create(model=args.model, messages=messages)
-                except Exception as e:
-                    # API rejette le paramètre (modèle non éligible) → retry sans.
-                    if "reasoning_effort" in str(e) and extra_kwargs:
-                        response = client.chat.completions.create(
-                            model=args.model, messages=messages
-                        )
-                    else:
-                        raise
-                finish = _reason_name(response.choices[0].finish_reason)
-                if finish not in ("stop", "STOP", None):
-                    raise RuntimeError(
-                        f"OpenAI abnormal finish_reason={finish!r} (model={args.model})"
-                    )
-                translated_text = response.choices[0].message.content.strip()
-
+            translated_text = _dispatch_provider_call(
+                client,
+                args,
+                system_instructions,
+                segment,
+                use_mistral,
+                use_claude,
+                use_gemini,
+                is_translation_note,
+            )
             _validate_translation_output(segment, translated_text, args, is_translation_note)
         except Exception as e:
             raise RuntimeError(f"Erreur lors de la traduction : {e}") from e
-
         translated_segments.append(translated_text)
 
-    return " ".join(
-        translated_segments
-    )  # TODO: cleaner segment join (espace après newline si coupure sur heading)
+    # Note: jonction par espace simple. Acceptable car la segmentation coupe sur
+    # \n\n / \n#  / \n##  / \n### , donc la fin du segment N et le début du
+    # segment N+1 commencent déjà par un newline structurant.
+    return " ".join(translated_segments)
+
+
+_FENCED_CODE_REGEX = re.compile(r"(^```[\w-]*\n)(.*?)(^```$)", re.DOTALL | re.MULTILINE)
+_INLINE_CODE_REGEX = re.compile(r"(?<!`)(`[^`\n]+?`)(?!`)")
+# News citation pattern: > EN quote \n > \n > FLAG _trad_ \n (optional > — attribution)
+_NEWS_CITATION_REGEX = re.compile(
+    r"(^> (?!— ).+?)[ \t]*\n" r">[ \t]*\n" r"(^> .+_)[ \t]*" r"(?:\n(^> — .+?)[ \t]*)?$",
+    re.MULTILINE,
+)
+_RESIDUAL_NEWS_PLACEHOLDER_REGEX = re.compile(r'<NEWSQUOTE\s+id=["\']\d+["\']\s*/>|#NEWSQUOTE\d+#')
+
+
+def _protect_code_blocks(content):
+    code_blocks = [m.group(0) for m in _FENCED_CODE_REGEX.finditer(content)]
+    placeholders = [f"#CODEBLOCK{i}#" for i in range(len(code_blocks))]
+    for placeholder, code_block in zip(placeholders, code_blocks, strict=False):
+        content = content.replace(code_block, placeholder)
+    return content, code_blocks, placeholders
+
+
+def _protect_inline_code(content):
+    inline_codes = [m.group(0) for m in _INLINE_CODE_REGEX.finditer(content)]
+    placeholders = [f"#INLINECODE{i}#" for i in range(len(inline_codes))]
+    # Replace one at a time to handle duplicate snippets correctly.
+    for placeholder, inline in zip(placeholders, inline_codes, strict=False):
+        content = content.replace(inline, placeholder, 1)
+    return content, inline_codes, placeholders
+
+
+def _protect_news_quotes(content, args):
+    if not args.news:
+        return content, [], []
+
+    original_quotes = []
+    attribution_urls = []
+
+    def citation_replacer(match):
+        idx = len(original_quotes)
+        original_quotes.append(match.group(1))
+        attribution = match.group(3)
+        if attribution:
+            url_match = re.search(r"\((.+?)\)", attribution)
+            if url_match:
+                attribution_urls.append(url_match.group(1))
+        protected = f"{news_quote_placeholder(idx)}\n>\n{match.group(2)}"
+        if attribution:
+            protected += f"\n{attribution}"
+        return protected
+
+    content = _NEWS_CITATION_REGEX.sub(citation_replacer, content)
+    if original_quotes:
+        print(f"  → {len(original_quotes)} citation(s) EN protégée(s)")
+    return content, original_quotes, attribution_urls
+
+
+def _restore_code(
+    translated_content, inline_codes, inline_placeholders, code_blocks, block_placeholders
+):
+    # Restore inline first, then fenced (matches extraction order).
+    for placeholder, inline in zip(inline_placeholders, inline_codes, strict=False):
+        translated_content = translated_content.replace(placeholder, inline)
+    for placeholder, block in zip(block_placeholders, code_blocks, strict=False):
+        translated_content = translated_content.replace(placeholder, block)
+    return translated_content
+
+
+def _validate_news_placeholders_intact(translated_content, n_quotes):
+    for idx in range(n_quotes):
+        if not news_quote_placeholder_regex(idx).search(translated_content):
+            raise RuntimeError(
+                f"VALIDATION: Placeholder {news_quote_placeholder(idx)} manquant "
+                "dans la traduction (le LLM l'a supprimé ou modifié)"
+            )
+
+
+def _restore_news_quotes(translated_content, original_quotes):
+    for idx, quote in enumerate(original_quotes):
+        translated_content, restored_count = news_quote_placeholder_regex(idx).subn(
+            quote, translated_content
+        )
+        if restored_count != 1:
+            raise RuntimeError(
+                f"VALIDATION: Placeholder {news_quote_placeholder(idx)} restauré "
+                f"{restored_count} fois (attendu: 1)"
+            )
+    return translated_content
+
+
+def _normalize_collapsed_markdown(translated_content):
+    """Sépare HR/lien collés à un heading sur la même ligne (post-LLM cleanup).
+
+    Patterns toujours invalides en markdown standard :
+      "--- ## Title"      → "---\\n\\n## Title"
+      "](url) ## Title"   → "](url)\\n\\n## Title"
+    """
+    translated_content = re.sub(
+        r"^--- (##+ )", r"---\n\n\1", translated_content, flags=re.MULTILINE
+    )
+    translated_content = re.sub(r"(\]\([^)]+\)) (##+ )", r"\1\n\n\2", translated_content)
+    if re.search(r"^---[ \t]+##+ ", translated_content, flags=re.MULTILINE):
+        raise RuntimeError("VALIDATION: séparateur markdown collé à un heading (`--- ##`)")
+    if re.search(r"\]\([^)]+\)[ \t]+##+ ", translated_content):
+        raise RuntimeError("VALIDATION: lien markdown collé à un heading (`](url) ##`)")
+    return translated_content
+
+
+def _cleanup_source_flag(translated_content, args):
+    """Source-flag cleanup en --news quand source != target.
+
+    Cas A (target=en) : supprime la ligne `> 🇫🇷 _..._` orpheline.
+    Cas B (target≠en) : swap drapeau source → drapeau cible.
+    """
+    if not (args.news and args.source_lang != args.target_lang):
+        return translated_content
+
+    source_flag = LANG_FLAGS.get(args.source_lang)
+    target_flag = LANG_FLAGS.get(args.target_lang)
+    if not (source_flag and source_flag in translated_content):
+        return translated_content
+
+    if args.target_lang == "en":
+        pattern = re.compile(
+            r"(^|\n)>\s*\n(>\s*" + re.escape(source_flag) + r"[^\n]*\n)",
+            flags=re.MULTILINE,
+        )
+        new_content, n = pattern.subn(r"\1", translated_content)
+        if n > 0:
+            print(f"  → {n} ligne(s) `> {source_flag} _trad_` supprimée(s) en cible EN (cleanup)")
+            return new_content
+        return translated_content
+
+    if target_flag:
+        count = translated_content.count(source_flag)
+        translated_content = translated_content.replace(source_flag, target_flag)
+        print(
+            f"  → {count} drapeau(x) source {source_flag} remplacé(s) par {target_flag} (cleanup)"
+        )
+    return translated_content
+
+
+def _validate_news_flags_for_en(translated_content):
+    for lang_code, flag in LANG_FLAGS.items():
+        if lang_code != "en" and flag in translated_content:
+            raise RuntimeError(
+                f"VALIDATION: Drapeau {flag} ({lang_code}) trouvé dans la traduction EN "
+                "(devrait être absent)"
+            )
+
+
+def _validate_news_flags_for_other(translated_content, args, expected_target_count):
+    target_flag = LANG_FLAGS.get(args.target_lang)
+    if target_flag:
+        flag_count = translated_content.count(target_flag)
+        if flag_count != expected_target_count:
+            raise RuntimeError(
+                f"VALIDATION: Drapeau {target_flag} trouvé {flag_count} fois "
+                f"(attendu: {expected_target_count})"
+            )
+    source_flag = LANG_FLAGS.get(args.source_lang)
+    if source_flag and source_flag in translated_content:
+        raise RuntimeError(
+            f"VALIDATION: Drapeau source {source_flag} encore présent dans la traduction"
+        )
+
+
+def _validate_news_post(translated_content, original_quotes, attribution_urls, args):
+    for quote in original_quotes:
+        if quote not in translated_content:
+            raise RuntimeError("VALIDATION: citation EN brute non restaurée dans la traduction")
+    for url in attribution_urls:
+        if url not in translated_content:
+            raise RuntimeError(
+                f"VALIDATION: URL d'attribution '{url}' manquante dans la traduction"
+            )
+    if _RESIDUAL_NEWS_PLACEHOLDER_REGEX.search(translated_content):
+        raise RuntimeError("VALIDATION: placeholder news résiduel après restauration")
+    if args.target_lang == "en":
+        _validate_news_flags_for_en(translated_content)
+    else:
+        _validate_news_flags_for_other(translated_content, args, len(original_quotes))
+
+
+def _append_translation_note(translated_content, client, args, use_mistral, use_claude, use_gemini):
+    note_source = (
+        "Ce document a été traduit de la version "
+        + args.source_lang
+        + " vers la langue "
+        + args.target_lang
+        + " en utilisant le modèle "
+        + args.model
+        + ". Pour plus d'informations sur le processus de traduction, consultez "
+        "https://github.com/jls42/ai-powered-markdown-translator"
+    )
+    translation_note = translate(
+        note_source, client, args, use_mistral, use_claude, use_gemini, True
+    )
+    return translated_content.rstrip("\n") + "\n\n**" + translation_note.strip() + "**\n"
+
+
+def _resolve_relative_paths(file_path, output_path, args):
+    relative_file_path = os.path.join(
+        args.source_dir, os.path.relpath(file_path, start=args.source_dir)
+    )
+    relative_output_path = os.path.join(
+        args.target_dir, os.path.relpath(output_path, start=args.target_dir)
+    )
+    return relative_file_path, relative_output_path
+
+
+def _write_output_file(output_path, translated_content, force, relative_output_path):
+    """Écrit le fichier ou skippe si destination existe sans --force.
+
+    Returns "success" si écrit, "skipped" si destination déjà présente.
+    """
+    clean_output_path = os.path.normpath(output_path)
+    if os.path.exists(clean_output_path) and not force:
+        print(
+            f"Le fichier '{relative_output_path}' existe déjà, aucune traduction n'est effectuée."
+        )
+        return "skipped"
+    with open(clean_output_path, "w", encoding="utf-8") as f:
+        f.write(translated_content)
+    return "success"
+
+
+def _translate_pipeline(content, client, args, use_mistral, use_claude, use_gemini):
+    """Pipeline de traduction d'un contenu déjà lu : protect → translate → restore → validate.
+
+    Retourne le contenu traduit prêt à écrire (avant éventuelle note de traduction).
+    """
+    content, code_blocks, block_placeholders = _protect_code_blocks(content)
+    content, inline_codes, inline_placeholders = _protect_inline_code(content)
+    content, original_quotes, attribution_urls = _protect_news_quotes(content, args)
+
+    translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
+
+    translated_content = _restore_code(
+        translated_content, inline_codes, inline_placeholders, code_blocks, block_placeholders
+    )
+
+    if args.news and original_quotes:
+        _validate_news_placeholders_intact(translated_content, len(original_quotes))
+    translated_content = _restore_news_quotes(translated_content, original_quotes)
+    translated_content = _normalize_collapsed_markdown(translated_content)
+    translated_content = _cleanup_source_flag(translated_content, args)
+
+    if args.news and original_quotes:
+        _validate_news_post(translated_content, original_quotes, attribution_urls, args)
+
+    return translated_content
 
 
 def translate_markdown_file(
@@ -614,253 +903,36 @@ def translate_markdown_file(
         str: "success" si la traduction a été écrite, "skipped" si le fichier était vide ou
              si la sortie existait déjà sans --force, "failure" si une exception a été levée.
     """
-
-    # Fallback pour le handler d'exception : si os.path.join lève, le except a un nom valide
+    # Fallback si os.path.join lève dans le bloc try (le except a un nom valide).
     relative_file_path = file_path
     try:
-        # Calcul des chemins relatifs pour un affichage plus lisible
-        relative_file_path = os.path.join(
-            args.source_dir, os.path.relpath(file_path, start=args.source_dir)
+        relative_file_path, relative_output_path = _resolve_relative_paths(
+            file_path, output_path, args
         )
-        relative_output_path = os.path.join(
-            args.target_dir, os.path.relpath(output_path, start=args.target_dir)
-        )
-
         print(f"Traitement du fichier : {relative_file_path}")
         start_time = time.time()
 
-        # Lecture du contenu du fichier
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
         if not content:
             print(f"Le fichier '{relative_file_path}' est vide, aucune traduction n'est effectuée.")
             return "skipped"
 
-        # Extraction et remplacement des blocs de code pour les préserver pendant la traduction
-        # 1) Blocs de code fencés (``` ... ```)
-        fenced_regex = re.compile(
-            r"(^```(?:[\w-]*)?\n)(.*?)(^```$)",
-            re.DOTALL | re.MULTILINE,
+        translated_content = _translate_pipeline(
+            content, client, args, use_mistral, use_claude, use_gemini
         )
-        code_blocks = [match.group(0) for match in fenced_regex.finditer(content)]
-        block_placeholders = [f"#CODEBLOCK{index}#" for index, _ in enumerate(code_blocks)]
-        for placeholder, code_block in zip(block_placeholders, code_blocks, strict=False):
-            content = content.replace(code_block, placeholder)
 
-        # 2) Code inline (` ... `) - protège aussi les backticks
-        # Regex: matche `contenu` mais pas les blocs déjà remplacés ni les doubles backticks ``
-        inline_regex = re.compile(r"(?<!`)(`[^`\n]+?`)(?!`)")
-        inline_codes = [match.group(0) for match in inline_regex.finditer(content)]
-        inline_placeholders = [f"#INLINECODE{index}#" for index, _ in enumerate(inline_codes)]
-        for placeholder, inline_code in zip(inline_placeholders, inline_codes, strict=False):
-            content = content.replace(
-                inline_code, placeholder, 1
-            )  # Replace one at a time to handle duplicates
-
-        # 3) Citations news (--news mode) : protéger les quotes EN originales
-        original_quotes = []
-        attribution_urls = []
-        if args.news:
-            # Pattern: > EN quote \n > \n > FLAG _translation_ \n optional attribution
-            # La citation EN peut être entre guillemets ou non selon la source X/blog.
-            # Les anciens articles n'ont pas toujours une ligne `> — ...` après la traduction.
-            citation_regex = re.compile(
-                r"(^> (?!— ).+?)[ \t]*\n"  # Groupe 1: citation EN brute
-                r">[ \t]*\n"  # ligne blockquote vide
-                r"(^> .+_)[ \t]*"  # Groupe 2: drapeau + traduction italique
-                r"(?:\n(^> — .+?)[ \t]*)?$",  # Groupe 3: ligne d'attribution optionnelle
-                re.MULTILINE,
-            )
-
-            def citation_replacer(match):
-                idx = len(original_quotes)
-                original_quotes.append(match.group(1))
-                # Extraire l'URL d'attribution pour validation
-                attribution = match.group(3)
-                if attribution:
-                    url_match = re.search(r"\((.+?)\)", attribution)
-                    if url_match:
-                        attribution_urls.append(url_match.group(1))
-                # Remplacer la quote EN par un placeholder, garder le reste pour le LLM
-                protected = f"{news_quote_placeholder(idx)}\n>\n{match.group(2)}"
-                if attribution:
-                    protected += f"\n{attribution}"
-                return protected
-
-            content = citation_regex.sub(citation_replacer, content)
-            if original_quotes:
-                print(f"  → {len(original_quotes)} citation(s) EN protégée(s)")
-
-        # Traduction du contenu
-        translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
-
-        # Restauration des blocs de code et code inline dans le contenu traduit
-        # 1) Restaurer le code inline d'abord (ordre inverse de l'extraction)
-        for placeholder, inline_code in zip(inline_placeholders, inline_codes, strict=False):
-            translated_content = translated_content.replace(placeholder, inline_code)
-        # 2) Restaurer les blocs fencés
-        for placeholder, code_block in zip(block_placeholders, code_blocks, strict=False):
-            translated_content = translated_content.replace(placeholder, code_block)
-
-        # 3) Validation AVANT restauration : vérifier que les placeholders sont intacts
-        if args.news and original_quotes:
-            for idx in range(len(original_quotes)):
-                placeholder = news_quote_placeholder(idx)
-                if not news_quote_placeholder_regex(idx).search(translated_content):
-                    raise RuntimeError(
-                        f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
-                        "(le LLM l'a supprimé ou modifié)"
-                    )
-
-        # 4) Restaurer les citations EN news
-        for idx, quote in enumerate(original_quotes):
-            translated_content, restored_count = news_quote_placeholder_regex(idx).subn(
-                quote, translated_content
-            )
-            if restored_count != 1:
-                raise RuntimeError(
-                    f"VALIDATION: Placeholder {news_quote_placeholder(idx)} restauré "
-                    f"{restored_count} fois (attendu: 1)"
-                )
-
-        # 4b) Normalisation des séparateurs markdown collés (post-LLM cleanup)
-        # Certains LLMs (gpt-5.4-mini notamment) collent des éléments de structure
-        # sur la même ligne au point de jonction des segments. Ces patterns sont
-        # toujours invalides en markdown standard (un heading doit être en début
-        # de ligne, précédé d'une ligne vide).
-        #
-        #   Pattern 1 (générique) : "--- ## Title" → "---\n\n## Title"
-        #     Un séparateur HR (---) immédiatement suivi d'un heading sur la même
-        #     ligne. Toujours invalide quel que soit le document markdown.
-        #
-        #   Pattern 2 (générique) : "](url) ## Title" → "](url)\n\n## Title"
-        #     Une fin de lien markdown ](url) immédiatement suivie d'un heading
-        #     sur la même ligne. Toujours invalide quel que soit le document.
-        #
-        # Cas réels documentés : ia-actualites-29-apr-2026.mdx (PL/JA/ZH/9 langues),
-        # ia-actualites-11-mar-2026.mdx (PL). Aucun de ces patterns n'a de cas
-        # d'usage légitime dans un document markdown bien formé.
-        translated_content = re.sub(
-            r"^--- (##+ )", r"---\n\n\1", translated_content, flags=re.MULTILINE
-        )
-        translated_content = re.sub(r"(\]\([^)]+\)) (##+ )", r"\1\n\n\2", translated_content)
-        if re.search(r"^---[ \t]+##+ ", translated_content, flags=re.MULTILINE):
-            raise RuntimeError("VALIDATION: séparateur markdown collé à un heading (`--- ##`)")
-        if re.search(r"\]\([^)]+\)[ \t]+##+ ", translated_content):
-            raise RuntimeError("VALIDATION: lien markdown collé à un heading (`](url) ##`)")
-
-        # 4c) Source-flag cleanup (post-LLM, --news only)
-        # En mode --news avec source=FR et target≠FR, le drapeau 🇫🇷 ne devrait
-        # jamais apparaître dans la sortie (on traduit DEPUIS le FR). Deux cas
-        # de "résidu 🇫🇷" sont à corriger :
-        #
-        #   Cas A — target == "en" : la ligne `> 🇫🇷 _trad FR_` aurait dû être
-        #   SUPPRIMÉE par le LLM (la quote EN au-dessus suffit). Elle reste
-        #   parfois en place (LLM EN oublie l'instruction du system prompt).
-        #   On supprime alors la ligne entière + la ligne `>` vide qui précède.
-        #
-        #   Cas B — target != "en" : la ligne `> 🇫🇷 _trad target_` a été TRADUITE
-        #   correctement par le LLM mais le drapeau n'a pas été échangé en
-        #   `> {flag_target} _trad_`. Vu sur PL (run du 29 avr 2026, citation TPU
-        #   8e gen). On échange juste le drapeau, le contenu est OK.
-        if args.news and args.source_lang != args.target_lang:
-            source_flag = LANG_FLAGS.get(args.source_lang)
-            target_flag = LANG_FLAGS.get(args.target_lang)
-            if source_flag and source_flag in translated_content:
-                if args.target_lang == "en":
-                    # Cas A : supprimer la ligne entière `> 🇫🇷 _..._` ainsi que la
-                    # ligne blockquote vide précédente (`>`) qui devient orpheline.
-                    pattern = re.compile(
-                        r"(^|\n)>\s*\n(>\s*" + re.escape(source_flag) + r"[^\n]*\n)",
-                        flags=re.MULTILINE,
-                    )
-                    new_content, n = pattern.subn(r"\1", translated_content)
-                    if n > 0:
-                        translated_content = new_content
-                        print(
-                            f"  → {n} ligne(s) `> {source_flag} _trad_` supprimée(s) en cible EN (cleanup)"
-                        )
-                elif target_flag:
-                    # Cas B : swap drapeau source → drapeau cible
-                    count = translated_content.count(source_flag)
-                    translated_content = translated_content.replace(source_flag, target_flag)
-                    print(
-                        f"  → {count} drapeau(x) source {source_flag} remplacé(s) par {target_flag} (cleanup)"
-                    )
-
-        # 5) Validation post-restauration des citations news
-        if args.news and original_quotes:
-            for quote in original_quotes:
-                if quote not in translated_content:
-                    raise RuntimeError(
-                        "VALIDATION: citation EN brute non restaurée dans la traduction"
-                    )
-            for url in attribution_urls:
-                if url not in translated_content:
-                    raise RuntimeError(
-                        f"VALIDATION: URL d'attribution '{url}' manquante dans la traduction"
-                    )
-            if re.search(r'<NEWSQUOTE\s+id=["\']\d+["\']\s*/>|#NEWSQUOTE\d+#', translated_content):
-                raise RuntimeError("VALIDATION: placeholder news résiduel après restauration")
-            if args.target_lang == "en":
-                for lang_code, flag in LANG_FLAGS.items():
-                    if lang_code != "en" and flag in translated_content:
-                        raise RuntimeError(
-                            f"VALIDATION: Drapeau {flag} ({lang_code}) trouvé dans la traduction EN "
-                            "(devrait être absent)"
-                        )
-            else:
-                target_flag = LANG_FLAGS.get(args.target_lang)
-                if target_flag:
-                    flag_count = translated_content.count(target_flag)
-                    expected = len(original_quotes)
-                    if flag_count != expected:
-                        raise RuntimeError(
-                            f"VALIDATION: Drapeau {target_flag} trouvé {flag_count} fois "
-                            f"(attendu: {expected})"
-                        )
-                source_flag = LANG_FLAGS.get(args.source_lang)
-                if source_flag and source_flag in translated_content:
-                    raise RuntimeError(
-                        f"VALIDATION: Drapeau source {source_flag} encore présent dans la traduction"
-                    )
-
-        # Ajout de la note de traduction si nécessaire
         if add_translation_note:
-            translation_note = translate(
-                "Ce document a été traduit de la version "
-                + args.source_lang
-                + " vers la langue "
-                + args.target_lang
-                + " en utilisant le modèle "
-                + args.model
-                + ". Pour plus d'informations sur le processus de traduction, consultez https://github.com/jls42/ai-powered-markdown-translator",
-                client,
-                args,
-                use_mistral,
-                use_claude,
-                use_gemini,
-                True,
-            )
-            translated_content = (
-                translated_content.rstrip("\n") + "\n\n**" + translation_note.strip() + "**\n"
+            translated_content = _append_translation_note(
+                translated_content, client, args, use_mistral, use_claude, use_gemini
             )
 
-        # Écriture du contenu traduit dans le fichier de sortie
-        clean_output_path = os.path.normpath(output_path)
-        if os.path.exists(clean_output_path) and not force:
+        status = _write_output_file(output_path, translated_content, force, relative_output_path)
+        if status == "success":
             print(
-                f"Le fichier '{relative_output_path}' existe déjà, aucune traduction n'est effectuée."
+                f"Fichier '{relative_file_path}' traduit en {time.time() - start_time:.2f} secondes et enregistré sous : {relative_output_path}"
             )
-            return "skipped"
-        with open(clean_output_path, "w", encoding="utf-8") as f:
-            f.write(translated_content)
-
-        end_time = time.time()
-        print(
-            f"Fichier '{relative_file_path}' traduit en {end_time - start_time:.2f} secondes et enregistré sous : {relative_output_path}"
-        )
-        return "success"
+        return status
     except OSError as e:
         print(f"Erreur lors du traitement du fichier '{relative_file_path}': {e}")
         return "failure"
@@ -888,6 +960,94 @@ def is_excluded(path):
     """
 
     return any(pattern in path for pattern in EXCLUDE_PATTERNS)
+
+
+def _should_skip_walk_dir(root, output_dir, output_base_dir, input_dir):
+    if is_excluded(root) or root.startswith(output_dir):
+        return True
+    # Skip un sous-répertoire direct d'input qui porte le même nom que le dossier de sortie.
+    return (
+        os.path.basename(root) == output_base_dir
+        and os.path.abspath(os.path.join(root, "..")) == input_dir
+    )
+
+
+def _resolve_output_filename(file, base, args):
+    if args.keep_filename:
+        return file
+    if args.include_model:
+        return f"{base}-{args.target_lang}-{args.model}.md"
+    return f"{base}-{args.target_lang}.md"
+
+
+def _existing_translation_exists(output_path, output_dir, base, args):
+    if args.keep_filename:
+        return os.path.exists(output_path)
+    target_language_files = glob.glob(
+        f"{output_dir}/**/{base}-{args.target_lang}*.md", recursive=True
+    ) + glob.glob(f"{output_dir}/**/{base}-*{args.target_lang}.md", recursive=True)
+    return any(os.path.exists(f) for f in target_language_files)
+
+
+def _record_translation_status(status, file, file_path, failed_files, skipped_files):
+    if status == "success":
+        print(f"Fichier '{file}' traité.")
+    elif status == "skipped":
+        skipped_files.append(file_path)
+    elif status == "failure":
+        failed_files.append(file_path)
+    else:
+        # Default-fail sur statut inattendu (régression future).
+        print(
+            f"WARNING: Statut inattendu pour '{file}': {status!r} -> traité comme échec",
+            file=sys.stderr,
+        )
+        failed_files.append(file_path)
+
+
+def _process_one_markdown_file(
+    file,
+    root,
+    input_dir,
+    output_dir,
+    client,
+    args,
+    use_mistral,
+    use_claude,
+    use_gemini,
+    add_translation_note,
+    force,
+    failed_files,
+    skipped_files,
+):
+    file_path = os.path.join(root, file)
+    base, _ext = os.path.splitext(file)
+    output_file = _resolve_output_filename(file, base, args)
+    relative_path = os.path.relpath(root, input_dir)
+    output_path = os.path.join(output_dir, relative_path, output_file)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    if _existing_translation_exists(output_path, output_dir, base, args) and not force:
+        print(f"La traduction de '{file}' existe déjà, aucune action effectuée.")
+        skipped_files.append(file_path)
+        return
+
+    status = translate_markdown_file(
+        file_path,
+        output_path,
+        client,
+        args,
+        use_mistral,
+        use_claude,
+        use_gemini,
+        add_translation_note,
+        force,
+    )
+    _record_translation_status(status, file, file_path, failed_files, skipped_files)
+
+
+def _is_translatable_markdown(file):
+    return (file.endswith(".md") or file.endswith(".mdx")) and not is_excluded(file)
 
 
 def translate_directory(
@@ -919,104 +1079,41 @@ def translate_directory(
         dict: {"failed": list[str], "skipped": list[str]} — chemins des fichiers qui ont
         échoué et ceux qui ont été skipped (déjà traduits, fichier vide, etc.).
     """
-
     failed_files = []
     skipped_files = []
 
     input_dir = os.path.abspath(input_dir)
     output_dir = os.path.abspath(output_dir)
-
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
     output_base_dir = os.path.basename(output_dir)
 
     for root, _dirs, files in os.walk(input_dir, topdown=True):
-        if is_excluded(root) or root.startswith(output_dir):
+        if _should_skip_walk_dir(root, output_dir, output_base_dir, input_dir):
             continue
-
-        if (
-            os.path.basename(root) == output_base_dir
-            and os.path.abspath(os.path.join(root, "..")) == input_dir
-        ):
-            continue
-
         for file in files:
-            if (file.endswith(".md") or file.endswith(".mdx")) and not is_excluded(file):
-                file_path = os.path.join(root, file)
-                base, ext = os.path.splitext(file)
-                if args.keep_filename:
-                    output_file = file
-                elif args.include_model:
-                    output_file = f"{base}-{args.target_lang}-{args.model}.md"
-                else:
-                    output_file = f"{base}-{args.target_lang}.md"
-                relative_path = os.path.relpath(root, input_dir)
-                output_path = os.path.join(output_dir, relative_path, output_file)
-
-                os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
-                if args.keep_filename:
-                    existing_translation = os.path.exists(output_path)
-                else:
-                    target_language_files = glob.glob(
-                        f"{output_dir}/**/{base}-{args.target_lang}*.md", recursive=True
-                    ) + glob.glob(f"{output_dir}/**/{base}-*{args.target_lang}.md", recursive=True)
-                    existing_translation = any(
-                        os.path.exists(file) for file in target_language_files
-                    )
-                if not existing_translation or force:
-                    status = translate_markdown_file(
-                        file_path,
-                        output_path,
-                        client,
-                        args,
-                        use_mistral,
-                        use_claude,
-                        use_gemini,
-                        add_translation_note,
-                        force,
-                    )
-                    if status == "success":
-                        print(f"Fichier '{file}' traité.")
-                    elif status == "skipped":
-                        skipped_files.append(file_path)
-                    elif status == "failure":
-                        failed_files.append(file_path)
-                    else:
-                        # Default-fail sur statut inattendu (régression future)
-                        print(
-                            f"WARNING: Statut inattendu pour '{file}': {status!r} -> traité comme échec",
-                            file=sys.stderr,
-                        )
-                        failed_files.append(file_path)
-                elif not force:
-                    print(f"La traduction de '{file}' existe déjà, aucune action effectuée.")
-                    skipped_files.append(file_path)
+            if not _is_translatable_markdown(file):
+                continue
+            _process_one_markdown_file(
+                file,
+                root,
+                input_dir,
+                output_dir,
+                client,
+                args,
+                use_mistral,
+                use_claude,
+                use_gemini,
+                add_translation_note,
+                force,
+                failed_files,
+                skipped_files,
+            )
 
     return {"failed": failed_files, "skipped": skipped_files}
 
 
-def main():
-    """
-    Point d'entrée principal du script de traduction de fichiers Markdown.
-
-    Ce script traduit des fichiers Markdown d'une langue source à une langue cible en utilisant
-    les services de traduction de l'API OpenAI, Mistral AI, Claude ou Gemini. Il prend en charge la segmentation
-    des textes longs et peut également ajouter une note de traduction en fin de document.
-
-    Arguments du script:
-    --source_dir: Répertoire contenant les fichiers Markdown à traduire.
-    --target_dir: Répertoire de destination pour les fichiers traduits.
-    --model: Modèle de traduction à utiliser.
-    --target_lang: Langue cible pour la traduction.
-    --source_lang: Langue source des documents.
-    --use_mistral: Indicateur pour utiliser l'API Mistral AI pour la traduction.
-    --use_claude: Indicateur pour utiliser l'API Claude pour la traduction.
-    --use_gemini: Indicateur pour utiliser l'API Gemini pour la traduction.
-    --add_translation_note: Indicateur pour ajouter une note de traduction au contenu traduit.
-    """
-
+def _build_arg_parser():
     parser = argparse.ArgumentParser(description="Traduit les fichiers Markdown.")
     parser.add_argument(
         "--force",
@@ -1103,10 +1200,10 @@ def main():
         default="medium",
         help="Effort de raisonnement OpenAI GPT-5.x (défaut: medium)",
     )
+    return parser
 
-    args = parser.parse_args()
 
-    # Validation des sources
+def _validate_input_paths(args):
     if args.file:
         if not os.path.isfile(args.file):
             raise ValueError(f"Le fichier spécifié n'existe pas : {args.file}")
@@ -1115,91 +1212,127 @@ def main():
     if not os.path.exists(args.target_dir):
         os.makedirs(args.target_dir)
 
-    if args.use_mistral:
-        default_model = ECO_MODEL_MISTRAL if args.eco else DEFAULT_MODEL_MISTRAL
-        args.model = args.model if args.model else default_model
-        api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
-        if not api_key:
-            raise ValueError("Clé API Mistral non spécifiée.")
-        client = Mistral(api_key=api_key)
-    elif args.use_claude:
-        default_model = ECO_MODEL_CLAUDE if args.eco else DEFAULT_MODEL_CLAUDE
-        args.model = args.model if args.model else default_model
-        api_key = os.getenv("ANTHROPIC_API_KEY", DEFAULT_ANTHROPIC_API_KEY)
-        if not api_key:
-            raise ValueError("Clé API Claude non spécifiée.")
-        client = anthropic.Anthropic(api_key=api_key)
-    elif args.use_gemini:
-        default_model = ECO_MODEL_GEMINI if args.eco else DEFAULT_MODEL_GEMINI
-        args.model = args.model if args.model else default_model
-        # Accepte les deux conventions de nommage couramment rencontrées :
-        # - GOOGLE_API_KEY (convention historique du SDK google.generativeai)
-        # - GEMINI_API_KEY (convention récente d'AI Studio + cohérence avec
-        #   les SDKs JS/TS comme @google/genai utilisé pour la génération
-        #   d'images dans les blogs Astro/Next).
-        api_key = (
-            os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or DEFAULT_GEMINI_API_KEY
-        )
-        if not api_key or api_key == DEFAULT_GEMINI_API_KEY:
-            raise ValueError(
-                "Clé API Gemini non spécifiée. Définir GOOGLE_API_KEY ou "
-                "GEMINI_API_KEY dans l'environnement ou .env."
-            )
-        genai.configure(api_key=api_key)
-        client = genai
-    else:
-        default_model = ECO_MODEL_OPENAI if args.eco else DEFAULT_MODEL_OPENAI
-        args.model = args.model if args.model else default_model
-        openai_api_key = os.getenv("OPENAI_API_KEY", DEFAULT_OPENAI_API_KEY)
-        if not openai_api_key:
-            raise ValueError("Clé API OpenAI non spécifiée.")
-        client = OpenAI(api_key=openai_api_key)
 
-    # Avertissement pour les modèles non listés
+def _init_mistral_client(args):
+    args.model = args.model or (ECO_MODEL_MISTRAL if args.eco else DEFAULT_MODEL_MISTRAL)
+    api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
+    if not api_key:
+        raise ValueError("Clé API Mistral non spécifiée.")
+    return Mistral(api_key=api_key)
+
+
+def _init_claude_client(args):
+    args.model = args.model or (ECO_MODEL_CLAUDE if args.eco else DEFAULT_MODEL_CLAUDE)
+    api_key = os.getenv("ANTHROPIC_API_KEY", DEFAULT_ANTHROPIC_API_KEY)
+    if not api_key:
+        raise ValueError("Clé API Claude non spécifiée.")
+    return anthropic.Anthropic(api_key=api_key)
+
+
+def _init_gemini_client(args):
+    args.model = args.model or (ECO_MODEL_GEMINI if args.eco else DEFAULT_MODEL_GEMINI)
+    # Accepte GOOGLE_API_KEY (SDK historique google.generativeai) et GEMINI_API_KEY
+    # (convention AI Studio, cohérent avec @google/genai côté JS/TS).
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or DEFAULT_GEMINI_API_KEY
+    if not api_key or api_key == DEFAULT_GEMINI_API_KEY:
+        raise ValueError(
+            "Clé API Gemini non spécifiée. Définir GOOGLE_API_KEY ou "
+            "GEMINI_API_KEY dans l'environnement ou .env."
+        )
+    genai.configure(api_key=api_key)
+    return genai
+
+
+def _init_openai_client(args):
+    args.model = args.model or (ECO_MODEL_OPENAI if args.eco else DEFAULT_MODEL_OPENAI)
+    openai_api_key = os.getenv("OPENAI_API_KEY", DEFAULT_OPENAI_API_KEY)
+    if not openai_api_key:
+        raise ValueError("Clé API OpenAI non spécifiée.")
+    return OpenAI(api_key=openai_api_key)
+
+
+def _select_provider_client(args):
+    if args.use_mistral:
+        return _init_mistral_client(args)
+    if args.use_claude:
+        return _init_claude_client(args)
+    if args.use_gemini:
+        return _init_gemini_client(args)
+    return _init_openai_client(args)
+
+
+def _resolve_single_output_filename(args):
+    if args.keep_filename:
+        return os.path.basename(args.file)
+    base = os.path.splitext(os.path.basename(args.file))[0]
+    if args.include_model:
+        return f"{base}-{args.target_lang}-{args.model}.md"
+    return f"{base}-{args.target_lang}.md"
+
+
+def _run_single_file(args, client):
+    output_file = _resolve_single_output_filename(args)
+    output_path = os.path.join(args.target_dir, output_file)
+    status = translate_markdown_file(
+        args.file,
+        output_path,
+        client,
+        args,
+        args.use_mistral,
+        args.use_claude,
+        args.use_gemini,
+        args.add_translation_note,
+        args.force,
+    )
+    # default-fail: tout statut hors {"success", "skipped"} compte comme échec
+    return [] if status in ("success", "skipped") else [args.file]
+
+
+def _run_directory(args, client):
+    result = translate_directory(
+        args.source_dir,
+        args.target_dir,
+        client,
+        args,
+        args.use_mistral,
+        args.use_claude,
+        args.use_gemini,
+        args.add_translation_note,
+        args.force,
+    )
+    # default-fail jusqu'au bout : dict mal formé → traiter comme échec.
+    return result.get("failed", ["<unexpected translate_directory result>"])
+
+
+def main():
+    """
+    Point d'entrée principal du script de traduction de fichiers Markdown.
+
+    Ce script traduit des fichiers Markdown d'une langue source à une langue cible en utilisant
+    les services de traduction de l'API OpenAI, Mistral AI, Claude ou Gemini. Il prend en charge la segmentation
+    des textes longs et peut également ajouter une note de traduction en fin de document.
+
+    Arguments du script:
+    --source_dir: Répertoire contenant les fichiers Markdown à traduire.
+    --target_dir: Répertoire de destination pour les fichiers traduits.
+    --model: Modèle de traduction à utiliser.
+    --target_lang: Langue cible pour la traduction.
+    --source_lang: Langue source des documents.
+    --use_mistral: Indicateur pour utiliser l'API Mistral AI pour la traduction.
+    --use_claude: Indicateur pour utiliser l'API Claude pour la traduction.
+    --use_gemini: Indicateur pour utiliser l'API Gemini pour la traduction.
+    --add_translation_note: Indicateur pour ajouter une note de traduction au contenu traduit.
+    """
+    args = _build_arg_parser().parse_args()
+    _validate_input_paths(args)
+    client = _select_provider_client(args)
+
     if args.model not in MODEL_TOKEN_LIMITS:
         print(
             f"⚠ Modèle '{args.model}' non listé, utilisation de la limite par défaut ({DEFAULT_TOKEN_LIMIT} tokens)"
         )
 
-    if args.file:
-        # Traduction d'un fichier unique
-        if args.keep_filename:
-            output_file = os.path.basename(args.file)
-        else:
-            base = os.path.splitext(os.path.basename(args.file))[0]
-            if args.include_model:
-                output_file = f"{base}-{args.target_lang}-{args.model}.md"
-            else:
-                output_file = f"{base}-{args.target_lang}.md"
-        output_path = os.path.join(args.target_dir, output_file)
-        status = translate_markdown_file(
-            args.file,
-            output_path,
-            client,
-            args,
-            args.use_mistral,
-            args.use_claude,
-            args.use_gemini,
-            args.add_translation_note,
-            args.force,
-        )
-        # default-fail: tout statut hors {"success", "skipped"} compte comme échec
-        failed_files = [] if status in ("success", "skipped") else [args.file]
-    else:
-        # Traduction d'un répertoire
-        result = translate_directory(
-            args.source_dir,
-            args.target_dir,
-            client,
-            args,
-            args.use_mistral,
-            args.use_claude,
-            args.use_gemini,
-            args.add_translation_note,
-            args.force,
-        )
-        # default-fail jusqu'au bout: si dict mal formé (régression future), traiter comme échec
-        failed_files = result.get("failed", ["<unexpected translate_directory result>"])
+    failed_files = _run_single_file(args, client) if args.file else _run_directory(args, client)
 
     if args.use_mistral or args.use_claude:
         with contextlib.suppress(TypeError):
