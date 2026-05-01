@@ -29,6 +29,13 @@ from translate import translate as translate_fn
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "fixtures", "long_fr_excerpt.txt")
 
 
+def _fake_openai_env():
+    """Env dict avec une clé bidon (non-placeholder) pour traverser la garde du
+    fix C1 — _init_openai_client refuse désormais la chaîne DEFAULT_OPENAI_API_KEY.
+    """
+    return {"OPENAI_API_KEY": "fixture-fake-key-not-placeholder"}  # pragma: allowlist secret
+
+
 def _make_openai_response(content, finish_reason="stop"):
     """Construit un mock OpenAI response qui exposeresponse.choices[0].message.content
     et response.choices[0].finish_reason."""
@@ -218,7 +225,10 @@ class TestSilentFailure(unittest.TestCase):
 
     def test_main_exits_nonzero_on_failure_single_file(self):
         """main() avec --file doit sys.exit(1) quand translate_markdown_file retourne 'failure'."""
+        # Clé bidon pour traverser la garde du fix C1 (_init_openai_client
+        # refuse désormais la chaîne placeholder DEFAULT_OPENAI_API_KEY).
         with (
+            patch.dict(os.environ, _fake_openai_env()),
             patch("translate.translate_markdown_file", return_value="failure"),
             patch("translate.OpenAI"),
             patch("os.path.isfile", return_value=True),
@@ -233,6 +243,7 @@ class TestSilentFailure(unittest.TestCase):
         """main() avec --source_dir doit sys.exit(1) quand translate_directory rapporte
         au moins un fichier en échec."""
         with (
+            patch.dict(os.environ, _fake_openai_env()),
             patch(
                 "translate.translate_directory",
                 return_value={"failed": ["a.md"], "skipped": []},
