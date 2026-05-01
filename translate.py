@@ -7,13 +7,14 @@ import os
 import re
 import sys
 import time
+import traceback
 
 import anthropic
 import google.generativeai as genai
 from dotenv import load_dotenv
 from langdetect import DetectorFactory, LangDetectException, detect_langs
 from mistralai import Mistral
-from openai import OpenAI
+from openai import BadRequestError, OpenAI
 
 # Détection de langue déterministe (évite les variations entre runs sur des textes courts)
 DetectorFactory.seed = 0
@@ -47,7 +48,7 @@ DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
 DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
 DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"
 DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"
-# Modèles par défaut (mis à jour mars 2026) - Qualité
+# Modèles par défaut (mis à jour avril 2026) - Qualité
 DEFAULT_MODEL_OPENAI = "gpt-5.5"
 DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
 DEFAULT_MODEL_CLAUDE = "claude-sonnet-4-6"
@@ -306,7 +307,12 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
         return
     try:
         probas = {p.lang: p.prob for p in detect_langs(stripped)}
-    except LangDetectException:
+    except LangDetectException as e:
+        print(
+            f"⚠ langdetect failed on output (model={args.model}, "
+            f"target={args.target_lang}, len={len(stripped)}): {e}",
+            file=sys.stderr,
+        )
         return
     src_p = probas.get(args.source_lang, 0.0)
     tgt_p = probas.get(args.target_lang, 0.0)
@@ -501,7 +507,10 @@ def _call_claude(client, args, prompt, segment):
     stop = _reason_name(response.stop_reason)
     if stop not in ("end_turn", "stop_sequence", None):
         raise RuntimeError(f"Claude abnormal stop_reason={stop!r} (model={args.model})")
-    return " ".join(block.text.strip() for block in response.content)
+    # Préserve la structure markdown entre blocs : pas de .strip() sur chaque
+    # bloc (qui mangerait des newlines structurants), join avec "\n\n" entre
+    # blocs distincts, et un seul .strip() global sur la sortie finale.
+    return "\n\n".join(block.text for block in response.content).strip()
 
 
 def _call_gemini(client, args, prompt, segment):
@@ -539,13 +548,24 @@ def _openai_extra_kwargs(args, is_translation_note):
 def _openai_create_with_fallback(client, args, messages, extra_kwargs):
     try:
         return client.chat.completions.create(model=args.model, messages=messages, **extra_kwargs)
-    except TypeError:
-        # Vieille version SDK qui ne connaît pas reasoning_effort.
+    except TypeError as e:
+        # Vieille version SDK locale qui ne connaît pas reasoning_effort.
+        if "reasoning_effort" not in str(e) or not extra_kwargs:
+            raise
+        print(
+            f"⚠ OpenAI SDK rejette reasoning_effort (TypeError) — retry sans (model={args.model})",
+            file=sys.stderr,
+        )
         return client.chat.completions.create(model=args.model, messages=messages)
-    except Exception as e:
-        if "reasoning_effort" in str(e) and extra_kwargs:
-            return client.chat.completions.create(model=args.model, messages=messages)
-        raise
+    except BadRequestError as e:
+        # Modèle qui ne supporte pas reasoning_effort côté serveur.
+        if "reasoning_effort" not in str(e) or not extra_kwargs:
+            raise
+        print(
+            f"⚠ OpenAI rejette reasoning_effort (400) — retry sans (model={args.model})",
+            file=sys.stderr,
+        )
+        return client.chat.completions.create(model=args.model, messages=messages)
 
 
 def _call_openai(client, args, prompt, segment, is_translation_note):
@@ -601,7 +621,7 @@ def translate(
     system_instructions = _build_system_instructions(args, is_translation_note)
 
     translated_segments = []
-    for segment in segments:
+    for idx, segment in enumerate(segments, start=1):
         try:
             translated_text = _dispatch_provider_call(
                 client,
@@ -615,13 +635,19 @@ def translate(
             )
             _validate_translation_output(segment, translated_text, args, is_translation_note)
         except Exception as e:
-            raise RuntimeError(f"Erreur lors de la traduction : {e}") from e
+            # On préserve le type d'origine dans le message ET la chaîne via `from e`
+            # (le traceback complet reste accessible par traceback.print_exc en haut).
+            raise RuntimeError(
+                f"Erreur lors de la traduction (segment {idx}/{len(segments)}, "
+                f"{type(e).__name__}): {e}"
+            ) from e
         translated_segments.append(translated_text)
 
-    # Note: jonction par espace simple. Acceptable car la segmentation coupe sur
-    # \n\n / \n#  / \n##  / \n### , donc la fin du segment N et le début du
-    # segment N+1 commencent déjà par un newline structurant.
-    return " ".join(translated_segments)
+    # Jonction par "\n" : les segments coupés sur "\n\n" / "\n## " préservent
+    # leur newline structurant, et les coupures sur ". " ou hard-cut (max_length)
+    # ne sont pas garanties de finir/commencer par "\n" — un "\n" explicite ici
+    # évite de coller deux paragraphes ou de fusionner un heading avec sa prose.
+    return "\n".join(translated_segments)
 
 
 _FENCED_CODE_REGEX = re.compile(r"(^```[\w-]*\n)(.*?)(^```$)", re.DOTALL | re.MULTILINE)
@@ -695,6 +721,39 @@ def _validate_news_placeholders_intact(translated_content, n_quotes):
                 f"VALIDATION: Placeholder {news_quote_placeholder(idx)} manquant "
                 "dans la traduction (le LLM l'a supprimé ou modifié)"
             )
+
+
+_CODE_PLACEHOLDER_LEFTOVER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE)\d+#")
+
+
+def _validate_code_placeholders_present(
+    translated_content, block_placeholders, inline_placeholders
+):
+    """Vérifie que chaque placeholder de code émis est bien présent dans la sortie LLM
+    avant la restauration (le LLM peut avoir supprimé ou modifié un placeholder)."""
+    for placeholder in block_placeholders:
+        if placeholder not in translated_content:
+            raise RuntimeError(
+                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
+                "(le LLM l'a supprimé ou modifié)"
+            )
+    for placeholder in inline_placeholders:
+        if placeholder not in translated_content:
+            raise RuntimeError(
+                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
+                "(le LLM l'a supprimé ou modifié)"
+            )
+
+
+def _validate_no_code_placeholder_leftover(translated_content):
+    """Vérifie qu'aucun placeholder #CODEBLOCKn# / #INLINECODEn# ne subsiste après
+    restauration (sinon il fuirait verbatim dans le fichier de sortie)."""
+    leftover = _CODE_PLACEHOLDER_LEFTOVER_REGEX.search(translated_content)
+    if leftover:
+        raise RuntimeError(
+            f"VALIDATION: Placeholder de code {leftover.group(0)!r} non restauré "
+            "(décalage d'index entre extraction et restauration)"
+        )
 
 
 def _restore_news_quotes(translated_content, original_quotes):
@@ -858,9 +917,11 @@ def _translate_pipeline(content, client, args, use_mistral, use_claude, use_gemi
 
     translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
 
+    _validate_code_placeholders_present(translated_content, block_placeholders, inline_placeholders)
     translated_content = _restore_code(
         translated_content, inline_codes, inline_placeholders, code_blocks, block_placeholders
     )
+    _validate_no_code_placeholder_leftover(translated_content)
 
     if args.news and original_quotes:
         _validate_news_placeholders_intact(translated_content, len(original_quotes))
@@ -934,13 +995,17 @@ def translate_markdown_file(
             )
         return status
     except OSError as e:
-        print(f"Erreur lors du traitement du fichier '{relative_file_path}': {e}")
+        print(f"Erreur lors du traitement du fichier '{relative_file_path}': {e}", file=sys.stderr)
+        traceback.print_exc()
         return "failure"
     except Exception as e:
         print(
-            f"Une erreur inattendue est survenue lors de la traduction du fichier '{relative_file_path}': {e}\n"
-            "Veuillez relancer le traitement pour ce fichier."
+            f"Une erreur inattendue est survenue lors de la traduction du fichier "
+            f"'{relative_file_path}' ({type(e).__name__}): {e}\n"
+            "Veuillez relancer le traitement pour ce fichier.",
+            file=sys.stderr,
         )
+        traceback.print_exc()
         return "failure"
 
 
@@ -1216,16 +1281,20 @@ def _validate_input_paths(args):
 def _init_mistral_client(args):
     args.model = args.model or (ECO_MODEL_MISTRAL if args.eco else DEFAULT_MODEL_MISTRAL)
     api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
-    if not api_key:
-        raise ValueError("Clé API Mistral non spécifiée.")
+    if not api_key or api_key == DEFAULT_MISTRAL_API_KEY:
+        raise ValueError(
+            "Clé API Mistral non spécifiée. Définir MISTRAL_API_KEY dans l'environnement ou .env."
+        )
     return Mistral(api_key=api_key)
 
 
 def _init_claude_client(args):
     args.model = args.model or (ECO_MODEL_CLAUDE if args.eco else DEFAULT_MODEL_CLAUDE)
     api_key = os.getenv("ANTHROPIC_API_KEY", DEFAULT_ANTHROPIC_API_KEY)
-    if not api_key:
-        raise ValueError("Clé API Claude non spécifiée.")
+    if not api_key or api_key == DEFAULT_ANTHROPIC_API_KEY:
+        raise ValueError(
+            "Clé API Claude non spécifiée. Définir ANTHROPIC_API_KEY dans l'environnement ou .env."
+        )
     return anthropic.Anthropic(api_key=api_key)
 
 
@@ -1246,8 +1315,10 @@ def _init_gemini_client(args):
 def _init_openai_client(args):
     args.model = args.model or (ECO_MODEL_OPENAI if args.eco else DEFAULT_MODEL_OPENAI)
     openai_api_key = os.getenv("OPENAI_API_KEY", DEFAULT_OPENAI_API_KEY)
-    if not openai_api_key:
-        raise ValueError("Clé API OpenAI non spécifiée.")
+    if not openai_api_key or openai_api_key == DEFAULT_OPENAI_API_KEY:
+        raise ValueError(
+            "Clé API OpenAI non spécifiée. Définir OPENAI_API_KEY dans l'environnement ou .env."
+        )
     return OpenAI(api_key=openai_api_key)
 
 

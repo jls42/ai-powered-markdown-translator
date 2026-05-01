@@ -147,6 +147,9 @@ class TestSilentFailure(unittest.TestCase):
         with open(FIXTURE_PATH, encoding="utf-8") as f:
             long_fr_text = f.read()
         segments = segment_text(long_fr_text, 16000)
+        self.assertGreaterEqual(
+            len(segments), 2, "fixture devrait produire ≥ 2 segments (sinon test vacuous)"
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             src = os.path.join(tmpdir, "input.md")
@@ -417,6 +420,220 @@ locale: 'pl'
         self.assertFalse(out.endswith("\n\n"))
 
 
+class TestSegmentBreakpointFallbacks(unittest.TestCase):
+    """Couvre individuellement les branches de _find_segment_breakpoint :
+    H2/H3 (déjà couvert par test_segment_text_prefers_h3_breakpoint),
+    paragraphe (\\n\\n), heading bas niveau (\\n#), fin de phrase (. ),
+    et hard-cut (max_length).
+    """
+
+    def test_breakpoint_paragraph(self):
+        """Quand pas de H2/H3 mais un \\n\\n dans la 2nde moitié → coupure au paragraphe."""
+        prefix = "Texte introductif. " * 600  # ~12k
+        text = prefix + "\n\nNouveau paragraphe. " * 300  # > 16k
+        self.assertGreater(len(text), 16000)
+        segments = segment_text(text, 16000)
+        self.assertGreaterEqual(len(segments), 2)
+        # Le 2nd segment doit commencer par "\n" (newline structurant) ou par
+        # le premier mot après le \n\n.
+        self.assertTrue(
+            segments[1].startswith("\n") or segments[1].startswith("Nouveau paragraphe"),
+            f"Segment[1] inattendu: {segments[1][:80]!r}",
+        )
+
+    def test_breakpoint_low_level_heading(self):
+        """Pas de H2/H3 ni de \\n\\n, mais un \\n#### dans la 2nde moitié → coupure heading bas niveau."""
+        prefix = "Phrase. " * 1700  # ~13k, sans \n\n
+        text = prefix + "\n#### Sous-section H4\nContenu H4. " * 100
+        self.assertGreater(len(text), 16000)
+        segments = segment_text(text, 16000)
+        self.assertGreaterEqual(len(segments), 2)
+        # La coupure tombe sur \n# (priorité 3) après le H4.
+        self.assertIn("####", segments[1])
+
+    def test_breakpoint_sentence_end(self):
+        """Pas de heading ni \\n\\n, juste des phrases → coupure ". "."""
+        # Texte d'un seul bloc, phrases séparées par ". " uniquement.
+        text = "Une phrase courte. " * 1700  # ~32k, pas de newlines
+        self.assertGreater(len(text), 16000)
+        segments = segment_text(text, 16000)
+        self.assertGreaterEqual(len(segments), 2)
+        # Le 1er segment doit finir sur ". " (ou se terminer par le boundary
+        # caractère après ". " selon l'index +1).
+        self.assertTrue(
+            segments[0].endswith(". ") or segments[0].endswith("."),
+            f"Segment[0] inattendu (fin): {segments[0][-40:]!r}",
+        )
+
+    def test_breakpoint_hard_cut(self):
+        """Pas de breakpoint sémantique du tout dans la 2nde moitié → hard-cut à max_length."""
+        # 20k caractères contigus sans aucun séparateur exploitable.
+        text = "x" * 20000
+        segments = segment_text(text, 16000)
+        self.assertEqual(len(segments), 2)
+        self.assertEqual(len(segments[0]), 16000)
+        self.assertEqual(segments[0] + segments[1], text)
+
+
+class TestCodePlaceholders(unittest.TestCase):
+    """Couvre la régression du commit a3c35fc (fenced regex hardening) et la
+    nouvelle validation des placeholders de code (#CODEBLOCKn# / #INLINECODEn#).
+    """
+
+    def test_fenced_block_no_lang(self):
+        """Fence sans info string ``` → doit être protégée."""
+        content = "Texte\n\n```\ncode brut\n```\n\nSuite."
+        protected, blocks, ph = translate._protect_code_blocks(content)
+        self.assertEqual(len(blocks), 1)
+        self.assertIn("#CODEBLOCK0#", protected)
+        self.assertNotIn("code brut", protected)
+
+    def test_fenced_block_hyphenated_lang(self):
+        """Fence avec lang hyphené ```python-repl → doit être protégée."""
+        content = "```python-repl\n>>> 1+1\n```"
+        protected, blocks, ph = translate._protect_code_blocks(content)
+        self.assertEqual(len(blocks), 1)
+        self.assertIn("#CODEBLOCK0#", protected)
+
+    def test_fenced_orphan_does_not_match(self):
+        """Une fence ouverte sans fermeture ne doit pas être consommée greedy."""
+        content = "Texte\n```\npas de fermeture"
+        protected, blocks, _ = translate._protect_code_blocks(content)
+        self.assertEqual(blocks, [])
+        self.assertEqual(protected, content)
+
+    def test_protect_restore_round_trip_identity(self):
+        """protect → restore = identité sur les blocs protégés."""
+        content = (
+            "Intro.\n\n"
+            "```python\nprint('hello')\n```\n\n"
+            "Avec `inline_code` au milieu.\n\n"
+            "```\nautre bloc\n```\n"
+        )
+        c1, blocks, b_ph = translate._protect_code_blocks(content)
+        c2, inlines, i_ph = translate._protect_inline_code(c1)
+        # Simule un LLM qui ne touche pas au texte (round-trip pur).
+        restored = translate._restore_code(c2, inlines, i_ph, blocks, b_ph)
+        self.assertEqual(restored, content)
+
+    def test_double_backtick_inline_not_swallowed(self):
+        """Backticks doubles ``foo`` ne doivent pas être pris pour inline-code single-tick."""
+        content = "Voir ``literal`backtick`` dans la doc."
+        _, inlines, _ = translate._protect_inline_code(content)
+        # Le pattern actuel (?<!`)`...`(?!`) exclut les doubles → 0 match attendu.
+        self.assertEqual(inlines, [])
+
+    def test_placeholder_leftover_raises(self):
+        """Un #CODEBLOCK0# qui n'a pas été restauré (mismatch d'index) doit lever."""
+        text = "Translated text with leftover #CODEBLOCK7# that was never restored."
+        with self.assertRaisesRegex(RuntimeError, r"non restauré|leftover|Placeholder"):
+            translate._validate_no_code_placeholder_leftover(text)
+
+    def test_placeholder_eaten_by_llm_raises(self):
+        """Un placeholder #CODEBLOCK0# émis mais absent de la sortie du LLM doit lever."""
+        text = "LLM output that lost the placeholder."
+        with self.assertRaisesRegex(RuntimeError, r"manquant|Placeholder"):
+            translate._validate_code_placeholders_present(text, ["#CODEBLOCK0#"], [])
+
+
+class TestNewsPlaceholderValidator(unittest.TestCase):
+    """_validate_news_placeholders_intact doit rejeter les sorties où le LLM a
+    localisé / supprimé / renommé le placeholder XML, y compris en scripts non
+    latins (CLAUDE.md flagge JA/ZH/AR/HI comme exact risk surface).
+    """
+
+    def test_chinese_localized_tag_rejected(self):
+        """LLM remplace <NEWSQUOTE id="0"/> par <新闻引用 id="0"/> → doit lever."""
+        bad = '<新闻引用 id="0"/>\n>\n> 🇨🇳 _十年磨一剑_\n'
+        with self.assertRaisesRegex(RuntimeError, r"Placeholder.*manquant"):
+            translate._validate_news_placeholders_intact(bad, n_quotes=1)
+
+    def test_korean_localized_tag_rejected(self):
+        bad = '<뉴스인용 id="0"/>\n>\n> 🇰🇷 _10년간의 작업._\n'
+        with self.assertRaisesRegex(RuntimeError, r"Placeholder.*manquant"):
+            translate._validate_news_placeholders_intact(bad, n_quotes=1)
+
+    def test_japanese_deleted_placeholder_rejected(self):
+        """Sortie JA sans aucun tag XML (LLM a remplacé par la quote traduite)."""
+        bad = "> 🇯🇵 _十年の月日を経て._\n> — [@GoogleAI X上で](https://x.com/google)\n"
+        with self.assertRaisesRegex(RuntimeError, r"Placeholder.*manquant"):
+            translate._validate_news_placeholders_intact(bad, n_quotes=1)
+
+    def test_arabic_correct_tag_passes(self):
+        """Tag NEWSQUOTE correct dans une sortie AR doit passer."""
+        good = '<NEWSQUOTE id="0"/>\n>\n> 🇸🇦 _عقد من العمل._\n'
+        translate._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
+
+    def test_hindi_correct_tag_passes(self):
+        good = '<NEWSQUOTE id="0"/>\n>\n> 🇮🇳 _एक दशक का काम._\n'
+        translate._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
+
+
+class TestLangDetectLayer2(unittest.TestCase):
+    """Couche 2 du validateur : si l'output ne matche aucune fenêtre source verbatim
+    (couche 1) mais reste dans la langue source, langdetect doit déclencher.
+    """
+
+    def test_paraphrased_french_output_raises(self):
+        """Texte paraphrasé en FR (pas de match verbatim avec le segment source)
+        et langdetect détecte FR → doit lever 'Output language mismatch'."""
+        # Segment source en FR
+        source_segment = (
+            "L'intelligence artificielle a profondément transformé le paysage industriel "
+            "ces dernières années, modifiant la manière dont les entreprises conçoivent "
+            "leurs produits et gèrent leurs chaînes d'approvisionnement."
+        )
+        # Output qui paraphrase en FR (pas de fenêtre source matchable mot-pour-mot,
+        # mais clairement français pour langdetect, ≥ 100 chars).
+        paraphrased_fr_output = (
+            "Les algorithmes d'apprentissage automatique bouleversent le secteur "
+            "manufacturier depuis une décennie. Beaucoup d'organisations adaptent "
+            "leurs processus internes pour intégrer ces nouvelles capacités prédictives "
+            "dans la prise de décision quotidienne et stratégique."
+        )
+        args = _base_args()
+        with self.assertRaisesRegex(RuntimeError, r"Output language mismatch"):
+            translate._validate_translation_output(
+                source_segment, paraphrased_fr_output, args, is_translation_note=False
+            )
+
+
+class TestMultiProviderStopReasons(unittest.TestCase):
+    """Whitelist des finish_reason / stop_reason par provider — un mauvais signal
+    abnormal doit lever pour TOUS les providers (anti-régression sur les copy-paste)."""
+
+    def test_claude_abnormal_stop_reason_raises(self):
+        client = MagicMock()
+        client.messages.create.return_value = MagicMock(
+            stop_reason="max_tokens",
+            content=[MagicMock(text="truncated")],
+        )
+        args = _base_args(model="claude-haiku-4-5-20251001")
+        with self.assertRaisesRegex(RuntimeError, r"Claude abnormal stop_reason"):
+            translate._call_claude(client, args, "prompt", "segment")
+
+    def test_mistral_abnormal_finish_reason_raises(self):
+        client = MagicMock()
+        client.chat.complete.return_value = MagicMock(
+            choices=[MagicMock(finish_reason="length", message=MagicMock(content="x"))]
+        )
+        args = _base_args(model="mistral-small-latest")
+        with self.assertRaisesRegex(RuntimeError, r"Mistral abnormal finish_reason"):
+            translate._call_mistral(client, args, "prompt", "segment")
+
+    def test_gemini_abnormal_finish_reason_raises(self):
+        gen_model = MagicMock()
+        gen_model.generate_content.return_value = MagicMock(
+            candidates=[MagicMock(finish_reason="MAX_TOKENS")],
+            text="truncated",
+        )
+        client = MagicMock()
+        client.GenerativeModel.return_value = gen_model
+        args = _base_args(model="gemini-3-flash-preview")
+        with self.assertRaisesRegex(RuntimeError, r"Gemini abnormal finish_reason"):
+            translate._call_gemini(client, args, "prompt", "segment")
+
+
 class TestStructuralLineLanguageBar(unittest.TestCase):
     """Le validateur post-traduction extrait des "fenêtres source" et vérifie
     qu'elles n'apparaissent pas verbatim dans la sortie. Les barres de langues
@@ -507,11 +724,17 @@ class TestDetectProvider(unittest.TestCase):
     _FAKE_OPENAI_KEY = "fixture-fake-openai-key-do-not-use-aaaaaaaaaaaaaaaa"
     _FAKE_GEMINI_KEY = "fixture-fake-gemini-key-do-not-use-bbbbbbbbbbbbbbbb"
 
-    def test_no_env_file_no_keys_emits_error(self):
-        """Pas de .env, pas de clés exportées → --eco par défaut + ERROR sur stderr."""
+    def test_no_env_file_no_keys_aborts(self):
+        """Pas de .env, pas de clés exportées → exit 1 + ERROR sur stderr.
+
+        L'ancien comportement (échouer silencieusement avec --eco + placeholder)
+        ré-introduisait précisément la classe de silent-failure que cette branche
+        corrige : les jobs en aval tombaient en 401 et release.sh validait
+        '28 fichiers présents' contre des traductions stales.
+        """
         stdout, stderr, rc = self._run_detect(env_content=None)
-        self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--eco")
+        self.assertEqual(rc, 1)
+        self.assertEqual(stdout, "")
         self.assertIn("ERROR", stderr)
 
     def test_openai_key_picks_openai(self):
@@ -544,16 +767,16 @@ class TestDetectProvider(unittest.TestCase):
         self.assertEqual(stdout, "--use_gemini --eco")
         self.assertIn("fallback Gemini", stderr)
 
-    def test_both_placeholders_emits_error(self):
-        """Les deux clés en placeholder → --eco + ERROR."""
+    def test_both_placeholders_aborts(self):
+        """Les deux clés en placeholder → exit 1 + ERROR (aucun flag bidon émis)."""
         stdout, stderr, rc = self._run_detect(
             env_content=(
                 "OPENAI_API_KEY=votre-cle-api-openai-par-defaut\n"
                 "GOOGLE_API_KEY=votre-cle-api-gemini-par-defaut\n"
             )
         )
-        self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--eco")
+        self.assertEqual(rc, 1)
+        self.assertEqual(stdout, "")
         self.assertIn("ERROR", stderr)
 
     def test_regen_provider_override_openai(self):

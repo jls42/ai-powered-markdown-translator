@@ -56,7 +56,10 @@ detect_provider() {
       ;;
   esac
 
-  # Auto-détection : OpenAI par défaut, fallback Gemini si OPENAI absent
+  # Auto-détection : OpenAI par défaut, fallback Gemini si OPENAI absent.
+  # IMPORTANT : si aucune clé valide, on échoue ici (exit 1) plutôt que d'émettre
+  # un flag bidon — sinon les jobs en aval tomberaient en 401 silencieusement et
+  # release.sh validerait "28 fichiers présents" contre des traductions stales.
   if [[ -n "$openai_key" ]] && [[ "$openai_key" != "$openai_placeholder" ]]; then
     echo "--eco"
     echo "[regen] OpenAI gpt-5.4-mini détecté → --eco (par défaut)" >&2
@@ -64,8 +67,9 @@ detect_provider() {
     echo "--use_gemini --eco"
     echo "[regen] WARNING: OPENAI_API_KEY absent → fallback Gemini Flash --use_gemini --eco" >&2
   else
-    echo "--eco"
-    echo "[regen] ERROR: ni OPENAI_API_KEY ni GOOGLE_API_KEY valide dans .env/env" >&2
+    echo "[regen] ERROR: aucune clé API valide (OPENAI_API_KEY, GOOGLE_API_KEY, GEMINI_API_KEY) dans .env/env" >&2
+    echo "[regen] ERROR: abort — définir au moins une clé valide avant de relancer" >&2
+    exit 1
   fi
 }
 
@@ -95,11 +99,16 @@ main() {
   failed_log=$(mktemp)
   trap 'rm -f "$failed_log"' EXIT
 
+  # Timeout par job : si un appel API hang, le job sort en 124 et est consigné
+  # comme échec plutôt que de figer toute la release indéfiniment.
+  local job_timeout="${REGEN_JOB_TIMEOUT:-600}"
+
   run_one() {
     local file="$1" lang="$2"
     # provider_flags et force_flag sont visibles ici via dynamic scoping bash
     # shellcheck disable=SC2086
-    if ! python translate.py --file "$file" --target_dir . --source_lang fr --target_lang "$lang" \
+    if ! timeout "$job_timeout" python translate.py --file "$file" --target_dir . \
+        --source_lang fr --target_lang "$lang" \
         $provider_flags --add_translation_note $force_flag; then
       echo "$file -> $lang" >> "$failed_log"
     fi
