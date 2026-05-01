@@ -64,7 +64,7 @@ Trajectoire :
 
 ### Lizard CCN — refactor planifié de translate.py
 
-Le seuil est 12 (futur 8). 4 fonctions de `translate.py` dépassent : `translate` (CCN 25), `translate_markdown_file` (CCN 47), `translate_directory` (CCN 21), `main` (CCN 32). Le fichier est temporairement exclu de Lizard via `-x "translate.py"` dans `scripts/check-complexity.sh`. Le refactor est un travail dédié à mener dans une PR séparée ; le gate s'applique strictement aux nouveaux scripts pour empêcher la régression.
+Le seuil est 12 (futur 8). 4 fonctions de `translate.py` dépassent : `translate` (CCN 25), `translate_markdown_file` (CCN 47), `translate_directory` (CCN 21), `main` (CCN 32). Le fichier est temporairement exclu de Lizard **par scope** : la commande ne reçoit que `scripts/` en argument (cf. `scripts/check-complexity.sh`). Le refactor est un travail dédié à mener dans une PR séparée ; le gate s'applique strictement aux nouveaux scripts pour empêcher la régression. Quand `translate.py` repassera sous le seuil, l'ajouter au scope de la commande (pas à `-x`).
 
 ### Gestion du baseline detect-secrets
 
@@ -227,11 +227,11 @@ This uses faster/cheaper models (gpt-5.4-mini) which are sufficient for document
 
 ### Default Models (2026)
 
-| Provider | Quality (default)        | Economic (`--eco`)          |
-| -------- | ------------------------ | --------------------------- |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`              |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001` |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`      |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview`    |
+| Provider | Quality (default)        | Economic (`--eco`)              |
+| -------- | ------------------------ | ------------------------------- |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Recommendation for long-form translations** : `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3-flash-preview`) tends to produce more reliable structure preservation on non-Latin scripts (PL, JA, ZH, AR, HI), particularly for `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
+> **Recommendation for long-form translations** : `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3.1-flash-lite-preview`) tends to produce more reliable structure preservation on non-Latin scripts (PL, JA, ZH, AR, HI), particularly for `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.

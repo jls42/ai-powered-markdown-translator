@@ -117,18 +117,18 @@ run() {
 }
 
 # Vérifie que gh est utilisable avec le token courant.
-# Note: on parse la sortie de `gh api user` (fail-closed) pour ne pas faire confiance
-# au seul exit code — un token expiré peut renvoyer un payload d'erreur.
+# Note: on lit `gh api user --jq .login` plutôt que de parser un blob arbitraire,
+# pour ne pas faire confiance au seul exit code (un token expiré peut renvoyer
+# un payload d'erreur avec exit 0 dans certains cas) ET ne pas matcher des
+# substrings comme "error" qui peuvent apparaître légitimement dans le profil.
 check_gh_auth() {
   if ! command -v gh >/dev/null 2>&1; then
     return 1
   fi
-  local output
-  output=$(gh api user 2>&1) || return 1
-  if echo "$output" | grep -qE '"message":\s*"Bad credentials"|"error"|HTTP 4[0-9]{2}|HTTP 5[0-9]{2}'; then
-    return 1
-  fi
-  return 0
+  local login
+  login=$(gh api user --jq .login 2>/dev/null) || return 1
+  # Un login GitHub valide est non vide et alphanumérique (avec tirets).
+  [[ -n "$login" && "$login" =~ ^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$ ]]
 }
 
 extract_release_notes() {
@@ -226,7 +226,7 @@ if [[ "$MODE" == "tag-only" ]]; then
 fi
 
 # === MODE PRINCIPAL : prepare-release ===
-# Étapes 1-7 : pré-checks, version, régénération, validation, commit, tag, push/MR/release
+# Étapes 1-7 : pré-checks, version, régénération, validation, commit, tag, push/PR/release
 
 # === Étape 0: Pré-checks ===
 log "Pré-checks..."
@@ -417,13 +417,16 @@ if $DO_PR; then
     if $DRY_RUN; then
       log "[dry-run] gh pr create --base main --head $CURRENT_BRANCH --title '$PR_TITLE'"
     else
-      gh pr create \
+      if gh pr create \
         --base main \
         --head "$CURRENT_BRANCH" \
         --title "$PR_TITLE" \
         --body "$PR_BODY" \
-        2>&1 || warn "Échec création PR (peut-être déjà existante)"
-      ok "PR créée"
+        2>&1; then
+        ok "PR créée"
+      else
+        warn "Échec création PR (peut-être déjà existante)"
+      fi
     fi
   else
     echo ""
@@ -439,9 +442,11 @@ if $DO_GITHUB_RELEASE && $WITH_TAG; then
     if $DRY_RUN; then
       log "[dry-run] gh release create $TAG --title v$VERSION (notes depuis CHANGELOG)"
     else
-      echo "$RELEASE_NOTES" | gh release create "$TAG" --title "v$VERSION" --notes-file - \
-        2>&1 || warn "Échec création GitHub Release (peut-être déjà existante)"
-      ok "GitHub Release v$VERSION créée"
+      if echo "$RELEASE_NOTES" | gh release create "$TAG" --title "v$VERSION" --notes-file - 2>&1; then
+        ok "GitHub Release v$VERSION créée"
+      else
+        warn "Échec création GitHub Release (peut-être déjà existante)"
+      fi
     fi
   else
     echo ""

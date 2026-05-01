@@ -22,7 +22,10 @@ status=0
   >"$audit_json" 2>"$audit_err" || status=$?
 
 # Classifier les erreurs réseau / PyPI down côté shell AVANT le parse JSON.
-if grep -qiE '(connection refused|timeout|getaddrinfo|name or service not known|temporary failure|resolve|unreachable|ssl: |proxy|HTTPSConnectionPool)' "$audit_err"; then
+# On ne matche que des marqueurs Python/urllib3 distinctifs (pas des substrings
+# génériques comme "timeout"/"ssl"/"proxy" qui pourraient apparaître dans des
+# messages non-réseau et faire passer silencieusement de vraies vulns).
+if grep -qE '(ConnectionError|ConnectTimeout|MaxRetryError|SSLError|gaierror|getaddrinfo failed|Name or service not known|Temporary failure in name resolution|HTTPSConnectionPool)' "$audit_err"; then
   echo "⚠ pip-audit transport error (skip non bloquant) :" >&2
   cat "$audit_err" >&2
   exit 0

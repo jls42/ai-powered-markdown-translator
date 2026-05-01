@@ -17,8 +17,14 @@ export PATH="$HOME/.local/bin:$PATH"
 
 if ! command -v opengrep >/dev/null 2>&1; then
   echo ""
-  echo "⚠ opengrep introuvable — SAST gate skip (non bloquant)." >&2
+  echo "⚠ opengrep introuvable — SAST gate skip." >&2
   echo "  Install : curl -fsSL https://raw.githubusercontent.com/opengrep/opengrep/main/install.sh | sh" >&2
+  # En CI, on échoue closed pour éviter de relâcher silencieusement le gate.
+  # En local (hors CI), on tolère l'absence (skip non bloquant) le temps de l'install.
+  if [[ -n "${CI:-}" || -n "${GITHUB_ACTIONS:-}" ]]; then
+    echo "  Détecté CI → fail-closed (set CI=0 ou installer opengrep)." >&2
+    exit 1
+  fi
   exit 0
 fi
 
