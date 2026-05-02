@@ -6,6 +6,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Commits**: Utiliser le skill `/helping-with-commits` pour tous les commits
 - **Recherche web**: Utiliser l'agent `web-research-specialist:web-research-specialist` pour les recherches de documentation (évite de polluer le contexte principal)
+- **Après chaque `git push`** (sur une PR, jamais main) : surveiller automatiquement les checks GitHub jusqu'à résolution.
+  1. Attendre ~30-60s que SonarCloud / CodeQL terminent leur scan initial.
+  2. `gh pr checks <num>` pour lire l'état (workflows actifs : `Analyze (python)`, `CodeQL`, `SonarQube`).
+  3. Si tous `pass` → signaler à l'utilisateur et stop.
+  4. Si un check est `pending` → re-check dans 60-90s (utiliser `ScheduleWakeup` pour ne pas bloquer le main thread, ou `gh run watch <run-id>` pour follow live).
+  5. Si un check est `fail` :
+     - Récupérer les détails via `gh run view <run-id> --log-failed` ou l'URL Sonar/CodeQL dans la colonne link.
+     - **Reproduire localement AVANT de proposer un fix** (règle "mesurer > deviner") — selon le check :
+       - SonarQube : la finding peut souvent être reproduite avec `pre-commit run --hook-stage pre-push --all-files` (Lizard CCN, Opengrep SAST, ruff). Pour les règles Sonar spécifiques (`python:S1234`), consulter directement l'URL Sonar du finding.
+       - CodeQL : voir l'URL `actions/runs/.../job/...` pour la query rule + emplacement source.
+       - Tests : `python -m unittest discover tests/` puis `python -m unittest discover scripts/tests/`.
+     - Appliquer le fix → `pre-commit run --all-files && pre-commit run --hook-stage pre-push --all-files` verts → skill `/helping-with-commits` → `git push`.
+  6. Reboucler jusqu'à tous verts ou finding non-trivial (dans ce cas stop et demander aide).
+  7. Pièges connus :
+     - `translate.py` est temporairement exclu du gate Lizard local (CCN > 12 sur 4 fonctions, refactor planifié) — mais SonarCloud le scanne quand même côté serveur. Une régression CCN sur translate.py sera signalée par Sonar pas par le pre-push.
+     - detect-secrets régénère parfois `.secrets.baseline` en pre-commit ; bien `git add` la baseline AVANT le commit suivant (sinon le pre-commit hook re-mute la baseline en boucle).
+     - Hooks pre-push lents (~30s mypy + 5s SAST + 10s pip-audit + tests) : si on enchaîne plusieurs petits commits, préférer batcher en local et un seul `git push` à la fin.
 
 ## Quality / pre-commit (workflow)
 
