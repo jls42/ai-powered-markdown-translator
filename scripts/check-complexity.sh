@@ -2,8 +2,9 @@
 # Garde-fou cyclomatic complexity via Lizard sur le code Python du repo.
 #
 # Threshold : 12 au démarrage (à durcir progressivement vers 8 — Codacy/EurekAI).
-# Scope : translate.py + scripts/*.py (les tests sont exclus, leur complexité
-# reflète la couverture, pas une dette de design).
+# Scope : scripts/*.py uniquement. translate.py est temporairement exclu **par
+# scope** (cf. note plus bas) le temps du refactor planifié. Les tests sont
+# exclus aussi, leur complexité reflète la couverture, pas une dette de design.
 #
 # Lizard est installé dans le venv via requirements-dev.txt.
 

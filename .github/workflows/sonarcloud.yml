@@ -32,9 +32,15 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          coverage run --source=translate,scripts -m unittest discover tests
-          coverage run --append --source=translate,scripts -m unittest discover scripts/tests
+          # Agrège les rc pour que les deux suites tournent ET que coverage xml
+          # soit toujours généré (sinon SonarCloud ne reçoit aucune donnée si la
+          # 1re suite échoue). Aligné sur scripts/run-unittest.sh.
+          set +e
+          rc=0
+          coverage run --source=translate,scripts -m unittest discover tests || rc=$?
+          coverage run --append --source=translate,scripts -m unittest discover scripts/tests || rc=$?
           coverage xml -o coverage.xml
+          exit "$rc"
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0

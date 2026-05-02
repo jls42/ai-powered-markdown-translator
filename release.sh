@@ -208,7 +208,7 @@ if [[ "$MODE" == "tag-only" ]]; then
     elif ! check_gh_auth; then
       warn "gh non authentifié (token expiré ?) — skip GitHub Release."
       warn "Reconnecte: gh auth login"
-      warn "Puis: ./release.sh --tag-only --skip-tests --version $VERSION (re-create) ou commande manuelle:"
+      warn "Puis: ./release.sh --tag-only --version $VERSION (re-create) ou commande manuelle:"
       warn "  echo \"\$(awk ... CHANGELOG.md)\" | gh release create $TAG --title v$VERSION --notes-file -"
     else
       log "Création GitHub Release..."
@@ -239,8 +239,17 @@ fi
 log "Branche: $CURRENT_BRANCH"
 
 if ! $SKIP_TESTS; then
-  log "Lancement des tests unittest..."
-  python -m unittest discover tests/ -v
+  log "Lancement des tests unittest (tests/ + scripts/tests/)..."
+  # Aligné sur scripts/run-unittest.sh : on agrège les rc pour que la 2e suite
+  # tourne même si la 1ère échoue. Sinon le pre-push hook divergerait du contrat
+  # release et un échec dans tests/ masquerait silencieusement scripts/tests/.
+  rc=0
+  python -m unittest discover -s tests/ -v || rc=$?
+  python -m unittest discover -s scripts/tests/ -v || rc=$?
+  if [[ "$rc" -ne 0 ]]; then
+    err "Tests en échec (rc=$rc)"
+    exit "$rc"
+  fi
   ok "Tests OK"
 else
   warn "Tests skipped (--skip-tests)"
