@@ -109,14 +109,14 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Modèles par défaut (2026)
 
-| Provider | Qualité (défaut)         | Économique (`--eco`)     |
-| -------- | ------------------------ | ------------------------ |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`           |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5`       |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`   |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
+| Provider | Qualité (défaut)         | Économique (`--eco`)            |
+| -------- | ------------------------ | ------------------------------- |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Recommandation traductions long-form** : `--use_gemini` (défaut = `gemini-3.1-pro-preview` qualité, `--eco` = `gemini-3-flash-preview`) tend à mieux préserver la structure markdown sur les scripts non-latins (PL, JA, ZH, AR, HI), notamment en mode `--news` où la fidélité des placeholders compte. OpenAI reste le défaut pour la rétrocompatibilité.
+> **Recommandation traductions long-form** : `--use_gemini` (défaut = `gemini-3.1-pro-preview` qualité, `--eco` = `gemini-3.1-flash-lite-preview`) tend à mieux préserver la structure markdown sur les scripts non-latins (PL, JA, ZH, AR, HI), notamment en mode `--news` où la fidélité des placeholders compte. OpenAI reste le défaut pour la rétrocompatibilité.
 
 ## Projets utilisant ce script
 

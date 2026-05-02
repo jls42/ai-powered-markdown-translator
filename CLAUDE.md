@@ -126,7 +126,7 @@ Effectue : checkout main → pull → vérifie cohérence CHANGELOG → tag anno
 
 #### Gestion gh token
 
-Le script vérifie l'auth gh en parsant la sortie de `gh api user` (le simple exit code de `gh auth status` n'est pas toujours fiable : on parse donc la sortie pour détecter `"error"` / `HTTP 4xx-5xx`). Si le token est expiré :
+Le script vérifie l'auth gh via `gh api user --jq .login` puis valide que le login retourné matche un format GitHub valide (`^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$`). Cette double check (exit code + format du login) évite les deux failure modes connus : exit code 0 avec payload d'erreur, et faux positifs si on matchait des substrings comme `"error"` qui peuvent apparaître légitimement dans le profil. Si le token est expiré :
 
 - Warn + skip PR / GitHub Release
 - Affiche les commandes manuelles
@@ -192,7 +192,7 @@ pip install -r requirements.txt
 - **API clients**: OpenAI, Mistral, Claude (Anthropic), and Gemini are initialized based on CLI flags
 - **Text segmentation**: `segment_text()` splits long documents at natural breakpoints (sentences, paragraphs, headers) respecting model token limits defined in `MODEL_TOKEN_LIMITS`
 - **Code preservation**: Regex extracts fenced code blocks AND inline code (`` `...` ``) before translation, replaces with placeholders, restores after
-- **News mode**: `--news` protects English quotes with `#NEWSQUOTE{n}#` placeholders, validates placeholder integrity before restoration, manages flag emojis per target language
+- **News mode**: `--news` protects English quotes with `<NEWSQUOTE id="N"/>` XML self-closing tags, validates placeholder integrity before restoration, manages flag emojis per target language. (La forme legacy `#NEWSQUOTE\d+#` n'est plus émise mais reste détectée comme résidu.)
 - **Directory traversal**: `translate_directory()` walks source directory, skips patterns in `EXCLUDE_PATTERNS`, checks for existing translations
 
 **Output naming**:
