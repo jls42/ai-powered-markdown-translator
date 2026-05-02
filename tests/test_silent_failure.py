@@ -62,6 +62,17 @@ def _base_args(**overrides):
     return Namespace(**defaults)
 
 
+def _long_en_translation(min_len=1200):
+    """Traduction EN factice assez longue pour ne pas déclencher le ratio guard."""
+    sentence = (
+        "Artificial intelligence has transformed industrial operations, helping teams "
+        "coordinate planning, monitor infrastructure, and improve decisions while "
+        "preserving clear human oversight. "
+    )
+    repeat = (min_len // len(sentence)) + 1
+    return sentence * repeat
+
+
 def _run_markdown_file_translation(
     source_text,
     mock_response,
@@ -130,13 +141,7 @@ class TestSilentFailure(unittest.TestCase):
 
         mock_client = MagicMock()
         # 1er segment: traduction EN plausible (>100 chars pour ne pas court-circuiter langdetect)
-        en_translation = (
-            "Artificial intelligence has profoundly transformed the industrial landscape "
-            "over the past decade, changing how companies design their products, manage "
-            "their supply chains, and interact with their customers. This evolution, long "
-            "confined to research laboratories, now flows through the most everyday "
-            "decision-making processes."
-        )
+        en_translation = _long_en_translation()
         mock_client.chat.completions.create.side_effect = [
             _make_openai_response(en_translation),
             _make_openai_response(segments[1]),  # FR brut = bug reproduit
@@ -171,7 +176,7 @@ class TestSilentFailure(unittest.TestCase):
                 if i == 1:
                     responses.append(_make_openai_response(seg))  # FR brut
                 else:
-                    responses.append(_make_openai_response("Translated content placeholder. " * 20))
+                    responses.append(_make_openai_response(_long_en_translation()))
             mock_client.chat.completions.create.side_effect = responses
 
             args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
@@ -809,6 +814,314 @@ class TestDetectProvider(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(stdout, "--use_gemini --eco")
         self.assertIn("REGEN_PROVIDER=gemini", stderr)
+
+
+class TestMainExitsOnRealSilentFailure(unittest.TestCase):
+    """Test d'intégration : main() doit propager sys.exit(1) quand la chaîne RÉELLE
+    de validation détecte un silent-failure dans translate_markdown_file. Les tests
+    précédents (test_main_exits_nonzero_on_failure_*) mockent translate_markdown_file
+    directement et n'exercent qu'une ligne de main() ; ce test ne mocke QUE le client
+    OpenAI, ce qui garantit que toute la chaîne
+    _dispatch_provider_call → _validate_translation_output → status=failure → sys.exit
+    est réellement exercée.
+    """
+
+    def test_main_exits_nonzero_on_real_silent_failure_chain(self):
+        with open(FIXTURE_PATH, encoding="utf-8") as f:
+            long_fr_text = f.read()
+        segments = segment_text(long_fr_text, 16000)
+        self.assertGreaterEqual(len(segments), 2, "fixture devrait produire ≥ 2 segments")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src_path = os.path.join(tmpdir, "input.md")
+            with open(src_path, "w", encoding="utf-8") as f:
+                f.write(long_fr_text)
+
+            responses = []
+            for i, seg in enumerate(segments):
+                if i == 1:
+                    # FR brut → couche 1 (source excerpt verbatim) déclenche
+                    responses.append(_make_openai_response(seg))
+                else:
+                    responses.append(_make_openai_response(_long_en_translation()))
+            mock_instance = MagicMock()
+            mock_instance.chat.completions.create.side_effect = responses
+
+            with (
+                patch.dict(os.environ, _fake_openai_env()),
+                patch("translate.OpenAI", return_value=mock_instance),
+                patch(
+                    "sys.argv",
+                    ["translate.py", "--file", src_path, "--target_dir", tmpdir],
+                ),
+            ):
+                with self.assertRaises(SystemExit) as cm:
+                    translate.main()
+                self.assertEqual(cm.exception.code, 1)
+
+            dst = os.path.join(tmpdir, "input-en.md")
+            self.assertFalse(
+                os.path.exists(dst),
+                "Le fichier de sortie ne doit PAS exister quand la chaîne réelle détecte "
+                "le silent-failure",
+            )
+
+
+def _long_fr_block(min_len=2400):
+    """Bloc FR factice ≥ 500 chars pour traverser le ratio guard et être détecté
+    par langdetect comme étant en français."""
+    sentence = (
+        "L'intelligence artificielle a profondément transformé le paysage industriel "
+        "ces dernières années, modifiant la manière dont les entreprises conçoivent "
+        "leurs produits et gèrent leurs chaînes d'approvisionnement. "
+    )
+    repeat = (min_len // len(sentence)) + 1
+    return sentence * repeat
+
+
+class TestPerProviderSilentFailure(unittest.TestCase):
+    """Couverture FR-passthrough end-to-end pour chaque provider, pas seulement OpenAI.
+    Sans ces tests, une régression dans _dispatch_provider_call (ex: skip de
+    _validate_translation_output pour Mistral/Claude/Gemini) ne serait pas détectée.
+    """
+
+    def test_silent_failure_raises_for_mistral(self):
+        long_fr = _long_fr_block()
+        mock_client = MagicMock()
+        mock_client.chat.complete.return_value = MagicMock(
+            choices=[MagicMock(finish_reason="stop", message=MagicMock(content=long_fr))]
+        )
+        args = _base_args(model="mistral-small-latest")
+        with self.assertRaisesRegex(
+            RuntimeError, r"untranslated source excerpt|Output language mismatch"
+        ):
+            translate_fn(long_fr, mock_client, args, use_mistral=True)
+
+    def test_silent_failure_raises_for_claude(self):
+        long_fr = _long_fr_block()
+        mock_client = MagicMock()
+        mock_client.messages.create.return_value = MagicMock(
+            stop_reason="end_turn",
+            content=[MagicMock(text=long_fr)],
+        )
+        args = _base_args(model="claude-haiku-4-5-20251001")
+        with self.assertRaisesRegex(
+            RuntimeError, r"untranslated source excerpt|Output language mismatch"
+        ):
+            translate_fn(long_fr, mock_client, args, use_claude=True)
+
+    def test_silent_failure_raises_for_gemini(self):
+        long_fr = _long_fr_block()
+        gen_model = MagicMock()
+        gen_model.generate_content.return_value = MagicMock(
+            candidates=[MagicMock(finish_reason="STOP")],
+            text=long_fr,
+        )
+        client = MagicMock()
+        client.GenerativeModel.return_value = gen_model
+        args = _base_args(model="gemini-3-flash-preview")
+        with self.assertRaisesRegex(
+            RuntimeError, r"untranslated source excerpt|Output language mismatch"
+        ):
+            translate_fn(long_fr, client, args, use_gemini=True)
+
+
+class TestProviderEmptyContent(unittest.TestCase):
+    """Empty-content guard du _dispatch_provider_call : un provider qui retourne
+    une chaîne vide avec finish_reason='stop' doit lever, pas produire un fichier vide.
+    """
+
+    def test_openai_empty_content_raises(self):
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = _make_openai_response(
+            "", finish_reason="stop"
+        )
+        args = _base_args()
+        with self.assertRaisesRegex(RuntimeError, r"Openai returned empty content"):
+            translate_fn("Some short source text.", mock_client, args)
+
+    def test_mistral_empty_content_raises(self):
+        mock_client = MagicMock()
+        mock_client.chat.complete.return_value = MagicMock(
+            choices=[MagicMock(finish_reason="stop", message=MagicMock(content=""))]
+        )
+        args = _base_args(model="mistral-small-latest")
+        with self.assertRaisesRegex(RuntimeError, r"Mistral returned empty content"):
+            translate_fn("Some short source text.", mock_client, args, use_mistral=True)
+
+    def test_claude_empty_content_raises(self):
+        mock_client = MagicMock()
+        mock_client.messages.create.return_value = MagicMock(
+            stop_reason="end_turn",
+            content=[MagicMock(text="")],
+        )
+        args = _base_args(model="claude-haiku-4-5-20251001")
+        with self.assertRaisesRegex(RuntimeError, r"Claude returned empty content"):
+            translate_fn("Some short source text.", mock_client, args, use_claude=True)
+
+    def test_gemini_empty_content_raises(self):
+        gen_model = MagicMock()
+        gen_model.generate_content.return_value = MagicMock(
+            candidates=[MagicMock(finish_reason="STOP")],
+            text="",
+        )
+        client = MagicMock()
+        client.GenerativeModel.return_value = gen_model
+        args = _base_args(model="gemini-3-flash-preview")
+        with self.assertRaisesRegex(RuntimeError, r"Gemini returned empty content"):
+            translate_fn("Some short source text.", client, args, use_gemini=True)
+
+
+class TestSourceOutputRatio(unittest.TestCase):
+    """Sanity ratio source/output : pour une source ≥ 500 chars, une sortie < 5%
+    doit lever. Couvre les refus type 'OK' / 'Sorry, I can't do that' qui
+    passent les checks finish_reason et langdetect (sortie courte = layer 2 skipped).
+    """
+
+    def test_short_refusal_for_long_source_raises(self):
+        long_fr = _long_fr_block()  # ~2500 chars
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = _make_openai_response(
+            "Sorry, I can't do that.",
+            finish_reason="stop",
+        )
+        args = _base_args()
+        with self.assertRaisesRegex(RuntimeError, r"Output suspiciously short for source"):
+            translate_fn(long_fr, mock_client, args)
+
+    def test_short_source_short_output_passes(self):
+        """Sources < 500 chars : le ratio guard est désactivé (texte court → sortie
+        proportionnellement courte est légitime)."""
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = _make_openai_response(
+            "OK.", finish_reason="stop"
+        )
+        args = _base_args()
+        # Pas d'exception attendue : la source est trop courte pour activer le guard.
+        translate_fn("Texte source court à traduire.", mock_client, args)
+
+
+class TestNewsCitationExtraction(unittest.TestCase):
+    """Couvre _protect_news_quotes() et _NEWS_CITATION_REGEX directement, vs les tests
+    end-to-end qui partent de contenu déjà protégé. La regex a évolué (commit 6a04061
+    pour rendre l'attribution optionnelle, fix multi-ligne pour capturer plusieurs
+    lignes EN consécutives) — ces tests sont les garants de non-régression directs.
+    """
+
+    def _args(self):
+        return _base_args(news=True)
+
+    def test_extract_with_attribution(self):
+        content = (
+            "## Section\n\n"
+            "> A decade in the making.\n"
+            ">\n"
+            "> 🇫🇷 _Une décennie en gestation._\n"
+            "> — [@GoogleAI](https://x.com/g)\n"
+        )
+        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        self.assertIn('<NEWSQUOTE id="0"/>', protected)
+        self.assertEqual(quotes, ["> A decade in the making."])
+        self.assertEqual(urls, ["https://x.com/g"])
+
+    def test_extract_without_attribution(self):
+        content = "## Section\n\n" "> A short EN quote.\n" ">\n" "> 🇫🇷 _Une courte citation EN._\n"
+        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        self.assertIn('<NEWSQUOTE id="0"/>', protected)
+        self.assertEqual(quotes, ["> A short EN quote."])
+        self.assertEqual(urls, [])
+
+    def test_extract_multiline_en_quote(self):
+        """Citation EN sur 3 lignes consécutives — DOIT être capturée intégralement.
+
+        Régression silent-failure : avant le fix, seule la dernière ligne était capturée
+        et les lignes précédentes passaient en clair au LLM (probablement traduites,
+        cassant le contrat de protection des citations EN)."""
+        content = (
+            "## Section\n\n"
+            "> First line of the EN quote.\n"
+            "> Second line of the EN quote.\n"
+            "> Third and final line.\n"
+            ">\n"
+            "> 🇫🇷 _Citation traduite multi-ligne._\n"
+            "> — [@source](https://x.com/source)\n"
+        )
+        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        self.assertEqual(len(quotes), 1)
+        # Les 3 lignes EN doivent être capturées intégralement dans le quote
+        self.assertIn("First line of the EN quote.", quotes[0])
+        self.assertIn("Second line of the EN quote.", quotes[0])
+        self.assertIn("Third and final line.", quotes[0])
+        # Et ne doivent PAS rester dans le contenu protégé envoyé au LLM
+        self.assertNotIn("First line of the EN quote.", protected)
+        self.assertNotIn("Second line of the EN quote.", protected)
+        self.assertNotIn("Third and final line.", protected)
+
+    def test_extract_consecutive_citations(self):
+        content = (
+            "## Sec 1\n\n"
+            "> Quote A.\n"
+            ">\n"
+            "> 🇫🇷 _Citation A._\n"
+            "> — [@a](https://x.com/a)\n\n"
+            "## Sec 2\n\n"
+            "> Quote B.\n"
+            ">\n"
+            "> 🇫🇷 _Citation B._\n"
+            "> — [@b](https://x.com/b)\n"
+        )
+        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        self.assertEqual(len(quotes), 2)
+        self.assertIn('<NEWSQUOTE id="0"/>', protected)
+        self.assertIn('<NEWSQUOTE id="1"/>', protected)
+        self.assertEqual(urls, ["https://x.com/a", "https://x.com/b"])
+
+    def test_news_disabled_passthrough(self):
+        content = "> Looks like a quote\n>\n> 🇫🇷 _trad_\n"
+        args = _base_args(news=False)
+        protected, quotes, urls = translate._protect_news_quotes(content, args)
+        self.assertEqual(protected, content)
+        self.assertEqual(quotes, [])
+        self.assertEqual(urls, [])
+
+
+def _gemini_blocked_response():
+    """Construit une réponse Gemini avec candidates valides mais .text qui raise
+    (cas 'safety filter blocked' réel)."""
+    response = MagicMock()
+    response.candidates = [MagicMock(finish_reason="STOP")]
+    type(response).text = property(
+        lambda self: (_ for _ in ()).throw(ValueError("blocked by safety filter"))
+    )
+    return response
+
+
+class TestGeminiEdgeCases(unittest.TestCase):
+    """Couvre les branches non-trivial de _call_gemini : candidates vide,
+    response.text qui raise (contenu bloqué par safety filters)."""
+
+    def test_gemini_no_candidates_returns_text(self):
+        """Réponse Gemini sans candidates mais avec text valide → doit retourner le text.
+        Le check finish_reason est skippé (pas de candidate à inspecter)."""
+        gen_model = MagicMock()
+        gen_model.generate_content.return_value = MagicMock(
+            candidates=[],
+            text="Some translated text.",
+        )
+        client = MagicMock()
+        client.GenerativeModel.return_value = gen_model
+        args = _base_args(model="gemini-3-flash-preview")
+        out = translate._call_gemini(client, args, "prompt", "segment")
+        self.assertEqual(out, "Some translated text.")
+
+    def test_gemini_blocked_response_raises(self):
+        gen_model = MagicMock()
+        gen_model.generate_content.return_value = _gemini_blocked_response()
+        client = MagicMock()
+        client.GenerativeModel.return_value = gen_model
+        args = _base_args(model="gemini-3-flash-preview")
+        with self.assertRaisesRegex(RuntimeError, r"Gemini response has no text|blocked"):
+            translate._call_gemini(client, args, "prompt", "segment")
 
 
 if __name__ == "__main__":

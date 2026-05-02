@@ -293,6 +293,18 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
     if not stripped:
         return
 
+    # Sanity ratio : sortie disproportionnellement courte vs source = refus / troncature / sortie type "OK"
+    # ou "Sorry, I can't do that". Garde-fou explicite pour les sources >= 500 chars,
+    # seuil 5% (cross-script FR→ZH descend rarement sous 30%, cross-script FR→AR autour de 60-80%).
+    source_len = len(segment.strip())
+    if source_len >= 500 and len(stripped) < max(50, source_len // 20):
+        raise RuntimeError(
+            f"Output suspiciously short for source: source={source_len} chars, "
+            f"output={len(stripped)} chars, ratio={len(stripped) / source_len:.1%} "
+            f"(model={args.model}, target={args.target_lang}, "
+            f"first 200 chars: {stripped[:200]!r})"
+        )
+
     out_norm = re.sub(r"\s+", " ", stripped).casefold()
     for window in _extract_source_windows(segment):
         window_norm = re.sub(r"\s+", " ", window).casefold()
@@ -582,12 +594,19 @@ def _dispatch_provider_call(
     client, args, prompt, segment, use_mistral, use_claude, use_gemini, is_translation_note
 ):
     if use_mistral:
-        return _call_mistral(client, args, prompt, segment)
-    if use_claude:
-        return _call_claude(client, args, prompt, segment)
-    if use_gemini:
-        return _call_gemini(client, args, prompt, segment)
-    return _call_openai(client, args, prompt, segment, is_translation_note)
+        text, provider = _call_mistral(client, args, prompt, segment), "mistral"
+    elif use_claude:
+        text, provider = _call_claude(client, args, prompt, segment), "claude"
+    elif use_gemini:
+        text, provider = _call_gemini(client, args, prompt, segment), "gemini"
+    else:
+        text, provider = _call_openai(client, args, prompt, segment, is_translation_note), "openai"
+    # Empty-content guard: un provider qui retourne "" avec finish_reason="stop"
+    # produirait un fichier vide marqué success — exactement le silent-failure
+    # que cette branche corrige.
+    if not text.strip():
+        raise RuntimeError(f"{provider.capitalize()} returned empty content (model={args.model})")
+    return text
 
 
 def translate(
@@ -615,6 +634,12 @@ def translate(
 
     Returns:
         str: Texte traduit.
+
+    Raises:
+        RuntimeError: si le finish_reason/stop_reason du provider est anormal,
+            si la sortie est vide, si elle contient un extrait source verbatim,
+            si elle est disproportionnellement courte vs la source, ou si
+            langdetect détecte la langue source comme dominante.
     """
     model_limit = MODEL_TOKEN_LIMITS.get(args.model, DEFAULT_TOKEN_LIMIT)
     segments = segment_text(text, min(16000, model_limit))
@@ -650,11 +675,17 @@ def translate(
     return "\n".join(translated_segments)
 
 
-_FENCED_CODE_REGEX = re.compile(r"(^```[\w-]*\n)(.*?)(^```$)", re.DOTALL | re.MULTILINE)
+_FENCED_CODE_REGEX = re.compile(r"(^```[\w-]*[ \t]*\n)(.*?)(^```[ \t]*$)", re.DOTALL | re.MULTILINE)
 _INLINE_CODE_REGEX = re.compile(r"(?<!`)(`[^`\n]+?`)(?!`)")
-# News citation pattern: > EN quote \n > \n > FLAG _trad_ \n (optional > — attribution)
+# News citation pattern: 1+ EN quote lines `> X` (excluding `> — attribution`)
+# then `>` empty separator, then `> FLAG _trad_`, optional `> — attribution`.
+# Multi-line EN quote bodies (common on long social-media quotes) MUST be captured
+# as a single group to be re-emitted verbatim — see _protect_news_quotes.
 _NEWS_CITATION_REGEX = re.compile(
-    r"(^> (?!— ).+?)[ \t]*\n" r">[ \t]*\n" r"(^> .+_)[ \t]*" r"(?:\n(^> — .+?)[ \t]*)?$",
+    r"(^> (?!— ).+(?:[ \t]*\n^> (?!— ).+)*)[ \t]*\n"
+    r"^>[ \t]*\n"
+    r"(^> .+_)[ \t]*"
+    r"(?:\n(^> — .+?)[ \t]*)?$",
     re.MULTILINE,
 )
 _RESIDUAL_NEWS_PLACEHOLDER_REGEX = re.compile(r'<NEWSQUOTE\s+id=["\']\d+["\']\s*/>|#NEWSQUOTE\d+#')
@@ -663,8 +694,11 @@ _RESIDUAL_NEWS_PLACEHOLDER_REGEX = re.compile(r'<NEWSQUOTE\s+id=["\']\d+["\']\s*
 def _protect_code_blocks(content):
     code_blocks = [m.group(0) for m in _FENCED_CODE_REGEX.finditer(content)]
     placeholders = [f"#CODEBLOCK{i}#" for i in range(len(code_blocks))]
+    # Replace one occurrence at a time : deux blocs byte-identical doivent recevoir
+    # des placeholders distincts (sinon #CODEBLOCK1# n'apparaît jamais et le validateur
+    # déclenche après l'appel API alors qu'on aurait pu détecter avant).
     for placeholder, code_block in zip(placeholders, code_blocks, strict=False):
-        content = content.replace(code_block, placeholder)
+        content = content.replace(code_block, placeholder, 1)
     return content, code_blocks, placeholders
 
 
@@ -813,11 +847,15 @@ def _cleanup_source_flag(translated_content, args):
         return translated_content
 
     if target_flag:
-        count = translated_content.count(source_flag)
-        translated_content = translated_content.replace(source_flag, target_flag)
-        print(
-            f"  → {count} drapeau(x) source {source_flag} remplacé(s) par {target_flag} (cleanup)"
-        )
+        # Scope strict : ne swap que dans les lignes citation `> 🇫🇷 …`.
+        # Un global replace toucherait aussi les citations EN restaurées qui pourraient
+        # citer nommément une source FR (cas rare mais réel).
+        pattern = re.compile(rf"^(>[ \t]+){re.escape(source_flag)}", flags=re.MULTILINE)
+        translated_content, count = pattern.subn(rf"\g<1>{target_flag}", translated_content)
+        if count:
+            print(
+                f"  → {count} drapeau(x) source {source_flag} remplacé(s) par {target_flag} (cleanup)"
+            )
     return translated_content
 
 

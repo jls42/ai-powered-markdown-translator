@@ -34,7 +34,9 @@ detect_provider() {
   local openai_placeholder="votre-cle-api-openai-par-defaut"
   local gemini_placeholder="votre-cle-api-gemini-par-defaut"
   local openai_key="${OPENAI_API_KEY:-}"
-  local gemini_key="${GOOGLE_API_KEY:-}"
+  # Accepte GOOGLE_API_KEY (SDK historique) ET GEMINI_API_KEY (convention AI Studio),
+  # cohérent avec _init_gemini_client() dans translate.py.
+  local gemini_key="${GOOGLE_API_KEY:-${GEMINI_API_KEY:-}}"
 
   # Override explicite via REGEN_PROVIDER=gemini ou REGEN_PROVIDER=openai
   case "${REGEN_PROVIDER:-}" in
