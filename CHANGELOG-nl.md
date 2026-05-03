@@ -1,63 +1,70 @@
-### Wijzigingslog
+### Changelog
 
-🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+🌍 [Frans](CHANGELOG.md) | [Engels](CHANGELOG-en.md) | [Spaans](CHANGELOG-es.md) | [Chinees](CHANGELOG-zh.md) | [Duits](CHANGELOG-de.md) | [Japans](CHANGELOG-ja.md) | [Koreaans](CHANGELOG-ko.md) | [Arabisch](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italiaans](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Pools](CHANGELOG-pl.md) | [Portugees](CHANGELOG-pt.md) | [Roemeens](CHANGELOG-ro.md) | [Zweeds](CHANGELOG-sv.md)
 
+- **1.7.4** SonarCloud + uitgebreide dekking (2026-05-03) :
+  - GitHub Actions `SonarCloud`-workflow (sonarcloud.yml + sonar-project.properties) : analyse bij elke push en pull-request, coverage-berekening via `coverage.xml`
+  - 11 SonarCloud-badges bovenaan de README (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
+  - Nieuw bestand `tests/test_orchestration.py` (+79 tests) dat de orchestratielaag van `translate.py` dekt : `_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` (TypeError + BadRequestError fallbacks), o1-series promptformaat, vroege-return-vertakkingen van `_validate_translation_output`
+  - `scripts/tests/test_audit_verdict.py` uitgebreid : dekking van `main()` (stdin/stdout) en het `if __name__ == "__main__"`-blok via subprocess
+  - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
+  - Extra hardening van `translate.py` (PR review feedback) : empty-content guard op alle providers, sanity ratio source/output (≥ 500 chars, < 5% = weigering), validatie van code-placeholders (`#CODEBLOCK`/`#INLINECODE`), post-LLM-normalisatie (scheidingstekens/links vastgeplakt aan een heading), `BadRequestError` retry zonder `reasoning_effort`
 - **1.7.3** Kwaliteitstooling pre-commit (2026-04-30) :
-  - Setup `pre-commit` "volledige EurekAI-type" : 14 hooks verdeeld over twee stages (snelle pre-commit + zware pre-push)
-  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 beschermde API-sleutels), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, enz.)
-  - Pre-push : mypy (geleidelijke lax-modus), Opengrep SAST (translate.py + scripts/), pip-audit (initiële rapportagemodus), unittest discover (tests/ + scripts/tests/)
-  - Lokale wrappers in `scripts/` die `./venv/bin/python` gebruiken (het systeem heeft geen `python` buiten venv)
-  - `scripts/audit_verdict.py` : JSON-parser pip-audit met 11 unittest-tests, aangepaste Python-port van de jls42-astro-parser
-  - 7 aanvankelijke ruff-schendingen gecorrigeerd : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+  - Setup `pre-commit` "volledig EurekAI-type" : 14 hooks verdeeld over twee stages (snelle pre-commit + zware pre-push)
+  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 API-sleutels beschermd), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, enz.)
+  - Pre-push : mypy (geleidelijk lakse modus), Opengrep SAST (translate.py + scripts/), pip-audit (initiële rapportagemodus), unittest discover (tests/ + scripts/tests/)
+  - Lokale wrappers in `scripts/` die `./venv/bin/python` gebruiken (het systeem heeft geen kale `python` buiten venv)
+  - `scripts/audit_verdict.py` : pip-audit JSON-parser met 11 unittest-tests, aangepaste Python-port van de jls42-astro-parser
+  - 7 eerste ruff-overtredingen gecorrigeerd : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
   - Documentatie : README.md (FR) + CLAUDE.md (gedetailleerde workflow), 28 opnieuw gegenereerde vertalingen
-  - Lizard sluit tijdelijk `translate.py` uit (4 functies met CCN 21-47, refactor gepland in een dedicated PR) — strikte gate op scripts/ om regressies te vermijden
-- **1.7.2** Stille-fout fix op lange vertalingen (2026-04-28) :
-  - Taalvalidatie na vertaling op alle providers (OpenAI, Mistral, Claude, Gemini) : deterministische laag (bronfragment teruggevonden als exact citaat) + probabilistische laag (`langdetect`)
-  - Whitelist `finish_reason` / `stop_reason` : `RuntimeError` op elke status buiten de whitelist gooien (truncation, content_filter, enz.)
-  - `max_tokens` Claude : `4096` → `16384` (voorkomt latente truncatie op segmenten van 16k tekens)
-  - Heading-aware segmentatie: prioriteit voor H2/H3 in de tweede helft van het segment (elk segment begint met een volledige semantische sectie)
-  - Foutdoorvoering tot aan een niet-nul exitcode : `translate_markdown_file` geeft een getypeerde status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` als minstens één bestand is mislukt (single-file en batch)
-  - Afhankelijke `langdetect==1.0.9` toegevoegd
+  - Lizard sluit tijdelijk `translate.py` uit (4 functies met CCN 21-47, refactor gepland in een aparte PR) — strikte gate op scripts/ om regressies te voorkomen
+- **1.7.2** Fix voor stille fouten bij lange vertalingen (2026-04-28) :
+  - Taalvalidatie na vertaling op alle providers (OpenAI, Mistral, Claude, Gemini) : deterministische laag (source-extract verbatim teruggevonden) + probabilistische laag (`langdetect`)
+  - Whitelist `finish_reason` / `stop_reason` : `RuntimeError` op elke status buiten de whitelist (truncation, content_filter, enz.)
+  - `max_tokens` Claude : `4096` → `16384` (voorkomt latente truncatie bij segmenten van 16k tekens)
+  - Heading-aware segmentatie : prioriteit H2/H3 in de 2e helft van het segment (elk segment begint met een complete semantische sectie)
+  - Doorvoer van fouten tot niet-nul exitcode : `translate_markdown_file` geeft een getypeerde status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` als minstens één bestand is mislukt (single-file en batch)
+  - Toevoeging van afhankelijkheid `langdetect==1.0.9`
   - Regressietests (`tests/test_silent_failure.py`, `unittest` stdlib) die de zes schakels van de foutketen dekken
 - **1.7.1** Update van OpenAI-modellen :
   - Standaardmodellen bijgewerkt naar GPT-5.4 (maart 2026) :
     - Kwaliteit : `gpt-5` → `gpt-5.4`
     - Economisch : `gpt-5-mini` → `gpt-5.4-mini`
-  - Tokenlimieten toegevoegd voor `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
+  - Toevoeging van tokenlimieten voor `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
 - **1.7** Nieuwigheden :
-  - Optie `--keep_filename` om de originele bestandsnaam te behouden tijdens het vertalen
-  - Ondersteuning voor het `.env`-bestand om API-sleutels automatisch te laden
-  - **Behouden van inline code** : backticks (`` `...` ``) zijn nu beschermd tijdens het vertalen
+  - Optie `--keep_filename` om de oorspronkelijke bestandsnaam te behouden tijdens het vertalen
+  - Ondersteuning van het bestand `.env` om API-sleutels automatisch te laden
+  - **Behoud van inline code** : backticks (`` `...` ``) zijn nu beschermd tijdens het vertalen
   - Verbetering van de systeemprompt :
-    - Betere afhandeling van aanhalingstekens in de YAML frontmatter
-    - Bescherming van templatevariabelen `{variable}`
+    - Betere omgang met aanhalingstekens in de YAML frontmatter
+    - Bescherming van template-variabelen `{variable}`
     - Verbod op ongevraagde vertalersnotities
   - Succesvol getest op 364 bestanden (blogmigratie jls42.org)
 - **1.6** Nieuwigheden :
-  - Ondersteuning voor de Google Gemini API voor vertaling (`--use_gemini`)
+  - Ondersteuning van de Google Gemini-API voor vertaling (`--use_gemini`)
   - Update van de standaardmodellen 2026 :
     - OpenAI : `gpt-5` (kwaliteit), `gpt-5-mini` (eco)
     - Claude : `claude-sonnet-4-5` (kwaliteit), `claude-haiku-4-5` (eco)
     - Gemini : `gemini-3-pro-preview` (kwaliteit), `gemini-3-flash-preview` (eco)
   - Economische modus (`--eco`) om snellere en goedkopere modellen te gebruiken
-  - Vertaling van één enkel bestand (`--file`) zonder een map te doorlopen
+  - Vertaling van één bestand (`--file`) zonder door een map te lopen
   - Nieuw vereenvoudigd naamgevingspatroon : `{base}-{lang}.md`
   - Optie `--include_model` om het oude formaat met de modelnaam te behouden
-  - Ondersteuning voor niet-vermelde modellen met standaard tokenlimiet (128k)
+  - Ondersteuning voor niet-gelijste modellen met standaard tokenlimiet (128k)
   - README vertaald in 14 talen
 - **1.5** Verbeteringen :
-  - **Update van API-sleutels en standaardmodellen:**
-    - **OpenAI :** Update van `DEFAULT_MODEL_OPENAI` naar `"gpt-4o"`.
-    - **Mistral AI :** Update van `DEFAULT_MODEL_MISTRAL` naar `"mistral-large-latest"`.
-    - **Claude van Anthropic :** Toevoeging van `DEFAULT_ANTHROPIC_API_KEY` en update van `DEFAULT_MODEL_CLAUDE` naar `"claude-3-5-sonnet-20240620"`.
+  - **Bijwerking van API-sleutels en standaardmodellen :**
+    - **OpenAI :** Bijgewerkt van `DEFAULT_MODEL_OPENAI` naar `"gpt-4o"`.
+    - **Mistral AI :** Bijgewerkt van `DEFAULT_MODEL_MISTRAL` naar `"mistral-large-latest"`.
+    - **Claude van Anthropic :** Toevoeging van `DEFAULT_ANTHROPIC_API_KEY` en bijwerking van `DEFAULT_MODEL_CLAUDE` naar `"claude-3-5-sonnet-20240620"`.
   - **Optimalisatie van vertaalprompts :**
     - De prompts voor directe vertalingen en vertaalnotities zijn verrijkt voor meer duidelijkheid en efficiëntie, inclusief gedetailleerde instructies over het behouden van metadata en specifieke opmaakelementen.
   - **Code-refactoring :**
     - Vervanging van `MistralClient` door de klasse `Mistral` voor de initialisatie van de Mistral AI-client.
-    - Herschikking van imports voor betere leesbaarheid en onderhoudbaarheid.
+    - Herschikking van imports voor betere leesbaarheid en onderhoud.
     - Verbetering van tekstsegmentatie en beheer van codeblokken om de oorspronkelijke opmaak tijdens het vertalen te behouden.
   - **Beheer van uitvoerbestanden :**
-    - Omkering van het model en de taal in de naam van uitvoerbestanden (bijvoorbeeld `f"{base}-{args.target_lang}-{args.model}.md"`), wat de organisatie en het terugvinden van vertalingen vergemakkelijkt.
+    - Omkering van model en taal in de bestandsnaam van uitvoerbestanden (bijvoorbeeld `f"{base}-{args.target_lang}-{args.model}.md"`), wat de organisatie en het terugvinden van vertalingen vergemakkelijkt.
   - **Diverse verbeteringen :**
     - Opschoning van de code door onnodige lege regels te verwijderen.
     - Kleine aanpassingen om de structuur en leesbaarheid van het script te verbeteren.
@@ -70,9 +77,9 @@
   - Verbeterd beheer van uitvoerbestanden
   - Verbeterde detectie van bestaande bestanden
   - Optie `--force` om vertaling af te dwingen
-  - Omkering van het model en de taal in de naam van het uitvoerbestand
-- **1.2** Fix van het wijzigingslog
-- **1.1** Toevoeging van ondersteuning voor de Mistral AI API
-- **1.0** Initiële versie - Ondersteuning van de OpenAI API
+  - Omkering van model en taal in de naam van het uitvoerbestand
+- **1.2** Fix van de changelog
+- **1.1** Toevoeging van ondersteuning voor de Mistral IA-API
+- **1.0** Eerste versie - Ondersteuning van de OpenAI API
 
-**Dit document is vertaald van de fr-versie naar de taal nl met behulp van het model gpt-5.4-mini. Voor meer informatie over het vertaalproces, raadpleeg https://github.com/jls42/ai-powered-markdown-translator**
+**Dit document is vertaald van de fr-versie naar de nl-taal met behulp van het model gpt-5.4-mini. Raadpleeg voor meer informatie over het vertaalproces https://github.com/jls42/ai-powered-markdown-translator**

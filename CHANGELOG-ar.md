@@ -2,77 +2,84 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7.3** أدوات جودة pre-commit (2026-04-30) :
-  - إعداد `pre-commit` "type EurekAI complet" : 14 خطافًا موزعة على مرحلتين (pre-commit سريع + pre-push ثقيل)
-  - Pre-commit : ruff (lint+format)، shellcheck، prettier (md/yaml/json)، detect-secrets (4 مفاتيح API محمية)، Lizard (CCN ≤ 12)، pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs، إلخ)
-  - Pre-push : mypy (وضع متساهل تدريجي)، Opengrep SAST (translate.py + scripts/)، pip-audit (وضع التقارير الأولي)، unittest discover (tests/ + scripts/tests/)
-  - أغلفة محلية في `scripts/` تستخدم `./venv/bin/python` (النظام لا يملك `python` عاريًا خارج venv)
-  - `scripts/audit_verdict.py` : محلل JSON لـ pip-audit مع 11 اختبار unittest، منفذ Python مُكيَّف من محلل jls42-astro
-  - تم تصحيح 7 مخالفات ruff أولية: B904 (raise from) ×2، B007 (unused dirs)، C408 (dict literal)، C419 (list-comp)، SIM105 (contextlib.suppress)، SIM110 (any())
-  - التوثيق : README.md (FR) + CLAUDE.md (سير عمل مفصل)، 28 ترجمة أُعيد توليدها
-  - يستثني Lizard مؤقتًا `translate.py` (4 دوال عند CCN 21-47، إعادة هيكلة مخططة في PR مخصصة) — gate صارم على scripts/ لتجنب التراجعات
+- **1.7.4** SonarCloud + تغطية شاملة (2026-05-03) :
+  - سير عمل GitHub Actions `SonarCloud` (sonarcloud.yml + sonar-project.properties) : تحليل عند كل push و pull-request، وحساب coverage عبر `coverage.xml`
+  - 11 شارة SonarCloud في أعلى README (Quality Gate، Security/Reliability/Maintainability ratings، Coverage، Vulnerabilities، Bugs، Code Smells، Duplicated Lines، Technical Debt، Lines of Code)
+  - ملف جديد `tests/test_orchestration.py` (+79 اختبارًا) يغطي طبقة orchestration الخاصة بـ `translate.py` : `_resolve_*_filename`، `_existing_translation_exists`، `_record_translation_status`، `_write_output_file`، `translate_directory`، `_validate_input_paths`، `_init_*_client`، `_select_provider_client`، `_normalize_collapsed_markdown`، `_cleanup_source_flag`، `_validate_news_flags_*`، `_openai_create_with_fallback` (TypeError + BadRequestError fallbacks)، تنسيق prompt لسلسلة o1-series، فروع early-return في `_validate_translation_output`
+  - توسيع `scripts/tests/test_audit_verdict.py` : تغطية `main()` (stdin/stdout) وكتلة `if __name__ == "__main__"` عبر subprocess
+  - **Coverage on new code** : 75.5% → ~98% (translate.py 98%، scripts/audit_verdict.py 97%)
+  - تعزيز إضافي لـ `translate.py` (تعليقات مراجعة PR) : حارس empty-content على جميع المزودين، نسبة سلامة المصدر/المخرجات (≥ 500 حرف، < 5% = رفض)، التحقق من placeholders code (`#CODEBLOCK`/`#INLINECODE`)، التطبيع بعد LLM (الفواصل/الروابط الملتصقة بعنوان heading)، retry لـ `BadRequestError` من دون `reasoning_effort`
+- **1.7.3** أدوات الجودة pre-commit (2026-04-30) :
+  - إعداد `pre-commit` "نوع EurekAI كامل" : 14 hook موزعة على مرحلتين (pre-commit سريع + pre-push ثقيل)
+  - Pre-commit : ruff (lint+format)، shellcheck، prettier (md/yaml/json)، detect-secrets (4 مفاتيح API محمية)، Lizard (CCN ≤ 12)، pre-commit-hooks v5 (whitespace، EOF، large-files، shebangs، إلخ.)
+  - Pre-push : mypy (وضع lax تدريجي)، Opengrep SAST (translate.py + scripts/)، pip-audit (وضع reporting أولي)، unittest discover (tests/ + scripts/tests/)
+  - Wrappers محلية في `scripts/` تستخدم `./venv/bin/python` (النظام لا يحتوي على `python` خام خارج venv)
+  - `scripts/audit_verdict.py` : محلّل JSON لـ pip-audit مع 11 اختبار unittest، نسخة Python ملائمة من parser jls42-astro
+  - إصلاح 7 مخالفات ruff أولية : B904 (raise from) ×2، B007 (unused dirs)، C408 (dict literal)، C419 (list-comp)، SIM105 (contextlib.suppress)، SIM110 (any())
+  - التوثيق : README.md (FR) + CLAUDE.md (سير العمل المفصل)، 28 ترجمة أُعيد توليدها
+  - يستبعد Lizard مؤقتًا `translate.py` (4 دوال بدرجة CCN بين 21-47، وسيُعاد هيكلتها في PR مخصص) — بوابة صارمة على scripts/ لتجنب التراجعات
 - **1.7.2** إصلاح الفشل الصامت في الترجمات الطويلة (2026-04-28) :
-  - التحقق من اللغة بعد الترجمة على جميع المزودين (OpenAI، Mistral، Claude، Gemini) : طبقة حتمية (المقتطف الأصلي المسترجع حرفيًا) + طبقة احتمالية (`langdetect`)
-  - قائمة سماح `finish_reason` / `stop_reason` : رفع `RuntimeError` على أي حالة خارج قائمة السماح (truncation، content_filter، إلخ.)
-  - `max_tokens` Claude : `4096` → `16384` (يتجنب truncation الخفي على المقاطع ذات 16k حرفًا)
-  - تقسيم مراعي للعناوين: أولوية H2/H3 في النصف الثاني من المقطع (كل مقطع يبدأ بقسم دلالي كامل)
-  - تمرير الأخطاء حتى رمز خروج غير صفري: `translate_markdown_file` يعيد حالة مُمَيَّزة `success` / `failure` / `skipped`، و`main()` `sys.exit(1)` إذا فشل ملف واحد على الأقل (ملف واحد ودفعي)
-  - إضافة تبعية `langdetect==1.0.9`
-  - اختبارات تراجعية (`tests/test_silent_failure.py`، `unittest` stdlib) تغطي الحلقات الست في سلسلة الخطأ
+  - التحقق من اللغة بعد الترجمة لدى جميع المزودين (OpenAI، Mistral، Claude، Gemini) : طبقة حتمية (مقتطف من المصدر تم العثور عليه حرفيًا) + طبقة احتمالية (`langdetect`)
+  - whitelist `finish_reason` / `stop_reason` : رفع `RuntimeError` على أي حالة خارج whitelist (truncation، content_filter، إلخ.)
+  - `max_tokens` Claude : `4096` → `16384` (يتجنب truncation الكامن على مقاطع 16k حرف)
+  - التقسيم المدرك للعناوين: أولوية H2/H3 في النصف الثاني من المقطع (كل مقطع يبدأ بقسم دلالي كامل)
+  - تمرير الأخطاء حتى exit code غير صفري : `translate_markdown_file` يعيد حالة معلمة `success` / `failure` / `skipped`، و `main()` `sys.exit(1)` إذا فشل ملف واحد على الأقل (single-file و batch)
+  - إضافة التبعية `langdetect==1.0.9`
+  - اختبارات regression (`tests/test_silent_failure.py`، `unittest` stdlib) تغطي الحلقات الست في سلسلة الخطأ
 - **1.7.1** تحديث نماذج OpenAI :
   - تحديث النماذج الافتراضية إلى GPT-5.4 (مارس 2026) :
     - الجودة : `gpt-5` → `gpt-5.4`
     - الاقتصادي : `gpt-5-mini` → `gpt-5.4-mini`
-  - إضافة حدود الرموز إلى `gpt-5.4`، `gpt-5.4-mini`، `gpt-5.4-nano` (400k)
-- **1.7** الجديد :
-  - خيار `--keep_filename` للاحتفاظ باسم الملف الأصلي أثناء الترجمة
+  - إضافة حدود الرموز لـ `gpt-5.4`، `gpt-5.4-mini`، `gpt-5.4-nano` (400k)
+- **1.7** جديد :
+  - الخيار `--keep_filename` للاحتفاظ باسم الملف الأصلي أثناء الترجمة
   - دعم ملف `.env` لتحميل مفاتيح API تلقائيًا
-  - **الحفاظ على الكود المضمّن** : أصبحت backticks (`` `...` ``) محمية الآن أثناء الترجمة
-  - تحسين prompt النظام:
-    - تعامل أفضل مع علامات الاقتباس في YAML frontmatter
+  - **الحفاظ على الكود المضمَّن** : أصبحت backticks (`` `...` ``) محمية الآن أثناء الترجمة
+  - تحسين prompt النظام :
+    - إدارة أفضل لعلامات الاقتباس في YAML frontmatter
     - حماية متغيرات القالب `{variable}`
-    - حظر ملاحظات المترجم غير المطلوبة
+    - منع ملاحظات المترجم غير المطلوبة
   - تم اختباره بنجاح على 364 ملفًا (ترحيل مدونة jls42.org)
-- **1.6** الجديد :
-  - دعم واجهة Google Gemini API للترجمة (`--use_gemini`)
+- **1.6** جديد :
+  - دعم Google Gemini API للترجمة (`--use_gemini`)
   - تحديث النماذج الافتراضية 2026 :
     - OpenAI : `gpt-5` (جودة)، `gpt-5-mini` (اقتصادي)
     - Claude : `claude-sonnet-4-5` (جودة)، `claude-haiku-4-5` (اقتصادي)
     - Gemini : `gemini-3-pro-preview` (جودة)، `gemini-3-flash-preview` (اقتصادي)
-  - وضع اقتصادي (`--eco`) لاستخدام نماذج أسرع وأقل تكلفة
-  - ترجمة ملف واحد (`--file`) دون استعراض دليل
+  - الوضع الاقتصادي (`--eco`) لاستخدام نماذج أسرع وأقل تكلفة
+  - ترجمة ملف واحد (`--file`) دون استعراض مجلد
   - نمط تسمية جديد مبسط : `{base}-{lang}.md`
-  - خيار `--include_model` للاحتفاظ بالتنسيق القديم مع اسم النموذج
-  - دعم النماذج غير المدرجة مع حد رموز افتراضي (128k)
-  - تمت ترجمة README إلى 14 لغة
+  - الخيار `--include_model` للاحتفاظ بالتنسيق القديم مع اسم النموذج
+  - دعم النماذج غير المدرجة مع حد افتراضي للرموز (128k)
+  - README مترجم إلى 14 لغة
 - **1.5** تحسينات :
-  - **تحديث مفاتيح API والنماذج الافتراضية:**
-    - **OpenAI :** تحديث `DEFAULT_MODEL_OPENAI` إلى `"gpt-4o"`.
-    - **Mistral AI :** تحديث `DEFAULT_MODEL_MISTRAL` إلى `"mistral-large-latest"`.
-    - **Claude من Anthropic :** إضافة `DEFAULT_ANTHROPIC_API_KEY` وتحديث `DEFAULT_MODEL_CLAUDE` إلى `"claude-3-5-sonnet-20240620"`.
-  - **تحسين prompts الترجمة:**
-    - تم إثراء prompts للترجمات المباشرة وملاحظات الترجمة من أجل وضوح وكفاءة أفضل، بما في ذلك تعليمات مفصلة حول الحفاظ على البيانات الوصفية وعناصر التنسيق المحددة.
-  - **إعادة هيكلة الكود:**
+  - **تحديث مفاتيح API والنماذج الافتراضية :**
+    - **OpenAI :** تحديث من `DEFAULT_MODEL_OPENAI` إلى `"gpt-4o"`.
+    - **Mistral AI :** تحديث من `DEFAULT_MODEL_MISTRAL` إلى `"mistral-large-latest"`.
+    - **Claude d'Anthropic :** إضافة `DEFAULT_ANTHROPIC_API_KEY` وتحديث من `DEFAULT_MODEL_CLAUDE` إلى `"claude-3-5-sonnet-20240620"`.
+  - **تحسين prompts الترجمة :**
+    - تمت إثراء prompts الخاصة بالترجمات المباشرة وملاحظات الترجمة من أجل وضوح وكفاءة أفضل، بما في ذلك تعليمات مفصلة حول الحفاظ على البيانات الوصفية وعناصر التنسيق الخاصة.
+  - **إعادة هيكلة الكود :**
     - استبدال `MistralClient` بالفئة `Mistral` لتهيئة عميل Mistral AI.
-    - إعادة تنظيم الاستيرادات لتحسين القراءة والصيانة.
+    - إعادة تنظيم imports لتحسين القراءة والصيانة.
     - تحسين تقسيم النصوص وإدارة كتل الكود للحفاظ على التنسيق الأصلي أثناء الترجمة.
-  - **إدارة ملفات الخرج:**
-    - عكس النموذج واللغة في اسم ملفات الخرج (مثلًا، `f"{base}-{args.target_lang}-{args.model}.md"`)، مما يسهل التنظيم والبحث عن الترجمات.
-  - **تحسينات متنوعة:**
-    - تنظيف الكود بإزالة الأسطر الفارغة غير الضرورية.
-    - تعديلات طفيفة لتحسين بنية السكربت وسهولة قراءته.
-- **1.4** الجديد :
-  - دعم واجهة Claude API من Anthropic للترجمة
+  - **إدارة ملفات الإخراج :**
+    - عكس ترتيب النموذج واللغة في اسم ملفات الإخراج (على سبيل المثال، `f"{base}-{args.target_lang}-{args.model}.md"`)، مما يسهل تنظيم الترجمات والبحث عنها.
+  - **تحسينات متنوعة :**
+    - تنظيف الكود بحذف الأسطر الفارغة غير الضرورية.
+    - تعديلات طفيفة لتحسين بنية السكربت ووضوحه.
+- **1.4** جديد :
+  - دعم Claude API من Anthropic للترجمة
   - تحسين prompts لزيادة الوضوح والكفاءة
-  - تعديلات طفيفة لتحسين صيانة الكود
+  - تعديلات طفيفة لتحسين قابلية صيانة الكود
 - **1.3** تحسينات وميزات جديدة :
   - إدارة محسنة لكتل الكود
-  - إدارة محسنة لملفات الخرج
+  - إدارة محسنة لملفات الإخراج
   - تحسين اكتشاف الملفات الموجودة
-  - خيار `--force` لفرض الترجمة
-  - عكس النموذج واللغة في اسم ملف الخرج
+  - الخيار `--force` لفرض الترجمة
+  - عكس ترتيب النموذج واللغة في اسم ملف الإخراج
 - **1.2** إصلاح سجل التغييرات
-- **1.1** إضافة دعم واجهة Mistral IA API
-- **1.0** الإصدار الأولي - دعم واجهة OpenAI API
+- **1.1** إضافة دعم Mistral IA API
+- **1.0** الإصدار الأولي - دعم OpenAI API
 
-**تمت ترجمة هذا المستند من النسخة fr إلى اللغة ar باستخدام النموذج gpt-5.4-mini. لمزيد من المعلومات حول عملية الترجمة، راجع https://github.com/jls42/ai-powered-markdown-translator**
+**تمت ترجمة هذا المستند من الإصدار fr إلى اللغة ar باستخدام النموذج gpt-5.4-mini. لمزيد من المعلومات حول عملية الترجمة، راجع https://github.com/jls42/ai-powered-markdown-translator**

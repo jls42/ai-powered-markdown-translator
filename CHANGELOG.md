@@ -2,6 +2,13 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.7.4** SonarCloud + couverture exhaustive (2026-05-03) :
+  - Workflow GitHub Actions `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analyse à chaque push et pull-request, calcul coverage via `coverage.xml`
+  - 11 badges SonarCloud en haut du README (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
+  - Nouveau fichier `tests/test_orchestration.py` (+79 tests) couvrant la couche orchestration de `translate.py` : `_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` (TypeError + BadRequestError fallbacks), o1-series prompt format, branches early-return de `_validate_translation_output`
+  - `scripts/tests/test_audit_verdict.py` étendu : couverture de `main()` (stdin/stdout) et du bloc `if __name__ == "__main__"` via subprocess
+  - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
+  - Hardening complémentaire de `translate.py` (PR review feedback) : empty-content guard sur tous les providers, sanity ratio source/output (≥ 500 chars, < 5% = refus), validation placeholders code (`#CODEBLOCK`/`#INLINECODE`), normalisation post-LLM (séparateurs/liens collés à un heading), `BadRequestError` retry sans `reasoning_effort`
 - **1.7.3** Outillage qualité pre-commit (2026-04-30) :
   - Setup `pre-commit` "type EurekAI complet" : 14 hooks répartis sur deux stages (pre-commit rapide + pre-push lourd)
   - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 API keys protégées), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
