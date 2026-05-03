@@ -1,44 +1,49 @@
 ### Jurnal de modificări
 
-🌍 [Franceză](CHANGELOG.md) | [Engleză](CHANGELOG-en.md) | [Spaniolă](CHANGELOG-es.md) | [Chineză](CHANGELOG-zh.md) | [Germană](CHANGELOG-de.md) | [Japoneză](CHANGELOG-ja.md) | [Coreeană](CHANGELOG-ko.md) | [Arabă](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italiană](CHANGELOG-it.md) | [Neerlandeză](CHANGELOG-nl.md) | [Poloneză](CHANGELOG-pl.md) | [Portugheză](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Suedeză](CHANGELOG-sv.md)
+🌍 [Franceză](CHANGELOG.md) | [Engleză](CHANGELOG-en.md) | [Spaniolă](CHANGELOG-es.md) | [Chineză](CHANGELOG-zh.md) | [Germană](CHANGELOG-de.md) | [Japoneză](CHANGELOG-ja.md) | [Coreeană](CHANGELOG-ko.md) | [Arabă](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italiană](CHANGELOG-it.md) | [Olandeză](CHANGELOG-nl.md) | [Poloneză](CHANGELOG-pl.md) | [Portugheză](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Suedeză](CHANGELOG-sv.md)
 
-- **1.7.4** SonarCloud + acoperire exhaustivă (2026-05-03) :
-  - Workflow GitHub Actions `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analiză la fiecare push și pull-request, calcul coverage prin `coverage.xml`
+- **1.8.3** SonarCloud + acoperire exhaustivă (2026-05-03) :
+  - Workflow GitHub Actions `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analiză la fiecare push și pull-request, calculul coverage prin `coverage.xml`
   - 11 badge-uri SonarCloud în partea de sus a README-ului (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
-  - Fișier nou `tests/test_orchestration.py` (+79 de teste) care acoperă stratul de orchestrare al `translate.py` : `_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` (fallback-uri TypeError + BadRequestError), formatul promptului o1-series, ramurile de early-return de la `_validate_translation_output`
-  - `scripts/tests/test_audit_verdict.py` extins : acoperire pentru `main()` (stdin/stdout) și blocul `if __name__ == "__main__"` prin subprocess
+  - Fișier nou `tests/test_orchestration.py` (+79 teste) care acoperă stratul de orchestrare al `translate.py` : `_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` (fallback-uri TypeError + BadRequestError), formatul promptului o1-series, ramurile de early-return ale `_validate_translation_output`
+  - `scripts/tests/test_audit_verdict.py` extins : acoperirea `main()` (stdin/stdout) și a blocului `if __name__ == "__main__"` prin subprocess
   - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
-  - Întărire suplimentară a `translate.py` (feedback din review-ul PR-ului) : protecție pentru conținut gol pe toți providerii, raport de sănătate sursă/ieșire (≥ 500 de caractere, < 5% = refuz), validare placeholder-e de cod (`#CODEBLOCK`/`#INLINECODE`), normalizare post-LLM (separatori/linkuri lipite de un heading), `BadRequestError` retry fără `reasoning_effort`
-- **1.7.3** Instrumente de calitate pre-commit (2026-04-30) :
-  - Setup `pre-commit` „tip EurekAI complet” : 14 hook-uri împărțite pe două stadii (pre-commit rapid + pre-push greu)
+  - Întărire suplimentară a `translate.py` (feedback din PR review) : guard pentru empty-content pe toți providerii, raport de rațiune sursă/ieșire (≥ 500 chars, < 5% = refuz), validare placeholders code (`#CODEBLOCK`/`#INLINECODE`), normalizare post-LLM (separatoare/linkuri lipite de un heading), `BadRequestError` retry fără `reasoning_effort`
+- **1.8.2** Instrumentare de calitate pre-commit (2026-04-30) :
+  - Setup `pre-commit` "type EurekAI complet" : 14 hook-uri împărțite în două stadii (pre-commit rapid + pre-push greu)
   - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 API keys protejate), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
   - Pre-push : mypy (mod lax progresiv), Opengrep SAST (translate.py + scripts/), pip-audit (mod de raportare inițial), unittest discover (tests/ + scripts/tests/)
-  - Wrapper-e locale în `scripts/` care folosesc `./venv/bin/python` (sistemul nu are `python` brut în afara venv)
+  - Wrappers locali în `scripts/` care folosesc `./venv/bin/python` (sistemul nu are `python` gol fără venv)
   - `scripts/audit_verdict.py` : parser JSON pip-audit cu 11 teste unittest, port Python adaptat după parserul jls42-astro
-  - 7 încălcări ruff inițiale corectate : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
-  - Documentație : README.md (FR) + CLAUDE.md (workflow detaliat), 28 de traduceri regenerate
-  - Lizard exclude temporar `translate.py` (4 funcții cu CCN 21-47, refactorizare planificată într-un PR dedicat) — gate strict pe scripts/ pentru a evita regresiile
-- **1.7.2** Remediere silent-failure pe traduceri lungi (2026-04-28) :
-  - Validare de limbă post-traducere pe toți providerii (OpenAI, Mistral, Claude, Gemini) : strat determinist (extras din sursă regăsit verbatim) + strat probabilist (`langdetect`)
-  - Whitelist `finish_reason` / `stop_reason` : aruncare `RuntimeError` la orice stare din afara whitelist-ului (truncation, content_filter, etc.)
-  - `max_tokens` Claude : `4096` → `16384` (evită truncarea latentă pe segmente de 16k caractere)
-  - Segmentare cu awareness pentru heading-uri : prioritate H2/H3 în a doua jumătate a segmentului (fiecare segment începe cu o secțiune semantică completă)
-  - Propagarea erorilor până la exit code non-zero : `translate_markdown_file` returnează un statut tipizat `success` / `failure` / `skipped`, `main()` `sys.exit(1)` dacă cel puțin un fișier a eșuat (single-file și batch)
+  - 7 încălcări inițiale ruff corectate : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+  - Documentație : README.md (FR) + CLAUDE.md (workflow detaliat), 28 traduceri regenerate
+  - Lizard exclude temporar `translate.py` (4 funcții cu CCN 21-47, refactor planificat într-un PR dedicat) — gate strict pe scripts/ pentru a evita regresiile
+- **1.8.1** Remediere silent-failure pentru traduceri lungi (2026-04-28) :
+  - Validare limbă post-traducere pe toți providerii (OpenAI, Mistral, Claude, Gemini) : strat determinist (extras din sursă regăsit verbatim) + strat probabilistic (`langdetect`)
+  - Whitelist `finish_reason` / `stop_reason` : aruncare `RuntimeError` pentru orice stare în afara whitelist-ului (truncation, content_filter, etc.)
+  - `max_tokens` Claude : `4096` → `16384` (evită truncarea latentă pe segmente de 16k chars)
+  - Segmentare heading-aware : prioritate H2/H3 în a doua jumătate a segmentului (fiecare segment începe cu o secțiune semantică completă)
+  - Propagarea erorilor până la un exit code non-zero : `translate_markdown_file` returnează un statut tipizat `success` / `failure` / `skipped`, `main()` `sys.exit(1)` dacă cel puțin un fișier a eșuat (single-file și batch)
   - Adăugare dependență `langdetect==1.0.9`
-  - Teste de regresie (`tests/test_silent_failure.py`, `unittest` stdlib) care acoperă cele șase verigi ale lanțului de erori
-- **1.7.1** Actualizare modele OpenAI :
-  - Modelele implicite actualizate la GPT-5.4 (martie 2026) :
-    - Calitate : `gpt-5` → `gpt-5.4`
-    - Economic : `gpt-5-mini` → `gpt-5.4-mini`
-  - Adăugarea limitelor de tokeni pentru `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
+  - Teste de regresie (`tests/test_silent_failure.py`, `unittest` stdlib) care acoperă cele șase verigi ale lanțului de eroare
+- **1.8** Mod `--news` + bump modele 2026 (2026-03-17, tag `v1.8`) :
+  - Modelele implicite actualizate (martie 2026) :
+    - OpenAI calitate : `gpt-5` → `gpt-5.4`
+    - OpenAI economic : `gpt-5-mini` → `gpt-5.4-mini`
+    - Gemini calitate : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+  - Adăugarea limitelor de tokeni pentru `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) și `gemini-3.1-pro-preview` (1M)
+  - Mod `--news` inițial : protecția citatelor EN cu placeholders `#NEWSQUOTE\d+#`, mapping `LANG_FLAGS` (15 limbi), gestionarea steagurilor după limba țintă
+  - Validarea placeholder-elor news înainte de restaurare (regresie: un LLM care ștergea placeholder-ul producea în mod silențios o ieșire fără citat)
+  - Scriptul `regen_translations.sh` făcut portabil (căi absolute, fără dependență de pwd)
+  - Linkul pentru Franceză adăugat în language bars README/CHANGELOG, 28 traduceri regenerate
 - **1.7** Noutăți :
-  - Opțiune `--keep_filename` pentru a păstra numele original al fișierului la traducere
+  - Opțiunea `--keep_filename` pentru a păstra numele original al fișierului la traducere
   - Suport pentru fișierul `.env` pentru a încărca automat cheile API
-  - **Păstrarea codului inline** : backtick-urile (`` `...` ``) sunt acum protejate în timpul traducerii
+  - **Păstrarea codului inline** : backticks (`` `...` ``) sunt acum protejate în timpul traducerii
   - Îmbunătățirea promptului de sistem :
     - Gestionare mai bună a ghilimelelor în YAML frontmatter
     - Protecția variabilelor template `{variable}`
-    - Interdicția notelor de traducător care nu au fost solicitate
+    - Interdicția notelor de traducător necerute
   - Testat cu succes pe 364 de fișiere (migrarea blogului jls42.org)
 - **1.6** Noutăți :
   - Suport pentru API-ul Google Gemini pentru traducere (`--use_gemini`)
@@ -47,9 +52,9 @@
     - Claude : `claude-sonnet-4-5` (calitate), `claude-haiku-4-5` (eco)
     - Gemini : `gemini-3-pro-preview` (calitate), `gemini-3-flash-preview` (eco)
   - Mod economic (`--eco`) pentru a folosi modele mai rapide și mai puțin costisitoare
-  - Traducere pentru fișier unic (`--file`) fără parcurgerea unui director
-  - Noul model simplificat de denumire : `{base}-{lang}.md`
-  - Opțiune `--include_model` pentru a păstra vechiul format cu numele modelului
+  - Traducerea unui singur fișier (`--file`) fără a parcurge un director
+  - Model nou de denumire simplificat : `{base}-{lang}.md`
+  - Opțiunea `--include_model` pentru a păstra vechiul format cu numele modelului
   - Suport pentru modelele nelistate cu limită implicită de tokeni (128k)
   - README tradus în 14 limbi
 - **1.5** Îmbunătățiri :
@@ -58,11 +63,11 @@
     - **Mistral AI :** Actualizare de la `DEFAULT_MODEL_MISTRAL` la `"mistral-large-latest"`.
     - **Claude de la Anthropic :** Adăugare `DEFAULT_ANTHROPIC_API_KEY` și actualizare de la `DEFAULT_MODEL_CLAUDE` la `"claude-3-5-sonnet-20240620"`.
   - **Optimizarea prompturilor de traducere :**
-    - Prompturile pentru traducerile directe și notele de traducere au fost îmbogățite pentru mai multă claritate și eficiență, incluzând instrucțiuni detaliate despre păstrarea metadatelor și a elementelor specifice de formatare.
+    - Prompturile pentru traducerile directe și notele de traducere au fost îmbogățite pentru o mai bună claritate și eficiență, incluzând instrucțiuni detaliate despre păstrarea metadatelor și a elementelor specifice de formatare.
   - **Refactorizarea codului :**
     - Înlocuirea `MistralClient` cu clasa `Mistral` pentru inițializarea clientului Mistral AI.
     - Reorganizarea importurilor pentru o mai bună lizibilitate și mentenanță.
-    - Îmbunătățirea segmentării textelor și a gestionării blocurilor de cod pentru a păstra formatarea originală în timpul traducerii.
+    - Îmbunătățirea segmentării textelor și a gestionării blocurilor de cod pentru a păstra formatarea originală la traducere.
   - **Gestionarea fișierelor de ieșire :**
     - Inversarea modelului și a limbii în numele fișierelor de ieșire (de exemplu, `f"{base}-{args.target_lang}-{args.model}.md"`), facilitând astfel organizarea și căutarea traducerilor.
   - **Îmbunătățiri diverse :**
@@ -73,12 +78,12 @@
   - Optimizarea prompturilor pentru o claritate și eficiență sporite
   - Ajustări minore pentru a îmbunătăți mentenanța codului
 - **1.3** Îmbunătățiri și funcționalități noi :
-  - Gestionarea îmbunătățită a blocurilor de cod
-  - Gestionarea îmbunătățită a fișierelor de ieșire
-  - Detectarea îmbunătățită a fișierelor existente
-  - Opțiune `--force` pentru a forța traducerea
+  - Gestionare îmbunătățită a blocurilor de cod
+  - Gestionare îmbunătățită a fișierelor de ieșire
+  - Detectare îmbunătățită a fișierelor existente
+  - Opțiunea `--force` pentru a forța traducerea
   - Inversarea modelului și a limbii în numele fișierului de ieșire
-- **1.2** Remediere la changelog
+- **1.2** Remediere changelog
 - **1.1** Adăugarea suportului pentru API-ul Mistral IA
 - **1.0** Versiunea inițială - Suport pentru API-ul OpenAI
 

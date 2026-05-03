@@ -2,14 +2,14 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7.4** SonarCloud + couverture exhaustive (2026-05-03) :
+- **1.8.3** SonarCloud + couverture exhaustive (2026-05-03) :
   - Workflow GitHub Actions `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analyse à chaque push et pull-request, calcul coverage via `coverage.xml`
   - 11 badges SonarCloud en haut du README (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
   - Nouveau fichier `tests/test_orchestration.py` (+79 tests) couvrant la couche orchestration de `translate.py` : `_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` (TypeError + BadRequestError fallbacks), o1-series prompt format, branches early-return de `_validate_translation_output`
   - `scripts/tests/test_audit_verdict.py` étendu : couverture de `main()` (stdin/stdout) et du bloc `if __name__ == "__main__"` via subprocess
   - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
   - Hardening complémentaire de `translate.py` (PR review feedback) : empty-content guard sur tous les providers, sanity ratio source/output (≥ 500 chars, < 5% = refus), validation placeholders code (`#CODEBLOCK`/`#INLINECODE`), normalisation post-LLM (séparateurs/liens collés à un heading), `BadRequestError` retry sans `reasoning_effort`
-- **1.7.3** Outillage qualité pre-commit (2026-04-30) :
+- **1.8.2** Outillage qualité pre-commit (2026-04-30) :
   - Setup `pre-commit` "type EurekAI complet" : 14 hooks répartis sur deux stages (pre-commit rapide + pre-push lourd)
   - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 API keys protégées), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
   - Pre-push : mypy (mode lax progressif), Opengrep SAST (translate.py + scripts/), pip-audit (mode reporting initial), unittest discover (tests/ + scripts/tests/)
@@ -18,7 +18,7 @@
   - 7 violations ruff initiales corrigées : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
   - Documentation : README.md (FR) + CLAUDE.md (workflow détaillé), 28 traductions régénérées
   - Lizard exclut temporairement `translate.py` (4 fonctions à CCN 21-47, refactor planifié dans une PR dédiée) — gate strict sur scripts/ pour éviter les régressions
-- **1.7.2** Fix silent-failure sur traductions longues (2026-04-28) :
+- **1.8.1** Fix silent-failure sur traductions longues (2026-04-28) :
   - Validation langue post-traduction sur tous les providers (OpenAI, Mistral, Claude, Gemini) : couche déterministe (extrait source retrouvé verbatim) + couche probabiliste (`langdetect`)
   - Whitelist `finish_reason` / `stop_reason` : lever `RuntimeError` sur tout état hors de la whitelist (truncation, content_filter, etc.)
   - `max_tokens` Claude : `4096` → `16384` (évite truncation latente sur segments de 16k chars)
@@ -26,11 +26,16 @@
   - Propagation des erreurs jusqu'à exit code non-zéro : `translate_markdown_file` retourne un statut typé `success` / `failure` / `skipped`, `main()` `sys.exit(1)` si au moins un fichier a échoué (single-file et batch)
   - Ajout dépendance `langdetect==1.0.9`
   - Tests de régression (`tests/test_silent_failure.py`, `unittest` stdlib) couvrant les six maillons de la chaîne d'erreur
-- **1.7.1** Mise à jour modèles OpenAI :
-  - Modèles par défaut mis à jour vers GPT-5.4 (mars 2026) :
-    - Qualité : `gpt-5` → `gpt-5.4`
-    - Économique : `gpt-5-mini` → `gpt-5.4-mini`
-  - Ajout des limites de tokens pour `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
+- **1.8** Mode `--news` + bump modèles 2026 (2026-03-17, tag `v1.8`) :
+  - Modèles par défaut mis à jour (mars 2026) :
+    - OpenAI qualité : `gpt-5` → `gpt-5.4`
+    - OpenAI économique : `gpt-5-mini` → `gpt-5.4-mini`
+    - Gemini qualité : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+  - Ajout des limites de tokens pour `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) et `gemini-3.1-pro-preview` (1M)
+  - Mode `--news` initial : protection des citations EN avec placeholders `#NEWSQUOTE\d+#`, mapping `LANG_FLAGS` (15 langues), gestion des drapeaux par langue cible
+  - Validation des placeholders news avant restauration (régression : un LLM qui supprimait le placeholder produisait silencieusement une sortie sans citation)
+  - Script `regen_translations.sh` rendu portable (chemins absolus, pas de dépendance au pwd)
+  - Lien Français ajouté dans les language bars README/CHANGELOG, 28 traductions régénérées
 - **1.7** Nouveautés :
   - Option `--keep_filename` pour conserver le nom de fichier original lors de la traduction
   - Support du fichier `.env` pour charger les clés API automatiquement

@@ -2,84 +2,89 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7.4** SonarCloud + 全面覆盖（2026-05-03）：
-  - GitHub Actions 工作流 `SonarCloud`（sonarcloud.yml + sonar-project.properties）：每次 push 和 pull request 都进行分析，通过 `coverage.xml` 计算 coverage
+- **1.8.3** SonarCloud + 全面覆盖（2026-05-03）：
+  - GitHub Actions 工作流 `SonarCloud`（sonarcloud.yml + sonar-project.properties）：每次 push 和 pull-request 时分析，通过 `coverage.xml` 计算 coverage
   - README 顶部新增 11 个 SonarCloud 徽章（Quality Gate、Security/Reliability/Maintainability 评级、Coverage、Vulnerabilities、Bugs、Code Smells、Duplicated Lines、Technical Debt、Lines of Code）
-  - 新文件 `tests/test_orchestration.py`（+79 tests），覆盖 `translate.py` 的编排层：`_resolve_*_filename`、`_existing_translation_exists`、`_record_translation_status`、`_write_output_file`、`translate_directory`、`_validate_input_paths`、`_init_*_client`、`_select_provider_client`、`_normalize_collapsed_markdown`、`_cleanup_source_flag`、`_validate_news_flags_*`、`_openai_create_with_fallback`（TypeError + BadRequestError 回退）、o1-series 提示格式、`_validate_translation_output` 的提前返回分支
-  - `scripts/tests/test_audit_verdict.py` 扩展：通过 subprocess 覆盖 `main()`（stdin/stdout）以及 `if __name__ == "__main__"` 块
-  - **新代码覆盖率**：75.5% → ~98%（translate.py 98%，scripts/audit_verdict.py 97%）
-  - 对 `translate.py` 的补充加固（PR review 反馈）：所有 provider 都增加空内容保护；源/输出比例健康检查（≥ 500 字符，< 5% = 拒绝）；占位符代码验证（`#CODEBLOCK`/`#INLINECODE`）；LLM 后归一化（与标题粘连的分隔符/链接）；`BadRequestError` 无 `reasoning_effort` 重试
-- **1.7.3** pre-commit 质量工具链（2026-04-30）：
-  - 设置 `pre-commit`“完整 EurekAI 类型”：14 个 hooks 分布在两个 stage（快速 pre-commit + 重型 pre-push）
-  - Pre-commit：ruff（lint+format）、shellcheck、prettier（md/yaml/json）、detect-secrets（保护 4 个 API key）、Lizard（CCN ≤ 12）、pre-commit-hooks v5（空白、EOF、大文件、shebang 等）
-  - Pre-push：mypy（渐进式宽松模式）、Opengrep SAST（translate.py + scripts/）、pip-audit（初始报告模式）、unittest discover（tests/ + scripts/tests/）
-  - `scripts/` 中的本地包装器使用 `./venv/bin/python`（系统在 venv 外没有裸 `python`）
-  - `scripts/audit_verdict.py`：为 pip-audit JSON 解析器编写 11 个 unittest，采用 jls42-astro 解析器的 Python 适配版
-  - 修复了 7 个初始 ruff 违规：B904（raise from）×2、B007（未使用的 dirs）、C408（字典字面量）、C419（列表推导）、SIM105（contextlib.suppress）、SIM110（any()）
-  - 文档：README.md（FR）+ CLAUDE.md（详细工作流），重新生成了 28 个翻译
-  - Lizard 临时排除 `translate.py`（4 个函数的 CCN 为 21-47，重构已计划在专门 PR 中进行）——对 scripts/ 实施严格 gate 以避免回归
-- **1.7.2** 修复长翻译中的静默失败（2026-04-28）：
-  - 所有 provider（OpenAI、Mistral、Claude、Gemini）都增加翻译后语言验证：确定性层（逐字找回源文片段）+ 概率层（`langdetect`）
-  - `finish_reason` / `stop_reason` 白名单：对白名单之外的任何状态（truncation、content_filter 等）抛出 `RuntimeError`
-  - `max_tokens` Claude：`4096` → `16384`（避免 16k 字符分段上的潜在截断）
-  - 以标题感知的分段：在分段后半部分优先 H2/H3（每个分段都以完整的语义章节开头）
-  - 将错误传播到非零退出码：`translate_markdown_file` 返回类型化状态 `success` / `failure` / `skipped`，若至少有一个文件失败则 `main()` `sys.exit(1)`（单文件和批量均适用）
+  - 新文件 `tests/test_orchestration.py`（+79 tests）覆盖 `translate.py` 的编排层：`_resolve_*_filename`、`_existing_translation_exists`、`_record_translation_status`、`_write_output_file`、`translate_directory`、`_validate_input_paths`、`_init_*_client`、`_select_provider_client`、`_normalize_collapsed_markdown`、`_cleanup_source_flag`、`_validate_news_flags_*`、`_openai_create_with_fallback`（TypeError + BadRequestError 回退）、o1-series prompt format、`_validate_translation_output` 的提前返回分支
+  - `scripts/tests/test_audit_verdict.py` 扩展：通过 subprocess 覆盖 `main()`（stdin/stdout）以及 `if __name__ == "__main__"` 代码块
+  - **Coverage on new code**：75.5% → ~98%（translate.py 98%，scripts/audit_verdict.py 97%）
+  - 对 `translate.py` 的补充加固（PR review feedback）：所有 provider 的空内容保护、源/输出合理性比率检查（≥ 500 chars，< 5% = 拒绝）、占位符代码验证（`#CODEBLOCK`/`#INLINECODE`）、LLM 后规范化（与 heading 粘连的分隔符/链接）、`BadRequestError` 重试且无 `reasoning_effort`
+- **1.8.2** pre-commit 质量工具链（2026-04-30）：
+  - 设置 `pre-commit`“完整 EurekAI 类型”：“14 个 hooks 分布在两个 stage（快速 pre-commit + 重型 pre-push）”
+  - Pre-commit：ruff（lint+format）、shellcheck、prettier（md/yaml/json）、detect-secrets（4 个受保护的 API keys）、Lizard（CCN ≤ 12）、pre-commit-hooks v5（whitespace、EOF、large-files、shebangs 等）
+  - Pre-push：mypy（逐步宽松模式）、Opengrep SAST（translate.py + scripts/）、pip-audit（初始 reporting 模式）、unittest discover（tests/ + scripts/tests/）
+  - `scripts/` 中使用 `./venv/bin/python` 的本地包装器（系统在 venv 外没有裸露的 `python`）
+  - `scripts/audit_verdict.py`：带 11 个 unittest 测试的 pip-audit JSON 解析器，来自 jls42-astro 解析器的 Python 适配版
+  - 修复了 7 个初始 ruff 违规：B904（raise from）×2、B007（unused dirs）、C408（dict literal）、C419（list-comp）、SIM105（contextlib.suppress）、SIM110（any()）
+  - 文档：README.md（FR）+ CLAUDE.md（详细工作流），28 个翻译已重新生成
+  - Lizard 暂时排除 `translate.py`（4 个函数 CCN 为 21-47，重构计划在专门 PR 中进行）——对 scripts/ 严格把关以避免回归
+- **1.8.1** 长翻译静默失败修复（2026-04-28）：
+  - 所有 provider 的翻译后语言验证（OpenAI、Mistral、Claude、Gemini）：确定性层（找到逐字匹配的源文本摘录）+ 概率层（`langdetect`）
+  - `finish_reason` / `stop_reason` 白名单：对任何不在白名单内的状态抛出 `RuntimeError`（truncation、content_filter 等）
+  - `max_tokens` Claude：`4096` → `16384`（避免 16k 字符分段上的隐性 truncation）
+  - 感知 heading 的分段：第二半段优先 H2/H3（每个片段都以完整的语义部分开始）
+  - 错误传播直到非零退出码：`translate_markdown_file` 返回带类型的状态 `success` / `failure` / `skipped`，若至少有一个文件失败则 `main()` `sys.exit(1)`（单文件和批处理）
   - 新增依赖 `langdetect==1.0.9`
   - 回归测试（`tests/test_silent_failure.py`、`unittest` stdlib）覆盖错误链路的六个环节
-- **1.7.1** 更新 OpenAI 模型：
-  - 默认模型更新为 GPT-5.4（2026 年 3 月）：
-    - 质量：`gpt-5` → `gpt-5.4`
-    - 经济：`gpt-5-mini` → `gpt-5.4-mini`
-  - 为 `gpt-5.4`、`gpt-5.4-mini`、`gpt-5.4-nano`（400k）添加 token 上限
+- **1.8** `--news` 模式 + 2026 模型升级（2026-03-17，标签 `v1.8`）：
+  - 默认模型已更新（2026 年 3 月）：
+    - OpenAI 质量：`gpt-5` → `gpt-5.4`
+    - OpenAI 经济：`gpt-5-mini` → `gpt-5.4-mini`
+    - Gemini 质量：`gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+  - 为 `gpt-5.4`、`gpt-5.4-mini`、`gpt-5.4-nano`（400k）和 `gemini-3.1-pro-preview`（1M）添加 token 限制
+  - `--news` 初始模式：通过占位符 `#NEWSQUOTE\d+#` 保护 EN 引文、`LANG_FLAGS` 映射（15 种语言）、按目标语言处理旗标
+  - 在恢复前验证 news 占位符（回归：某个删除占位符的 LLM 会静默地产生没有引用的输出）
+  - `regen_translations.sh` 脚本已移植为可移植版本（绝对路径，不依赖 pwd）
+  - 在 README/CHANGELOG 的 language bars 中添加法语链接，28 个翻译已重新生成
 - **1.7** 新功能：
-  - 选项 `--keep_filename`，用于在翻译时保留原始文件名
-  - 支持 `.env` 文件，可自动加载 API 密钥
+  - `--keep_filename` 选项：翻译时保留原文件名
+  - 支持 `.env` 文件以自动加载 API keys
   - **保留行内代码**：反引号（`` `...` ``）现在在翻译期间受到保护
   - 系统提示词改进：
     - 更好地处理 YAML frontmatter 中的引号
     - 保护模板变量 `{variable}`
-    - 禁止未请求的译者注释
+    - 禁止未要求的译者备注
   - 已成功测试 364 个文件（jls42.org 博客迁移）
 - **1.6** 新功能：
-  - 支持 Google Gemini API 用于翻译（`--use_gemini`）
+  - 支持 Google Gemini 翻译 API（`--use_gemini`）
   - 更新 2026 默认模型：
     - OpenAI：`gpt-5`（质量）、`gpt-5-mini`（经济）
     - Claude：`claude-sonnet-4-5`（质量）、`claude-haiku-4-5`（经济）
     - Gemini：`gemini-3-pro-preview`（质量）、`gemini-3-flash-preview`（经济）
-  - 经济模式（`--eco`），用于使用更快、更便宜的模型
+  - 经济模式（`--eco`），使用更快且成本更低的模型
   - 单文件翻译（`--file`），无需遍历目录
   - 新的简化命名模式：`{base}-{lang}.md`
-  - 选项 `--include_model`，用于保留带模型名称的旧格式
-  - 支持未列出的模型，默认 token 上限（128k）
-  - README 已翻译成 14 种语言
+  - `--include_model` 选项以保留带模型名的旧格式
+  - 支持未列出的模型，默认 token 限制为 128k
+  - README 已翻译为 14 种语言
 - **1.5** 改进：
-  - **更新 API 密钥和默认模型：**
+  - **更新 API keys 和默认模型：**
     - **OpenAI：** 将 `DEFAULT_MODEL_OPENAI` 更新为 `"gpt-4o"`。
     - **Mistral AI：** 将 `DEFAULT_MODEL_MISTRAL` 更新为 `"mistral-large-latest"`。
-    - **Anthropic Claude：** 添加 `DEFAULT_ANTHROPIC_API_KEY`，并将 `DEFAULT_MODEL_CLAUDE` 更新为 `"claude-3-5-sonnet-20240620"`。
+    - **Anthropic 的 Claude：** 新增 `DEFAULT_ANTHROPIC_API_KEY`，并将 `DEFAULT_MODEL_CLAUDE` 更新为 `"claude-3-5-sonnet-20240620"`。
   - **翻译提示词优化：**
-    - 直译和翻译注释的提示词经过增强，以获得更好的清晰度和效率，并包含关于保留元数据和特定格式元素的详细说明。
+    - 直译和翻译说明的提示词已增强，以提升清晰度和效率，并包含关于保留元数据和特定格式元素的详细说明。
   - **代码重构：**
     - 用 `Mistral` 类替换 `MistralClient`，用于初始化 Mistral AI 客户端。
-    - 重新组织导入，以提高可读性和可维护性。
+    - 重新组织 imports，以提高可读性和可维护性。
     - 改进文本分段和代码块处理，以在翻译时保留原始格式。
   - **输出文件管理：**
-    - 交换输出文件名中的模型和语言顺序（例如，`f"{base}-{args.target_lang}-{args.model}.md"`），从而更便于组织和查找翻译。
+    - 交换输出文件名中的模型和语言顺序（例如，`f"{base}-{args.target_lang}-{args.model}.md"`），从而更方便整理和查找翻译结果。
   - **其他改进：**
-    - 清理代码，删除不必要的空行。
-    - 进行小幅调整，以改善脚本结构和可读性。
+    - 通过删除不必要的空行清理代码。
+    - 进行细微调整，以改进脚本结构和可读性。
 - **1.4** 新功能：
-  - 支持 Anthropic Claude API 用于翻译
-  - 优化提示词，以提高清晰度和效率
-  - 进行小幅调整，以改善代码维护
-- **1.3** 改进和新功能：
+  - 支持 Anthropic 的 Claude API 进行翻译
+  - 优化提示词以提升清晰度和效率
+  - 进行细微调整以提高代码可维护性
+- **1.3** 改进与新功能：
   - 改进代码块处理
-  - 改进输出文件管理
-  - 改进现有文件检测
-  - 选项 `--force`，用于强制翻译
-  - 交换输出文件名中的模型和语言顺序
+  - 改进输出文件处理
+  - 改进对现有文件的检测
+  - `--force` 选项用于强制翻译
+  - 在输出文件名中交换模型和语言顺序
 - **1.2** 修复 changelog
 - **1.1** 添加对 Mistral IA API 的支持
 - **1.0** 初始版本 - 支持 OpenAI API
 
-**本文档已使用 gpt-5.4-mini 模型从 fr 版本翻译为 zh 语言。有关翻译过程的更多信息，请参阅 https://github.com/jls42/ai-powered-markdown-translator**
+**此文档已使用 gpt-5.4-mini 模型从 fr 版本翻译为 zh 语言。有关翻译过程的更多信息，请参阅 https://github.com/jls42/ai-powered-markdown-translator**

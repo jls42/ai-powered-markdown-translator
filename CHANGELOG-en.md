@@ -1,85 +1,90 @@
 ### Changelog
 
-🌍 [French](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Spanish](CHANGELOG-es.md) | [Chinese](CHANGELOG-zh.md) | [German](CHANGELOG-de.md) | [Japanese](CHANGELOG-ja.md) | [Korean](CHANGELOG-ko.md) | [Arabic](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italian](CHANGELOG-it.md) | [Dutch](CHANGELOG-nl.md) | [Polish](CHANGELOG-pl.md) | [Portuguese](CHANGELOG-pt.md) | [Romanian](CHANGELOG-ro.md) | [Swedish](CHANGELOG-sv.md)
+🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7.4** SonarCloud + comprehensive coverage (2026-05-03) :
+- **1.8.3** SonarCloud + exhaustive coverage (2026-05-03) :
   - GitHub Actions workflow `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analysis on every push and pull request, coverage calculated via `coverage.xml`
   - 11 SonarCloud badges at the top of the README (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
   - New file `tests/test_orchestration.py` (+79 tests) covering the orchestration layer of `translate.py` : `_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` (TypeError + BadRequestError fallbacks), o1-series prompt format, early-return branches of `_validate_translation_output`
-  - `scripts/tests/test_audit_verdict.py` extended : coverage of `main()` (stdin/stdout) and the `if __name__ == "__main__"` block via subprocess
+  - `scripts/tests/test_audit_verdict.py` expanded : coverage of `main()` (stdin/stdout) and the `if __name__ == "__main__"` block via subprocess
   - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
-  - Additional hardening of `translate.py` (PR review feedback) : empty-content guard on all providers, source/output sanity ratio (≥ 500 chars, < 5% = refusal), code placeholder validation (`#CODEBLOCK`/`#INLINECODE`), post-LLM normalization (separators/links stuck to a heading), `BadRequestError` retry without `reasoning_effort`
-- **1.7.3** Pre-commit quality tooling (2026-04-30) :
-  - `pre-commit` setup "full EurekAI type" : 14 hooks distributed across two stages (fast pre-commit + heavy pre-push)
+  - Additional hardening of `translate.py` (PR review feedback) : empty-content guard on all providers, source/output sanity ratio (≥ 500 chars, < 5% = refusal), validation of code placeholders (`#CODEBLOCK`/`#INLINECODE`), post-LLM normalization (separators/links attached to a heading), `BadRequestError` retry without `reasoning_effort`
+- **1.8.2** Pre-commit quality tooling (2026-04-30) :
+  - Setup `pre-commit` "complete EurekAI type" : 14 hooks split across two stages (fast pre-commit + heavy pre-push)
   - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 protected API keys), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
   - Pre-push : mypy (progressive lax mode), Opengrep SAST (translate.py + scripts/), pip-audit (initial reporting mode), unittest discover (tests/ + scripts/tests/)
-  - Local wrappers in `scripts/` that use `./venv/bin/python` (the system does not have `python` bare outside venv)
-  - `scripts/audit_verdict.py` : pip-audit JSON parser with 11 unittest tests, Python port adapted from the jls42-astro parser
+  - Local wrappers in `scripts/` that use `./venv/bin/python` (the system does not have `python` installed outside venv)
+  - `scripts/audit_verdict.py` : JSON parser for pip-audit with 11 unittest tests, adapted Python port of the jls42-astro parser
   - 7 initial ruff violations fixed : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
   - Documentation : README.md (FR) + CLAUDE.md (detailed workflow), 28 regenerated translations
   - Lizard temporarily excludes `translate.py` (4 functions with CCN 21-47, refactor planned in a dedicated PR) — strict gate on scripts/ to avoid regressions
-- **1.7.2** Silent-failure fix on long translations (2026-04-28) :
+- **1.8.1** Silent-failure fix on long translations (2026-04-28) :
   - Post-translation language validation on all providers (OpenAI, Mistral, Claude, Gemini) : deterministic layer (source excerpt found verbatim) + probabilistic layer (`langdetect`)
   - `finish_reason` / `stop_reason` whitelist : raise `RuntimeError` on any state outside the whitelist (truncation, content_filter, etc.)
   - `max_tokens` Claude : `4096` → `16384` (avoids latent truncation on 16k-char segments)
-  - Heading-aware segmentation : H2/H3 priority in the second half of the segment (each segment starts with a complete semantic section)
-  - Error propagation to a non-zero exit code : `translate_markdown_file` returns a typed `success` / `failure` / `skipped` status, `main()` `sys.exit(1)` if at least one file failed (single-file and batch)
+  - Heading-aware segmentation : priority H2/H3 in the second half of the segment (each segment starts with a complete semantic section)
+  - Error propagation through to a non-zero exit code : `translate_markdown_file` returns a typed status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` if at least one file failed (single-file and batch)
   - Added dependency `langdetect==1.0.9`
   - Regression tests (`tests/test_silent_failure.py`, `unittest` stdlib) covering the six links in the error chain
-- **1.7.1** OpenAI model update :
-  - Default models updated to GPT-5.4 (March 2026) :
-    - Quality : `gpt-5` → `gpt-5.4`
-    - Economical : `gpt-5-mini` → `gpt-5.4-mini`
-  - Added token limits for `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
+- **1.8** `--news` mode + 2026 model bump (2026-03-17, tag `v1.8`) :
+  - Default models updated (March 2026) :
+    - OpenAI quality : `gpt-5` → `gpt-5.4`
+    - OpenAI economical : `gpt-5-mini` → `gpt-5.4-mini`
+    - Gemini quality : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+  - Added token limits for `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) and `gemini-3.1-pro-preview` (1M)
+  - Initial `--news` mode : EN quote protection with `#NEWSQUOTE\d+#` placeholders, `LANG_FLAGS` mapping (15 languages), flag handling by target language
+  - Validation of news placeholders before restoration (regression: an LLM that removed the placeholder silently produced output without a quote)
+  - `regen_translations.sh` script made portable (absolute paths, no pwd dependency)
+  - French link added in the README/CHANGELOG language bars, 28 regenerated translations
 - **1.7** New features :
-  - `--keep_filename` option to keep the original filename when translating
+  - `--keep_filename` option to keep the original filename during translation
   - Support for the `.env` file to load API keys automatically
   - **Inline code preservation** : backticks (`` `...` ``) are now protected during translation
-  - Improved system prompt :
+  - System prompt improvement :
     - Better handling of quotes in YAML frontmatter
-    - Protection of template variables `{variable}`
+    - Protection of `{variable}` template variables
     - Prohibition of unsolicited translator notes
   - Successfully tested on 364 files (jls42.org blog migration)
 - **1.6** New features :
   - Support for the Google Gemini API for translation (`--use_gemini`)
-  - Updated default models for 2026 :
-    - OpenAI : `gpt-5` (quality), `gpt-5-mini` (economy)
-    - Claude : `claude-sonnet-4-5` (quality), `claude-haiku-4-5` (economy)
-    - Gemini : `gemini-3-pro-preview` (quality), `gemini-3-flash-preview` (economy)
-  - Economy mode (`--eco`) to use faster and less expensive models
+  - 2026 default model updates :
+    - OpenAI : `gpt-5` (quality), `gpt-5-mini` (eco)
+    - Claude : `claude-sonnet-4-5` (quality), `claude-haiku-4-5` (eco)
+    - Gemini : `gemini-3-pro-preview` (quality), `gemini-3-flash-preview` (eco)
+  - Economic mode (`--eco`) to use faster and less expensive models
   - Single-file translation (`--file`) without traversing a directory
   - New simplified naming pattern : `{base}-{lang}.md`
   - `--include_model` option to keep the old format with the model name
-  - Support for unlisted models with a default token limit (128k)
+  - Support for unlisted models with default token limit (128k)
   - README translated into 14 languages
 - **1.5** Improvements :
-  - **Updated API keys and default models:**
-    - **OpenAI:** Updated from `DEFAULT_MODEL_OPENAI` to `"gpt-4o"`.
-    - **Mistral AI:** Updated from `DEFAULT_MODEL_MISTRAL` to `"mistral-large-latest"`.
-    - **Anthropic Claude:** Added `DEFAULT_ANTHROPIC_API_KEY` and updated from `DEFAULT_MODEL_CLAUDE` to `"claude-3-5-sonnet-20240620"`.
-  - **Optimization of translation prompts:**
-    - Prompts for direct translations and translation notes were enriched for better clarity and efficiency, including detailed instructions on preserving metadata and specific formatting elements.
-  - **Code refactoring:**
-    - Replacement of `MistralClient` with the `Mistral` class for initializing the Mistral AI client.
-    - Reorganization of imports for better readability and maintainability.
+  - **API key and default model updates :**
+    - **OpenAI :** Updated from `DEFAULT_MODEL_OPENAI` to `"gpt-4o"`.
+    - **Mistral AI :** Updated from `DEFAULT_MODEL_MISTRAL` to `"mistral-large-latest"`.
+    - **Anthropic Claude :** Added `DEFAULT_ANTHROPIC_API_KEY` and updated `DEFAULT_MODEL_CLAUDE` to `"claude-3-5-sonnet-20240620"`.
+  - **Translation prompt optimization :**
+    - The prompts for direct translations and translation notes were enriched for better clarity and efficiency, including detailed instructions on preserving metadata and specific formatting elements.
+  - **Code refactoring :**
+    - Replaced `MistralClient` with the `Mistral` class for initializing the Mistral AI client.
+    - Reorganized imports for better readability and maintenance.
     - Improved text segmentation and code block handling to preserve the original formatting during translation.
-  - **Output file management:**
-    - Reversal of the model and language in the output file names (for example, `f"{base}-{args.target_lang}-{args.model}.md"`), making organization and translation lookup easier.
-  - **Miscellaneous improvements:**
-    - Code cleanup by removing unnecessary blank lines.
+  - **Output file management :**
+    - Reversed the model and language in output filenames (for example, `f"{base}-{args.target_lang}-{args.model}.md"`), making translations easier to organize and find.
+  - **Various improvements :**
+    - Cleaned up the code by removing unnecessary blank lines.
     - Minor adjustments to improve the structure and readability of the script.
 - **1.4** New features :
-  - Support for Anthropic Claude API for translation
-  - Prompt optimization for greater clarity and efficiency
-  - Minor adjustments to improve code maintainability
+  - Support for the Anthropic Claude API for translation
+  - Prompt optimization for increased clarity and efficiency
+  - Minor adjustments to improve code maintenance
 - **1.3** Improvements and new features :
-  - Improved code block handling
-  - Improved output file handling
+  - Improved handling of code blocks
+  - Improved handling of output files
   - Improved detection of existing files
   - `--force` option to force translation
-  - Reversal of the model and language in the output file name
+  - Reversal of the model and language in the output filename
 - **1.2** Changelog fix
 - **1.1** Added support for the Mistral AI API
 - **1.0** Initial version - Support for the OpenAI API
 
-**This document was translated from the fr version to the en language using the gpt-5.4-mini model. For more information about the translation process, see https://github.com/jls42/ai-powered-markdown-translator**
+**This document was translated from the fr version into the en language using the gpt-5.4-mini model. For more information about the translation process, see https://github.com/jls42/ai-powered-markdown-translator**
