@@ -5,17 +5,19 @@ Couvre les verdicts attendus sur la shape JSON de `pip-audit --format=json`.
 
 from __future__ import annotations
 
+import io
 import json
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 # Permet l'import de `scripts.audit_verdict` quand les tests tournent depuis
 # scripts/tests/. La racine du projet est deux niveaux au-dessus.
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from scripts.audit_verdict import compute_audit_verdict
+from scripts.audit_verdict import compute_audit_verdict, main
 
 
 class TestAuditVerdict(unittest.TestCase):
@@ -80,6 +82,48 @@ class TestAuditVerdict(unittest.TestCase):
     def test_parse_error_vulns_not_list(self) -> None:
         payload = json.dumps({"dependencies": [{"name": "x", "vulns": "not-a-list"}]})
         self.assertEqual(compute_audit_verdict(payload), "parse-error")
+
+
+class TestAuditVerdictMain(unittest.TestCase):
+    def _run_main(self, stdin_payload: str) -> tuple[int, str]:
+        stdin = io.StringIO(stdin_payload)
+        stdout = io.StringIO()
+        with patch.object(sys, "stdin", stdin), patch.object(sys, "stdout", stdout):
+            rc = main()
+        return rc, stdout.getvalue()
+
+    def test_main_ok_payload(self) -> None:
+        rc, out = self._run_main('{"dependencies": []}')
+        self.assertEqual(rc, 0)
+        self.assertEqual(out, "ok\n")
+
+    def test_main_vulnerable_payload(self) -> None:
+        payload = json.dumps({"dependencies": [{"vulns": [{"id": "1"}, {"id": "2"}]}]})
+        rc, out = self._run_main(payload)
+        self.assertEqual(rc, 0)
+        self.assertEqual(out, "vulnerable:2\n")
+
+    def test_main_parse_error(self) -> None:
+        rc, out = self._run_main("not-json")
+        self.assertEqual(rc, 0)
+        self.assertEqual(out, "parse-error\n")
+
+    def test_module_entrypoint_invokes_main(self) -> None:
+        """Garde-fou : exécuter le module avec `python -m scripts.audit_verdict`
+        couvre le bloc `if __name__ == "__main__"`."""
+        import subprocess
+
+        repo_root = Path(__file__).resolve().parents[2]
+        proc = subprocess.run(
+            [sys.executable, "-m", "scripts.audit_verdict"],
+            input='{"dependencies": []}',
+            capture_output=True,
+            text=True,
+            cwd=str(repo_root),
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertEqual(proc.stdout, "ok\n")
 
 
 if __name__ == "__main__":
