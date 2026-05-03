@@ -1,47 +1,47 @@
-### Ändringslogg
+### Changelog
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.8.3** SonarCloud + fullständig täckning (2026-05-03) :
-  - GitHub Actions `SonarCloud`-arbetsflöde (sonarcloud.yml + sonar-project.properties) : analys vid varje push och pull request, täckningsberäkning via `coverage.xml`
-  - 11 SonarCloud-märken högst upp i README:n (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
-  - Ny fil `tests/test_orchestration.py` (+79 tester) som täcker orkestreringslagret i `translate.py` : `_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` (TypeError + BadRequestError fallback), o1-series prompt format, tidiga returgrenar i `_validate_translation_output`
-  - `scripts/tests/test_audit_verdict.py` utökat : täckning av `main()` (stdin/stdout) och blocket `if __name__ == "__main__"` via subprocess
-  - **Täckning för ny kod** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
-  - Kompletterande härdning av `translate.py` (PR review feedback) : guard för tomt innehåll för alla leverantörer, rimlighetskontroll av förhållandet källa/utdata (≥ 500 tecken, < 5% = avslag), validering av platshållarkod (`#CODEBLOCK`/`#INLINECODE`), efter-LLM-normalisering (separatörer/länkar som klistrats fast vid en rubrik), `BadRequestError` återförsök utan `reasoning_effort`
-- **1.8.2** Kvalitetsverktyg pre-commit (2026-04-30) :
-  - `pre-commit`-uppsättning "fullständig EurekAI-typ" : 14 hooks fördelade på två steg (snabb pre-commit + tung pre-push)
-  - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 skyddade API-nycklar), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
-  - Pre-push : mypy (gradvis mild läge), Opengrep SAST (translate.py + scripts/), pip-audit (initialt rapportläge), unittest discover (tests/ + scripts/tests/)
-  - Lokala wrappers i `scripts/` som använder `./venv/bin/python` (systemet har inte `python` rent utanför venv)
-  - `scripts/audit_verdict.py` : pip-audit JSON-parser med 11 unittest-tester, Python-port anpassad från jls42-astro:s parser
-  - 7 initiala ruff-överträdelser åtgärdade : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
-  - Dokumentation : README.md (FR) + CLAUDE.md (detaljerat arbetsflöde), 28 regenererade översättningar
-  - Lizard undantar tillfälligt `translate.py` (4 funktioner med CCN 21-47, refaktor planeras i en dedikerad PR) — strikt gate på scripts/ för att undvika regressioner
-- **1.8.1** Fix för tyst misslyckande vid långa översättningar (2026-04-28) :
-  - Validering av språk efter översättning för alla leverantörer (OpenAI, Mistral, Claude, Gemini) : deterministiskt lager (källa-extrakt återfanns ordagrant) + probabilistiskt lager (`langdetect`)
-  - Whitelist `finish_reason` / `stop_reason` : kasta `RuntimeError` för alla tillstånd utanför whitelist:en (trunkering, content_filter, etc.)
-  - `max_tokens` Claude : `4096` → `16384` (undviker latent trunkering på segment om 16k tecken)
-  - Rubrikmedveten segmentering : prioritet för H2/H3 i den andra halvan av segmentet (varje segment börjar med en komplett semantisk sektion)
-  - Felpropagering ända till icke-noll exitkod : `translate_markdown_file` returnerar ett typat statusvärde `success` / `failure` / `skipped`, `main()` `sys.exit(1)` om minst en fil misslyckades (single-file och batch)
-  - Nytt beroende `langdetect==1.0.9`
-  - Regressionstester (`tests/test_silent_failure.py`, `unittest` stdlib) som täcker kedjans sex fel-länkar
+- **1.9** Fixa silent-failure + komplett kvalitetsverktyg (2026-05-03) :
+  - **Fix för silent-failure vid långa översättningar** :
+    - Språkvalidering efter översättning för alla leverantörer (OpenAI, Mistral, Claude, Gemini): deterministiskt lager (källutdrag återfunnet ordagrant) + probabilistiskt lager (`langdetect`)
+    - Whitelist `finish_reason` / `stop_reason` : kasta `RuntimeError` för alla tillstånd utanför whitelist:en (truncation, content_filter, etc.)
+    - `max_tokens` Claude : `4096` → `16384` (undviker latent truncation på segment på 16k tecken)
+    - Heading-aware segmentering: prioritet för H2/H3 i den andra halvan av segmentet (varje segment börjar med en komplett semantisk sektion)
+    - Spridning av fel ända till icke-noll exit code : `translate_markdown_file` returnerar en typad status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` om minst en fil misslyckades (single-file och batch)
+    - Guard för tomt innehåll för alla leverantörer, sanity ratio källa/utdata (≥ 500 tecken, < 5 % = avslag), validering av platshållare för kod (`#CODEBLOCK`/`#INLINECODE`), normalisering efter LLM (separatörer/länkar som klistrats fast vid en heading), `BadRequestError` retry utan `reasoning_effort`
+    - Tillagd beroende `langdetect==1.0.9`
+  - **Kvalitetsverktyg pre-commit** ("komplett EurekAI-typ", 14 hooks) :
+    - Pre-commit: ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 skyddade API-nycklar), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
+    - Pre-push: mypy (gradvis läget lax), Opengrep SAST (translate.py + scripts/), pip-audit (initial rapporteringsläge), unittest discover (tests/ + scripts/tests/)
+    - Lokala wrappers i `scripts/` som använder `./venv/bin/python`
+    - `scripts/audit_verdict.py` : JSON-parser för pip-audit med 11 unittest-tester, anpassad Python-port av jls42-astro jls-parsern
+    - 7 initiala ruff-överträdelser åtgärdade: B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+    - Lizard exkluderar tillfälligt `translate.py` (4 funktioner med CCN 21-47, refaktorering planerad) — strikt gate på scripts/
+  - **SonarCloud + fullständig täckning** :
+    - GitHub Actions-arbetsflöde `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analys vid varje push och pull request, coverage via `coverage.xml`
+    - 11 SonarCloud-badges högst upp i README:n (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
+    - `tests/test_silent_failure.py` (`unittest` stdlib) : täcker de sex länkarna i silent-failure-felkedjan
+    - `tests/test_orchestration.py` (+79 tester) : täcker orkestreringslagret i `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError-fallbacks, o1-series promptformat, tidiga returgrenar i `_validate_translation_output`)
+    - `scripts/tests/test_audit_verdict.py` : täckning av `main()` (stdin/stdout) och blocket `if __name__ == "__main__"` via subprocess
+    - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
+  - Dokumentation : `README.md` (FR + 14 översättningar) med badges, `CLAUDE.md` (detaljerat pre-commit- och watch-CI-arbetsflöde), 28 nygenererade översättningar
 - **1.8** `--news`-läge + modelluppdatering 2026 (2026-03-17, tag `v1.8`) :
   - Standardmodeller uppdaterade (mars 2026) :
     - OpenAI kvalitet : `gpt-5` → `gpt-5.4`
-    - OpenAI ekonomisk : `gpt-5-mini` → `gpt-5.4-mini`
+    - OpenAI ekonomi : `gpt-5-mini` → `gpt-5.4-mini`
     - Gemini kvalitet : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
-  - Lagt till token-gränser för `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) och `gemini-3.1-pro-preview` (1M)
-  - Initialt `--news`-läge : skydd av EN-citat med platshållare `#NEWSQUOTE\d+#`, mapping `LANG_FLAGS` (15 språk), flagghantering per målspråk
-  - Validering av nyhetsplatshållare före återställning (regression: en LLM som tog bort platshållaren producerade tyst en utdata utan citat)
+  - Tillagda tokenbegränsningar för `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) och `gemini-3.1-pro-preview` (1M)
+  - Inledande `--news`-läge : skydd av EN-citat med platshållare `#NEWSQUOTE\d+#`, mapping `LANG_FLAGS` (15 språk), hantering av flaggor per målspråk
+  - Validering av news-platshållare före återställning (regression: en LLM som tog bort platshållaren producerade tyst en utdata utan citat)
   - Skriptet `regen_translations.sh` gjort portabelt (absoluta sökvägar, inget beroende av pwd)
-  - Fransk länk tillagd i language bars README/CHANGELOG, 28 regenererade översättningar
+  - Franskt språk tillagt i language bars för README/CHANGELOG, 28 översättningar nygenererade
 - **1.7** Nyheter :
-  - Alternativ `--keep_filename` för att behålla det ursprungliga filnamnet vid översättning
+  - Alternativ `--keep_filename` för att behålla originalfilnamnet vid översättning
   - Stöd för filen `.env` för att ladda API-nycklar automatiskt
   - **Bevarande av inline-kod** : backticks (`` `...` ``) skyddas nu under översättningen
   - Förbättring av systemprompten :
-    - Bättre hantering av citationstecken i YAML-frontmatter
+    - Bättre hantering av citattecken i YAML-frontmatter
     - Skydd av template-variabler `{variable}`
     - Förbud mot oönskade översättaranteckningar
   - Testat framgångsrikt på 364 filer (bloggmigrering jls42.org)
@@ -51,40 +51,40 @@
     - OpenAI : `gpt-5` (kvalitet), `gpt-5-mini` (ekonomi)
     - Claude : `claude-sonnet-4-5` (kvalitet), `claude-haiku-4-5` (ekonomi)
     - Gemini : `gemini-3-pro-preview` (kvalitet), `gemini-3-flash-preview` (ekonomi)
-  - Ekonomiskt läge (`--eco`) för att använda snabbare och billigare modeller
-  - Översättning av enstaka fil (`--file`) utan att gå igenom en katalog
-  - Ny förenklad namngivningsmönster : `{base}-{lang}.md`
+  - Ekonomiläge (`--eco`) för att använda snabbare och billigare modeller
+  - Översättning av en enskild fil (`--file`) utan att gå igenom en katalog
+  - Ny förenklad namngivningspattern : `{base}-{lang}.md`
   - Alternativ `--include_model` för att behålla det gamla formatet med modellnamnet
-  - Stöd för icke-listade modeller med standardgräns för tokenantal (128k)
+  - Stöd för modeller som inte listas med standard tokenlimit (128k)
   - README översatt till 14 språk
 - **1.5** Förbättringar :
   - **Uppdatering av API-nycklar och standardmodeller :**
     - **OpenAI :** Uppdatering från `DEFAULT_MODEL_OPENAI` till `"gpt-4o"`.
     - **Mistral AI :** Uppdatering från `DEFAULT_MODEL_MISTRAL` till `"mistral-large-latest"`.
-    - **Anthropic Claude :** Tillägg av `DEFAULT_ANTHROPIC_API_KEY` och uppdatering från `DEFAULT_MODEL_CLAUDE` till `"claude-3-5-sonnet-20240620"`.
+    - **Claude d'Anthropic :** Tillägg av `DEFAULT_ANTHROPIC_API_KEY` och uppdatering från `DEFAULT_MODEL_CLAUDE` till `"claude-3-5-sonnet-20240620"`.
   - **Optimering av översättningsprompter :**
-    - Prompterna för direkta översättningar och översättningsanteckningar har utökats för bättre tydlighet och effektivitet, inklusive detaljerade instruktioner om bevarande av metadata och specifika formateringsdetaljer.
+    - Prompter för direkta översättningar och översättaranteckningar har berikats för bättre tydlighet och effektivitet, inklusive detaljerade instruktioner om bevarande av metadata och specifika formateringselement.
   - **Kodrefaktorering :**
     - Ersättning av `MistralClient` med klassen `Mistral` för initialisering av Mistral AI-klienten.
     - Omorganisering av imports för bättre läsbarhet och underhåll.
-    - Förbättrad segmentering av texter och hantering av kodblock för att bevara det ursprungliga formatet vid översättning.
+    - Förbättring av textsegmentering och hantering av kodblock för att bevara originalformateringen vid översättning.
   - **Hantering av utdatafiler :**
-    - Omvändning av modell och språk i namnet på utdatafilerna (t.ex. `f"{base}-{args.target_lang}-{args.model}.md"`), vilket underlättar organisering och sökning av översättningar.
-  - **Övriga förbättringar :**
+    - Omvändning av modell och språk i namnet på utdatafilerna (till exempel `f"{base}-{args.target_lang}-{args.model}.md"`), vilket underlättar organisering och sökning efter översättningar.
+  - **Diverse förbättringar :**
     - Rensning av koden genom att ta bort onödiga tomma rader.
     - Mindre justeringar för att förbättra skriptets struktur och läsbarhet.
 - **1.4** Nyheter :
-  - Stöd för Anthropics Claude API för översättning
+  - Stöd för Anthropic Claude API för översättning
   - Optimering av prompter för ökad tydlighet och effektivitet
   - Mindre justeringar för att förbättra kodunderhållet
 - **1.3** Förbättringar och nya funktioner :
   - Förbättrad hantering av kodblock
   - Förbättrad hantering av utdatafiler
-  - Förbättrad upptäckt av befintliga filer
-  - Alternativ `--force` för att tvinga fram översättning
+  - Förbättrad detektering av befintliga filer
+  - Alternativ `--force` för att tvinga översättning
   - Omvändning av modell och språk i namnet på utdatafilen
-- **1.2** Fix av ändringsloggen
-- **1.1** Tillägg av stöd för Mistral AI API
+- **1.2** Fix av changelog
+- **1.1** Tillägg av stöd för Mistral IA API
 - **1.0** Initial version - Stöd för OpenAI API
 
-**Detta dokument har översatts från versionen fr till språket sv med hjälp av modellen gpt-5.4-mini. För mer information om översättningsprocessen, se https://github.com/jls42/ai-powered-markdown-translator**
+**Detta dokument har översatts från fr-versionen till språket sv med hjälp av modellen gpt-5.4-mini. För mer information om översättningsprocessen, se https://github.com/jls42/ai-powered-markdown-translator**
