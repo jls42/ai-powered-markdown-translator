@@ -76,7 +76,7 @@ while [[ $# -gt 0 ]]; do
       MODE="tag-only"; SKIP_REGEN=true
       shift ;;
     --dry-run)
-      MODE="dry-run"; DRY_RUN=true
+      MODE="dry-run"; DRY_RUN=true; ASSUME_YES=true
       shift ;;
     --version)             VERSION="$2"; shift 2 ;;
     --tag)                 TAG="$2"; shift 2 ;;
@@ -141,7 +141,8 @@ extract_release_notes() {
 }
 
 extract_changelog_version() {
-  grep -m 1 -oE '\*\*[0-9]+\.[0-9]+\.[0-9]+\*\*' CHANGELOG.md | head -1 | tr -d '*'
+  # Accepte X.Y et X.Y.Z (cohérent avec extract_release_notes ci-dessus).
+  grep -m 1 -oE '\*\*[0-9]+\.[0-9]+(\.[0-9]+)?\*\*' CHANGELOG.md | head -1 | tr -d '*'
 }
 
 # === Activation venv (commun) ===
@@ -261,7 +262,7 @@ ok "Import OK"
 # === Étape 1: Extraction version ===
 CHANGELOG_VERSION=$(extract_changelog_version)
 if [[ -z "$CHANGELOG_VERSION" ]]; then
-  err "Impossible d'extraire la version depuis CHANGELOG.md (pattern '- **X.Y.Z**' attendu)"
+  err "Impossible d'extraire la version depuis CHANGELOG.md (pattern '- **X.Y[.Z]**' attendu)"
   exit 1
 fi
 log "Version détectée dans CHANGELOG: $CHANGELOG_VERSION"
