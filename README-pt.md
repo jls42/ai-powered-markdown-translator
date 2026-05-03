@@ -2,11 +2,31 @@
 
 🌍 [Francês](README.md) | [Inglês](README-en.md) | [Espanhol](README-es.md) | [Chinês](README-zh.md) | [Alemão](README-de.md) | [Japonês](README-ja.md) | [Coreano](README-ko.md) | [Árabe](README-ar.md) | [Hindi](README-hi.md) | [Italiano](README-it.md) | [Holandês](README-nl.md) | [Polonês](README-pl.md) | [Português](README-pt.md) | [Romeno](README-ro.md) | [Sueco](README-sv.md)
 
+<h4 align="center">📊 Qualidade do código</h4>
+
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Quality Gate Status"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Security Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Reliability Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Maintainability Rating"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Coverage"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilities"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Bugs"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Duplicated Lines (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Technical Debt"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Lines of Code"></a>
+</p>
+
 Tradutor de arquivos Markdown usando **OpenAI**, **Mistral AI**, **Claude (Anthropic)** e **Google Gemini**.
 
 Este script Python traduz arquivos Markdown de um idioma de origem para um idioma de destino, preservando a formatação, os blocos de código e os metadados front matter.
 
-## Características Principais
+## Principais Características
 
 - **Multi-Provider**: Suporte a 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **Modelos 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
@@ -16,7 +36,7 @@ Este script Python traduz arquivos Markdown de um idioma de origem para um idiom
 - **Preservação do Código**: Os blocos de código E o código inline (`` `...` ``) são preservados
 - **Nome do Arquivo**: Opção `--keep_filename` para manter o nome original
 - **Modo Notícias**: Opção `--news` para proteger citações em inglês e gerenciar bandeiras em artigos de notícias
-- **Configuração .env**: Suporte ao arquivo `.env` para chaves de API
+- **Configuração .env**: Suporte ao arquivo `.env` para as chaves de API
 - **Nota de Tradução**: Adição opcional de uma nota no final do documento
 
 ## Instalação
@@ -38,7 +58,7 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Hooks ativos: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexidade), detect-secrets (chaves de API), mypy (tipagem progressiva), Opengrep (SAST), pip-audit (CVE deps), unittest. Veja a seção `CLAUDE.md` _Quality / pre-commit_ para detalhes.
+Hooks ativos: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexidade), detect-secrets (chaves API), mypy (tipagem progressiva), Opengrep (SAST), pip-audit (CVE deps), unittest. Veja a seção `CLAUDE.md` _Quality / pre-commit_ para detalhes.
 
 ## Configuração
 
@@ -57,7 +77,7 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 ## Uso
 
-### Traduzir um arquivo único
+### Traduzir um único arquivo
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
@@ -100,25 +120,25 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--eco`                  | Usar os modelos econômicos                                         |
 | `--use_mistral`          | Usar a API Mistral AI                                                |
 | `--use_claude`           | Usar a API Claude                                                    |
-| `--use_gemini`           | Usar a API Gemini                                                    |
+| `--use_gemini`           | Usar a API Gemini                                                  |
 | `--force`                | Forçar a retradução                                                  |
 | `--keep_filename`        | Manter o nome original do arquivo                                     |
-| `--news`                 | Modo notícias: protege citações em inglês, gerencia bandeiras por idioma |
-| `--add_translation_note`        | Adicionar uma nota de tradução                                           |
+| `--news`                 | Modo notícias: protege as citações em EN, gerencia as bandeiras por idioma |
+| `--add_translation_note` | Adicionar uma nota de tradução                                           |
 | `--include_model`        | Incluir o nome do modelo no arquivo de saída                       |
 
 ### Modelos padrão (2026)
 
-| Provedor | Qualidade (padrão)         | Econômico (`--eco`)     |
-| -------- | ------------------------ | ------------------------ |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`           |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5`       |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`   |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
+| Provider | Qualidade (padrão)         | Econômico (`--eco`)            |
+| -------- | ------------------------ | ------------------------------- |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Recomendação para traduções long-form** : `--use_gemini` (padrão = `gemini-3.1-pro-preview` qualidade, `--eco` = `gemini-3-flash-preview`) tende a preservar melhor a estrutura markdown em scripts não latinos (PL, JA, ZH, AR, HI), especialmente no modo `--news` em que a fidelidade dos placeholders conta. OpenAI continua sendo o padrão para retrocompatibilidade.
+> **Recomendação para traduções long-form** : `--use_gemini` (padrão = `gemini-3.1-pro-preview` qualidade, `--eco` = `gemini-3.1-flash-lite-preview`) tende a preservar melhor a estrutura markdown em scripts não latinos (PL, JA, ZH, AR, HI), especialmente no modo `--news` onde a fidelidade dos placeholders é importante. OpenAI continua sendo o padrão para retrocompatibilidade.
 
-## Projetos usando este script
+## Projetos que usam este script
 
 - **[jls42.org](https://jls42.org)** - Blog pessoal multilíngue (15 idiomas)
 

@@ -1,23 +1,43 @@
-# Traduttore di Markdown AI-Powered
+# Traduttore Markdown basato su AI
 
 🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
 
+<h4 align="center">📊 Qualità del codice</h4>
+
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Stato Quality Gate"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Valutazione sicurezza"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Valutazione affidabilità"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Valutazione manutenibilità"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Copertura"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilità"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Bug"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Linee duplicate (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Debito tecnico"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Linee di codice"></a>
+</p>
+
 Traduttore di file Markdown che utilizza **OpenAI**, **Mistral AI**, **Claude (Anthropic)** e **Google Gemini**.
 
-Questo script Python traduce file Markdown da una lingua sorgente a una lingua di destinazione preservando la formattazione, i blocchi di codice e i metadati front matter.
+Questo script Python traduce file Markdown da una lingua di origine a una lingua di destinazione preservando la formattazione, i blocchi di codice e i metadati front matter.
 
 ## Caratteristiche principali
 
-- **Multi-Provider**: supporto per 4 API (OpenAI, Mistral, Claude, Gemini)
+- **Multi-provider**: supporto per 4 API (OpenAI, Mistral, Claude, Gemini)
 - **Modelli 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
 - **Modalità economica**: opzione `--eco` per usare modelli più veloci e meno costosi
-- **File singolo**: opzione `--file` per tradurre un singolo file
-- **Segmentazione intelligente**: gestione di testi lunghi con limiti di token per modello
-- **Preservazione del codice**: i blocchi di codice E il codice inline (`` `...` ``) vengono preservati
+- **File singolo**: opzione `--file` per tradurre un solo file
+- **Segmentazione intelligente**: gestione dei testi lunghi con limiti di token per modello
+- **Preservazione del codice**: i blocchi di codice E il codice inline (`` `...` ``) sono preservati
 - **Nome file**: opzione `--keep_filename` per mantenere il nome originale
-- **Modalità news**: opzione `--news` per proteggere le citazioni inglesi e gestire le bandiere negli articoli di attualità
+- **Modalità News**: opzione `--news` per proteggere le citazioni inglesi e gestire le bandiere negli articoli di attualità
 - **Configurazione .env**: supporto del file `.env` per le chiavi API
-- **Nota di traduzione**: aggiunta opzionale di una nota alla fine del documento
+- **Nota di traduzione**: aggiunta opzionale di una nota in fondo al documento
 
 ## Installazione
 
@@ -30,7 +50,7 @@ pip install -r requirements.txt
 
 ### Strumenti di qualità (opzionale ma consigliato)
 
-Il progetto utilizza [`pre-commit`](https://pre-commit.com) per impedire il commit di codice mal formattato, vulnerabile o contenente segreti. Installazione:
+Il progetto usa [`pre-commit`](https://pre-commit.com) per impedire il commit di codice mal formattato, vulnerabile o contenente un segreto. Installazione:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -38,11 +58,11 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Hook attivi: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complessità), detect-secrets (chiavi API), mypy (tipizzazione progressiva), Opengrep (SAST), pip-audit (CVE deps), unittest. Vedi la sezione `CLAUDE.md` _Quality / pre-commit_ per i dettagli.
+Hook attivi: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complessità), detect-secrets (chiavi API), mypy (tipizzazione progressiva), Opengrep (SAST), pip-audit (CVE dipendenze), unittest. Vedi la sezione `CLAUDE.md` _Qualità / pre-commit_ per i dettagli.
 
 ## Configurazione
 
-Creare un file `.env` alla radice del progetto oppure definire le variabili d'ambiente:
+Create un file `.env` nella radice del progetto oppure definite le variabili d'ambiente:
 
 ```bash
 # Fichier .env (recommandé)
@@ -81,7 +101,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Modalità economica
 
-Usa modelli più veloci e meno costosi (gpt-5.4-mini, claude-haiku, gemini-flash):
+Usa modelli più veloci e meno costosi (gpt-5.4-mini, claude-haiku, gemini-flash) :
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -91,44 +111,44 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 | Opzione                  | Descrizione                                                         |
 | ------------------------ | ------------------------------------------------------------------- |
-| `--file`                 | File Markdown singolo da tradurre                                   |
-| `--source_dir`           | Directory sorgente contenente i file Markdown                        |
+| `--file`                 | File Markdown singolo da tradurre                                  |
+| `--source_dir`           | Directory sorgente contenente i file Markdown                       |
 | `--target_dir`           | Directory di output per i file tradotti                             |
-| `--source_lang`          | Lingua sorgente (predefinita: `fr`)                       |
-| `--target_lang`          | Lingua di destinazione (predefinita: `en`)                |
+| `--source_lang`          | Lingua sorgente (predefinita: `fr`)                                            |
+| `--target_lang`          | Lingua di destinazione (predefinita: `en`)                                         |
 | `--model`                | Modello specifico da usare                                          |
-| `--eco`                  | Usare i modelli economici                                           |
-| `--use_mistral`          | Usare l'API Mistral AI                                               |
-| `--use_claude`           | Usare l'API Claude                                                   |
-| `--use_gemini`           | Usare l'API Gemini                                                   |
-| `--force`                | Forzare la ritraduzione                                              |
-| `--keep_filename`        | Conservare il nome file originale                                    |
-| `--news`                 | Modalità attualità: protegge le citazioni EN, gestisce le bandiere per lingua |
-| `--add_translation_note` | Aggiungere una nota di traduzione                                     |
-| `--include_model`        | Includere il nome del modello nel file di output                      |
+| `--eco`                  | Usare i modelli economici                                          |
+| `--use_mistral`          | Usare l'API Mistral AI                                             |
+| `--use_claude`           | Usare l'API Claude                                                 |
+| `--use_gemini`           | Usare l'API Gemini                                                 |
+| `--force`                | Forzare la ritraslazione                                             |
+| `--keep_filename`        | Mantenere il nome file originale                                     |
+| `--news`                 | Modalità notizie: protegge le citazioni EN, gestisce le bandiere per lingua |
+| `--add_translation_note` | Aggiungere una nota di traduzione                                      |
+| `--include_model`        | Includere il nome del modello nel file di output                     |
 
 ### Modelli predefiniti (2026)
 
-| Provider | Qualità (predefinita)   | Economico (`--eco`) |
-| -------- | ------------------------ | ------------------------ |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`           |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5`       |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`   |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
+| Provider | Qualità (predefinita)         | Economico (`--eco`)            |
+| -------- | ------------------------ | ------------------------------- |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Raccomandazione per traduzioni long-form**: `--use_gemini` (predefinito = `gemini-3.1-pro-preview` qualità, `--eco` = `gemini-3-flash-preview`) tende a preservare meglio la struttura markdown su script non latini (PL, JA, ZH, AR, HI), soprattutto in modalità `--news` dove la fedeltà dei placeholder conta. OpenAI resta il predefinito per la retrocompatibilità.
+> **Raccomandazione per traduzioni lunghe**: `--use_gemini` (predefinito = `gemini-3.1-pro-preview` qualità, `--eco` = `gemini-3.1-flash-lite-preview`) tende a preservare meglio la struttura markdown su script non latini (PL, JA, ZH, AR, HI), in particolare in modalità `--news` dove conta la fedeltà dei placeholder. OpenAI resta il predefinito per la retrocompatibilità.
 
-## Progetti che utilizzano questo script
+## Progetti che usano questo script
 
 - **[jls42.org](https://jls42.org)** - Blog personale multilingue (15 lingue)
 
 ## Autore
 
 Julien LE SAUX
-Email: contact@jls42.org
+Email : contact@jls42.org
 
 ## Licenza
 
 GNU GENERAL PUBLIC LICENSE Version 3. Vedi [LICENSE](LICENSE).
 
-**Questo documento è stato tradotto dalla versione fr alla lingua it utilizzando il modello gpt-5.4-mini. Per ulteriori informazioni sul processo di traduzione, consulta https://github.com/jls42/ai-powered-markdown-translator**
+**Questo documento è stato tradotto dalla versione fr nella lingua it utilizzando il modello gpt-5.4-mini. Per ulteriori informazioni sul processo di traduzione, consulta https://github.com/jls42/ai-powered-markdown-translator**

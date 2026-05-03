@@ -1,23 +1,43 @@
 # AI-aangedreven Markdown-vertaler
 
-🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
+🌍 [Frans](README.md) | [Engels](README-en.md) | [Spaans](README-es.md) | [Chinees](README-zh.md) | [Duits](README-de.md) | [Japans](README-ja.md) | [Koreaans](README-ko.md) | [Arabisch](README-ar.md) | [Hindi](README-hi.md) | [Italiaans](README-it.md) | [Nederlands](README-nl.md) | [Pools](README-pl.md) | [Portugees](README-pt.md) | [Roemeens](README-ro.md) | [Zweeds](README-sv.md)
 
-Markdown-bestandsvertaler die **OpenAI**, **Mistral AI**, **Claude (Anthropic)** en **Google Gemini** gebruikt.
+<h4 align="center">📊 Codekwaliteit</h4>
 
-Dit Python-script vertaalt Markdown-bestanden van een brontaal naar een doeltaal, terwijl opmaak, codeblokken en front matter-metagegevens behouden blijven.
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Quality Gate Status"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Security Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Reliability Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Maintainability Rating"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Coverage"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilities"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Bugs"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Duplicated Lines (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Technical Debt"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Lines of Code"></a>
+</p>
 
-## Belangrijkste functies
+Markdown-bestandsvertaler met **OpenAI**, **Mistral AI**, **Claude (Anthropic)** en **Google Gemini**.
 
-- **Multi-provider**: Ondersteuning voor 4 API's (OpenAI, Mistral, Claude, Gemini)
+Dit Python-script vertaalt Markdown-bestanden van een brontaal naar een doeltaal, terwijl de opmaak, codeblokken en front-mattermetadata behouden blijven.
+
+## Belangrijkste kenmerken
+
+- **Multi-Provider**: Ondersteuning voor 4 API's (OpenAI, Mistral, Claude, Gemini)
 - **Modellen 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **Zuinigheidsmodus**: Optie `--eco` om snellere en goedkopere modellen te gebruiken
+- **Economische modus**: Optie `--eco` om snellere en goedkopere modellen te gebruiken
 - **Enkel bestand**: Optie `--file` om één enkel bestand te vertalen
-- **Intelligente segmentatie**: Beheer van lange teksten met tokenlimieten per model
-- **Codebehoud**: Codeblokken EN inline code (`` `...` ``) worden behouden
-- **Bestandsnaam**: Optie `--keep_filename` om de originele naam te behouden
-- **Nieuwsmode**: Optie `--news` om Engelse citaten te beschermen en vlaggen in nieuwsartikelen te beheren
+- **Intelligente segmentatie**: Verwerking van lange teksten met tokenlimieten per model
+- **Codebehoud**: Codeblokken EN inline code (`` `...` ``) blijven behouden
+- **Bestandsnaam**: Optie `--keep_filename` om de oorspronkelijke naam te behouden
+- **Nieuwsmodus**: Optie `--news` om Engelse citaten te beschermen en vlaggen in nieuwsartikelen te beheren
 - **.env-configuratie**: Ondersteuning voor het bestand `.env` voor API-sleutels
-- **Vertaalnota**: Optioneel toevoegen van een notitie aan het einde van het document
+- **Vertaalnotitie**: Optioneel toevoegen van een notitie aan het einde van het document
 
 ## Installatie
 
@@ -28,9 +48,9 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Kwaliteitsgereedschap (optioneel maar aanbevolen)
+### Kwaliteitstools (optioneel maar aanbevolen)
 
-Het project gebruikt [`pre-commit`](https://pre-commit.com) om te voorkomen dat er slecht opgemaakte, kwetsbare code of code met een geheim wordt gecommit. Installatie:
+Het project gebruikt [`pre-commit`](https://pre-commit.com) om te voorkomen dat slecht opgemaakte, kwetsbare of geheimen bevattende code wordt gecommit. Installatie:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -38,7 +58,7 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Actieve hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexiteit), detect-secrets (API-sleutels), mypy (progressieve typing), Opengrep (SAST), pip-audit (CVE-afhankelijkheden), unittest. Zie `CLAUDE.md` sectie _Quality / pre-commit_ voor details.
+Actieve hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexiteit), detect-secrets (API-sleutels), mypy (geleidelijke typecontrole), Opengrep (SAST), pip-audit (CVE-afhankelijkheden), unittest. Zie sectie `CLAUDE.md` _Quality / pre-commit_ voor details.
 
 ## Configuratie
 
@@ -79,7 +99,7 @@ python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content
 python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
 ```
 
-### Zuinigheidsmodus
+### Economische modus
 
 Gebruikt snellere en goedkopere modellen (gpt-5.4-mini, claude-haiku, gemini-flash):
 
@@ -91,32 +111,32 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 | Optie                   | Beschrijving                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Enkel Markdown-bestand om te vertalen                                     |
-| `--source_dir`           | Bronmap met de Markdown-bestanden                                       |
-| `--target_dir`           | Uitvoermap voor de vertaalde bestanden                                   |
+| `--file`                 | Eén Markdown-bestand om te vertalen                                       |
+| `--source_dir`           | Brondirectory met de Markdown-bestanden                        |
+| `--target_dir`           | Uitvoermap voor de vertaalde bestanden                          |
 | `--source_lang`          | Brontaal (standaard: `fr`)                                             |
 | `--target_lang`          | Doeltaal (standaard: `en`)                                              |
 | `--model`                | Specifiek model om te gebruiken                                             |
-| `--eco`                  | Gebruik de zuinige modellen                                         |
+| `--eco`                  | Gebruik de economische modellen                                         |
 | `--use_mistral`          | Gebruik de Mistral AI-API                                                |
 | `--use_claude`           | Gebruik de Claude-API                                                    |
-| `--use_gemini`           | Gebruik de Gemini-API                                                   |
-| `--force`                | Vertalen opnieuw forceren                                                  |
-| `--keep_filename`        | Originele bestandsnaam behouden                                     |
+| `--use_gemini`           | Gebruik de Gemini-API                                                  |
+| `--force`                | Vertaling opnieuw afdwingen                                                  |
+| `--keep_filename`        | Oorspronkelijke bestandsnaam behouden                                     |
 | `--news`                 | Nieuwsmode: beschermt EN-citaten, beheert vlaggen per taal |
-| `--add_translation_note` | Vertaalnota toevoegen                                           |
+| `--add_translation_note` | Een vertaalnotitie toevoegen                                           |
 | `--include_model`        | De modelnaam opnemen in het uitvoerbestand                       |
 
 ### Standaardmodellen (2026)
 
-| Provider | Kwaliteit (standaard)         | Zuinig (`--eco`)     |
-| -------- | ------------------------ | ------------------------ |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`           |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5`       |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`   |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
+| Provider | Kwaliteit (standaard)         | Economisch (`--eco`)            |
+| -------- | ------------------------ | ------------------------------- |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Aanbeveling voor lange vertalingen**: `--use_gemini` (standaard = `gemini-3.1-pro-preview` kwaliteit, `--eco` = `gemini-3-flash-preview`) heeft de neiging de markdown-structuur beter te behouden op niet-Latijnse scripts (PL, JA, ZH, AR, HI), vooral in `--news`-modus waar de nauwkeurigheid van placeholders telt. OpenAI blijft de standaard voor achterwaartse compatibiliteit.
+> **Aanbeveling voor langvormvertalingen**: `--use_gemini` (standaard = `gemini-3.1-pro-preview` kwaliteit, `--eco` = `gemini-3.1-flash-lite-preview`) heeft de neiging de markdown-structuur beter te behouden op niet-Latijnse scripts (PL, JA, ZH, AR, HI), vooral in `--news`-modus waar de betrouwbaarheid van placeholders belangrijk is. OpenAI blijft de standaard voor achterwaartse compatibiliteit.
 
 ## Projecten die dit script gebruiken
 
@@ -131,4 +151,4 @@ E-mail : contact@jls42.org
 
 GNU GENERAL PUBLIC LICENSE Versie 3. Zie [LICENSE](LICENSE).
 
-**Dit document is vertaald van de fr-versie naar de taal nl met behulp van het model gpt-5.4-mini. Voor meer informatie over het vertaalproces, raadpleeg https://github.com/jls42/ai-powered-markdown-translator**
+**Dit document is vertaald van de fr-versie naar de nl-taal met behulp van het model gpt-5.4-mini. Voor meer informatie over het vertaalproces, raadpleeg https://github.com/jls42/ai-powered-markdown-translator**

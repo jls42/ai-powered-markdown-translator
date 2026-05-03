@@ -2,17 +2,37 @@
 
 🌍 [French](README.md) | [English](README-en.md) | [Spanish](README-es.md) | [Chinese](README-zh.md) | [German](README-de.md) | [Japanese](README-ja.md) | [Korean](README-ko.md) | [Arabic](README-ar.md) | [Hindi](README-hi.md) | [Italian](README-it.md) | [Dutch](README-nl.md) | [Polish](README-pl.md) | [Portuguese](README-pt.md) | [Romanian](README-ro.md) | [Swedish](README-sv.md)
 
+<h4 align="center">📊 Code Quality</h4>
+
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Quality Gate Status"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Security Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Reliability Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Maintainability Rating"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Coverage"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilities"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Bugs"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Duplicated Lines (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Technical Debt"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Lines of Code"></a>
+</p>
+
 Markdown file translator using **OpenAI**, **Mistral AI**, **Claude (Anthropic)** and **Google Gemini**.
 
-This Python script translates Markdown files from a source language to a target language while preserving formatting, code blocks, and front matter metadata.
+This Python script translates Markdown files from a source language into a target language while preserving formatting, code blocks, and front matter metadata.
 
 ## Main Features
 
 - **Multi-Provider**: Support for 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **2026 Models**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **Economy Mode**: Option `--eco` to use faster and less expensive models
+- **Economy Mode**: Option `--eco` to use faster, less expensive models
 - **Single File**: Option `--file` to translate a single file
-- **Intelligent Segmentation**: Handling long texts with token limits per model
+- **Smart Segmentation**: Handles long texts with model-specific token limits
 - **Code Preservation**: Code blocks AND inline code (`` `...` ``) are preserved
 - **File Name**: Option `--keep_filename` to keep the original name
 - **News Mode**: Option `--news` to protect English quotes and handle flags in news articles
@@ -30,7 +50,7 @@ pip install -r requirements.txt
 
 ### Quality tooling (optional but recommended)
 
-The project uses [`pre-commit`](https://pre-commit.com) to prevent committing poorly formatted, vulnerable, or secret-containing code. Installation:
+The project uses [`pre-commit`](https://pre-commit.com) to prevent committing badly formatted, vulnerable, or secret-containing code. Installation:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -38,11 +58,11 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Active hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexity), detect-secrets (API keys), mypy (progressive typing), Opengrep (SAST), pip-audit (CVE deps), unittest. See `CLAUDE.md` section _Quality / pre-commit_ for details.
+Active hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexity), detect-secrets (API keys), mypy (gradual typing), Opengrep (SAST), pip-audit (CVE deps), unittest. See `CLAUDE.md` section _Quality / pre-commit_ for details.
 
 ## Configuration
 
-Create a `.env` file at the root of the project or define environment variables:
+Create a `.env` file at the root of the project or define the environment variables:
 
 ```bash
 # Fichier .env (recommandé)
@@ -81,7 +101,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Economy mode
 
-Uses faster and less expensive models (gpt-5.4-mini, claude-haiku, gemini-flash):
+Uses faster, less expensive models (gpt-5.4-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -102,21 +122,21 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_claude`           | Use the Claude API                                                    |
 | `--use_gemini`           | Use the Gemini API                                                    |
 | `--force`                | Force re-translation                                                  |
-| `--keep_filename`        | Keep the original filename                                     |
+| `--keep_filename`        | Keep the original file name                                     |
 | `--news`                 | News mode: protects EN quotes, handles flags by language |
 | `--add_translation_note` | Add a translation note                                           |
 | `--include_model`        | Include the model name in the output file                       |
 
-### Default models (2026)
+### Default Models (2026)
 
-| Provider | Quality (default)         | Economy (`--eco`)     |
-| -------- | ------------------------ | ------------------------ |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`           |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5`       |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`   |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3-flash-preview` |
+| Provider | Quality (default)         | Economy (`--eco`)            |
+| -------- | ------------------------ | ------------------------------- |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Long-form translation recommendation**: `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3-flash-preview`) tends to better preserve markdown structure on non-Latin scripts (PL, JA, ZH, AR, HI), especially in `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
+> **Recommendation for long-form translations**: `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3.1-flash-lite-preview`) tends to better preserve markdown structure on non-Latin scripts (PL, JA, ZH, AR, HI), especially in `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
 
 ## Projects using this script
 
@@ -125,10 +145,10 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 ## Author
 
 Julien LE SAUX
-Email: contact@jls42.org
+Email : contact@jls42.org
 
 ## License
 
 GNU GENERAL PUBLIC LICENSE Version 3. See [LICENSE](LICENSE).
 
-**This document was translated from the fr version into the en language using the gpt-5.4-mini model. For more information about the translation process, see https://github.com/jls42/ai-powered-markdown-translator**
+**This document was translated from the fr version to the en language using the gpt-5.4-mini model. For more information about the translation process, see https://github.com/jls42/ai-powered-markdown-translator**
