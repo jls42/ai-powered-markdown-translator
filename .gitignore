@@ -27,6 +27,7 @@ env/
 .ruff_cache/
 .mypy_cache/
 .pytest_cache/
+.coverage
 node_modules/
 pip-audit-report.json
 

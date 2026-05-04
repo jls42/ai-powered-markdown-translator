@@ -2,9 +2,6 @@
 # Calcule un verdict bash-friendly à partir du JSON de `pip-audit --format=json`.
 # Lecture stdin pour rester compatible avec le pipe utilisé par check-pip-audit.sh.
 # Sortie : `ok` | `vulnerable:N` | `parse-error` | `no-metadata`.
-#
-# Adapté de scripts/audit-verdict.py de jls42-astro (qui ciblait npm audit).
-# Voir scripts/tests/test_audit_verdict.py pour les invariants couverts.
 
 from __future__ import annotations
 

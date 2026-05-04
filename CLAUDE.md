@@ -81,7 +81,7 @@ Trajectoire :
 
 ### Lizard CCN — refactor planifié de translate.py
 
-Le seuil est 12 (futur 8). 4 fonctions de `translate.py` dépassent : `translate` (CCN 25), `translate_markdown_file` (CCN 47), `translate_directory` (CCN 21), `main` (CCN 32). Le fichier est temporairement exclu de Lizard **par scope** : la commande ne reçoit que `scripts/` en argument (cf. `scripts/check-complexity.sh`). Le refactor est un travail dédié à mener dans une PR séparée ; le gate s'applique strictement aux nouveaux scripts pour empêcher la régression. Quand `translate.py` repassera sous le seuil, l'ajouter au scope de la commande (pas à `-x`).
+Le seuil est 12 (futur 8). Plusieurs fonctions de `translate.py` (notamment `translate`, `translate_markdown_file`, `translate_directory`, `main`) dépassent le seuil. Le fichier est temporairement exclu de Lizard **par scope** : la commande ne reçoit que `scripts/` en argument (cf. `scripts/check-complexity.sh`). Le refactor est un travail dédié à mener dans une PR séparée ; le gate s'applique strictement aux nouveaux scripts pour empêcher la régression. Quand `translate.py` repassera sous le seuil, l'ajouter au scope de la commande (pas à `-x`). Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python translate.py`.
 
 ### Gestion du baseline detect-secrets
 

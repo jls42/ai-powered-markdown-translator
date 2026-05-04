@@ -30,8 +30,8 @@ FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "fixtures", "long_fr_exce
 
 
 def _fake_openai_env():
-    """Env dict avec une clé bidon (non-placeholder) pour traverser la garde du
-    fix C1 — _init_openai_client refuse désormais la chaîne DEFAULT_OPENAI_API_KEY.
+    """Env avec une clé non-placeholder. _init_openai_client refuse la chaîne
+    DEFAULT_OPENAI_API_KEY pour empêcher un run silencieux contre l'API publique.
     """
     return {"OPENAI_API_KEY": "fixture-fake-key-not-placeholder"}  # pragma: allowlist secret
 
@@ -230,8 +230,6 @@ class TestSilentFailure(unittest.TestCase):
 
     def test_main_exits_nonzero_on_failure_single_file(self):
         """main() avec --file doit sys.exit(1) quand translate_markdown_file retourne 'failure'."""
-        # Clé bidon pour traverser la garde du fix C1 (_init_openai_client
-        # refuse désormais la chaîne placeholder DEFAULT_OPENAI_API_KEY).
         with (
             patch.dict(os.environ, _fake_openai_env()),
             patch("translate.translate_markdown_file", return_value="failure"),
@@ -492,8 +490,8 @@ class TestSegmentBreakpointFallbacks(unittest.TestCase):
 
 
 class TestCodePlaceholders(unittest.TestCase):
-    """Couvre la régression du commit a3c35fc (fenced regex hardening) et la
-    nouvelle validation des placeholders de code (#CODEBLOCKn# / #INLINECODEn#).
+    """Couvre le fenced regex strict (orphan non-greedy, lang hyphené) et la
+    validation des placeholders de code (#CODEBLOCKn# / #INLINECODEn#).
     """
 
     def test_fenced_block_no_lang(self):
@@ -743,9 +741,8 @@ class TestDetectProvider(unittest.TestCase):
     def test_no_env_file_no_keys_aborts(self):
         """Pas de .env, pas de clés exportées → exit 1 + ERROR sur stderr.
 
-        L'ancien comportement (échouer silencieusement avec --eco + placeholder)
-        ré-introduisait précisément la classe de silent-failure que cette branche
-        corrige : les jobs en aval tombaient en 401 et release.sh validait
+        Fail-closed plutôt qu'émettre `--eco` avec une clé placeholder : sinon
+        les jobs en aval tomberaient en 401 silencieux et release.sh validerait
         '28 fichiers présents' contre des traductions stales.
         """
         stdout, stderr, rc = self._run_detect(env_content=None)
@@ -814,6 +811,246 @@ class TestDetectProvider(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(stdout, "--use_gemini --eco")
         self.assertIn("REGEN_PROVIDER=gemini", stderr)
+
+
+class TestNewsPipelinePerProvider(unittest.TestCase):
+    """Couvre translate_markdown_file end-to-end pour Mistral/Claude/Gemini en mode
+    --news, pas seulement OpenAI. Sans cette classe, une régression où
+    _translate_pipeline ou _validate_news_post serait skippé pour un provider donné
+    ne ferait échouer aucun test (le scaffolding partagé hardcodait OpenAI).
+    """
+
+    SOURCE_NEWS = """---
+title: Test
+locale: 'fr'
+---
+
+## Section
+
+> A decade in the making.
+>
+> 🇫🇷 _Une décennie en gestation._
+> — [@GoogleAI sur X](https://x.com/GoogleAI/status/1)
+"""
+
+    TRANSLATED_NEWS = """---
+title: Test
+locale: 'pl'
+---
+
+## Sekcja
+
+<NEWSQUOTE id="0"/>
+>
+> 🇵🇱 _Dekada pracy._
+> — [@GoogleAI na X](https://x.com/GoogleAI/status/1)
+"""
+
+    def _run_with_provider(self, provider, mock_client_factory):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = os.path.join(tmpdir, "input.md")
+            dst = os.path.join(tmpdir, "input-pl.md")
+            with open(src, "w", encoding="utf-8") as f:
+                f.write(self.SOURCE_NEWS)
+            args = _base_args(
+                source_dir=tmpdir,
+                target_dir=tmpdir,
+                target_lang="pl",
+                news=True,
+                model={
+                    "mistral": "mistral-small-latest",
+                    "claude": "claude-haiku-4-5-20251001",
+                    "gemini": "gemini-3-flash-preview",
+                }[provider],
+            )
+            status = translate_markdown_file(
+                src,
+                dst,
+                mock_client_factory(),
+                args,
+                use_mistral=(provider == "mistral"),
+                use_claude=(provider == "claude"),
+                use_gemini=(provider == "gemini"),
+                add_translation_note=False,
+                force=False,
+            )
+            output = None
+            if os.path.exists(dst):
+                with open(dst, encoding="utf-8") as f:
+                    output = f.read()
+            return status, output
+
+    def _mistral_client(self):
+        client = MagicMock()
+        client.chat.complete.return_value = MagicMock(
+            choices=[
+                MagicMock(
+                    finish_reason="stop",
+                    message=MagicMock(content=self.TRANSLATED_NEWS),
+                )
+            ]
+        )
+        return client
+
+    def _claude_client(self):
+        client = MagicMock()
+        client.messages.create.return_value = MagicMock(
+            stop_reason="end_turn",
+            content=[MagicMock(text=self.TRANSLATED_NEWS)],
+        )
+        return client
+
+    def _gemini_client(self):
+        gen_model = MagicMock()
+        gen_model.generate_content.return_value = MagicMock(
+            candidates=[MagicMock(finish_reason="STOP")],
+            text=self.TRANSLATED_NEWS,
+        )
+        client = MagicMock()
+        client.GenerativeModel.return_value = gen_model
+        return client
+
+    def test_news_pipeline_mistral(self):
+        status, out = self._run_with_provider("mistral", self._mistral_client)
+        self.assertEqual(status, "success")
+        self.assertIn("> A decade in the making.", out)
+        self.assertNotIn("<NEWSQUOTE", out)
+        self.assertIn("🇵🇱", out)
+
+    def test_news_pipeline_claude(self):
+        status, out = self._run_with_provider("claude", self._claude_client)
+        self.assertEqual(status, "success")
+        self.assertIn("> A decade in the making.", out)
+        self.assertNotIn("<NEWSQUOTE", out)
+        self.assertIn("🇵🇱", out)
+
+    def test_news_pipeline_gemini(self):
+        status, out = self._run_with_provider("gemini", self._gemini_client)
+        self.assertEqual(status, "success")
+        self.assertIn("> A decade in the making.", out)
+        self.assertNotIn("<NEWSQUOTE", out)
+        self.assertIn("🇵🇱", out)
+
+    def test_news_pipeline_claude_missing_placeholder_fails(self):
+        """Régression croisée : si Claude perd le placeholder XML, status=failure
+        et fichier non écrit (chaîne complète exercée pour ce provider)."""
+        bad_translation = """---
+title: Test
+locale: 'pl'
+---
+
+## Sekcja
+
+> 🇵🇱 _Dekada pracy._
+> — [@GoogleAI na X](https://x.com/GoogleAI/status/1)
+"""
+        client = MagicMock()
+        client.messages.create.return_value = MagicMock(
+            stop_reason="end_turn",
+            content=[MagicMock(text=bad_translation)],
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = os.path.join(tmpdir, "input.md")
+            dst = os.path.join(tmpdir, "input-pl.md")
+            with open(src, "w", encoding="utf-8") as f:
+                f.write(self.SOURCE_NEWS)
+            args = _base_args(
+                source_dir=tmpdir,
+                target_dir=tmpdir,
+                target_lang="pl",
+                news=True,
+                model="claude-haiku-4-5-20251001",
+            )
+            status = translate_markdown_file(
+                src,
+                dst,
+                client,
+                args,
+                use_mistral=False,
+                use_claude=True,
+                use_gemini=False,
+                add_translation_note=False,
+                force=False,
+            )
+            self.assertEqual(status, "failure")
+            self.assertFalse(os.path.exists(dst))
+
+
+class TestRestoreNewsQuotesCount(unittest.TestCase):
+    """_restore_news_quotes raise si le placeholder a été restauré 0 ou >1 fois.
+
+    Cas pathologique : le LLM duplique un placeholder XML dans sa sortie (rare
+    mais observé sur cibles non-latines). Sans cette garde, la citation EN
+    serait dupliquée silencieusement dans le fichier final.
+    """
+
+    def test_duplicate_placeholder_raises(self):
+        translated = (
+            '<NEWSQUOTE id="0"/>\n>\n> 🇵🇱 _trad._\n\n'
+            '<NEWSQUOTE id="0"/>\n>\n> Doublon parasite.\n'
+        )
+        with self.assertRaisesRegex(RuntimeError, r"restauré 2 fois"):
+            translate._restore_news_quotes(translated, ["> Quote source EN."])
+
+    def test_zero_placeholder_raises(self):
+        translated = "Sortie qui a perdu le placeholder.\n"
+        with self.assertRaisesRegex(RuntimeError, r"restauré 0 fois"):
+            translate._restore_news_quotes(translated, ["> Quote source EN."])
+
+    def test_exactly_one_placeholder_passes(self):
+        translated = '<NEWSQUOTE id="0"/>\n>\n> 🇵🇱 _trad._\n'
+        out = translate._restore_news_quotes(translated, ["> Quote source EN."])
+        self.assertIn("> Quote source EN.", out)
+        self.assertNotIn("<NEWSQUOTE", out)
+
+
+class TestValidateNewsPost(unittest.TestCase):
+    """Couvre les branches post-restoration de _validate_news_post : citation EN
+    brute, URL d'attribution, placeholder résiduel (XML et legacy #NEWSQUOTEn#).
+    """
+
+    def _args(self, target_lang="pl"):
+        return _base_args(news=True, target_lang=target_lang)
+
+    def test_raw_quote_missing_raises(self):
+        translated = "Sortie sans la citation source.\n"
+        with self.assertRaisesRegex(RuntimeError, r"citation EN brute non restaurée"):
+            translate._validate_news_post(
+                translated,
+                original_quotes=["> A decade in the making."],
+                attribution_urls=[],
+                args=self._args(),
+            )
+
+    def test_attribution_url_missing_raises(self):
+        translated = "> A decade in the making.\n> 🇵🇱 _trad_\n"
+        with self.assertRaisesRegex(RuntimeError, r"URL d'attribution.*manquante"):
+            translate._validate_news_post(
+                translated,
+                original_quotes=["> A decade in the making."],
+                attribution_urls=["https://x.com/google"],
+                args=self._args(),
+            )
+
+    def test_residual_xml_placeholder_raises(self):
+        translated = "> A decade in the making.\n" "> 🇵🇱 _trad_\n" '<NEWSQUOTE id="1"/>\n'
+        with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
+            translate._validate_news_post(
+                translated,
+                original_quotes=["> A decade in the making."],
+                attribution_urls=[],
+                args=self._args(),
+            )
+
+    def test_residual_legacy_placeholder_raises(self):
+        translated = "> A decade in the making.\n" "> 🇵🇱 _trad_\n" "#NEWSQUOTE1#\n"
+        with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
+            translate._validate_news_post(
+                translated,
+                original_quotes=["> A decade in the making."],
+                attribution_urls=[],
+                args=self._args(),
+            )
 
 
 class TestMainExitsOnRealSilentFailure(unittest.TestCase):
@@ -1002,10 +1239,9 @@ class TestSourceOutputRatio(unittest.TestCase):
 
 
 class TestNewsCitationExtraction(unittest.TestCase):
-    """Couvre _protect_news_quotes() et _NEWS_CITATION_REGEX directement, vs les tests
-    end-to-end qui partent de contenu déjà protégé. La regex a évolué (commit 6a04061
-    pour rendre l'attribution optionnelle, fix multi-ligne pour capturer plusieurs
-    lignes EN consécutives) — ces tests sont les garants de non-régression directs.
+    """Couvre _protect_news_quotes() et _NEWS_CITATION_REGEX directement, vs les
+    tests end-to-end qui partent de contenu déjà protégé. Garants de non-régression
+    sur l'attribution optionnelle et la capture multi-ligne d'un même bloc EN.
     """
 
     def _args(self):
@@ -1032,11 +1268,10 @@ class TestNewsCitationExtraction(unittest.TestCase):
         self.assertEqual(urls, [])
 
     def test_extract_multiline_en_quote(self):
-        """Citation EN sur 3 lignes consécutives — DOIT être capturée intégralement.
+        """Plusieurs lignes EN consécutives doivent être capturées dans un seul groupe.
 
-        Régression silent-failure : avant le fix, seule la dernière ligne était capturée
-        et les lignes précédentes passaient en clair au LLM (probablement traduites,
-        cassant le contrat de protection des citations EN)."""
+        Sinon les lignes précédant la dernière passeraient en clair au LLM et seraient
+        traduites, cassant le contrat de protection des citations EN."""
         content = (
             "## Section\n\n"
             "> First line of the EN quote.\n"
