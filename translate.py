@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import contextlib
 import glob
 import os
 import re
@@ -19,7 +18,6 @@ from openai import BadRequestError, OpenAI
 # Détection de langue déterministe (évite les variations entre runs sur des textes courts)
 DetectorFactory.seed = 0
 
-# Charger les variables d'environnement depuis .env si présent
 load_dotenv()
 
 EXCLUDE_PATTERNS = ["traductions_", "venv", "PRIVACY.md"]
@@ -43,40 +41,40 @@ LANG_FLAGS = {
     "fr": "🇫🇷",
 }
 
-# Initialisation de la configuration avec les valeurs par défaut
 DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
 DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
 DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"
 DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"
-# Modèles par défaut (mis à jour avril 2026) - Qualité
+
 DEFAULT_MODEL_OPENAI = "gpt-5.5"
 DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
 DEFAULT_MODEL_CLAUDE = "claude-sonnet-4-6"
 DEFAULT_MODEL_GEMINI = "gemini-3.1-pro-preview"
 
-# Modèles économiques (--eco)
 ECO_MODEL_OPENAI = "gpt-5.4-mini"
 ECO_MODEL_MISTRAL = "mistral-small-latest"
 ECO_MODEL_CLAUDE = "claude-haiku-4-5-20251001"
 ECO_MODEL_GEMINI = "gemini-3.1-flash-lite-preview"
 
-# Limite de tokens par défaut pour les modèles non listés
+# Fallback pour les modèles non listés dans MODEL_TOKEN_LIMITS.
 DEFAULT_TOKEN_LIMIT = 128000
 
 DEFAULT_SOURCE_LANG = "fr"
 DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
+# Limites de contexte par modèle. Sources : doc officielle de chaque provider.
+# Mettre à jour quand un nouveau modèle est ajouté.
 MODEL_TOKEN_LIMITS = {
-    # OpenAI GPT-5.5 series (avril 2026, 1M+ context)
+    # OpenAI GPT-5.5 series (1M+ context)
     "gpt-5.5": 1050000,
     "gpt-5.5-pro": 1050000,
-    # OpenAI GPT-5.4 series (mars 2026)
+    # OpenAI GPT-5.4 series
     "gpt-5.4": 400000,
     "gpt-5.4-mini": 400000,
     "gpt-5.4-nano": 400000,
     "gpt-5.4-pro": 400000,
-    # OpenAI GPT-5 series (2026)
+    # OpenAI GPT-5 series
     "gpt-5.2": 400000,
     "gpt-5.1": 400000,
     "gpt-5": 400000,
@@ -101,14 +99,13 @@ MODEL_TOKEN_LIMITS = {
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
     "chatgpt-4o-latest": 128000,
-    # Anthropic Claude 4.6+ (avril 2026, 1M context au prix standard
-    # selon doc Anthropic — "Claude Mythos Preview, Opus 4.7, Opus 4.6,
-    # and Sonnet 4.6 include the full 1M token context window at standard pricing").
-    # Haiku 4.5 reste sur 200K (pas listé dans les modèles 1M).
+    # Anthropic Claude 4.6+ : 1M context au prix standard (Opus 4.7, Opus 4.6,
+    # Sonnet 4.6 explicitement listés dans la doc Anthropic).
+    # Haiku 4.5 reste sur 200K (pas dans la liste 1M).
     "claude-opus-4-7": 1000000,
     "claude-opus-4-6": 1000000,
     "claude-sonnet-4-6": 1000000,
-    # Anthropic Claude 4.5 (2026)
+    # Anthropic Claude 4.5
     "claude-opus-4-5-20251101": 200000,
     "claude-sonnet-4-5-20250929": 200000,
     "claude-haiku-4-5-20251001": 200000,
@@ -118,12 +115,12 @@ MODEL_TOKEN_LIMITS = {
     # Anthropic Claude 3.x (legacy)
     "claude-3-5-sonnet-20240620": 200000,
     "claude-3-7-sonnet-20250219": 200000,
-    # Mistral (2026)
+    # Mistral
     "mistral-large-latest": 128000,
     "mistral-small-latest": 128000,
     "magistral-medium-latest": 40000,
     "magistral-small-latest": 40000,
-    # Google Gemini (2026)
+    # Google Gemini
     "gemini-3.1-pro-preview": 1000000,
     "gemini-3.1-flash-lite-preview": 1000000,
     "gemini-3-pro-preview": 1000000,
@@ -212,22 +209,9 @@ def _find_segment_breakpoint(segment, max_length):
 
 
 def segment_text(text, max_length):
-    """
-    Divise un texte Markdown en segments ne dépassant pas la longueur maximale spécifiée.
-
-    Priorité sémantique stricte pour le point de coupure (dans la 2nde moitié du segment) :
-      1. Heading H2 ou H3 (\\n## ou \\n### ) — préserve un contexte sémantique complet
-      2. Paragraphe (\\n\\n)
-      3. Heading niveau quelconque (\\n#)
-      4. Fin de phrase (. )
-      5. Hard cut (max_length) si rien au-delà du seuil min_pos
-
-    Args:
-        text (str): Texte Markdown à diviser.
-        max_length (int): Longueur maximale de chaque segment.
-
-    Returns:
-        list[str]: Liste des segments de texte Markdown.
+    """Coupure sémantique dans la 2nde moitié de chaque segment, par priorité :
+    H2/H3 > paragraphe > heading quelconque > fin de phrase > hard cut.
+    Garde une section sémantique complète au début de chaque segment suivant.
     """
     segments = []
     while text:
@@ -293,9 +277,9 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
     if not stripped:
         return
 
-    # Sanity ratio : sortie disproportionnellement courte vs source = refus / troncature / sortie type "OK"
-    # ou "Sorry, I can't do that". Garde-fou explicite pour les sources >= 500 chars,
-    # seuil 5% (cross-script FR→ZH descend rarement sous 30%, cross-script FR→AR autour de 60-80%).
+    # Sanity ratio : sortie disproportionnellement courte vs source (refus type "OK" /
+    # "Sorry, I can't do that" / troncature). Activé pour source >= 500 chars,
+    # seuil 5% avec floor 50 chars (cross-script FR→ZH ~30%, FR→AR ~60-80%).
     source_len = len(segment.strip())
     if source_len >= 500 and len(stripped) < max(50, source_len // 20):
         raise RuntimeError(
@@ -515,7 +499,10 @@ def _call_mistral(client, args, prompt, segment):
 
 def _call_claude(client, args, prompt, segment):
     messages = [{"role": "user", "content": prompt + "\n\n" + segment}]
-    response = client.messages.create(model=args.model, max_tokens=16384, messages=messages)
+    # 32768 : marge sur l'expansion cross-script (FR→JA/ZH/KO/AR/HI peuvent
+    # dépasser 16k tokens en sortie pour des segments source de 16k chars).
+    # Sonnet 4.6 et Opus 4.6+ supportent au moins 64k output tokens.
+    response = client.messages.create(model=args.model, max_tokens=32768, messages=messages)
     stop = _reason_name(response.stop_reason)
     if stop not in ("end_turn", "stop_sequence", None):
         raise RuntimeError(f"Claude abnormal stop_reason={stop!r} (model={args.model})")
@@ -601,9 +588,8 @@ def _dispatch_provider_call(
         text, provider = _call_gemini(client, args, prompt, segment), "gemini"
     else:
         text, provider = _call_openai(client, args, prompt, segment, is_translation_note), "openai"
-    # Empty-content guard: un provider qui retourne "" avec finish_reason="stop"
-    # produirait un fichier vide marqué success — exactement le silent-failure
-    # que cette branche corrige.
+    # Empty-content guard : un provider qui retourne "" avec finish_reason="stop"
+    # produirait sinon un fichier vide marqué success.
     if not text.strip():
         raise RuntimeError(f"{provider.capitalize()} returned empty content (model={args.model})")
     return text
@@ -618,28 +604,9 @@ def translate(
     use_gemini=False,
     is_translation_note=False,
 ):
-    """
-    Traduit un texte à l'aide de l'API OpenAI, Mistral AI, Claude ou Gemini, selon les paramètres spécifiés.
-    Cette fonction segmente d'abord le texte pour s'assurer qu'il respecte la limite de tokens du modèle.
-    Elle utilise un argument optionnel 'is_translation_note' pour gérer différemment les notes de traduction.
-
-    Args:
-        text (str): Texte à traduire.
-        client: Objet client de l'API de traduction (OpenAI, Mistral AI, Claude ou Gemini).
-        args: Objet argparse contenant les arguments de la ligne de commande.
-        use_mistral (bool): Si True, utilise l'API Mistral AI pour la traduction.
-        use_claude (bool): Si True, utilise l'API Claude pour la traduction.
-        use_gemini (bool): Si True, utilise l'API Gemini pour la traduction.
-        is_translation_note (bool): Si True, le texte est une note de traduction.
-
-    Returns:
-        str: Texte traduit.
-
-    Raises:
-        RuntimeError: si le finish_reason/stop_reason du provider est anormal,
-            si la sortie est vide, si elle contient un extrait source verbatim,
-            si elle est disproportionnellement courte vs la source, ou si
-            langdetect détecte la langue source comme dominante.
+    """Segmente puis traduit le texte, et lève RuntimeError si une garde de
+    silent-failure se déclenche (finish_reason anormal, sortie vide, extrait
+    source verbatim, ratio source/output trop faible, langue source détectée).
     """
     model_limit = MODEL_TOKEN_LIMITS.get(args.model, DEFAULT_TOKEN_LIMIT)
     segments = segment_text(text, min(16000, model_limit))
@@ -984,23 +951,8 @@ def translate_markdown_file(
     add_translation_note=False,
     force=False,
 ):
-    """
-    Traduit un fichier Markdown en utilisant les modèles de traitement du langage naturel de OpenAI, Mistral AI, Claude ou Gemini.
-
-    Args:
-        file_path (str): Chemin complet vers le fichier d'entrée.
-        output_path (str): Chemin complet vers le fichier de sortie.
-        client: Objet client de traduction.
-        args: Arguments supplémentaires pour la traduction.
-        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
-        use_claude (bool): Indique si l'API Claude doit être utilisée pour la traduction.
-        use_gemini (bool): Indique si l'API Gemini doit être utilisée pour la traduction.
-        add_translation_note (bool): Indique si une note de traduction doit être ajoutée.
-        force (bool): Indique si la traduction doit être forcée même si une traduction existe déjà.
-
-    Returns:
-        str: "success" si la traduction a été écrite, "skipped" si le fichier était vide ou
-             si la sortie existait déjà sans --force, "failure" si une exception a été levée.
+    """Retourne "success" / "skipped" (vide ou déjà traduit) / "failure"
+    (toute exception est attrapée et propagée par status, sans écrire le fichier).
     """
     # Fallback si os.path.join lève dans le bloc try (le except a un nom valide).
     relative_file_path = file_path
@@ -1048,20 +1000,6 @@ def translate_markdown_file(
 
 
 def is_excluded(path):
-    """
-    Vérifie si le chemin donné correspond à l'un des motifs d'exclusion.
-
-    Cette fonction parcourt la liste des motifs d'exclusion définis dans EXCLUDE_PATTERNS.
-    Si l'un de ces motifs est trouvé dans le chemin fourni, la fonction renvoie True,
-    indiquant que le chemin doit être exclu du processus de traduction.
-
-    Args:
-        path (str): Le chemin du fichier ou du répertoire à vérifier.
-
-    Returns:
-        bool: True si le chemin correspond à l'un des motifs d'exclusion, False sinon.
-    """
-
     return any(pattern in path for pattern in EXCLUDE_PATTERNS)
 
 
@@ -1164,23 +1102,8 @@ def translate_directory(
     add_translation_note,
     force,
 ):
-    """
-    Traduit tous les fichiers markdown dans le répertoire d'entrée et ses sous-répertoires.
-
-    Args:
-        input_dir (str): Chemin vers le répertoire d'entrée.
-        output_dir (str): Chemin vers le répertoire de sortie.
-        client: Objet client de traduction.
-        args: Arguments supplémentaires pour la traduction.
-        use_mistral (bool): Indique si l'API Mistral AI doit être utilisée pour la traduction.
-        use_claude (bool): Indique si l'API Claude doit être utilisée pour la traduction.
-        use_gemini (bool): Indique si l'API Gemini doit être utilisée pour la traduction.
-        add_translation_note (bool): Indique si une note de traduction doit être ajoutée.
-        force (bool): Indique si la traduction doit être forcée même si une traduction existe déjà.
-
-    Returns:
-        dict: {"failed": list[str], "skipped": list[str]} — chemins des fichiers qui ont
-        échoué et ceux qui ont été skipped (déjà traduits, fichier vide, etc.).
+    """Walk récursif. Retourne {"failed": [...], "skipped": [...]} avec les
+    chemins absolus des fichiers ; le caller agrège pour décider de exit(1).
     """
     failed_files = []
     skipped_files = []
@@ -1414,24 +1337,7 @@ def _run_directory(args, client):
 
 
 def main():
-    """
-    Point d'entrée principal du script de traduction de fichiers Markdown.
-
-    Ce script traduit des fichiers Markdown d'une langue source à une langue cible en utilisant
-    les services de traduction de l'API OpenAI, Mistral AI, Claude ou Gemini. Il prend en charge la segmentation
-    des textes longs et peut également ajouter une note de traduction en fin de document.
-
-    Arguments du script:
-    --source_dir: Répertoire contenant les fichiers Markdown à traduire.
-    --target_dir: Répertoire de destination pour les fichiers traduits.
-    --model: Modèle de traduction à utiliser.
-    --target_lang: Langue cible pour la traduction.
-    --source_lang: Langue source des documents.
-    --use_mistral: Indicateur pour utiliser l'API Mistral AI pour la traduction.
-    --use_claude: Indicateur pour utiliser l'API Claude pour la traduction.
-    --use_gemini: Indicateur pour utiliser l'API Gemini pour la traduction.
-    --add_translation_note: Indicateur pour ajouter une note de traduction au contenu traduit.
-    """
+    """Entrée CLI : exit(1) si au moins un fichier a échoué, exit(0) sinon."""
     args = _build_arg_parser().parse_args()
     _validate_input_paths(args)
     client = _select_provider_client(args)
@@ -1442,10 +1348,6 @@ def main():
         )
 
     failed_files = _run_single_file(args, client) if args.file else _run_directory(args, client)
-
-    if args.use_mistral or args.use_claude:
-        with contextlib.suppress(TypeError):
-            del client
 
     if failed_files:
         print(

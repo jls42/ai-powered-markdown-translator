@@ -6,7 +6,7 @@
   - **Fix silent-failure sur traductions longues** :
     - Validation langue post-traduction sur tous les providers (OpenAI, Mistral, Claude, Gemini) : couche déterministe (extrait source retrouvé verbatim) + couche probabiliste (`langdetect`)
     - Whitelist `finish_reason` / `stop_reason` : lever `RuntimeError` sur tout état hors de la whitelist (truncation, content_filter, etc.)
-    - `max_tokens` Claude : `4096` → `16384` (évite truncation latente sur segments de 16k chars)
+    - `max_tokens` Claude : `4096` → `32768` (évite truncation latente sur segments 16k, marge cross-script FR→JA/ZH/KO/AR/HI)
     - Segmentation heading-aware : priorité H2/H3 dans la 2nde moitié du segment (chaque segment commence par une section sémantique complète)
     - Propagation des erreurs jusqu'à exit code non-zéro : `translate_markdown_file` retourne un statut typé `success` / `failure` / `skipped`, `main()` `sys.exit(1)` si au moins un fichier a échoué (single-file et batch)
     - Empty-content guard sur tous les providers, sanity ratio source/output (≥ 500 chars, < 5% = refus), validation placeholders code (`#CODEBLOCK`/`#INLINECODE`), normalisation post-LLM (séparateurs/liens collés à un heading), `BadRequestError` retry sans `reasoning_effort`
