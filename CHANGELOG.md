@@ -2,6 +2,20 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.10** Note de traduction multi-position + format marker "embed card" (2026-05-05) :
+  - **Nouvelles options CLI** (additives, défauts inchangés → **non breaking**) :
+    - `--note_position {top,bottom,both}` (défaut : `bottom`) : place la note en haut, en bas, ou aux deux endroits du fichier traduit.
+    - `--note_format {legacy,marker}` (défaut : `legacy`) :
+      - `legacy` reproduit strictement le comportement v1.9 (paragraphe gras `**…**`) **byte-for-byte**.
+      - `marker` émet une link reference definition Markdown invisible (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) suivie d'un **blockquote 3-paragraphes** structuré pour un rendu type "GitHub repo embed card" : titre du projet en code inline (`**\`ai-powered-markdown-translator\`\*\*`), description traduite par le LLM, et lien CTA (`[Voir le projet sur GitHub ↗](URL)`) avec arrow visible. Exploitable au build par un plugin remark (cf. blog jls42.org → plugin `remark-translation-banner`).
+  - **Frontmatter-aware insertion** : en mode `top` ou `both`, la note est insérée **après le bloc `---` de fermeture** du frontmatter YAML (sécurité Astro Content Collections / gray-matter). Helper `_split_frontmatter` détecte `---\n…\n---\n` au début du fichier et préserve son intégrité.
+  - **Sanitizer modèle whitelist** : `_sanitize_model` remplace tout caractère hors `[A-Za-z0-9._:/-]` par `_`, fallback `unknown` si vide. Aligne sur le validateur côté plugin remark Astro et neutralise les caractères qui casseraient le format du marker (espace, guillemet, parenthèse, virgule, etc.).
+  - **Refactor interne** : `_append_translation_note` (1 fonction monolithique) → 6 helpers purs (`_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/composer séparés (le builder retourne un bloc pur sans séparateur, le composer applique les `\n\n` selon la position).
+  - **`_quote_lines` blank-preserving** : préfixe chaque ligne par `> `, en transformant les lignes vides en `>` seul. Permet à mdast de voir 3 paragraphes distincts dans le blockquote (titre / description / lien) au lieu d'un seul paragraphe avec line-breaks.
+  - **`_build_translation_note_block` adaptatif** : selon le nombre de paragraphes que le LLM a préservés (3 = format card complet, 2 = phrase + lien, 1 = fallback monolithique), assemble le bloc différemment. Robuste aux dérives de traduction.
+  - **Compatibilité ascendante** : `getattr(args, "note_position", "bottom")` et `getattr(args, "note_format", "legacy")` côté `_compose_with_notes` — les Namespace sans ces attributs (tests existants, appels programmatiques externes) continuent à fonctionner sans modification.
+  - **Tests** : `tests/test_translation_note_position.py` (29 tests unitaires) couvre la matrice position × format, le préfixage multi-ligne, la rétrocompat byte-for-byte, le sanitizer, le split frontmatter, le format 3-paragraphes, le fallback 2-paragraphes, et un test e2e via `translate_markdown_file`. `tests/test_silent_failure.py` reste **inchangé** et passe sans modification (validation de la rétrocompat).
+  - 182 tests pass, 0 régression.
 - **1.9** Fix silent-failure + outillage qualité complet (2026-05-03) :
   - **Fix silent-failure sur traductions longues** :
     - Validation langue post-traduction sur tous les providers (OpenAI, Mistral, Claude, Gemini) : couche déterministe (extrait source retrouvé verbatim) + couche probabiliste (`langdetect`)

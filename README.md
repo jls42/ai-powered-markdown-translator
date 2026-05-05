@@ -125,7 +125,37 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--keep_filename`        | Conserver le nom de fichier original                                     |
 | `--news`                 | Mode actualités : protège les citations EN, gère les drapeaux par langue |
 | `--add_translation_note` | Ajouter une note de traduction                                           |
+| `--note_position`        | Position de la note : `top`, `bottom` (défaut), ou `both`                |
+| `--note_format`          | Format de la note : `legacy` (défaut, paragraphe gras) ou `marker`       |
 | `--include_model`        | Inclure le nom du modèle dans le fichier de sortie                       |
+
+### Note de traduction : positions et formats
+
+Avec `--add_translation_note`, le translator peut placer la note en haut, en bas, ou aux deux endroits, et la rendre soit en format texte simple (rétrocompatible) soit en format `marker` consommable par un plugin Markdown.
+
+**Position** (`--note_position`) :
+
+- `bottom` (défaut) : note en fin de fichier, comme historiquement.
+- `top` : note insérée **après le frontmatter YAML** (sécurité Astro Content Collections, gray-matter, etc.).
+- `both` : note insérée en haut ET en bas (un seul appel LLM, contenu réutilisé pour les deux placements).
+
+**Format** (`--note_format`) :
+
+- `legacy` (défaut) : paragraphe gras `**...**` — comportement strictement identique à v1.9, byte-for-byte. Compatible avec Hugo, GitHub, GitLab, et tout renderer Markdown.
+- `marker` : link reference definition Markdown invisible (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) suivie d'un blockquote en gras. Lisible nativement sur GitHub/GitLab, et exploitable au build par un plugin remark côté Astro pour produire une bannière stylisée (cf. blog jls42.org).
+
+```bash
+# Compatibilité legacy (rien ne change vs v1.9)
+python translate.py --file article.mdx --target_lang en --add_translation_note
+
+# Format marker, note en haut uniquement (Astro)
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position top
+
+# Format marker en haut ET en bas
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position both
+```
 
 ### Modèles par défaut (2026)
 
