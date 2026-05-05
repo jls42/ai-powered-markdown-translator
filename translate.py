@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime
 import glob
 import os
 import re
@@ -868,21 +869,137 @@ def _validate_news_post(translated_content, original_quotes, attribution_urls, a
         _validate_news_flags_for_other(translated_content, args, len(original_quotes))
 
 
-def _append_translation_note(translated_content, client, args, use_mistral, use_claude, use_gemini):
-    note_source = (
-        "Ce document a été traduit de la version "
+def _build_translation_note_source(args):
+    """Émet une note structurée en 3 paragraphes (style "GitHub repo embed card") :
+
+    1. Titre repo (nom du projet en code inline + gras) — invariant : protégé
+       de la traduction par les backticks (mécanisme `_protect_inline_code`).
+    2. Description traduite (phrase explicative).
+    3. Lien CTA Markdown avec arrow visible.
+
+    Cette structure permet au consommateur (plugin remark-translation-banner
+    côté blog) de construire un layout en grille (icône / titre+desc / CTA)
+    avec stretched link. Si le LLM ne préserve pas les `\\n\\n`, le builder
+    retombe gracieusement sur 2 paragraphes ou 1 paragraphe en gras.
+    """
+    title = "**`ai-powered-markdown-translator`**"
+    phrase = (
+        "Article traduit du "
         + args.source_lang
-        + " vers la langue "
+        + " vers le "
         + args.target_lang
-        + " en utilisant le modèle "
+        + " avec "
         + args.model
-        + ". Pour plus d'informations sur le processus de traduction, consultez "
-        "https://github.com/jls42/ai-powered-markdown-translator"
+        + "."
     )
+    link = "[Voir le projet sur GitHub ↗](https://github.com/jls42/ai-powered-markdown-translator)"
+    return title + "\n\n" + phrase + "\n\n" + link
+
+
+def _sanitize_model(model):
+    cleaned = re.sub(r"[^A-Za-z0-9._:/-]+", "_", model).strip("_")
+    return cleaned or "unknown"
+
+
+def _quote_lines(text):
+    """Préfixe chaque ligne par '> ', en préservant les lignes vides comme '>'.
+
+    La préservation d'une ligne vide en `>` est cruciale : elle permet à mdast
+    de voir deux paragraphes distincts dans le même blockquote (sentence + CTA),
+    plutôt qu'un seul paragraphe avec un line-break interne.
+    """
+    out = []
+    for ln in text.strip().splitlines():
+        stripped = ln.rstrip()
+        if stripped:
+            out.append(f"> {stripped}")
+        else:
+            out.append(">")
+    return "\n".join(out)
+
+
+def _split_frontmatter(content):
+    lines = content.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return "", content
+    for index in range(1, len(lines)):
+        if lines[index].strip() == "---":
+            frontmatter = "".join(lines[: index + 1]).rstrip("\n")
+            body = "".join(lines[index + 1 :]).lstrip("\n")
+            return frontmatter, body
+    return "", content
+
+
+def _build_translation_note_block(args, translated_note, placement, fmt):
+    if fmt == "legacy":
+        return "**" + translated_note.strip() + "**"
+    safe_model = _sanitize_model(args.model)
+    title = (
+        f"v=1 source={args.source_lang} target={args.target_lang} "
+        f"model={safe_model} date={datetime.date.today().isoformat()}"
+    )
+    # Selon le nombre de paragraphes que le LLM a préservés, on assemble
+    # le bloc différemment :
+    #   - 3+ paragraphes (titre + desc + lien) → on garde tel quel, sans
+    #     wrap supplémentaire (le titre porte déjà ses `**...**` propres).
+    #   - 2 paragraphes (phrase + lien) → on wrap la phrase en gras pour
+    #     préserver l'emphase, le lien reste hors du `<strong>`.
+    #   - 1 paragraphe (LLM a tout collé) → fallback : tout en gras.
+    parts = re.split(r"\n\s*\n", translated_note.strip())
+    if len(parts) >= 3:
+        body = "\n\n".join(p.strip() for p in parts)
+    elif len(parts) == 2:
+        body = "**" + parts[0].strip() + "**\n\n" + parts[1].strip()
+    else:
+        body = "**" + translated_note.strip() + "**"
+    quoted = _quote_lines(body)
+    # Blank line between definition and blockquote keeps the output Prettier-friendly
+    # (Prettier MDX inserts one anyway). The remark plugin still detects the adjacent
+    # blockquote — mdast does not nodify the blank-line separator.
+    return f'[ai-translation-note-{placement}]: <> "{title}"\n\n{quoted}'
+
+
+def _compose_with_notes(content, args, translated_note, fmt):
+    pos = getattr(args, "note_position", "bottom")
+    base = content.rstrip("\n")
+    blocks = {
+        "top": _build_translation_note_block(args, translated_note, "top", fmt),
+        "bottom": _build_translation_note_block(args, translated_note, "bottom", fmt),
+    }
+    frontmatter, body = _split_frontmatter(base)
+
+    if pos == "bottom":
+        return base + "\n\n" + blocks["bottom"] + "\n"
+
+    if pos == "top":
+        if frontmatter:
+            return frontmatter + "\n\n" + blocks["top"] + "\n\n" + body.rstrip("\n") + "\n"
+        return blocks["top"] + "\n\n" + base + "\n"
+
+    if pos == "both":
+        if frontmatter:
+            return (
+                frontmatter
+                + "\n\n"
+                + blocks["top"]
+                + "\n\n"
+                + body.rstrip("\n")
+                + "\n\n"
+                + blocks["bottom"]
+                + "\n"
+            )
+        return blocks["top"] + "\n\n" + base + "\n\n" + blocks["bottom"] + "\n"
+
+    raise ValueError(f"unknown note_position: {pos}")
+
+
+def _append_translation_note(translated_content, client, args, use_mistral, use_claude, use_gemini):
+    note_source = _build_translation_note_source(args)
     translation_note = translate(
         note_source, client, args, use_mistral, use_claude, use_gemini, True
     )
-    return translated_content.rstrip("\n") + "\n\n**" + translation_note.strip() + "**\n"
+    fmt = getattr(args, "note_format", "legacy")
+    return _compose_with_notes(translated_content, args, translation_note, fmt)
 
 
 def _resolve_relative_paths(file_path, output_path, args):
@@ -1199,6 +1316,22 @@ def _build_arg_parser():
         "--add_translation_note",
         action="store_true",
         help="Ajouter une note de traduction au contenu traduit",
+    )
+    parser.add_argument(
+        "--note_position",
+        choices=["top", "bottom", "both"],
+        default="bottom",
+        help="Position de la note de traduction (défaut: bottom). Requiert --add_translation_note.",
+    )
+    parser.add_argument(
+        "--note_format",
+        choices=["legacy", "marker"],
+        default="legacy",
+        help=(
+            "Format de la note de traduction (défaut: legacy = paragraphe gras compatible v1.9). "
+            "'marker' produit une link reference definition + blockquote (consommable par un plugin "
+            "Markdown comme remark-translation-banner)."
+        ),
     )
     parser.add_argument(
         "--eco",
