@@ -869,21 +869,21 @@ def _validate_news_post(translated_content, original_quotes, attribution_urls, a
         _validate_news_flags_for_other(translated_content, args, len(original_quotes))
 
 
-def _build_translation_note_source(args):
-    """Émet une note structurée en 3 paragraphes (style "GitHub repo embed card") :
+def _translation_note_invariants():
+    """Parties INVARIANTES de la note de traduction (jamais envoyées au LLM).
 
-    1. Titre repo (nom du projet en code inline + gras) — invariant : protégé
-       de la traduction par les backticks (mécanisme `_protect_inline_code`).
-    2. Description traduite (phrase explicative).
-    3. Lien CTA Markdown avec arrow visible.
-
-    Cette structure permet au consommateur (plugin remark-translation-banner
-    côté blog) de construire un layout en grille (icône / titre+desc / CTA)
-    avec stretched link. Si le LLM ne préserve pas les `\\n\\n`, le builder
-    retombe gracieusement sur 2 paragraphes ou 1 paragraphe en gras.
+    Le titre du repo et l'URL GitHub ne doivent JAMAIS être altérés par le
+    LLM (slug, casse, backticks, scheme), donc on les assemble côté Python
+    après traduction de la phrase descriptive. Voir `_append_translation_note`.
     """
     title = "**`ai-powered-markdown-translator`**"
-    phrase = (
+    link = "[Voir le projet sur GitHub ↗](https://github.com/jls42/ai-powered-markdown-translator)"
+    return title, link
+
+
+def _build_translation_note_phrase(args):
+    """Phrase descriptive — SEULE partie envoyée au LLM pour traduction."""
+    return (
         "Article traduit du "
         + args.source_lang
         + " vers le "
@@ -892,7 +892,23 @@ def _build_translation_note_source(args):
         + args.model
         + "."
     )
-    link = "[Voir le projet sur GitHub ↗](https://github.com/jls42/ai-powered-markdown-translator)"
+
+
+def _build_translation_note_source(args):
+    """Émet une note structurée en 3 paragraphes (style "GitHub repo embed card") :
+
+    1. Titre repo (nom du projet en code inline + gras) — invariant assemblé en Python.
+    2. Description (phrase explicative) — seule partie traduite par le LLM.
+    3. Lien CTA Markdown avec arrow visible — invariant assemblé en Python.
+
+    Cette structure permet au consommateur (plugin remark-translation-banner
+    côté blog) de construire un layout en grille (icône / titre+desc / CTA).
+    Le pipeline réel (`_append_translation_note`) traduit UNIQUEMENT la phrase
+    et reconstruit le bloc complet — cette fonction reste exposée pour les
+    tests qui inspectent le format source attendu.
+    """
+    title, link = _translation_note_invariants()
+    phrase = _build_translation_note_phrase(args)
     return title + "\n\n" + phrase + "\n\n" + link
 
 
@@ -994,11 +1010,22 @@ def _compose_with_notes(content, args, translated_note, fmt):
 
 
 def _append_translation_note(translated_content, client, args, use_mistral, use_claude, use_gemini):
-    note_source = _build_translation_note_source(args)
-    translation_note = translate(
-        note_source, client, args, use_mistral, use_claude, use_gemini, True
-    )
+    # On ne soumet au LLM QUE la phrase descriptive : titre du repo et lien
+    # GitHub sont assemblés côté Python pour garantir l'invariance du slug
+    # `ai-powered-markdown-translator` et de l'URL (que la fonction
+    # `translate()` n'aurait protégés ni via `_protect_inline_code`, ni via
+    # `_protect_code_blocks` — ces protections vivent dans `_translate_pipeline`).
     fmt = getattr(args, "note_format", "legacy")
+    phrase_source = _build_translation_note_phrase(args)
+    translated_phrase = translate(
+        phrase_source, client, args, use_mistral, use_claude, use_gemini, True
+    ).strip()
+    if fmt == "marker":
+        title, link = _translation_note_invariants()
+        translation_note = title + "\n\n" + translated_phrase + "\n\n" + link
+    else:
+        # legacy : phrase simple wrappée en `**...**` par _build_translation_note_block
+        translation_note = translated_phrase
     return _compose_with_notes(translated_content, args, translation_note, fmt)
 
 
