@@ -141,11 +141,11 @@ Avec `--add_translation_note`, le translator peut placer la note en haut, en bas
 
 **Format** (`--note_format`) :
 
-- `legacy` (défaut) : paragraphe gras `**...**` — comportement strictement identique à v1.9, byte-for-byte. Compatible avec Hugo, GitHub, GitLab, et tout renderer Markdown.
+- `legacy` (défaut) : paragraphe gras `**...**` — comportement strictement identique à v1.8, byte-for-byte. Compatible avec Hugo, GitHub, GitLab, et tout renderer Markdown.
 - `marker` : link reference definition Markdown invisible (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) suivie d'un blockquote en gras. Lisible nativement sur GitHub/GitLab, et exploitable au build par un plugin remark côté Astro pour produire une bannière stylisée (cf. blog jls42.org).
 
 ```bash
-# Compatibilité legacy (rien ne change vs v1.9)
+# Compatibilité legacy (rien ne change vs v1.8)
 python translate.py --file article.mdx --target_lang en --add_translation_note
 
 # Format marker, note en haut uniquement (Astro)
