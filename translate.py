@@ -588,11 +588,21 @@ _NEWS_FINAL_CHECKS = (
 
 _PLACEHOLDER_PRESERVATION_CONTRACT = (
     "\n\n<placeholder_preservation_contract>"
-    "\nThe input may contain placeholders like `#INLINECODE0#`, `#INLINECODE1#`, `#CODEBLOCK0#`, etc. These represent code blocks and inline code extracted before translation."
-    "\nEVERY such placeholder present in the input MUST appear in the output exactly as-is: same prefix (`#INLINECODE` or `#CODEBLOCK`), same digit, same trailing `#`. Do not rename, translate, transliterate, drop, or merge them. Do not add new ones."
+    "\nThe input may contain placeholders like `#INLINECODE0#`, `#INLINECODE1#`, `#CODEBLOCK0#`, `#URL0#`, `#ANCHOR0#`, etc. These represent code blocks, inline code, URLs, and explicit HTML anchors extracted before translation."
+    "\nEVERY such placeholder present in the input MUST appear in the output exactly as-is: same prefix (`#INLINECODE`, `#CODEBLOCK`, `#URL`, `#ANCHOR`), same digit, same trailing `#`. Do not rename, translate, transliterate, drop, or merge them. Do not add new ones."
     "\nWhen the target language reorders sentence components (e.g. English SVO → Chinese/Japanese/Korean SOV, or relative clause repositioning in Hindi/Arabic), move the placeholder to its grammatically correct position — but keep it intact."
-    "\nBefore returning, count `#INLINECODE` and `#CODEBLOCK` occurrences in your output. The count MUST equal the count in the input. If a placeholder fell into a table cell or list item that you rephrased, double-check it survived the rewrite."
+    "\nBefore returning, count `#INLINECODE`, `#CODEBLOCK`, `#URL`, and `#ANCHOR` occurrences in your output. The count MUST equal the count in the input. If a placeholder fell into a table cell or list item that you rephrased, double-check it survived the rewrite."
     "\n</placeholder_preservation_contract>"
+)
+
+_HEADING_ANCHOR_CONSISTENCY_CONTRACT = (
+    "\n\n<heading_anchor_consistency_contract>"
+    "\nFor Markdown anchor links `[text](#fragment)` where `fragment` is a slug derived from a heading in the same document (lowercase, spaces replaced by `-`), translate `fragment` TOGETHER with the heading it points to. GitHub regenerates the anchor slug from the translated heading, so an unchanged fragment breaks the link if the heading is translated."
+    "\nExample EN→FR:"
+    "\n  WRONG (link breaks): output keeps `See [the cache section](#caching-strategy)` while the heading becomes `## Stratégie de mise en cache`."
+    "\n  RIGHT (link works): output is `Voir [la section sur la mise en cache](#stratégie-de-mise-en-cache)` paired with `## Stratégie de mise en cache`."
+    '\nIf a `(#fragment)` is already replaced by an `#ANCHOR0#` (or similar) placeholder, leave that placeholder alone — it represents an explicit `<a name="..."></a>` declaration whose identifier is technical and must NOT be translated. Only `(#X)` fragments still visible in the input fall under this consistency rule.'
+    "\n</heading_anchor_consistency_contract>"
 )
 
 
@@ -637,6 +647,7 @@ def _build_system_instructions(args, is_translation_note):
     # (cf. caveman EN→HI : header HI + body EN, détecté par la garde layer 2).
     base = _build_base_markdown_prompt(args) + _MARKDOWN_TRANSLATION_CONTRACT
     base += _PLACEHOLDER_PRESERVATION_CONTRACT
+    base += _HEADING_ANCHOR_CONSISTENCY_CONTRACT
     base += _build_non_latin_script_addendum(args.target_lang)
     if args.news:
         base += _build_news_addendum(args)
