@@ -146,8 +146,7 @@ def news_quote_placeholder_regex(index):
 # Lignes vraiment structurelles → à JETER (pas de contenu textuel utile)
 # Inclut: code fence (```), hr/frontmatter delimiters (---), table separators (|),
 # placeholders (#CODEBLOCK1#, <NEWSQUOTE id="1"/>…), YAML frontmatter keys (heroImage:, tags:, …),
-# blockquotes (> …) car les citations protégées par --news y sont conservées
-# verbatim source/cible, et continuations de liste/dict YAML (crochets, accolades,
+# continuations de liste/dict YAML (crochets, accolades,
 # strings 'item' ou 'item', sur leur propre ligne après reformatage prettier).
 # Inclut aussi les barres de langues markdown (README/CHANGELOG/blog multilingue) :
 # une ligne qui ne contient QUE des liens [label](file.md) séparés par `|`, avec
@@ -163,7 +162,6 @@ _STRUCTURAL_LINE = re.compile(
     r"|#[A-Z]+\d+#"  # placeholder (#CODEBLOCK1#, etc.)
     r"|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"  # placeholder news XML
     r"|[A-Za-z_][\w-]*:(?:\s|$)"  # YAML key: (title:, tags:, …)
-    r"|>"  # blockquote
     r"|[\[\]{}]"  # YAML list/dict bracket on own line
     r"|['\"][^'\"\n]+['\"]\s*,?\s*$"  # YAML string item ('item' or "item", possibly with trailing comma)
     r"|(?:\S+\s+)?\[[^\]]+\]\([^)]+\.md\)(?:\s*\|\s*\[[^\]]+\]\([^)]+\.md\))+\s*$"  # markdown language/nav bar
@@ -173,6 +171,8 @@ _STRUCTURAL_LINE = re.compile(
 )
 # Préfixes Markdown inline → à STRIPPER (on garde le texte derrière)
 _INLINE_MD_PREFIX = re.compile(r"^\s*(?:[-*+]\s+|#{1,6}\s+|\d+\.\s+)")
+_EMPTY_BLOCKQUOTE_LINE = re.compile(r"^\s*>\s*$")
+_BLOCKQUOTE_PREFIX = re.compile(r"^\s*>\s?")
 _URL_OR_PLACEHOLDER = re.compile(
     r"https?://\S+|#(?:CODEBLOCK|INLINECODE)\d+#|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"
 )
@@ -249,7 +249,7 @@ def _looks_like_proper_noun_list(window):
     return upper_starts / len(words) > 0.7
 
 
-def _extract_source_windows(segment):
+def _extract_source_windows(segment, ignore_blockquotes=False):
     """Retourne des fenêtres textuelles 'saines' (≥120 chars) issues du segment source,
     en regroupant les paragraphes wrappés. Pour les paragraphes longs (≥600 chars), extrait
     3 fenêtres (début/milieu/fin) pour couvrir le cas où le source non-traduit serait au milieu."""
@@ -257,9 +257,14 @@ def _extract_source_windows(segment):
     for para in re.split(r"\n\s*\n", segment):
         kept_lines = []
         for line in para.split("\n"):
+            if _EMPTY_BLOCKQUOTE_LINE.match(line):
+                continue
+            if ignore_blockquotes and _BLOCKQUOTE_PREFIX.match(line):
+                continue
             if _STRUCTURAL_LINE.match(line):
                 continue
-            kept_lines.append(_INLINE_MD_PREFIX.sub("", line))
+            unquoted = _BLOCKQUOTE_PREFIX.sub("", line)
+            kept_lines.append(_INLINE_MD_PREFIX.sub("", unquoted))
         if not kept_lines:
             continue
         joined = " ".join(kept_lines)
@@ -316,7 +321,7 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
         )
 
     out_norm = re.sub(r"\s+", " ", stripped).casefold()
-    for window in _extract_source_windows(segment):
+    for window in _extract_source_windows(segment, ignore_blockquotes=args.news):
         if _looks_like_proper_noun_list(window):
             continue
         window_norm = re.sub(r"\s+", " ", window).casefold()
@@ -365,6 +370,7 @@ def _build_base_markdown_prompt(args):
         "Output ONLY the translated Markdown, with no comments or explanations. "
         "Preserve the complete Markdown structure: headings, lists, tables, blockquotes, "
         "front matter, MDX/HTML tags, directives, comments, and blank-line separation. "
+        "Translate human-readable text inside blockquotes while preserving the `>` markers. "
         "For Markdown links [text](url), translate the visible link text and keep the URL unchanged. "
         "For Markdown tables, preserve pipes, separator rows, alignment markers, numbers, units, "
         "IDs, and model/product names; translate human-readable headers and cell labels. "
@@ -471,7 +477,7 @@ def _build_news_rules_other(args, target_flag, placeholder_example):
     )
 
 
-_NEWS_COMMON_CONTRACT = (
+_MARKDOWN_TRANSLATION_CONTRACT = (
     "\n\n<markdown_translation_contract>"
     "\n<completion_rules>"
     "\n- The output MUST include EVERY part of the source document."
@@ -479,6 +485,7 @@ _NEWS_COMMON_CONTRACT = (
     "\n- Preserve ALL paragraphs, lists, code blocks, tables, and blockquotes from the source."
     "\n- Translate the document FROM start TO end. The output must reach the same final element as the source (last paragraph, last list item, last section)."
     "\n- DO NOT truncate, summarize, merge, or skip any element."
+    "\n- Translate ALL prose into the target language. Do NOT leave any sentence, paragraph, list item, table cell, blockquote, image alt text, or HTML attribute value (alt=, title=, aria-label=) in the source language. Each prose string must be fully rendered in the target language."
     "\n</completion_rules>"
     "\n<markdown_structure_rules>"
     "\n- ALWAYS preserve a blank line between a horizontal rule `---` and any heading. They MUST NEVER be on the same line."
@@ -490,10 +497,16 @@ _NEWS_COMMON_CONTRACT = (
     "\n- In front matter, translate only human-readable prose string values. Keep technical or structural fields unchanged: dates, slugs, paths, file references, tag arrays, ids, booleans, numbers, and identifier-like values. Update an existing locale/lang/language code to the target language; do not add one if absent."
     "\n</markdown_structure_rules>"
     "\n<final_checklist>"
-    "\nBefore returning, verify silently: all headings are present; all `<NEWSQUOTE` tags are present; all URLs are unchanged; the target flag count is correct; no source flag remains; the final section is complete."
+    "\nBefore returning, verify silently: all headings are present; all URLs are unchanged; the final section is complete; nothing has been truncated or summarized; EVERY prose paragraph has been translated to the target language (no source-language sentences remain)."
     "\nReturn ONLY the translated Markdown. No checklist, no commentary."
     "\n</final_checklist>"
     "\n</markdown_translation_contract>"
+)
+
+_NEWS_FINAL_CHECKS = (
+    "\n\n<news_final_checks>"
+    "\nAdditional checks for news mode: every `<NEWSQUOTE` tag must be present in its original Latin form with the same id; the target flag emoji count must equal the citation count; no source flag (🇫🇷) remains anywhere."
+    "\n</news_final_checks>"
 )
 
 
@@ -504,13 +517,18 @@ def _build_news_addendum(args):
         rules = _build_news_rules_en(placeholder_example)
     else:
         rules = _build_news_rules_other(args, target_flag, placeholder_example)
-    return rules + _NEWS_COMMON_CONTRACT
+    return rules + _NEWS_FINAL_CHECKS
 
 
 def _build_system_instructions(args, is_translation_note):
     if is_translation_note:
         return _build_translation_note_prompt(args)
-    base = _build_base_markdown_prompt(args)
+    # Le contrat de complétude/structure markdown s'applique à TOUTES les
+    # traductions (news ou non) — sans cette instruction explicite, certains
+    # LLMs (gpt-5.x compris) "résument" les longs documents techniques en
+    # traduisant uniquement le header et en laissant le body en source_lang
+    # (cf. caveman EN→HI : header HI + body EN, détecté par la garde layer 2).
+    base = _build_base_markdown_prompt(args) + _MARKDOWN_TRANSLATION_CONTRACT
     if args.news:
         base += _build_news_addendum(args)
     return base
