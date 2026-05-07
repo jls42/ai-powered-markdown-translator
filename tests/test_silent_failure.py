@@ -691,6 +691,69 @@ class TestStructuralLineLanguageBar(unittest.TestCase):
         self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
 
 
+class TestStructuralLineHTML(unittest.TestCase):
+    """README HTML-style (cf. EurekAI) : `<p align="center">` et nav-bars HTML
+    `<a href="X.md">🇬🇧 English</a> · <a href="Y.md">🇪🇸 Español</a>` ont leurs
+    URLs et noms de langues conservés à l'identique source/cible — donc
+    matcheraient verbatim dans la sortie sans cette exception structurelle."""
+
+    def test_html_open_tag_alone_is_structural(self):
+        for line in ('<p align="center">', "<p>", "<div class='hero'>", "<section>"):
+            self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line), line)
+
+    def test_html_close_tag_alone_is_structural(self):
+        for line in ("</p>", "</div>", "</section>"):
+            self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line), line)
+
+    def test_html_self_closing_tag_alone_is_structural(self):
+        for line in ("<br>", "<br/>", "<br />", "<hr>", '<img src="x.png" alt="y" />'):
+            self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line), line)
+
+    def test_html_nav_bar_with_flags_is_structural(self):
+        """Le bandeau language switcher EurekAI."""
+        line = (
+            '<a href="README-en.md">🇬🇧 English</a> · '
+            '<a href="README-es.md">🇪🇸 Español</a> · '
+            '<a href="README-pt.md">🇧🇷 Português</a><br>'
+        )
+        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+
+    def test_html_nav_bar_pipe_separator_is_structural(self):
+        line = '<a href="a.md">A</a> | <a href="b.md">B</a> | <a href="c.md">C</a>'
+        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+
+    def test_html_paragraph_with_strong_text_is_NOT_structural(self):
+        """Une vraie phrase avec balises inline doit rester traduite (pas skip)."""
+        line = "<strong>Transforme votre contenu en expérience interactive.</strong>"
+        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+
+
+class TestExtractSourceWindowsStripsHTML(unittest.TestCase):
+    """Le cleaning de fenêtre source doit strip les balises HTML inline
+    (mais conserver le texte) pour éviter les faux positifs où des balises
+    littérales (<strong>, <span>, etc.) restent identiques source/cible."""
+
+    def test_html_inline_tags_are_stripped_text_kept(self):
+        # On force une fenêtre ≥120 chars cleaned pour passer le filtre.
+        prose = (
+            "<strong>Phrase suffisamment longue pour passer le seuil de 120 "
+            "caracteres apres avoir retire les balises HTML inline du texte "
+            "source.</strong>"
+        )
+        windows = translate._extract_source_windows(prose)
+        self.assertEqual(len(windows), 1)
+        self.assertNotIn("<strong>", windows[0])
+        self.assertNotIn("</strong>", windows[0])
+        self.assertIn("Phrase suffisamment longue", windows[0])
+
+    def test_html_only_paragraph_yields_no_window_after_strip(self):
+        # Un paragraphe composé uniquement de balises HTML + URLs courtes
+        # doit produire un cleaned trop court (<120 chars) → 0 fenêtre.
+        prose = '<a href="README-en.md">English</a> · <a href="README-es.md">Español</a>'
+        windows = translate._extract_source_windows(prose)
+        self.assertEqual(windows, [])
+
+
 REGEN_SCRIPT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "regen_translations.sh")
 )

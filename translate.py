@@ -167,6 +167,8 @@ _STRUCTURAL_LINE = re.compile(
     r"|[\[\]{}]"  # YAML list/dict bracket on own line
     r"|['\"][^'\"\n]+['\"]\s*,?\s*$"  # YAML string item ('item' or "item", possibly with trailing comma)
     r"|(?:\S+\s+)?\[[^\]]+\]\([^)]+\.md\)(?:\s*\|\s*\[[^\]]+\]\([^)]+\.md\))+\s*$"  # markdown language/nav bar
+    r"|</?[a-zA-Z][a-zA-Z0-9]*(?:\s[^>]*)?\s*/?>(?:\s*</?[a-zA-Z][a-zA-Z0-9]*(?:\s[^>]*)?\s*/?>)*\s*$"  # ligne composée uniquement de balises HTML (<p align="center">, </p>, <br/>, etc.)
+    r"|(?:\S+\s+)?<a\s+href=['\"][^'\"]+['\"][^>]*>[^<]*</a>(?:\s*[·•|·‧]\s*<a\s+href=['\"][^'\"]+['\"][^>]*>[^<]*</a>)+(?:\s*<br\s*/?>)?\s*$"  # html language/nav bar (≥2 <a href> séparés par · • ‧ |)
     r")"
 )
 # Préfixes Markdown inline → à STRIPPER (on garde le texte derrière)
@@ -243,6 +245,12 @@ def _extract_source_windows(segment):
             continue
         joined = " ".join(kept_lines)
         cleaned = _URL_OR_PLACEHOLDER.sub("", joined)
+        # Strip les balises HTML inline : sans ça, des balises littérales
+        # (<strong>, <a href="...">, <span class="...">, etc.) restent identiques
+        # source/cible et créent des faux positifs de passthrough quand la fenêtre
+        # contient peu de texte traduisible (ex. nav-bar avec drapeaux + noms de
+        # langues qui sont eux-mêmes invariants source/cible).
+        cleaned = re.sub(r"<[^>]+>", " ", cleaned)
         cleaned = re.sub(r"\s+", " ", cleaned).strip()
         n = len(cleaned)
         if n < 120:
