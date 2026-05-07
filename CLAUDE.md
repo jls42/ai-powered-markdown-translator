@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Après chaque `git push`** (sur une PR, jamais main) : surveiller automatiquement les checks GitHub jusqu'à résolution.
   1. Attendre ~30-60s que SonarCloud / CodeQL terminent leur scan initial.
   2. `gh pr checks <num>` pour lire l'état (workflows actifs : `Analyze (python)`, `CodeQL`, `SonarQube`).
-  3. Si tous `pass` → signaler à l'utilisateur et stop.
+  3. Si tous `pass` → **toujours** requêter l'API Sonar des issues ouvertes en complément (cf. piège ci-dessous), puis signaler à l'utilisateur et stop.
   4. Si un check est `pending` → re-check dans 60-90s (utiliser `ScheduleWakeup` pour ne pas bloquer le main thread, ou `gh run watch <run-id>` pour follow live).
   5. Si un check est `fail` :
      - Récupérer les détails via `gh run view <run-id> --log-failed` ou l'URL Sonar/CodeQL dans la colonne link.
@@ -20,7 +20,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
      - Appliquer le fix → `pre-commit run --all-files && pre-commit run --hook-stage pre-push --all-files` verts → skill `/helping-with-commits` → `git push`.
   6. Reboucler jusqu'à tous verts ou finding non-trivial (dans ce cas stop et demander aide).
   7. Pièges connus :
+     - **`gh pr checks <num>` ne reflète QUE le quality gate Sonar, pas les issues ouvertes**. Un Major Code Smell qui ne fait pas tomber le gate apparaîtra `pass` côté GitHub mais reste à traiter. Après chaque push, requêter en plus l'API publique :
+       ```bash
+       curl -s "https://sonarcloud.io/api/issues/search?componentKeys=jls42_ai-powered-markdown-translator&pullRequest=<num>&resolved=false&ps=50" \
+         | python3 -c "import json,sys; d=json.load(sys.stdin); print('total:', d.get('total', 0)); [print(f\"  [{i['severity']}] {i['type']} {i['rule']} {i['component'].split(':')[-1]}:{i.get('line','?')} - {i['message']}\") for i in d.get('issues', [])]"
+       ```
+       Délai d'indexation Sonar : ~60-90s après le push (ré-exécuter si `total` reflète encore l'ancien commit).
      - `translate.py` est temporairement exclu du gate Lizard local (CCN > 12 sur 4 fonctions, refactor planifié) — mais SonarCloud le scanne quand même côté serveur. Une régression CCN sur translate.py sera signalée par Sonar pas par le pre-push.
+     - **`ruff-format` peut fusionner deux f-strings adjacents sur une seule ligne**, ce qui crée une concaténation implicite que Sonar S5799 (`Merge these implicitly concatenated strings; or did you forget a comma?`) flag comme Code Smell Major. Préférer une seule f-string au lieu de deux f-strings sur des lignes séparées si le contenu peut tenir sous la limite de longueur.
      - detect-secrets régénère parfois `.secrets.baseline` en pre-commit ; bien `git add` la baseline AVANT le commit suivant (sinon le pre-commit hook re-mute la baseline en boucle).
      - Hooks pre-push lents (~30s mypy + 5s SAST + 10s pip-audit + tests) : si on enchaîne plusieurs petits commits, préférer batcher en local et un seul `git push` à la fin.
 
