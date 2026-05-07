@@ -174,7 +174,7 @@ _INLINE_MD_PREFIX = re.compile(r"^\s*(?:[-*+]\s+|#{1,6}\s+|\d+\.\s+)")
 _EMPTY_BLOCKQUOTE_LINE = re.compile(r"^\s*>\s*$")
 _BLOCKQUOTE_PREFIX = re.compile(r"^\s*>\s?")
 _URL_OR_PLACEHOLDER = re.compile(
-    r"https?://\S+|#(?:CODEBLOCK|INLINECODE|URL)\d+#|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"
+    r"https?://\S+|#(?:CODEBLOCK|INLINECODE|URL|ANCHOR)\d+#|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"
 )
 _MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
 _LANG_SCRIPT_RANGES = {
@@ -770,7 +770,7 @@ def _dispatch_provider_call(
     return text
 
 
-_SEGMENT_PLACEHOLDER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL)\d+#")
+_SEGMENT_PLACEHOLDER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL|ANCHOR)\d+#")
 
 
 def _validate_segment_placeholders(input_segment, output_text):
@@ -956,6 +956,48 @@ def _restore_urls(translated_content, urls, placeholders):
     return translated_content
 
 
+# Anchors locales explicites style Terraform : `<a name="X"></a>` (destination)
+# + `[text](#X)` (référence). Quand `X` est défini par un tag explicite, il ne
+# doit JAMAIS être traduit (l'identifiant technique est figé). On protège donc :
+#  1. tous les `<a name="X"></a>` ;
+#  2. uniquement les `(#X)` dont le `X` (déséchappé) correspond à un `<a name>`
+#     du document.
+# Les `(#X)` qui ne correspondent à AUCUN `<a name>` sont laissés au LLM : ce
+# sont des anchors dérivées de headings (e.g. `#caveman-compress-receipts`
+# pointant vers `### caveman-compress-receipts`). GitHub regénère le slug à
+# partir du heading traduit, donc la cohérence vient quand le LLM traduit
+# heading et lien ensemble — figer l'ancre ici casserait le lien interne.
+_ANCHOR_NAME_REGEX = re.compile(r'<a\s+name=["\']([^"\']+)["\']\s*></a>')
+_ANCHOR_LINK_REGEX = re.compile(r"\(#([^)\s]+)\)")
+
+
+def _protect_anchors(content):
+    explicit_targets = {m.group(1) for m in _ANCHOR_NAME_REGEX.finditer(content)}
+    anchors = []
+
+    # 1. Tous les <a name="X"></a> (toujours protégés byte-identical).
+    for m in _ANCHOR_NAME_REGEX.finditer(content):
+        anchors.append(m.group(0))
+
+    # 2. (#X) seulement si X (avec \_ déséchappés) correspond à un target explicite.
+    if explicit_targets:
+        for m in _ANCHOR_LINK_REGEX.finditer(content):
+            fragment_unescaped = m.group(1).replace(r"\_", "_").replace(r"\-", "-")
+            if fragment_unescaped in explicit_targets:
+                anchors.append(m.group(0))
+
+    placeholders = [f"#ANCHOR{i}#" for i in range(len(anchors))]
+    for placeholder, anchor in zip(placeholders, anchors, strict=False):
+        content = content.replace(anchor, placeholder, 1)
+    return content, anchors, placeholders
+
+
+def _restore_anchors(translated_content, anchors, placeholders):
+    for placeholder, anchor in zip(placeholders, anchors, strict=False):
+        translated_content = translated_content.replace(placeholder, anchor)
+    return translated_content
+
+
 def _protect_news_quotes(content, args):
     if not args.news:
         return content, [], []
@@ -1002,15 +1044,19 @@ def _validate_news_placeholders_intact(translated_content, n_quotes):
             )
 
 
-_CODE_PLACEHOLDER_LEFTOVER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL)\d+#")
+_CODE_PLACEHOLDER_LEFTOVER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL|ANCHOR)\d+#")
 
 
 def _validate_code_placeholders_present(
-    translated_content, block_placeholders, inline_placeholders, url_placeholders=()
+    translated_content,
+    block_placeholders,
+    inline_placeholders,
+    url_placeholders=(),
+    anchor_placeholders=(),
 ):
-    """Vérifie que chaque placeholder émis (code blocks, inline code, URLs) est bien
-    présent dans la sortie LLM avant la restauration (le LLM peut avoir supprimé ou
-    modifié un placeholder)."""
+    """Vérifie que chaque placeholder émis (code blocks, inline code, URLs, anchors)
+    est bien présent dans la sortie LLM avant la restauration (le LLM peut avoir
+    supprimé ou modifié un placeholder)."""
     for placeholder in block_placeholders:
         if placeholder not in translated_content:
             raise RuntimeError(
@@ -1028,6 +1074,12 @@ def _validate_code_placeholders_present(
             raise RuntimeError(
                 f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
                 "(le LLM a supprimé ou modifié l'URL)"
+            )
+    for placeholder in anchor_placeholders:
+        if placeholder not in translated_content:
+            raise RuntimeError(
+                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
+                "(le LLM a supprimé ou modifié l'ancre locale)"
             )
 
 
@@ -1362,18 +1414,32 @@ def _translate_pipeline(content, client, args, use_mistral, use_claude, use_gemi
     # les URLs avant, l'attribution capturée serait `#URL{n}#` au lieu de l'URL
     # réelle et la validation news post-traduction ne saurait pas quoi chercher.
     content, original_quotes, attribution_urls = _protect_news_quotes(content, args)
-    # URLs après les protections de code et de news : ainsi les URLs déjà
-    # cachées derrière `#CODEBLOCK*#` / `#INLINECODE*#` ne sont pas touchées,
-    # et toutes les autres (markdown links, HTML href/src, badges, anchors
-    # absolues) sont remplacées par `#URL{n}#` avant l'appel LLM.
+    # Anchors AVANT urls : sinon le regex anchor `\(#[^)\s]+\)` matcherait
+    # aussi les placeholders `#URL\d+#` (ex. `(#URL0#)` dans une attribution
+    # news). Aucun conflit dans l'autre sens : les anchors fragment-locaux
+    # (`(#X)`) ne contiennent jamais de `https?://`, et `<a name="X"></a>`
+    # est borné par les attributs de balise HTML.
+    content, anchors, anchor_placeholders = _protect_anchors(content)
+    # URLs après les protections de code/news/anchors : ainsi les URLs déjà
+    # cachées derrière `#CODEBLOCK*#` / `#INLINECODE*#` / `#ANCHOR*#` ne sont
+    # pas touchées, et toutes les autres (markdown links, HTML href/src,
+    # badges, anchors absolues) sont remplacées par `#URL{n}#`.
     content, urls, url_placeholders = _protect_urls(content)
 
     translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
 
     _validate_code_placeholders_present(
-        translated_content, block_placeholders, inline_placeholders, url_placeholders
+        translated_content,
+        block_placeholders,
+        inline_placeholders,
+        url_placeholders,
+        anchor_placeholders,
     )
+    # Restoration en ordre inverse : `urls` d'abord (les placeholders d'URL
+    # peuvent contenir des fragments `#xxx` qui ressemblent à des anchors),
+    # puis `anchors` (qui peuvent avoir été préservés byte-identical).
     translated_content = _restore_urls(translated_content, urls, url_placeholders)
+    translated_content = _restore_anchors(translated_content, anchors, anchor_placeholders)
     translated_content = _restore_code(
         translated_content, inline_codes, inline_placeholders, code_blocks, block_placeholders
     )
