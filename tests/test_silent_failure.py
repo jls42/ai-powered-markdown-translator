@@ -303,6 +303,26 @@ class TestSilentFailure(unittest.TestCase):
         self.assertNotIn("translate 'title' and 'description'", system_prompt)
         self.assertNotIn("change 'locale'", system_prompt)
 
+    def test_markdown_contract_applies_to_non_news_translations(self):
+        """Le contrat complétude/prose doit aussi couvrir les README non-news."""
+        args = _base_args(news=False)
+        system_prompt = translate._build_system_instructions(args, is_translation_note=False)
+
+        self.assertIn("<markdown_translation_contract>", system_prompt)
+        self.assertIn("Translate ALL prose into the target language", system_prompt)
+        self.assertIn("EVERY prose paragraph has been translated", system_prompt)
+        self.assertNotIn("<news_final_checks>", system_prompt)
+
+    def test_news_prompt_combines_markdown_contract_and_news_checks(self):
+        """Le mode --news garde le contrat markdown général + checks spécifiques news."""
+        args = _base_args(news=True, target_lang="pl")
+        system_prompt = translate._build_system_instructions(args, is_translation_note=False)
+
+        self.assertIn("<markdown_translation_contract>", system_prompt)
+        self.assertIn("Translate ALL prose into the target language", system_prompt)
+        self.assertIn("<news_citation_contract", system_prompt)
+        self.assertIn("<news_final_checks>", system_prompt)
+
     def test_news_xml_placeholder_restores_unquoted_quote(self):
         """Le mode --news protège aussi les citations EN sans guillemets et accepte
         la variante XML auto-formatée `<NEWSQUOTE id="0" />`."""
@@ -610,6 +630,41 @@ class TestLangDetectLayer2(unittest.TestCase):
             translate._validate_translation_output(
                 source_segment, paraphrased_fr_output, args, is_translation_note=False
             )
+
+
+class TestGenericBlockquoteValidation(unittest.TestCase):
+    """Generic Markdown blockquotes are translatable prose.
+
+    The news pipeline has special protected quote handling, but outside
+    `--news`, leaving a long `>` quote verbatim is the same silent-failure
+    surface as leaving a paragraph untranslated.
+    """
+
+    def test_generic_blockquote_passthrough_raises(self):
+        source_segment = (
+            "> The reason your React component is re-rendering is likely because "
+            "you are creating a new object reference on each render cycle. "
+            "When you pass an inline object as a prop, React shallow comparison "
+            "sees it as a different object every time, which triggers a re-render."
+        )
+        args = _base_args(source_lang="en", target_lang="es", news=False)
+
+        with self.assertRaisesRegex(RuntimeError, r"untranslated source excerpt"):
+            translate._validate_translation_output(
+                source_segment, source_segment, args, is_translation_note=False
+            )
+
+    def test_news_blockquotes_can_still_be_ignored(self):
+        source_segment = (
+            "> A decade in the making, the chips for the agentic era have arrived.\n"
+            ">\n"
+            "> 🇫🇷 _Une décennie en gestation, les puces sont arrivées._\n"
+            "> — [@GoogleAI sur X](https://x.com/GoogleAI/status/1)"
+        )
+
+        windows = translate._extract_source_windows(source_segment, ignore_blockquotes=True)
+
+        self.assertEqual(windows, [])
 
 
 class TestMultiProviderStopReasons(unittest.TestCase):
