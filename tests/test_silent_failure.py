@@ -814,10 +814,9 @@ class TestDetectProvider(unittest.TestCase):
 
 
 class TestNewsPipelinePerProvider(unittest.TestCase):
-    """Couvre translate_markdown_file end-to-end pour Mistral/Claude/Gemini en mode
-    --news, pas seulement OpenAI. Sans cette classe, une régression où
-    _translate_pipeline ou _validate_news_post serait skippé pour un provider donné
-    ne ferait échouer aucun test (le scaffolding partagé hardcodait OpenAI).
+    """Exerce translate_markdown_file end-to-end en mode --news pour
+    Mistral / Claude / Gemini, afin qu'une régression provider-spécifique
+    dans _translate_pipeline ou _validate_news_post soit attrapée.
     """
 
     SOURCE_NEWS = """---
@@ -932,8 +931,8 @@ locale: 'pl'
         self.assertIn("🇵🇱", out)
 
     def test_news_pipeline_claude_missing_placeholder_fails(self):
-        """Régression croisée : si Claude perd le placeholder XML, status=failure
-        et fichier non écrit (chaîne complète exercée pour ce provider)."""
+        """Path Claude : un placeholder <NEWSQUOTE> manquant doit produire
+        status=failure et aucun fichier écrit."""
         bad_translation = """---
 title: Test
 locale: 'pl'

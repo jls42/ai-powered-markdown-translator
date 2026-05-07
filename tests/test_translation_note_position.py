@@ -21,6 +21,7 @@ from unittest.mock import MagicMock
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from translate import (
+    _append_translation_note,
     _build_translation_note_block,
     _build_translation_note_source,
     _compose_with_notes,
@@ -83,8 +84,6 @@ class TestBuildBlock(unittest.TestCase):
         multi = "Line one of the translation.\nLine two with details."
         out = _build_translation_note_block(args, multi, "top", "marker")
         lines = out.splitlines()
-        # Format: [definition]\n\n> **line one\n> line two**
-        # lines[0] = definition, lines[1] = "" (blank), lines[2] = first quoted line
         self.assertEqual(lines[0][:5], "[ai-t")
         self.assertEqual(lines[1], "")
         self.assertEqual(lines[2], "> **Line one of the translation.")
@@ -171,10 +170,10 @@ class TestSplitFrontmatter(unittest.TestCase):
         self.assertEqual(fm, "---\ntitle: X\nlocale: fr\n---")
         self.assertEqual(body, "Body.\n")
 
-    def test_malformed_frontmatter_no_close(self):
-        # No closing --- → fallback to "no frontmatter"
-        fm, body = _split_frontmatter("---\ntitle: X\nNo close marker\n")
-        self.assertEqual(fm, "")
+    def test_malformed_frontmatter_no_close_raises(self):
+        with self.assertRaises(RuntimeError) as cm:
+            _split_frontmatter("---\ntitle: X\nNo close marker\n")
+        self.assertIn("malformed frontmatter", str(cm.exception))
 
 
 class TestQuoteLines(unittest.TestCase):
@@ -196,14 +195,16 @@ class TestSourceBuilder(unittest.TestCase):
         out = _build_translation_note_source(args)
         parts = out.split("\n\n")
         self.assertEqual(len(parts), 3)
-        # 1. Repo title in inline-code (protected from translation)
-        self.assertIn("`ai-powered-markdown-translator`", parts[0])
-        self.assertTrue(parts[0].startswith("**`"))
-        # 2. Translatable description
-        self.assertIn("Article traduit du fr vers le ja avec gpt-5-mini.", parts[1])
-        # 3. Markdown link with visible arrow indicator
-        self.assertTrue(parts[2].strip().startswith("[Voir le projet sur GitHub ↗]"))
-        self.assertIn("github.com/jls42/ai-powered-markdown-translator", parts[2])
+        # Structure : titre repo | phrase | lien
+        self.assertEqual(parts[0], "**`ai-powered-markdown-translator`**")
+        self.assertRegex(
+            parts[1],
+            r"^Article traduit du \S+ vers le \S+ avec \S+\.$",
+        )
+        self.assertEqual(
+            parts[2],
+            "[Voir le projet sur GitHub ↗](https://github.com/jls42/ai-powered-markdown-translator)",
+        )
 
     def test_source_paragraphs_are_blank_line_separated(self):
         """The blank lines between title/description/link enable the CSS grid layout."""
@@ -258,18 +259,27 @@ class TestMarkerSplitsSentenceAndLink(unittest.TestCase):
         out = _build_translation_note_block(args, translated, "top", "marker")
         self.assertIn(f"> **{translated}**", out)
 
+    def test_marker_block_single_paragraph_with_markdown_link_is_not_bolded(self):
+        """Wrapping a Markdown link in `**...**` breaks rendering in some
+        renderers — keep the raw form when a link is detected."""
+        args = _args()
+        translated = "See [the project](https://example.com) for details."
+        out = _build_translation_note_block(args, translated, "top", "marker")
+        self.assertIn(f"> {translated}", out)
+        self.assertNotIn(f"**{translated}**", out)
+
 
 class TestRetrocompatByteForByte(unittest.TestCase):
     """Le défaut (legacy + bottom) doit reproduire EXACTEMENT le format v1.9."""
 
     def test_default_no_args_legacy_unchanged_byte_for_byte(self):
         args = _args(note_position="bottom", note_format="legacy")
-        content = "Contenu traduit final.\n"
-        translated_note = "This document was translated from fr to en using model gpt-5-mini. Etc."
-        out = _compose_with_notes(content, args, translated_note, "legacy")
-        # v1.9 implementation:
-        v19_simulated = content.rstrip("\n") + "\n\n**" + translated_note.strip() + "**\n"
-        self.assertEqual(out, v19_simulated)
+        out = _compose_with_notes(
+            "Contenu traduit final.\n", args, "This document was translated.", "legacy"
+        )
+        # Forme exacte v1.9 — figée comme golden literal (un refactor de
+        # spacing doit échouer, pas re-mimer l'implémentation actuelle).
+        self.assertEqual(out, "Contenu traduit final.\n\n**This document was translated.**\n")
 
     def test_namespace_without_new_attrs_uses_defaults(self):
         """Un Namespace sans note_position / note_format doit retomber sur bottom + legacy."""
@@ -328,6 +338,99 @@ class TestIntegrationWithMarkdownFile(unittest.TestCase):
         self.assertTrue(out.startswith("---\n"))
         self.assertIn("\n---\n\n[ai-translation-note-top]", out)
         self.assertIn("Body.", out)
+
+    def test_e2e_marker_bottom_no_frontmatter(self):
+        source = "# Article\n\nBody.\n"
+        status, out = self._run(
+            source,
+            [_make_openai_response(source), _make_openai_response("Phrase.")],
+            {"note_position": "bottom", "note_format": "marker"},
+        )
+        self.assertEqual(status, "success")
+        self.assertTrue(out.startswith("# Article"))
+        self.assertIn("[ai-translation-note-bottom]", out)
+        self.assertNotIn("[ai-translation-note-top]", out)
+
+    def test_e2e_marker_both_no_frontmatter(self):
+        source = "# Article\n\nBody.\n"
+        status, out = self._run(
+            source,
+            [_make_openai_response(source), _make_openai_response("Phrase.")],
+            {"note_position": "both", "note_format": "marker"},
+        )
+        self.assertEqual(status, "success")
+        self.assertLess(out.index("[ai-translation-note-top]"), out.index("# Article"))
+        self.assertLess(out.index("# Article"), out.index("[ai-translation-note-bottom]"))
+
+    def test_e2e_legacy_top_no_frontmatter(self):
+        source = "# Article\n\nBody.\n"
+        status, out = self._run(
+            source,
+            [_make_openai_response(source), _make_openai_response("Translated note.")],
+            {"note_position": "top", "note_format": "legacy"},
+        )
+        self.assertEqual(status, "success")
+        # Format legacy : pas de marker definition, juste un paragraphe **bold**
+        self.assertNotIn("[ai-translation-note-", out)
+        self.assertTrue(out.startswith("**Translated note.**\n\n"))
+
+    def test_e2e_legacy_both_with_frontmatter(self):
+        source = "---\ntitle: T\n---\n\nBody.\n"
+        status, out = self._run(
+            source,
+            [_make_openai_response(source), _make_openai_response("TN.")],
+            {"note_position": "both", "note_format": "legacy"},
+        )
+        self.assertEqual(status, "success")
+        # Frontmatter d'abord, puis note top, puis body, puis note bottom
+        self.assertTrue(out.startswith("---\ntitle: T\n---\n\n**TN.**\n\nBody."))
+        self.assertTrue(out.endswith("**TN.**\n"))
+
+
+class TestComposeUnknownPosition(unittest.TestCase):
+    def test_unknown_position_raises_value_error(self):
+        args = _args(note_position="middle", note_format="marker")
+        with self.assertRaises(ValueError) as cm:
+            _compose_with_notes("Body.\n", args, "Translated.", "marker")
+        self.assertIn("middle", str(cm.exception))
+
+
+class TestLLMPayloadExcludesInvariants(unittest.TestCase):
+    """Garde-fou du commit 5a29002 : le titre repo et l'URL GitHub ne doivent
+    JAMAIS être envoyés au LLM (sinon il peut les mutiler : slug, casse,
+    backticks, scheme). Sans ce test, un revert qui re-route titre+URL via
+    `translate()` passerait toutes les autres assertions silencieusement.
+    """
+
+    INVARIANT_TITLE_FRAGMENT = "ai-powered-markdown-translator"
+    INVARIANT_URL_FRAGMENT = "github.com/jls42"
+
+    def _capture_payload(self, args_overrides):
+        args = _args(**args_overrides)
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = _make_openai_response("Phrase traduite.")
+        result = _append_translation_note(
+            "Body.\n", mock_client, args, use_mistral=False, use_claude=False, use_gemini=False
+        )
+        # Concatène tous les contenus envoyés au LLM (system + user)
+        sent = ""
+        for call in mock_client.chat.completions.create.call_args_list:
+            for msg in call.kwargs["messages"]:
+                sent += msg["content"] + "\n"
+        return sent, result
+
+    def test_marker_format_does_not_send_title_or_url(self):
+        sent, result = self._capture_payload({"note_format": "marker"})
+        self.assertNotIn(self.INVARIANT_TITLE_FRAGMENT, sent)
+        self.assertNotIn(self.INVARIANT_URL_FRAGMENT, sent)
+        # Round-trip : titre + URL DOIVENT apparaître dans la sortie composée
+        self.assertIn(f"`{self.INVARIANT_TITLE_FRAGMENT}`", result)
+        self.assertIn(self.INVARIANT_URL_FRAGMENT, result)
+
+    def test_legacy_format_does_not_send_title_or_url(self):
+        sent, _ = self._capture_payload({"note_format": "legacy"})
+        self.assertNotIn(self.INVARIANT_TITLE_FRAGMENT, sent)
+        self.assertNotIn(self.INVARIANT_URL_FRAGMENT, sent)
 
 
 if __name__ == "__main__":
