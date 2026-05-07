@@ -525,7 +525,7 @@ def _call_gemini(client, args, prompt, segment):
         # juste "blocked or empty" et masquerait le vrai motif.
         feedback = getattr(response, "prompt_feedback", None)
         raise RuntimeError(
-            f"Gemini returned no candidates (model={args.model}, " f"prompt_feedback={feedback!r})"
+            f"Gemini returned no candidates (model={args.model}, prompt_feedback={feedback!r})"
         )
     try:
         return response.text.strip()
