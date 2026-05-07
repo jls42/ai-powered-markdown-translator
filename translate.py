@@ -167,7 +167,7 @@ _STRUCTURAL_LINE = re.compile(
     r"|[\[\]{}]"  # YAML list/dict bracket on own line
     r"|['\"][^'\"\n]+['\"]\s*,?\s*$"  # YAML string item ('item' or "item", possibly with trailing comma)
     r"|(?:\S+\s+)?\[[^\]]+\]\([^)]+\.md\)(?:\s*\|\s*\[[^\]]+\]\([^)]+\.md\))+\s*$"  # markdown language/nav bar
-    r"|</?[a-zA-Z][a-zA-Z0-9]*[^>]*/?>(?:\s*</?[a-zA-Z][a-zA-Z0-9]*[^>]*/?>)*\s*$"  # ligne composée uniquement de balises HTML (<p align="center">, </p>, <br/>, etc.) — `[^>]*` est non-ambigu (pas de backtracking exponentiel CodeQL)
+    r"|</?[a-zA-Z][^>]*>(?:\s*</?[a-zA-Z][^>]*>)*\s*$"  # ligne composée uniquement de balises HTML (<p align="center">, </p>, <br/>, etc.) — `[^>]*>` borne strictement, pas d'ambigüité avec un `/?` final qui ferait backtracker (CodeQL py/redos-trailing-quantifier)
     r"|(?:\S+\s+)?<a\s+href=['\"][^'\"]+['\"][^>]*>[^<]*</a>(?:\s*[·•|·‧]\s*<a\s+href=['\"][^'\"]+['\"][^>]*>[^<]*</a>)+(?:\s*<br\s*/?>)?\s*$"  # html language/nav bar (≥2 <a href> séparés par · • ‧ |)
     r")"
 )
