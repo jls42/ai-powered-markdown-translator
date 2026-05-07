@@ -1334,19 +1334,21 @@ class TestGeminiEdgeCases(unittest.TestCase):
     """Couvre les branches non-trivial de _call_gemini : candidates vide,
     response.text qui raise (contenu bloqué par safety filters)."""
 
-    def test_gemini_no_candidates_returns_text(self):
-        """Réponse Gemini sans candidates mais avec text valide → doit retourner le text.
-        Le check finish_reason est skippé (pas de candidate à inspecter)."""
+    def test_gemini_no_candidates_raises_with_prompt_feedback(self):
+        """Réponse Gemini sans candidates = SAFETY/RECITATION/quota côté upstream.
+        Le RuntimeError doit citer prompt_feedback pour rendre la cause actionnable
+        au lieu d'un message générique 'blocked or empty'."""
         gen_model = MagicMock()
+        feedback = MagicMock(block_reason="SAFETY")
         gen_model.generate_content.return_value = MagicMock(
             candidates=[],
-            text="Some translated text.",
+            prompt_feedback=feedback,
         )
         client = MagicMock()
         client.GenerativeModel.return_value = gen_model
         args = _base_args(model="gemini-3-flash-preview")
-        out = translate._call_gemini(client, args, "prompt", "segment")
-        self.assertEqual(out, "Some translated text.")
+        with self.assertRaisesRegex(RuntimeError, r"no candidates.*prompt_feedback"):
+            translate._call_gemini(client, args, "prompt", "segment")
 
     def test_gemini_blocked_response_raises(self):
         gen_model = MagicMock()
@@ -1356,6 +1358,44 @@ class TestGeminiEdgeCases(unittest.TestCase):
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"Gemini response has no text|blocked"):
             translate._call_gemini(client, args, "prompt", "segment")
+
+
+class TestOpenAINoneContent(unittest.TestCase):
+    """Garde explicite : SDK OpenAI peut renvoyer message.content=None quand
+    la réponse contient uniquement un refusal ou des tool_calls. Sans la garde,
+    .strip() lèverait un AttributeError opaque."""
+
+    def test_openai_none_content_raises_with_refusal(self):
+        message = MagicMock(content=None, refusal="I cannot translate this.", tool_calls=None)
+        response = MagicMock(choices=[MagicMock(message=message, finish_reason="stop")])
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = response
+        args = _base_args()
+        with self.assertRaisesRegex(RuntimeError, r"message\.content=None.*refusal"):
+            translate._call_openai(mock_client, args, "prompt", "segment", False)
+
+
+class TestComposeWithNotesBottomTolerantToMalformedFM(unittest.TestCase):
+    """Fix: _compose_with_notes ne doit parser le frontmatter que pour les
+    layouts qui insèrent au-dessus du body. En mode `bottom`, un fichier avec
+    `---` orphelin (sans fence de fermeture) ne doit PAS faire échouer la note."""
+
+    def test_bottom_with_malformed_frontmatter_does_not_raise(self):
+        content = "---\ntitle: oops\n# Body without closing fence\n"
+        args = _base_args()
+        args.note_position = "bottom"
+        args.note_format = "legacy"
+        out = translate._compose_with_notes(content, args, "Note traduite", "legacy")
+        self.assertIn("**Note traduite**", out)
+        self.assertTrue(out.endswith("\n"))
+
+    def test_top_with_malformed_frontmatter_still_raises(self):
+        content = "---\ntitle: oops\n# Body without closing fence\n"
+        args = _base_args()
+        args.note_position = "top"
+        args.note_format = "legacy"
+        with self.assertRaisesRegex(RuntimeError, r"malformed frontmatter"):
+            translate._compose_with_notes(content, args, "Note traduite", "legacy")
 
 
 if __name__ == "__main__":

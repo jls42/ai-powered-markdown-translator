@@ -133,9 +133,13 @@ check_gh_auth() {
 
 extract_release_notes() {
   local ver="$1"
-  awk -v ver="$ver" '
-    $0 ~ "^- \\*\\*" ver "\\*\\*" { keep=1 }
-    keep && $0 ~ "^- \\*\\*[0-9]+\\.[0-9]+" && $0 !~ "^- \\*\\*" ver "\\*\\*" { exit }
+  # Échappe les '.' de la version pour qu'un `1.9` ne matche pas `1x9` et que
+  # la condition d'arrêt ne s'attrape pas elle-même sur des voisins comme `1.9.1`.
+  local ver_re
+  ver_re=$(printf '%s' "$ver" | sed 's/\./\\./g')
+  awk -v ver_re="$ver_re" '
+    $0 ~ "^- \\*\\*" ver_re "\\*\\*" { keep=1 }
+    keep && $0 ~ "^- \\*\\*[0-9]+\\.[0-9]+" && $0 !~ "^- \\*\\*" ver_re "\\*\\*" { exit }
     keep { print }
   ' CHANGELOG.md
 }

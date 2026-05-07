@@ -519,6 +519,14 @@ def _call_gemini(client, args, prompt, segment):
         fr_name = _reason_name(getattr(candidates[0], "finish_reason", None))
         if fr_name not in ("STOP", "FINISH_REASON_STOP", None):
             raise RuntimeError(f"Gemini abnormal finish_reason={fr_name!r} (model={args.model})")
+    else:
+        # Pas de candidat = SAFETY/RECITATION/quota côté upstream. La cause
+        # vit dans `prompt_feedback` ; sans ça, le RuntimeError final dirait
+        # juste "blocked or empty" et masquerait le vrai motif.
+        feedback = getattr(response, "prompt_feedback", None)
+        raise RuntimeError(
+            f"Gemini returned no candidates (model={args.model}, " f"prompt_feedback={feedback!r})"
+        )
     try:
         return response.text.strip()
     except (ValueError, AttributeError) as e:
@@ -570,10 +578,22 @@ def _call_openai(client, args, prompt, segment, is_translation_note):
     messages = _build_openai_messages(args, prompt, segment)
     extra_kwargs = _openai_extra_kwargs(args, is_translation_note)
     response = _openai_create_with_fallback(client, args, messages, extra_kwargs)
-    finish = _reason_name(response.choices[0].finish_reason)
+    choice = response.choices[0]
+    finish = _reason_name(choice.finish_reason)
     if finish not in ("stop", "STOP", None):
         raise RuntimeError(f"OpenAI abnormal finish_reason={finish!r} (model={args.model})")
-    return response.choices[0].message.content.strip()
+    content = choice.message.content
+    if content is None:
+        # SDK récents renvoient `content=None` quand la réponse contient
+        # uniquement un refusal ou des tool_calls. Sans cette garde, .strip()
+        # lèverait un AttributeError opaque qui noierait la vraie cause.
+        refusal = getattr(choice.message, "refusal", None)
+        tool_calls = getattr(choice.message, "tool_calls", None)
+        raise RuntimeError(
+            f"OpenAI returned message.content=None (model={args.model}, "
+            f"refusal={refusal!r}, tool_calls={tool_calls!r})"
+        )
+    return content.strip()
 
 
 def _dispatch_provider_call(
@@ -988,10 +1008,14 @@ def _compose_with_notes(content, args, translated_note, fmt):
         "top": _build_translation_note_block(args, translated_note, "top", fmt),
         "bottom": _build_translation_note_block(args, translated_note, "bottom", fmt),
     }
-    frontmatter, body = _split_frontmatter(base)
 
     if pos == "bottom":
         return base + "\n\n" + blocks["bottom"] + "\n"
+
+    # Frontmatter parsing only when the layout actually inserts above the body :
+    # un opening `---` sans fence de fermeture lève RuntimeError, et on ne veut
+    # pas faire échouer un fichier dont la note ne touche que le bas.
+    frontmatter, body = _split_frontmatter(base)
 
     if pos == "top":
         if frontmatter:
