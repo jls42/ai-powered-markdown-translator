@@ -298,10 +298,17 @@ def _has_target_script_signal(text, target_lang):
     cleaned = _clean_for_language_detection(text)
     target_chars = _count_chars_in_ranges(cleaned, ranges)
     latin_chars = len(re.findall(r"[A-Za-z]", cleaned))
-    # README techniques traduits vers HI/AR/JA/KO/ZH restent mixtes par design
-    # (noms de produits, CLI flags, code, modèles). Un volume absolu de script
-    # cible + une part raisonnable évitent d'accepter un simple header traduit.
-    return target_chars >= 400 and target_chars / max(1, target_chars + latin_chars) >= 0.20
+    total_alpha = target_chars + latin_chars
+    if total_alpha == 0:
+        return False
+    ratio = target_chars / total_alpha
+    # README techniques traduits vers HI/AR/JA/KO/ZH ont 2 patterns valides :
+    # - prose dense (≥400 chars cible et ratio ≥20%) : sections de docs.
+    # - section "liste de ressources" (≥150 chars cible et ratio ≥30%) : titres
+    #   traduits + liens latin où le LLM ne peut pas traduire les noms de
+    #   packages (Pacman, Homebrew, Helm…) ; le ratio reste fort sur la prose
+    #   réelle (cleaned), mais le volume absolu est mécaniquement bas.
+    return (target_chars >= 400 and ratio >= 0.20) or (target_chars >= 150 and ratio >= 0.30)
 
 
 def _line_is_droppable(line, ignore_blockquotes):
@@ -753,6 +760,74 @@ def _dispatch_provider_call(
     return text
 
 
+_SEGMENT_PLACEHOLDER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE)\d+#")
+
+
+def _validate_segment_placeholders(input_segment, output_text):
+    """Vérifie que tous les placeholders #CODEBLOCKn# / #INLINECODEn# présents
+    dans le segment d'entrée sont aussi dans la sortie LLM. Détecte au niveau
+    segment ce que `_validate_code_placeholders_present` détecterait au niveau
+    pipeline — utile pour permettre un retry ciblé sur le segment fautif."""
+    in_phs = set(_SEGMENT_PLACEHOLDER_REGEX.findall(input_segment))
+    out_phs = set(_SEGMENT_PLACEHOLDER_REGEX.findall(output_text))
+    missing = in_phs - out_phs
+    if missing:
+        raise RuntimeError(
+            f"Placeholder(s) {sorted(missing)} manquant(s) dans la sortie segment "
+            "(le LLM les a supprimés ou modifiés)"
+        )
+
+
+def _translate_segment_with_retry(
+    segment,
+    idx,
+    total,
+    client,
+    args,
+    system_instructions,
+    use_mistral,
+    use_claude,
+    use_gemini,
+    is_translation_note,
+    max_retries=1,
+):
+    """Appelle le LLM puis valide placeholders + langue/passthrough. En cas de
+    fail récupérable (non-déterminisme LLM), retry 1 fois max. Les fails non-
+    récupérables (finish_reason anormal, sortie vide) ne sont pas retryés —
+    ils indiquent un problème API, pas un problème de qualité de traduction."""
+    last_exc = None
+    for attempt in range(max_retries + 1):
+        translated_text = _dispatch_provider_call(
+            client,
+            args,
+            system_instructions,
+            segment,
+            use_mistral,
+            use_claude,
+            use_gemini,
+            is_translation_note,
+        )
+        try:
+            _validate_segment_placeholders(segment, translated_text)
+            _validate_translation_output(segment, translated_text, args, is_translation_note)
+            if attempt > 0:
+                print(
+                    f"✓ Segment {idx}/{total} validated on retry {attempt}/{max_retries}",
+                    file=sys.stderr,
+                )
+            return translated_text
+        except RuntimeError as e:
+            last_exc = e
+            if attempt >= max_retries:
+                raise
+            print(
+                f"⚠ Segment {idx}/{total} validation failed "
+                f"(attempt {attempt + 1}/{max_retries + 1}): {e}. Retrying...",
+                file=sys.stderr,
+            )
+    raise last_exc  # unreachable, garde de sécurité
+
+
 def translate(
     text,
     client,
@@ -773,17 +848,18 @@ def translate(
     translated_segments = []
     for idx, segment in enumerate(segments, start=1):
         try:
-            translated_text = _dispatch_provider_call(
+            translated_text = _translate_segment_with_retry(
+                segment,
+                idx,
+                len(segments),
                 client,
                 args,
                 system_instructions,
-                segment,
                 use_mistral,
                 use_claude,
                 use_gemini,
                 is_translation_note,
             )
-            _validate_translation_output(segment, translated_text, args, is_translation_note)
         except Exception as e:
             # On préserve le type d'origine dans le message ET la chaîne via `from e`
             # (le traceback complet reste accessible par traceback.print_exc en haut).

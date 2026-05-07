@@ -141,10 +141,13 @@ class TestSilentFailure(unittest.TestCase):
 
         mock_client = MagicMock()
         # 1er segment: traduction EN plausible (>100 chars pour ne pas court-circuiter langdetect)
+        # 2e segment: FR brut (retry inclus → 2 fois consécutives FR brut pour épuiser
+        # le retry segment-level avant de propager la RuntimeError).
         en_translation = _long_en_translation()
         mock_client.chat.completions.create.side_effect = [
             _make_openai_response(en_translation),
-            _make_openai_response(segments[1]),  # FR brut = bug reproduit
+            _make_openai_response(segments[1]),  # FR brut = bug reproduit (1ère tentative)
+            _make_openai_response(segments[1]),  # FR brut (retry échoue aussi)
         ]
 
         args = _base_args()
@@ -170,11 +173,13 @@ class TestSilentFailure(unittest.TestCase):
                 f.write(long_fr_text)
 
             mock_client = MagicMock()
-            # Fournir une réponse par segment (sinon StopIteration masque le test)
+            # Fournir une réponse par segment + une 2e réponse FR brut pour le segment
+            # fautif (retry segment-level fait 2 appels max sur celui-ci).
             responses = []
             for i, seg in enumerate(segments):
                 if i == 1:
-                    responses.append(_make_openai_response(seg))  # FR brut
+                    responses.append(_make_openai_response(seg))  # FR brut (tentative 1)
+                    responses.append(_make_openai_response(seg))  # FR brut (retry échoue)
                 else:
                     responses.append(_make_openai_response(_long_en_translation()))
             mock_client.chat.completions.create.side_effect = responses
@@ -1281,7 +1286,9 @@ class TestMainExitsOnRealSilentFailure(unittest.TestCase):
             responses = []
             for i, seg in enumerate(segments):
                 if i == 1:
-                    # FR brut → couche 1 (source excerpt verbatim) déclenche
+                    # FR brut → couche 1 (source excerpt verbatim) déclenche.
+                    # Fournir 2 fois pour épuiser le retry segment-level (tentative 1 + retry).
+                    responses.append(_make_openai_response(seg))
                     responses.append(_make_openai_response(seg))
                 else:
                     responses.append(_make_openai_response(_long_en_translation()))
