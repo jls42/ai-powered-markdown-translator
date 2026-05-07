@@ -353,7 +353,7 @@ locale: 'pl'
 <NEWSQUOTE id="0" />
 >
 > 🇵🇱 _Powstające przez dekadę układy już nadeszły._
-> — [@GoogleAI na X](https://x.com/GoogleAI/status/1)
+> — [@GoogleAI na X](#URL0#)
 """
 
         status, out, _ = _run_markdown_file_translation(
@@ -1042,6 +1042,9 @@ locale: 'fr'
 > — [@GoogleAI sur X](https://x.com/GoogleAI/status/1)
 """
 
+    # Pipeline protège l'URL d'attribution en `#URL0#` avant l'appel LLM,
+    # donc le mock doit retourner avec le placeholder. Le pipeline le restaure
+    # ensuite via `_restore_urls`.
     TRANSLATED_NEWS = """---
 title: Test
 locale: 'pl'
@@ -1052,7 +1055,7 @@ locale: 'pl'
 <NEWSQUOTE id="0"/>
 >
 > 🇵🇱 _Dekada pracy._
-> — [@GoogleAI na X](https://x.com/GoogleAI/status/1)
+> — [@GoogleAI na X](#URL0#)
 """
 
     def _run_with_provider(self, provider, mock_client_factory):
@@ -1151,7 +1154,7 @@ locale: 'pl'
 ## Sekcja
 
 > 🇵🇱 _Dekada pracy._
-> — [@GoogleAI na X](https://x.com/GoogleAI/status/1)
+> — [@GoogleAI na X](#URL0#)
 """
         client = MagicMock()
         client.messages.create.return_value = MagicMock(

@@ -174,7 +174,7 @@ _INLINE_MD_PREFIX = re.compile(r"^\s*(?:[-*+]\s+|#{1,6}\s+|\d+\.\s+)")
 _EMPTY_BLOCKQUOTE_LINE = re.compile(r"^\s*>\s*$")
 _BLOCKQUOTE_PREFIX = re.compile(r"^\s*>\s?")
 _URL_OR_PLACEHOLDER = re.compile(
-    r"https?://\S+|#(?:CODEBLOCK|INLINECODE)\d+#|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"
+    r"https?://\S+|#(?:CODEBLOCK|INLINECODE|URL)\d+#|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"
 )
 _MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
 _LANG_SCRIPT_RANGES = {
@@ -770,7 +770,7 @@ def _dispatch_provider_call(
     return text
 
 
-_SEGMENT_PLACEHOLDER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE)\d+#")
+_SEGMENT_PLACEHOLDER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL)\d+#")
 
 
 def _validate_segment_placeholders(input_segment, output_text):
@@ -930,6 +930,32 @@ def _protect_inline_code(content):
     return content, inline_codes, placeholders
 
 
+# URLs (http/https) sont byte-identical entre source et cible : les filer au LLM
+# en clair l'incite parfois à traduire le texte qu'elles contiennent (badges
+# shields.io avec `?text=Voir_la_démo`, ancres `#section-name`) ou à les drop
+# en rephrasant une phrase qui les portait (`<a href="…">Trio</a>` → "Trio").
+# On les remplace par `#URL{n}#` avant l'appel LLM, comme on le fait pour les
+# code blocks. Bornes : tout sauf whitespace, balises HTML, guillemets, et
+# parenthèses Markdown (qui clôturent `[text](url)`).
+_URL_PROTECTION_REGEX = re.compile(r"https?://[^\s<>\"'()\[\]{}]+")
+
+
+def _protect_urls(content):
+    urls = [m.group(0) for m in _URL_PROTECTION_REGEX.finditer(content)]
+    placeholders = [f"#URL{i}#" for i in range(len(urls))]
+    # Replace one at a time : deux URLs byte-identical doivent recevoir des
+    # placeholders distincts (cohérent avec _protect_code_blocks).
+    for placeholder, url in zip(placeholders, urls, strict=False):
+        content = content.replace(url, placeholder, 1)
+    return content, urls, placeholders
+
+
+def _restore_urls(translated_content, urls, placeholders):
+    for placeholder, url in zip(placeholders, urls, strict=False):
+        translated_content = translated_content.replace(placeholder, url)
+    return translated_content
+
+
 def _protect_news_quotes(content, args):
     if not args.news:
         return content, [], []
@@ -976,14 +1002,15 @@ def _validate_news_placeholders_intact(translated_content, n_quotes):
             )
 
 
-_CODE_PLACEHOLDER_LEFTOVER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE)\d+#")
+_CODE_PLACEHOLDER_LEFTOVER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL)\d+#")
 
 
 def _validate_code_placeholders_present(
-    translated_content, block_placeholders, inline_placeholders
+    translated_content, block_placeholders, inline_placeholders, url_placeholders=()
 ):
-    """Vérifie que chaque placeholder de code émis est bien présent dans la sortie LLM
-    avant la restauration (le LLM peut avoir supprimé ou modifié un placeholder)."""
+    """Vérifie que chaque placeholder émis (code blocks, inline code, URLs) est bien
+    présent dans la sortie LLM avant la restauration (le LLM peut avoir supprimé ou
+    modifié un placeholder)."""
     for placeholder in block_placeholders:
         if placeholder not in translated_content:
             raise RuntimeError(
@@ -995,6 +1022,12 @@ def _validate_code_placeholders_present(
             raise RuntimeError(
                 f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
                 "(le LLM l'a supprimé ou modifié)"
+            )
+    for placeholder in url_placeholders:
+        if placeholder not in translated_content:
+            raise RuntimeError(
+                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
+                "(le LLM a supprimé ou modifié l'URL)"
             )
 
 
@@ -1323,11 +1356,24 @@ def _translate_pipeline(content, client, args, use_mistral, use_claude, use_gemi
     """
     content, code_blocks, block_placeholders = _protect_code_blocks(content)
     content, inline_codes, inline_placeholders = _protect_inline_code(content)
+    # News quotes AVANT URLs : `_protect_news_quotes` lit l'attribution
+    # `> — [text](https://...)` en regex et capture l'URL réelle dans
+    # `attribution_urls` (utilisée par `_validate_news_post`). Si on protégeait
+    # les URLs avant, l'attribution capturée serait `#URL{n}#` au lieu de l'URL
+    # réelle et la validation news post-traduction ne saurait pas quoi chercher.
     content, original_quotes, attribution_urls = _protect_news_quotes(content, args)
+    # URLs après les protections de code et de news : ainsi les URLs déjà
+    # cachées derrière `#CODEBLOCK*#` / `#INLINECODE*#` ne sont pas touchées,
+    # et toutes les autres (markdown links, HTML href/src, badges, anchors
+    # absolues) sont remplacées par `#URL{n}#` avant l'appel LLM.
+    content, urls, url_placeholders = _protect_urls(content)
 
     translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
 
-    _validate_code_placeholders_present(translated_content, block_placeholders, inline_placeholders)
+    _validate_code_placeholders_present(
+        translated_content, block_placeholders, inline_placeholders, url_placeholders
+    )
+    translated_content = _restore_urls(translated_content, urls, url_placeholders)
     translated_content = _restore_code(
         translated_content, inline_codes, inline_placeholders, code_blocks, block_placeholders
     )
