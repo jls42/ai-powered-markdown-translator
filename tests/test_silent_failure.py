@@ -728,6 +728,45 @@ class TestStructuralLineHTML(unittest.TestCase):
         self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
 
 
+class TestLooksLikeProperNounList(unittest.TestCase):
+    """Heuristique pour exclure les fenêtres dominées par des noms propres
+    (marques/produits) du passthrough check : ces fenêtres restent identiques
+    source/cible légitimement, donc un match n'indique PAS de silent-failure."""
+
+    def test_product_name_list_is_proper_noun_dominated(self):
+        # Cas réel rencontré sur le README de caveman (faux positif EN→ES/HI).
+        window = (
+            "* opencode, Roo, Amp, Goose, Kiro CLI, Augment, Aider Desk, "
+            "Continue, Kilo, Junie (JetBrains), Trae"
+        )
+        self.assertTrue(translate._looks_like_proper_noun_list(window))
+
+    def test_normal_french_prose_is_not_proper_noun_dominated(self):
+        window = (
+            "Le projet utilise une approche moderne pour la traduction "
+            "automatique des documents techniques."
+        )
+        self.assertFalse(translate._looks_like_proper_noun_list(window))
+
+    def test_normal_english_prose_with_acronyms_is_not_proper_noun_dominated(self):
+        window = (
+            "The API uses HTTP for communication and JSON for data exchange "
+            "between the client and the server."
+        )
+        self.assertFalse(translate._looks_like_proper_noun_list(window))
+
+    def test_short_window_under_5_words_is_not_filtered(self):
+        # Sécurité : ne pas skip à tort des fenêtres trop courtes.
+        window = "Mistral AI Service"
+        self.assertFalse(translate._looks_like_proper_noun_list(window))
+
+    def test_title_case_long_heading_is_not_filtered_at_70pct(self):
+        # Title case 6 mots, mais "for" est lowercase → 5/6 = 83% — skip.
+        # Avec des "and"/"the" intercalés, on tombe sous 70%.
+        window = "Setup and the configuration of advanced features in production environments"
+        self.assertFalse(translate._looks_like_proper_noun_list(window))
+
+
 class TestExtractSourceWindowsStripsHTML(unittest.TestCase):
     """Le cleaning de fenêtre source doit strip les balises HTML inline
     (mais conserver le texte) pour éviter les faux positifs où des balises

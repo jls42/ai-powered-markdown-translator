@@ -167,7 +167,7 @@ _STRUCTURAL_LINE = re.compile(
     r"|[\[\]{}]"  # YAML list/dict bracket on own line
     r"|['\"][^'\"\n]+['\"]\s*,?\s*$"  # YAML string item ('item' or "item", possibly with trailing comma)
     r"|(?:\S+\s+)?\[[^\]]+\]\([^)]+\.md\)(?:\s*\|\s*\[[^\]]+\]\([^)]+\.md\))+\s*$"  # markdown language/nav bar
-    r"|</?[a-zA-Z][a-zA-Z0-9]*(?:\s[^>]*)?\s*/?>(?:\s*</?[a-zA-Z][a-zA-Z0-9]*(?:\s[^>]*)?\s*/?>)*\s*$"  # ligne composée uniquement de balises HTML (<p align="center">, </p>, <br/>, etc.)
+    r"|</?[a-zA-Z][a-zA-Z0-9]*[^>]*/?>(?:\s*</?[a-zA-Z][a-zA-Z0-9]*[^>]*/?>)*\s*$"  # ligne composée uniquement de balises HTML (<p align="center">, </p>, <br/>, etc.) — `[^>]*` est non-ambigu (pas de backtracking exponentiel CodeQL)
     r"|(?:\S+\s+)?<a\s+href=['\"][^'\"]+['\"][^>]*>[^<]*</a>(?:\s*[·•|·‧]\s*<a\s+href=['\"][^'\"]+['\"][^>]*>[^<]*</a>)+(?:\s*<br\s*/?>)?\s*$"  # html language/nav bar (≥2 <a href> séparés par · • ‧ |)
     r")"
 )
@@ -228,6 +228,25 @@ def segment_text(text, max_length):
 def _reason_name(reason):
     """Normalise un finish_reason/stop_reason : extrait .name si enum, sinon retourne tel quel."""
     return getattr(reason, "name", reason)
+
+
+def _looks_like_proper_noun_list(window):
+    """Heuristique : la fenêtre est dominée par des mots commençant par
+    majuscule (>70% des mots ≥3 chars), suggérant une liste de noms propres /
+    marques / produits qui restent identiques source/cible légitimement
+    (ex. `opencode, Roo, Amp, Goose, Kiro CLI, …`). Un match verbatim de ces
+    fenêtres dans la sortie n'indique PAS un passthrough — le LLM ne traduit
+    pas un nom de produit. On les exclut donc de la garde anti-passthrough.
+
+    Seuil min 5 mots pour ne pas skip à tort des fenêtres trop courtes ;
+    seuil 70% pour préserver la détection sur des phrases title-case
+    (`The API uses HTTP for Communication`) qui restent légitimes à matcher.
+    """
+    words = re.findall(r"[A-Za-z][A-Za-z'-]{2,}", window)
+    if len(words) < 5:
+        return False
+    upper_starts = sum(1 for w in words if w[0].isupper())
+    return upper_starts / len(words) > 0.7
 
 
 def _extract_source_windows(segment):
@@ -298,6 +317,8 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
 
     out_norm = re.sub(r"\s+", " ", stripped).casefold()
     for window in _extract_source_windows(segment):
+        if _looks_like_proper_noun_list(window):
+            continue
         window_norm = re.sub(r"\s+", " ", window).casefold()
         if window_norm in out_norm:
             raise RuntimeError(
