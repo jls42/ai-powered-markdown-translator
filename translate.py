@@ -185,6 +185,18 @@ _LANG_SCRIPT_RANGES = {
     "zh": (("\u4e00", "\u9fff"),),
 }
 
+# Pour les targets non-latins, l'instruction explicite sur le script attendu
+# est n\u00e9cessaire : sans \u00e7a, certains LLMs (gpt-5.4-mini eco notamment) font
+# du Hinglish/Spanglish technique et ne transcrivent qu'une partie en script
+# cible (cf. caveman EN\u2192HI qui sortait \u00e0 ~31% Devanagari sans cette instruction).
+_LANG_SCRIPT_NAMES = {
+    "ar": "Arabic (\u0627\u0644\u0639\u0631\u0628\u064a\u0629)",
+    "hi": "Hindi (\u0939\u093f\u0928\u094d\u0926\u0940, Devanagari)",
+    "ja": "Japanese (\u65e5\u672c\u8a9e, Hiragana/Katakana/Kanji)",
+    "ko": "Korean (\ud55c\uad6d\uc5b4, Hangul)",
+    "zh": "Chinese (\u4e2d\u6587, Hanzi)",
+}
+
 
 def _find_last_h2_h3_match(segment, min_pos):
     """Retourne le dernier match \\n## ou \\n### à partir de min_pos, ou None."""
@@ -578,6 +590,27 @@ def _build_news_addendum(args):
     return rules + _NEWS_FINAL_CHECKS
 
 
+def _build_non_latin_script_addendum(target_lang):
+    """Instruction explicite quand le script cible est non-latin (HI, AR, ZH, JA, KO).
+    Sans ça, les LLMs (en particulier les modèles eco) écrivent souvent une
+    fraction de la prose en latin transliteration / English, ce qui produit
+    une traduction "Hinglish technique" sous-utilisable."""
+    script_name = _LANG_SCRIPT_NAMES.get(target_lang)
+    if not script_name:
+        return ""
+    return (
+        "\n\n<target_script_contract>"
+        f"\nALL human-readable prose MUST be written in {script_name}."
+        "\nKeep latin script ONLY for: code blocks, inline code, URLs, file paths, "
+        "anchors, brand and product names (e.g. React, useMemo, Mistral), CLI flags "
+        "(e.g. --eco, --news), model identifiers, and YAML/TOML structural keys."
+        "\nDo NOT write prose paragraphs, sentences, or list items in latin "
+        f"transliteration or in source language. Every paragraph of natural language "
+        f"must be rendered natively in {script_name}."
+        "\n</target_script_contract>"
+    )
+
+
 def _build_system_instructions(args, is_translation_note):
     if is_translation_note:
         return _build_translation_note_prompt(args)
@@ -587,6 +620,7 @@ def _build_system_instructions(args, is_translation_note):
     # traduisant uniquement le header et en laissant le body en source_lang
     # (cf. caveman EN→HI : header HI + body EN, détecté par la garde layer 2).
     base = _build_base_markdown_prompt(args) + _MARKDOWN_TRANSLATION_CONTRACT
+    base += _build_non_latin_script_addendum(args.target_lang)
     if args.news:
         base += _build_news_addendum(args)
     return base
