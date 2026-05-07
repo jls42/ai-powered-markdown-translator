@@ -800,7 +800,15 @@ def translate(
     return "\n".join(translated_segments)
 
 
-_FENCED_CODE_REGEX = re.compile(r"(^```[\w-]*[ \t]*\n)(.*?)(^```[ \t]*$)", re.DOTALL | re.MULTILINE)
+_FENCED_CODE_REGEX = re.compile(
+    # Info-string CommonMark : tout texte jusqu'au newline après les ``` (pas
+    # juste un identifiant `[\w-]*`). Les README utilisent souvent des attributs
+    # (e.g. ` ```Python hl_lines="7  12" ` chez FastAPI, ` ```py title="..." ` chez
+    # MkDocs) — sans cette tolérance, le bloc n'est pas protégé, le code part au
+    # LLM comme prose, et la garde anti-passthrough lève un faux positif.
+    r"(^```[^\n]*\n)(.*?)(^```[ \t]*$)",
+    re.DOTALL | re.MULTILINE,
+)
 _INLINE_CODE_REGEX = re.compile(r"(?<!`)(`[^`\n]+?`)(?!`)")
 # News citation pattern: 1+ EN quote lines `> X` (excluding `> — attribution`)
 # then `>` empty separator, then `> FLAG _trad_`, optional `> — attribution`.
