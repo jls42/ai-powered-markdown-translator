@@ -22,20 +22,20 @@
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Lines of Code"></a>
 </p>
 
-Markdown-Datei-Übersetzer, der **OpenAI**, **Mistral AI**, **Claude (Anthropic)** und **Google Gemini** verwendet.
+Markdown-Dateiübersetzer mit **OpenAI**, **Mistral AI**, **Claude (Anthropic)** und **Google Gemini**.
 
-Dieses Python-Skript übersetzt Markdown-Dateien von einer Quellsprache in eine Zielsprache und bewahrt dabei die Formatierung, Codeblöcke und die Front-Matter-Metadaten.
+Dieses Python-Skript übersetzt Markdown-Dateien von einer Quellsprache in eine Zielsprache, wobei Formatierung, Codeblöcke und Front-Matter-Metadaten erhalten bleiben.
 
 ## Hauptmerkmale
 
-- **Multi-Provider**: Unterstützung für 4 APIs (OpenAI, Mistral, Claude, Gemini)
+- **Multi-Provider**: Unterstützung von 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **Modelle 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **Sparmodus**: Option `--eco` zur Verwendung schnellerer und kostengünstigerer Modelle
-- **Einzeldatei**: Option `--file`, um nur eine einzelne Datei zu übersetzen
-- **Intelligente Segmentierung**: Verarbeitung langer Texte mit tokenbasierten Modellgrenzen
-- **Code-Erhaltung**: Codeblöcke UND Inline-Code (`` `...` ``) werden beibehalten
+- **Sparmodus**: Option `--eco` zur Verwendung schnellerer und günstigerer Modelle
+- **Einzeldatei**: Option `--file`, um eine einzelne Datei zu übersetzen
+- **Intelligente Segmentierung**: Verarbeitung langer Texte mit modellabhängigen Token-Grenzen
+- **Code-Erhaltung**: Die Codeblöcke UND der Inline-Code (`` `...` ``) bleiben erhalten
 - **Dateiname**: Option `--keep_filename`, um den ursprünglichen Namen beizubehalten
-- **News-Modus**: Option `--news`, um englische Anführungszeichen zu schützen und Flaggen in Nachrichtenartikeln zu verarbeiten
+- **News-Modus**: Option `--news`, um englische Zitate zu schützen und Flaggen in Nachrichtenartikeln zu behandeln
 - **.env-Konfiguration**: Unterstützung der Datei `.env` für API-Schlüssel
 - **Übersetzungshinweis**: Optionales Hinzufügen eines Hinweises am Ende des Dokuments
 
@@ -48,9 +48,9 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Qualitätstools (optional, aber empfohlen)
+### Qualitäts-Tooling (optional, aber empfohlen)
 
-Das Projekt verwendet [`pre-commit`](https://pre-commit.com), um zu verhindern, dass schlecht formatierter, unsicherer oder geheime Daten enthaltender Code eingecheckt wird. Installation:
+Das Projekt verwendet [`pre-commit`](https://pre-commit.com), um zu verhindern, dass schlecht formatierter, verwundbarer oder geheimhaltiger Code committet wird. Installation:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -58,7 +58,7 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Aktive Hooks: ruff (Linting+Formatierung), shellcheck (bash), prettier (markdown/yaml/json), Lizard (Komplexität), detect-secrets (API-Schlüssel), mypy (schrittweise Typisierung), Opengrep (SAST), pip-audit (CVE-Dependencies), unittest. Siehe Abschnitt `CLAUDE.md` _Quality / pre-commit_ für Details.
+Aktive Hooks: ruff (Linting+Formatierung), shellcheck (bash), prettier (markdown/yaml/json), Lizard (Komplexität), detect-secrets (API-Schlüssel), mypy (schrittweise Typisierung), Opengrep (SAST), pip-audit (CVE-Abhängigkeiten), unittest. Siehe Abschnitt `CLAUDE.md` _Quality / pre-commit_ für Details.
 
 ## Konfiguration
 
@@ -101,7 +101,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Sparmodus
 
-Verwendet schnellere und kostengünstigere Modelle (gpt-5.4-mini, claude-haiku, gemini-flash):
+Verwendet schnellere und günstigere Modelle (gpt-5.4-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -111,32 +111,62 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 | Option                   | Beschreibung                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Einzelne zu übersetzende Markdown-Datei                                  |
+| `--file`                 | Einzelne Markdown-Datei zum Übersetzen                                   |
 | `--source_dir`           | Quellverzeichnis mit den Markdown-Dateien                                |
 | `--target_dir`           | Ausgabeverzeichnis für die übersetzten Dateien                           |
 | `--source_lang`          | Quellsprache (Standard: `fr`)                                             |
 | `--target_lang`          | Zielsprache (Standard: `en`)                                              |
-| `--model`                | Zu verwendendes spezifisches Modell                                      |
-| `--eco`                  | Wirtschaftliche Modelle verwenden                                         |
-| `--use_mistral`          | Die Mistral-AI-API verwenden                                              |
-| `--use_claude`           | Die Claude-API verwenden                                                  |
-| `--use_gemini`           | Die Gemini-API verwenden                                                  |
-| `--force`                | Neuübersetzung erzwingen                                                  |
-| `--keep_filename`        | Ursprünglichen Dateinamen beibehalten                                     |
-| `--news`                 | Nachrichtenmodus: schützt EN-Zitate, verarbeitet Flaggen nach Sprache     |
-| `--add_translation_note` | Einen Übersetzungshinweis hinzufügen                                        |
-| `--include_model`        | Den Modellnamen in der Ausgabedatei einfügen                               |
+| `--model`                | Spezifisches zu verwendendes Modell                                      |
+| `--eco`                  | Sparmodelle verwenden                                                  |
+| `--use_mistral`          | Mistral-AI-API verwenden                                               |
+| `--use_claude`           | Claude-API verwenden                                                    |
+| `--use_gemini`           | Gemini-API verwenden                                                    |
+| `--force`                | Neuübersetzung erzwingen                                                |
+| `--keep_filename`        | Ursprünglichen Dateinamen beibehalten                                    |
+| `--news`                 | Nachrichtenmodus: schützt EN-Zitate, behandelt Flaggen nach Sprache      |
+| `--add_translation_note` | Übersetzungshinweis hinzufügen                                           |
+| `--note_position`        | Position des Hinweises: `top`, `bottom` (Standard) oder `both`                |
+| `--note_format`          | Format des Hinweises: `legacy` (Standard, fetter Absatz) oder `marker`       |
+| `--include_model`        | Modellnamen in der Ausgabedatei einfügen                                  |
+
+### Übersetzungshinweis: Positionen und Formate
+
+Mit `--add_translation_note` kann der Übersetzer den Hinweis oben, unten oder an beiden Stellen platzieren und ihn entweder im einfachen Textformat (rückwärtskompatibel) oder im von einem Markdown-Plugin verarbeitbaren `marker`-Format ausgeben.
+
+**Position** (`--note_position`) :
+
+- `bottom` (Standard): Hinweis am Dateiende, wie historisch üblich.
+- `top` : Hinweis **nach dem YAML-Frontmatter** eingefügt (Sicherheit für Astro Content Collections, gray-matter usw.).
+- `both` : Hinweis oben UND unten eingefügt (ein einziger LLM-Aufruf, Inhalt für beide Platzierungen wiederverwendet).
+
+**Format** (`--note_format`) :
+
+- `legacy` (Standard): fett gedruckter Absatz `**...**` — strikt identisches Verhalten wie v1.8, bytegenau. Kompatibel mit Hugo, GitHub, GitLab und jedem Markdown-Renderer.
+- `marker` : unsichtbare Markdown-Link-Referenzdefinition `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`, gefolgt von einem fett gedruckten Blockzitat. Nativ auf GitHub/GitLab lesbar und beim Build durch ein remark-Plugin auf Astro-Seite nutzbar, um ein stilisiertes Banner zu erzeugen (vgl. Blog jls42.org).
+
+```bash
+# Compatibilité legacy (rien ne change vs v1.8)
+python translate.py --file article.mdx --target_lang en --add_translation_note
+
+# Format marker, note en haut uniquement (Astro)
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position top
+
+# Format marker en haut ET en bas
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position both
+```
 
 ### Standardmodelle (2026)
 
-| Anbieter | Qualität (Standard)         | Wirtschaftlich (`--eco`)            |
+| Anbieter | Qualität (Standard)         | Sparmodus (`--eco`)            |
 | -------- | ------------------------ | ------------------------------- |
 | OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
 | Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Empfehlung für Langform-Übersetzungen**: `--use_gemini` (Standard = `gemini-3.1-pro-preview` Qualität, `--eco` = `gemini-3.1-flash-lite-preview`) bewahrt die Markdown-Struktur bei nicht-lateinischen Skripten (PL, JA, ZH, AR, HI) tendenziell besser, insbesondere im `--news`-Modus, in dem die Genauigkeit der Platzhalter zählt. OpenAI bleibt aus Gründen der Rückwärtskompatibilität der Standardwert.
+> **Empfehlung für Long-Form-Übersetzungen**: `--use_gemini` (Standard = `gemini-3.1-pro-preview` Qualität, `--eco` = `gemini-3.1-flash-lite-preview`) bewahrt die Markdown-Struktur bei nicht-lateinischen Skripten (PL, JA, ZH, AR, HI) tendenziell besser, insbesondere im `--news`-Modus, in dem die Genauigkeit der Platzhalter wichtig ist. OpenAI bleibt aus Gründen der Rückwärtskompatibilität die Standardwahl.
 
 ## Projekte, die dieses Skript verwenden
 
@@ -144,11 +174,11 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Autor
 
-Julien LE SAUX
+Julien LE SAUX  
 E-Mail: contact@jls42.org
 
 ## Lizenz
 
 GNU GENERAL PUBLIC LICENSE Version 3. Siehe [LICENSE](LICENSE).
 
-**Dieses Dokument wurde von der Version fr in die Sprache de unter Verwendung des Modells gpt-5.4-mini übersetzt. Für weitere Informationen zum Übersetzungsprozess besuchen Sie https://github.com/jls42/ai-powered-markdown-translator**
+**Übersetzter Artikel vom Fr ins De mit gpt-5.4-mini.**

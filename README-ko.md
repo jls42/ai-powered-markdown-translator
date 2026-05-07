@@ -22,22 +22,22 @@
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Lines of Code"></a>
 </p>
 
-**OpenAI**, **Mistral AI**, **Claude (Anthropic)** 및 **Google Gemini**를 사용하는 Markdown 파일 번역기.
+**OpenAI**, **Mistral AI**, **Claude (Anthropic)** 및 **Google Gemini**를 사용하는 Markdown 파일 번역기입니다.
 
-이 Python 스크립트는 서식, 코드 블록, front matter 메타데이터를 보존하면서 Markdown 파일을 원본 언어에서 대상 언어로 번역합니다.
+이 Python 스크립트는 서식, 코드 블록, front matter 메타데이터를 보존하면서 소스 언어에서 대상 언어로 Markdown 파일을 번역합니다.
 
 ## 주요 기능
 
-- **다중 제공자**: 4개 API 지원(OpenAI, Mistral, Claude, Gemini)
+- **Multi-Provider**: 4개 API 지원(OpenAI, Mistral, Claude, Gemini)
 - **2026 모델**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **경제 모드**: 더 빠르고 비용이 적게 드는 모델을 사용하기 위한 `--eco` 옵션
+- **경제 모드**: 더 빠르고 저렴한 모델을 사용하기 위한 `--eco` 옵션
 - **단일 파일**: 단일 파일을 번역하기 위한 `--file` 옵션
-- **지능형 분할**: 모델별 토큰 한도에 맞춘 긴 텍스트 처리
-- **코드 보존**: 코드 블록과 인라인 코드(`` `...` ``)가 보존됩니다
+- **지능형 분할**: 모델별 토큰 제한을 고려한 긴 텍스트 처리
+- **코드 보존**: 코드 블록과 인라인 코드( ```...``` )가 보존됩니다
 - **파일명**: 원래 이름을 유지하기 위한 `--keep_filename` 옵션
-- **뉴스 모드**: 뉴스 기사에서 영어 인용문을 보호하고 언어별 국기를 처리하기 위한 `--news` 옵션
+- **뉴스 모드**: 뉴스 기사에서 영어 인용문을 보호하고 국기를 처리하기 위한 `--news` 옵션
 - **.env 구성**: API 키를 위한 `.env` 파일 지원
-- **번역 메모**: 문서 끝에 선택적으로 메모 추가
+- **번역 노트**: 문서 끝에 선택적으로 노트 추가
 
 ## 설치
 
@@ -50,7 +50,7 @@ pip install -r requirements.txt
 
 ### 품질 도구(선택 사항이지만 권장)
 
-이 프로젝트는 형식이 맞지 않거나 취약한 코드, 또는 비밀이 포함된 코드를 커밋하지 못하도록 [`pre-commit`](https://pre-commit.com)를 사용합니다. 설치:
+이 프로젝트는 포맷이 잘못되었거나, 취약하거나, 비밀을 포함한 코드를 커밋하지 않도록 [`pre-commit`](https://pre-commit.com)를 사용합니다. 설치:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -58,7 +58,7 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-활성 훅: ruff(lint+format), shellcheck(bash), prettier(markdown/yaml/json), Lizard(복잡도), detect-secrets(API 키), mypy(점진적 타이핑), Opengrep(SAST), pip-audit(CVE deps), unittest. 자세한 내용은 `CLAUDE.md`의 _Quality / pre-commit_ 섹션을 참조하세요.
+활성 훅: ruff(lint+format), shellcheck(bash), prettier(markdown/yaml/json), Lizard(복잡도), detect-secrets(API 키), mypy(점진적 타이핑), Opengrep(SAST), pip-audit(CVE deps), unittest. 자세한 내용은 `CLAUDE.md` 섹션 _Quality / pre-commit_를 참조하세요.
 
 ## 구성
 
@@ -101,7 +101,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### 경제 모드
 
-더 빠르고 비용이 적게 드는 모델(gpt-5.4-mini, claude-haiku, gemini-flash)을 사용합니다:
+더 빠르고 저렴한 모델(gpt-5.4-mini, claude-haiku, gemini-flash)을 사용합니다:
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -112,31 +112,61 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | 옵션                   | 설명                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
 | `--file`                 | 번역할 단일 Markdown 파일                                       |
-| `--source_dir`           | Markdown 파일이 들어 있는 소스 디렉터리                        |
+| `--source_dir`           | Markdown 파일이 포함된 소스 디렉터리                        |
 | `--target_dir`           | 번역된 파일의 출력 디렉터리                          |
-| `--source_lang`          | 원본 언어(기본값: `fr`)                                             |
+| `--source_lang`          | 소스 언어(기본값: `fr`)                                             |
 | `--target_lang`          | 대상 언어(기본값: `en`)                                              |
 | `--model`                | 사용할 특정 모델                                             |
-| `--eco`                  | 경제 모델 사용                                         |
+| `--eco`                  | 경제형 모델 사용                                         |
 | `--use_mistral`          | Mistral AI API 사용                                                |
 | `--use_claude`           | Claude API 사용                                                    |
 | `--use_gemini`           | Gemini API 사용                                                    |
 | `--force`                | 재번역 강제                                                  |
 | `--keep_filename`        | 원래 파일명 유지                                     |
-| `--news`                 | 뉴스 모드: EN 인용문을 보호하고, 언어별 국기를 관리 |
-| `--add_translation_note` | 번역 메모 추가                                           |
+| `--news`                 | 뉴스 모드: EN 인용문 보호, 언어별 국기 처리 |
+| `--add_translation_note` | 번역 노트 추가                                           |
+| `--note_position`        | 노트 위치: `top`, `bottom`(기본값), 또는 `both`                |
+| `--note_format`          | 노트 형식: `legacy`(기본값, 굵은 문단) 또는 `marker`       |
 | `--include_model`        | 출력 파일에 모델 이름 포함                       |
+
+### 번역 노트: 위치 및 형식
+
+`--add_translation_note`를 사용하면 번역기는 노트를 상단, 하단 또는 양쪽에 배치할 수 있으며, 일반 텍스트 형식(하위 호환) 또는 Markdown 플러그인이 사용할 수 있는 `marker` 형식으로 렌더링할 수 있습니다.
+
+**위치** (`--note_position`) :
+
+- `bottom`(기본값): 기존처럼 파일 끝에 노트 삽입.
+- `top` : YAML frontmatter 뒤에 노트 삽입(Astro Content Collections, gray-matter 등의 안전성).
+- `both` : 상단과 하단 모두에 삽입(단일 LLM 호출, 두 위치에 재사용되는 콘텐츠).
+
+**형식** (`--note_format`) :
+
+- `legacy`(기본값): 굵은 문단 `**...**` — v1.8과 바이트 단위로 완전히 동일한 동작. Hugo, GitHub, GitLab 및 모든 Markdown 렌더러와 호환됩니다.
+- `marker` : 보이지 않는 Markdown 링크 참조 정의 `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"` 뒤에 굵은 blockquote가 이어집니다. GitHub/GitLab에서 기본적으로 읽을 수 있으며, Astro의 remark 플러그인에서 빌드 시 활용하여 스타일이 적용된 배너를 생성할 수 있습니다(jls42.org 블로그 참조).
+
+```bash
+# Compatibilité legacy (rien ne change vs v1.8)
+python translate.py --file article.mdx --target_lang en --add_translation_note
+
+# Format marker, note en haut uniquement (Astro)
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position top
+
+# Format marker en haut ET en bas
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position both
+```
 
 ### 기본 모델(2026)
 
-| 제공자 | 품질(기본)         | 경제형 (`--eco`)            |
+| Provider | 품질(기본값)         | 경제형 (`--eco`)            |
 | -------- | ------------------------ | ------------------------------- |
 | OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
 | Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **장문 번역 권장 사항**: `--use_gemini`(기본 = `gemini-3.1-pro-preview` 품질, `--eco` = `gemini-3.1-flash-lite-preview`)는 비라틴 문자 스크립트(PL, JA, ZH, AR, HI)에서 마크다운 구조를 더 잘 보존하는 경향이 있으며, 특히 플레이스홀더 충실도가 중요한 `--news` 모드에서 그렇습니다. 하위 호환성을 위해 OpenAI가 여전히 기본값입니다.
+> **긴 형식 번역 권장 사항**: `--use_gemini`(기본값 = `gemini-3.1-pro-preview` 품질, `--eco` = `gemini-3.1-flash-lite-preview`)는 비라틴 문자 스크립트(PL, JA, ZH, AR, HI)에서 Markdown 구조를 더 잘 보존하는 경향이 있으며, 특히 플레이스홀더의 정확성이 중요한 `--news` 모드에서 그렇습니다. OpenAI는 하위 호환성을 위한 기본값으로 유지됩니다.
 
 ## 이 스크립트를 사용하는 프로젝트
 
@@ -145,10 +175,10 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 ## 작성자
 
 Julien LE SAUX
-이메일: contact@jls42.org
+Email : contact@jls42.org
 
 ## 라이선스
 
 GNU GENERAL PUBLIC LICENSE Version 3. [LICENSE](LICENSE)를 참조하세요.
 
-**이 문서는 gpt-5.4-mini 모델을 사용하여 fr 버전에서 ko 언어로 번역되었습니다. 번역 과정에 대한 자세한 정보는 https://github.com/jls42/ai-powered-markdown-translator 를 참조하세요.**
+**gpt-5.4-mini로 프랑스어에서 한국어로 번역된 기사.**
