@@ -176,6 +176,14 @@ _BLOCKQUOTE_PREFIX = re.compile(r"^\s*>\s?")
 _URL_OR_PLACEHOLDER = re.compile(
     r"https?://\S+|#(?:CODEBLOCK|INLINECODE)\d+#|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"
 )
+_MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
+_LANG_SCRIPT_RANGES = {
+    "ar": (("\u0600", "\u06ff"),),
+    "hi": (("\u0900", "\u097f"),),
+    "ja": (("\u3040", "\u30ff"), ("\u4e00", "\u9fff")),
+    "ko": (("\uac00", "\ud7af"),),
+    "zh": (("\u4e00", "\u9fff"),),
+}
 
 
 def _find_last_h2_h3_match(segment, min_pos):
@@ -249,47 +257,90 @@ def _looks_like_proper_noun_list(window):
     return upper_starts / len(words) > 0.7
 
 
+def _clean_for_language_detection(text):
+    """Réduit le bruit structurel avant langdetect/script checks.
+
+    Les README techniques contiennent beaucoup de HTML, URLs, placeholders,
+    liens Markdown, anchors et code. Les laisser dans le corpus pousse
+    langdetect vers `en`, surtout pour HI où le texte traduit garde souvent des
+    noms de produits/flags CLI en latin.
+    """
+    text = _MARKDOWN_LINK.sub(r"\1", text)
+    text = _URL_OR_PLACEHOLDER.sub(" ", text)
+    text = re.sub(r"<[^>]+>", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _count_chars_in_ranges(text, ranges):
+    count = 0
+    for ch in text:
+        if any(start <= ch <= end for start, end in ranges):
+            count += 1
+    return count
+
+
+def _has_target_script_signal(text, target_lang):
+    ranges = _LANG_SCRIPT_RANGES.get(target_lang)
+    if not ranges:
+        return False
+    cleaned = _clean_for_language_detection(text)
+    target_chars = _count_chars_in_ranges(cleaned, ranges)
+    latin_chars = len(re.findall(r"[A-Za-z]", cleaned))
+    # README techniques traduits vers HI/AR/JA/KO/ZH restent mixtes par design
+    # (noms de produits, CLI flags, code, modèles). Un volume absolu de script
+    # cible + une part raisonnable évitent d'accepter un simple header traduit.
+    return target_chars >= 400 and target_chars / max(1, target_chars + latin_chars) >= 0.20
+
+
+def _line_is_droppable(line, ignore_blockquotes):
+    """Vrai si la ligne est purement structurelle (pas de prose à comparer)."""
+    if _EMPTY_BLOCKQUOTE_LINE.match(line):
+        return True
+    if ignore_blockquotes and _BLOCKQUOTE_PREFIX.match(line):
+        return True
+    return bool(_STRUCTURAL_LINE.match(line))
+
+
+def _clean_paragraph_for_window(para, ignore_blockquotes):
+    """Retourne la prose normalisée d'un paragraphe (chaîne vide si rien d'utile).
+
+    Strip blockquotes empty/structurelles, préfixes Markdown inline, URLs,
+    balises HTML inline (<strong>, <a>, etc.) qui restent identiques source/cible
+    et créeraient des faux positifs de passthrough.
+    """
+    kept_lines = []
+    for line in para.split("\n"):
+        if _line_is_droppable(line, ignore_blockquotes):
+            continue
+        unquoted = _BLOCKQUOTE_PREFIX.sub("", line)
+        kept_lines.append(_INLINE_MD_PREFIX.sub("", unquoted))
+    if not kept_lines:
+        return ""
+    joined = " ".join(kept_lines)
+    cleaned = _URL_OR_PLACEHOLDER.sub("", joined)
+    cleaned = re.sub(r"<[^>]+>", " ", cleaned)
+    return re.sub(r"\s+", " ", cleaned).strip()
+
+
+def _windows_from_clean_text(cleaned):
+    """Retourne 0/1/3 fenêtres selon la longueur (paragraphe long = début/milieu/fin)."""
+    n = len(cleaned)
+    if n < 120:
+        return []
+    if n >= 600:
+        mid = n // 2
+        return [cleaned[:200], cleaned[mid - 100 : mid + 100], cleaned[-200:]]
+    return [cleaned[:200]]
+
+
 def _extract_source_windows(segment, ignore_blockquotes=False):
     """Retourne des fenêtres textuelles 'saines' (≥120 chars) issues du segment source,
     en regroupant les paragraphes wrappés. Pour les paragraphes longs (≥600 chars), extrait
     3 fenêtres (début/milieu/fin) pour couvrir le cas où le source non-traduit serait au milieu."""
     windows = []
     for para in re.split(r"\n\s*\n", segment):
-        kept_lines = []
-        for line in para.split("\n"):
-            if _EMPTY_BLOCKQUOTE_LINE.match(line):
-                continue
-            if ignore_blockquotes and _BLOCKQUOTE_PREFIX.match(line):
-                continue
-            if _STRUCTURAL_LINE.match(line):
-                continue
-            unquoted = _BLOCKQUOTE_PREFIX.sub("", line)
-            kept_lines.append(_INLINE_MD_PREFIX.sub("", unquoted))
-        if not kept_lines:
-            continue
-        joined = " ".join(kept_lines)
-        cleaned = _URL_OR_PLACEHOLDER.sub("", joined)
-        # Strip les balises HTML inline : sans ça, des balises littérales
-        # (<strong>, <a href="...">, <span class="...">, etc.) restent identiques
-        # source/cible et créent des faux positifs de passthrough quand la fenêtre
-        # contient peu de texte traduisible (ex. nav-bar avec drapeaux + noms de
-        # langues qui sont eux-mêmes invariants source/cible).
-        cleaned = re.sub(r"<[^>]+>", " ", cleaned)
-        cleaned = re.sub(r"\s+", " ", cleaned).strip()
-        n = len(cleaned)
-        if n < 120:
-            continue
-        if n >= 600:
-            mid = n // 2
-            windows.extend(
-                [
-                    cleaned[:200],
-                    cleaned[mid - 100 : mid + 100],
-                    cleaned[-200:],
-                ]
-            )
-        else:
-            windows.append(cleaned[:200])
+        cleaned = _clean_paragraph_for_window(para, ignore_blockquotes)
+        windows.extend(_windows_from_clean_text(cleaned))
     return windows
 
 
@@ -332,14 +383,18 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
                 f"matched window: {window_norm[:100]!r})"
             )
 
-    if len(stripped) < 100:
+    langdetect_text = _clean_for_language_detection(stripped)
+    if _has_target_script_signal(stripped, args.target_lang):
+        return
+
+    if len(langdetect_text) < 100:
         return
     try:
-        probas = {p.lang: p.prob for p in detect_langs(stripped)}
+        probas = {p.lang: p.prob for p in detect_langs(langdetect_text)}
     except LangDetectException as e:
         print(
             f"⚠ langdetect failed on output (model={args.model}, "
-            f"target={args.target_lang}, len={len(stripped)}): {e}",
+            f"target={args.target_lang}, len={len(langdetect_text)}): {e}",
             file=sys.stderr,
         )
         return
@@ -371,6 +426,9 @@ def _build_base_markdown_prompt(args):
         "Preserve the complete Markdown structure: headings, lists, tables, blockquotes, "
         "front matter, MDX/HTML tags, directives, comments, and blank-line separation. "
         "Translate human-readable text inside blockquotes while preserving the `>` markers. "
+        "For non-Latin target languages, write prose in the natural native script; keep Latin "
+        "script only for code, URLs, anchors, product/model names, CLI flags, and unavoidable "
+        "technical identifiers. "
         "For Markdown links [text](url), translate the visible link text and keep the URL unchanged. "
         "For Markdown tables, preserve pipes, separator rows, alignment markers, numbers, units, "
         "IDs, and model/product names; translate human-readable headers and cell labels. "

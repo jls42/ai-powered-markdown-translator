@@ -667,6 +667,54 @@ class TestGenericBlockquoteValidation(unittest.TestCase):
         self.assertEqual(windows, [])
 
 
+class TestHindiTechnicalReadmeValidation(unittest.TestCase):
+    """HI README techniques restent souvent mixtes Hindi + latin technique."""
+
+    def test_hindi_with_technical_latin_terms_bypasses_langdetect_false_positive(self):
+        source_segment = (
+            "This README explains installation, usage, benchmarks, and plugin behavior "
+            "for multiple developer agents in a technical command-line workflow."
+        )
+        hindi_sentence = (
+            "यह README स्थापना, उपयोग, बेंचमार्क और plugin behavior को समझाता है "
+            "ताकि developer agents command line workflow में सही तरह से काम करें। "
+        )
+        translated = (
+            '<p align="center">caveman</p>\n\n'
+            + (hindi_sentence * 12)
+            + " Claude Code Codex Gemini CLI Cursor Windsurf OpenAI GPT MCP plugin "
+            + "install.sh README benchmarks evals useMemo React render tokens "
+        )
+        args = _base_args(source_lang="en", target_lang="hi", news=False)
+
+        with patch("translate.detect_langs", return_value=[MagicMock(lang="en", prob=0.86)]):
+            translate._validate_translation_output(
+                source_segment, translated, args, is_translation_note=False
+            )
+
+    def test_hindi_header_only_still_fails_language_mismatch(self):
+        source_segment = (
+            "A technical paragraph about installation workflows and command line tools."
+        )
+        translated = (
+            "<strong>स्थापना</strong>\n\n"
+            "A rewritten English paragraph about setup workflows, benchmarks, plugins, "
+            "agents, command line tools, and installation behavior."
+        )
+        args = _base_args(source_lang="en", target_lang="hi", news=False)
+
+        with (
+            patch(
+                "translate.detect_langs",
+                return_value=[MagicMock(lang="en", prob=0.95), MagicMock(lang="hi", prob=0.05)],
+            ),
+            self.assertRaisesRegex(RuntimeError, r"Output language mismatch"),
+        ):
+            translate._validate_translation_output(
+                source_segment, translated, args, is_translation_note=False
+            )
+
+
 class TestMultiProviderStopReasons(unittest.TestCase):
     """Whitelist des finish_reason / stop_reason par provider — un mauvais signal
     abnormal doit lever pour TOUS les providers (anti-régression sur les copy-paste)."""
