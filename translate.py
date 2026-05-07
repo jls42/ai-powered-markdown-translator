@@ -586,6 +586,15 @@ _NEWS_FINAL_CHECKS = (
     "\n</news_final_checks>"
 )
 
+_PLACEHOLDER_PRESERVATION_CONTRACT = (
+    "\n\n<placeholder_preservation_contract>"
+    "\nThe input may contain placeholders like `#INLINECODE0#`, `#INLINECODE1#`, `#CODEBLOCK0#`, etc. These represent code blocks and inline code extracted before translation."
+    "\nEVERY such placeholder present in the input MUST appear in the output exactly as-is: same prefix (`#INLINECODE` or `#CODEBLOCK`), same digit, same trailing `#`. Do not rename, translate, transliterate, drop, or merge them. Do not add new ones."
+    "\nWhen the target language reorders sentence components (e.g. English SVO → Chinese/Japanese/Korean SOV, or relative clause repositioning in Hindi/Arabic), move the placeholder to its grammatically correct position — but keep it intact."
+    "\nBefore returning, count `#INLINECODE` and `#CODEBLOCK` occurrences in your output. The count MUST equal the count in the input. If a placeholder fell into a table cell or list item that you rephrased, double-check it survived the rewrite."
+    "\n</placeholder_preservation_contract>"
+)
+
 
 def _build_news_addendum(args):
     target_flag = LANG_FLAGS.get(args.target_lang, "")
@@ -627,6 +636,7 @@ def _build_system_instructions(args, is_translation_note):
     # traduisant uniquement le header et en laissant le body en source_lang
     # (cf. caveman EN→HI : header HI + body EN, détecté par la garde layer 2).
     base = _build_base_markdown_prompt(args) + _MARKDOWN_TRANSLATION_CONTRACT
+    base += _PLACEHOLDER_PRESERVATION_CONTRACT
     base += _build_non_latin_script_addendum(args.target_lang)
     if args.news:
         base += _build_news_addendum(args)
