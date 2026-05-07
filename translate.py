@@ -64,8 +64,6 @@ DEFAULT_SOURCE_LANG = "fr"
 DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
-# Limites de contexte par modèle. Sources : doc officielle de chaque provider.
-# Mettre à jour quand un nouveau modèle est ajouté.
 MODEL_TOKEN_LIMITS = {
     # OpenAI GPT-5.5 series (1M+ context)
     "gpt-5.5": 1050000,
@@ -894,22 +892,26 @@ def _build_translation_note_phrase(args):
     )
 
 
+def _assemble_translation_note_paragraphs(phrase):
+    """Forme canonique 3-paragraphes : titre (Python) + phrase + lien (Python).
+
+    Appelée à la fois par `_build_translation_note_source` (vue source pour
+    documentation/tests) et par `_append_translation_note` (vue runtime avec
+    la phrase déjà traduite). Garantit que les deux paths produisent un bloc
+    structurellement identique.
+    """
+    title, link = _translation_note_invariants()
+    return title + "\n\n" + phrase + "\n\n" + link
+
+
 def _build_translation_note_source(args):
-    """Émet une note structurée en 3 paragraphes (style "GitHub repo embed card") :
+    """Émet la note source non traduite en 3 paragraphes (style "GitHub repo embed card") :
 
     1. Titre repo (nom du projet en code inline + gras) — invariant assemblé en Python.
     2. Description (phrase explicative) — seule partie traduite par le LLM.
     3. Lien CTA Markdown avec arrow visible — invariant assemblé en Python.
-
-    Cette structure permet au consommateur (plugin remark-translation-banner
-    côté blog) de construire un layout en grille (icône / titre+desc / CTA).
-    Le pipeline réel (`_append_translation_note`) traduit UNIQUEMENT la phrase
-    et reconstruit le bloc complet — cette fonction reste exposée pour les
-    tests qui inspectent le format source attendu.
     """
-    title, link = _translation_note_invariants()
-    phrase = _build_translation_note_phrase(args)
-    return title + "\n\n" + phrase + "\n\n" + link
+    return _assemble_translation_note_paragraphs(_build_translation_note_phrase(args))
 
 
 def _sanitize_model(model):
@@ -943,7 +945,12 @@ def _split_frontmatter(content):
             frontmatter = "".join(lines[: index + 1]).rstrip("\n")
             body = "".join(lines[index + 1 :]).lstrip("\n")
             return frontmatter, body
-    return "", content
+    # Opening `---` sans fence de fermeture : insérer la note sans erreur
+    # produirait un fichier mal formé (note placée au-dessus d'un `---`
+    # orphelin). On préfère faire échouer le fichier (failed_files dans
+    # translate_markdown_file) plutôt qu'écrire silencieusement un output
+    # cassé.
+    raise RuntimeError("malformed frontmatter: opening '---' without closing fence")
 
 
 def _build_translation_note_block(args, translated_note, placement, fmt):
@@ -954,20 +961,19 @@ def _build_translation_note_block(args, translated_note, placement, fmt):
         f"v=1 source={args.source_lang} target={args.target_lang} "
         f"model={safe_model} date={datetime.date.today().isoformat()}"
     )
-    # Selon le nombre de paragraphes que le LLM a préservés, on assemble
-    # le bloc différemment :
-    #   - 3+ paragraphes (titre + desc + lien) → on garde tel quel, sans
-    #     wrap supplémentaire (le titre porte déjà ses `**...**` propres).
-    #   - 2 paragraphes (phrase + lien) → on wrap la phrase en gras pour
-    #     préserver l'emphase, le lien reste hors du `<strong>`.
-    #   - 1 paragraphe (LLM a tout collé) → fallback : tout en gras.
+    # 3+ paragraphes : forme canonique titre/desc/lien — on garde tel quel.
+    # 2 paragraphes : wrap UNIQUEMENT la phrase en gras, le lien reste hors
+    #   du `<strong>` (rendu fragile dans certains renderers).
+    # 1 paragraphe : fallback emphase, sauf si la chaîne contient un lien
+    #   Markdown `](` — la mise en gras d'un lien est fragile, on émet brut.
     parts = re.split(r"\n\s*\n", translated_note.strip())
     if len(parts) >= 3:
         body = "\n\n".join(p.strip() for p in parts)
     elif len(parts) == 2:
         body = "**" + parts[0].strip() + "**\n\n" + parts[1].strip()
     else:
-        body = "**" + translated_note.strip() + "**"
+        raw = translated_note.strip()
+        body = raw if "](" in raw else "**" + raw + "**"
     quoted = _quote_lines(body)
     # Blank line between definition and blockquote keeps the output Prettier-friendly
     # (Prettier MDX inserts one anyway). The remark plugin still detects the adjacent
@@ -1021,10 +1027,8 @@ def _append_translation_note(translated_content, client, args, use_mistral, use_
         phrase_source, client, args, use_mistral, use_claude, use_gemini, True
     ).strip()
     if fmt == "marker":
-        title, link = _translation_note_invariants()
-        translation_note = title + "\n\n" + translated_phrase + "\n\n" + link
+        translation_note = _assemble_translation_note_paragraphs(translated_phrase)
     else:
-        # legacy : phrase simple wrappée en `**...**` par _build_translation_note_block
         translation_note = translated_phrase
     return _compose_with_notes(translated_content, args, translation_note, fmt)
 
