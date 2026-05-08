@@ -1,0 +1,48 @@
+name: SonarCloud
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+          pip install coverage
+
+      - name: Run tests with coverage
+        run: |
+          # Agrège les rc pour que les deux suites tournent ET que coverage xml
+          # soit toujours généré (sinon SonarCloud ne reçoit aucune donnée si la
+          # 1re suite échoue). Aligné sur scripts/run-unittest.sh.
+          set +e
+          rc=0
+          coverage run --source=translate,scripts -m unittest discover tests || rc=$?
+          coverage run --append --source=translate,scripts -m unittest discover scripts/tests || rc=$?
+          coverage xml -o coverage.xml
+          exit "$rc"
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@59db25f34e16620e48ab4bb9e4a5dce155cb5432 # v8.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

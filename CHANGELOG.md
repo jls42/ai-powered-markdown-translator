@@ -2,58 +2,101 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.7.1** Mise à jour modèles OpenAI :
-    - Modèles par défaut mis à jour vers GPT-5.4 (mars 2026) :
-        - Qualité : `gpt-5` → `gpt-5.4`
-        - Économique : `gpt-5-mini` → `gpt-5.4-mini`
-    - Ajout des limites de tokens pour `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k)
+- **1.9** Fix silent-failure + outillage qualité complet + note de traduction multi-position (2026-05-07) :
+  - **Note de traduction multi-position + format marker "embed card"** :
+    - Nouvelles options CLI (additives, défauts inchangés → **non breaking**) :
+      - `--note_position {top,bottom,both}` (défaut : `bottom`) : place la note en haut, en bas, ou aux deux endroits du fichier traduit.
+      - `--note_format {legacy,marker}` (défaut : `legacy`) :
+        - `legacy` reproduit strictement le comportement v1.8 (paragraphe gras `**…**`) **byte-for-byte**.
+        - `marker` émet une link reference definition Markdown invisible (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) suivie d'un **blockquote 3-paragraphes** structuré pour un rendu type "GitHub repo embed card" : titre du projet en code inline (`**\`ai-powered-markdown-translator\`\*\*`), description traduite par le LLM, et lien CTA (`[Voir le projet sur GitHub ↗](URL)`) avec arrow visible. Exploitable au build par un plugin remark (cf. blog jls42.org → plugin `remark-translation-banner`).
+    - **Invariants jamais envoyés au LLM** : titre repo et URL GitHub sont assemblés côté Python après traduction de la phrase descriptive. Le LLM ne voit jamais le slug `ai-powered-markdown-translator` ni `https://github.com/jls42/...`, garantissant qu'aucun renderer/casse/scheme ne soit altéré.
+    - **Frontmatter-aware insertion** : en mode `top` ou `both`, la note est insérée **après le bloc `---` de fermeture** du frontmatter YAML (sécurité Astro Content Collections / gray-matter). Helper `_split_frontmatter` détecte `---\n…\n---\n` au début du fichier et préserve son intégrité ; **lève `RuntimeError`** sur frontmatter ouvert sans fence de fermeture (le fichier remonte dans `failed_files` au lieu d'être écrit avec une note mal placée).
+    - **Sanitizer modèle whitelist** : `_sanitize_model` remplace tout caractère hors `[A-Za-z0-9._:/-]` par `_`, fallback `unknown` si vide. Aligne sur le validateur côté plugin remark Astro et neutralise les caractères qui casseraient le format du marker (espace, guillemet, parenthèse, virgule, etc.).
+    - **Refactor interne** : `_append_translation_note` (1 fonction monolithique) → 7 helpers purs (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/composer séparés (le builder retourne un bloc pur sans séparateur, le composer applique les `\n\n` selon la position) ; production et helper source partagent le même assembleur 3-paragraphes.
+    - **`_quote_lines` blank-preserving** : préfixe chaque ligne par `> `, en transformant les lignes vides en `>` seul. Permet à mdast de voir 3 paragraphes distincts dans le blockquote (titre / description / lien) au lieu d'un seul paragraphe avec line-breaks.
+    - **`_build_translation_note_block` adaptatif** : selon le nombre de paragraphes que le LLM a préservés (3 = format card complet, 2 = phrase + lien, 1 = fallback). Le fallback 1-paragraphe **n'enrobe plus en `**...**`** quand un lien Markdown `](` est détecté (rendu fragile de `<strong>` autour d'un lien).
+    - **Compatibilité ascendante** : `getattr(args, "note_position", "bottom")` et `getattr(args, "note_format", "legacy")` côté `_compose_with_notes` — les Namespace sans ces attributs (tests existants, appels programmatiques externes) continuent à fonctionner sans modification.
+  - **Fix silent-failure sur traductions longues** :
+    - Validation langue post-traduction sur tous les providers (OpenAI, Mistral, Claude, Gemini) : couche déterministe (extrait source retrouvé verbatim) + couche probabiliste (`langdetect`)
+    - Whitelist `finish_reason` / `stop_reason` : lever `RuntimeError` sur tout état hors de la whitelist (truncation, content_filter, etc.)
+    - `max_tokens` Claude : `4096` → `32768` (évite truncation latente sur segments 16k, marge cross-script FR→JA/ZH/KO/AR/HI)
+    - Segmentation heading-aware : priorité H2/H3 dans la 2nde moitié du segment (chaque segment commence par une section sémantique complète)
+    - Propagation des erreurs jusqu'à exit code non-zéro : `translate_markdown_file` retourne un statut typé `success` / `failure` / `skipped`, `main()` `sys.exit(1)` si au moins un fichier a échoué (single-file et batch)
+    - Empty-content guard sur tous les providers, sanity ratio source/output (≥ 500 chars, < 5% = refus), validation placeholders code (`#CODEBLOCK`/`#INLINECODE`), normalisation post-LLM (séparateurs/liens collés à un heading), `BadRequestError` retry sans `reasoning_effort`
+    - Ajout dépendance `langdetect==1.0.9`
+  - **Outillage qualité pre-commit** ("type EurekAI complet", 14 hooks) :
+    - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 API keys protégées), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
+    - Pre-push : mypy (mode lax progressif), Opengrep SAST (translate.py + scripts/), pip-audit (mode reporting initial), unittest discover (tests/ + scripts/tests/)
+    - Wrappers locaux dans `scripts/` qui utilisent `./venv/bin/python`
+    - `scripts/audit_verdict.py` : parser JSON pip-audit avec 11 tests unittest, port Python adapté du parser jls42-astro
+    - 7 violations ruff initiales corrigées : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+    - Lizard exclut temporairement `translate.py` (4 fonctions à CCN 21-47, refactor planifié) — gate strict sur scripts/
+  - **SonarCloud + couverture exhaustive** :
+    - Workflow GitHub Actions `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analyse à chaque push et pull-request, coverage via `coverage.xml`
+    - 11 badges SonarCloud en haut du README (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
+    - `tests/test_silent_failure.py` (`unittest` stdlib) : couvre les six maillons de la chaîne d'erreur silent-failure
+    - `tests/test_orchestration.py` (+79 tests) : couvre la couche orchestration de `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallbacks, o1-series prompt format, branches early-return de `_validate_translation_output`)
+    - `scripts/tests/test_audit_verdict.py` : couverture de `main()` (stdin/stdout) et du bloc `if __name__ == "__main__"` via subprocess
+    - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
+  - **Tests** : `tests/test_translation_note_position.py` couvre la matrice position × format (incl. E2E `marker+top|bottom|both` et `legacy+top|bottom|both`), le préfixage multi-ligne, la rétrocompat byte-for-byte (golden literal), le sanitizer, le split frontmatter (incl. raise sur fence non fermé), le format 3-paragraphes, le fallback 2-paragraphes, le guard 1-paragraphe + lien Markdown, et un garde-fou critique `TestLLMPayloadExcludesInvariants` qui assert que titre+URL ne sont jamais envoyés au LLM. **190 tests pass**, 0 régression.
+  - Documentation : `README.md` (FR + 14 traductions) avec badges, `CLAUDE.md` (workflow pre-commit + watch CI détaillé), 28 traductions régénérées
+- **1.8** Mode `--news` + bump modèles 2026 (2026-03-17, tag `v1.8`) :
+  - Modèles par défaut mis à jour (mars 2026) :
+    - OpenAI qualité : `gpt-5` → `gpt-5.4`
+    - OpenAI économique : `gpt-5-mini` → `gpt-5.4-mini`
+    - Gemini qualité : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+  - Ajout des limites de tokens pour `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) et `gemini-3.1-pro-preview` (1M)
+  - Mode `--news` initial : protection des citations EN avec placeholders `#NEWSQUOTE\d+#`, mapping `LANG_FLAGS` (15 langues), gestion des drapeaux par langue cible
+  - Validation des placeholders news avant restauration (régression : un LLM qui supprimait le placeholder produisait silencieusement une sortie sans citation)
+  - Script `regen_translations.sh` rendu portable (chemins absolus, pas de dépendance au pwd)
+  - Lien Français ajouté dans les language bars README/CHANGELOG, 28 traductions régénérées
 - **1.7** Nouveautés :
-    - Option `--keep_filename` pour conserver le nom de fichier original lors de la traduction
-    - Support du fichier `.env` pour charger les clés API automatiquement
-    - **Préservation du code inline** : les backticks (`` `...` ``) sont maintenant protégés pendant la traduction
-    - Amélioration du prompt système :
-        - Meilleure gestion des guillemets dans le YAML frontmatter
-        - Protection des variables template `{variable}`
-        - Interdiction des notes de traducteur non demandées
-    - Testé avec succès sur 364 fichiers (migration blog jls42.org)
+  - Option `--keep_filename` pour conserver le nom de fichier original lors de la traduction
+  - Support du fichier `.env` pour charger les clés API automatiquement
+  - **Préservation du code inline** : les backticks (`` `...` ``) sont maintenant protégés pendant la traduction
+  - Amélioration du prompt système :
+    - Meilleure gestion des guillemets dans le YAML frontmatter
+    - Protection des variables template `{variable}`
+    - Interdiction des notes de traducteur non demandées
+  - Testé avec succès sur 364 fichiers (migration blog jls42.org)
 - **1.6** Nouveautés :
-    - Support de l'API Google Gemini pour la traduction (`--use_gemini`)
-    - Mise à jour des modèles par défaut 2026 :
-        - OpenAI : `gpt-5` (qualité), `gpt-5-mini` (éco)
-        - Claude : `claude-sonnet-4-5` (qualité), `claude-haiku-4-5` (éco)
-        - Gemini : `gemini-3-pro-preview` (qualité), `gemini-3-flash-preview` (éco)
-    - Mode économique (`--eco`) pour utiliser des modèles plus rapides et moins coûteux
-    - Traduction de fichier unique (`--file`) sans parcourir un répertoire
-    - Nouveau pattern de nommage simplifié : `{base}-{lang}.md`
-    - Option `--include_model` pour conserver l'ancien format avec le nom du modèle
-    - Support des modèles non listés avec limite de tokens par défaut (128k)
-    - README traduit en 14 langues
+  - Support de l'API Google Gemini pour la traduction (`--use_gemini`)
+  - Mise à jour des modèles par défaut 2026 :
+    - OpenAI : `gpt-5` (qualité), `gpt-5-mini` (éco)
+    - Claude : `claude-sonnet-4-5` (qualité), `claude-haiku-4-5` (éco)
+    - Gemini : `gemini-3-pro-preview` (qualité), `gemini-3-flash-preview` (éco)
+  - Mode économique (`--eco`) pour utiliser des modèles plus rapides et moins coûteux
+  - Traduction de fichier unique (`--file`) sans parcourir un répertoire
+  - Nouveau pattern de nommage simplifié : `{base}-{lang}.md`
+  - Option `--include_model` pour conserver l'ancien format avec le nom du modèle
+  - Support des modèles non listés avec limite de tokens par défaut (128k)
+  - README traduit en 14 langues
 - **1.5** Améliorations :
-    - **Mise à jour des clés API et des modèles par défaut :**
-        - **OpenAI :** Mise à jour de `DEFAULT_MODEL_OPENAI` à `"gpt-4o"`.
-        - **Mistral AI :** Mise à jour de `DEFAULT_MODEL_MISTRAL` à `"mistral-large-latest"`.
-        - **Claude d'Anthropic :** Ajout de `DEFAULT_ANTHROPIC_API_KEY` et mise à jour de `DEFAULT_MODEL_CLAUDE` à `"claude-3-5-sonnet-20240620"`.
-    - **Optimisation des prompts de traduction :**
-        - Les prompts pour les traductions directes et les notes de traduction ont été enrichis pour une meilleure clarté et efficacité, incluant des instructions détaillées sur la préservation des métadonnées et des éléments de formatage spécifiques.
-    - **Refactorisation du code :**
-        - Remplacement de `MistralClient` par la classe `Mistral` pour l'initialisation du client Mistral AI.
-        - Réorganisation des imports pour une meilleure lisibilité et maintenance.
-        - Amélioration de la segmentation des textes et gestion des blocs de code pour préserver le formatage original lors de la traduction.
-    - **Gestion des fichiers de sortie :**
-        - Inversion du modèle et de la langue dans le nom des fichiers de sortie (par exemple, `f"{base}-{args.target_lang}-{args.model}.md"`), facilitant ainsi l'organisation et la recherche des traductions.
-    - **Améliorations diverses :**
-        - Nettoyage du code en supprimant les lignes vides inutiles.
-        - Ajustements mineurs pour améliorer la structure et la lisibilité du script.
+  - **Mise à jour des clés API et des modèles par défaut :**
+    - **OpenAI :** Mise à jour de `DEFAULT_MODEL_OPENAI` à `"gpt-4o"`.
+    - **Mistral AI :** Mise à jour de `DEFAULT_MODEL_MISTRAL` à `"mistral-large-latest"`.
+    - **Claude d'Anthropic :** Ajout de `DEFAULT_ANTHROPIC_API_KEY` et mise à jour de `DEFAULT_MODEL_CLAUDE` à `"claude-3-5-sonnet-20240620"`.
+  - **Optimisation des prompts de traduction :**
+    - Les prompts pour les traductions directes et les notes de traduction ont été enrichis pour une meilleure clarté et efficacité, incluant des instructions détaillées sur la préservation des métadonnées et des éléments de formatage spécifiques.
+  - **Refactorisation du code :**
+    - Remplacement de `MistralClient` par la classe `Mistral` pour l'initialisation du client Mistral AI.
+    - Réorganisation des imports pour une meilleure lisibilité et maintenance.
+    - Amélioration de la segmentation des textes et gestion des blocs de code pour préserver le formatage original lors de la traduction.
+  - **Gestion des fichiers de sortie :**
+    - Inversion du modèle et de la langue dans le nom des fichiers de sortie (par exemple, `f"{base}-{args.target_lang}-{args.model}.md"`), facilitant ainsi l'organisation et la recherche des traductions.
+  - **Améliorations diverses :**
+    - Nettoyage du code en supprimant les lignes vides inutiles.
+    - Ajustements mineurs pour améliorer la structure et la lisibilité du script.
 - **1.4** Nouveautés :
-    - Support de l'API Claude d'Anthropic pour la traduction
-    - Optimisation des prompts pour une clarté et efficacité accrues
-    - Ajustements mineurs pour améliorer la maintenance du code
+  - Support de l'API Claude d'Anthropic pour la traduction
+  - Optimisation des prompts pour une clarté et efficacité accrues
+  - Ajustements mineurs pour améliorer la maintenance du code
 - **1.3** Améliorations et nouvelles fonctionnalités :
-    - Gestion améliorée des blocs de code
-    - Gestion améliorée des fichiers de sortie
-    - Détection de fichiers existants améliorée
-    - Option `--force` pour forcer la traduction
-    - Inversion du modèle et de la langue dans le nom du fichier de sortie
+  - Gestion améliorée des blocs de code
+  - Gestion améliorée des fichiers de sortie
+  - Détection de fichiers existants améliorée
+  - Option `--force` pour forcer la traduction
+  - Inversion du modèle et de la langue dans le nom du fichier de sortie
 - **1.2** Fix du changelog
 - **1.1** Ajout du support de l'API Mistral IA
 - **1.0** Version initiale - Support de l'API OpenAI

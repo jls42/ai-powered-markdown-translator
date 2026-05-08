@@ -1,31 +1,68 @@
-# Traducător de Markdown bazat pe AI
+# Traducător de Markdown alimentat de AI
 
 🌍 [Franceză](README.md) | [Engleză](README-en.md) | [Spaniolă](README-es.md) | [Chineză](README-zh.md) | [Germană](README-de.md) | [Japoneză](README-ja.md) | [Coreeană](README-ko.md) | [Arabă](README-ar.md) | [Hindi](README-hi.md) | [Italiană](README-it.md) | [Olandeză](README-nl.md) | [Poloneză](README-pl.md) | [Portugheză](README-pt.md) | [Română](README-ro.md) | [Suedeză](README-sv.md)
 
-Traducător de fișiere Markdown care utilizează **OpenAI**, **Mistral AI**, **Claude (Anthropic)** și **Google Gemini**.
+<h4 align="center">📊 Calitatea codului</h4>
 
-Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă, păstrând formatarea, blocurile de cod și metadatele front matter.
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Starea Quality Gate"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Evaluare de securitate"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Evaluare de fiabilitate"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Evaluare de mentenabilitate"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Acoperire"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilități"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Erori"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code smells"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Linii duplicate (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Datorie tehnică"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Linii de cod"></a>
+</p>
+<p align="center">
+  <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="Insignă Codacy"></a>
+  <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
+</p>
+
+Traducător de fișiere Markdown folosind **OpenAI**, **Mistral AI**, **Claude (Anthropic)** și **Google Gemini**.
+
+Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă, păstrând în același timp formatarea, blocurile de cod și metadatele front matter.
 
 ## Caracteristici principale
 
-- **Multi-provider**: Suport pentru 4 API-uri (OpenAI, Mistral, Claude, Gemini)
-- **Modele 2026**: GPT-5.4, Claude Sonnet 4.5, Gemini 3.1 Pro
-- **Mod economic**: Opțiune `--eco` pentru a folosi modele mai rapide și mai puțin costisitoare
-- **Fișier unic**: Opțiune `--file` pentru a traduce un singur fișier
-- **Segmentare inteligentă**: Gestionarea textelor lungi cu limite de tokeni per model
+- **Multi-Provider**: Suport pentru 4 API-uri (OpenAI, Mistral, Claude, Gemini)
+- **Modele 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
+- **Mod economic**: Opțiunea `--eco` pentru a folosi modele mai rapide și mai puțin costisitoare
+- **Fișier unic**: Opțiunea `--file` pentru a traduce un singur fișier
+- **Segmentare inteligentă**: Gestionarea textelor lungi cu limite de token-uri per model
 - **Păstrarea codului**: Blocurile de cod ȘI codul inline (`` `...` ``) sunt păstrate
-- **Nume de fișier**: Opțiune `--keep_filename` pentru a păstra numele original
-- **Mod știri**: Opțiune `--news` pentru a proteja citatele în engleză și a gestiona steagurile în articolele de știri
+- **Numele fișierului**: Opțiunea `--keep_filename` pentru a păstra numele original
+- **Modul News**: Opțiunea `--news` pentru a proteja citatele în engleză și a gestiona steagurile în articolele de știri
 - **Configurație .env**: Suport pentru fișierul `.env` pentru cheile API
-- **Notă de traducere**: Adăugarea opțională a unei note la sfârșitul documentului
+- **Notă de traducere**: Adăugare opțională a unei note la finalul documentului
 
 ## Instalare
 
 ```bash
-git clone https://gitlab.com/jls42/ai-powered-markdown-translator.git
+git clone https://github.com/jls42/ai-powered-markdown-translator.git
 cd ai-powered-markdown-translator
+python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+### Instrumente de calitate (opțional, dar recomandat)
+
+Proiectul folosește [`pre-commit`](https://pre-commit.com) pentru a împiedica comiterea de cod formatat greșit, vulnerabil sau care conține un secret. Instalare:
+
+```bash
+pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
+pre-commit install                    # hooks rapides à chaque commit
+pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
+```
+
+Hook-uri active: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexitate), detect-secrets (chei API), mypy (tipizare progresivă), Opengrep (SAST), pip-audit (CVE deps), unittest. Vezi `CLAUDE.md` secțiunea _Calitate / pre-commit_ pentru detalii.
 
 ## Configurare
 
@@ -44,7 +81,7 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 ## Utilizare
 
-### Traducerea unui fișier unic
+### Traducerea unui singur fișier
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
@@ -53,7 +90,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Traducerea unui director
 
 ```bash
-# Avec OpenAI (défaut: gpt-5.4)
+# Avec OpenAI (défaut: gpt-5.5)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -68,7 +105,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Mod economic
 
-Folosește modele mai rapide și mai puțin costisitoare (gpt-5-mini, claude-haiku, gemini-flash):
+Folosește modele mai rapide și mai puțin costisitoare (gpt-5.4-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -76,32 +113,64 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Opțiuni
 
-| Opțiune | Descriere |
-|--------|-------------|
-| `--file` | Fișier Markdown unic de tradus |
-| `--source_dir` | Director sursă care conține fișierele Markdown |
-| `--target_dir` | Director de ieșire pentru fișierele traduse |
-| `--source_lang` | Limba sursă (implicit: `fr`) |
-| `--target_lang` | Limba țintă (implicit: `en`) |
-| `--model` | Model specific de utilizat |
-| `--eco` | Folosește modelele economice |
-| `--use_mistral` | Folosește API-ul Mistral AI |
-| `--use_claude` | Folosește API-ul Claude |
-| `--use_gemini` | Folosește API-ul Gemini |
-| `--force` | Forțează re-traducerea |
-| `--keep_filename` | Păstrează numele original al fișierului |
-| `--news` | Mod actualități: protejează citatele în EN, gestionează steagurile pe limbă |
-| `--add_translation_note` | Adaugă o notă de traducere |
-| `--include_model` | Include numele modelului în fișierul de ieșire |
+| Opțiune                 | Descriere                                                             |
+| ----------------------- | --------------------------------------------------------------------- |
+| `--file`                 | Fișier Markdown unic de tradus                                        |
+| `--source_dir`           | Director sursă care conține fișierele Markdown                        |
+| `--target_dir`           | Director de ieșire pentru fișierele traduse                           |
+| `--source_lang`          | Limbă sursă (implicit: `fr`)                                             |
+| `--target_lang`          | Limbă țintă (implicit: `en`)                                              |
+| `--model`                | Model specific de utilizat                                            |
+| `--eco`                  | Folosește modelele economice                                          |
+| `--use_mistral`          | Folosește API-ul Mistral AI                                             |
+| `--use_claude`           | Folosește API-ul Claude                                                   |
+| `--use_gemini`           | Folosește API-ul Gemini                                                    |
+| `--force`                | Forțează retraducerea                                                  |
+| `--keep_filename`        | Păstrează numele original al fișierului                                 |
+| `--news`                 | Modul știri: protejează citatele în engleză, gestionează steagurile pe limbă |
+| `--add_translation_note` | Adaugă o notă de traducere                                           |
+| `--note_position`        | Poziția notei: `top`, `bottom` (implicit), sau `both`                |
+| `--note_format`          | Formatul notei: `legacy` (implicit, paragraf îngroșat) sau `marker`       |
+| `--include_model`        | Include numele modelului în fișierul de ieșire                         |
+
+### Notă de traducere: poziții și formate
+
+Cu `--add_translation_note`, translatorul poate plasa nota sus, jos sau în ambele locuri și o poate reda fie în format text simplu (retrocompatibil), fie în format `marker` consumabil de un plugin Markdown.
+
+**Poziție** (`--note_position`) :
+
+- `bottom` (implicit): notă la sfârșitul fișierului, ca în mod istoric.
+- `top`: notă inserată **după frontmatter-ul YAML** (siguranță Astro Content Collections, gray-matter etc.).
+- `both`: notă inserată sus ȘI jos (o singură apelare LLM, conținut reutilizat pentru ambele plasări).
+
+**Format** (`--note_format`) :
+
+- `legacy` (implicit): paragraf îngroșat `**...**` — comportament strict identic cu v1.8, byte-for-byte. Compatibil cu Hugo, GitHub, GitLab și orice renderer Markdown.
+- `marker`: definiție de referință de link Markdown invizibilă (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) urmată de un blockquote îngroșat. Lizibil nativ pe GitHub/GitLab și exploatat la build de un plugin remark în Astro pentru a produce un banner stilizat (cf. blogul jls42.org).
+
+```bash
+# Compatibilité legacy (rien ne change vs v1.8)
+python translate.py --file article.mdx --target_lang en --add_translation_note
+
+# Format marker, note en haut uniquement (Astro)
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position top
+
+# Format marker en haut ET en bas
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position both
+```
 
 ### Modele implicite (2026)
 
-| Provider | Calitate (implicit) | Economic (`--eco`) |
-|----------|---------------------|--------------------------|
-| OpenAI | `gpt-5` | `gpt-5-mini` |
-| Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
-| Mistral | `mistral-large-latest` | `mistral-small-latest` |
-| Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
+| Furnizor | Calitate (implicit)         | Economic (`--eco`)            |
+| -------- | ------------------------ | ------------------------------- |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
+
+> **Recomandare pentru traduceri long-form** : `--use_gemini` (implicit = `gemini-3.1-pro-preview` calitate, `--eco` = `gemini-3.1-flash-lite-preview`) tinde să păstreze mai bine structura markdown pe scripturi non-latine (PL, JA, ZH, AR, HI), în special în modul `--news`, unde fidelitatea placeholderelor contează. OpenAI rămâne implicitul pentru retrocompatibilitate.
 
 ## Proiecte care folosesc acest script
 
@@ -109,9 +178,11 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ## Autor
 
-Julien LE SAUX
+Julien LE SAUX  
 Email : contact@jls42.org
 
 ## Licență
 
-GNU GENERAL PUBLIC LICENSE Version 3. Vezi [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Versiunea 3. Vezi [LICENSE](LICENSE).
+
+**Articol tradus din fr în ro cu gpt-5.4-mini.**

@@ -1,0 +1,30 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["traductions_*", "venv", "translate.py.old", "tests/fixtures"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP", "SIM", "RUF"]
+ignore = [
+    "E501", # line-too-long géré par ruff-format
+    "B008", # function-call-in-default-argument (faux positif fréquent avec argparse)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]
+"scripts/tests/*" = ["E402"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = false
+warn_unused_configs = true
+ignore_missing_imports = true
+check_untyped_defs = false
+disallow_untyped_defs = false
+no_implicit_optional = true
+strict_equality = true
+exclude = ["translate\\.py\\.old$", "venv/", "traductions_.*", "tests/fixtures/"]
+
+[[tool.mypy.overrides]]
+module = ["dotenv", "mistralai.*", "anthropic.*", "google.*", "langdetect.*", "openai.*", "tqdm.*"]
+ignore_missing_imports = true

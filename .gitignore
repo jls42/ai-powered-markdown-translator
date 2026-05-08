@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment / secrets
+.env
+.env.local
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local IDE / tooling state (Claude Code, Codex, etc.)
+.claude/
+.codex
+
+# Quality tooling caches
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+node_modules/
+pip-audit-report.json
+
+# Project-specific
+translate.py.old
+exemple.txt
+TODO.md
+
+# Output artifacts (translation runs in subdirs)
+traductions_*/
+
+# Personal helper scripts pointing to other repos (kept local, not versioned)
+translate_all.sh
+translate_blog.sh
+translate_babelfishai.sh

@@ -1,0 +1,6 @@
+# Dev tooling for pre-commit hooks (installed inside venv).
+# pre-commit itself is installed system-wide (4.5.1+), not here.
+detect-secrets>=1.5
+pip-audit>=2.7
+mypy>=1.10
+lizard>=1.17

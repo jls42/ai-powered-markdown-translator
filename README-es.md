@@ -1,35 +1,72 @@
-# Traductor de Markdown con IA
+# Traductor de Markdown impulsado por IA
 
 🌍 [Francés](README.md) | [Inglés](README-en.md) | [Español](README-es.md) | [Chino](README-zh.md) | [Alemán](README-de.md) | [Japonés](README-ja.md) | [Coreano](README-ko.md) | [Árabe](README-ar.md) | [Hindi](README-hi.md) | [Italiano](README-it.md) | [Neerlandés](README-nl.md) | [Polaco](README-pl.md) | [Portugués](README-pt.md) | [Rumano](README-ro.md) | [Sueco](README-sv.md)
 
+<h4 align="center">📊 Calidad del código</h4>
+
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Estado del Quality Gate"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Calificación de seguridad"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Calificación de fiabilidad"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Calificación de mantenibilidad"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Cobertura"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilidades"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Errores"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Olores de código"></a>
+</p>
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Líneas duplicadas (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Deuda técnica"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Líneas de código"></a>
+</p>
+<p align="center">
+  <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="Insignia de Codacy"></a>
+  <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
+</p>
+
 Traductor de archivos Markdown que utiliza **OpenAI**, **Mistral AI**, **Claude (Anthropic)** y **Google Gemini**.
 
-Este script Python traduce archivos Markdown de un idioma de origen a un idioma de destino, preservando el formato, los bloques de código y los metadatos del front matter.
+Este script Python traduce archivos Markdown de un idioma fuente a un idioma destino, preservando el formato, los bloques de código y los metadatos front matter.
 
-## Características Principales
+## Características principales
 
-- **Multi-Proveedor**: Soporte de 4 APIs (OpenAI, Mistral, Claude, Gemini)
-- **Modelos 2026**: GPT-5.4, Claude Sonnet 4.5, Gemini 3.1 Pro
-- **Modo Económico**: Opción `--eco` para usar modelos más rápidos y menos costosos
-- **Archivo Único**: Opción `--file` para traducir un solo archivo
-- **Segmentación Inteligente**: Gestión de textos largos con límites de tokens por modelo
-- **Preservación del Código**: Los bloques de código Y el código inline (`` `...` ``) se preservan
-- **Nombre de Archivo**: Opción `--keep_filename` para conservar el nombre original
-- **Modo Noticias**: Opción `--news` para proteger las citas en inglés y gestionar las banderas en artículos de actualidad
-- **Configuración .env**: Soporte del archivo `.env` para las claves API
-- **Nota de Traducción**: Añadido opcional de una nota al final del documento
+- **Multi-proveedor**: compatibilidad con 4 APIs (OpenAI, Mistral, Claude, Gemini)
+- **Modelos 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
+- **Modo económico**: opción `--eco` para usar modelos más rápidos y menos costosos
+- **Archivo único**: opción `--file` para traducir un solo archivo
+- **Segmentación inteligente**: gestión de textos largos con límites de tokens por modelo
+- **Conservación del código**: los bloques de código Y el código inline (`` `...` ``) se preservan
+- **Nombre de archivo**: opción `--keep_filename` para conservar el nombre original
+- **Modo noticias**: opción `--news` para proteger las citas en inglés y gestionar las banderas en los artículos de noticias
+- **Configuración .env**: compatibilidad con el archivo `.env` para las claves API
+- **Nota de traducción**: adición opcional de una nota al final del documento
 
 ## Instalación
 
 ```bash
-git clone https://gitlab.com/jls42/ai-powered-markdown-translator.git
+git clone https://github.com/jls42/ai-powered-markdown-translator.git
 cd ai-powered-markdown-translator
+python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Herramientas de calidad (opcional pero recomendadas)
+
+El proyecto utiliza [`pre-commit`](https://pre-commit.com) para evitar hacer commits de código mal formateado, vulnerable o que contenga un secreto. Instalación:
+
+```bash
+pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
+pre-commit install                    # hooks rapides à chaque commit
+pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
+```
+
+Hooks activos: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complejidad), detect-secrets (claves API), mypy (tipado progresivo), Opengrep (SAST), pip-audit (CVE de dependencias), unittest. Véase la sección `CLAUDE.md` _Quality / pre-commit_ para más detalles.
+
 ## Configuración
 
-Crea un archivo `.env` en la raíz del proyecto o define las variables de entorno:
+Cree un archivo `.env` en la raíz del proyecto o defina las variables de entorno:
 
 ```bash
 # Fichier .env (recommandé)
@@ -53,7 +90,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Traducir un directorio
 
 ```bash
-# Avec OpenAI (défaut: gpt-5.4)
+# Avec OpenAI (défaut: gpt-5.5)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -68,7 +105,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Modo económico
 
-Usa modelos más rápidos y menos costosos (gpt-5-mini, claude-haiku, gemini-flash):
+Usa modelos más rápidos y menos costosos (gpt-5.4-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -76,42 +113,76 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Opciones
 
-| Opción | Descripción |
-|--------|-------------|
-| `--file` | Archivo Markdown único a traducir |
-| `--source_dir` | Directorio de origen que contiene los archivos Markdown |
-| `--target_dir` | Directorio de salida para los archivos traducidos |
-| `--source_lang` | Idioma de origen (por defecto: `fr`) |
-| `--target_lang` | Idioma de destino (por defecto: `en`) |
-| `--model` | Modelo específico a utilizar |
-| `--eco` | Usar modelos económicos |
-| `--use_mistral` | Usar la API de Mistral AI |
-| `--use_claude` | Usar la API de Claude |
-| `--use_gemini` | Usar la API de Gemini |
-| `--force` | Forzar la retraducción |
-| `--keep_filename` | Conservar el nombre de archivo original |
-| `--news` | Modo noticias: protege las citas EN, gestiona las banderas por idioma |
-| `--add_translation_note` | Añadir una nota de traducción |
-| `--include_model` | Incluir el nombre del modelo en el archivo de salida |
+| Opción                   | Descripción                                                              |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `--file`                 | Archivo Markdown único a traducir                                       |
+| `--source_dir`           | Directorio de origen que contiene los archivos Markdown                  |
+| `--target_dir`           | Directorio de salida para los archivos traducidos                        |
+| `--source_lang`          | Idioma fuente (predeterminado: `fr`)                          |
+| `--target_lang`          | Idioma destino (predeterminado: `en`)                          |
+| `--model`                | Modelo específico a utilizar                                             |
+| `--eco`                  | Usar los modelos económicos                                               |
+| `--use_mistral`          | Usar la API de Mistral AI                                                 |
+| `--use_claude`           | Usar la API de Claude                                                     |
+| `--use_gemini`           | Usar la API de Gemini                                                     |
+| `--force`                | Forzar la retraducción                                                    |
+| `--keep_filename`        | Conservar el nombre de archivo original                                   |
+| `--news`                 | Modo noticias: protege las citas EN, gestiona las banderas por idioma     |
+| `--add_translation_note` | Añadir una nota de traducción                                           |
+| `--note_position`        | Posición de la nota: `top`, `bottom` (predeterminado), o `both` |
+| `--note_format`          | Formato de la nota: `legacy` (predeterminado, párrafo en negrita) o `marker` |
+| `--include_model`        | Incluir el nombre del modelo en el archivo de salida                      |
+
+### Nota de traducción: posiciones y formatos
+
+Con `--add_translation_note`, el traductor puede colocar la nota arriba, abajo o en ambos lugares, y renderizarla tanto en formato de texto simple (retrocompatible) como en formato `marker` consumible por un plugin de Markdown.
+
+**Posición** (`--note_position`):
+
+- `bottom` (predeterminado): nota al final del archivo, como históricamente.
+- `top` : nota insertada **después del frontmatter YAML** (seguridad de Astro Content Collections, gray-matter, etc.).
+- `both` : nota insertada arriba Y abajo (una sola llamada LLM, contenido reutilizado para ambas ubicaciones).
+
+**Formato** (`--note_format`):
+
+- `legacy` (predeterminado): párrafo en negrita `**...**` — comportamiento estrictamente idéntico a v1.8, byte por byte. Compatible con Hugo, GitHub, GitLab y cualquier renderizador Markdown.
+- `marker` : definición de referencia de enlace Markdown invisible (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) seguida de un blockquote en negrita. Legible de forma nativa en GitHub/GitLab, y utilizable en la compilación por un plugin remark del lado de Astro para producir una banner estilizada (cf. blog jls42.org).
+
+```bash
+# Compatibilité legacy (rien ne change vs v1.8)
+python translate.py --file article.mdx --target_lang en --add_translation_note
+
+# Format marker, note en haut uniquement (Astro)
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position top
+
+# Format marker en haut ET en bas
+python translate.py --file article.mdx --target_lang en \
+    --add_translation_note --note_format marker --note_position both
+```
 
 ### Modelos predeterminados (2026)
 
-| Proveedor | Calidad (predeterminado) | Económico (`--eco`) |
-|----------|--------------------------|---------------------------|
-| OpenAI | `gpt-5` | `gpt-5-mini` |
-| Claude | `claude-sonnet-4-5` | `claude-haiku-4-5` |
-| Mistral | `mistral-large-latest` | `mistral-small-latest` |
-| Gemini | `gemini-3-pro-preview` | `gemini-3-flash-preview` |
+| Proveedor | Calidad (predeterminado)         | Económico (`--eco`)            |
+| -------- | ------------------------ | ------------------------------- |
+| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
+| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
+| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
+| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-## Proyectos que usan este script
+> **Recomendación para traducciones largas**: `--use_gemini` (predeterminado = `gemini-3.1-pro-preview` calidad, `--eco` = `gemini-3.1-flash-lite-preview`) tiende a preservar mejor la estructura Markdown en scripts no latinos (PL, JA, ZH, AR, HI), especialmente en modo `--news` donde la fidelidad de los placeholders importa. OpenAI sigue siendo el predeterminado para la retrocompatibilidad.
+
+## Proyectos que utilizan este script
 
 - **[jls42.org](https://jls42.org)** - Blog personal multilingüe (15 idiomas)
 
 ## Autor
 
 Julien LE SAUX
-Correo electrónico: contact@jls42.org
+Correo electrónico : contact@jls42.org
 
 ## Licencia
 
-GNU GENERAL PUBLIC LICENSE Version 3. Ver [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Versión 3. Véase [LICENSE](LICENSE).
+
+**Artículo traducido del fr al es con gpt-5.4-mini.**

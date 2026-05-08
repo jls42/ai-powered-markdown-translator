@@ -1,59 +1,104 @@
 ### Änderungsprotokoll
 
-🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+🌍 [Französisch](CHANGELOG.md) | [Englisch](CHANGELOG-en.md) | [Spanisch](CHANGELOG-es.md) | [Chinesisch](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [Japanisch](CHANGELOG-ja.md) | [Koreanisch](CHANGELOG-ko.md) | [Arabisch](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italienisch](CHANGELOG-it.md) | [Niederländisch](CHANGELOG-nl.md) | [Polnisch](CHANGELOG-pl.md) | [Portugiesisch](CHANGELOG-pt.md) | [Rumänisch](CHANGELOG-ro.md) | [Schwedisch](CHANGELOG-sv.md)
 
-- **1.7.1** OpenAI-Modelle aktualisiert:
-    - Standardmodelle auf GPT-5.4 (März 2026) aktualisiert:
-        - Qualität: `gpt-5` → `gpt-5.4`
-        - Wirtschaftlich: `gpt-5-mini` → `gpt-5.4-mini`
-    - Tokenlimits für `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) hinzugefügt
-- **1.7** Neuheiten:
-    - Option `--keep_filename`, um den ursprünglichen Dateinamen bei der Übersetzung beizubehalten
-    - Unterstützung der Datei `.env`, um API-Schlüssel automatisch zu laden
-    - **Inline-Code-Erhaltung**: Backticks (`` `...` ``) sind jetzt während der Übersetzung geschützt
-    - Verbesserter System-Prompt:
-        - Bessere Handhabung von Anführungszeichen im YAML-Frontmatter
-        - Schutz von Template-Variablen `{variable}`
-        - Verbot nicht angeforderter Übersetzer-Notizen
-    - Erfolgreich mit 364 Dateien getestet (Blog-Migration jls42.org)
-- **1.6** Neuheiten:
-    - Unterstützung der Google-Gemini-API für Übersetzungen (`--use_gemini`)
-    - Aktualisierte Standardmodelle 2026:
-        - OpenAI: `gpt-5` (Qualität), `gpt-5-mini` (Economy)
-        - Claude: `claude-sonnet-4-5` (Qualität), `claude-haiku-4-5` (Economy)
-        - Gemini: `gemini-3-pro-preview` (Qualität), `gemini-3-flash-preview` (Economy)
-    - Economy-Modus (`--eco`), um schnellere und kostengünstigere Modelle zu verwenden
-    - Übersetzung einzelner Dateien (`--file`) ohne Durchlaufen eines Verzeichnisses
-    - Neues vereinfachtes Benennungsschema: `{base}-{lang}.md`
-    - Option `--include_model`, um das alte Format mit dem Modellnamen beizubehalten
-    - Unterstützung nicht gelisteter Modelle mit standardmäßigem Tokenlimit (128k)
-    - README in 14 Sprachen übersetzt
-- **1.5** Verbesserungen:
-    - **Aktualisierung der API-Schlüssel und Standardmodelle:**
-        - **OpenAI:** Aktualisierung von `DEFAULT_MODEL_OPENAI` auf `"gpt-4o"`.
-        - **Mistral AI:** Aktualisierung von `DEFAULT_MODEL_MISTRAL` auf `"mistral-large-latest"`.
-        - **Claude von Anthropic:** Hinzufügen von `DEFAULT_ANTHROPIC_API_KEY` und Aktualisierung von `DEFAULT_MODEL_CLAUDE` auf `"claude-3-5-sonnet-20240620"`.
-    - **Optimierung der Übersetzungs-Prompts:**
-        - Die Prompts für direkte Übersetzungen und Übersetzungsnotizen wurden für bessere Klarheit und Effizienz erweitert, einschließlich detaillierter Anweisungen zur Erhaltung von Metadaten und spezifischen Formatierungselementen.
-    - **Code-Refactoring:**
-        - Ersetzung von `MistralClient` durch die Klasse `Mistral` für die Initialisierung des Mistral-AI-Clients.
-        - Neuordnung der Imports für bessere Lesbarkeit und Wartbarkeit.
-        - Verbesserte Textsegmentierung und Codeblock-Verwaltung, um die ursprüngliche Formatierung bei der Übersetzung zu erhalten.
-    - **Verwaltung der Ausgabedateien:**
-        - Umkehrung von Modell und Sprache im Namen der Ausgabedateien (zum Beispiel `f"{base}-{args.target_lang}-{args.model}.md"`), um die Organisation und Suche nach Übersetzungen zu erleichtern.
-    - **Verschiedene Verbesserungen:**
-        - Bereinigung des Codes durch Entfernen unnötiger Leerzeilen.
-        - Kleine Anpassungen zur Verbesserung der Struktur und Lesbarkeit des Skripts.
-- **1.4** Neuheiten:
-    - Unterstützung der Claude-API von Anthropic für Übersetzungen
-    - Optimierung der Prompts für mehr Klarheit und Effizienz
-    - Kleine Anpassungen zur Verbesserung der Wartbarkeit des Codes
-- **1.3** Verbesserungen und neue Funktionen:
-    - Verbesserte Verwaltung von Codeblöcken
-    - Verbesserte Verwaltung von Ausgabedateien
-    - Verbesserte Erkennung vorhandener Dateien
-    - Option `--force`, um die Übersetzung zu erzwingen
-    - Umkehrung von Modell und Sprache im Namen der Ausgabedatei
-- **1.2** Fehlerbehebung im Changelog
-- **1.1** Unterstützung für die Mistral-AI-API hinzugefügt
-- **1.0** Erstveröffentlichung - Unterstützung der OpenAI-API
+- **1.9** Behebung von Silent-Failure + vollständiges Qualitäts-Tooling + mehrpositionale Übersetzungsnotiz (2026-05-07) :
+  - **Mehrpositionale Übersetzungsnotiz + Marker-Format "embed card"** :
+    - Neue CLI-Optionen (additiv, Standard unverändert → **nicht brechend**) :
+      - `--note_position {top,bottom,both}` (Standard: `bottom`) : platziert die Notiz oben, unten oder an beiden Stellen der übersetzten Datei.
+      - `--note_format {legacy,marker}` (Standard: `legacy`) :
+        - `legacy` reproduziert strikt das Verhalten von v1.8 (fett gedruckter Absatz `**…**`) **byte-für-byte**.
+        - `marker` erzeugt eine unsichtbare Markdown-Link-Referenzdefinition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`), gefolgt von einem **dreiparagrafigen Blockquote**, strukturiert für ein Rendering als "GitHub repo embed card" : Projekttitel in Inline-Code (`**\`ai-powered-markdown-translator\`\*\*`), vom LLM übersetzte Beschreibung und CTA-Link (`[Voir le projet sur GitHub ↗](URL)`) mit sichtbarem Pfeil. Beim Build durch ein remark-Plugin nutzbar (vgl. Blog jls42.org → Plugin `remark-translation-banner`).
+    - **Invarianten, die niemals an das LLM gesendet werden** : Repo-Titel und GitHub-URL werden nach der Übersetzung des beschreibenden Satzes auf Python-Seite zusammengesetzt. Das LLM sieht niemals den Slug `ai-powered-markdown-translator` oder `https://github.com/jls42/...`, wodurch garantiert ist, dass kein Renderer/keine Groß- und Kleinschreibung/kein Scheme verändert wird.
+    - **Frontmatter-aware insertion** : im Modus `top` oder `both` wird die Notiz **nach dem schließenden `---`-Block** des YAML-Frontmatters eingefügt (Sicherheit für Astro Content Collections / gray-matter). Der Helper `_split_frontmatter` erkennt `---\n…\n---\n` am Dateianfang und bewahrt dessen Integrität; **wirft `RuntimeError`** bei offenem Frontmatter ohne schließende Fence (die Datei wird in `failed_files` zurückgegeben, statt mit einer falsch platzierten Notiz geschrieben zu werden).
+    - **Whitelist-Modell-Sanitizer** : `_sanitize_model` ersetzt jedes Zeichen außerhalb von `[A-Za-z0-9._:/-]` durch `_`, Fallback `unknown` wenn leer. Orientiert sich am Validator auf der Astro-remark-Plugin-Seite und neutralisiert Zeichen, die das Marker-Format zerstören würden (Leerzeichen, Anführungszeichen, Klammer, Komma usw.).
+    - **Interner Refactor** : `_append_translation_note` (1 monolithische Funktion) → 7 reine Helper (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/Composer getrennt (der Builder gibt einen reinen Block ohne Trenner zurück, der Composer wendet die `\n\n` je nach Position an); Produktion und Source-Helper teilen sich denselben 3-Absatz-Assembler.
+    - **`_quote_lines` blank-preserving** : präfixiert jede Zeile mit `> `, indem leere Zeilen nur in `>` umgewandelt werden. Ermöglicht mdast, im Blockquote 3 unterschiedliche Absätze zu erkennen (Titel / Beschreibung / Link) statt nur einen Absatz mit Zeilenumbrüchen.
+    - **`_build_translation_note_block` adaptiv** : je nach Anzahl der Absätze, die das LLM erhalten hat (3 = vollständiges Card-Format, 2 = Satz + Link, 1 = Fallback). Der 1-Absatz-Fallback wird **nicht mehr in `**...**` eingebettet**, wenn ein Markdown-Link `](` erkannt wird (fragiles Rendering von `<strong>` um einen Link).
+    - **Abwärtskompatibilität** : `getattr(args, "note_position", "bottom")` und `getattr(args, "note_format", "legacy")` auf `_compose_with_notes`-Seite — Namespaces ohne diese Attribute (bestehende Tests, externe programmgesteuerte Aufrufe) funktionieren weiterhin unverändert.
+  - **Behebung von Silent-Failure bei langen Übersetzungen** :
+    - Sprachvalidierung nach der Übersetzung bei allen Providern (OpenAI, Mistral, Claude, Gemini) : deterministische Ebene (Quelltextausschnitt verbatim wiedergefunden) + probabilistische Ebene (`langdetect`)
+    - Whitelist `finish_reason` / `stop_reason` : `RuntimeError` bei jedem Zustand außerhalb der Whitelist (truncation, content_filter usw.)
+    - `max_tokens` Claude : `4096` → `32768` (vermeidet latente truncation bei 16k-Segmenten, Cross-Script-Puffer FR→JA/ZH/KO/AR/HI)
+    - Heading-aware Segmentierung: Priorität H2/H3 in der zweiten Hälfte des Segments (jedes Segment beginnt mit einem vollständigen semantischen Abschnitt)
+    - Fehlerweitergabe bis zu einem nicht-null Exit-Code: `translate_markdown_file` gibt einen typisierten Status `success` / `failure` / `skipped` zurück, `main()` `sys.exit(1)` wenn mindestens eine Datei fehlgeschlagen ist (single-file und batch)
+    - Empty-content-Guard bei allen Providern, Sanity-Ratio Quelle/Ausgabe (≥ 500 Zeichen, < 5% = Ablehnung), Validierung von Code-Platzhaltern (`#CODEBLOCK`/`#INLINECODE`), Normalisierung nach dem LLM (Trenner/Links an eine Heading angeklebt), `BadRequestError` Retry ohne `reasoning_effort`
+    - Abhängigkeit `langdetect==1.0.9` hinzugefügt
+  - **Qualitäts-Tooling pre-commit** ("vollständiger EurekAI-Typ", 14 Hooks) :
+    - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 geschützte API-Keys), Lizard (CCN ≤ 12), pre-commit-hooks v5 (Whitespace, EOF, große Dateien, Shebangs usw.)
+    - Pre-push : mypy (progressiver lax-Modus), Opengrep SAST (translate.py + scripts/), pip-audit (initialer Reporting-Modus), unittest discover (tests/ + scripts/tests/)
+    - Lokale Wrapper in `scripts/`, die `./venv/bin/python` verwenden
+    - `scripts/audit_verdict.py` : JSON-Parser für pip-audit mit 11 unittest-Tests, angepasster Python-Port des Parsers jls42-astro
+    - 7 anfängliche ruff-Verstöße behoben: B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+    - Lizard schließt vorübergehend `translate.py` aus (4 Funktionen mit CCN 21-47, Refactor geplant) — strikte Gate für scripts/
+  - **SonarCloud + vollständige Abdeckung** :
+    - GitHub-Actions-Workflow `SonarCloud` (sonarcloud.yml + sonar-project.properties) : Analyse bei jedem Push und jeder Pull Request, Coverage via `coverage.xml`
+    - 11 SonarCloud-Badges oben im README (Quality Gate, Security/Reliability/Maintainability-Ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
+    - `tests/test_silent_failure.py` (`unittest` stdlib) : deckt die sechs Glieder der Silent-Failure-Fehlerkette ab
+    - `tests/test_orchestration.py` (+79 Tests) : deckt die Orchestrierungsschicht von `translate.py` ab (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError Fallbacks, o1-series Prompt-Format, frühe-return-Zweige von `_validate_translation_output`)
+    - `scripts/tests/test_audit_verdict.py` : Abdeckung von `main()` (stdin/stdout) und des `if __name__ == "__main__"`-Blocks via subprocess
+    - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
+  - **Tests** : `tests/test_translation_note_position.py` deckt die Matrix Position × Format ab (inkl. E2E `marker+top|bottom|both` und `legacy+top|bottom|both`), die mehrzeilige Präfixierung, die Byte-für-Byte-Abwärtskompatibilität (golden literal), den Sanitizer, den Frontmatter-Split (inkl. raise bei ungeschlossener Fence), das 3-Absatz-Format, den 2-Absatz-Fallback, den 1-Absatz+Markdown-Link-Guard und einen kritischen Schutz `TestLLMPayloadExcludesInvariants`, der sicherstellt, dass Titel+URL niemals an das LLM gesendet werden. **190 Tests bestanden**, 0 Regressionen.
+  - Dokumentation : `README.md` (FR + 14 Übersetzungen) mit Badges, `CLAUDE.md` (detaillierter Pre-commit-Workflow + CI-Watch), 28 neu generierte Übersetzungen
+- **1.8** `--news`-Modus + Modell-Update 2026 (2026-03-17, Tag `v1.8`) :
+  - Standardmodelle aktualisiert (März 2026) :
+    - OpenAI Qualität : `gpt-5` → `gpt-5.4`
+    - OpenAI günstig : `gpt-5-mini` → `gpt-5.4-mini`
+    - Gemini Qualität : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+  - Token-Limits hinzugefügt für `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) und `gemini-3.1-pro-preview` (1M)
+  - Initialer `--news`-Modus : Schutz der EN-Zitate mit `#NEWSQUOTE\d+#`-Platzhaltern, `LANG_FLAGS`-Mapping (15 Sprachen), Verwaltung der Flags je Zielsprache
+  - Validierung der News-Platzhalter vor der Wiederherstellung (Regression: ein LLM, das den Platzhalter entfernte, erzeugte stillschweigend eine Ausgabe ohne Zitat)
+  - Script `regen_translations.sh` portabel gemacht (absolute Pfade, keine Abhängigkeit vom pwd)
+  - Französischer Link in den README/CHANGELOG-Sprachleisten hinzugefügt, 28 Übersetzungen neu generiert
+- **1.7** Neuheiten :
+  - Option `--keep_filename` zum Beibehalten des ursprünglichen Dateinamens bei der Übersetzung
+  - Unterstützung der Datei `.env` zum automatischen Laden der API-Keys
+  - **Erhalt von Inline-Code** : die Backticks (`` `...` ``) sind während der Übersetzung jetzt geschützt
+  - Verbesserung des System-Prompts :
+    - Bessere Behandlung von Anführungszeichen im YAML-Frontmatter
+    - Schutz der Template-Variablen `{variable}`
+    - Verbot nicht angeforderter Übersetzer-Notizen
+  - Erfolgreich getestet an 364 Dateien (Migration des Blogs jls42.org)
+- **1.6** Neuheiten :
+  - Unterstützung der Google-Gemini-API für die Übersetzung (`--use_gemini`)
+  - Aktualisierung der Standardmodelle 2026 :
+    - OpenAI : `gpt-5` (Qualität), `gpt-5-mini` (Öko)
+    - Claude : `claude-sonnet-4-5` (Qualität), `claude-haiku-4-5` (Öko)
+    - Gemini : `gemini-3-pro-preview` (Qualität), `gemini-3-flash-preview` (Öko)
+  - Sparmodus (`--eco`) zur Verwendung schnellerer und kostengünstigerer Modelle
+  - Einzeldatei-Übersetzung (`--file`) ohne Durchlaufen eines Verzeichnisses
+  - Neues vereinfachtes Naming-Pattern : `{base}-{lang}.md`
+  - Option `--include_model` zum Beibehalten des alten Formats mit dem Modellnamen
+  - Unterstützung nicht gelisteter Modelle mit Standard-Token-Limit (128k)
+  - README in 14 Sprachen übersetzt
+- **1.5** Verbesserungen :
+  - **Aktualisierung der API-Keys und der Standardmodelle :**
+    - **OpenAI :** Aktualisierung von `DEFAULT_MODEL_OPENAI` auf `"gpt-4o"`.
+    - **Mistral AI :** Aktualisierung von `DEFAULT_MODEL_MISTRAL` auf `"mistral-large-latest"`.
+    - **Claude von Anthropic :** Hinzufügen von `DEFAULT_ANTHROPIC_API_KEY` und Aktualisierung von `DEFAULT_MODEL_CLAUDE` auf `"claude-3-5-sonnet-20240620"`.
+  - **Optimierung der Übersetzungsprompts :**
+    - Die Prompts für direkte Übersetzungen und Übersetzungsnotizen wurden erweitert, um mehr Klarheit und Effizienz zu bieten, einschließlich detaillierter Anweisungen zum Erhalt von Metadaten und spezifischen Formatierungselementen.
+  - **Code-Refactoring :**
+    - Ersetzung von `MistralClient` durch die Klasse `Mistral` zur Initialisierung des Mistral-AI-Clients.
+    - Neuordnung der Imports für bessere Lesbarkeit und Wartbarkeit.
+    - Verbesserung der Textsegmentierung und Behandlung von Codeblöcken, um das ursprüngliche Format bei der Übersetzung zu bewahren.
+  - **Verwaltung der Ausgabedateien :**
+    - Umkehrung von Modell und Sprache im Namen der Ausgabedateien (zum Beispiel `f"{base}-{args.target_lang}-{args.model}.md"`), wodurch Organisation und Auffinden der Übersetzungen erleichtert werden.
+  - **Sonstige Verbesserungen :**
+    - Bereinigung des Codes durch Entfernen unnötiger Leerzeilen.
+    - Kleinere Anpassungen zur Verbesserung der Struktur und Lesbarkeit des Skripts.
+- **1.4** Neuheiten :
+  - Unterstützung der Claude-API von Anthropic für die Übersetzung
+  - Optimierung der Prompts für mehr Klarheit und Effizienz
+  - Kleinere Anpassungen zur Verbesserung der Code-Wartung
+- **1.3** Verbesserungen und neue Funktionen :
+  - Verbesserte Behandlung von Codeblöcken
+  - Verbesserte Behandlung von Ausgabedateien
+  - Verbesserte Erkennung vorhandener Dateien
+  - Option `--force` zur Erzwingung der Übersetzung
+  - Umkehrung von Modell und Sprache im Namen der Ausgabedatei
+- **1.2** Fix des Changelogs
+- **1.1** Hinzufügen der Unterstützung für die Mistral AI API
+- **1.0** Initiale Version - Unterstützung der OpenAI API
+
+**Artikel aus dem Französischen ins Deutsche mit gpt-5.4-mini übersetzt.**

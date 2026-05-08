@@ -1,0 +1,116 @@
+# Pre-commit hooks configuration
+# Install:
+#   pip install pre-commit
+#   pre-commit install                          # hooks pre-commit
+#   pre-commit install --hook-type pre-push     # gates lourds (audit, SAST, mypy, tests)
+# Manual run:
+#   pre-commit run --all-files                  # tous les hooks pre-commit
+#   pre-commit run --hook-stage pre-push --all-files  # tous les pre-push
+
+repos:
+  # Shellcheck - Linter pour scripts bash (version Python embarquée, pas Docker)
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: ["-x"] # Follow source statements
+
+  # Ruff - Linter Python ultra-rapide (remplace flake8/pylint/isort)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # Prettier - Formatage JSON/YAML/Markdown (version stable, pas alpha)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        files: \.(json|yaml|yml|md)$
+        exclude: |
+          (?x)^(
+            (README|CHANGELOG)-[a-z]{2}\.md|
+            traductions_.*|
+            tests/fixtures/.*|
+            LICENSE|
+            TODO\.md
+          )$
+
+  # Hooks basiques utiles
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.md$
+      - id: end-of-file-fixer
+        exclude: \.md$
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  # Detect-secrets - Empêche les fuites accidentelles de clés API
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: |
+          (?x)^(
+            (README|CHANGELOG)-[a-z]{2}\.md|
+            traductions_.*|
+            tests/fixtures/.*|
+            \.secrets\.baseline|
+            venv/.*
+          )$
+
+  # Gates locaux (inspirés EurekAI/jls42-astro). Séparation pre-commit (rapide)
+  # et pre-push (lourd, réseau) pour ne pas ralentir le flow de commit.
+  - repo: local
+    hooks:
+      # Lizard cyclomatic complexity (CCN <= 12, durcir progressivement)
+      - id: check-complexity
+        name: Lizard cyclomatic complexity (CCN <= 12)
+        entry: scripts/check-complexity.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+        files: ^(translate|scripts/.*|tests/.*)\.py$
+
+      # mypy lax au démarrage (filet de sécurité progressif)
+      - id: mypy
+        name: mypy (lax mode, durcir progressivement)
+        entry: scripts/run-mypy.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      # SAST scan via Opengrep. ~30s, pre-push uniquement. Skip si opengrep absent.
+      - id: check-security-sast
+        name: Opengrep SAST scan (translate.py + scripts/)
+        entry: scripts/check-security-sast.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      # pip-audit critical-only avec classification réseau côté shell.
+      # Mode reporting initial (warn + exit 0), passer en bloquant après PR de bump.
+      - id: check-pip-audit
+        name: pip-audit (mode reporting initial)
+        entry: scripts/check-pip-audit.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      # Tests unittest sur tests/ ET scripts/tests/
+      - id: unittest
+        name: python unittest discover (tests/ + scripts/tests/)
+        entry: scripts/run-unittest.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
