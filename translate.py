@@ -174,7 +174,7 @@ _INLINE_MD_PREFIX = re.compile(r"^\s*(?:[-*+]\s+|#{1,6}\s+|\d+\.\s+)")
 _EMPTY_BLOCKQUOTE_LINE = re.compile(r"^\s*>\s*$")
 _BLOCKQUOTE_PREFIX = re.compile(r"^\s*>\s?")
 _URL_OR_PLACEHOLDER = re.compile(
-    r"https?://\S+|#(?:CODEBLOCK|INLINECODE|URL|ANCHOR)\d+#|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"
+    r"https?://\S+|#(?:CODEBLOCK|INLINECODE|URL|ANCHOR|REFLABEL)\d+#|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"
 )
 _MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
 _LANG_SCRIPT_RANGES = {
@@ -588,10 +588,11 @@ _NEWS_FINAL_CHECKS = (
 
 _PLACEHOLDER_PRESERVATION_CONTRACT = (
     "\n\n<placeholder_preservation_contract>"
-    "\nThe input may contain placeholders like `#INLINECODE0#`, `#INLINECODE1#`, `#CODEBLOCK0#`, `#URL0#`, `#ANCHOR0#`, etc. These represent code blocks, inline code, URLs, and explicit HTML anchors extracted before translation."
-    "\nEVERY such placeholder present in the input MUST appear in the output exactly as-is: same prefix (`#INLINECODE`, `#CODEBLOCK`, `#URL`, `#ANCHOR`), same digit, same trailing `#`. Do not rename, translate, transliterate, drop, or merge them. Do not add new ones."
+    "\nThe input may contain placeholders like `#INLINECODE0#`, `#INLINECODE1#`, `#CODEBLOCK0#`, `#URL0#`, `#ANCHOR0#`, `#REFLABEL0#`, etc. These represent code blocks, inline code, URLs, explicit HTML anchors, and Markdown reference-style link labels extracted before translation."
+    "\nEVERY such placeholder present in the input MUST appear in the output exactly as-is: same prefix (`#INLINECODE`, `#CODEBLOCK`, `#URL`, `#ANCHOR`, `#REFLABEL`), same digit, same trailing `#`. Do not rename, translate, transliterate, drop, or merge them. Do not add new ones."
     "\nWhen the target language reorders sentence components (e.g. English SVO → Chinese/Japanese/Korean SOV, or relative clause repositioning in Hindi/Arabic), move the placeholder to its grammatically correct position — but keep it intact."
-    "\nBefore returning, count `#INLINECODE`, `#CODEBLOCK`, `#URL`, and `#ANCHOR` occurrences in your output. The count MUST equal the count in the input. If a placeholder fell into a table cell or list item that you rephrased, double-check it survived the rewrite."
+    "\nFor reference-style links of the form `[visible text][#REFLABEL0#]` or `![alt text][#REFLABEL0#]`, translate the visible text/alt freely but keep the `[#REFLABEL0#]` part exactly as-is — it is the technical key Markdown uses to find the matching definition."
+    "\nBefore returning, count `#INLINECODE`, `#CODEBLOCK`, `#URL`, `#ANCHOR`, and `#REFLABEL` occurrences in your output. The count MUST equal the count in the input. If a placeholder fell into a table cell or list item that you rephrased, double-check it survived the rewrite."
     "\n</placeholder_preservation_contract>"
 )
 
@@ -781,7 +782,7 @@ def _dispatch_provider_call(
     return text
 
 
-_SEGMENT_PLACEHOLDER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL|ANCHOR)\d+#")
+_SEGMENT_PLACEHOLDER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL|ANCHOR|REFLABEL)\d+#")
 
 
 def _validate_segment_placeholders(input_segment, output_text):
@@ -1057,6 +1058,63 @@ def _build_heading_slug_map(source_slugs, target_slugs):
     return {src: tgt for src, tgt in zip(source_slugs, target_slugs, strict=False) if src != tgt}
 
 
+# Reference-style links Markdown : `[![alt][label1]][label2]` + définitions
+# `[label1]: URL` et `[label2]: URL` séparées en bas du document. Le LLM
+# traduit naturellement les `alt` text et les link text visibles, mais oublie
+# parfois de propager le changement aux LABELS (clés techniques utilisées par
+# Markdown pour matcher inline ↔ definition). Cas concret deno-hi :
+#   header: [![Twitter बैज][]][Twitter link]   ← label image traduit en HI
+#   bottom: [Twitter badge]: URL                ← label PAS traduit (toujours EN)
+# → Markdown ne fait pas le lien `Twitter बैज` ↔ `Twitter badge` → badge cassé.
+#
+# Solution pipeline : protéger TOUS les labels (clés techniques, jamais traduits)
+# en placeholders `#REFLABEL{n}#` avant l'appel LLM. Le LLM traduit les textes
+# visibles mais ne touche pas aux clés. Restoration byte-identical.
+_REF_DEFINITION_REGEX = re.compile(r"^(\[)([^\]\n]+)(\]:\s+\S[^\n]*)$", re.MULTILINE)
+
+
+def _protect_ref_labels(content):
+    labels = []
+    label_to_idx = {}
+    for m in _REF_DEFINITION_REGEX.finditer(content):
+        label = m.group(2)
+        if label not in label_to_idx:
+            label_to_idx[label] = len(labels)
+            labels.append(label)
+    if not labels:
+        return content, [], []
+
+    placeholders = [f"#REFLABEL{i}#" for i in range(len(labels))]
+
+    def replace_def(m):
+        return m.group(1) + placeholders[label_to_idx[m.group(2)]] + m.group(3)
+
+    content = _REF_DEFINITION_REGEX.sub(replace_def, content)
+
+    # Collapsed form `[label][]` (Markdown utilise `label` comme clé) → `[label][#PH#]`.
+    # Full reference `][label]` (suit la fermeture d'un autre `[...]`) → `][#PH#]`.
+    # Shortcut form `[label]` (pas suivi de `(`, `[`, `:` → utilise `label` comme
+    # clé) → `[label][#PH#]`. Skip si c'est en fait un titre `[label]:` (def).
+    for label, ph in zip(labels, placeholders, strict=False):
+        esc = re.escape(label)
+        content = re.sub(rf"\[({esc})\]\[\]", rf"[\1][{ph}]", content)
+        content = re.sub(rf"\]\[{esc}\]", f"][{ph}]", content)
+        # Shortcut : `[label]` non suivi de `(`, `[`, `:` (= def)
+        content = re.sub(
+            rf"\[({esc})\](?![\(\[:])(?![^\n]*\]:)",
+            rf"[\1][{ph}]",
+            content,
+        )
+
+    return content, labels, placeholders
+
+
+def _restore_ref_labels(translated_content, labels, placeholders):
+    for placeholder, label in zip(placeholders, labels, strict=False):
+        translated_content = translated_content.replace(placeholder, label)
+    return translated_content
+
+
 def _protect_news_quotes(content, args):
     if not args.news:
         return content, [], []
@@ -1103,7 +1161,7 @@ def _validate_news_placeholders_intact(translated_content, n_quotes):
             )
 
 
-_CODE_PLACEHOLDER_LEFTOVER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL|ANCHOR)\d+#")
+_CODE_PLACEHOLDER_LEFTOVER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL|ANCHOR|REFLABEL)\d+#")
 
 
 def _validate_code_placeholders_present(
@@ -1112,10 +1170,10 @@ def _validate_code_placeholders_present(
     inline_placeholders,
     url_placeholders=(),
     anchor_placeholders=(),
+    ref_label_placeholders=(),
 ):
-    """Vérifie que chaque placeholder émis (code blocks, inline code, URLs, anchors)
-    est bien présent dans la sortie LLM avant la restauration (le LLM peut avoir
-    supprimé ou modifié un placeholder)."""
+    """Vérifie que chaque placeholder émis (code blocks, inline code, URLs, anchors,
+    reference labels) est bien présent dans la sortie LLM avant la restauration."""
     for placeholder in block_placeholders:
         if placeholder not in translated_content:
             raise RuntimeError(
@@ -1139,6 +1197,23 @@ def _validate_code_placeholders_present(
             raise RuntimeError(
                 f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
                 "(le LLM a supprimé ou modifié l'ancre locale)"
+            )
+    for placeholder in ref_label_placeholders:
+        if placeholder not in translated_content:
+            raise RuntimeError(
+                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
+                "(le LLM a supprimé ou modifié un label reference-style)"
+            )
+
+
+def _validate_ref_label_placeholders_present(translated_content, placeholders):
+    """Validation explicite pre-restoration des reference-link labels (alias avec
+    message dédié pour faciliter le debug)."""
+    for placeholder in placeholders:
+        if placeholder not in translated_content:
+            raise RuntimeError(
+                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
+                "(le LLM a supprimé ou modifié un label reference-style)"
             )
 
 
@@ -1484,10 +1559,14 @@ def _translate_pipeline(content, client, args, use_mistral, use_claude, use_gemi
     # (`(#X)`) ne contiennent jamais de `https?://`, et `<a name="X"></a>`
     # est borné par les attributs de balise HTML.
     content, anchors, anchor_placeholders, anchor_metadata = _protect_anchors(content)
-    # URLs après les protections de code/news/anchors : ainsi les URLs déjà
-    # cachées derrière `#CODEBLOCK*#` / `#INLINECODE*#` / `#ANCHOR*#` ne sont
-    # pas touchées, et toutes les autres (markdown links, HTML href/src,
-    # badges, anchors absolues) sont remplacées par `#URL{n}#`.
+    # Reference-style link labels : protéger les clés techniques `[label]:`
+    # et leurs usages inline `[text][label]` / `[label][]` pour que le LLM
+    # traduise les textes visibles sans casser le lien Markdown inline ↔ def.
+    content, ref_labels, ref_label_placeholders = _protect_ref_labels(content)
+    # URLs après les protections de code/news/anchors/ref-labels : ainsi les
+    # URLs déjà cachées derrière les autres placeholders ne sont pas touchées,
+    # et toutes les autres (markdown links, HTML href/src, badges, anchors
+    # absolues) sont remplacées par `#URL{n}#`.
     content, urls, url_placeholders = _protect_urls(content)
 
     translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
@@ -1498,13 +1577,13 @@ def _translate_pipeline(content, client, args, use_mistral, use_claude, use_gemi
         inline_placeholders,
         url_placeholders,
         anchor_placeholders,
+        ref_label_placeholders,
     )
     # Calcule les slugs des headings post-LLM pour le sync TOC heading-derived.
     target_heading_slugs = _extract_heading_slugs(translated_content)
-    # Restoration en ordre inverse : `urls` d'abord (les placeholders d'URL
-    # peuvent contenir des fragments `#xxx` qui ressemblent à des anchors),
-    # puis `anchors` (avec resync des heading-derived).
+    # Restoration : urls → ref_labels → anchors (resync heading-derived) → code.
     translated_content = _restore_urls(translated_content, urls, url_placeholders)
+    translated_content = _restore_ref_labels(translated_content, ref_labels, ref_label_placeholders)
     translated_content = _restore_anchors(
         translated_content,
         anchors,
