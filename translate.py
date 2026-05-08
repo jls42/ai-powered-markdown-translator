@@ -173,10 +173,14 @@ _STRUCTURAL_LINE = re.compile(
 _INLINE_MD_PREFIX = re.compile(r"^\s*(?:[-*+]\s+|#{1,6}\s+|\d+\.\s+)")
 _EMPTY_BLOCKQUOTE_LINE = re.compile(r"^\s*>\s*$")
 _BLOCKQUOTE_PREFIX = re.compile(r"^\s*>\s?")
-_URL_OR_PLACEHOLDER = re.compile(
-    r"https?://\S+|#(?:CODEBLOCK|INLINECODE|URL|ANCHOR|REFLABEL)\d+#|<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>"
-)
+# Split en 2 regex pour rester sous le seuil Sonar S5843 (complexity ≤20).
+# `_URL_OR_PLACEHOLDER` couvre URLs absolues + placeholders ; les news quotes
+# XML self-closing ont leur propre regex, appliquée séparément quand utile.
+_URL_OR_PLACEHOLDER = re.compile(r"https?://\S+|#(?:CODEBLOCK|INLINECODE|URL|ANCHOR|REFLABEL)\d+#")
+_NEWSQUOTE_PLACEHOLDER_REGEX = re.compile(r"<NEWSQUOTE\s+id=['\"]\d+['\"]\s*/>")
 _MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
+# Constante factorée pour Sonar S1192 (literal "<[^>]+>" dupliqué 3 fois).
+_HTML_TAG_REGEX = re.compile(r"<[^>]+>")
 _LANG_SCRIPT_RANGES = {
     "ar": (("\u0600", "\u06ff"),),
     "hi": (("\u0900", "\u097f"),),
@@ -279,7 +283,8 @@ def _clean_for_language_detection(text):
     """
     text = _MARKDOWN_LINK.sub(r"\1", text)
     text = _URL_OR_PLACEHOLDER.sub(" ", text)
-    text = re.sub(r"<[^>]+>", " ", text)
+    text = _NEWSQUOTE_PLACEHOLDER_REGEX.sub(" ", text)
+    text = _HTML_TAG_REGEX.sub(" ", text)
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -337,7 +342,7 @@ def _clean_paragraph_for_window(para, ignore_blockquotes):
         return ""
     joined = " ".join(kept_lines)
     cleaned = _URL_OR_PLACEHOLDER.sub("", joined)
-    cleaned = re.sub(r"<[^>]+>", " ", cleaned)
+    cleaned = _HTML_TAG_REGEX.sub(" ", cleaned)
     return re.sub(r"\s+", " ", cleaned).strip()
 
 
@@ -979,10 +984,11 @@ def _restore_urls(translated_content, urls, placeholders):
 #    le TOC mais pas le heading → fragment et heading se désynchronisent).
 _ANCHOR_NAME_REGEX = re.compile(r'<a\s+name=["\']([^"\']+)["\']\s*></a>')
 _ANCHOR_LINK_REGEX = re.compile(r"\(#([^)\s]+)\)")
-# `[^\n]+` greedy non-ambigu (consomme jusqu'à fin de ligne sans backtracking) ;
-# trim côté Python via `.strip()` plutôt que `(.+?)\s*$` qui permet du polynomial
-# backtracking sur des lignes très longues avec espaces (Sonar S5852).
-_HEADING_REGEX = re.compile(r"^(#{1,6})\s+([^\n]+)$", re.MULTILINE)
+# `[ \t]+` (non `\s+`) : `\s` inclut `\n`, et avec `re.MULTILINE` le moteur
+# pourrait tenter de consommer des newlines puis backtracker. `[ \t]+` est
+# strictement non-ambigu (Sonar S5852). `[^\n]+` greedy puis `.strip()` côté
+# Python pour trimmer les whitespace finaux.
+_HEADING_REGEX = re.compile(r"^(#{1,6})[ \t]+([^\n]+)$", re.MULTILINE)
 
 
 def _github_slug(heading_text):
@@ -994,7 +1000,7 @@ def _github_slug(heading_text):
     mais suffisant pour matcher les TOC vers les headings dans la majorité des cas.
     """
     text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", heading_text)  # markdown links
-    text = re.sub(r"<[^>]+>", "", text)  # HTML tags
+    text = _HTML_TAG_REGEX.sub("", text)  # HTML tags
     text = re.sub(r"[*_`~]+", "", text)  # emphasis
     text = text.lower()
     text = re.sub(r"\s+", "-", text)
