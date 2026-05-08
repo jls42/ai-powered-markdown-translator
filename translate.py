@@ -967,46 +967,94 @@ def _restore_urls(translated_content, urls, placeholders):
     return translated_content
 
 
-# Anchors locales explicites style Terraform : `<a name="X"></a>` (destination)
-# + `[text](#X)` (référence). Quand `X` est défini par un tag explicite, il ne
-# doit JAMAIS être traduit (l'identifiant technique est figé). On protège donc :
-#  1. tous les `<a name="X"></a>` ;
-#  2. uniquement les `(#X)` dont le `X` (déséchappé) correspond à un `<a name>`
-#     du document.
-# Les `(#X)` qui ne correspondent à AUCUN `<a name>` sont laissés au LLM : ce
-# sont des anchors dérivées de headings (e.g. `#caveman-compress-receipts`
-# pointant vers `### caveman-compress-receipts`). GitHub regénère le slug à
-# partir du heading traduit, donc la cohérence vient quand le LLM traduit
-# heading et lien ensemble — figer l'ancre ici casserait le lien interne.
+# Anchors locales : 3 patterns à protéger
+# 1. `<a name="X"></a>` explicite (destination Terraform-style, jamais traduit)
+# 2. `[text](#X)` où X correspond à un `<a name>` (référence Terraform, byte-identical)
+# 3. `[text](#X)` où X correspond au slug d'un heading du document (TOC) :
+#    on protège la paire (heading, fragment) pendant l'appel LLM, puis on
+#    regénère le fragment avec le slug du heading TRADUIT post-restore. Ainsi
+#    le TOC pointe TOUJOURS vers le bon heading, peu importe ce que le LLM
+#    fait au heading et au TOC indépendamment (cf. express-zh : LLM traduit
+#    le TOC mais pas le heading → fragment et heading se désynchronisent).
 _ANCHOR_NAME_REGEX = re.compile(r'<a\s+name=["\']([^"\']+)["\']\s*></a>')
 _ANCHOR_LINK_REGEX = re.compile(r"\(#([^)\s]+)\)")
+_HEADING_REGEX = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
+
+
+def _github_slug(heading_text):
+    """Approximation du slug GitHub d'un heading.
+
+    Règles GitHub : strip markdown emphasis, lowercase, espaces → `-`,
+    suppression de la ponctuation sauf `-` `_` et chars Unicode word.
+    Pas exhaustif (github-slugger gère aussi les emojis, doublons d'id, etc.)
+    mais suffisant pour matcher les TOC vers les headings dans la majorité des cas.
+    """
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", heading_text)  # markdown links
+    text = re.sub(r"<[^>]+>", "", text)  # HTML tags
+    text = re.sub(r"[*_`~]+", "", text)  # emphasis
+    text = text.lower()
+    text = re.sub(r"\s+", "-", text)
+    text = re.sub(r"[^\w\-]", "", text, flags=re.UNICODE)
+    return text.strip("-")
+
+
+def _extract_heading_slugs(content):
+    """Liste ordonnée des slugs des headings (par position dans le doc)."""
+    return [_github_slug(m.group(2)) for m in _HEADING_REGEX.finditer(content)]
 
 
 def _protect_anchors(content):
     explicit_targets = {m.group(1) for m in _ANCHOR_NAME_REGEX.finditer(content)}
+    heading_slugs = set(_extract_heading_slugs(content))
     anchors = []
+    metadata = []  # parallèle à anchors : {"type": "explicit"|"terraform"|"heading", "slug": str|None}
 
     # 1. Tous les <a name="X"></a> (toujours protégés byte-identical).
     for m in _ANCHOR_NAME_REGEX.finditer(content):
         anchors.append(m.group(0))
+        metadata.append({"type": "explicit", "slug": None})
 
-    # 2. (#X) seulement si X (avec \_ déséchappés) correspond à un target explicite.
-    if explicit_targets:
-        for m in _ANCHOR_LINK_REGEX.finditer(content):
-            fragment_unescaped = m.group(1).replace(r"\_", "_").replace(r"\-", "-")
-            if fragment_unescaped in explicit_targets:
-                anchors.append(m.group(0))
+    # 2. (#X) où X correspond à un target explicite OU à un slug de heading source.
+    for m in _ANCHOR_LINK_REGEX.finditer(content):
+        fragment_unescaped = m.group(1).replace(r"\_", "_").replace(r"\-", "-")
+        if fragment_unescaped in explicit_targets:
+            anchors.append(m.group(0))
+            metadata.append({"type": "terraform", "slug": fragment_unescaped})
+        elif fragment_unescaped in heading_slugs:
+            anchors.append(m.group(0))
+            metadata.append({"type": "heading", "slug": fragment_unescaped})
 
     placeholders = [f"#ANCHOR{i}#" for i in range(len(anchors))]
     for placeholder, anchor in zip(placeholders, anchors, strict=False):
         content = content.replace(anchor, placeholder, 1)
-    return content, anchors, placeholders
+    return content, anchors, placeholders, metadata
 
 
-def _restore_anchors(translated_content, anchors, placeholders):
-    for placeholder, anchor in zip(placeholders, anchors, strict=False):
-        translated_content = translated_content.replace(placeholder, anchor)
+def _restore_anchors(
+    translated_content, anchors, placeholders, metadata, source_heading_slugs, target_heading_slugs
+):
+    """Restaure chaque placeholder par son anchor original.
+    Pour les heading-derived (`type="heading"`), regénère le fragment avec le
+    slug du heading TRADUIT correspondant (mapping par position) — ainsi le
+    TOC pointe vers le heading traduit même si LLM a divergé entre eux.
+    """
+    slug_map = _build_heading_slug_map(source_heading_slugs, target_heading_slugs)
+    for placeholder, anchor, meta in zip(placeholders, anchors, metadata, strict=False):
+        if meta["type"] == "heading" and meta["slug"] in slug_map:
+            new_slug = slug_map[meta["slug"]]
+            new_anchor = f"(#{new_slug})"
+            translated_content = translated_content.replace(placeholder, new_anchor)
+        else:
+            translated_content = translated_content.replace(placeholder, anchor)
     return translated_content
+
+
+def _build_heading_slug_map(source_slugs, target_slugs):
+    """Mapping source_slug → target_slug par position. Retourne {} si les
+    listes ont des longueurs différentes (impossible de matcher fiablement)."""
+    if len(source_slugs) != len(target_slugs):
+        return {}
+    return {src: tgt for src, tgt in zip(source_slugs, target_slugs, strict=False) if src != tgt}
 
 
 def _protect_news_quotes(content, args):
@@ -1425,12 +1473,17 @@ def _translate_pipeline(content, client, args, use_mistral, use_claude, use_gemi
     # les URLs avant, l'attribution capturée serait `#URL{n}#` au lieu de l'URL
     # réelle et la validation news post-traduction ne saurait pas quoi chercher.
     content, original_quotes, attribution_urls = _protect_news_quotes(content, args)
+    # Capture les slugs des headings AVANT protection : on en aura besoin après
+    # le LLM pour resynchroniser les TOC `(#heading-slug)` avec les slugs des
+    # headings traduits (cas express-zh : LLM traduit le TOC en chinois mais
+    # laisse le heading en anglais → mismatch, lien cassé).
+    source_heading_slugs = _extract_heading_slugs(content)
     # Anchors AVANT urls : sinon le regex anchor `\(#[^)\s]+\)` matcherait
     # aussi les placeholders `#URL\d+#` (ex. `(#URL0#)` dans une attribution
     # news). Aucun conflit dans l'autre sens : les anchors fragment-locaux
     # (`(#X)`) ne contiennent jamais de `https?://`, et `<a name="X"></a>`
     # est borné par les attributs de balise HTML.
-    content, anchors, anchor_placeholders = _protect_anchors(content)
+    content, anchors, anchor_placeholders, anchor_metadata = _protect_anchors(content)
     # URLs après les protections de code/news/anchors : ainsi les URLs déjà
     # cachées derrière `#CODEBLOCK*#` / `#INLINECODE*#` / `#ANCHOR*#` ne sont
     # pas touchées, et toutes les autres (markdown links, HTML href/src,
@@ -1446,11 +1499,20 @@ def _translate_pipeline(content, client, args, use_mistral, use_claude, use_gemi
         url_placeholders,
         anchor_placeholders,
     )
+    # Calcule les slugs des headings post-LLM pour le sync TOC heading-derived.
+    target_heading_slugs = _extract_heading_slugs(translated_content)
     # Restoration en ordre inverse : `urls` d'abord (les placeholders d'URL
     # peuvent contenir des fragments `#xxx` qui ressemblent à des anchors),
-    # puis `anchors` (qui peuvent avoir été préservés byte-identical).
+    # puis `anchors` (avec resync des heading-derived).
     translated_content = _restore_urls(translated_content, urls, url_placeholders)
-    translated_content = _restore_anchors(translated_content, anchors, anchor_placeholders)
+    translated_content = _restore_anchors(
+        translated_content,
+        anchors,
+        anchor_placeholders,
+        anchor_metadata,
+        source_heading_slugs,
+        target_heading_slugs,
+    )
     translated_content = _restore_code(
         translated_content, inline_codes, inline_placeholders, code_blocks, block_placeholders
     )
