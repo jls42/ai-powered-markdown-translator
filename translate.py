@@ -1021,6 +1021,11 @@ def _restore_urls(translated_content, urls, placeholders):
 #    le TOC mais pas le heading → fragment et heading se désynchronisent).
 _ANCHOR_NAME_REGEX = re.compile(r'<a\s+name=["\']([^"\']+)["\']\s*></a>')
 _ANCHOR_LINK_REGEX = re.compile(r"\(#([^)\s]+)\)")
+# HTML anchor reference `<a href="#X">...</a>`. Capture le `href="#X"` complet
+# (avec quote = guillemet ou apostrophe) pour pouvoir reconstruire la même
+# syntaxe en restoration. cf. caveman README qui utilise des `<a href="#install">`
+# au lieu des `[link](#install)` markdown.
+_HTML_HREF_ANCHOR_REGEX = re.compile(r'href=(["\'])#([^"\'#?]+)\1')
 # `[ \t]+` (non `\s+`) : whitespace intra-ligne, strictement non-ambigu.
 # `[^\n]+` greedy borné par le `\n` final, pas de backtracking polynomial.
 # `.strip()` côté Python pour trimmer les espaces finaux capturés.
@@ -1069,7 +1074,7 @@ def _protect_anchors(content):
         anchors.append(m.group(0))
         metadata.append({"type": "explicit", "slug": None})
 
-    # 2. (#X) où X correspond à un target explicite OU à un slug de heading source.
+    # 2. (#X) markdown où X correspond à un target explicite OU à un slug de heading source.
     for m in _ANCHOR_LINK_REGEX.finditer(content):
         fragment_unescaped = m.group(1).replace(r"\_", "_").replace(r"\-", "-")
         if fragment_unescaped in explicit_targets:
@@ -1078,6 +1083,18 @@ def _protect_anchors(content):
         elif fragment_unescaped in heading_slugs:
             anchors.append(m.group(0))
             metadata.append({"type": "heading", "slug": fragment_unescaped})
+
+    # 3. `href="#X"` HTML : même logique que (#X) markdown mais sur les anchors HTML.
+    # On capture le `href="#X"` complet (avec quotes) pour pouvoir le restaurer
+    # avec le slug traduit en gardant la syntaxe `href="#new_slug"`.
+    for m in _HTML_HREF_ANCHOR_REGEX.finditer(content):
+        fragment = m.group(2)
+        if fragment in explicit_targets:
+            anchors.append(m.group(0))
+            metadata.append({"type": "terraform_html", "slug": fragment, "quote": m.group(1)})
+        elif fragment in heading_slugs:
+            anchors.append(m.group(0))
+            metadata.append({"type": "heading_html", "slug": fragment, "quote": m.group(1)})
 
     placeholders = [f"#ANCHOR{i}#" for i in range(len(anchors))]
     for placeholder, anchor in zip(placeholders, anchors, strict=False):
@@ -1096,8 +1113,10 @@ def _restore_anchors(
     slug_map = _build_heading_slug_map(source_heading_slugs, target_heading_slugs)
     for placeholder, anchor, meta in zip(placeholders, anchors, metadata, strict=False):
         if meta["type"] == "heading" and meta["slug"] in slug_map:
-            new_slug = slug_map[meta["slug"]]
-            new_anchor = f"(#{new_slug})"
+            new_anchor = f"(#{slug_map[meta['slug']]})"
+            translated_content = translated_content.replace(placeholder, new_anchor)
+        elif meta["type"] == "heading_html" and meta["slug"] in slug_map:
+            new_anchor = f"href={meta['quote']}#{slug_map[meta['slug']]}{meta['quote']}"
             translated_content = translated_content.replace(placeholder, new_anchor)
         else:
             translated_content = translated_content.replace(placeholder, anchor)
