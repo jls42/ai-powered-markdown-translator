@@ -472,12 +472,12 @@ class TestTranslateDirectory(unittest.TestCase):
 
 class TestValidateInputPaths(unittest.TestCase):
     def test_file_does_not_exist_raises(self):
-        args = _base_args(file="/source/__inexistant_xyz_42.md", target_dir="/tmp")
+        args = _base_args(file="/source/__inexistant_xyz_42.md", target_dir="/dest")
         with self.assertRaisesRegex(ValueError, "fichier spécifié n'existe pas"):
             translate._validate_input_paths(args)
 
     def test_source_dir_does_not_exist_raises(self):
-        args = _base_args(file=None, source_dir="/source/__inexistant_xyz_42", target_dir="/tmp")
+        args = _base_args(file=None, source_dir="/source/__inexistant_xyz_42", target_dir="/dest")
         with self.assertRaisesRegex(ValueError, "répertoire source"):
             translate._validate_input_paths(args)
 
@@ -777,19 +777,19 @@ class TestRunSingleAndDirectory(unittest.TestCase):
     """_run_single_file / _run_directory : couvre les chemins du retour failed_files."""
 
     def test_run_single_file_failure_listed(self):
-        args = _base_args(file="/source/foo.md", target_dir="/tmp")
+        args = _base_args(file="/source/foo.md", target_dir="/dest")
         with patch("translate.translate_markdown_file", return_value="failure"):
             failed = translate._run_single_file(args, MagicMock())
         self.assertEqual(failed, ["/source/foo.md"])
 
     def test_run_single_file_success_empty(self):
-        args = _base_args(file="/source/foo.md", target_dir="/tmp")
+        args = _base_args(file="/source/foo.md", target_dir="/dest")
         with patch("translate.translate_markdown_file", return_value="success"):
             failed = translate._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
 
     def test_run_single_file_skipped_empty(self):
-        args = _base_args(file="/source/foo.md", target_dir="/tmp")
+        args = _base_args(file="/source/foo.md", target_dir="/dest")
         with patch("translate.translate_markdown_file", return_value="skipped"):
             failed = translate._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
@@ -828,7 +828,7 @@ class TestMainModelWarning(unittest.TestCase):
                     "--file",
                     "/source/fake.md",
                     "--target_dir",
-                    "/tmp",
+                    "/dest",
                     "--model",
                     "modele-inconnu-xyz",
                 ],

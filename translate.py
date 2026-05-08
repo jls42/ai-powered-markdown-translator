@@ -988,9 +988,9 @@ _ANCHOR_LINK_REGEX = re.compile(r"\(#([^)\s]+)\)")
 # `[ \t]+` (non `\s+`) : whitespace intra-ligne, strictement non-ambigu.
 # `[^\n]+` greedy borné par le `\n` final, pas de backtracking polynomial.
 # `.strip()` côté Python pour trimmer les espaces finaux capturés.
-_HEADING_REGEX = re.compile(
-    r"^(#{1,6})[ \t]+([^\n]+)$", re.MULTILINE
-)  # NOSONAR S5852: bornes strictes, faux positif
+# fmt: off
+_HEADING_REGEX = re.compile(r"^(#{1,6})[ \t]+([^\n]+)$", re.MULTILINE)  # NOSONAR S5852
+# fmt: on
 
 
 def _github_slug(heading_text):

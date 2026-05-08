@@ -242,7 +242,7 @@ class TestSilentFailure(unittest.TestCase):
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
-                "sys.argv", ["translate.py", "--file", "/source/fake.md", "--target_dir", "/tmp"]
+                "sys.argv", ["translate.py", "--file", "/source/fake.md", "--target_dir", "/dest"]
             ),
         ):
             with self.assertRaises(SystemExit) as cm:
