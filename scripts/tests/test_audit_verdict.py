@@ -114,7 +114,7 @@ class TestAuditVerdictMain(unittest.TestCase):
         import subprocess
 
         repo_root = Path(__file__).resolve().parents[2]
-        proc = subprocess.run(
+        proc = subprocess.run(  # nosec B603 — test exécute le CLI du repo via sys.executable
             [sys.executable, "-m", "scripts.audit_verdict"],
             input='{"dependencies": []}',
             capture_output=True,

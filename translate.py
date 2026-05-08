@@ -8,6 +8,7 @@ import re
 import sys
 import time
 import traceback
+import unicodedata
 
 import anthropic
 import google.generativeai as genai
@@ -984,18 +985,22 @@ def _restore_urls(translated_content, urls, placeholders):
 #    le TOC mais pas le heading → fragment et heading se désynchronisent).
 _ANCHOR_NAME_REGEX = re.compile(r'<a\s+name=["\']([^"\']+)["\']\s*></a>')
 _ANCHOR_LINK_REGEX = re.compile(r"\(#([^)\s]+)\)")
-# `[ \t]+` (non `\s+`) : `\s` inclut `\n`, et avec `re.MULTILINE` le moteur
-# pourrait tenter de consommer des newlines puis backtracker. `[ \t]+` est
-# strictement non-ambigu (Sonar S5852). `[^\n]+` greedy puis `.strip()` côté
-# Python pour trimmer les whitespace finaux.
-_HEADING_REGEX = re.compile(r"^(#{1,6})[ \t]+([^\n]+)$", re.MULTILINE)
+# `[ \t]+` (non `\s+`) : whitespace intra-ligne, strictement non-ambigu.
+# `[^\n]+` greedy borné par le `\n` final, pas de backtracking polynomial.
+# `.strip()` côté Python pour trimmer les espaces finaux capturés.
+_HEADING_REGEX = re.compile(
+    r"^(#{1,6})[ \t]+([^\n]+)$", re.MULTILINE
+)  # NOSONAR S5852: bornes strictes, faux positif
 
 
 def _github_slug(heading_text):
     """Approximation du slug GitHub d'un heading.
 
     Règles GitHub : strip markdown emphasis, lowercase, espaces → `-`,
-    suppression de la ponctuation sauf `-` `_` et chars Unicode word.
+    suppression de la ponctuation sauf `-` `_` et chars Unicode utiles.
+    On conserve aussi les marques combinantes Unicode (`Mn`, `Mc`, `Me`) :
+    sans elles, les anchors Devanagari perdent leurs voyelles
+    (`विषय-सूची` → `वषय-सच`) et ne correspondent plus aux slugs GitHub.
     Pas exhaustif (github-slugger gère aussi les emojis, doublons d'id, etc.)
     mais suffisant pour matcher les TOC vers les headings dans la majorité des cas.
     """
@@ -1004,8 +1009,12 @@ def _github_slug(heading_text):
     text = re.sub(r"[*_`~]+", "", text)  # emphasis
     text = text.lower()
     text = re.sub(r"\s+", "-", text)
-    text = re.sub(r"[^\w\-]", "", text, flags=re.UNICODE)
-    return text.strip("-")
+    kept = []
+    for char in text:
+        category = unicodedata.category(char)
+        if char in {"-", "_"} or category[0] in {"L", "M", "N"}:
+            kept.append(char)
+    return "".join(kept).strip("-")
 
 
 def _extract_heading_slugs(content):

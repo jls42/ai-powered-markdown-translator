@@ -241,7 +241,9 @@ class TestSilentFailure(unittest.TestCase):
             patch("translate.OpenAI"),
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
-            patch("sys.argv", ["translate.py", "--file", "/tmp/fake.md", "--target_dir", "/tmp"]),
+            patch(
+                "sys.argv", ["translate.py", "--file", "/source/fake.md", "--target_dir", "/tmp"]
+            ),
         ):
             with self.assertRaises(SystemExit) as cm:
                 translate.main()
@@ -264,9 +266,9 @@ class TestSilentFailure(unittest.TestCase):
                 [
                     "translate.py",
                     "--source_dir",
-                    "/tmp/src",
+                    "/source/src",
                     "--target_dir",
-                    "/tmp/dst",
+                    "/source/dst",
                 ],
             ),
         ):
@@ -573,6 +575,27 @@ class TestCodePlaceholders(unittest.TestCase):
         text = "LLM output that lost the placeholder."
         with self.assertRaisesRegex(RuntimeError, r"manquant|Placeholder"):
             translate._validate_code_placeholders_present(text, ["#CODEBLOCK0#"], [])
+
+
+class TestHeadingAnchors(unittest.TestCase):
+    def test_github_slug_preserves_devanagari_marks(self):
+        """Les matras Devanagari doivent survivre dans les slugs heading-derived."""
+        self.assertEqual(translate._github_slug("विषय-सूची"), "विषय-सूची")
+        self.assertEqual(translate._github_slug("इंस्टॉलेशन"), "इंस्टॉलेशन")
+        self.assertEqual(translate._github_slug("TC (तकनीकी समिति)"), "tc-तकनीकी-समिति")
+
+    def test_heading_anchor_restore_uses_devanagari_slug_with_marks(self):
+        source_slugs = ["tc-technical-committee"]
+        target_slugs = [translate._github_slug("TC (तकनीकी समिति)")]
+        out = translate._restore_anchors(
+            "[TC (तकनीकी समिति)]#ANCHOR0#",
+            ["(#tc-technical-committee)"],
+            ["#ANCHOR0#"],
+            [{"type": "heading", "slug": "tc-technical-committee"}],
+            source_slugs,
+            target_slugs,
+        )
+        self.assertEqual(out, "[TC (तकनीकी समिति)](#tc-तकनीकी-समिति)")
 
 
 class TestNewsPlaceholderValidator(unittest.TestCase):
@@ -934,7 +957,7 @@ class TestDetectProvider(unittest.TestCase):
             if exported_env:
                 env.update(exported_env)
 
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B603 B607 — test exécute un wrapper bash construit en local
                 ["bash", "-c", wrapper],
                 cwd=tmpdir,
                 env=env,

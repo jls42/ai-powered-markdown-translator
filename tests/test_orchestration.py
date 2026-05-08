@@ -122,30 +122,33 @@ class TestResolveOutputFilename(unittest.TestCase):
 
 class TestResolveSingleOutputFilename(unittest.TestCase):
     def test_keep_filename(self):
-        args = _base_args(keep_filename=True, file="/tmp/foo/article.mdx")
+        args = _base_args(keep_filename=True, file="/source/foo/article.mdx")
         self.assertEqual(translate._resolve_single_output_filename(args), "article.mdx")
 
     def test_include_model(self):
         args = _base_args(
-            include_model=True, file="/tmp/foo/article.md", target_lang="ja", model="gpt-5.4-mini"
+            include_model=True,
+            file="/source/foo/article.md",
+            target_lang="ja",
+            model="gpt-5.4-mini",
         )
         self.assertEqual(
             translate._resolve_single_output_filename(args), "article-ja-gpt-5.4-mini.md"
         )
 
     def test_default(self):
-        args = _base_args(file="/tmp/foo/article.md", target_lang="pt")
+        args = _base_args(file="/source/foo/article.md", target_lang="pt")
         self.assertEqual(translate._resolve_single_output_filename(args), "article-pt.md")
 
 
 class TestExcludePatterns(unittest.TestCase):
     def test_is_excluded_match(self):
-        self.assertTrue(translate.is_excluded("/tmp/traductions_en/foo.md"))
-        self.assertTrue(translate.is_excluded("/tmp/foo/PRIVACY.md"))
-        self.assertTrue(translate.is_excluded("/tmp/venv/lib/foo.md"))
+        self.assertTrue(translate.is_excluded("/source/traductions_en/foo.md"))
+        self.assertTrue(translate.is_excluded("/source/foo/PRIVACY.md"))
+        self.assertTrue(translate.is_excluded("/source/venv/lib/foo.md"))
 
     def test_is_excluded_no_match(self):
-        self.assertFalse(translate.is_excluded("/tmp/content/posts/foo.md"))
+        self.assertFalse(translate.is_excluded("/source/content/posts/foo.md"))
 
     def test_is_translatable_markdown_md(self):
         self.assertTrue(translate._is_translatable_markdown("article.md"))
@@ -163,24 +166,28 @@ class TestExcludePatterns(unittest.TestCase):
 class TestShouldSkipWalkDir(unittest.TestCase):
     def test_skip_excluded_root(self):
         self.assertTrue(
-            translate._should_skip_walk_dir("/tmp/foo/venv/lib", "/tmp/out", "out", "/tmp/foo")
+            translate._should_skip_walk_dir(
+                "/source/foo/venv/lib", "/source/out", "out", "/source/foo"
+            )
         )
 
     def test_skip_root_inside_output_dir(self):
         self.assertTrue(
-            translate._should_skip_walk_dir("/tmp/out/sub", "/tmp/out", "out", "/tmp/in")
+            translate._should_skip_walk_dir("/source/out/sub", "/source/out", "out", "/source/in")
         )
 
     def test_skip_subdir_named_like_output(self):
         """Un sous-répertoire direct d'input qui a le même nom que le dossier
         de sortie doit être skippé pour éviter de lire les traductions."""
         self.assertTrue(
-            translate._should_skip_walk_dir("/tmp/in/out", "/tmp/elsewhere/out", "out", "/tmp/in")
+            translate._should_skip_walk_dir(
+                "/source/in/out", "/source/elsewhere/out", "out", "/source/in"
+            )
         )
 
     def test_dont_skip_unrelated_dir(self):
         self.assertFalse(
-            translate._should_skip_walk_dir("/tmp/in/posts", "/tmp/out", "out", "/tmp/in")
+            translate._should_skip_walk_dir("/source/in/posts", "/source/out", "out", "/source/in")
         )
 
 
@@ -465,12 +472,12 @@ class TestTranslateDirectory(unittest.TestCase):
 
 class TestValidateInputPaths(unittest.TestCase):
     def test_file_does_not_exist_raises(self):
-        args = _base_args(file="/tmp/__inexistant_xyz_42.md", target_dir="/tmp")
+        args = _base_args(file="/source/__inexistant_xyz_42.md", target_dir="/tmp")
         with self.assertRaisesRegex(ValueError, "fichier spécifié n'existe pas"):
             translate._validate_input_paths(args)
 
     def test_source_dir_does_not_exist_raises(self):
-        args = _base_args(file=None, source_dir="/tmp/__inexistant_xyz_42", target_dir="/tmp")
+        args = _base_args(file=None, source_dir="/source/__inexistant_xyz_42", target_dir="/tmp")
         with self.assertRaisesRegex(ValueError, "répertoire source"):
             translate._validate_input_paths(args)
 
@@ -770,25 +777,25 @@ class TestRunSingleAndDirectory(unittest.TestCase):
     """_run_single_file / _run_directory : couvre les chemins du retour failed_files."""
 
     def test_run_single_file_failure_listed(self):
-        args = _base_args(file="/tmp/foo.md", target_dir="/tmp")
+        args = _base_args(file="/source/foo.md", target_dir="/tmp")
         with patch("translate.translate_markdown_file", return_value="failure"):
             failed = translate._run_single_file(args, MagicMock())
-        self.assertEqual(failed, ["/tmp/foo.md"])
+        self.assertEqual(failed, ["/source/foo.md"])
 
     def test_run_single_file_success_empty(self):
-        args = _base_args(file="/tmp/foo.md", target_dir="/tmp")
+        args = _base_args(file="/source/foo.md", target_dir="/tmp")
         with patch("translate.translate_markdown_file", return_value="success"):
             failed = translate._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
 
     def test_run_single_file_skipped_empty(self):
-        args = _base_args(file="/tmp/foo.md", target_dir="/tmp")
+        args = _base_args(file="/source/foo.md", target_dir="/tmp")
         with patch("translate.translate_markdown_file", return_value="skipped"):
             failed = translate._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
 
     def test_run_directory_dict_with_failed(self):
-        args = _base_args(source_dir="/tmp/src", target_dir="/tmp/dst")
+        args = _base_args(source_dir="/source/src", target_dir="/source/dst")
         with patch(
             "translate.translate_directory",
             return_value={"failed": ["a.md"], "skipped": []},
@@ -798,7 +805,7 @@ class TestRunSingleAndDirectory(unittest.TestCase):
     def test_run_directory_default_fail_on_malformed(self):
         """Default-fail : si translate_directory renvoie une dict mal formée
         (sans clé 'failed'), on traite comme un échec."""
-        args = _base_args(source_dir="/tmp/src", target_dir="/tmp/dst")
+        args = _base_args(source_dir="/source/src", target_dir="/source/dst")
         with patch("translate.translate_directory", return_value={"oops": []}):
             failed = translate._run_directory(args, MagicMock())
         self.assertTrue(failed)
@@ -819,7 +826,7 @@ class TestMainModelWarning(unittest.TestCase):
                 [
                     "translate.py",
                     "--file",
-                    "/tmp/fake.md",
+                    "/source/fake.md",
                     "--target_dir",
                     "/tmp",
                     "--model",
@@ -850,9 +857,9 @@ class TestMainCleansUpMistralClient(unittest.TestCase):
                     "translate.py",
                     "--use_mistral",
                     "--source_dir",
-                    "/tmp/src",
+                    "/source/src",
                     "--target_dir",
-                    "/tmp/dst",
+                    "/source/dst",
                 ],
             ),
         ):
@@ -870,8 +877,8 @@ class TestModuleEntrypoint(unittest.TestCase):
         repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         env = os.environ.copy()
         env["OPENAI_API_KEY"] = "fixture-openai-key-not-placeholder"  # pragma: allowlist secret
-        proc = subprocess.run(
-            [sys.executable, "translate.py", "--file", "/tmp/__inexistant_xyz_orchestration"],
+        proc = subprocess.run(  # nosec B603 — test exécute translate.py du repo via sys.executable
+            [sys.executable, "translate.py", "--file", "/source/__inexistant_xyz_orchestration"],
             cwd=repo_root,
             env=env,
             capture_output=True,
