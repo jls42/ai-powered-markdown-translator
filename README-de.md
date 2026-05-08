@@ -5,39 +5,43 @@
 <h4 align="center">📊 Codequalität</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Quality Gate Status"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Security Rating"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Reliability Rating"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Maintainability Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Status des Quality Gates"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Sicherheitsbewertung"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Zuverlässigkeitsbewertung"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Wartbarkeitsbewertung"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Coverage"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilities"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Bugs"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Testabdeckung"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Schwachstellen"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Fehler"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Duplicated Lines (%)"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Technical Debt"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Lines of Code"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Duplizierte Zeilen (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Technische Schulden"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Codezeilen"></a>
+</p>
+<p align="center">
+  <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="Codacy-Badge"></a>
+  <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
 Markdown-Dateiübersetzer mit **OpenAI**, **Mistral AI**, **Claude (Anthropic)** und **Google Gemini**.
 
-Dieses Python-Skript übersetzt Markdown-Dateien von einer Quellsprache in eine Zielsprache, wobei Formatierung, Codeblöcke und Front-Matter-Metadaten erhalten bleiben.
+Dieses Python-Skript übersetzt Markdown-Dateien von einer Quellsprache in eine Zielsprache und bewahrt dabei die Formatierung, die Codeblöcke und die Frontmatter-Metadaten.
 
-## Hauptmerkmale
+## Hauptfunktionen
 
 - **Multi-Provider**: Unterstützung von 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **Modelle 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **Sparmodus**: Option `--eco` zur Verwendung schnellerer und günstigerer Modelle
+- **Sparmodus**: Option `--eco`, um schnellere und günstigere Modelle zu verwenden
 - **Einzeldatei**: Option `--file`, um eine einzelne Datei zu übersetzen
 - **Intelligente Segmentierung**: Verarbeitung langer Texte mit modellabhängigen Token-Grenzen
-- **Code-Erhaltung**: Die Codeblöcke UND der Inline-Code (`` `...` ``) bleiben erhalten
+- **Code-Erhaltung**: Sowohl Codeblöcke ALS auch Inline-Code (`` `...` ``) werden bewahrt
 - **Dateiname**: Option `--keep_filename`, um den ursprünglichen Namen beizubehalten
-- **News-Modus**: Option `--news`, um englische Zitate zu schützen und Flaggen in Nachrichtenartikeln zu behandeln
+- **Nachrichtenmodus**: Option `--news`, um englische Zitate zu schützen und Flaggen in Nachrichtenartikeln zu verarbeiten
 - **.env-Konfiguration**: Unterstützung der Datei `.env` für API-Schlüssel
-- **Übersetzungshinweis**: Optionales Hinzufügen eines Hinweises am Ende des Dokuments
+- **Übersetzungsnotiz**: Optionale Hinzufügung einer Notiz am Ende des Dokuments
 
 ## Installation
 
@@ -50,7 +54,7 @@ pip install -r requirements.txt
 
 ### Qualitäts-Tooling (optional, aber empfohlen)
 
-Das Projekt verwendet [`pre-commit`](https://pre-commit.com), um zu verhindern, dass schlecht formatierter, verwundbarer oder geheimhaltiger Code committet wird. Installation:
+Das Projekt verwendet [`pre-commit`](https://pre-commit.com), um zu verhindern, dass schlecht formatierter, unsicherer oder geheime Daten enthaltender Code committed wird. Installation:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -58,11 +62,11 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Aktive Hooks: ruff (Linting+Formatierung), shellcheck (bash), prettier (markdown/yaml/json), Lizard (Komplexität), detect-secrets (API-Schlüssel), mypy (schrittweise Typisierung), Opengrep (SAST), pip-audit (CVE-Abhängigkeiten), unittest. Siehe Abschnitt `CLAUDE.md` _Quality / pre-commit_ für Details.
+Aktive Hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (Komplexität), detect-secrets (API-Schlüssel), mypy (schrittweise Typisierung), Opengrep (SAST), pip-audit (CVE deps), unittest. Siehe `CLAUDE.md` Abschnitt _Qualität / pre-commit_ für Details.
 
 ## Konfiguration
 
-Erstellen Sie eine Datei `.env` im Stammverzeichnis des Projekts oder definieren Sie die Umgebungsvariablen:
+Erstellen Sie eine Datei `.env` im Projektstamm oder definieren Sie die Umgebungsvariablen:
 
 ```bash
 # Fichier .env (recommandé)
@@ -111,38 +115,38 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 | Option                   | Beschreibung                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Einzelne Markdown-Datei zum Übersetzen                                   |
-| `--source_dir`           | Quellverzeichnis mit den Markdown-Dateien                                |
-| `--target_dir`           | Ausgabeverzeichnis für die übersetzten Dateien                           |
+| `--file`                 | Einzelne Markdown-Datei zum Übersetzen                                      |
+| `--source_dir`           | Quellverzeichnis mit den Markdown-Dateien                        |
+| `--target_dir`           | Ausgabeverzeichnis für die übersetzten Dateien                          |
 | `--source_lang`          | Quellsprache (Standard: `fr`)                                             |
 | `--target_lang`          | Zielsprache (Standard: `en`)                                              |
-| `--model`                | Spezifisches zu verwendendes Modell                                      |
-| `--eco`                  | Sparmodelle verwenden                                                  |
-| `--use_mistral`          | Mistral-AI-API verwenden                                               |
-| `--use_claude`           | Claude-API verwenden                                                    |
-| `--use_gemini`           | Gemini-API verwenden                                                    |
-| `--force`                | Neuübersetzung erzwingen                                                |
-| `--keep_filename`        | Ursprünglichen Dateinamen beibehalten                                    |
-| `--news`                 | Nachrichtenmodus: schützt EN-Zitate, behandelt Flaggen nach Sprache      |
-| `--add_translation_note` | Übersetzungshinweis hinzufügen                                           |
-| `--note_position`        | Position des Hinweises: `top`, `bottom` (Standard) oder `both`                |
-| `--note_format`          | Format des Hinweises: `legacy` (Standard, fetter Absatz) oder `marker`       |
-| `--include_model`        | Modellnamen in der Ausgabedatei einfügen                                  |
+| `--model`                | Zu verwendendes spezifisches Modell                                             |
+| `--eco`                  | Sparmodelle verwenden                                         |
+| `--use_mistral`          | Die Mistral AI-API verwenden                                                |
+| `--use_claude`           | Die Claude-API verwenden                                                    |
+| `--use_gemini`           | Die Gemini-API verwenden                                                    |
+| `--force`                | Neuübersetzung erzwingen                                                  |
+| `--keep_filename`        | Den ursprünglichen Dateinamen beibehalten                                     |
+| `--news`                 | Nachrichtenmodus: schützt englische Zitate, verwaltet Flaggen nach Sprache |
+| `--add_translation_note` | Eine Übersetzungsnotiz hinzufügen                                           |
+| `--note_position`        | Position der Notiz: `top`, `bottom` (Standard), oder `both`                |
+| `--note_format`          | Format der Notiz: `legacy` (Standard, fetter Absatz) oder `marker`       |
+| `--include_model`        | Den Modellnamen in die Ausgabedatei aufnehmen                       |
 
-### Übersetzungshinweis: Positionen und Formate
+### Übersetzungsnotiz: Positionen und Formate
 
-Mit `--add_translation_note` kann der Übersetzer den Hinweis oben, unten oder an beiden Stellen platzieren und ihn entweder im einfachen Textformat (rückwärtskompatibel) oder im von einem Markdown-Plugin verarbeitbaren `marker`-Format ausgeben.
+Mit `--add_translation_note` kann der Übersetzer die Notiz oben, unten oder an beiden Stellen platzieren und sie entweder im einfachen Textformat (rückwärtskompatibel) oder im von einem Markdown-Plugin verarbeitbaren `marker`-Format ausgeben.
 
 **Position** (`--note_position`) :
 
-- `bottom` (Standard): Hinweis am Dateiende, wie historisch üblich.
-- `top` : Hinweis **nach dem YAML-Frontmatter** eingefügt (Sicherheit für Astro Content Collections, gray-matter usw.).
-- `both` : Hinweis oben UND unten eingefügt (ein einziger LLM-Aufruf, Inhalt für beide Platzierungen wiederverwendet).
+- `bottom` (Standard) : Notiz am Ende der Datei, wie historisch üblich.
+- `top` : Notiz **nach dem YAML-Frontmatter** eingefügt (Sicherheit für Astro Content Collections, gray-matter usw.).
+- `both` : Notiz oben UND unten eingefügt (ein einziger LLM-Aufruf, Inhalt für beide Platzierungen wiederverwendet).
 
 **Format** (`--note_format`) :
 
-- `legacy` (Standard): fett gedruckter Absatz `**...**` — strikt identisches Verhalten wie v1.8, bytegenau. Kompatibel mit Hugo, GitHub, GitLab und jedem Markdown-Renderer.
-- `marker` : unsichtbare Markdown-Link-Referenzdefinition `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`, gefolgt von einem fett gedruckten Blockzitat. Nativ auf GitHub/GitLab lesbar und beim Build durch ein remark-Plugin auf Astro-Seite nutzbar, um ein stilisiertes Banner zu erzeugen (vgl. Blog jls42.org).
+- `legacy` (Standard) : fetter Absatz `**...**` — Verhalten streng identisch zu v1.8, Byte für Byte. Kompatibel mit Hugo, GitHub, GitLab und jedem Markdown-Renderer.
+- `marker` : unsichtbare Markdown-Link-Reference-Definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`), gefolgt von einem fett formatierten Blockquote. Nativ auf GitHub/GitLab lesbar und beim Build durch ein remark-Plugin in Astro nutzbar, um ein stilisiertes Banner zu erzeugen (vgl. Blog jls42.org).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -166,7 +170,7 @@ python translate.py --file article.mdx --target_lang en \
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Empfehlung für Long-Form-Übersetzungen**: `--use_gemini` (Standard = `gemini-3.1-pro-preview` Qualität, `--eco` = `gemini-3.1-flash-lite-preview`) bewahrt die Markdown-Struktur bei nicht-lateinischen Skripten (PL, JA, ZH, AR, HI) tendenziell besser, insbesondere im `--news`-Modus, in dem die Genauigkeit der Platzhalter wichtig ist. OpenAI bleibt aus Gründen der Rückwärtskompatibilität die Standardwahl.
+> **Empfehlung für Long-Form-Übersetzungen** : `--use_gemini` (Standard = `gemini-3.1-pro-preview` Qualität, `--eco` = `gemini-3.1-flash-lite-preview`) tendiert dazu, die Markdown-Struktur bei nicht-lateinischen Skripten (PL, JA, ZH, AR, HI) besser zu bewahren, insbesondere im `--news`-Modus, in dem die Treue der Platzhalter zählt. OpenAI bleibt für die Rückwärtskompatibilität der Standardwert.
 
 ## Projekte, die dieses Skript verwenden
 
@@ -175,10 +179,10 @@ python translate.py --file article.mdx --target_lang en \
 ## Autor
 
 Julien LE SAUX  
-E-Mail: contact@jls42.org
+E-Mail : contact@jls42.org
 
 ## Lizenz
 
 GNU GENERAL PUBLIC LICENSE Version 3. Siehe [LICENSE](LICENSE).
 
-**Übersetzter Artikel vom Fr ins De mit gpt-5.4-mini.**
+**Artikel aus dem Französischen ins Deutsche mit gpt-5.4-mini.**

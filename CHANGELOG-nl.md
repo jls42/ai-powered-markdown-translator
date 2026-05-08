@@ -1,104 +1,104 @@
-### Wijzigingslog
+### Changelog
 
-🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+🌍 [Frans](CHANGELOG.md) | [Engels](CHANGELOG-en.md) | [Spaans](CHANGELOG-es.md) | [Chinees](CHANGELOG-zh.md) | [Duits](CHANGELOG-de.md) | [Japans](CHANGELOG-ja.md) | [Koreaans](CHANGELOG-ko.md) | [Arabisch](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italiaans](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Pools](CHANGELOG-pl.md) | [Portugees](CHANGELOG-pt.md) | [Roemeens](CHANGELOG-ro.md) | [Zweeds](CHANGELOG-sv.md)
 
-- **1.9** Oplossing voor silent-failure + complete kwaliteitstooling + multi-positie vertaalnotitie (2026-05-07) :
-  - **Multi-positie vertaalnotitie + markerformaat "embed card"** :
-    - Nieuwe CLI-opties (additief, standaardwaarden ongewijzigd → **non-breaking**) :
-      - `--note_position {top,bottom,both}` (standaard : `bottom`) : plaatst de notitie bovenaan, onderaan, of op beide plekken van het vertaalde bestand.
-      - `--note_format {legacy,marker}` (standaard : `legacy`) :
-        - `legacy` reproduceert strikt het v1.8-gedrag (vetgedrukte paragraaf `**…**`) **byte-for-byte**.
-        - `marker` geeft een onzichtbare Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) uit, gevolgd door een **blockquote met 3 paragrafen** gestructureerd voor een "GitHub repo embed card"-weergave: projecttitel in inline code (`**\`ai-powered-markdown-translator\`\*\*`), beschrijving vertaald door de LLM, en een CTA-link (`[Voir le projet sur GitHub ↗](URL)`) met zichtbare pijl. Exploiteerbaar in build via een remark-plugin (cf. blog jls42.org → plugin `remark-translation-banner`).
-    - **Invarianten nooit naar de LLM gestuurd** : repo-titel en GitHub-URL worden aan de Python-kant samengesteld na vertaling van de beschrijvende zin. De LLM ziet nooit de slug `ai-powered-markdown-translator` of `https://github.com/jls42/...`, waardoor gegarandeerd wordt dat geen enkele renderer/case/schema wordt gewijzigd.
-    - **Frontmatter-aware invoeging** : in `top`- of `both`-modus wordt de notitie ingevoegd **na het afsluitende `---`-blok** van de YAML-frontmatter (veiligheid Astro Content Collections / gray-matter). Helper `_split_frontmatter` detecteert `---\n…\n---\n` aan het begin van het bestand en behoudt de integriteit ervan; **gooit `RuntimeError`** bij een open frontmatter zonder afsluitende fence (het bestand wordt doorgestuurd naar `failed_files` in plaats van geschreven te worden met een verkeerd geplaatste notitie).
-    - **Whitelist-modelsanitizer** : `_sanitize_model` vervangt elk teken buiten `[A-Za-z0-9._:/-]` door `_`, fallback `unknown` als leeg. Sluit aan op de validator aan de pluginkant van remark Astro en neutraliseert tekens die het markerformaat zouden breken (spatie, aanhalingsteken, haakje, komma, enz.).
-    - **Interne refactor** : `_append_translation_note` (1 monolithische functie) → 7 pure helpers (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/composer gescheiden (de builder retourneert een zuiver blok zonder scheidingsteken, de composer past de `\n\n` toe volgens de positie) ; productie en source-helper delen dezelfde 3-paragraaf-assembler.
-    - **`_quote_lines` blank-preserving** : prefixeert elke regel met `> `, en zet lege regels om naar alleen `>`. Maakt het voor mdast mogelijk om 3 afzonderlijke paragrafen in de blockquote te zien (titel / beschrijving / link) in plaats van één enkele paragraaf met line-breaks.
-    - **`_build_translation_note_block` adaptief** : afhankelijk van het aantal paragrafen dat de LLM heeft behouden (3 = volledig kaartformaat, 2 = zin + link, 1 = fallback). De 1-paragraaf-fallback **wrapt niet langer in `**...**`** wanneer een Markdown-link `](` wordt gedetecteerd (fragiele rendering van `<strong>` rond een link).
+- **1.9** Silent-failure + complete kwaliteits-tooling + meervoudige-positie vertaalsnotitie opgelost (2026-05-07) :
+  - **Meervoudige-positie vertaalsnotitie + markerformaat "embed card"** :
+    - Nieuwe CLI-opties (toevoegingen, standaardwaarden ongewijzigd → **non breaking**) :
+      - `--note_position {top,bottom,both}` (standaard: `bottom`) : plaatst de notitie bovenaan, onderaan, of op beide plaatsen in het vertaalde bestand.
+      - `--note_format {legacy,marker}` (standaard: `legacy`) :
+        - `legacy` reproduceert strikt het v1.8-gedrag (vetgedrukte `**…**`-paragraaf) **byte-voor-byte**.
+        - `marker` geeft een onzichtbare Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) uit, gevolgd door een **blockquote van 3 paragrafen** die gestructureerd is voor een "GitHub repo embed card"-achtige weergave: projecttitel in inline code (`**\`ai-powered-markdown-translator\`\*\*`), door de LLM vertaalde beschrijving, en CTA-link (`[Voir le projet sur GitHub ↗](URL)`) met zichtbare pijl. Bruikbaar in de build via een remark-plugin (cf. blog jls42.org → plugin `remark-translation-banner`).
+    - **Nooit naar de LLM verzonden invarianten** : repo-titel en GitHub-URL worden aan Python-kant samengesteld na vertaling van de beschrijvende zin. De LLM ziet nooit de slug `ai-powered-markdown-translator` of `https://github.com/jls42/...`, waardoor gegarandeerd wordt dat geen enkele renderer/case/scheme wordt gewijzigd.
+    - **Frontmatter-aware invoeging** : in `top`- of `both`-modus wordt de notitie ingevoegd **na het sluitende `---`-blok** van het YAML-frontmatter (veiligheid Astro Content Collections / gray-matter). Helper `_split_frontmatter` detecteert `---\n…\n---\n` aan het begin van het bestand en behoudt de integriteit ervan; **gooit `RuntimeError`** bij geopende frontmatter zonder sluitende fence (het bestand gaat terug naar `failed_files` in plaats van te worden weggeschreven met een verkeerd geplaatste notitie).
+    - **Whitelist-modelsanitizer** : `_sanitize_model` vervangt elk teken buiten `[A-Za-z0-9._:/-]` door `_`, fallback `unknown` als het leeg is. Sluit aan op de validator aan de plugin-kant van remark Astro en neutraliseert de tekens die het markerformaat zouden breken (spatie, aanhalingsteken, haakje, komma, enz.).
+    - **Interne refactor** : `_append_translation_note` (1 monolithische functie) → 7 zuivere helpers (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/composer gescheiden (de builder geeft een zuiver blok terug zonder scheidingsteken, de composer past de `\n\n` toe volgens de positie) ; productie en bron-helper delen dezelfde 3-paragrafen-assembler.
+    - **`_quote_lines` blank-preserving** : zet voor elke regel `> ` en verandert lege regels alleen in `>`. Hierdoor kan mdast 3 afzonderlijke paragrafen in de blockquote zien (titel / beschrijving / link) in plaats van één enkele paragraaf met regeleinden.
+    - **Adaptieve `_build_translation_note_block`** : afhankelijk van het aantal paragrafen dat de LLM heeft behouden (3 = volledig card-formaat, 2 = zin + link, 1 = fallback). De 1-paragraaf fallback wordt **niet langer ingekaderd in `**...**`** wanneer een Markdown-link `](` wordt gedetecteerd (fragiele weergave van `<strong>` rond een link).
     - **Achterwaartse compatibiliteit** : `getattr(args, "note_position", "bottom")` en `getattr(args, "note_format", "legacy")` aan `_compose_with_notes`-kant — Namespaces zonder deze attributen (bestaande tests, externe programmatische aanroepen) blijven zonder wijziging werken.
-  - **Oplossing voor silent-failure bij lange vertalingen** :
-    - Taalvalidatie na vertaling voor alle providers (OpenAI, Mistral, Claude, Gemini) : deterministische laag (bronfragment teruggevonden letterlijk) + probabilistische laag (`langdetect`)
-    - `finish_reason` / `stop_reason` whitelist : `RuntimeError` gooien bij elke staat buiten de whitelist (truncation, content_filter, enz.)
-    - `max_tokens` Claude : `4096` → `32768` (vermijdt latente truncatie op segmenten van 16k, cross-script marge FR→JA/ZH/KO/AR/HI)
-    - Segmentatie met heading-awareness: prioriteit voor H2/H3 in de tweede helft van het segment (elk segment begint met een complete semantische sectie)
-    - Foutpropagatie tot een niet-nul exitcode: `translate_markdown_file` retourneert een getypeerde status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` als minstens één bestand faalde (single-file en batch)
-    - Leeg-inhoud-guard op alle providers, sanity ratio bron/output (≥ 500 tekens, < 5% = weigering), validatie van code-placeholders (`#CODEBLOCK`/`#INLINECODE`), post-LLM normalisatie (scheidingslijnen/links vastgeplakt aan een heading), `BadRequestError` retry zonder `reasoning_effort`
-    - Toevoeging van afhankelijkheid `langdetect==1.0.9`
-  - **Kwaliteitstooling pre-commit** ("volledige EurekAI-type", 14 hooks) :
+  - **Silent-failure-fix bij lange vertalingen** :
+    - Post-vertaling taalvalidatie op alle providers (OpenAI, Mistral, Claude, Gemini) : deterministische laag (bronfragment vergeleken letterlijk teruggevonden) + probabilistische laag (`langdetect`)
+    - Whitelist `finish_reason` / `stop_reason` : `RuntimeError` gooien op elke status buiten de whitelist (truncation, content_filter, enz.)
+    - `max_tokens` Claude : `4096` → `32768` (voorkomt latente truncatie op 16k-segmenten, cross-script FR→JA/ZH/KO/AR/HI-marge)
+    - Heading-aware segmentatie : prioriteit voor H2/H3 in de tweede helft van het segment (elk segment begint met een complete semantische sectie)
+    - Foutpropagatie tot aan een niet-nul exitcode : `translate_markdown_file` geeft een getypeerde status `success` / `failure` / `skipped` terug, `main()` `sys.exit(1)` als minstens één bestand is mislukt (single-file en batch)
+    - Empty-content guard op alle providers, sanity ratio bron/output (≥ 500 tekens, < 5% = weigering), validatie van code-placeholders (`#CODEBLOCK`/`#INLINECODE`), normalisatie na LLM (scheidingstekens/links die aan een heading vastzitten), `BadRequestError` retry zonder `reasoning_effort`
+    - Afhankelijkheid `langdetect==1.0.9` toegevoegd
+  - **Pre-commit kwaliteits-tooling** ("volledig EurekAI-type", 14 hooks) :
     - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 beschermde API-sleutels), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, enz.)
-    - Pre-push : mypy (progressieve lichte modus), Opengrep SAST (translate.py + scripts/), pip-audit (initiële rapportagemodus), unittest discover (tests/ + scripts/tests/)
+    - Pre-push : mypy (progressieve laks-modus), Opengrep SAST (translate.py + scripts/), pip-audit (initiële reporting-modus), unittest discover (tests/ + scripts/tests/)
     - Lokale wrappers in `scripts/` die `./venv/bin/python` gebruiken
-    - `scripts/audit_verdict.py` : JSON-parser voor pip-audit met 11 unittest-tests, Python-port van de parser jls42-astro
-    - 7 eerste ruff-overtredingen gecorrigeerd : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+    - `scripts/audit_verdict.py` : JSON-parser voor pip-audit met 11 unittest-tests, aangepaste Python-port van de jls42-astro-parser
+    - 7 initiële ruff-overtredingen opgelost : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
     - Lizard sluit tijdelijk `translate.py` uit (4 functies met CCN 21-47, refactor gepland) — strikte gate op scripts/
-  - **SonarCloud + uitgebreide dekking** :
+  - **SonarCloud + volledige dekking** :
     - GitHub Actions-workflow `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analyse bij elke push en pull-request, coverage via `coverage.xml`
     - 11 SonarCloud-badges bovenaan de README (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
     - `tests/test_silent_failure.py` (`unittest` stdlib) : dekt de zes schakels van de silent-failure-foutketen
-    - `tests/test_orchestration.py` (+79 tests) : dekt de orchestratielaag van `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallbacks, o1-series prompt format, early-return-branches van `_validate_translation_output`)
-    - `scripts/tests/test_audit_verdict.py` : dekking van `main()` (stdin/stdout) en van het blok `if __name__ == "__main__"` via subprocess
+    - `tests/test_orchestration.py` (+79 tests) : dekt de orchestration-laag van `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallbacks, o1-series promptformat, vroege-return-branches van `_validate_translation_output`)
+    - `scripts/tests/test_audit_verdict.py` : dekking van `main()` (stdin/stdout) en het `if __name__ == "__main__"`-blok via subprocess
     - **Coverage op nieuwe code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
-  - **Tests** : `tests/test_translation_note_position.py` dekt de matrix positie × formaat (incl. E2E `marker+top|bottom|both` en `legacy+top|bottom|both`), multi-regel-prefixing, byte-for-byte achterwaartse compatibiliteit (golden literal), de sanitizer, de frontmatter-split (incl. raise op niet-gesloten fence), het 3-paragraaf-formaat, de 2-paragraaf-fallback, de 1-paragraaf-guard + Markdown-link, en een kritische beveiliging `TestLLMPayloadExcludesInvariants` die assert dat titel+URL nooit naar de LLM worden gestuurd. **190 tests geslaagd**, 0 regressie.
-  - Documentatie : `README.md` (FR + 14 vertalingen) met badges, `CLAUDE.md` (pre-commit workflow + gedetailleerde CI-watch), 28 opnieuw gegenereerde vertalingen
-- **1.8** `--news`-modus + model-upgrade 2026 (2026-03-17, tag `v1.8`) :
+  - **Tests** : `tests/test_translation_note_position.py` dekt de matrix positie × formaat (incl. E2E `marker+top|bottom|both` en `legacy+top|bottom|both`), het meerregelige voorvoegsel, de byte-voor-byte achterwaartse compatibiliteit (golden literal), de sanitizer, de frontmatter-split (incl. raise bij niet-gesloten fence), het 3-paragrafen-formaat, de 2-paragrafen-fallback, de 1-paragraaf + Markdown-link guard, en een kritieke veiligheidsmaatregel `TestLLMPayloadExcludesInvariants` die assert dat titel+URL nooit naar de LLM worden verzonden. **190 tests geslaagd**, 0 regressie.
+  - Documentatie : `README.md` (FR + 14 vertalingen) met badges, `CLAUDE.md` (pre-commit workflow + gedetailleerde CI-watch), 28 regenererde vertalingen
+- **1.8** `--news`-modus + model-bump 2026 (2026-03-17, tag `v1.8`) :
   - Standaardmodellen bijgewerkt (maart 2026) :
     - OpenAI kwaliteit : `gpt-5` → `gpt-5.4`
     - OpenAI economisch : `gpt-5-mini` → `gpt-5.4-mini`
     - Gemini kwaliteit : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
   - Toevoeging van tokenlimieten voor `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) en `gemini-3.1-pro-preview` (1M)
-  - Initiële `--news`-modus : bescherming van EN-citaten met placeholders `#NEWSQUOTE\d+#`, mapping `LANG_FLAGS` (15 talen), afhandeling van vlaggen per doeltaal
-  - Validatie van nieuws-placeholders vóór herstel (regressie: een LLM die de placeholder verwijderde produceerde stilzwijgend een output zonder citaat)
-  - Script `regen_translations.sh` draagbaar gemaakt (absolute paden, geen afhankelijkheid van de pwd)
-  - Franse link toegevoegd in de taalbalken van README/CHANGELOG, 28 vertalingen opnieuw gegenereerd
+  - Initiële `--news`-modus : bescherming van EN-citaten met placeholders `#NEWSQUOTE\d+#`, mapping `LANG_FLAGS` (15 talen), beheer van vlaggen per doeltaal
+  - Validatie van news-placeholders vóór herstel (regressie: een LLM die de placeholder verwijderde produceerde stilzwijgend output zonder citaat)
+  - Script `regen_translations.sh` draagbaar gemaakt (absolute paden, geen afhankelijkheid van pwd)
+  - Franse link toegevoegd in de language bars README/CHANGELOG, 28 vertalingen geregenereerd
 - **1.7** Nieuwigheden :
-  - Optie `--keep_filename` om de oorspronkelijke bestandsnaam te behouden tijdens het vertalen
-  - Ondersteuning voor het bestand `.env` om API-sleutels automatisch te laden
-  - **Behoud van inline code** : backticks (`` `...` ``) worden nu beschermd tijdens het vertalen
+  - Optie `--keep_filename` om de oorspronkelijke bestandsnaam te behouden bij het vertalen
+  - Ondersteuning voor bestand `.env` om API-sleutels automatisch te laden
+  - **Behoud van inline code** : de backticks (`` `...` ``) zijn nu beschermd tijdens de vertaling
   - Verbetering van de systeemprompt :
     - Betere afhandeling van aanhalingstekens in de YAML-frontmatter
     - Bescherming van template-variabelen `{variable}`
-    - Verbod op ongevraagde vertalersnotities
+    - Verbod op ongevraagde vertaalaantekeningen
   - Succesvol getest op 364 bestanden (blogmigratie jls42.org)
 - **1.6** Nieuwigheden :
   - Ondersteuning voor de Google Gemini API voor vertaling (`--use_gemini`)
-  - Bijwerking van standaardmodellen 2026 :
+  - Bijgewerkte standaardmodellen 2026 :
     - OpenAI : `gpt-5` (kwaliteit), `gpt-5-mini` (eco)
     - Claude : `claude-sonnet-4-5` (kwaliteit), `claude-haiku-4-5` (eco)
     - Gemini : `gemini-3-pro-preview` (kwaliteit), `gemini-3-flash-preview` (eco)
   - Economische modus (`--eco`) om snellere en goedkopere modellen te gebruiken
-  - Vertaling van één bestand (`--file`) zonder een map te doorlopen
+  - Vertaling van één enkel bestand (`--file`) zonder een map te doorlopen
   - Nieuw vereenvoudigd naamgevingspatroon : `{base}-{lang}.md`
   - Optie `--include_model` om het oude formaat met de modelnaam te behouden
-  - Ondersteuning voor niet-opgesomde modellen met standaard tokenlimiet (128k)
+  - Ondersteuning voor niet-vermelde modellen met standaard tokenlimiet (128k)
   - README vertaald in 14 talen
 - **1.5** Verbeteringen :
-  - **Bijwerking van API-sleutels en standaardmodellen :**
-    - **OpenAI :** Bijwerking van `DEFAULT_MODEL_OPENAI` naar `"gpt-4o"`.
-    - **Mistral AI :** Bijwerking van `DEFAULT_MODEL_MISTRAL` naar `"mistral-large-latest"`.
-    - **Claude van Anthropic :** Toevoeging van `DEFAULT_ANTHROPIC_API_KEY` en bijwerking van `DEFAULT_MODEL_CLAUDE` naar `"claude-3-5-sonnet-20240620"`.
+  - **Bijgewerkte API-sleutels en standaardmodellen:**
+    - **OpenAI :** Bijgewerkt van `DEFAULT_MODEL_OPENAI` naar `"gpt-4o"`.
+    - **Mistral AI :** Bijgewerkt van `DEFAULT_MODEL_MISTRAL` naar `"mistral-large-latest"`.
+    - **Anthropic Claude :** `DEFAULT_ANTHROPIC_API_KEY` toegevoegd en `DEFAULT_MODEL_CLAUDE` bijgewerkt naar `"claude-3-5-sonnet-20240620"`.
   - **Optimalisatie van vertaalprompts :**
-    - De prompts voor directe vertalingen en vertaalnotities zijn verrijkt voor meer duidelijkheid en efficiëntie, inclusief gedetailleerde instructies over het behouden van metadata en specifieke opmaakelementen.
+    - De prompts voor directe vertalingen en vertaalaantekeningen zijn verrijkt voor meer duidelijkheid en efficiëntie, inclusief gedetailleerde instructies over het behoud van metadata en specifieke formatteringselementen.
   - **Code-refactorisatie :**
-    - Vervanging van `MistralClient` door de klasse `Mistral` voor initialisatie van de Mistral AI-client.
-    - Herschikking van imports voor betere leesbaarheid en onderhoud.
+    - Vervanging van `MistralClient` door de klasse `Mistral` voor de initialisatie van de Mistral AI-client.
+    - Herschikking van imports voor betere leesbaarheid en onderhoudbaarheid.
     - Verbetering van tekstsegmentatie en beheer van codeblokken om de oorspronkelijke opmaak tijdens het vertalen te behouden.
   - **Beheer van uitvoerbestanden :**
-    - Omkering van het model en de taal in de bestandsnaam van uitvoerbestanden (bijvoorbeeld `f"{base}-{args.target_lang}-{args.model}.md"`), wat de organisatie en het zoeken naar vertalingen vergemakkelijkt.
+    - Omkering van model en taal in de naam van de uitvoerbestanden (bijvoorbeeld `f"{base}-{args.target_lang}-{args.model}.md"`), waardoor organisatie en terugvinden van vertalingen wordt vergemakkelijkt.
   - **Diverse verbeteringen :**
     - Opschonen van de code door onnodige lege regels te verwijderen.
     - Kleine aanpassingen om de structuur en leesbaarheid van het script te verbeteren.
 - **1.4** Nieuwigheden :
-  - Ondersteuning van de Claude API van Anthropic voor vertaling
+  - Ondersteuning voor de Claude API van Anthropic voor vertaling
   - Optimalisatie van prompts voor meer duidelijkheid en efficiëntie
-  - Kleine aanpassingen om het onderhoud van de code te verbeteren
+  - Kleine aanpassingen om het codeonderhoud te verbeteren
 - **1.3** Verbeteringen en nieuwe functies :
   - Verbeterd beheer van codeblokken
   - Verbeterd beheer van uitvoerbestanden
   - Verbeterde detectie van bestaande bestanden
-  - Optie `--force` om vertaling te forceren
+  - Optie `--force` om vertaling af te dwingen
   - Omkering van model en taal in de naam van het uitvoerbestand
-- **1.2** Oplossing voor het wijzigingslog
+- **1.2** Changelog-fix
 - **1.1** Toevoeging van ondersteuning voor de Mistral IA API
-- **1.0** Eerste versie - Ondersteuning van de OpenAI API
+- **1.0** Initiële versie - Ondersteuning voor de OpenAI API
 
-**Artikel vertaald van het fr naar het nl met gpt-5.4-mini.**
+**Artikel vertaald van fr naar nl met gpt-5.4-mini.**

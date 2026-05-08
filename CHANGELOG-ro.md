@@ -1,44 +1,44 @@
-### Istoric modificări
+### Jurnal de modificări
 
-🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
+🌍 [Franceză](CHANGELOG.md) | [Engleză](CHANGELOG-en.md) | [Spaniolă](CHANGELOG-es.md) | [Chineză](CHANGELOG-zh.md) | [Germană](CHANGELOG-de.md) | [Japoneză](CHANGELOG-ja.md) | [Coreeană](CHANGELOG-ko.md) | [Arabă](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italiană](CHANGELOG-it.md) | [Neerlandeză](CHANGELOG-nl.md) | [Poloneză](CHANGELOG-pl.md) | [Portugheză](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Suedeză](CHANGELOG-sv.md)
 
-- **1.9** Remediere silent-failure + set complet de instrumentare a calității + notă de traducere multi-poziție (2026-05-07) :
+- **1.9** Rezolvare silent-failure + instrumentație completă de calitate + notă de traducere multi-poziție (2026-05-07) :
   - **Notă de traducere multi-poziție + format marker "embed card"** :
-    - Noi opțiuni CLI (adiționale, implicite neschimbate → **non breaking**) :
+    - Noi opțiuni CLI (adiționale, valori implicite neschimbate → **non breaking**) :
       - `--note_position {top,bottom,both}` (implicit: `bottom`) : plasează nota sus, jos sau în ambele locuri ale fișierului tradus.
       - `--note_format {legacy,marker}` (implicit: `legacy`) :
-        - `legacy` reproduce strict comportamentul v1.8 (paragraf îngroșat `**…**`) **byte-for-byte**.
-        - `marker` emite o link reference definition Markdown invizibilă (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`), urmată de un **blockquote cu 3 paragrafe** structurat pentru un randare de tip "GitHub repo embed card" : titlul proiectului în inline code (`**\`ai-powered-markdown-translator\`\*\*`), descrierea tradusă de LLM și link-ul CTA (`[Voir le projet sur GitHub ↗](URL)`) cu săgeată vizibilă. Explotabil la build printr-un plugin remark (cf. blog jls42.org → plugin `remark-translation-banner`).
-    - **Invariante niciodată trimise către LLM** : titlul repo și URL-ul GitHub sunt asamblate în Python după traducerea frazei descriptive. LLM-ul nu vede niciodată slug-ul `ai-powered-markdown-translator` nici `https://github.com/jls42/...`, garantând că niciun renderer/case/scheme nu va fi alterat.
-    - **Inserare aware de frontmatter** : în modul `top` sau `both`, nota este inserată **după blocul de `---` de închidere** al frontmatter-ului YAML (siguranță Astro Content Collections / gray-matter). Helper-ul `_split_frontmatter` detectează `---\n…\n---\n` la începutul fișierului și îi păstrează integritatea; **aruncă `RuntimeError`** la frontmatter deschis fără fence de închidere (fișierul este raportat în `failed_files` în loc să fie scris cu o notă plasată greșit).
-    - **Sanitizer cu model whitelist** : `_sanitize_model` înlocuiește orice caracter din afara `[A-Za-z0-9._:/-]` cu `_`, fallback `unknown` dacă este gol. Se aliniază cu validatorul din pluginul remark Astro și neutralizează caracterele care ar rupe formatul marker-ului (spațiu, ghilimele, paranteză, virgulă etc.).
-    - **Refactor intern** : `_append_translation_note` (1 funcție monolitică) → 7 helper-e pure (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/composer separați (builder-ul returnează un bloc pur fără separator, composer-ul aplică `\n\n` în funcție de poziție) ; producția și helper-ul sursă folosesc același asamblor cu 3 paragrafe.
-    - **`_quote_lines` blank-preserving** : prefixează fiecare linie cu `> `, transformând liniile goale în `>` singur. Permite lui mdast să vadă 3 paragrafe distincte în blockquote (titlu / descriere / link) în loc de un singur paragraf cu line-break-uri.
-    - **`_build_translation_note_block` adaptativ** : în funcție de numărul de paragrafe pe care LLM-ul le-a păstrat (3 = format card complet, 2 = propoziție + link, 1 = fallback). Fallback-ul cu 1 paragraf **nu mai încadrează în `**...**`** atunci când este detectat un link Markdown `](` (randare fragilă de `<strong>` în jurul unui link).
-    - **Compatibilitate ascendentă** : `getattr(args, "note_position", "bottom")` și `getattr(args, "note_format", "legacy")` din partea `_compose_with_notes` — Namespace-urile fără aceste atribute (testele existente, apelurile programatice externe) continuă să funcționeze fără modificări.
-  - **Remediere silent-failure pentru traduceri lungi** :
-    - Validare de limbă post-traducere pe toți providerii (OpenAI, Mistral, Claude, Gemini) : strat determinist (extrasul sursă regăsit verbatim) + strat probabilist (`langdetect`)
+        - `legacy` reproduce strict comportamentul v1.8 (paragraf cu aldine `**…**`) **byte-for-byte**.
+        - `marker` emite o definiție Markdown invizibilă de link reference (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`), urmată de un **blockquote cu 3 paragrafe** structurat pentru un randare de tip „GitHub repo embed card” : titlul proiectului în cod inline (`**\`ai-powered-markdown-translator\`\*\*`), descrierea tradusă de LLM și linkul CTA (`[Voir le projet sur GitHub ↗](URL)`) cu săgeată vizibilă. Utilizabil la build de un plugin remark (cf. blog jls42.org → plugin `remark-translation-banner`).
+    - **Invariante niciodată trimise la LLM** : titlul repo și URL-ul GitHub sunt asamblate pe partea Python după traducerea frazei descriptive. LLM-ul nu vede niciodată slug-ul `ai-powered-markdown-translator` nici `https://github.com/jls42/...`, garantând că niciun renderer/uppercase/schemă nu va fi alterat.
+    - **Inserare conștientă de frontmatter** : în modul `top` sau `both`, nota este inserată **după blocul `---` de închidere** al frontmatter-ului YAML (securitate Astro Content Collections / gray-matter). Helper-ul `_split_frontmatter` detectează `---\n…\n---\n` la începutul fișierului și îi păstrează integritatea ; **aruncă `RuntimeError`** pe frontmatter deschis fără fence de închidere (fișierul este raportat în `failed_files` în loc să fie scris cu o notă plasată greșit).
+    - **Sanitizer model whitelist** : `_sanitize_model` înlocuiește orice caracter din afara `[A-Za-z0-9._:/-]` cu `_`, fallback `unknown` dacă este gol. Se aliniază cu validatorul de pe partea plugin-ului remark Astro și neutralizează caracterele care ar strica formatul markerului (spațiu, ghilimele, paranteză, virgulă etc.).
+    - **Refactor intern** : `_append_translation_note` (1 funcție monolitică) → 7 helpers puri (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/composer separate (builder-ul returnează un bloc pur fără separator, iar composer-ul aplică `\n\n` în funcție de poziție) ; producția și helper-ul sursă împart același asamblor în 3 paragrafe.
+    - **`_quote_lines` blank-preserving** : prefixedă fiecare linie cu `> `, transformând liniile goale în doar `>`. Permite lui mdast să vadă 3 paragrafe distincte în blockquote (titlu / descriere / link) în loc de un singur paragraf cu line-break-uri.
+    - **`_build_translation_note_block` adaptativ** : în funcție de numărul de paragrafe pe care LLM-ul le-a păstrat (3 = format card complet, 2 = frază + link, 1 = fallback). Fallback-ul cu 1 paragraf **nu mai învelește în `**...**`** când este detectat un link Markdown `](` (randare fragilă a `<strong>` în jurul unui link).
+    - **Compatibilitate ascendentă** : `getattr(args, "note_position", "bottom")` și `getattr(args, "note_format", "legacy")` pe partea `_compose_with_notes` — Namespace-urile fără aceste atribute (teste existente, apeluri programatice externe) continuă să funcționeze fără modificări.
+  - **Rezolvare silent-failure pentru traduceri lungi** :
+    - Validare de limbă post-traducere pe toți providerii (OpenAI, Mistral, Claude, Gemini) : strat determinist (extrasul sursă regăsit verbatim) + strat probabilistic (`langdetect`)
     - Whitelist `finish_reason` / `stop_reason` : aruncă `RuntimeError` pentru orice stare în afara whitelist-ului (truncation, content_filter etc.)
-    - `max_tokens` Claude : `4096` → `32768` (evită truncation latent pe segmente 16k, marjă cross-script FR→JA/ZH/KO/AR/HI)
-    - Segmentare heading-aware: prioritate H2/H3 în a doua jumătate a segmentului (fiecare segment începe cu o secțiune semantică completă)
-    - Propagarea erorilor până la exit code nenul: `translate_markdown_file` returnează un status tipat `success` / `failure` / `skipped`, `main()` `sys.exit(1)` dacă cel puțin un fișier a eșuat (single-file și batch)
-    - Guard de empty-content pe toți providerii, sanity ratio source/output (≥ 500 caractere, < 5% = refuz), validare a placeholderelor de cod (`#CODEBLOCK`/`#INLINECODE`), normalizare post-LLM (separatori/linkuri lipite de un heading), `BadRequestError` retry fără `reasoning_effort`
+    - `max_tokens` Claude : `4096` → `32768` (evită truncation latent pe segmente de 16k, marjă cross-script FR→JA/ZH/KO/AR/HI)
+    - Segmentare cu awareness pentru heading-uri : prioritate H2/H3 în a doua jumătate a segmentului (fiecare segment începe cu o secțiune semantică completă)
+    - Propagarea erorilor până la exit code nenul : `translate_markdown_file` returnează un statut tipizat `success` / `failure` / `skipped`, `main()` `sys.exit(1)` dacă cel puțin un fișier a eșuat (single-file și batch)
+    - Empty-content guard pe toți providerii, sanity ratio sursă/output (≥ 500 caractere, < 5% = refuz), validare placeholders code (`#CODEBLOCK`/`#INLINECODE`), normalizare post-LLM (separatoare/linkuri lipite de un heading), retry `BadRequestError` fără `reasoning_effort`
     - Adăugare dependență `langdetect==1.0.9`
-  - **Instrumentare de calitate pre-commit** ("tip EurekAI complet", 14 hook-uri) :
+  - **Instrumentație de calitate pre-commit** ("type EurekAI complet", 14 hooks) :
     - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 chei API protejate), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs etc.)
-    - Pre-push : mypy (mod lax progresiv), Opengrep SAST (translate.py + scripts/), pip-audit (mod raportare inițial), unittest discover (tests/ + scripts/tests/)
-    - Wrapper-e locale în `scripts/` care folosesc `./venv/bin/python`
-    - `scripts/audit_verdict.py` : parser JSON pip-audit cu 11 teste unittest, port Python adaptat al parserului jls42-astro
+    - Pre-push : mypy (mod lax progresiv), Opengrep SAST (translate.py + scripts/), pip-audit (mod de raportare inițial), unittest discover (tests/ + scripts/tests/)
+    - Wrappers locale în `scripts/` care folosesc `./venv/bin/python`
+    - `scripts/audit_verdict.py` : parser JSON pip-audit cu 11 teste unittest, port Python adaptat după parser-ul jls42-astro
     - 7 încălcări ruff inițiale corectate : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
     - Lizard exclude temporar `translate.py` (4 funcții cu CCN 21-47, refactor planificat) — gate strict pe scripts/
   - **SonarCloud + acoperire exhaustivă** :
-    - Workflow GitHub Actions `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analiză la fiecare push și pull-request, coverage prin `coverage.xml`
+    - Workflow GitHub Actions `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analiză la fiecare push și pull-request, coverage via `coverage.xml`
     - 11 badge-uri SonarCloud în partea de sus a README-ului (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
     - `tests/test_silent_failure.py` (`unittest` stdlib) : acoperă cele șase verigi ale lanțului de eroare silent-failure
-    - `tests/test_orchestration.py` (+79 tests) : acoperă stratul de orchestrare al `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallbacks, formatul prompt o1-series, ramurile early-return din `_validate_translation_output`)
-    - `scripts/tests/test_audit_verdict.py` : acoperire pentru `main()` (stdin/stdout) și blocul `if __name__ == "__main__"` prin subprocess
-    - **Coverage pe cod nou** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
-  - **Teste** : `tests/test_translation_note_position.py` acoperă matricea poziție × format (incl. E2E `marker+top|bottom|both` și `legacy+top|bottom|both`), prefixarea multi-linie, retrocompatibilitatea byte-for-byte (golden literal), sanitizer-ul, split-ul frontmatter (incl. raise pe fence neînchis), formatul cu 3 paragrafe, fallback-ul cu 2 paragrafe, guard-ul cu 1 paragraf + link Markdown și un gard critic `TestLLMPayloadExcludesInvariants` care assertă că titlul+URL-ul nu sunt trimise niciodată către LLM. **190 teste trecute**, 0 regresie.
+    - `tests/test_orchestration.py` (+79 teste) : acoperă stratul de orchestration al `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallbacks, formatul prompt o1-series, ramurile early-return ale `_validate_translation_output`)
+    - `scripts/tests/test_audit_verdict.py` : acoperire pentru `main()` (stdin/stdout) și pentru blocul `if __name__ == "__main__"` prin subprocess
+    - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
+  - **Teste** : `tests/test_translation_note_position.py` acoperă matricea poziție × format (incl. E2E `marker+top|bottom|both` și `legacy+top|bottom|both`), prefixarea multi-linie, retrocompatibilitatea byte-for-byte (golden literal), sanitizer-ul, split-ul frontmatter (incl. raise pe fence neînchis), formatul cu 3 paragrafe, fallback-ul cu 2 paragrafe, guard-ul cu 1 paragraf + link Markdown și un gard critic `TestLLMPayloadExcludesInvariants` care assertă că titlul+URL-ul nu sunt niciodată trimise la LLM. **190 teste trecute**, 0 regresie.
   - Documentație : `README.md` (FR + 14 traduceri) cu badge-uri, `CLAUDE.md` (workflow pre-commit + watch CI detaliat), 28 traduceri regenerate
 - **1.8** Modul `--news` + bump modele 2026 (2026-03-17, tag `v1.8`) :
   - Modele implicite actualizate (martie 2026) :
@@ -47,16 +47,16 @@
     - Gemini calitate : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
   - Adăugarea limitelor de tokeni pentru `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) și `gemini-3.1-pro-preview` (1M)
   - Modul `--news` inițial : protecția citatelor EN cu placeholder-e `#NEWSQUOTE\d+#`, mapping `LANG_FLAGS` (15 limbi), gestionarea steagurilor după limba țintă
-  - Validarea placeholder-elor news înainte de restaurare (regresie: un LLM care ștergea placeholder-ul producea în tăcere o ieșire fără citare)
+  - Validarea placeholder-elor news înainte de restaurare (regresie : un LLM care ștergea placeholder-ul producea în mod silențios o ieșire fără citare)
   - Scriptul `regen_translations.sh` făcut portabil (căi absolute, fără dependență de pwd)
-  - Link Franceză adăugat în language bars README/CHANGELOG, 28 traduceri regenerate
+  - Link-ul francez adăugat în language bars README/CHANGELOG, 28 traduceri regenerate
 - **1.7** Noutăți :
-  - Opțiunea `--keep_filename` pentru păstrarea numelui original al fișierului în timpul traducerii
+  - Opțiune `--keep_filename` pentru a păstra numele original al fișierului în timpul traducerii
   - Suport pentru fișierul `.env` pentru a încărca automat cheile API
-  - **Păstrarea codului inline** : backtick-urile (`` `...` ``) sunt acum protejate în timpul traducerii
+  - **Păstrarea codului inline** : backticks-urile (`` `...` ``) sunt acum protejate în timpul traducerii
   - Îmbunătățirea promptului de sistem :
     - Gestionare mai bună a ghilimelelor în YAML frontmatter
-    - Protecția variabilelor de template `{variable}`
+    - Protecția variabilelor template `{variable}`
     - Interdicția notelor de traducător nesolicitate
   - Testat cu succes pe 364 de fișiere (migrarea blogului jls42.org)
 - **1.6** Noutăți :
@@ -65,11 +65,11 @@
     - OpenAI : `gpt-5` (calitate), `gpt-5-mini` (eco)
     - Claude : `claude-sonnet-4-5` (calitate), `claude-haiku-4-5` (eco)
     - Gemini : `gemini-3-pro-preview` (calitate), `gemini-3-flash-preview` (eco)
-  - Modul economic (`--eco`) pentru a utiliza modele mai rapide și mai puțin costisitoare
-  - Traducerea unui singur fișier (`--file`) fără parcurgerea unui director
+  - Modul economic (`--eco`) pentru a folosi modele mai rapide și mai puțin costisitoare
+  - Traducere pentru fișier unic (`--file`) fără a parcurge un director
   - Nou pattern de denumire simplificat : `{base}-{lang}.md`
-  - Opțiunea `--include_model` pentru a păstra vechiul format cu numele modelului
-  - Suport pentru modelele nelistate cu limită implicită de tokeni (128k)
+  - Opțiune `--include_model` pentru a păstra formatul vechi cu numele modelului
+  - Suport pentru modele nelistate cu limită implicită de tokeni (128k)
   - README tradus în 14 limbi
 - **1.5** Îmbunătățiri :
   - **Actualizarea cheilor API și a modelelor implicite :**
@@ -77,7 +77,7 @@
     - **Mistral AI :** Actualizare de la `DEFAULT_MODEL_MISTRAL` la `"mistral-large-latest"`.
     - **Claude de la Anthropic :** Adăugare `DEFAULT_ANTHROPIC_API_KEY` și actualizare de la `DEFAULT_MODEL_CLAUDE` la `"claude-3-5-sonnet-20240620"`.
   - **Optimizarea prompturilor de traducere :**
-    - Prompturile pentru traducerile directe și notele de traducere au fost îmbogățite pentru mai multă claritate și eficiență, incluzând instrucțiuni detaliate despre păstrarea metadatelor și a elementelor specifice de formatare.
+    - Prompturile pentru traducerile directe și notele de traducere au fost îmbogățite pentru o mai bună claritate și eficiență, incluzând instrucțiuni detaliate privind păstrarea metadatelor și a elementelor specifice de formatare.
   - **Refactorizarea codului :**
     - Înlocuirea `MistralClient` cu clasa `Mistral` pentru inițializarea clientului Mistral AI.
     - Reorganizarea importurilor pentru o mai bună lizibilitate și mentenanță.
@@ -94,11 +94,11 @@
 - **1.3** Îmbunătățiri și funcționalități noi :
   - Gestionare îmbunătățită a blocurilor de cod
   - Gestionare îmbunătățită a fișierelor de ieșire
-  - Detectarea fișierelor existente îmbunătățită
-  - Opțiunea `--force` pentru a forța traducerea
+  - Detectare îmbunătățită a fișierelor existente
+  - Opțiune `--force` pentru a forța traducerea
   - Inversarea modelului și a limbii în numele fișierului de ieșire
-- **1.2** Corectare a changelog-ului
-- **1.1** Adăugarea suportului pentru API-ul Mistral IA
+- **1.2** Rezolvare changelog
+- **1.1** Adăugare suport pentru API-ul Mistral AI
 - **1.0** Versiunea inițială - Suport pentru API-ul OpenAI
 
 **Articol tradus din fr în ro cu gpt-5.4-mini.**

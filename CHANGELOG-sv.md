@@ -1,104 +1,104 @@
-### Ändringslogg
+### Changelog
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.9** Fixa tyst fel + komplett kvalitetsverktyg + notis om flerstegsöversättning (2026-05-07) :
-  - **Notis om flerstegsöversättning + formatmarkör "embed card"** :
-    - Nya CLI-alternativ (tillägg, oförändrade standardvärden → **icke-brytande**) :
-      - `--note_position {top,bottom,both}` (standard : `bottom`) : placerar notisen högst upp, längst ned, eller på båda platserna i den översatta filen.
-      - `--note_format {legacy,marker}` (standard : `legacy`) :
-        - `legacy` återger strikt v1.8-beteendet (fet paragraf `**…**`) **byte-för-byte**.
-        - `marker` skickar ut en osynlig Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) följt av ett **blockquote med 3 stycken** strukturerat för en rendering av typen "GitHub repo embed card" : projektets titel i inlinekod (`**\`ai-powered-markdown-translator\`\*\*`), beskrivning översatt av LLM, och CTA-länk (`[Voir le projet sur GitHub ↗](URL)`) med synlig pil. Kan användas vid byggtid av ett remark-plugin (jfr. blogg jls42.org → plugin `remark-translation-banner`).
-    - **Invarianta värden skickas aldrig till LLM** : repo-titel och GitHub-URL sätts ihop på Python-sidan efter översättning av den beskrivande meningen. LLM ser aldrig sluggen `ai-powered-markdown-translator` eller `https://github.com/jls42/...`, vilket garanterar att ingen renderer/case/scheme ändras.
-    - **Frontmatter-medveten insättning** : i läge `top` eller `both` sätts notisen in **efter stängningsblocket `---`** i YAML-frontmattert (säkerhet för Astro Content Collections / gray-matter). Hjälpfunktionen `_split_frontmatter` upptäcker `---\n…\n---\n` i början av filen och bevarar dess integritet ; **höjer `RuntimeError`** vid öppet frontmatter utan stängande fence (filen går tillbaka till `failed_files` i stället för att skrivas med en felplacerad notis).
-    - **Whitelist-modellsanering** : `_sanitize_model` ersätter varje tecken utanför `[A-Za-z0-9._:/-]` med `_`, fallback `unknown` om tom. Passar plugin-sidans validerare i Astro remark och neutraliserar tecken som skulle förstöra markörformatet (mellanslag, citattecken, parentes, komma, etc.).
-    - **Intern refaktorering** : `_append_translation_note` (1 monolitisk funktion) → 7 rena hjälpfunktioner (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/komponist separerade (buildern returnerar ett rent block utan avgränsare, kompositorn tillämpar `\n\n` beroende på position) ; produktion och source-helper delar samma 3-stycks-assembler.
-    - **`_quote_lines` blank-preserving** : prefixerar varje rad med `> `, och gör tomma rader till enbart `>`. Gör att mdast ser 3 separata stycken i blockcitatet (titel / beskrivning / länk) i stället för ett enda stycke med radbrytningar.
-    - **`_build_translation_note_block` adaptiv** : beroende på antalet stycken som LLM har bevarat (3 = komplett kortformat, 2 = fras + länk, 1 = fallback). Fallback med 1 stycke **omsluter inte längre i `**...**`** när en Markdown-länk `](` detekteras (skör rendering av `<strong>` runt en länk).
-    - **Bakåtkompatibilitet** : `getattr(args, "note_position", "bottom")` och `getattr(args, "note_format", "legacy")` på `_compose_with_notes`-sidan — Namespaces utan dessa attribut (befintliga tester, externa programmatiska anrop) fortsätter att fungera utan ändring.
-  - **Fix för tyst fel på långa översättningar** :
-    - Språkvalidering efter översättning för alla leverantörer (OpenAI, Mistral, Claude, Gemini) : deterministiskt lager (källutdrag återfunnet ordagrant) + probabilistiskt lager (`langdetect`)
-    - `finish_reason` / `stop_reason`-whitelist : höj `RuntimeError` för varje tillstånd utanför whitelist (trunkering, content_filter, etc.)
-    - `max_tokens` Claude : `4096` → `32768` (undviker latent trunkering på 16k-segment, marginal för korsskrifts-översättning FR→JA/ZH/KO/AR/HI)
-    - Rubrikmedveten segmentering : prioritet för H2/H3 i segmentets andra halva (varje segment börjar med en komplett semantisk sektion)
-    - Felpropagering ända till icke-noll exit code : `translate_markdown_file` returnerar en typad status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` om minst en fil misslyckades (single-file och batch)
-    - Guard för tomt innehåll på alla leverantörer, sanity ratio för källa/utdata (≥ 500 tecken, < 5 % = avvisning), validering av kod-placeholders `#CODEBLOCK`/`#INLINECODE`, normalisering efter LLM (avgränsare/länkar som sitter ihop med en rubrik), `BadRequestError` retry utan `reasoning_effort`
+- **1.9** Åtgärdat silent-failure + komplett kvalitetsverktyg + anteckning om flerpunktsöversättning (2026-05-07) :
+  - **Anteckning om flerpunktsöversättning + markörformat "embed card"** :
+    - Nya CLI-alternativ (tillägg, oförändrade standardvärden → **non breaking**) :
+      - `--note_position {top,bottom,both}` (standard: `bottom`) : placerar anteckningen överst, nederst eller på båda ställena i den översatta filen.
+      - `--note_format {legacy,marker}` (standard: `legacy`) :
+        - `legacy` återger strikt v1.8-beteendet (fet paragraf `**…**`) **byte-for-byte**.
+        - `marker` skickar ut en osynlig Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) följt av ett **blockquote med 3 paragrafer** strukturerat för en rendering i stil med "GitHub repo embed card" : projekttitel i inlinekod (`**\`ai-powered-markdown-translator\`\*\*`), beskrivning översatt av LLM, och CTA-länk (`[Voir le projet sur GitHub ↗](URL)`) med synlig pil. Kan utnyttjas i builden via ett remark-plugin (se blog jls42.org → plugin `remark-translation-banner`).
+    - **Invariant som aldrig skickas till LLM** : repo-titeln och GitHub-URL:en sätts ihop på Python-sidan efter översättning av den beskrivande meningen. LLM ser aldrig sluggen `ai-powered-markdown-translator` eller `https://github.com/jls42/...`, vilket garanterar att ingen renderer/gemener-scheman-variant ändras.
+    - **Frontmatter-medveten infogning** : i läge `top` eller `both` infogas anteckningen **efter det avslutande `---`-blocket** i YAML-frontmattert (säkerhet för Astro Content Collections / gray-matter). Hjälpfunktionen `_split_frontmatter` upptäcker `---\n…\n---\n` i början av filen och bevarar dess integritet ; **kastar `RuntimeError`** vid öppet frontmatter utan stängande fence (filen skickas tillbaka till `failed_files` i stället för att skrivas med en felplacerad anteckning).
+    - **Whitelist-modellens sanitizer** : `_sanitize_model` ersätter alla tecken utanför `[A-Za-z0-9._:/-]` med `_`, fallback `unknown` om tom. Anpassad till valideraren på Astro remark-plugin-sidan och neutraliserar tecken som skulle bryta markörformatet (mellanslag, citationstecken, parentes, komma, etc.).
+    - **Intern refaktorering** : `_append_translation_note` (1 monolitisk funktion) → 7 rena hjälpfunktioner (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/composer separerade (buildern returnerar ett rent block utan avgränsare, composern tillämpar `\n\n` enligt positionen) ; produktion och källhjälpen delar samma 3-paragraphs-assemblerare.
+    - **`_quote_lines` blank-preserving** : prefixerar varje rad med `> `, och gör tomma rader till endast `>`. Gör att mdast ser 3 distinkta paragrafer i blockquote:et (titel / beskrivning / länk) i stället för en enda paragraf med radbrytningar.
+    - **`_build_translation_note_block` adaptiv** : beroende på hur många paragrafer LLM:en har bevarat (3 = komplett card-format, 2 = mening + länk, 1 = fallback). Fallback med 1 paragraf **omsluter inte längre i `**...**`** när en Markdown-länk `](` upptäcks (skört renderingsbeteende för `<strong>` runt en länk).
+    - **Bakåtkompatibilitet** : `getattr(args, "note_position", "bottom")` och `getattr(args, "note_format", "legacy")` på `_compose_with_notes`-sidan — Namespace utan dessa attribut (befintliga tester, externa programmatiska anrop) fortsätter att fungera utan ändring.
+  - **Åtgärdat silent-failure vid långa översättningar** :
+    - Språkvalidering efter översättning på alla leverantörer (OpenAI, Mistral, Claude, Gemini) : deterministiskt lager (källutdrag hittas verbatim) + probabilistiskt lager (`langdetect`)
+    - `finish_reason` / `stop_reason`-whitelist : kasta `RuntimeError` för varje tillstånd utanför whitelist (truncation, content_filter, etc.)
+    - `max_tokens` Claude : `4096` → `32768` (undviker latent truncation på 16k-segment, marginal för cross-script FR→JA/ZH/KO/AR/HI)
+    - Heading-medveten segmentering : prioritet för H2/H3 i den andra halvan av segmentet (varje segment börjar med en komplett semantisk sektion)
+    - Felpropagering ända till icke-noll exit code : `translate_markdown_file` returnerar ett typat statusvärde `success` / `failure` / `skipped`, `main()` `sys.exit(1)` om minst en fil misslyckades (single-file och batch)
+    - Empty-content-guard på alla leverantörer, sanity ratio source/output (≥ 500 chars, < 5% = avslag), validering av placeholders code (`#CODEBLOCK`/`#INLINECODE`), efter-LLM-normalisering (separatorer/länkar som klistrats ihop med en heading), `BadRequestError` retry utan `reasoning_effort`
     - Lagt till beroendet `langdetect==1.0.9`
   - **Kvalitetsverktyg pre-commit** ("komplett EurekAI-typ", 14 hooks) :
     - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 skyddade API-nycklar), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
-    - Pre-push : mypy (gradvis lax-läge), Opengrep SAST (translate.py + scripts/), pip-audit (initialt rapportläge), unittest discover (tests/ + scripts/tests/)
+    - Pre-push : mypy (progressivt läge med låg strikt nivå), Opengrep SAST (translate.py + scripts/), pip-audit (initialt rapporteringsläge), unittest discover (tests/ + scripts/tests/)
     - Lokala wrappers i `scripts/` som använder `./venv/bin/python`
-    - `scripts/audit_verdict.py` : JSON-parser för pip-audit med 11 unittest-tester, portad Python-version av jls42-astro-parsaren
-    - 7 initiala ruff-överträdelser åtgärdade : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
-    - Lizard exkluderar tillfälligt `translate.py` (4 funktioner med CCN 21-47, refaktor planerad) — strikt gate på scripts/
-  - **SonarCloud + heltäckande testtäckning** :
+    - `scripts/audit_verdict.py` : JSON-parser för pip-audit med 11 unittest-tester, Python-port anpassad från jls42-astro-parsern
+    - 7 initiala ruff-överträdelser rättade: B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+    - Lizard exkluderar tillfälligt `translate.py` (4 funktioner med CCN 21-47, refaktorering planerad) — strikt gate på scripts/
+  - **SonarCloud + fullständig täckning** :
     - GitHub Actions-workflow `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analys vid varje push och pull request, coverage via `coverage.xml`
     - 11 SonarCloud-badges högst upp i README (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
-    - `tests/test_silent_failure.py` (`unittest` stdlib) : täcker de sex länkarna i kedjan för tyst-fel
-    - `tests/test_orchestration.py` (+79 tester) : täcker orkestreringslagret i `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallback, o1-series promptformat, tidiga return-grenar i `_validate_translation_output`)
-    - `scripts/tests/test_audit_verdict.py` : täckning av `main()` (stdin/stdout) och blocket `if __name__ == "__main__"` via subprocess
+    - `tests/test_silent_failure.py` (`unittest` stdlib) : täcker de sex länkarna i silent-failure-felkedjan
+    - `tests/test_orchestration.py` (+79 tester) : täcker orkestreringslagret för `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError-fallbacks, o1-series promptformat, tidiga returgrenar i `_validate_translation_output`)
+    - `scripts/tests/test_audit_verdict.py` : täckning för `main()` (stdin/stdout) och `if __name__ == "__main__"`-blocket via subprocess
     - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
-  - **Tester** : `tests/test_translation_note_position.py` täcker positions × format-matrisen (inkl. E2E `marker+top|bottom|both` och `legacy+top|bottom|both`), flerrads-prefixering, byte-för-byte-bakåtkompatibilitet (golden literal), saneraren, frontmatter-spliten (inkl. raise på icke-stängd fence), 3-stycksformatet, 2-stycks-fallbacken, 1-stycks-guard + Markdown-länk, samt en kritisk säkerhetskontroll `TestLLMPayloadExcludesInvariants` som assertar att titel+URL aldrig skickas till LLM. **190 tester passerade**, 0 regression.
-  - Dokumentation : `README.md` (FR + 14 översättningar) med badges, `CLAUDE.md` (workflow för pre-commit + detaljerad CI-watch), 28 regenererade översättningar
-- **1.8** Läge `--news` + modelluppdatering 2026 (2026-03-17, tag `v1.8`) :
+  - **Tester** : `tests/test_translation_note_position.py` täcker matrisen position × format (inkl. E2E `marker+top|bottom|both` och `legacy+top|bottom|both`), flerradsprefixering, bakåtkompatibilitet byte-for-byte (golden literal), sanitizern, frontmatter-splitten (inkl. raise vid icke-stängd fence), 3-paragraphs-formatet, 2-paragraphs-fallbacken, 1-paragraphs-guard + Markdown-länk, samt en kritisk säkerhetskontroll `TestLLMPayloadExcludesInvariants` som assert:ar att titel+URL aldrig skickas till LLM. **190 tester passerar**, 0 regression.
+  - Dokumentation : `README.md` (FR + 14 översättningar) med badges, `CLAUDE.md` (detaljerat pre-commit-workflow + watch CI), 28 regenererade översättningar
+- **1.8** Läget `--news` + modelluppdatering 2026 (2026-03-17, tag `v1.8`) :
   - Standardmodeller uppdaterade (mars 2026) :
     - OpenAI kvalitet : `gpt-5` → `gpt-5.4`
     - OpenAI ekonomisk : `gpt-5-mini` → `gpt-5.4-mini`
     - Gemini kvalitet : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
-  - Lagt till tokenbegränsningar för `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) och `gemini-3.1-pro-preview` (1M)
-  - Initialt `--news`-läge : skydd av EN-citat med placeholders `#NEWSQUOTE\d+#`, `LANG_FLAGS`-mappning (15 språk), hantering av flaggor per målspråk
-  - Validering av news-placeholders före återställning (regression : en LLM som tog bort placeholdern gav tyst utdata utan citation)
+  - Lagt till token-gränser för `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) och `gemini-3.1-pro-preview` (1M)
+  - Första `--news`-läget : skydd av EN-citat med placeholders `#NEWSQUOTE\d+#`, mapping `LANG_FLAGS` (15 språk), hantering av flaggor per målspråk
+  - Validering av news-placeholders före återställning (regression: en LLM som tog bort placeholdern producerade tyst en utdata utan citat)
   - Skriptet `regen_translations.sh` gjort portabelt (absoluta sökvägar, inget beroende av pwd)
-  - Fransk länk tillagd i språkbarerna README/CHANGELOG, 28 översättningar regenererade
+  - Fransk länk tillagd i språkfälten README/CHANGELOG, 28 översättningar regenererade
 - **1.7** Nyheter :
   - Alternativet `--keep_filename` för att behålla det ursprungliga filnamnet vid översättning
-  - Stöd för filen `.env` för att automatiskt läsa in API-nycklar
+  - Stöd för filen `.env` för att ladda API-nycklar automatiskt
   - **Bevarande av inlinekod** : backticks (`` `...` ``) skyddas nu under översättningen
   - Förbättring av systemprompten :
-    - Bättre hantering av citattecken i YAML-frontmatter
+    - Bättre hantering av citationstecken i YAML-frontmatter
     - Skydd av template-variabler `{variable}`
-    - Förbud mot oönskade översättaranteckningar
-  - Testat framgångsrikt på 364 filer (migrering av bloggen jls42.org)
+    - Förbud mot oönskade translator notes
+  - Testat framgångsrikt på 364 filer (migration av jls42.org-bloggen)
 - **1.6** Nyheter :
   - Stöd för Google Gemini API för översättning (`--use_gemini`)
-  - Uppdatering av standardmodeller 2026 :
+  - Uppdatering av standardmodeller för 2026 :
     - OpenAI : `gpt-5` (kvalitet), `gpt-5-mini` (eko)
     - Claude : `claude-sonnet-4-5` (kvalitet), `claude-haiku-4-5` (eko)
     - Gemini : `gemini-3-pro-preview` (kvalitet), `gemini-3-flash-preview` (eko)
-  - Ekonomiläge (`--eco`) för att använda snabbare och billigare modeller
-  - Översättning av enskild fil (`--file`) utan att gå igenom en katalog
-  - Ny förenklad namngivningsmall : `{base}-{lang}.md`
+  - Ekonomiskt läge (`--eco`) för att använda snabbare och billigare modeller
+  - Översättning av en enskild fil (`--file`) utan att genomsöka en katalog
+  - Ny förenklad namngivningsmodell : `{base}-{lang}.md`
   - Alternativ `--include_model` för att behålla det gamla formatet med modellnamnet
-  - Stöd för modeller som inte listas med standardgräns för tokens (128k)
+  - Stöd för icke-listade modeller med standardgräns för tokens (128k)
   - README översatt till 14 språk
 - **1.5** Förbättringar :
   - **Uppdatering av API-nycklar och standardmodeller :**
     - **OpenAI :** Uppdatering från `DEFAULT_MODEL_OPENAI` till `"gpt-4o"`.
     - **Mistral AI :** Uppdatering från `DEFAULT_MODEL_MISTRAL` till `"mistral-large-latest"`.
     - **Anthropic Claude :** Tillagd `DEFAULT_ANTHROPIC_API_KEY` och uppdatering från `DEFAULT_MODEL_CLAUDE` till `"claude-3-5-sonnet-20240620"`.
-  - **Optimering av översättningspromptar :**
-    - Prompterna för direkta översättningar och översättningsnoter har utökats för bättre tydlighet och effektivitet, inklusive detaljerade instruktioner om bevarande av metadata och specifika formateringsinslag.
+  - **Optimering av översättningsprompter :**
+    - Prompterna för direkta översättningar och översättningsnoter har utökats för bättre tydlighet och effektivitet, inklusive detaljerade instruktioner om bevarande av metadata och specifika formateringsobjekt.
   - **Kodrefaktorering :**
     - Ersättning av `MistralClient` med klassen `Mistral` för initialisering av Mistral AI-klienten.
-    - Omorganisering av imports för bättre läsbarhet och underhåll.
-    - Förbättrad textssegmentering och hantering av kodblock för att bevara originalformateringen under översättning.
+    - Omstrukturering av imports för bättre läsbarhet och underhåll.
+    - Förbättring av textsegmentering och hantering av kodblock för att bevara originalformateringen under översättning.
   - **Hantering av utdatafiler :**
-    - Omkastning av modell och språk i namnet på utdatafilerna (till exempel, `f"{base}-{args.target_lang}-{args.model}.md"`), vilket underlättar organisation och sökning av översättningar.
+    - Omvändning av modell och språk i namnet på utdatafilerna (till exempel `f"{base}-{args.target_lang}-{args.model}.md"`), vilket underlättar organisering och sökning av översättningar.
   - **Diverse förbättringar :**
-    - Städning av koden genom att ta bort onödiga tomma rader.
+    - Städning av kod genom att ta bort onödiga tomma rader.
     - Mindre justeringar för att förbättra skriptets struktur och läsbarhet.
 - **1.4** Nyheter :
   - Stöd för Anthropic Claude API för översättning
-  - Optimering av prompter för ökad tydlighet och effektivitet
-  - Mindre justeringar för att förbättra kodunderhållet
+  - Optimering av promter för ökad tydlighet och effektivitet
+  - Mindre justeringar för att förbättra kodens underhållbarhet
 - **1.3** Förbättringar och nya funktioner :
   - Förbättrad hantering av kodblock
   - Förbättrad hantering av utdatafiler
-  - Förbättrad upptäckt av befintliga filer
-  - Alternativ `--force` för att tvinga fram översättning
-  - Omkastning av modell och språk i namnet på utdatafilen
-- **1.2** Fix av changelog
+  - Förbättrad detektering av befintliga filer
+  - Alternativ `--force` för att tvinga översättning
+  - Omvändning av modell och språk i namnet på utdatafilen
+- **1.2** Changelog-fix
 - **1.1** Lagt till stöd för Mistral IA API
-- **1.0** Inledande version - Stöd för OpenAI API
+- **1.0** Initial version - Stöd för OpenAI API
 
-**Översatt artikel från fr till sv med gpt-5.4-mini.**
+**Artikel översatt från fr till sv med gpt-5.4-mini.**

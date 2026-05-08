@@ -5,39 +5,43 @@
 <h4 align="center">📊 代码质量</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Quality Gate Status"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Security Rating"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Reliability Rating"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Maintainability Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="质量门状态"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="安全评级"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="可靠性评级"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="可维护性评级"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Coverage"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilities"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Bugs"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="覆盖率"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="漏洞"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="缺陷"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="代码异味"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Duplicated Lines (%)"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Technical Debt"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Lines of Code"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="重复行（%）"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="技术债务"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="代码行数"></a>
+</p>
+<p align="center">
+  <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="Codacy 徽章"></a>
+  <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-使用 **OpenAI**、**Mistral AI**、**Claude（Anthropic）** 和 **Google Gemini** 的 Markdown 文件翻译器。
+使用 **OpenAI**、**Mistral AI**、**Claude (Anthropic)** 和 **Google Gemini** 的 Markdown 文件翻译器。
 
-这个 Python 脚本将 Markdown 文件从源语言翻译为目标语言，同时保留格式、代码块和 front matter 元数据。
+这个 Python 脚本会将 Markdown 文件从源语言翻译为目标语言，同时保留格式、代码块和 front matter 元数据。
 
 ## 主要特性
 
 - **多提供商**：支持 4 个 API（OpenAI、Mistral、Claude、Gemini）
 - **2026 模型**：GPT-5.5、Claude Sonnet 4.6、Gemini 3.1 Pro
-- **经济模式**：选项 `--eco`，可使用更快且更便宜的模型
-- **单文件**：选项 `--file`，用于翻译单个文件
-- **智能分段**：通过模型 token 限制处理长文本
-- **代码保留**：代码块和内联代码（`` `...` ``）都会被保留
-- **文件名**：选项 `--keep_filename`，保留原始名称
-- **新闻模式**：选项 `--news`，用于保护英文引号并处理新闻文章中的语言旗帜
+- **经济模式**：使用 `--eco` 选项来调用更快、更便宜的模型
+- **单文件**：使用 `--file` 选项翻译单个文件
+- **智能分段**：结合模型的 token 限制处理长文本
+- **代码保留**：代码块以及行内代码（`` `...` ``）都会被保留
+- **文件名**：使用 `--keep_filename` 选项保留原始名称
+- **新闻模式**：使用 `--news` 选项保护英文引文并按语言处理文章中的国旗
 - **.env 配置**：支持用于 API 密钥的 `.env` 文件
-- **翻译注释**：可在文档末尾添加可选注释
+- **翻译注记**：可在文档末尾附加可选注记
 
 ## 安装
 
@@ -50,7 +54,7 @@ pip install -r requirements.txt
 
 ### 质量工具（可选但推荐）
 
-项目使用 [`pre-commit`](https://pre-commit.com) 来防止提交格式不正确、存在漏洞或包含机密的代码。安装：
+项目使用 [`pre-commit`](https://pre-commit.com) 来防止提交格式不正确、有漏洞或包含密钥的代码。安装：
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -58,7 +62,7 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-已启用的 hooks：ruff（lint+format）、shellcheck（bash）、prettier（markdown/yaml/json）、Lizard（复杂度）、detect-secrets（API 密钥）、mypy（渐进式类型检查）、Opengrep（SAST）、pip-audit（CVE 依赖）、unittest。详见 `CLAUDE.md` 的 _质量 / pre-commit_ 部分。
+已启用的 Hook：ruff（lint+format）、shellcheck（bash）、prettier（markdown/yaml/json）、Lizard（复杂度）、detect-secrets（API 密钥）、mypy（渐进式类型检查）、Opengrep（SAST）、pip-audit（CVE 依赖）、unittest。详情参见 `CLAUDE.md` 中的 _Quality / pre-commit_ 章节。
 
 ## 配置
 
@@ -75,7 +79,7 @@ GOOGLE_API_KEY=votre-clé-api-google
 export OPENAI_API_KEY='votre-clé-api-openai'
 ```
 
-## 用法
+## 使用方法
 
 ### 翻译单个文件
 
@@ -101,7 +105,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### 经济模式
 
-使用更快且更便宜的模型（gpt-5.4-mini、claude-haiku、gemini-flash）：
+使用更快、更便宜的模型（gpt-5.4-mini、claude-haiku、gemini-flash）：
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -109,11 +113,11 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### 选项
 
-| 选项                   | 描述                                                              |
+| 选项                   | 说明                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
 | `--file`                 | 要翻译的单个 Markdown 文件                                       |
 | `--source_dir`           | 包含 Markdown 文件的源目录                        |
-| `--target_dir`           | 翻译后文件的输出目录                          |
+| `--target_dir`           | 已翻译文件的输出目录                          |
 | `--source_lang`          | 源语言（默认：`fr`）                                             |
 | `--target_lang`          | 目标语言（默认：`en`）                                              |
 | `--model`                | 要使用的特定模型                                             |
@@ -123,26 +127,26 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_gemini`           | 使用 Gemini API                                                    |
 | `--force`                | 强制重新翻译                                                  |
 | `--keep_filename`        | 保留原始文件名                                     |
-| `--news`                 | 新闻模式：保护英文引号，按语言处理旗帜 |
-| `--add_translation_note` | 添加翻译注释                                           |
-| `--note_position`        | 注释位置：`top`、`bottom`（默认），或 `both`                |
-| `--note_format`          | 注释格式：`legacy`（默认，粗体段落）或 `marker`       |
+| `--news`                 | 新闻模式：保护英文引文，按语言处理国旗 |
+| `--add_translation_note` | 添加翻译注记                                           |
+| `--note_position`        | 注记位置：`top`、`bottom`（默认）或 `both`                |
+| `--note_format`          | 注记格式：`legacy`（默认，粗体段落）或 `marker`       |
 | `--include_model`        | 在输出文件中包含模型名称                       |
 
-### 翻译注释：位置与格式
+### 翻译注记：位置与格式
 
-使用 `--add_translation_note`，翻译器可以将注释放在顶部、底部或两处，并且可以将其呈现为纯文本格式（向后兼容）或可由 Markdown 插件消费的 `marker` 格式。
+使用 `--add_translation_note`，翻译器可以将注记放在顶部、底部或两处，并且可以将其呈现为纯文本格式（向后兼容）或可供 Markdown 插件消费的 `marker` 格式。
 
 **位置**（`--note_position`）：
 
-- `bottom`（默认）：注释放在文件末尾，与历史行为一致。
-- `top`：注释放在 **YAML frontmatter 之后**（Astro Content Collections、gray-matter 等的安全性）。
-- `both`：注释放在顶部和底部（只需一次 LLM 调用，内容可重复用于两个位置）。
+- `bottom`（默认）：注记置于文件末尾，与历史行为一致。
+- `top`：注记插入在 **YAML frontmatter 之后**（适用于 Astro Content Collections、gray-matter 等场景）。
+- `both`：注记同时插入到顶部和底部（只需一次 LLM 调用，内容复用到两个位置）。
 
 **格式**（`--note_format`）：
 
-- `legacy`（默认）：粗体 `**...**` 段落——与 v1.8 的行为完全一致，逐字节一致。兼容 Hugo、GitHub、GitLab，以及任何 Markdown 渲染器。
-- `marker`：不可见的 Markdown 链接引用定义 `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`，后接一个粗体 blockquote。可在 GitHub/GitLab 上原生读取，并可在构建时通过 Astro 端的 remark 插件生成样式化横幅（参见 jls42.org 博客）。
+- `legacy`（默认）：粗体段落 `**...**` —— 与 v1.8 的行为逐字节完全一致。兼容 Hugo、GitHub、GitLab 以及任何 Markdown 渲染器。
+- `marker`：不可见的 Markdown 链接引用定义（`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`），后接一个粗体块引用。在 GitHub/GitLab 上可直接阅读，并可在 Astro 侧通过 remark 插件在构建时生成样式化横幅（参见 jls42.org 博客）。
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -166,7 +170,7 @@ python translate.py --file article.mdx --target_lang en \
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **长篇翻译建议**：`--use_gemini`（默认 = `gemini-3.1-pro-preview` 质量，`--eco` = `gemini-3.1-flash-lite-preview`）在非拉丁脚本（PL、JA、ZH、AR、HI）的 Markdown 结构保留方面往往表现更好，尤其是在 `--news` 模式下，那里占位符的准确性尤为重要。为了向后兼容，OpenAI 仍为默认。
+> **长篇翻译建议**：`--use_gemini`（默认 = `gemini-3.1-pro-preview` 质量，`--eco` = `gemini-3.1-flash-lite-preview`）在非拉丁脚本（PL、JA、ZH、AR、HI）的脚本上往往更能保留 markdown 结构，尤其是在 `--news` 模式下，此时占位符的忠实度很重要。为保持向后兼容，OpenAI 仍然是默认值。
 
 ## 使用此脚本的项目
 
@@ -174,11 +178,11 @@ python translate.py --file article.mdx --target_lang en \
 
 ## 作者
 
-Julien LE SAUX
-Email : contact@jls42.org
+Julien LE SAUX  
+邮箱：contact@jls42.org
 
 ## 许可证
 
-GNU GENERAL PUBLIC LICENSE 第 3 版。参见 [LICENSE](LICENSE)。
+GNU 通用公共许可证第 3 版。参见 [LICENSE](LICENSE)。
 
-**使用 gpt-5.4-mini 将文章从法语翻译成中文。**
+**由 gpt-5.4-mini 从 fr 翻译成 zh 的文章。**
