@@ -872,7 +872,7 @@ class TestModuleEntrypoint(unittest.TestCase):
     le script avec une invocation rapide qui sort en erreur (validation paths)."""
 
     def test_module_entrypoint_invokes_main(self):
-        import subprocess
+        import subprocess  # nosec B404 — test exécute translate.py CLI
 
         repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         env = os.environ.copy()

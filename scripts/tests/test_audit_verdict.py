@@ -111,7 +111,7 @@ class TestAuditVerdictMain(unittest.TestCase):
     def test_module_entrypoint_invokes_main(self) -> None:
         """Garde-fou : exécuter le module avec `python -m scripts.audit_verdict`
         couvre le bloc `if __name__ == "__main__"`."""
-        import subprocess
+        import subprocess  # nosec B404 — test exécute le CLI scripts.audit_verdict
 
         repo_root = Path(__file__).resolve().parents[2]
         proc = subprocess.run(  # nosec B603 — test exécute le CLI du repo via sys.executable

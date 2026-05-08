@@ -1,0 +1,14 @@
+# Codacy configuration — minimal, n'exclut QUE ce qui est inadapté au projet.
+# https://docs.codacy.com/repositories-configure/codacy-configuration-file/
+
+exclude_paths:
+  # CLAUDE.md est lu par Claude Code mais ce n'est pas un manifeste d'agent
+  # autonome. Les règles Codacy "agent-config quality" (boundaries, identity,
+  # SOUL.md, acronymes français comme AVANT/CCN/PL, complex sentences) ne
+  # s'appliquent pas à un README dev technique en français.
+  - "CLAUDE.md"
+  # Traductions auto-générées du README et du CHANGELOG (28 fichiers).
+  - "README-*.md"
+  - "CHANGELOG-*.md"
+  # Fixtures de test, pas du code.
+  - "tests/fixtures/**"

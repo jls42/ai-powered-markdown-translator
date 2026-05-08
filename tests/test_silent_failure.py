@@ -12,7 +12,7 @@ Lancement : python -m unittest discover tests/ -v
 """
 
 import os
-import subprocess
+import subprocess  # nosec B404 — utilisé pour tester le CLI translate.py
 import sys
 import tempfile
 import unittest
