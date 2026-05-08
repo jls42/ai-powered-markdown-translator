@@ -1063,38 +1063,66 @@ def _extract_heading_slugs(content):
     return [_github_slug(m.group(2).strip()) for m in _HEADING_REGEX.finditer(content)]
 
 
+def _classify_anchor_target(fragment, explicit_targets, heading_slugs, html_quote=None):
+    """Détermine le type d'un fragment d'anchor : terraform (matche `<a name>`)
+    ou heading (matche un slug source). Retourne `None` si aucun match (l'anchor
+    n'est pas protégé pour éviter les faux positifs sur des liens externes)."""
+    is_terraform = fragment in explicit_targets
+    if is_terraform:
+        kind = "terraform_html" if html_quote else "terraform"
+    elif fragment in heading_slugs:
+        kind = "heading_html" if html_quote else "heading"
+    else:
+        return None
+    meta = {"type": kind, "slug": fragment}
+    if html_quote is not None:
+        meta["quote"] = html_quote
+    return meta
+
+
+def _collect_md_anchor_links(content, explicit_targets, heading_slugs):
+    """Anchors `(#X)` Markdown : déséchape les `\\_` / `\\-` avant matching."""
+    out = []
+    for m in _ANCHOR_LINK_REGEX.finditer(content):
+        fragment = m.group(1).replace(r"\_", "_").replace(r"\-", "-")
+        meta = _classify_anchor_target(fragment, explicit_targets, heading_slugs)
+        if meta is not None:
+            out.append((m.group(0), meta))
+    return out
+
+
+def _collect_html_href_anchors(content, explicit_targets, heading_slugs):
+    """Anchors `href="#X"` HTML : capture le quote pour restoration syntaxique."""
+    out = []
+    for m in _HTML_HREF_ANCHOR_REGEX.finditer(content):
+        meta = _classify_anchor_target(
+            m.group(2), explicit_targets, heading_slugs, html_quote=m.group(1)
+        )
+        if meta is not None:
+            out.append((m.group(0), meta))
+    return out
+
+
 def _protect_anchors(content):
     explicit_targets = {m.group(1) for m in _ANCHOR_NAME_REGEX.finditer(content)}
     heading_slugs = set(_extract_heading_slugs(content))
     anchors = []
-    metadata = []  # parallèle à anchors : {"type": "explicit"|"terraform"|"heading", "slug": str|None}
+    metadata = []
 
-    # 1. Tous les <a name="X"></a> (toujours protégés byte-identical).
+    # 1. <a name="X"></a> (toujours protégés byte-identical).
     for m in _ANCHOR_NAME_REGEX.finditer(content):
         anchors.append(m.group(0))
         metadata.append({"type": "explicit", "slug": None})
 
-    # 2. (#X) markdown où X correspond à un target explicite OU à un slug de heading source.
-    for m in _ANCHOR_LINK_REGEX.finditer(content):
-        fragment_unescaped = m.group(1).replace(r"\_", "_").replace(r"\-", "-")
-        if fragment_unescaped in explicit_targets:
-            anchors.append(m.group(0))
-            metadata.append({"type": "terraform", "slug": fragment_unescaped})
-        elif fragment_unescaped in heading_slugs:
-            anchors.append(m.group(0))
-            metadata.append({"type": "heading", "slug": fragment_unescaped})
+    # 2. (#X) Markdown : terraform OU heading-derived.
+    for anchor, meta in _collect_md_anchor_links(content, explicit_targets, heading_slugs):
+        anchors.append(anchor)
+        metadata.append(meta)
 
-    # 3. `href="#X"` HTML : même logique que (#X) markdown mais sur les anchors HTML.
-    # On capture le `href="#X"` complet (avec quotes) pour pouvoir le restaurer
-    # avec le slug traduit en gardant la syntaxe `href="#new_slug"`.
-    for m in _HTML_HREF_ANCHOR_REGEX.finditer(content):
-        fragment = m.group(2)
-        if fragment in explicit_targets:
-            anchors.append(m.group(0))
-            metadata.append({"type": "terraform_html", "slug": fragment, "quote": m.group(1)})
-        elif fragment in heading_slugs:
-            anchors.append(m.group(0))
-            metadata.append({"type": "heading_html", "slug": fragment, "quote": m.group(1)})
+    # 3. `href="#X"` HTML : terraform OU heading-derived (avec quote pour restoration).
+    for anchor, meta in _collect_html_href_anchors(content, explicit_targets, heading_slugs):
+        anchors.append(anchor)
+        metadata.append(meta)
 
     placeholders = [f"#ANCHOR{i}#" for i in range(len(anchors))]
     for placeholder, anchor in zip(placeholders, anchors, strict=False):
