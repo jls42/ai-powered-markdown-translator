@@ -979,7 +979,10 @@ def _restore_urls(translated_content, urls, placeholders):
 #    le TOC mais pas le heading → fragment et heading se désynchronisent).
 _ANCHOR_NAME_REGEX = re.compile(r'<a\s+name=["\']([^"\']+)["\']\s*></a>')
 _ANCHOR_LINK_REGEX = re.compile(r"\(#([^)\s]+)\)")
-_HEADING_REGEX = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
+# `[^\n]+` greedy non-ambigu (consomme jusqu'à fin de ligne sans backtracking) ;
+# trim côté Python via `.strip()` plutôt que `(.+?)\s*$` qui permet du polynomial
+# backtracking sur des lignes très longues avec espaces (Sonar S5852).
+_HEADING_REGEX = re.compile(r"^(#{1,6})\s+([^\n]+)$", re.MULTILINE)
 
 
 def _github_slug(heading_text):
@@ -1001,7 +1004,7 @@ def _github_slug(heading_text):
 
 def _extract_heading_slugs(content):
     """Liste ordonnée des slugs des headings (par position dans le doc)."""
-    return [_github_slug(m.group(2)) for m in _HEADING_REGEX.finditer(content)]
+    return [_github_slug(m.group(2).strip()) for m in _HEADING_REGEX.finditer(content)]
 
 
 def _protect_anchors(content):
