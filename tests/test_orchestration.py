@@ -353,21 +353,20 @@ class TestProcessOneMarkdownFileSkip(unittest.TestCase):
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
             failed, skipped = [], []
             mock_client = MagicMock()
-            translate._process_one_markdown_file(
-                "article.md",
-                input_dir,
-                input_dir,
-                output_dir,
-                mock_client,
-                args,
-                False,
-                False,
-                False,
-                False,
-                False,
-                failed,
-                skipped,
+            ctx = translate._DirectoryWalkContext(
+                input_dir=input_dir,
+                output_dir=output_dir,
+                client=mock_client,
+                args=args,
+                use_mistral=False,
+                use_claude=False,
+                use_gemini=False,
+                add_translation_note=False,
+                force=False,
+                failed_files=failed,
+                skipped_files=skipped,
             )
+            translate._process_one_markdown_file("article.md", input_dir, ctx)
             self.assertEqual(skipped, [src])
             self.assertEqual(failed, [])
             mock_client.chat.completions.create.assert_not_called()
@@ -388,21 +387,20 @@ class TestProcessOneMarkdownFileSkip(unittest.TestCase):
             failed, skipped = [], []
             mock_client = MagicMock()
             mock_client.chat.completions.create.return_value = _make_openai_response("Hello.")
-            translate._process_one_markdown_file(
-                "article.md",
-                input_dir,
-                input_dir,
-                output_dir,
-                mock_client,
-                args,
-                False,
-                False,
-                False,
-                False,
+            ctx = translate._DirectoryWalkContext(
+                input_dir=input_dir,
+                output_dir=output_dir,
+                client=mock_client,
+                args=args,
+                use_mistral=False,
+                use_claude=False,
+                use_gemini=False,
+                add_translation_note=False,
                 force=True,
                 failed_files=failed,
                 skipped_files=skipped,
             )
+            translate._process_one_markdown_file("article.md", input_dir, ctx)
             self.assertEqual(failed, [])
             self.assertEqual(skipped, [])
             with open(os.path.join(output_dir, "article-en.md")) as f:

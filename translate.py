@@ -9,6 +9,7 @@ import sys
 import time
 import traceback
 import unicodedata
+from dataclasses import dataclass
 
 import anthropic
 import google.generativeai as genai
@@ -369,24 +370,10 @@ def _extract_source_windows(segment, ignore_blockquotes=False):
     return windows
 
 
-def _validate_translation_output(segment, translated_text, args, is_translation_note):
-    """Vérifie que la sortie n'est pas le segment source retourné brut (bug silent-failure)
-    ou une traduction qui serait restée dans la langue source.
-
-    Couche 1 (toujours active): fenêtres source retrouvées verbatim dans la sortie.
-    Couche 2 (≥100 chars): langdetect probabiliste sur la langue de sortie.
-    """
-    if is_translation_note:
-        return
-    if args.source_lang == args.target_lang:
-        return
-    stripped = translated_text.strip()
-    if not stripped:
-        return
-
-    # Sanity ratio : sortie disproportionnellement courte vs source (refus type "OK" /
-    # "Sorry, I can't do that" / troncature). Activé pour source >= 500 chars,
-    # seuil 5% avec floor 50 chars (cross-script FR→ZH ~30%, FR→AR ~60-80%).
+def _check_output_short_ratio(segment, stripped, args):
+    """Sanity ratio : sortie disproportionnellement courte vs source (refus type
+    "OK" / "Sorry, I can't do that" / troncature). Activé pour source >= 500
+    chars, seuil 5% avec floor 50 chars (cross-script FR→ZH ~30%, FR→AR ~60-80%)."""
     source_len = len(segment.strip())
     if source_len >= 500 and len(stripped) < max(50, source_len // 20):
         raise RuntimeError(
@@ -396,6 +383,10 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
             f"first 200 chars: {stripped[:200]!r})"
         )
 
+
+def _check_passthrough_excerpt(segment, stripped, args):
+    """Couche 1 : vérifie qu'aucune fenêtre source ≥120 chars (cleaned) n'apparaît
+    verbatim dans la sortie (bug silent-failure typique : LLM renvoie le source brut)."""
     out_norm = re.sub(r"\s+", " ", stripped).casefold()
     for window in _extract_source_windows(segment, ignore_blockquotes=args.news):
         if _looks_like_proper_noun_list(window):
@@ -408,10 +399,15 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
                 f"matched window: {window_norm[:100]!r})"
             )
 
-    langdetect_text = _clean_for_language_detection(stripped)
+
+def _check_output_language(stripped, args):
+    """Couche 2 : langdetect probabiliste sur la langue de sortie. Court-circuite
+    si target script (HI/AR/ZH/JA/KO) déjà détecté en quantité suffisante (le
+    code-switching technique fait que langdetect peut sous-estimer la cible).
+    """
     if _has_target_script_signal(stripped, args.target_lang):
         return
-
+    langdetect_text = _clean_for_language_detection(stripped)
     if len(langdetect_text) < 100:
         return
     try:
@@ -431,6 +427,19 @@ def _validate_translation_output(segment, translated_text, args, is_translation_
             f"got {args.source_lang} (p={src_p:.2f}), model={args.model}, "
             f"first 200 chars: {stripped[:200]!r}"
         )
+
+
+def _validate_translation_output(segment, translated_text, args, is_translation_note):
+    """Vérifie que la sortie LLM n'est pas un silent-failure. Dispatch :
+    ratio guard → passthrough check → langdetect/script check."""
+    if is_translation_note or args.source_lang == args.target_lang:
+        return
+    stripped = translated_text.strip()
+    if not stripped:
+        return
+    _check_output_short_ratio(segment, stripped, args)
+    _check_passthrough_excerpt(segment, stripped, args)
+    _check_output_language(stripped, args)
 
 
 _O1_SERIES = ("o1", "o1-mini", "o1-preview")
@@ -490,11 +499,8 @@ def _build_news_rules_en(placeholder_example):
     )
 
 
-def _build_news_rules_other(args, target_flag, placeholder_example):
+def _build_news_placeholder_rule(placeholder_example):
     return (
-        '\n\n<news_citation_contract version="4">'
-        "\nThese rules are CRITICAL and override ordinary translation instincts."
-        "\n"
         "\n<placeholder_rule>"
         f"\nNews quote placeholders are XML self-closing tags like `{placeholder_example}`."
         "\nThey are protected technical tags, not words and not content."
@@ -503,60 +509,88 @@ def _build_news_rules_other(args, target_flag, placeholder_example):
         "\nDo not replace the XML tag with the quote text. Do not delete it. Do not wrap it in code fences."
         "\nBefore finalizing output: count `<NEWSQUOTE` tags in the output. The count MUST equal the source input."
         "\n</placeholder_rule>"
-        "\n"
+    )
+
+
+def _build_news_flag_rule(args, target_flag):
+    return (
         "\n<flag_rule>"
         f"For each citation block: replace the source flag 🇫🇷 with {target_flag} and translate the italic text COMPLETELY to {args.target_lang}."
         "\nCOMPLETE = same number of sentences, all concepts included, no truncation or summarization. The placeholder represents the original English quote — translate FROM its meaning."
         f"\nThe {target_flag} emoji MUST ONLY appear inside blockquote citation lines (starting with `> `), and ONLY ONCE per citation."
         "\n</flag_rule>"
+    )
+
+
+_NEWS_RULES_EXAMPLES = (
+    "\n<examples>"
+    "\nExample 1 — Polish target (PL):"
+    "\nINPUT:"
+    '\n<NEWSQUOTE id="0"/>'
+    "\n>"
+    "\n> 🇫🇷 _Une décennie de travail._"
+    "\n> — [@GoogleAI sur X](https://x.com/google)"
+    "\nCORRECT OUTPUT:"
+    '\n<NEWSQUOTE id="0"/>'
+    "\n>"
+    "\n> 🇵🇱 _Dekada pracy._"
+    "\n> — [@GoogleAI na X](https://x.com/google)"
+    "\n"
+    "\nExample 2 — Chinese target (ZH), tag MUST stay in Latin script:"
+    "\nINPUT:"
+    '\n<NEWSQUOTE id="0"/>'
+    "\n>"
+    "\n> 🇫🇷 _Une décennie de travail._"
+    "\n> — [@GoogleAI sur X](https://x.com/google)"
+    "\nCORRECT OUTPUT:"
+    '\n<NEWSQUOTE id="0"/>'
+    "\n>"
+    "\n> 🇨🇳 _十年磨一剑。_"
+    "\n> — [@GoogleAI 在 X 上](https://x.com/google)"
+    '\nWRONG: `<新闻引用 id="0"/>`, `<QUOTE id="0"/>`, or replacing the tag with the quote.'
+    "\n"
+    "\nExample 3 — Korean target (KO):"
+    "\nINPUT:"
+    '\n<NEWSQUOTE id="0"/>'
+    "\n>"
+    "\n> 🇫🇷 _Une décennie de travail._"
+    "\n> — [@GoogleAI sur X](https://x.com/google)"
+    "\nCORRECT OUTPUT:"
+    '\n<NEWSQUOTE id="0"/>'
+    "\n>"
+    "\n> 🇰🇷 _10년간의 작업._"
+    "\n> — [@GoogleAI X에서](https://x.com/google)"
+    '\nWRONG: `<뉴스인용 id="0"/>` or any Korean tag name.'
+    "\n"
+    "\nExample 4 — Arabic/Hindi scripts:"
+    "\nCORRECT OUTPUT tag line:"
+    '\n<NEWSQUOTE id="0"/>'
+    "\nWRONG: translating NEWSQUOTE, changing quotes, changing id, or removing the slash."
+    "\n</examples>"
+)
+
+
+def _build_news_result_format(args, target_flag):
+    return (
+        f'\nResult format for {args.target_lang} target:\n<NEWSQUOTE id="N"/>\n>\n'
+        f"> {target_flag} _translated italic text in {args.target_lang}_\n"
+        "> — [attribution text translated](url unchanged)"
+    )
+
+
+def _build_news_rules_other(args, target_flag, placeholder_example):
+    return (
+        '\n\n<news_citation_contract version="4">'
+        "\nThese rules are CRITICAL and override ordinary translation instincts."
         "\n"
-        "\n<examples>"
-        "\nExample 1 — Polish target (PL):"
-        "\nINPUT:"
-        '\n<NEWSQUOTE id="0"/>'
-        "\n>"
-        "\n> 🇫🇷 _Une décennie de travail._"
-        "\n> — [@GoogleAI sur X](https://x.com/google)"
-        "\nCORRECT OUTPUT:"
-        '\n<NEWSQUOTE id="0"/>'
-        "\n>"
-        "\n> 🇵🇱 _Dekada pracy._"
-        "\n> — [@GoogleAI na X](https://x.com/google)"
-        "\n"
-        "\nExample 2 — Chinese target (ZH), tag MUST stay in Latin script:"
-        "\nINPUT:"
-        '\n<NEWSQUOTE id="0"/>'
-        "\n>"
-        "\n> 🇫🇷 _Une décennie de travail._"
-        "\n> — [@GoogleAI sur X](https://x.com/google)"
-        "\nCORRECT OUTPUT:"
-        '\n<NEWSQUOTE id="0"/>'
-        "\n>"
-        "\n> 🇨🇳 _十年磨一剑。_"
-        "\n> — [@GoogleAI 在 X 上](https://x.com/google)"
-        '\nWRONG: `<新闻引用 id="0"/>`, `<QUOTE id="0"/>`, or replacing the tag with the quote.'
-        "\n"
-        "\nExample 3 — Korean target (KO):"
-        "\nINPUT:"
-        '\n<NEWSQUOTE id="0"/>'
-        "\n>"
-        "\n> 🇫🇷 _Une décennie de travail._"
-        "\n> — [@GoogleAI sur X](https://x.com/google)"
-        "\nCORRECT OUTPUT:"
-        '\n<NEWSQUOTE id="0"/>'
-        "\n>"
-        "\n> 🇰🇷 _10년간의 작업._"
-        "\n> — [@GoogleAI X에서](https://x.com/google)"
-        '\nWRONG: `<뉴스인용 id="0"/>` or any Korean tag name.'
-        "\n"
-        "\nExample 4 — Arabic/Hindi scripts:"
-        "\nCORRECT OUTPUT tag line:"
-        '\n<NEWSQUOTE id="0"/>'
-        "\nWRONG: translating NEWSQUOTE, changing quotes, changing id, or removing the slash."
-        "\n</examples>"
-        "\n"
-        f'\nResult format for {args.target_lang} target:\n<NEWSQUOTE id="N"/>\n>\n> {target_flag} _translated italic text in {args.target_lang}_\n> — [attribution text translated](url unchanged)'
-        "\n</news_citation_contract>"
+        + _build_news_placeholder_rule(placeholder_example)
+        + "\n"
+        + _build_news_flag_rule(args, target_flag)
+        + "\n"
+        + _NEWS_RULES_EXAMPLES
+        + "\n"
+        + _build_news_result_format(args, target_flag)
+        + "\n</news_citation_contract>"
     )
 
 
@@ -806,19 +840,21 @@ def _validate_segment_placeholders(input_segment, output_text):
         )
 
 
-def _translate_segment_with_retry(
-    segment,
-    idx,
-    total,
-    client,
-    args,
-    system_instructions,
-    use_mistral,
-    use_claude,
-    use_gemini,
-    is_translation_note,
-    max_retries=1,
-):
+@dataclass
+class _LLMCallSpec:
+    """Regroupe les paramètres d'un appel LLM (provider + flags) pour réduire
+    la signature de `_translate_segment_with_retry` et `_dispatch_provider_call`."""
+
+    client: object
+    args: object
+    system_instructions: str
+    use_mistral: bool = False
+    use_claude: bool = False
+    use_gemini: bool = False
+    is_translation_note: bool = False
+
+
+def _translate_segment_with_retry(segment, idx, total, spec, max_retries=1):
     """Appelle le LLM puis valide placeholders + langue/passthrough. En cas de
     fail récupérable (non-déterminisme LLM), retry 1 fois max. Les fails non-
     récupérables (finish_reason anormal, sortie vide) ne sont pas retryés —
@@ -826,18 +862,20 @@ def _translate_segment_with_retry(
     last_exc = None
     for attempt in range(max_retries + 1):
         translated_text = _dispatch_provider_call(
-            client,
-            args,
-            system_instructions,
+            spec.client,
+            spec.args,
+            spec.system_instructions,
             segment,
-            use_mistral,
-            use_claude,
-            use_gemini,
-            is_translation_note,
+            spec.use_mistral,
+            spec.use_claude,
+            spec.use_gemini,
+            spec.is_translation_note,
         )
         try:
             _validate_segment_placeholders(segment, translated_text)
-            _validate_translation_output(segment, translated_text, args, is_translation_note)
+            _validate_translation_output(
+                segment, translated_text, spec.args, spec.is_translation_note
+            )
             if attempt > 0:
                 print(
                     f"✓ Segment {idx}/{total} validated on retry {attempt}/{max_retries}",
@@ -873,21 +911,19 @@ def translate(
     segments = segment_text(text, min(16000, model_limit))
     system_instructions = _build_system_instructions(args, is_translation_note)
 
+    spec = _LLMCallSpec(
+        client=client,
+        args=args,
+        system_instructions=system_instructions,
+        use_mistral=use_mistral,
+        use_claude=use_claude,
+        use_gemini=use_gemini,
+        is_translation_note=is_translation_note,
+    )
     translated_segments = []
     for idx, segment in enumerate(segments, start=1):
         try:
-            translated_text = _translate_segment_with_retry(
-                segment,
-                idx,
-                len(segments),
-                client,
-                args,
-                system_instructions,
-                use_mistral,
-                use_claude,
-                use_gemini,
-                is_translation_note,
-            )
+            translated_text = _translate_segment_with_retry(segment, idx, len(segments), spec)
         except Exception as e:
             # On préserve le type d'origine dans le message ET la chaîne via `from e`
             # (le traceback complet reste accessible par traceback.print_exc en haut).
@@ -1182,6 +1218,18 @@ def _validate_news_placeholders_intact(translated_content, n_quotes):
 _CODE_PLACEHOLDER_LEFTOVER_REGEX = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL|ANCHOR|REFLABEL)\d+#")
 
 
+def _check_placeholders_present(translated_content, placeholders, kind_label=""):
+    """Vérifie qu'un set de placeholders est intact dans la sortie LLM. `kind_label`
+    enrichit le message d'erreur (e.g. 'l'URL', 'l'ancre locale')."""
+    suffix = f" ({kind_label})" if kind_label else ""
+    for placeholder in placeholders:
+        if placeholder not in translated_content:
+            raise RuntimeError(
+                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
+                f"(le LLM l'a supprimé ou modifié{suffix})"
+            )
+
+
 def _validate_code_placeholders_present(
     translated_content,
     block_placeholders,
@@ -1192,36 +1240,15 @@ def _validate_code_placeholders_present(
 ):
     """Vérifie que chaque placeholder émis (code blocks, inline code, URLs, anchors,
     reference labels) est bien présent dans la sortie LLM avant la restauration."""
-    for placeholder in block_placeholders:
-        if placeholder not in translated_content:
-            raise RuntimeError(
-                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
-                "(le LLM l'a supprimé ou modifié)"
-            )
-    for placeholder in inline_placeholders:
-        if placeholder not in translated_content:
-            raise RuntimeError(
-                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
-                "(le LLM l'a supprimé ou modifié)"
-            )
-    for placeholder in url_placeholders:
-        if placeholder not in translated_content:
-            raise RuntimeError(
-                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
-                "(le LLM a supprimé ou modifié l'URL)"
-            )
-    for placeholder in anchor_placeholders:
-        if placeholder not in translated_content:
-            raise RuntimeError(
-                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
-                "(le LLM a supprimé ou modifié l'ancre locale)"
-            )
-    for placeholder in ref_label_placeholders:
-        if placeholder not in translated_content:
-            raise RuntimeError(
-                f"VALIDATION: Placeholder {placeholder} manquant dans la traduction "
-                "(le LLM a supprimé ou modifié un label reference-style)"
-            )
+    groups = (
+        (block_placeholders, ""),
+        (inline_placeholders, ""),
+        (url_placeholders, "URL"),
+        (anchor_placeholders, "ancre locale"),
+        (ref_label_placeholders, "label reference-style"),
+    )
+    for placeholders, kind_label in groups:
+        _check_placeholders_present(translated_content, placeholders, kind_label)
 
 
 def _validate_ref_label_placeholders_present(translated_content, placeholders):
@@ -1277,41 +1304,46 @@ def _normalize_collapsed_markdown(translated_content):
     return translated_content
 
 
-def _cleanup_source_flag(translated_content, args):
-    """Source-flag cleanup en --news quand source != target.
+def _cleanup_source_flag_for_en(translated_content, source_flag):
+    """Cas target=en : supprime la ligne `> 🇫🇷 _..._` orpheline (citation FR
+    annotée que le mode news copie pour les autres targets, mais redondante en EN)."""
+    pattern = re.compile(
+        r"(^|\n)>\s*\n(>\s*" + re.escape(source_flag) + r"[^\n]*\n)",
+        flags=re.MULTILINE,
+    )
+    new_content, n = pattern.subn(r"\1", translated_content)
+    if n > 0:
+        print(f"  → {n} ligne(s) `> {source_flag} _trad_` supprimée(s) en cible EN (cleanup)")
+        return new_content
+    return translated_content
 
-    Cas A (target=en) : supprime la ligne `> 🇫🇷 _..._` orpheline.
-    Cas B (target≠en) : swap drapeau source → drapeau cible.
-    """
+
+def _cleanup_source_flag_swap(translated_content, source_flag, target_flag):
+    """Cas target≠en : swap drapeau source → drapeau cible dans les lignes
+    citation `> 🇫🇷 …` (scope strict ; un replace global toucherait aussi les
+    citations EN restaurées citant nommément une source FR — cas rare mais réel)."""
+    pattern = re.compile(rf"^(>[ \t]+){re.escape(source_flag)}", flags=re.MULTILINE)
+    translated_content, count = pattern.subn(rf"\g<1>{target_flag}", translated_content)
+    if count:
+        print(
+            f"  → {count} drapeau(x) source {source_flag} remplacé(s) par {target_flag} (cleanup)"
+        )
+    return translated_content
+
+
+def _cleanup_source_flag(translated_content, args):
+    """Source-flag cleanup en --news quand source != target. Dispatch sur les
+    deux variantes : cas A (target=en, drop) ou cas B (target≠en, swap)."""
     if not (args.news and args.source_lang != args.target_lang):
         return translated_content
-
     source_flag = LANG_FLAGS.get(args.source_lang)
-    target_flag = LANG_FLAGS.get(args.target_lang)
     if not (source_flag and source_flag in translated_content):
         return translated_content
-
     if args.target_lang == "en":
-        pattern = re.compile(
-            r"(^|\n)>\s*\n(>\s*" + re.escape(source_flag) + r"[^\n]*\n)",
-            flags=re.MULTILINE,
-        )
-        new_content, n = pattern.subn(r"\1", translated_content)
-        if n > 0:
-            print(f"  → {n} ligne(s) `> {source_flag} _trad_` supprimée(s) en cible EN (cleanup)")
-            return new_content
-        return translated_content
-
+        return _cleanup_source_flag_for_en(translated_content, source_flag)
+    target_flag = LANG_FLAGS.get(args.target_lang)
     if target_flag:
-        # Scope strict : ne swap que dans les lignes citation `> 🇫🇷 …`.
-        # Un global replace toucherait aussi les citations EN restaurées qui pourraient
-        # citer nommément une source FR (cas rare mais réel).
-        pattern = re.compile(rf"^(>[ \t]+){re.escape(source_flag)}", flags=re.MULTILINE)
-        translated_content, count = pattern.subn(rf"\g<1>{target_flag}", translated_content)
-        if count:
-            print(
-                f"  → {count} drapeau(x) source {source_flag} remplacé(s) par {target_flag} (cleanup)"
-            )
+        return _cleanup_source_flag_swap(translated_content, source_flag, target_flag)
     return translated_content
 
 
@@ -1733,45 +1765,50 @@ def _record_translation_status(status, file, file_path, failed_files, skipped_fi
         failed_files.append(file_path)
 
 
-def _process_one_markdown_file(
-    file,
-    root,
-    input_dir,
-    output_dir,
-    client,
-    args,
-    use_mistral,
-    use_claude,
-    use_gemini,
-    add_translation_note,
-    force,
-    failed_files,
-    skipped_files,
-):
+@dataclass
+class _DirectoryWalkContext:
+    """Contexte d'un walk récursif `translate_directory` : regroupe les paramètres
+    de configuration et les accumulateurs de résultat pour réduire la signature
+    de `_process_one_markdown_file` (passait 13 params, maintenant 4)."""
+
+    input_dir: str
+    output_dir: str
+    client: object
+    args: object
+    use_mistral: bool
+    use_claude: bool
+    use_gemini: bool
+    add_translation_note: bool
+    force: bool
+    failed_files: list
+    skipped_files: list
+
+
+def _process_one_markdown_file(file, root, ctx):
     file_path = os.path.join(root, file)
     base, _ext = os.path.splitext(file)
-    output_file = _resolve_output_filename(file, base, args)
-    relative_path = os.path.relpath(root, input_dir)
-    output_path = os.path.join(output_dir, relative_path, output_file)
+    output_file = _resolve_output_filename(file, base, ctx.args)
+    relative_path = os.path.relpath(root, ctx.input_dir)
+    output_path = os.path.join(ctx.output_dir, relative_path, output_file)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    if _existing_translation_exists(output_path, output_dir, base, args) and not force:
+    if _existing_translation_exists(output_path, ctx.output_dir, base, ctx.args) and not ctx.force:
         print(f"La traduction de '{file}' existe déjà, aucune action effectuée.")
-        skipped_files.append(file_path)
+        ctx.skipped_files.append(file_path)
         return
 
     status = translate_markdown_file(
         file_path,
         output_path,
-        client,
-        args,
-        use_mistral,
-        use_claude,
-        use_gemini,
-        add_translation_note,
-        force,
+        ctx.client,
+        ctx.args,
+        ctx.use_mistral,
+        ctx.use_claude,
+        ctx.use_gemini,
+        ctx.add_translation_note,
+        ctx.force,
     )
-    _record_translation_status(status, file, file_path, failed_files, skipped_files)
+    _record_translation_status(status, file, file_path, ctx.failed_files, ctx.skipped_files)
 
 
 def _is_translatable_markdown(file):
@@ -1792,14 +1829,25 @@ def translate_directory(
     """Walk récursif. Retourne {"failed": [...], "skipped": [...]} avec les
     chemins absolus des fichiers ; le caller agrège pour décider de exit(1).
     """
-    failed_files = []
-    skipped_files = []
-
     input_dir = os.path.abspath(input_dir)
     output_dir = os.path.abspath(output_dir)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     output_base_dir = os.path.basename(output_dir)
+
+    ctx = _DirectoryWalkContext(
+        input_dir=input_dir,
+        output_dir=output_dir,
+        client=client,
+        args=args,
+        use_mistral=use_mistral,
+        use_claude=use_claude,
+        use_gemini=use_gemini,
+        add_translation_note=add_translation_note,
+        force=force,
+        failed_files=[],
+        skipped_files=[],
+    )
 
     for root, _dirs, files in os.walk(input_dir, topdown=True):
         if _should_skip_walk_dir(root, output_dir, output_base_dir, input_dir):
@@ -1807,27 +1855,12 @@ def translate_directory(
         for file in files:
             if not _is_translatable_markdown(file):
                 continue
-            _process_one_markdown_file(
-                file,
-                root,
-                input_dir,
-                output_dir,
-                client,
-                args,
-                use_mistral,
-                use_claude,
-                use_gemini,
-                add_translation_note,
-                force,
-                failed_files,
-                skipped_files,
-            )
+            _process_one_markdown_file(file, root, ctx)
 
-    return {"failed": failed_files, "skipped": skipped_files}
+    return {"failed": ctx.failed_files, "skipped": ctx.skipped_files}
 
 
-def _build_arg_parser():
-    parser = argparse.ArgumentParser(description="Traduit les fichiers Markdown.")
+def _add_io_args(parser):
     parser.add_argument(
         "--force",
         action="store_true",
@@ -1850,11 +1883,9 @@ def _build_arg_parser():
         default=DEFAULT_TARGET_DIR,
         help="Répertoire cible pour sauvegarder les traductions",
     )
-    parser.add_argument(
-        "--model",
-        type=str,
-        help="Modèle GPT à utiliser pour la traduction, la valeur par défaut dépend de l'API sélectionnée",
-    )
+
+
+def _add_lang_args(parser):
     parser.add_argument(
         "--target_lang",
         type=str,
@@ -1867,10 +1898,16 @@ def _build_arg_parser():
         default=DEFAULT_SOURCE_LANG,
         help="Langue source pour la traduction",
     )
+
+
+def _add_provider_args(parser):
     parser.add_argument(
-        "--use_mistral",
-        action="store_true",
-        help="Utiliser l'API Mistral AI pour la traduction",
+        "--model",
+        type=str,
+        help="Modèle GPT à utiliser pour la traduction, la valeur par défaut dépend de l'API sélectionnée",
+    )
+    parser.add_argument(
+        "--use_mistral", action="store_true", help="Utiliser l'API Mistral AI pour la traduction"
     )
     parser.add_argument(
         "--use_claude",
@@ -1882,6 +1919,33 @@ def _build_arg_parser():
         action="store_true",
         help="Utiliser l'API Gemini de Google pour la traduction",
     )
+    parser.add_argument(
+        "--eco",
+        action="store_true",
+        help="Utiliser les modèles économiques (mini/flash) au lieu des modèles qualité",
+    )
+    parser.add_argument(
+        "--reasoning_effort",
+        choices=("low", "medium", "high"),
+        default="medium",
+        help="Effort de raisonnement OpenAI GPT-5.x (défaut: medium)",
+    )
+
+
+def _add_output_naming_args(parser):
+    parser.add_argument(
+        "--include_model",
+        action="store_true",
+        help="Inclure le nom du modèle dans le fichier de sortie (ex: README-en-gpt-5.md)",
+    )
+    parser.add_argument(
+        "--keep_filename",
+        action="store_true",
+        help="Conserver le nom et l'extension du fichier original (pour Astro, Hugo, etc.)",
+    )
+
+
+def _add_note_args(parser):
     parser.add_argument(
         "--add_translation_note",
         action="store_true",
@@ -1903,32 +1967,24 @@ def _build_arg_parser():
             "Markdown comme remark-translation-banner)."
         ),
     )
-    parser.add_argument(
-        "--eco",
-        action="store_true",
-        help="Utiliser les modèles économiques (mini/flash) au lieu des modèles qualité",
-    )
-    parser.add_argument(
-        "--include_model",
-        action="store_true",
-        help="Inclure le nom du modèle dans le fichier de sortie (ex: README-en-gpt-5.md)",
-    )
-    parser.add_argument(
-        "--keep_filename",
-        action="store_true",
-        help="Conserver le nom et l'extension du fichier original (pour Astro, Hugo, etc.)",
-    )
+
+
+def _add_news_args(parser):
     parser.add_argument(
         "--news",
         action="store_true",
         help="Active les règles de traduction des citations news (drapeaux + quotes EN protégées)",
     )
-    parser.add_argument(
-        "--reasoning_effort",
-        choices=("low", "medium", "high"),
-        default="medium",
-        help="Effort de raisonnement OpenAI GPT-5.x (défaut: medium)",
-    )
+
+
+def _build_arg_parser():
+    parser = argparse.ArgumentParser(description="Traduit les fichiers Markdown.")
+    _add_io_args(parser)
+    _add_lang_args(parser)
+    _add_provider_args(parser)
+    _add_output_naming_args(parser)
+    _add_note_args(parser)
+    _add_news_args(parser)
     return parser
 
 
