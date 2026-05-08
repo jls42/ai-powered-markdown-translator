@@ -12,3 +12,7 @@ exclude_paths:
   - "CHANGELOG-*.md"
   # Fixtures de test, pas du code.
   - "tests/fixtures/**"
+  # Faux positif "SonarQube Docs API Key detected" sur la référence GitHub
+  # Actions `${{ secrets.SONAR_TOKEN }}` (template canonique SonarSource).
+  # Aucune clé en clair, juste une référence Vault GHA.
+  - ".github/workflows/sonarcloud.yml"
