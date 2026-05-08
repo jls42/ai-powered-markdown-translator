@@ -20,6 +20,7 @@ from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+import translate
 from translate import (
     _append_translation_note,
     _build_translation_note_block,
@@ -308,17 +309,13 @@ class TestIntegrationWithMarkdownFile(unittest.TestCase):
             mock_client = MagicMock()
             mock_client.chat.completions.create.side_effect = mock_responses
             args = _args(source_dir=tmpdir, target_dir=tmpdir, **args_overrides)
-            status = translate_markdown_file(
-                src,
-                dst,
-                mock_client,
-                args,
-                use_mistral=False,
-                use_claude=False,
-                use_gemini=False,
+            config = translate._TranslationConfig(
+                client=mock_client,
+                args=args,
                 add_translation_note=True,
                 force=False,
             )
+            status = translate_markdown_file(src, dst, config)
             output = None
             if os.path.exists(dst):
                 with open(dst, encoding="utf-8") as f:

@@ -1585,124 +1585,188 @@ def _write_output_file(output_path, translated_content, force, relative_output_p
     return "success"
 
 
-def _translate_pipeline(content, client, args, use_mistral, use_claude, use_gemini):
-    """Pipeline de traduction d'un contenu déjà lu : protect → translate → restore → validate.
+@dataclass
+class _PipelineState:
+    """Artefacts collectés lors de la phase `protect` du pipeline, conservés
+    pour la phase `restore` post-LLM."""
 
-    Retourne le contenu traduit prêt à écrire (avant éventuelle note de traduction).
-    """
+    code_blocks: list
+    block_placeholders: list
+    inline_codes: list
+    inline_placeholders: list
+    original_quotes: list
+    attribution_urls: list
+    source_heading_slugs: list
+    anchors: list
+    anchor_placeholders: list
+    anchor_metadata: list
+    ref_labels: list
+    ref_label_placeholders: list
+    urls: list
+    url_placeholders: list
+
+
+def _protect_pipeline_inputs(content, args):
+    """Phase `protect` du pipeline : extrait dans l'ordre code/news/anchors/
+    ref-labels/urls. L'ordre est critique (cf. commentaires inline) — toute
+    inversion casse soit la capture des `attribution_urls` news, soit le
+    matching des regex de placeholder qui peuvent se confondre."""
     content, code_blocks, block_placeholders = _protect_code_blocks(content)
     content, inline_codes, inline_placeholders = _protect_inline_code(content)
-    # News quotes AVANT URLs : `_protect_news_quotes` lit l'attribution
-    # `> — [text](https://...)` en regex et capture l'URL réelle dans
-    # `attribution_urls` (utilisée par `_validate_news_post`). Si on protégeait
-    # les URLs avant, l'attribution capturée serait `#URL{n}#` au lieu de l'URL
-    # réelle et la validation news post-traduction ne saurait pas quoi chercher.
+    # News quotes AVANT URLs : capture les `attribution_urls` réelles avant
+    # qu'elles ne soient remplacées par `#URL{n}#`.
     content, original_quotes, attribution_urls = _protect_news_quotes(content, args)
-    # Capture les slugs des headings AVANT protection : on en aura besoin après
-    # le LLM pour resynchroniser les TOC `(#heading-slug)` avec les slugs des
-    # headings traduits (cas express-zh : LLM traduit le TOC en chinois mais
-    # laisse le heading en anglais → mismatch, lien cassé).
+    # Capture les slugs des headings source pour resync TOC post-LLM.
     source_heading_slugs = _extract_heading_slugs(content)
-    # Anchors AVANT urls : sinon le regex anchor `\(#[^)\s]+\)` matcherait
-    # aussi les placeholders `#URL\d+#` (ex. `(#URL0#)` dans une attribution
-    # news). Aucun conflit dans l'autre sens : les anchors fragment-locaux
-    # (`(#X)`) ne contiennent jamais de `https?://`, et `<a name="X"></a>`
-    # est borné par les attributs de balise HTML.
+    # Anchors AVANT urls : éviter que `\(#[^)\s]+\)` matche `(#URL\d+#)`.
     content, anchors, anchor_placeholders, anchor_metadata = _protect_anchors(content)
-    # Reference-style link labels : protéger les clés techniques `[label]:`
-    # et leurs usages inline `[text][label]` / `[label][]` pour que le LLM
-    # traduise les textes visibles sans casser le lien Markdown inline ↔ def.
+    # Reference-style labels avant URLs : la def `[label]: URL` doit garder
+    # sa structure `[#REFLABEL{n}#]: #URL{n}#`.
     content, ref_labels, ref_label_placeholders = _protect_ref_labels(content)
-    # URLs après les protections de code/news/anchors/ref-labels : ainsi les
-    # URLs déjà cachées derrière les autres placeholders ne sont pas touchées,
-    # et toutes les autres (markdown links, HTML href/src, badges, anchors
-    # absolues) sont remplacées par `#URL{n}#`.
     content, urls, url_placeholders = _protect_urls(content)
 
-    translated_content = translate(content, client, args, use_mistral, use_claude, use_gemini)
+    state = _PipelineState(
+        code_blocks=code_blocks,
+        block_placeholders=block_placeholders,
+        inline_codes=inline_codes,
+        inline_placeholders=inline_placeholders,
+        original_quotes=original_quotes,
+        attribution_urls=attribution_urls,
+        source_heading_slugs=source_heading_slugs,
+        anchors=anchors,
+        anchor_placeholders=anchor_placeholders,
+        anchor_metadata=anchor_metadata,
+        ref_labels=ref_labels,
+        ref_label_placeholders=ref_label_placeholders,
+        urls=urls,
+        url_placeholders=url_placeholders,
+    )
+    return content, state
 
+
+def _restore_pipeline_outputs(translated_content, state, args):
+    """Phase `restore` du pipeline : valide placeholders → restore en ordre
+    inverse (urls → ref_labels → anchors → code) → news/cleanup → validate."""
     _validate_code_placeholders_present(
         translated_content,
-        block_placeholders,
-        inline_placeholders,
-        url_placeholders,
-        anchor_placeholders,
-        ref_label_placeholders,
+        state.block_placeholders,
+        state.inline_placeholders,
+        state.url_placeholders,
+        state.anchor_placeholders,
+        state.ref_label_placeholders,
     )
-    # Calcule les slugs des headings post-LLM pour le sync TOC heading-derived.
     target_heading_slugs = _extract_heading_slugs(translated_content)
-    # Restoration : urls → ref_labels → anchors (resync heading-derived) → code.
-    translated_content = _restore_urls(translated_content, urls, url_placeholders)
-    translated_content = _restore_ref_labels(translated_content, ref_labels, ref_label_placeholders)
+    translated_content = _restore_urls(translated_content, state.urls, state.url_placeholders)
+    translated_content = _restore_ref_labels(
+        translated_content, state.ref_labels, state.ref_label_placeholders
+    )
     translated_content = _restore_anchors(
         translated_content,
-        anchors,
-        anchor_placeholders,
-        anchor_metadata,
-        source_heading_slugs,
+        state.anchors,
+        state.anchor_placeholders,
+        state.anchor_metadata,
+        state.source_heading_slugs,
         target_heading_slugs,
     )
     translated_content = _restore_code(
-        translated_content, inline_codes, inline_placeholders, code_blocks, block_placeholders
+        translated_content,
+        state.inline_codes,
+        state.inline_placeholders,
+        state.code_blocks,
+        state.block_placeholders,
     )
     _validate_no_code_placeholder_leftover(translated_content)
 
-    if args.news and original_quotes:
-        _validate_news_placeholders_intact(translated_content, len(original_quotes))
-    translated_content = _restore_news_quotes(translated_content, original_quotes)
+    if args.news and state.original_quotes:
+        _validate_news_placeholders_intact(translated_content, len(state.original_quotes))
+    translated_content = _restore_news_quotes(translated_content, state.original_quotes)
     translated_content = _normalize_collapsed_markdown(translated_content)
     translated_content = _cleanup_source_flag(translated_content, args)
 
-    if args.news and original_quotes:
-        _validate_news_post(translated_content, original_quotes, attribution_urls, args)
-
+    if args.news and state.original_quotes:
+        _validate_news_post(translated_content, state.original_quotes, state.attribution_urls, args)
     return translated_content
 
 
-def translate_markdown_file(
-    file_path,
-    output_path,
-    client,
-    args,
-    use_mistral,
-    use_claude,
-    use_gemini,
-    add_translation_note=False,
-    force=False,
-):
+@dataclass
+class _TranslationConfig:
+    """Regroupe les paramètres de traduction (client + flags providers + flags
+    fonctionnels) pour réduire les signatures publiques `translate_markdown_file`,
+    `translate_directory` et helpers internes (passaient 7-9 params positionnels)."""
+
+    client: object
+    args: object
+    use_mistral: bool = False
+    use_claude: bool = False
+    use_gemini: bool = False
+    add_translation_note: bool = False
+    force: bool = False
+
+
+def _translate_pipeline(content, config):
+    """Pipeline complet : protect → translate → restore → validate."""
+    content, state = _protect_pipeline_inputs(content, config.args)
+    translated_content = translate(
+        content,
+        config.client,
+        config.args,
+        config.use_mistral,
+        config.use_claude,
+        config.use_gemini,
+    )
+    return _restore_pipeline_outputs(translated_content, state, config.args)
+
+
+def _read_translatable_source(file_path, relative_file_path):
+    """Lit le fichier source. Retourne (content, status) où status est `None`
+    si OK, `"skipped"` si vide (le caller propage)."""
+    with open(file_path, encoding="utf-8") as f:
+        content = f.read()
+    if not content:
+        print(f"Le fichier '{relative_file_path}' est vide, aucune traduction n'est effectuée.")
+        return content, "skipped"
+    return content, None
+
+
+def _translate_one_file(file_path, output_path, config):
+    """Cœur de `translate_markdown_file` sans la gestion d'erreurs externes.
+    Lève toute exception au caller, qui la convertit en status `"failure"`."""
+    relative_file_path, relative_output_path = _resolve_relative_paths(
+        file_path, output_path, config.args
+    )
+    print(f"Traitement du fichier : {relative_file_path}")
+    start_time = time.time()
+
+    content, status = _read_translatable_source(file_path, relative_file_path)
+    if status is not None:
+        return status
+
+    translated_content = _translate_pipeline(content, config)
+    if config.add_translation_note:
+        translated_content = _append_translation_note(
+            translated_content,
+            config.client,
+            config.args,
+            config.use_mistral,
+            config.use_claude,
+            config.use_gemini,
+        )
+
+    status = _write_output_file(output_path, translated_content, config.force, relative_output_path)
+    if status == "success":
+        print(
+            f"Fichier '{relative_file_path}' traduit en {time.time() - start_time:.2f} secondes "
+            f"et enregistré sous : {relative_output_path}"
+        )
+    return status
+
+
+def translate_markdown_file(file_path, output_path, config):
     """Retourne "success" / "skipped" (vide ou déjà traduit) / "failure"
-    (toute exception est attrapée et propagée par status, sans écrire le fichier).
-    """
-    # Fallback si os.path.join lève dans le bloc try (le except a un nom valide).
+    (toute exception est attrapée et propagée par status, sans écrire le fichier)."""
     relative_file_path = file_path
     try:
-        relative_file_path, relative_output_path = _resolve_relative_paths(
-            file_path, output_path, args
-        )
-        print(f"Traitement du fichier : {relative_file_path}")
-        start_time = time.time()
-
-        with open(file_path, encoding="utf-8") as f:
-            content = f.read()
-        if not content:
-            print(f"Le fichier '{relative_file_path}' est vide, aucune traduction n'est effectuée.")
-            return "skipped"
-
-        translated_content = _translate_pipeline(
-            content, client, args, use_mistral, use_claude, use_gemini
-        )
-
-        if add_translation_note:
-            translated_content = _append_translation_note(
-                translated_content, client, args, use_mistral, use_claude, use_gemini
-            )
-
-        status = _write_output_file(output_path, translated_content, force, relative_output_path)
-        if status == "success":
-            print(
-                f"Fichier '{relative_file_path}' traduit en {time.time() - start_time:.2f} secondes et enregistré sous : {relative_output_path}"
-            )
-        return status
+        return _translate_one_file(file_path, output_path, config)
     except OSError as e:
         print(f"Erreur lors du traitement du fichier '{relative_file_path}': {e}", file=sys.stderr)
         traceback.print_exc()
@@ -1767,19 +1831,13 @@ def _record_translation_status(status, file, file_path, failed_files, skipped_fi
 
 @dataclass
 class _DirectoryWalkContext:
-    """Contexte d'un walk récursif `translate_directory` : regroupe les paramètres
-    de configuration et les accumulateurs de résultat pour réduire la signature
-    de `_process_one_markdown_file` (passait 13 params, maintenant 4)."""
+    """Contexte d'un walk récursif `translate_directory` : config + chemins
+    racines + accumulateurs. Réduit la signature de `_process_one_markdown_file`
+    à 3 params (file, root, ctx)."""
 
     input_dir: str
     output_dir: str
-    client: object
-    args: object
-    use_mistral: bool
-    use_claude: bool
-    use_gemini: bool
-    add_translation_note: bool
-    force: bool
+    config: _TranslationConfig
     failed_files: list
     skipped_files: list
 
@@ -1787,27 +1845,20 @@ class _DirectoryWalkContext:
 def _process_one_markdown_file(file, root, ctx):
     file_path = os.path.join(root, file)
     base, _ext = os.path.splitext(file)
-    output_file = _resolve_output_filename(file, base, ctx.args)
+    output_file = _resolve_output_filename(file, base, ctx.config.args)
     relative_path = os.path.relpath(root, ctx.input_dir)
     output_path = os.path.join(ctx.output_dir, relative_path, output_file)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    if _existing_translation_exists(output_path, ctx.output_dir, base, ctx.args) and not ctx.force:
+    already_exists = _existing_translation_exists(
+        output_path, ctx.output_dir, base, ctx.config.args
+    )
+    if already_exists and not ctx.config.force:
         print(f"La traduction de '{file}' existe déjà, aucune action effectuée.")
         ctx.skipped_files.append(file_path)
         return
 
-    status = translate_markdown_file(
-        file_path,
-        output_path,
-        ctx.client,
-        ctx.args,
-        ctx.use_mistral,
-        ctx.use_claude,
-        ctx.use_gemini,
-        ctx.add_translation_note,
-        ctx.force,
-    )
+    status = translate_markdown_file(file_path, output_path, ctx.config)
     _record_translation_status(status, file, file_path, ctx.failed_files, ctx.skipped_files)
 
 
@@ -1815,20 +1866,9 @@ def _is_translatable_markdown(file):
     return (file.endswith(".md") or file.endswith(".mdx")) and not is_excluded(file)
 
 
-def translate_directory(
-    input_dir,
-    output_dir,
-    client,
-    args,
-    use_mistral,
-    use_claude,
-    use_gemini,
-    add_translation_note,
-    force,
-):
+def translate_directory(input_dir, output_dir, config):
     """Walk récursif. Retourne {"failed": [...], "skipped": [...]} avec les
-    chemins absolus des fichiers ; le caller agrège pour décider de exit(1).
-    """
+    chemins absolus des fichiers ; le caller agrège pour décider de exit(1)."""
     input_dir = os.path.abspath(input_dir)
     output_dir = os.path.abspath(output_dir)
     if not os.path.exists(output_dir):
@@ -1838,13 +1878,7 @@ def translate_directory(
     ctx = _DirectoryWalkContext(
         input_dir=input_dir,
         output_dir=output_dir,
-        client=client,
-        args=args,
-        use_mistral=use_mistral,
-        use_claude=use_claude,
-        use_gemini=use_gemini,
-        add_translation_note=add_translation_note,
-        force=force,
+        config=config,
         failed_files=[],
         skipped_files=[],
     )
@@ -2061,36 +2095,30 @@ def _resolve_single_output_filename(args):
     return f"{base}-{args.target_lang}.md"
 
 
+def _build_translation_config(args, client):
+    return _TranslationConfig(
+        client=client,
+        args=args,
+        use_mistral=args.use_mistral,
+        use_claude=args.use_claude,
+        use_gemini=args.use_gemini,
+        add_translation_note=args.add_translation_note,
+        force=args.force,
+    )
+
+
 def _run_single_file(args, client):
     output_file = _resolve_single_output_filename(args)
     output_path = os.path.join(args.target_dir, output_file)
-    status = translate_markdown_file(
-        args.file,
-        output_path,
-        client,
-        args,
-        args.use_mistral,
-        args.use_claude,
-        args.use_gemini,
-        args.add_translation_note,
-        args.force,
-    )
+    config = _build_translation_config(args, client)
+    status = translate_markdown_file(args.file, output_path, config)
     # default-fail: tout statut hors {"success", "skipped"} compte comme échec
     return [] if status in ("success", "skipped") else [args.file]
 
 
 def _run_directory(args, client):
-    result = translate_directory(
-        args.source_dir,
-        args.target_dir,
-        client,
-        args,
-        args.use_mistral,
-        args.use_claude,
-        args.use_gemini,
-        args.add_translation_note,
-        args.force,
-    )
+    config = _build_translation_config(args, client)
+    result = translate_directory(args.source_dir, args.target_dir, config)
     # default-fail jusqu'au bout : dict mal formé → traiter comme échec.
     return result.get("failed", ["<unexpected translate_directory result>"])
 

@@ -106,17 +106,13 @@ def _run_markdown_file_translation(
             news=news,
         )
 
-        status = translate_markdown_file(
-            src,
-            dst,
-            mock_client,
-            args,
-            use_mistral=False,
-            use_claude=False,
-            use_gemini=False,
+        config = translate._TranslationConfig(
+            client=mock_client,
+            args=args,
             add_translation_note=add_translation_note,
             force=False,
         )
+        status = translate_markdown_file(src, dst, config)
 
         output = None
         if os.path.exists(dst):
@@ -185,17 +181,8 @@ class TestSilentFailure(unittest.TestCase):
             mock_client.chat.completions.create.side_effect = responses
 
             args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
-            status = translate_markdown_file(
-                src,
-                dst,
-                mock_client,
-                args,
-                use_mistral=False,
-                use_claude=False,
-                use_gemini=False,
-                add_translation_note=False,
-                force=False,
-            )
+            config = translate._TranslationConfig(client=mock_client, args=args)
+            status = translate_markdown_file(src, dst, config)
             self.assertEqual(status, "failure")
             self.assertFalse(
                 os.path.exists(dst),
@@ -1098,17 +1085,16 @@ locale: 'pl'
                     "gemini": "gemini-3-flash-preview",
                 }[provider],
             )
-            status = translate_markdown_file(
-                src,
-                dst,
-                mock_client_factory(),
-                args,
+            config = translate._TranslationConfig(
+                client=mock_client_factory(),
+                args=args,
                 use_mistral=(provider == "mistral"),
                 use_claude=(provider == "claude"),
                 use_gemini=(provider == "gemini"),
                 add_translation_note=False,
                 force=False,
             )
+            status = translate_markdown_file(src, dst, config)
             output = None
             if os.path.exists(dst):
                 with open(dst, encoding="utf-8") as f:
@@ -1196,17 +1182,16 @@ locale: 'pl'
                 news=True,
                 model="claude-haiku-4-5-20251001",
             )
-            status = translate_markdown_file(
-                src,
-                dst,
-                client,
-                args,
+            config = translate._TranslationConfig(
+                client=client,
+                args=args,
                 use_mistral=False,
                 use_claude=True,
                 use_gemini=False,
                 add_translation_note=False,
                 force=False,
             )
+            status = translate_markdown_file(src, dst, config)
             self.assertEqual(status, "failure")
             self.assertFalse(os.path.exists(dst))
 

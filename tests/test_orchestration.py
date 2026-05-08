@@ -291,16 +291,11 @@ class TestEmptyAndIOErrorPaths(unittest.TestCase):
             src = os.path.join(tmpdir, "empty.md")
             open(src, "w").close()
             args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
+            config = translate._TranslationConfig(client=MagicMock(), args=args)
             status = translate.translate_markdown_file(
                 src,
                 os.path.join(tmpdir, "empty-en.md"),
-                MagicMock(),
-                args,
-                False,
-                False,
-                False,
-                False,
-                False,
+                config,
             )
             self.assertEqual(status, "skipped")
 
@@ -320,16 +315,11 @@ class TestEmptyAndIOErrorPaths(unittest.TestCase):
                 return real_open(path, *a, **kw)
 
             with patch("builtins.open", side_effect=selective_open):
+                config = translate._TranslationConfig(client=MagicMock(), args=args)
                 status = translate.translate_markdown_file(
                     src,
                     os.path.join(tmpdir, "exists-en.md"),
-                    MagicMock(),
-                    args,
-                    False,
-                    False,
-                    False,
-                    False,
-                    False,
+                    config,
                 )
             self.assertEqual(status, "failure")
 
@@ -353,16 +343,11 @@ class TestProcessOneMarkdownFileSkip(unittest.TestCase):
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
             failed, skipped = [], []
             mock_client = MagicMock()
+            config = translate._TranslationConfig(client=mock_client, args=args, force=False)
             ctx = translate._DirectoryWalkContext(
                 input_dir=input_dir,
                 output_dir=output_dir,
-                client=mock_client,
-                args=args,
-                use_mistral=False,
-                use_claude=False,
-                use_gemini=False,
-                add_translation_note=False,
-                force=False,
+                config=config,
                 failed_files=failed,
                 skipped_files=skipped,
             )
@@ -387,16 +372,11 @@ class TestProcessOneMarkdownFileSkip(unittest.TestCase):
             failed, skipped = [], []
             mock_client = MagicMock()
             mock_client.chat.completions.create.return_value = _make_openai_response("Hello.")
+            config = translate._TranslationConfig(client=mock_client, args=args, force=True)
             ctx = translate._DirectoryWalkContext(
                 input_dir=input_dir,
                 output_dir=output_dir,
-                client=mock_client,
-                args=args,
-                use_mistral=False,
-                use_claude=False,
-                use_gemini=False,
-                add_translation_note=False,
-                force=True,
+                config=config,
                 failed_files=failed,
                 skipped_files=skipped,
             )
@@ -424,17 +404,8 @@ class TestTranslateDirectory(unittest.TestCase):
             mock_client = MagicMock()
             mock_client.chat.completions.create.return_value = _make_openai_response("Hello.")
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
-            result = translate.translate_directory(
-                input_dir,
-                output_dir,
-                mock_client,
-                args,
-                False,
-                False,
-                False,
-                False,
-                False,
-            )
+            config = translate._TranslationConfig(client=mock_client, args=args)
+            result = translate.translate_directory(input_dir, output_dir, config)
             self.assertEqual(result["failed"], [])
             self.assertTrue(os.path.exists(os.path.join(output_dir, "a-en.md")))
             # Sans --keep_filename, l'extension de sortie est forcée à .md
@@ -451,17 +422,8 @@ class TestTranslateDirectory(unittest.TestCase):
 
             mock_client = MagicMock()
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
-            translate.translate_directory(
-                input_dir,
-                output_dir,
-                mock_client,
-                args,
-                False,
-                False,
-                False,
-                False,
-                False,
-            )
+            config = translate._TranslationConfig(client=mock_client, args=args)
+            translate.translate_directory(input_dir, output_dir, config)
             self.assertFalse(
                 os.path.exists(os.path.join(output_dir, "traductions_old", "skip-en.md"))
             )
