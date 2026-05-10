@@ -5,10 +5,10 @@
 <h4 align="center">📊 Kodkvalitet</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Kvalitetsgrindstatus"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Säkerhetsbetyg"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Tillförlitlighetsbetyg"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Underhållbarhetsbetyg"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Status för kvalitetsgrinden"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Säkerhetsbedömning"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Tillförlitlighetsbedömning"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Underhållsbarhetsbedömning"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Täckning"></a>
@@ -17,7 +17,7 @@
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Kodlukt"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Dubblerade rader (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Duplicerade rader (%)"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Teknisk skuld"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Kodrader"></a>
 </p>
@@ -26,18 +26,18 @@
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-Markdown-filsöversättare som använder **OpenAI**, **Mistral AI**, **Claude (Anthropic)** och **Google Gemini**.
+Markdown-filöversättare som använder **OpenAI**, **Mistral AI**, **Claude (Anthropic)** och **Google Gemini**.
 
-Detta Python-skript översätter Markdown-filer från ett källspråk till ett målspråk samtidigt som formateringen, kodblocken och front matter-metadata bevaras.
+Detta Python-skript översätter Markdown-filer från ett källspråk till ett målspråk samtidigt som det bevarar formatering, kodblock och front matter-metadata.
 
 ## Huvudfunktioner
 
-- **Flera leverantörer**: Stöd för 4 API:er (OpenAI, Mistral, Claude, Gemini)
+- **Multi-Provider**: Stöd för 4 API:er (OpenAI, Mistral, Claude, Gemini)
 - **Modeller 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
 - **Ekonomiläge**: Alternativ `--eco` för att använda snabbare och billigare modeller
-- **Enskild fil**: Alternativ `--file` för att översätta en enda fil
-- **Intelligent segmentering**: Hantering av långa texter med token-gränser per modell
-- **Kodbevarande**: Kodblock OCH inline-kod (`` `...` ``) bevaras
+- **Enstaka fil**: Alternativ `--file` för att översätta en enda fil
+- **Intelligent segmentering**: Hantering av långa texter med tokenbegränsningar per modell
+- **Kodbevarande**: Kodblock OCH inlinekod (`` `...` ``) bevaras
 - **Filnamn**: Alternativ `--keep_filename` för att behålla det ursprungliga namnet
 - **Nyhetsläge**: Alternativ `--news` för att skydda engelska citat och hantera flaggor i nyhetsartiklar
 - **.env-konfiguration**: Stöd för filen `.env` för API-nycklar
@@ -52,7 +52,7 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Kvalitetsverktyg (valfritt men rekommenderat)
+### Kvalitetsverktyg (valfritt men rekommenderas)
 
 Projektet använder [`pre-commit`](https://pre-commit.com) för att förhindra att kod som är felaktigt formaterad, sårbar eller innehåller en hemlighet committas. Installation:
 
@@ -62,7 +62,7 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Aktiva hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (komplexitet), detect-secrets (API-nycklar), mypy (gradvis typning), Opengrep (SAST), pip-audit (CVE-avhängigheter), unittest. Se `CLAUDE.md` avsnittet _Quality / pre-commit_ för detaljer.
+Aktiva hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (komplexitet), detect-secrets (API-nycklar), mypy (progressiv typning), Opengrep (SAST), pip-audit (CVE-beroenden), unittest. Se avsnittet `CLAUDE.md` _Quality / pre-commit_ för detaljer.
 
 ## Konfiguration
 
@@ -81,7 +81,7 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 ## Användning
 
-### Översätt en enskild fil
+### Översätt en enda fil
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
@@ -105,7 +105,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Ekonomiläge
 
-Använder snabbare och billigare modeller (gpt-5.4-mini, claude-haiku, gemini-flash):
+Använder snabbare och billigare modeller (gpt-5.4-mini, claude-haiku, gemini-flash) :
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -113,40 +113,40 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Alternativ
 
-| Alternativ              | Beskrivning                                                       |
-| ----------------------- | ----------------------------------------------------------------- |
-| `--file`                 | Enskild Markdown-fil att översätta                                |
-| `--source_dir`           | Källkatalog som innehåller Markdown-filerna                        |
-| `--target_dir`           | Utkatalog för de översatta filerna                                 |
-| `--source_lang`          | Källspråk (standard: `fr`)                               |
-| `--target_lang`          | Målspråk (standard: `en`)                                |
-| `--model`                | Specifik modell att använda                                        |
-| `--eco`                  | Använd ekonomimodellerna                                           |
-| `--use_mistral`          | Använd Mistral AI:s API                                            |
-| `--use_claude`           | Använd Claude:s API                                                |
-| `--use_gemini`           | Använd Gemini:s API                                                |
-| `--force`                | Tvinga omöversättning                                               |
-| `--keep_filename`        | Behåll det ursprungliga filnamnet                                  |
-| `--news`                 | Nyhetsläge: skyddar EN-citat, hanterar flaggor per språk           |
-| `--add_translation_note` | Lägg till en översättningsnotis                                    |
-| `--note_position`        | Notisens placering: `top`, `bottom` (standard), eller `both` |
+| Alternativ              | Beskrivning                                                           |
+| ----------------------- | --------------------------------------------------------------------- |
+| `--file`                 | En enda Markdown-fil att översätta                                    |
+| `--source_dir`           | Källkatalog som innehåller Markdown-filerna                           |
+| `--target_dir`           | Utkatalog för de översatta filerna                                    |
+| `--source_lang`          | Källspråk (standard: `fr`)                                   |
+| `--target_lang`          | Målspråk (standard: `en`)                                    |
+| `--model`                | Specifik modell att använda                                            |
+| `--eco`                  | Använd ekonomimodellerna                                               |
+| `--use_mistral`          | Använd Mistral AI-API:n                                                |
+| `--use_claude`           | Använd Claude-API:n                                                   |
+| `--use_gemini`           | Använd Gemini-API:n                                                   |
+| `--force`                | Tvinga omöversättning                                                  |
+| `--keep_filename`        | Behåll det ursprungliga filnamnet                                      |
+| `--news`                 | Nyhetsläge: skyddar EN-citat, hanterar flaggor per språk               |
+| `--add_translation_note` | Lägg till en översättningsnotis                                       |
+| `--note_position`        | Notisens placering: `top`, `bottom` (standard) eller `both` |
 | `--note_format`          | Notisens format: `legacy` (standard, fet paragraf) eller `marker` |
-| `--include_model`        | Inkludera modellnamnet i utdatafilen                               |
+| `--include_model`        | Inkludera modellnamnet i utdatafilen                                   |
 
-### Översättningsnotis: placeringar och format
+### Översättningsnotis: placering och format
 
-Med `--add_translation_note` kan översättaren placera notisen överst, nederst eller på båda ställena, och göra den antingen i vanligt textformat (bakåtkompatibelt) eller i `marker`-format som kan användas av ett Markdown-plugin.
+Med `--add_translation_note` kan translatorn placera notisen överst, nederst eller på båda platserna, och göra den antingen i vanligt textformat (bakåtkompatibelt) eller i `marker`-format som kan användas av ett Markdown-plugin.
 
 **Placering** (`--note_position`) :
 
 - `bottom` (standard): notis i slutet av filen, som historiskt.
-- `top` : notis infogad **efter YAML-front matter** (säkerhet för Astro Content Collections, gray-matter, etc.).
-- `both` : notis infogad överst OCH nederst (ett enda LLM-anrop, innehåll återanvänds för båda placeringarna).
+- `top` : notis infogad **efter YAML-frontmatter** (säkerhet för Astro Content Collections, gray-matter, etc.).
+- `both` : notis infogad både överst OCH nederst (ett enda LLM-anrop, innehåll som återanvänds för båda placeringarna).
 
 **Format** (`--note_format`) :
 
-- `legacy` (standard): fet paragraf `**...**` — beteende som är strikt identiskt med v1.8, byte för byte. Kompatibelt med Hugo, GitHub, GitLab och alla Markdown-renderare.
-- `marker` : Markdown-länkdefinitionsreferens (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) följd av ett blockquote i fet stil. Läst direkt på GitHub/GitLab, och användbart vid build via ett remark-plugin på Astro-sidan för att skapa en stiliserad banner (se bloggen jls42.org).
+- `legacy` (standard): fet paragraf `**...**` — beteendet är strikt identiskt med v1.8, byte för byte. Kompatibelt med Hugo, GitHub, GitLab och alla Markdown-renderare.
+- `marker` : osynlig Markdown-länkreferensdefinition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) följd av ett blockquote i fet stil. Nativt läsbar på GitHub/GitLab, och kan användas vid build av ett remark-plugin i Astro för att skapa en stiliserad banner (jfr. bloggen jls42.org).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -163,14 +163,14 @@ python translate.py --file article.mdx --target_lang en \
 
 ### Standardmodeller (2026)
 
-| Leverantör | Kvalitet (standard)      | Ekonomi (`--eco`)         |
-| ---------- | ------------------------ | ------------------------------- |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
+| Leverantör | Kvalitet (standard)     | Ekonomi (`--eco`)        |
+| --------- | ------------------------ | ------------------------------- |
+| OpenAI    | `gpt-5.5`                | `gpt-5.4-mini`                  |
+| Claude    | `claude-sonnet-4-6`            | `claude-haiku-4-5-20251001`                 |
+| Mistral   | `mistral-large-latest`           | `mistral-small-latest`                |
+| Gemini    | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Rekommendation för långa översättningar**: `--use_gemini` (standard = `gemini-3.1-pro-preview` kvalitet, `--eco` = `gemini-3.1-flash-lite-preview`) tenderar att bättre bevara markdown-strukturen i icke-latinska skript (PL, JA, ZH, AR, HI), särskilt i `--news`-läge där troheten mot platshållare är viktig. OpenAI förblir standard för bakåtkompatibilitet.
+> **Rekommendation för långa översättningar** : `--use_gemini` (standard = `gemini-3.1-pro-preview` kvalitet, `--eco` = `gemini-3.1-flash-lite-preview`) tenderar att bättre bevara markdown-strukturen på icke-latinska skript (PL, JA, ZH, AR, HI), särskilt i `--news`-läge där placeholder-trogenhet är viktig. OpenAI förblir standard för bakåtkompatibilitet.
 
 ## Projekt som använder detta skript
 
@@ -178,8 +178,8 @@ python translate.py --file article.mdx --target_lang en \
 
 ## Författare
 
-Julien LE SAUX
-E-post : contact@jls42.org
+Julien LE SAUX  
+E-post: contact@jls42.org
 
 ## Licens
 

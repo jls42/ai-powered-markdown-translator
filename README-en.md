@@ -30,16 +30,16 @@ Markdown file translator using **OpenAI**, **Mistral AI**, **Claude (Anthropic)*
 
 This Python script translates Markdown files from a source language to a target language while preserving formatting, code blocks, and front matter metadata.
 
-## Main Features
+## Key Features
 
 - **Multi-Provider**: Support for 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **2026 Models**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **Economy Mode**: `--eco` option to use faster and less expensive models
-- **Single File**: `--file` option to translate a single file
-- **Smart Segmentation**: Handles long texts with model token limits
+- **Economy Mode**: Option `--eco` to use faster, lower-cost models
+- **Single File**: Option `--file` to translate a single file
+- **Intelligent Segmentation**: Handles long texts with model token limits
 - **Code Preservation**: Code blocks AND inline code (`` `...` ``) are preserved
-- **File Name**: `--keep_filename` option to keep the original name
-- **News Mode**: `--news` option to protect English quotations and handle flags in news articles
+- **File Name**: Option `--keep_filename` to keep the original name
+- **News Mode**: Option `--news` to protect English quotes and handle flags in news articles
 - **.env Configuration**: Support for the `.env` file for API keys
 - **Translation Note**: Optional note added at the end of the document
 
@@ -66,7 +66,7 @@ Active hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/jso
 
 ## Configuration
 
-Create a `.env` file at the project root or set environment variables:
+Create a `.env` file in the project root or define the environment variables:
 
 ```bash
 # Fichier .env (recommandé)
@@ -105,7 +105,7 @@ python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content
 
 ### Economy mode
 
-Uses faster and less expensive models (gpt-5.4-mini, claude-haiku, gemini-flash):
+Uses faster, lower-cost models (gpt-5.4-mini, claude-haiku, gemini-flash):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -116,18 +116,18 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | Option                   | Description                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
 | `--file`                 | Single Markdown file to translate                                       |
-| `--source_dir`           | Source directory containing Markdown files                              |
+| `--source_dir`           | Source directory containing Markdown files                               |
 | `--target_dir`           | Output directory for translated files                                   |
 | `--source_lang`          | Source language (default: `fr`)                                             |
 | `--target_lang`          | Target language (default: `en`)                                              |
-| `--model`                | Specific model to use                                                  |
-| `--eco`                  | Use economy models                                                  |
+| `--model`                | Specific model to use                                                   |
+| `--eco`                  | Use economy models                                                     |
 | `--use_mistral`          | Use the Mistral AI API                                                |
 | `--use_claude`           | Use the Claude API                                                    |
 | `--use_gemini`           | Use the Gemini API                                                    |
-| `--force`                | Force retranslation                                                  |
+| `--force`                | Force re-translation                                                  |
 | `--keep_filename`        | Keep the original file name                                     |
-| `--news`                 | News mode: protects EN quotes, handles flags by language |
+| `--news`                 | News mode: protects EN quotes, handles language flags |
 | `--add_translation_note` | Add a translation note                                           |
 | `--note_position`        | Note position: `top`, `bottom` (default), or `both`                |
 | `--note_format`          | Note format: `legacy` (default, bold paragraph) or `marker`       |
@@ -135,18 +135,18 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Translation note: positions and formats
 
-With `--add_translation_note`, the translator can place the note at the top, at the bottom, or in both places, and render it either in plain text format (backward compatible) or in `marker` format consumable by a Markdown plugin.
+With `--add_translation_note`, the translator can place the note at the top, bottom, or both, and render it either as plain text (backward-compatible) or as `marker` format consumable by a Markdown plugin.
 
 **Position** (`--note_position`) :
 
-- `bottom` (default): note placed at the end of the file, as historically.
+- `bottom` (default): note at the end of the file, as historically.
 - `top`: note inserted **after the YAML front matter** (Astro Content Collections safety, gray-matter, etc.).
-- `both`: note inserted at the top AND at the bottom (one LLM call only, content reused for both placements).
+- `both`: note inserted at the top AND at the bottom (a single LLM call, content reused for both placements).
 
 **Format** (`--note_format`) :
 
-- `legacy` (default): bold paragraph `**...**` — strictly identical behavior to v1.8, byte-for-byte. Compatible with Hugo, GitHub, GitLab, and any Markdown renderer.
-- `marker`: Markdown invisible link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a bold blockquote. Natively readable on GitHub/GitLab, and usable at build time by a remark plugin on the Astro side to produce a styled banner (see the jls42.org blog).
+- `legacy` (default): bold paragraph `**...**` — behavior strictly identical to v1.8, byte-for-byte. Compatible with Hugo, GitHub, GitLab, and any Markdown renderer.
+- `marker`: invisible Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a bold blockquote. Natively readable on GitHub/GitLab, and usable at build time by a remark plugin on the Astro side to produce a stylized banner (see jls42.org blog).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -161,7 +161,7 @@ python translate.py --file article.mdx --target_lang en \
     --add_translation_note --note_format marker --note_position both
 ```
 
-### Default models (2026)
+### Default Models (2026)
 
 | Provider | Quality (default)         | Economy (`--eco`)            |
 | -------- | ------------------------ | ------------------------------- |
@@ -170,15 +170,15 @@ python translate.py --file article.mdx --target_lang en \
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **Recommendation for long-form translations**: `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3.1-flash-lite-preview`) tends to preserve markdown structure better on non-Latin scripts (PL, JA, ZH, AR, HI), especially in `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
+> **Long-form translation recommendation** : `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3.1-flash-lite-preview`) tends to better preserve markdown structure on non-Latin scripts (PL, JA, ZH, AR, HI), especially in `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
 
-## Projects using this script
+## Projects Using This Script
 
 - **[jls42.org](https://jls42.org)** - Multilingual personal blog (15 languages)
 
 ## Author
 
-Julien LE SAUX
+Julien LE SAUX  
 Email: contact@jls42.org
 
 ## License
