@@ -1541,6 +1541,42 @@ class TestNewsCitationExtraction(unittest.TestCase):
         self.assertEqual(quotes, [])
         self.assertEqual(urls, [])
 
+    def test_extract_attribution_url_with_nested_parens(self):
+        """Bug v1.9 (fixé en v1.9.2) : attribution avec markdown link entre
+        parenthèses englobantes — typique `(relayé par [@account sur X](url))`.
+        L'ancienne regex `\\((.+?)\\)` lazy capturait `relayé par [@account sur X](url`
+        (sans `)` final + incluant préfixe FR), ce qui faisait échouer
+        `_validate_news_post` car (a) chaîne tronquée, (b) "relayé par"
+        traduit en target_lang.
+        Le fix extrait UNIQUEMENT l'URL via `\\]\\(([^)]+)\\)` — invariant
+        préservé par les placeholders #URL{N}# pendant la traduction.
+        """
+        content = (
+            "## Section\n\n"
+            "> A quote in EN.\n"
+            ">\n"
+            "> 🇫🇷 _Une citation en FR._\n"
+            "> — Vasek Mlejnsky, CEO E2B (relayé par [@genspark_ai sur X](https://x.com/genspark_ai/status/2052602512360808652))\n"
+        )
+        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        self.assertEqual(quotes, ["> A quote in EN."])
+        # Extraction propre : juste l'URL, sans préfixe FR ni `)` tronqué.
+        self.assertEqual(urls, ["https://x.com/genspark_ai/status/2052602512360808652"])
+
+    def test_extract_attribution_url_with_french_prefix(self):
+        """Variante : préfixe FR (`via`, `selon`, etc.) sans parenthèses englobantes.
+        L'extraction doit ignorer le préfixe et ne capturer que l'URL pure.
+        """
+        content = (
+            "## Section\n\n"
+            "> Quote.\n"
+            ">\n"
+            "> 🇫🇷 _Citation._\n"
+            "> — via [@source officielle](https://example.com/post/42)\n"
+        )
+        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        self.assertEqual(urls, ["https://example.com/post/42"])
+
 
 def _gemini_blocked_response():
     """Construit une réponse Gemini avec candidates valides mais .text qui raise
