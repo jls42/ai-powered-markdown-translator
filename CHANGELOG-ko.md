@@ -1,112 +1,122 @@
-### 변경 내역
+### 변경 사항
 
 🌍 [프랑스어](CHANGELOG.md) | [영어](CHANGELOG-en.md) | [스페인어](CHANGELOG-es.md) | [중국어](CHANGELOG-zh.md) | [독일어](CHANGELOG-de.md) | [일본어](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [아랍어](CHANGELOG-ar.md) | [힌디어](CHANGELOG-hi.md) | [이탈리아어](CHANGELOG-it.md) | [네덜란드어](CHANGELOG-nl.md) | [폴란드어](CHANGELOG-pl.md) | [포르투갈어](CHANGELOG-pt.md) | [루마니아어](CHANGELOG-ro.md) | [스웨덴어](CHANGELOG-sv.md)
 
-- **1.9.1** marker 번역 주석의 CTA 라벨 i18n 수정 (2026-05-10) :
+- **1.9.2** 중첩된 괄호 또는 FR 접두사가 있는 news attribution URL 추출 수정 (2026-05-11) :
 
-  - **버그 수정**: 번역된 파일 상단의 marker 배너에 있는 CTA 링크의 `[Voir le projet sur GitHub ↗]` 라벨이 모든 대상 언어에서 `target_lang`을 따르는 대신 **프랑스어로** 남아 있었다. LLM은 이를 절대 보지 못한다(저장소의 URL과 slug를 보존하기 위해 Python 쪽에서 조립함). 그래서 번역 단계에서 이를 바로잡을 수 없었다. v1.9에서 `marker` 형식을 추가한 이후의 조용한 회귀였다.
-  - **수정**: 15개 언어를 각자의 로컬라이즈된 라벨에 매핑하는 새 상수 `_VIEW_PROJECT_LABELS` 추가. `_translation_note_invariants(target_lang)`와 `_assemble_translation_note_paragraphs(phrase, target_lang)`가 이제 대상 언어를 전달한다. 언어를 알 수 없을 때는 `fr` 폴백(안전 장치, KeyError 없음).
-  - **테스트**: `test_source_emits_three_paragraphs_repo_title_description_link` 조정됨(target_lang `ja` → 예상되는 일본어 라벨). 새 테스트 2개: `test_source_link_label_localized_per_target_lang`(라틴, 표의문자, 아브자드 스크립트를 포괄하는 7개 언어로 매개변수화)와 `test_source_link_label_falls_back_to_french_for_unknown_target`. 총합: `test_translation_note_position.py`의 테스트 40개(38개 대신).
-  - **하위 호환성**: 기본값 `target_lang="fr"`를 가진 시그니처 — `args.target_lang`가 없는 외부 프로그래매틱 호출도 수정 없이 계속 동작.
+  - **버그 수정** : `_protect_news_quotes`에서 attribution URL 추출은 `re.search(r"\((.+?)\)", attribution)` 정규식을 사용하고 있었습니다(괄호 사이의 lazy capture). `(relayé par [@user sur X](https://x.com/.../123))` 유형의 attribution(중첩된 괄호: 바깥쪽 `(` + markdown link의 `]()`)에서는 캡처가 처음 만난 `)`에서 멈춰 → 문자열이 잘리고 + FR 접두사까지 포함된 상태가 되었습니다: `relayé par [@user sur X](https://x.com/.../123`(마지막 `)` 없이). 그 결과 `_validate_news_post`가 번역된 출력에서 이 문자열을 찾다가 항상 실패했습니다(두 가지 이유: 잘린 `)` + "relayé par"가 `relayed by`/`weitergeleitet von`/...로 번역됨). low → medium → high → gpt-5.5의 전체 연쇄가 통과할 수 없었습니다.
+  - **수정** : 정규식이 `re.search(r"\]\(([^)]+)\)", attribution)`로 바뀝니다 — markdown link의 `](url)`를 정확히 겨냥하여 **순수 URL만**(FR 접두사나 truncation 없이) 캡처하며, 번역 중 `#URL{N}#` placeholder로 불변성이 유지됩니다. 다음 두 가지 문제 패턴에 대해 견고합니다.
+    - `(relayé par [@account sur X](url))` — 중첩된 괄호
+    - `via [@source](url)` 또는 `selon [@author](url)` — 바깥 괄호가 없는 FR 접두사
+  - **테스트** : `test_silent_failure.py`의 `TestNewsCitationExtraction` 클래스에 새로 2개 추가:
+    - `test_extract_attribution_url_with_nested_parens` (Genspark CEO E2B 버그를 정확히 재현한 사례)
+    - `test_extract_attribution_url_with_french_prefix` ( `via`를 사용한 변형 )
+  - **커버리지 공백** : `check-editorial-coverage.py`는 편집 문법은 검증하지만 translator에 의한 번역 가능성은 검증하지 않습니다. 가능한 개선점(v1.9.2 범위 밖)은 게시 전에 위험 패턴을 감지하기 위해 dry-run에서 attribution 추출을 시뮬레이션하는 체크를 추가하는 것입니다.
 
-- **1.9** silent-failure 수정 + 완전한 품질 도구 + 다중 위치 번역 주석 (2026-05-07) :
-  - **다중 위치 번역 주석 + marker "embed card" 형식** :
-    - 새로운 CLI 옵션(추가형, 기본값 유지 → **non breaking**) :
-      - `--note_position {top,bottom,both}`(기본값: `bottom`) : 주석을 번역된 파일의 상단, 하단 또는 양쪽에 배치.
+- **1.9.1** marker 번역 노트의 CTA 라벨 i18n 수정 (2026-05-10) :
+
+  - **버그 수정** : 번역된 파일 상단의 marker 배너에 있는 CTA 링크의 `[Voir le projet sur GitHub ↗]` 라벨이 모든 대상 언어에서 `target_lang`를 따라가지 못하고 **프랑스어로 남아** 있었습니다. LLM은 이를 절대 보지 못합니다(URL과 repo slug를 보존하기 위해 Python 쪽에서 조립됨), 그래서 번역 단계가 이를 되돌릴 수 없었습니다. v1.9에서 `marker` 형식을 추가한 이후의 조용한 회귀였습니다.
+  - **수정** : 15개 언어를 각 로컬라이즈된 라벨로 매핑하는 새 상수 `_VIEW_PROJECT_LABELS`를 추가했습니다. `_translation_note_invariants(target_lang)`과 `_assemble_translation_note_paragraphs(phrase, target_lang)`가 이제 대상 언어를 전달합니다. 언어가 알려지지 않은 경우에는 `fr`로 폴백합니다(안전, KeyError 없음).
+  - **테스트** : `test_source_emits_three_paragraphs_repo_title_description_link`을 조정했습니다(target_lang `ja` → 기대되는 일본어 라벨). 새 테스트 2개: `test_source_link_label_localized_per_target_lang`(라틴, 표의문자, 아브자드 스크립트를 포괄하도록 7개 언어에 매개변수화) 및 `test_source_link_label_falls_back_to_french_for_unknown_target`. 총계: `test_translation_note_position.py`에 40개 테스트(기존 38개 대신).
+  - **하위 호환성** : 기본값 `target_lang="fr"`를 가진 시그니처 — `args.target_lang`가 없는 외부 프로그램 호출자는 수정 없이 계속 동작합니다.
+
+- **1.9** silent-failure 수정 + 완전한 품질 도구 + 다중 위치 번역 노트 (2026-05-07) :
+  - **다중 위치 번역 노트 + marker 형식 "embed card"** :
+    - 새로운 CLI 옵션(추가형, 기본값 불변 → **non breaking**) :
+      - `--note_position {top,bottom,both}`(기본값: `bottom`) : 번역된 파일의 상단, 하단 또는 양쪽에 노트를 배치합니다.
       - `--note_format {legacy,marker}`(기본값: `legacy`) :
-        - `legacy`은 v1.8의 동작을 엄격하게 재현하며(굵은 문단 `**…**`) **byte-for-byte** 동일하다.
-        - `marker`는 보이지 않는 Markdown 링크 참조 정의(`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`)를 내보내고, 이어서 "GitHub repo embed card" 형태의 렌더링을 위한 구조화된 **3문단 blockquote**를 출력한다: 인라인 코드의 프로젝트 제목(`**\`ai-powered-markdown-translator\`\*\*`), LLM이 번역한 설명, 그리고 보이는 arrow가 있는 CTA 링크(`[Voir le projet sur GitHub ↗](URL)`). remark 플러그인으로 빌드 시 활용 가능(참조: blog jls42.org → 플러그인 `remark-translation-banner`).
-    - **LLM에 절대 전달되지 않는 불변값**: 저장소 제목과 GitHub URL은 설명 문장을 번역한 뒤 Python 쪽에서 조립한다. LLM은 slug `ai-powered-markdown-translator`나 `https://github.com/jls42/...`를 절대 보지 못하므로, 어떤 renderer/case/scheme도 변경되지 않음을 보장한다.
-    - **frontmatter 인식 삽입**: `top` 또는 `both` 모드에서는 주석이 YAML frontmatter의 닫는 `---` 블록 **뒤**에 삽입된다(Astro Content Collections / gray-matter 안전성). Helper `_split_frontmatter`가 파일 시작 부분의 `---\n…\n---\n`를 감지하고 그 무결성을 보존한다. 닫는 fence가 없는 열린 frontmatter에는 **`RuntimeError`를 발생**시키며(파일은 잘못 배치된 주석으로 쓰기되는 대신 `failed_files`로 되돌아감).
-    - **화이트리스트 모델 sanitizer**: `_sanitize_model`가 `[A-Za-z0-9._:/-]` 밖의 모든 문자를 `_`로 바꾸고, 비어 있으면 `unknown`를 사용한다. Astro remark 플러그인 쪽 validator와 맞추며 marker 형식을 깨뜨리는 문자(공백, 따옴표, 괄호, 쉼표 등)를 무력화한다.
-    - **내부 리팩터링**: `_append_translation_note`(1개의 거대한 단일 함수) → 7개의 순수 helper(`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). builder/composer 분리(빌더는 구분자 없는 순수 블록을 반환하고, composer는 위치에 따라 `\n\n`를 적용) ; production과 source helper가 같은 3문단 assembler를 공유한다.
-    - **`_quote_lines` blank-preserving**: 각 줄 앞에 `> `를 붙이고, 빈 줄은 `>` 하나로 변환. mdast가 blockquote 안에서 제목 / 설명 / 링크의 3개 분리된 문단을 보도록 하여 line-break가 있는 하나의 문단이 되지 않게 한다.
-    - **`_build_translation_note_block` 적응형**: LLM이 보존한 문단 수에 따라(3 = 완전한 카드 형식, 2 = 문장 + 링크, 1 = 폴백). 1문단 폴백은 Markdown 링크 `](`가 감지되면 더 이상 `**...**`로 감싸지 않는다(링크 주변 `<strong>`의 취약한 렌더링).
-    - **하위 호환성**: `getattr(args, "note_position", "bottom")`와 `getattr(args, "note_format", "legacy")`는 `_compose_with_notes` 쪽에서 유지 — 이러한 속성이 없는 Namespace(기존 테스트, 외부 프로그래매틱 호출)는 수정 없이 계속 동작.
+        - `legacy`는 v1.8 동작을 (굵은 단락 `**…**`) **byte-for-byte**로 엄격하게 재현합니다.
+        - `marker`는 보이지 않는 Markdown link reference definition(`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`)을 내보낸 뒤, "GitHub repo embed card" 스타일 렌더링을 위한 구조화된 **3단락 blockquote**를 이어 붙입니다: 프로젝트 제목은 inline code(`**\`ai-powered-markdown-translator\`\*\*`), LLM이 번역한 설명, 그리고 보이는 화살표가 있는 CTA 링크(`[Voir le projet sur GitHub ↗](URL)`). remark 플러그인으로 빌드 시 활용 가능합니다(참고: blog jls42.org → 플러그인 `remark-translation-banner`).
+    - **LLM에 절대 보내지 않는 불변 요소** : repo 제목과 GitHub URL은 설명 문장을 번역한 뒤 Python 쪽에서 조립됩니다. LLM은 절대 slug `ai-powered-markdown-translator`나 `https://github.com/jls42/...`를 보지 못하므로 어떤 renderer/대소문자/스키마도 변경되지 않음이 보장됩니다.
+    - **Frontmatter-aware 삽입** : `top` 또는 `both` 모드에서는 노트가 YAML frontmatter의 닫는 `---` 블록 **뒤에** 삽입됩니다(Astro Content Collections / gray-matter 안전성). Helper `_split_frontmatter`는 파일 시작의 `---\n…\n---\n`를 감지하고 무결성을 보존합니다. 닫는 fence가 없는 열린 frontmatter에 대해서는 `RuntimeError`를 발생시키며(잘못 배치된 노트와 함께 쓰여지는 대신 파일이 `failed_files`로 되돌아감), 안전하게 실패합니다.
+    - **화이트리스트 모델 sanitizer** : `_sanitize_model`는 `[A-Za-z0-9._:/-]` 밖의 모든 문자를 `_`로 대체하고, 비어 있으면 `unknown`를 사용합니다. Astro remark 플러그인 쪽 validator와 맞추고, marker 형식을 깨뜨리는 문자(공백, 따옴표, 괄호, 쉼표 등)를 무력화합니다.
+    - **내부 리팩터링** : `_append_translation_note`(1개의 거대한 함수) → 7개의 순수 helper(`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). builder/composer 분리( builder는 구분자 없는 순수 블록을 반환하고, composer는 위치에 따라 `\n\n`를 적용) ; production과 source helper가 동일한 3단락 assembler를 공유합니다.
+    - **`_quote_lines` blank-preserving** : 각 줄 앞에 `> `를 붙이고, 빈 줄은 `>`만으로 변환합니다. 이를 통해 mdast가 blockquote 안에서 제목 / 설명 / 링크의 3개 서로 다른 단락을 인식할 수 있으며, line-break가 있는 하나의 단락으로 합쳐지지 않습니다.
+    - **`_build_translation_note_block` 적응형** : LLM이 보존한 단락 수에 따라 다릅니다(3 = 완전한 카드 형식, 2 = 문장 + 링크, 1 = fallback). 1단락 fallback은 Markdown 링크 `](`가 감지되면 더 이상 `**...**`로 감싸지지 않습니다(링크 주변의 `<strong>` 렌더링이 취약함).
+    - **상위 호환성** : `getattr(args, "note_position", "bottom")`와 `getattr(args, "note_format", "legacy")`가 `_compose_with_notes` 쪽에 있음 — 이러한 속성이 없는 Namespace(기존 테스트, 외부 프로그램 호출)도 수정 없이 계속 동작합니다.
   - **긴 번역에서의 silent-failure 수정** :
-    - 모든 provider(OpenAI, Mistral, Claude, Gemini)에서 번역 후 언어 검증: 결정론적 레이어(소스 발췌를 그대로 재발견) + 확률론적 레이어(`langdetect`)
-    - `finish_reason` / `stop_reason` 화이트리스트: 화이트리스트 밖의 모든 상태(truncation, content_filter 등)에 대해 `RuntimeError` 발생
-    - `max_tokens` Claude : `4096` → `32768`(16k 세그먼트에서의 잠재적 truncation을 방지, FR→JA/ZH/KO/AR/HI 교차 스크립트 여유 확보)
-    - heading-aware 세그먼테이션: 세그먼트의 후반부에서 H2/H3 우선(각 세그먼트는 완전한 의미 단위 섹션으로 시작)
-    - 오류를 non-zero exit code까지 전파: `translate_markdown_file`가 `success` / `failure` / `skipped`로 유형화된 상태를 반환하고, 적어도 하나의 파일이 실패하면 `main()` `sys.exit(1)` (단일 파일 및 배치 모두)
-    - 모든 provider에 대한 empty-content guard, source/output sanity ratio(≥ 500자, < 5% = 거부), code placeholder 검증(`#CODEBLOCK`/`#INLINECODE`), LLM 후 정규화(heading에 붙어 있는 구분자/링크), `BadRequestError`를 통한 `reasoning_effort` 없는 재시도
+    - 모든 provider(OpenAI, Mistral, Claude, Gemini)에 대해 번역 후 언어 검증: 결정적 계층(소스 추출문이 verbatim으로 복원됨) + 확률적 계층(`langdetect`)
+    - `finish_reason` / `stop_reason` 화이트리스트 : 화이트리스트 밖의 모든 상태(truncation, content_filter 등)에 대해 `RuntimeError`를 발생시킵니다.
+    - `max_tokens` Claude : `4096` → `32768`(16k 세그먼트에서의 잠복 truncation 방지, FR→JA/ZH/KO/AR/HI의 교차 스크립트 여유 확보)
+    - 헤딩 인식 세그먼ენტ화 : 세그먼트 후반부에서 H2/H3 우선순위(각 세그먼트는 완전한 의미 단위 섹션으로 시작)
+    - 비-zero exit code까지 에러 전파 : `translate_markdown_file`가 유형화된 상태 `success` / `failure` / `skipped`를 반환하고, 최소 한 파일이라도 실패하면 `main()` `sys.exit(1)`가 됩니다(single-file 및 batch)
+    - 모든 provider에 대한 Empty-content guard, source/output sanity ratio(≥ 500자, < 5% = 거부), placeholder code 검증(`#CODEBLOCK`/`#INLINECODE`), LLM 이후 정규화(구분자/링크가 heading에 붙는 현상 수정), `BadRequestError`를 `reasoning_effort` 없이 재시도
     - 의존성 `langdetect==1.0.9` 추가
-  - **사전 커밋 품질 도구**("완전한 EurekAI 유형", 14 hooks) :
-    - Pre-commit : ruff(lint+format), shellcheck, prettier(md/yaml/json), detect-secrets(보호된 API key 4개), Lizard(CCN ≤ 12), pre-commit-hooks v5(whitespace, EOF, large-files, shebangs 등)
-    - Pre-push : mypy(점진적 lax 모드), Opengrep SAST(translate.py + scripts/), pip-audit(초기 reporting 모드), unittest discover(tests/ + scripts/tests/)
-    - `scripts/` 안의 로컬 wrapper가 `./venv/bin/python`를 사용
-    - `scripts/audit_verdict.py` : 11개의 unittest로 pip-audit JSON parser를 파싱, jls42-astro 파서에서 적응한 Python 포트
+  - **pre-commit 품질 도구**("완전한 EurekAI 타입", 14 hooks) :
+    - Pre-commit : ruff(lint+format), shellcheck, prettier(md/yaml/json), detect-secrets(보호된 4개 API key), Lizard(CCN ≤ 12), pre-commit-hooks v5(whitespace, EOF, large-files, shebangs 등)
+    - Pre-push : mypy(점진적 느슨한 모드), Opengrep SAST(translate.py + scripts/), pip-audit(초기 reporting 모드), unittest discover(tests/ + scripts/tests/)
+    - `scripts/` 안의 로컬 wrapper는 `./venv/bin/python`를 사용합니다.
+    - `scripts/audit_verdict.py` : pip-audit용 JSON parser, unittest 테스트 11개 포함, jls42-astro parser를 기반으로 한 Python 포트
     - 초기 ruff 위반 7개 수정: B904(raise from) ×2, B007(unused dirs), C408(dict literal), C419(list-comp), SIM105(contextlib.suppress), SIM110(any())
-    - Lizard가 일시적으로 `translate.py`를 제외( CCN 21-47의 함수 4개, 리팩터링 예정 ) — scripts/에 대해 엄격한 gate
+    - Lizard는 `translate.py`를 일시적으로 제외(4개 함수가 CCN 21-47, 리팩터링 예정) — scripts/에 대해서는 엄격한 gate
   - **SonarCloud + 포괄적 커버리지** :
-    - GitHub Actions 워크플로 `SonarCloud`(sonarcloud.yml + sonar-project.properties) : 모든 push와 pull-request마다 분석, `coverage.xml`를 통한 coverage
+    - GitHub Actions 워크플로 `SonarCloud`(sonarcloud.yml + sonar-project.properties) : 모든 push와 pull-request에서 분석, `coverage.xml`를 통한 coverage
     - README 상단의 SonarCloud 배지 11개(Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
     - `tests/test_silent_failure.py`(`unittest` stdlib) : silent-failure 오류 체인의 6개 연결 고리를 모두 커버
-    - `tests/test_orchestration.py`(+79 tests) : `translate.py`의 orchestration 계층(`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError 폴백, o1-series prompt format, `_validate_translation_output`의 early-return 분기)을 커버
-    - `scripts/tests/test_audit_verdict.py` : `main()`(stdin/stdout)와 `if __name__ == "__main__"` 블록의 subprocess 경유 커버리지
-    - **신규 코드 커버리지** : 75.5% → 약 98%(translate.py 98%, scripts/audit_verdict.py 97%)
-  - **테스트** : `tests/test_translation_note_position.py`가 위치 × 형식 매트릭스(E2E `marker+top|bottom|both` 및 `legacy+top|bottom|both` 포함), 다중 줄 prefix, byte-for-byte 하위 호환성(golden literal), sanitizer, frontmatter 분할(닫히지 않은 fence에 대한 raise 포함), 3문단 형식, 2문단 폴백, 1문단 + Markdown 링크 가드, 그리고 제목+URL이 절대 LLM에 전달되지 않음을 assert하는 치명적 가드레일 `TestLLMPayloadExcludesInvariants`을 커버한다. **190개 테스트 통과**, 회귀 0.
-  - 문서화 : 배지가 포함된 `README.md`(FR + 14개 번역), `CLAUDE.md`(자세한 pre-commit 워크플로 + CI watch), 28개의 재생성된 번역
-
-- **1.8** `--news` 모드 + 2026 모델 상향 (2026-03-17, 태그 `v1.8`) :
+    - `tests/test_orchestration.py`(+79 tests) : `translate.py`의 orchestration 계층을 커버(`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallback, o1-series prompt format, `_validate_translation_output`의 early-return 분기)
+    - `scripts/tests/test_audit_verdict.py` : `main()`(stdin/stdout)와 `if __name__ == "__main__"` 블록의 coverage를 subprocess를 통해 확보
+    - **새 코드 기준 Coverage** : 75.5% → 약 98%(translate.py 98%, scripts/audit_verdict.py 97%)
+  - **테스트** : `tests/test_translation_note_position.py`이 위치 × 형식 매트릭스(E2E `marker+top|bottom|both` 및 `legacy+top|bottom|both` 포함), 멀티라인 prefixing, byte-for-byte 하위 호환(golden literal), sanitizer, frontmatter split(닫히지 않은 fence에 대한 raise 포함), 3단락 형식, 2단락 fallback, 1단락 guard + Markdown 링크, 그리고 제목+URL이 절대 LLM에 전달되지 않음을 assert하는 핵심 가드 `TestLLMPayloadExcludesInvariants`를 커버합니다. **190개 테스트 통과**, 회귀 0.
+  - 문서화 : `README.md`(FR + 14개 번역, 배지 포함), `CLAUDE.md`(상세한 pre-commit 워크플로 + CI watch), 번역 28개 재생성
+- **1.8** `--news` 모드 + 2026 모델 업그레이드 (2026-03-17, 태그 `v1.8`) :
   - 기본 모델 업데이트(2026년 3월) :
-    - OpenAI 고품질 : `gpt-5` → `gpt-5.4`
+    - OpenAI 품질 : `gpt-5` → `gpt-5.4`
     - OpenAI 경제형 : `gpt-5-mini` → `gpt-5.4-mini`
-    - Gemini 고품질 : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+    - Gemini 품질 : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
   - `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`(400k) 및 `gemini-3.1-pro-preview`(1M)에 대한 token 제한 추가
-  - `--news` 초기 모드 : EN 인용문 보호를 위한 placeholders `#NEWSQUOTE\d+#`, `LANG_FLAGS` 매핑(15개 언어), 대상 언어별 flag 처리
-  - 복원 전에 news placeholder 검증(회귀: placeholder를 삭제하는 LLM은 silently citation 없는 출력을 생성)
-  - `regen_translations.sh` 스크립트를 portable하게 수정(절대 경로, pwd 의존성 없음)
-  - README/CHANGELOG language bars에 프랑스어 링크 추가, 28개 번역 재생성
-- **1.7** 새로운 기능 :
-  - 번역 시 원래 파일 이름을 유지하는 `--keep_filename` 옵션
-  - API key를 자동으로 불러오기 위한 `.env` 파일 지원
-  - **인라인 코드 보존**: 백틱(`` `...` ``)이 이제 번역 중 보호됨
+  - 초기 `--news` 모드 : `#NEWSQUOTE\d+#` placeholder로 EN 인용 보호, `LANG_FLAGS` 매핑(15개 언어), 대상 언어별 flag 처리
+  - 복원 전에 news placeholder 검증(회귀: placeholder를 삭제한 LLM이 citation 없이 조용히 출력을 생성하던 문제)
+  - `regen_translations.sh` 스크립트의 이식성 향상(절대 경로 사용, pwd 의존성 없음)
+  - README/CHANGELOG language bar에 프랑스어 링크 추가, 번역 28개 재생성
+- **1.7** 새 기능 :
+  - 번역 시 원본 파일명을 유지하는 `--keep_filename` 옵션
+  - API 키를 자동으로 불러오기 위한 `.env` 파일 지원
+  - **inline code 보존** : backticks(`` `...` ``)가 이제 번역 중 보호됩니다
   - 시스템 프롬프트 개선 :
-    - YAML frontmatter에서 따옴표 처리 향상
-    - template 변수 `{variable}` 보호
-    - 요청되지 않은 번역자 주석 금지
-  - 364개 파일에서 성공적으로 테스트 완료(jls42.org 블로그 마이그레이션)
-- **1.6** 새로운 기능 :
+    - YAML frontmatter에서 따옴표 처리 개선
+    - 템플릿 변수 `{variable}` 보호
+    - 요청되지 않은 번역자 노트 금지
+  - 364개 파일에서 성공적으로 테스트됨(jls42.org 블로그 마이그레이션)
+- **1.6** 새 기능 :
   - 번역용 Google Gemini API 지원(`--use_gemini`)
   - 2026 기본 모델 업데이트 :
-    - OpenAI : `gpt-5`(고품질), `gpt-5-mini`(에코)
-    - Claude : `claude-sonnet-4-5`(고품질), `claude-haiku-4-5`(에코)
-    - Gemini : `gemini-3-pro-preview`(고품질), `gemini-3-flash-preview`(에코)
-  - 더 빠르고 저렴한 모델을 사용하기 위한 경제형 모드(`--eco`)
+    - OpenAI : `gpt-5`(품질), `gpt-5-mini`(경제형)
+    - Claude : `claude-sonnet-4-5`(품질), `claude-haiku-4-5`(경제형)
+    - Gemini : `gemini-3-pro-preview`(품질), `gemini-3-flash-preview`(경제형)
+  - 더 빠르고 비용이 낮은 모델을 사용하기 위한 경제형 모드(`--eco`)
   - 디렉터리를 순회하지 않는 단일 파일 번역(`--file`)
-  - 새로운 단순화된 이름 패턴: `{base}-{lang}.md`
-  - 모델 이름이 포함된 기존 형식을 유지하기 위한 `--include_model` 옵션
-  - 기본 token 제한(128k)이 있는 목록에 없는 모델 지원
+  - 단순화된 새 네이밍 패턴 : `{base}-{lang}.md`
+  - 모델 이름을 포함한 기존 형식을 유지하는 `--include_model` 옵션
+  - 기본 token 제한(128k)을 가진 미등록 모델 지원
   - 14개 언어로 번역된 README
 - **1.5** 개선 사항 :
   - **API key 및 기본 모델 업데이트 :**
-    - **OpenAI :** `DEFAULT_MODEL_OPENAI`을 `"gpt-4o"`로 업데이트.
-    - **Mistral AI :** `DEFAULT_MODEL_MISTRAL`을 `"mistral-large-latest"`로 업데이트.
-    - **Anthropic의 Claude :** `DEFAULT_ANTHROPIC_API_KEY` 추가 및 `DEFAULT_MODEL_CLAUDE`을 `"claude-3-5-sonnet-20240620"`로 업데이트.
+    - **OpenAI :** `DEFAULT_MODEL_OPENAI`에서 `"gpt-4o"`로 업데이트.
+    - **Mistral AI :** `DEFAULT_MODEL_MISTRAL`에서 `"mistral-large-latest"`로 업데이트.
+    - **Anthropic의 Claude :** `DEFAULT_ANTHROPIC_API_KEY` 추가 및 `DEFAULT_MODEL_CLAUDE`에서 `"claude-3-5-sonnet-20240620"`로 업데이트.
   - **번역 프롬프트 최적화 :**
-    - 직접 번역과 번역 주석을 위한 프롬프트가 메타데이터와 특정 서식 요소 보존에 대한 상세 지침을 포함하도록 더 명확하고 효율적으로 강화됨.
+    - 직접 번역과 번역 노트용 프롬프트를 더 명확하고 효율적으로 다듬었으며, 메타데이터와 특정 포맷 요소 보존에 대한 상세 지침을 포함했습니다.
   - **코드 리팩터링 :**
     - Mistral AI 클라이언트 초기화를 위해 `MistralClient`를 `Mistral` 클래스로 교체.
-    - 가독성과 유지보수성을 높이기 위한 import 재구성.
-    - 번역 중 원래 서식을 보존하기 위한 텍스트 세분화 및 코드 블록 처리 개선.
+    - 가독성과 유지보수를 높이기 위해 import 재구성.
+    - 번역 중 원래 포맷을 보존하기 위해 텍스트 세분화 및 코드 블록 처리를 개선.
   - **출력 파일 관리 :**
-    - 출력 파일 이름에서 모델과 언어의 순서를 반전(예: `f"{base}-{args.target_lang}-{args.model}.md"`), 번역 정리와 검색이 쉬워짐.
-  - **기타 개선 :**
-    - 불필요한 빈 줄을 제거하여 코드 정리.
-    - 스크립트 구조와 가독성을 개선하기 위한 소규모 조정.
-- **1.4** 새로운 기능 :
-  - 번역을 위한 Anthropic Claude API 지원
+    - 출력 파일 이름에서 모델과 언어의 순서를 뒤집어(예: `f"{base}-{args.target_lang}-{args.model}.md"`), 번역물의 정리와 검색을 더 쉽게 함.
+  - **기타 개선 사항 :**
+    - 불필요한 빈 줄 제거로 코드 정리.
+    - 스크립트의 구조와 가독성을 개선하기 위한 사소한 조정.
+- **1.4** 새 기능 :
+  - 번역용 Anthropic의 Claude API 지원
   - 더 높은 명확성과 효율성을 위한 프롬프트 최적화
-  - 코드 유지보수성을 개선하기 위한 소규모 조정
-- **1.3** 개선 사항 및 새로운 기능 :
+  - 코드 유지보수성 향상을 위한 사소한 조정
+- **1.3** 개선 사항 및 새 기능 :
   - 코드 블록 처리 개선
-  - 출력 파일 처리 개선
+  - 출력 파일 관리 개선
   - 기존 파일 감지 개선
-  - 번역을 강제하기 위한 `--force` 옵션
-  - 출력 파일 이름에서 모델과 언어의 순서 반전
-- **1.2** 변경 내역 수정
-- **1.1** Mistral AI API 지원 추가
+  - 번역을 강제하는 `--force` 옵션
+  - 출력 파일 이름에서 모델과 언어의 순서 뒤집기
+- **1.2** 변경 사항 수정
+- **1.1** Mistral IA API 지원 추가
 - **1.0** 초기 버전 - OpenAI API 지원
 
 **gpt-5.4-mini로 fr에서 ko로 번역된 기사.**
