@@ -1228,7 +1228,13 @@ def _protect_news_quotes(content, args):
         original_quotes.append(match.group(1))
         attribution = match.group(3)
         if attribution:
-            url_match = re.search(r"\((.+?)\)", attribution)
+            # Cible le `](url)` du markdown link `[text](url)` :
+            # robuste aux parenthèses imbriquées (ex: `(relayé par [text](url))`)
+            # et n'inclut pas le préfixe FR ("relayé par", "via", etc.) qui
+            # serait traduit et casserait `_validate_news_post`.
+            # On stocke uniquement l'URL pure : c'est un invariant préservé
+            # par les placeholders #URL{N}# pendant la traduction.
+            url_match = re.search(r"\]\(([^)]+)\)", attribution)
             if url_match:
                 attribution_urls.append(url_match.group(1))
         protected = f"{news_quote_placeholder(idx)}\n>\n{match.group(2)}"

@@ -2,6 +2,17 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.9.2** Fix extraction URL d'attribution news avec parenthèses imbriquées ou préfixe FR (2026-05-11) :
+
+  - **Bug fixé** : l'extraction des URLs d'attribution dans `_protect_news_quotes` utilisait la regex `re.search(r"\((.+?)\)", attribution)` (lazy capture entre parenthèses). Sur une attribution du type `(relayé par [@user sur X](https://x.com/.../123))` (parenthèses imbriquées : `(` englobante + `]()` du markdown link), la capture s'arrêtait au premier `)` rencontré → chaîne tronquée + incluant le préfixe FR : `relayé par [@user sur X](https://x.com/.../123` (sans `)` final). Conséquence : `_validate_news_post` cherchait cette chaîne dans la sortie traduite et échouait systématiquement (deux raisons : `)` tronqué + "relayé par" traduit en `relayed by`/`weitergeleitet von`/...). Cascade complète low → medium → high → gpt-5.5 ne pouvait pas passer.
+  - **Fix** : la regex devient `re.search(r"\]\(([^)]+)\)", attribution)` — cible spécifiquement le `](url)` du markdown link, capture **uniquement l'URL pure** (sans préfixe FR ni tronquage), invariant préservé par les placeholders `#URL{N}#` pendant la traduction. Robuste aux deux patterns problématiques :
+    - `(relayé par [@account sur X](url))` — parenthèses imbriquées
+    - `via [@source](url)` ou `selon [@author](url)` — préfixe FR sans parenthèses englobantes
+  - **Tests** : 2 nouveaux dans `test_silent_failure.py` classe `TestNewsCitationExtraction` :
+    - `test_extract_attribution_url_with_nested_parens` (cas exact reproduit du bug Genspark CEO E2B)
+    - `test_extract_attribution_url_with_french_prefix` (variante avec `via`)
+  - **Couverture lacune** : `check-editorial-coverage.py` valide la syntaxe éditoriale mais pas la traduisibilité par le translator. Une amélioration possible (hors scope v1.9.2) serait un check qui simule l'extraction d'attribution en dry-run pour détecter les patterns à risque AVANT publication.
+
 - **1.9.1** Fix i18n du label CTA dans la note de traduction marker (2026-05-10) :
 
   - **Bug fixé** : le label `[Voir le projet sur GitHub ↗]` du lien CTA dans le bandeau marker en haut des fichiers traduits restait **en français** pour toutes les langues cibles, au lieu de suivre `target_lang`. Le LLM ne le voit jamais (assemblé côté Python pour préserver l'URL et le slug du repo), donc la phase de traduction n'arrivait pas à le rattraper. Régression silencieuse depuis l'ajout du format `marker` en v1.9.

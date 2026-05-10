@@ -1,111 +1,122 @@
 ### 変更履歴
 
-🌍 [フランス語](CHANGELOG.md) | [英語](CHANGELOG-en.md) | [スペイン語](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [ドイツ語](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [韓国語](CHANGELOG-ko.md) | [アラビア語](CHANGELOG-ar.md) | [ヒンディー語](CHANGELOG-hi.md) | [イタリア語](CHANGELOG-it.md) | [オランダ語](CHANGELOG-nl.md) | [ポーランド語](CHANGELOG-pl.md) | [ポルトガル語](CHANGELOG-pt.md) | [ルーマニア語](CHANGELOG-ro.md) | [スウェーデン語](CHANGELOG-sv.md)
+🌍 [フランス語](CHANGELOG.md) | [英語](CHANGELOG-en.md) | [スペイン語](CHANGELOG-es.md) | [中国語](CHANGELOG-zh.md) | [ドイツ語](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [韓国語](CHANGELOG-ko.md) | [アラビア語](CHANGELOG-ar.md) | [ヒンディー語](CHANGELOG-hi.md) | [イタリア語](CHANGELOG-it.md) | [オランダ語](CHANGELOG-nl.md) | [ポーランド語](CHANGELOG-pl.md) | [ポルトガル語](CHANGELOG-pt.md) | [ルーマニア語](CHANGELOG-ro.md) | [スウェーデン語](CHANGELOG-sv.md)
 
-- **1.9.1** 翻訳メモ marker 内の CTA ラベルの i18n 修正 (2026-05-10) :
+- **1.9.2** 括弧の入れ子または FR プレフィックス付きのニュースのアトリビューション URL 抽出を修正 (2026-05-11) :
 
-  - **修正済みの不具合**: 翻訳済みファイル上部の marker バナー内にある CTA リンクのラベル `[Voir le projet sur GitHub ↗]` が、すべての対象言語で `target_lang` に従うのではなく、**フランス語のまま** になっていました。LLM にはそれが一切見えないため（URL とリポジトリの slug を保持するために Python 側で組み立てている）、翻訳フェーズでは修正しきれませんでした。v1.9 で `marker` 形式を追加して以来の、静かな回帰です。
-  - **修正**: 15言語をそれぞれのローカライズ済みラベルに対応付ける新しい定数 `_VIEW_PROJECT_LABELS` を追加。`_translation_note_invariants(target_lang)` と `_assemble_translation_note_paragraphs(phrase, target_lang)` は、これ以降ターゲット言語を伝播します。言語が不明な場合は `fr` にフォールバックします（安全性のため、KeyError は発生しません）。
-  - **テスト**: `test_source_emits_three_paragraphs_repo_title_description_link` を調整（target_lang `ja` → 期待される日本語ラベル）。新しいテストを 2 件追加: `test_source_link_label_localized_per_target_lang`（7言語に対してパラメータ化し、ラテン文字・表語文字・アブジャド系スクリプトをカバー）と `test_source_link_label_falls_back_to_french_for_unknown_target`。合計: `test_translation_note_position.py` に 40 テスト（38 から増加）。
-  - **後方互換性**: デフォルト付きシグネチャ `target_lang="fr"` — `args.target_lang` なしの外部プログラム呼び出しでも、変更なしで引き続き動作します。
+  - **修正されたバグ**: ``_protect_news_quotes`` 内のアトリビューション URL 抽出は、``re.search(r"\((.+?)\)", attribution)``（括弧間の遅延キャプチャ）という正規表現を使っていた。``(relayé par [@user sur X](https://x.com/.../123))`` のようなアトリビューション（入れ子の括弧: 外側の ``(`` + markdown link の ``]()``）では、キャプチャが最初に見つかった ``)`` で止まり、結果として文字列が切り詰められ、さらに FR プレフィックスが含まれる: ``relayé par [@user sur X](https://x.com/.../123``（末尾の ``)`` なし）。結果として ``_validate_news_post`` は翻訳後の出力内でこの文字列を探して必ず失敗していた（理由は 2 つ: ``)`` が切り詰められていたことと、「relayé par」が ``relayed by``/``weitergeleitet von``/... に翻訳されていたこと）。low → medium → high → gpt-5.5 の完全なカスケードは通過できなかった。
+  - **修正**: 正規表現を ``re.search(r"\]\(([^)]+)\)", attribution)`` に変更 — markdown link の ``](url)`` を狙い、**純粋な URL のみ**をキャプチャする（FR プレフィックスも切り詰めもなし）。翻訳中は ``#URL{N}#`` によって不変性が保たれる。問題の 2 パターンに対して堅牢:
+    - ``(relayé par [@account sur X](url))`` — 入れ子の括弧
+    - ``via [@source](url)`` または ``selon [@author](url)`` — 外側の括弧なしの FR プレフィックス
+  - **テスト**: ``test_silent_failure.py`` クラス ``TestNewsCitationExtraction`` に 2 つ追加:
+    - ``test_extract_attribution_url_with_nested_parens``（Genspark CEO E2B のバグを正確に再現したケース）
+    - ``test_extract_attribution_url_with_french_prefix``（``via`` 付きのバリエーション）
+  - **カバレッジの穴**: ``check-editorial-coverage.py`` は編集上の構文は検証するが、translator による翻訳可能性までは検証しない。v1.9.2 の範囲外だが、公開前にアトリビューション抽出を dry-run でシミュレーションし、危険なパターンを事前検出するチェックを追加する改善が考えられる。
 
-- **1.9** サイレント失敗修正 + 品質ツール一式 + 複数位置翻訳メモ (2026-05-07) :
-  - **複数位置翻訳メモ + "embed card" marker 形式** :
-    - 新しい CLI オプション（追加のみ、デフォルトは不変 → **non breaking**）:
-      - `--note_position {top,bottom,both}`（デフォルト: `bottom`）: メモをファイルの先頭、末尾、または両方に配置します。
-      - `--note_format {legacy,marker}`（デフォルト: `legacy`）:
-        - `legacy` は v1.8 の動作を厳密に再現します（太字段落 `**…**`）を **byte-for-byte**。
-        - `marker` は、目に見えない Markdown の link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) に続いて、**3段落の blockquote** を出力し、"GitHub repo embed card" 風にレンダリングできるようにします: inline code でのプロジェクトタイトル (`**\`ai-powered-markdown-translator\`\*\*`)、LLM による翻訳済み説明、そして見える矢印付きの CTA リンク (`[Voir le projet sur GitHub ↗](URL)`)。remark プラグインによるビルド時の利用が可能です（jls42.org のブログ参照 → プラグイン `remark-translation-banner`）。
-    - **LLM に一切送られない不変要素**: リポジトリタイトルと GitHub URL は、説明文の翻訳後に Python 側で組み立てます。LLM は slug `ai-powered-markdown-translator` と `https://github.com/jls42/...` を決して見ないため、レンダラー／大文字小文字／scheme が変更されることはありません。
-    - **フロントマターを考慮した挿入**: `top` または `both` モードでは、メモは YAML フロントマターの閉じる `---` ブロックの**後**に挿入されます（Astro Content Collections / gray-matter の安全性対策）。Helper `_split_frontmatter` はファイル先頭の `---\n…\n---\n` を検出して整合性を維持し、閉じる fence がないまま開いた frontmatter には **`RuntimeError` を送出** します（その場合、ファイルは不適切な位置にメモを付けたまま書き込まれず、`failed_files` に戻されます）。
-    - **ホワイトリスト式モデルサニタイザ**: `_sanitize_model` は `[A-Za-z0-9._:/-]` 以外の文字をすべて `_` に置換し、空なら `unknown` にフォールバックします。Astro の remark プラグイン側の validator に合わせ、marker フォーマットを壊す文字（スペース、引用符、括弧、カンマなど）を無効化します。
-    - **内部リファクタ**: `_append_translation_note`（1つのモノリシック関数）→ 7つの純粋な helper (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`)。builder/composer を分離（builder は区切りなしの純粋なブロックを返し、composer は位置に応じて `\n\n` を適用）; production と helper source は同じ 3段落アセンブラを共有します。
-    - **`_quote_lines` blank-preserving**: 各行の先頭に `> ` を付け、空行は `>` のみに変換します。これにより mdast は blockquote 内で 3 つの別々の段落（タイトル / 説明 / リンク）を認識でき、改行を含む単一段落ではなくなります。
-    - **`_build_translation_note_block` 適応型**: LLM が保持した段落数に応じて切り替え（3 = 完全な card 形式、2 = 文 + リンク、1 = フォールバック）。1段落フォールバックでは、Markdown リンク `](` が検出された場合に **もはや `**...**` で囲みません**（リンクの周囲での `<strong>` のレンダリングが不安定なため）。
-    - **後方互換性**: `getattr(args, "note_position", "bottom")` と `getattr(args, "note_format", "legacy")` を `_compose_with_notes` 側で維持 — これらの属性を持たない Namespace（既存テスト、外部プログラム呼び出し）でも変更なしで動作し続けます。
-  - **長文翻訳における silent-failure 修正**:
-    - すべての provider（OpenAI、Mistral、Claude、Gemini）で翻訳後の言語検証を実施: 決定論的レイヤー（元文の抜粋が verbatim で見つかる）+ 確率論的レイヤー（`langdetect`）
-    - `finish_reason` / `stop_reason` ホワイトリスト: ホワイトリスト外の状態（truncation、content_filter など）では `RuntimeError` を送出
-    - `max_tokens` Claude: `4096` → `32768`（16k セグメントでの潜在的な truncation を回避し、FR→JA/ZH/KO/AR/HI のクロススクリプト余裕を確保）
-    - 見出しを意識した segmentation: セグメント後半では H2/H3 を優先（各セグメントが完全な意味的セクションで始まるようにする）
-    - エラーを非ゼロの exit code まで伝播: `translate_markdown_file` は型付きステータス `success` / `failure` / `skipped` を返し、`main()` は少なくとも 1 ファイル失敗した場合に `sys.exit(1)` を返します（single-file と batch の両方）
-    - すべての provider に対する empty-content guard、source/output の sanity ratio（≥ 500 文字、< 5% = 拒否）、placeholder code 検証 (`#CODEBLOCK`/`#INLINECODE`)、LLM 後の正規化（区切り / リンクが見出しに貼り付いた状態の修正）、`BadRequestError` retry without `reasoning_effort`
-    - 依存関係 `langdetect==1.0.9` を追加
-  - **pre-commit 品質ツール**（"type EurekAI 完全版", 14 hooks）:
-    - Pre-commit: ruff（lint+format）、shellcheck、prettier（md/yaml/json）、detect-secrets（保護された 4 つの API キー）、Lizard（CCN ≤ 12）、pre-commit-hooks v5（whitespace、EOF、large-files、shebangs など）
-    - Pre-push: mypy（段階的に緩めるモード）、Opengrep SAST（translate.py + scripts/）、pip-audit（初期 reporting モード）、unittest discover（tests/ + scripts/tests/）
-    - `scripts/` 内のローカル wrapper は `./venv/bin/python`
-    - `scripts/audit_verdict.py` : 11 件の unittest で pip-audit の JSON parser を検証、jls42-astro の parser を移植した Python 実装
-    - 初期の ruff 違反 7 件を修正: B904（raise from）×2、B007（unused dirs）、C408（dict literal）、C419（list-comp）、SIM105（contextlib.suppress）、SIM110（any()）
-    - Lizard は一時的に `translate.py` を除外（CCN 21-47 の関数が 4 つ、リファクタは計画済み）— scripts/ に対しては厳格 gate
-  - **SonarCloud + 完全なカバレッジ**:
-    - GitHub Actions ワークフロー `SonarCloud`（sonarcloud.yml + sonar-project.properties）: push と pull-request のたびに解析を実行し、coverage は `coverage.xml` で取得
-    - README 上部に 11 個の SonarCloud バッジ（Quality Gate、Security/Reliability/Maintainability ratings、Coverage、Vulnerabilities、Bugs、Code Smells、Duplicated Lines、Technical Debt、Lines of Code）
-    - `tests/test_silent_failure.py`（`unittest` stdlib）: サイレント失敗エラー連鎖の 6 つのリンクをカバー
-    - `tests/test_orchestration.py`（+79 tests）: `translate.py` の orchestration 層をカバー（`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallback、o1-series prompt format、`_validate_translation_output` の early-return 分岐）
-    - `scripts/tests/test_audit_verdict.py` : `main()`（stdin/stdout）と `if __name__ == "__main__"` ブロックを subprocess 経由でカバー
+- **1.9.1** marker 翻訳ノート内の CTA ラベルの i18n を修正 (2026-05-10) :
+
+  - **修正されたバグ**: 変換済みファイル上部の marker バナーにある CTA リンクのラベル ``[Voir le projet sur GitHub ↗]`` が、すべての対象言語で **フランス語のまま** で、``target_lang`` に従っていなかった。LLM には見えない（URL と repo slug を保つため Python 側で組み立てられる）ため、翻訳フェーズでは補えなかった。v1.9 で ``marker`` 形式を追加して以来の静かな回帰。
+  - **修正**: 15 言語をそれぞれのローカライズ済みラベルにマップする新しい定数 ``_VIEW_PROJECT_LABELS`` を追加。``_translation_note_invariants(target_lang)`` と ``_assemble_translation_note_paragraphs(phrase, target_lang)`` が対象言語を伝播するようになった。言語が不明な場合は ``fr`` にフォールバック（安全策、KeyError なし）。
+  - **テスト**: ``test_source_emits_three_paragraphs_repo_title_description_link`` を調整（target_lang ``ja`` → 期待される日本語ラベル）。新規テスト 2 件: ``test_source_link_label_localized_per_target_lang``（ラテン文字、表語文字、アブジャドをカバーする 7 言語でパラメータ化）と ``test_source_link_label_falls_back_to_french_for_unknown_target``。合計: ``test_translation_note_position.py`` に 40 テスト（38 から増加）。
+  - **後方互換性**: デフォルト ``target_lang="fr"`` 付きのシグネチャ — ``args.target_lang`` なしの外部プログラムからの呼び出しも変更なしで引き続き動作する。
+
+- **1.9** サイレント失敗修正 + 完全な品質ツール群 + 多位置翻訳ノート (2026-05-07) :
+  - **多位置翻訳ノート + marker 形式 "embed card"** :
+    - 新しい CLI オプション（追加のみ、既定値は変更なし → **非破壊**）:
+      - ``--note_position {top,bottom,both}``（既定: ``bottom``）: 翻訳済みファイルの上部、下部、または両方にノートを配置する。
+      - ``--note_format {legacy,marker}``（既定: ``legacy``）:
+        - ``legacy`` は v1.8 の挙動を厳密に再現する（太字パラグラフ ``**…**``）**byte-for-byte**。
+        - ``marker`` は、目に見えない Markdown の link reference definition (``[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"``) の後に、"GitHub repo embed card" 風のレンダリング向けに構造化された **3 段落の blockquote** を出力する: インラインコードのプロジェクトタイトル (``**\`ai-powered-markdown-translator\`\*\*``)、LLM により翻訳された説明、そして可視の矢印付き CTA リンク (``[Voir le projet sur GitHub ↗](URL)``)。remark プラグインにより build 時に利用可能（cf. blog jls42.org → plugin ``remark-translation-banner``）。
+    - **LLM に一切送られない不変要素**: repo タイトルと GitHub URL は、説明文を翻訳した後に Python 側で組み立てられる。LLM には slug ``ai-powered-markdown-translator`` も ``https://github.com/jls42/...`` も見えないため、renderer / 大文字小文字 / scheme が一切変わらないことが保証される。
+    - **frontmatter を意識した挿入**: ``top`` または ``both`` モードでは、ノートは YAML frontmatter の閉じ ``---`` ブロックの **後ろ** に挿入される（Astro Content Collections / gray-matter の安全性）。helper ``_split_frontmatter`` はファイル先頭の ``---\n…\n---\n`` を検出して整合性を保つ；閉じ fence のない開いた frontmatter に対しては **``RuntimeError`` を送出** し（誤った位置にノートを書き込まず、ファイルは ``failed_files`` に戻る）。
+    - **ホワイトリスト方式のモデルサニタイザー**: ``_sanitize_model`` は ``[A-Za-z0-9._:/-]`` 以外の文字をすべて ``_`` に置換し、空なら ``unknown`` にフォールバック。Astro remark プラグイン側のバリデータと整合し、marker 形式を壊す文字（空白、引用符、括弧、カンマなど）を無効化する。
+    - **内部リファクタリング**: ``_append_translation_note``（1 つのモノリシック関数）→ 7 つの純粋な helper（``_translation_note_invariants``, ``_build_translation_note_phrase``, ``_assemble_translation_note_paragraphs``, ``_build_translation_note_source``, ``_sanitize_model``, ``_quote_lines``, ``_split_frontmatter``, ``_build_translation_note_block``, ``_compose_with_notes``）。builder/composer を分離（builder は区切りなしの純粋なブロックを返し、composer は位置に応じて ``\n\n`` を適用）; production と source helper は同じ 3 段落アセンブラを共有する。
+    - **``_quote_lines`` blank-preserving**: 各行の先頭に ``> `` を付け、空行は ``>`` のみへ変換する。これにより mdast は blockquote 内に 3 つの別々のパラグラフ（タイトル / 説明 / リンク）を認識でき、改行を含む 1 つのパラグラフではなくなる。
+    - **``_build_translation_note_block`` の適応**: LLM が保持したパラグラフ数に応じて（3 = 完全な card 形式、2 = 文章 + リンク、1 = フォールバック）。1 パラグラフのフォールバックでは、Markdown リンク ``](`` が検出された場合に **もはや ``**...**`` で囲まない**（リンク周辺の ``<strong>`` の描画が不安定なため）。
+    - **後方互換性**: ``getattr(args, "note_position", "bottom")`` と ``getattr(args, "note_format", "legacy")`` は ``_compose_with_notes`` 側で対応 — これらの属性を持たない Namespace（既存テスト、外部プログラム呼び出し）も変更なしで動作し続ける。
+  - **長文翻訳におけるサイレント失敗修正**:
+    - すべての provider（OpenAI, Mistral, Claude, Gemini）に対する翻訳後の言語検証: 決定論的レイヤー（ソースの断片が verbatim で再発見される）+ 確率論的レイヤー（``langdetect``）
+    - ``finish_reason`` / ``stop_reason``: whitelist 外の状態（truncation, content_filter など）では ``RuntimeError`` を送出
+    - ``max_tokens`` Claude: ``4096`` → ``32768``（16k セグメントでの潜在的 truncation を回避、FR→JA/ZH/KO/AR/HI のクロススクリプト余裕を確保）
+    - 見出し認識セグメンテーション: セグメント後半では H2/H3 を優先（各セグメントが完全な意味セクションから始まる）
+    - エラーを non-zero の exit code まで伝播: ``translate_markdown_file`` は型付きステータス ``success`` / ``failure`` / ``skipped`` を返し、``main()`` は少なくとも 1 ファイルが失敗した場合に ``sys.exit(1)`` する（単一ファイルとバッチの両方）
+    - すべての provider で empty-content ガード、source/output の sanity ratio（≥ 500 chars, < 5% = 拒否）、コードプレースホルダーの検証（``#CODEBLOCK`` / ``#INLINECODE``）、LLM 後の正規化（見出しに結合した区切り / リンク）、``BadRequestError`` の ``reasoning_effort`` なし retry
+    - 依存関係 ``langdetect==1.0.9`` を追加
+  - **品質ツール群 pre-commit**（"完全な EurekAI 型", 14 hooks）:
+    - Pre-commit: ruff（lint+format）、shellcheck、prettier（md/yaml/json）、detect-secrets（保護された 4 つの API keys）、Lizard（CCN ≤ 12）、pre-commit-hooks v5（whitespace、EOF、large-files、shebangs など）
+    - Pre-push: mypy（段階的な緩めモード）、Opengrep SAST（translate.py + scripts/）、pip-audit（初期 reporting モード）、unittest discover（tests/ + scripts/tests/）
+    - ``scripts/`` 内のローカル wrappers は ``./venv/bin/python`` を使用
+    - ``scripts/audit_verdict.py``: 11 個の unittest で pip-audit JSON parser を実装、jls42-astro parser の Python 移植版
+    - 初期の 7 件の ruff 違反を修正: B904（raise from）×2、B007（unused dirs）、C408（dict literal）、C419（list-comp）、SIM105（contextlib.suppress）、SIM110（any()）
+    - Lizard は一時的に ``translate.py`` を除外（CCN 21-47 の 4 関数、リファクタリング予定）— scripts/ に対しては厳格な gate
+  - **SonarCloud + 網羅的カバレッジ**:
+    - GitHub Actions のワークフロー ``SonarCloud``（sonarcloud.yml + sonar-project.properties）: push と pull-request ごとに解析、coverage は ``coverage.xml`` 経由
+    - README 先頭に 11 個の SonarCloud バッジ（Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code）
+    - ``tests/test_silent_failure.py``（``unittest`` stdlib）: サイレント失敗のエラーチェーンの 6 つのリンクをカバー
+    - ``tests/test_orchestration.py``（+79 tests）: ``translate.py`` のオーケストレーション層をカバー（``_resolve_*_filename``, ``_existing_translation_exists``, ``_record_translation_status``, ``_write_output_file``, ``translate_directory``, ``_validate_input_paths``, ``_init_*_client``, ``_select_provider_client``, ``_normalize_collapsed_markdown``, ``_cleanup_source_flag``, ``_validate_news_flags_*``, ``_openai_create_with_fallback`` TypeError + BadRequestError フォールバック、o1-series prompt format、``_validate_translation_output`` の early-return ブランチ）
+    - ``scripts/tests/test_audit_verdict.py``: ``main()``（stdin/stdout）と ``if __name__ == "__main__"`` ブロックの coverage を subprocess 経由で実施
     - **新規コードの Coverage**: 75.5% → 約 98%（translate.py 98%、scripts/audit_verdict.py 97%）
-  - **テスト**: `tests/test_translation_note_position.py` は位置 × 形式のマトリクスをカバー（E2E `marker+top|bottom|both` と `legacy+top|bottom|both` を含む）、複数行プレフィックス、byte-for-byte の後方互換性（golden literal）、サニタイザ、frontmatter の分割（閉じていない fence での raise を含む）、3段落形式、2段落フォールバック、1段落 + Markdown リンクの guard、そしてタイトル+URL が決して LLM に送られないことを assert する重要なガードレール `TestLLMPayloadExcludesInvariants`。**190 テストが pass**、回帰 0。
-  - ドキュメント: バッジ付きの `README.md`（FR + 14 翻訳）、`CLAUDE.md`（詳細な pre-commit ワークフロー + CI watch）、28 件の翻訳を再生成
-- **1.8** `--news` モード + 2026 モデル更新 (2026-03-17、tag `v1.8`) :
+  - **テスト**: ``tests/test_translation_note_position.py`` は position × format のマトリクス（``marker+top|bottom|both`` と ``legacy+top|bottom|both`` を含む E2E）、複数行プレフィックス付け、byte-for-byte 後方互換（golden literal）、サニタイザー、frontmatter split（未閉鎖 fence に対する raise を含む）、3-paragraph 形式、2-paragraph フォールバック、1-paragraph + Markdown link のガード、そしてタイトル+URL が決して LLM に送られないことを assert する重大なガード ``TestLLMPayloadExcludesInvariants`` をカバー。**190 テスト合格**, 回帰 0。
+  - ドキュメント: バッジ付き ``README.md``（FR + 14 translations）、``CLAUDE.md``（pre-commit ワークフロー + 詳細な CI watch）、28 の翻訳を再生成
+- **1.8** ``--news`` モード + モデル更新 2026 (2026-03-17, tag ``v1.8``) :
   - デフォルトモデルを更新（2026年3月）:
-    - OpenAI 品質: `gpt-5` → `gpt-5.4`
-    - OpenAI 経済: `gpt-5-mini` → `gpt-5.4-mini`
-    - Gemini 品質: `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
-  - `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`（400k）および `gemini-3.1-pro-preview`（1M）に対する token 制限を追加
-  - 初期 `--news` モード: EN 引用を `#NEWSQUOTE\d+#` で保護、`LANG_FLAGS`（15言語）をマッピング、対象言語ごとのフラグ処理
-  - 復元前に news placeholders を検証（回帰: placeholder を削除する LLM により、引用なしの出力が静かに生成されていた）
-  - `regen_translations.sh` スクリプトをポータブル化（絶対パス、pwd 依存なし）
-  - README/CHANGELOG の language bars にフランス語リンクを追加、28 件の翻訳を再生成
+    - OpenAI 品質: ``gpt-5`` → ``gpt-5.4``
+    - OpenAI エコノミー: ``gpt-5-mini`` → ``gpt-5.4-mini``
+    - Gemini 品質: ``gemini-3-pro-preview`` → ``gemini-3.1-pro-preview``
+  - ``gpt-5.4``, ``gpt-5.4-mini``, ``gpt-5.4-nano``（400k）および ``gemini-3.1-pro-preview``（1M）の token 制限を追加
+  - ``--news`` モード初期版: ``#NEWSQUOTE\d+#`` プレースホルダーによる EN 引用の保護、``LANG_FLAGS`` マッピング（15 言語）、対象言語ごとのフラグ処理
+  - 復元前の news プレースホルダー検証（回帰: プレースホルダーを削除する LLM が、引用のない出力を静かに生成していた）
+  - ``regen_translations.sh`` スクリプトを portable にした（絶対パス、pwd への依存なし）
+  - README/CHANGELOG の language bars にフランス語リンクを追加、28 の翻訳を再生成
 - **1.7** 新機能:
-  - 翻訳時に元のファイル名を維持するための `--keep_filename` オプション
-  - API キーを自動ロードするための `.env` ファイル対応
-  - **インラインコードの保護**: バッククォート（`` `...` ``）が翻訳中に保護されるようになりました
-  - システムプロンプトの改善:
-    - YAML frontmatter 内の引用符処理を改善
-    - テンプレート変数 `{variable}` を保護
-    - 要求されていない翻訳者注記を禁止
-  - 364 ファイルで正常動作を確認（jls42.org ブログ移行）
+  - 翻訳時に元のファイル名を保持するための ``--keep_filename`` オプション
+  - API keys を自動で読み込む ``.env`` ファイルのサポート
+  - **インラインコードの保持**: バッククォート（`` ``...`` ``）が翻訳中も保護されるようになった
+  - システム prompt の改善:
+    - YAML frontmatter 内の引用符の扱いを改善
+    - テンプレート変数 ``{variable}`` の保護
+    - 要求されていない translator note の禁止
+  - 364 ファイルで正常にテスト済み（jls42.org ブログ移行）
 - **1.6** 新機能:
-  - 翻訳用 Google Gemini API のサポート (`--use_gemini`)
-  - 2026 年デフォルトモデルを更新:
-    - OpenAI: `gpt-5`（品質）、`gpt-5-mini`（エコ）
-    - Claude: `claude-sonnet-4-5`（品質）、`claude-haiku-4-5`（エコ）
-    - Gemini: `gemini-3-pro-preview`（品質）、`gemini-3-flash-preview`（エコ）
-  - より高速で低コストなモデルを使うための経済モード (`--eco`)
-  - ディレクトリを走査せずに 1 ファイルだけを翻訳する機能 (`--file`)
-  - 新しい簡略化された命名パターン: `{base}-{lang}.md`
-  - モデル名を含む旧形式を維持するための `--include_model` オプション
-  - デフォルトの token 制限付きで、未列挙モデルをサポート（128k）
+  - 翻訳用の Google Gemini API のサポート（``--use_gemini``）
+  - 2026 年のデフォルトモデル更新:
+    - OpenAI: ``gpt-5``（品質）, ``gpt-5-mini``（エコ）
+    - Claude: ``claude-sonnet-4-5``（品質）, ``claude-haiku-4-5``（エコ）
+    - Gemini: ``gemini-3-pro-preview``（品質）, ``gemini-3-flash-preview``（エコ）
+  - より高速で低コストのモデルを使うためのエコモード（``--eco``）
+  - ディレクトリを走査せずに単一ファイル翻訳（``--file``）
+  - 新しい簡略化された命名パターン: ``{base}-{lang}.md``
+  - モデル名付きの旧形式を保持するためのオプション ``--include_model``
+  - 既定の token 制限（128k）を持つ未列挙モデルのサポート
   - README を 14 言語に翻訳
 - **1.5** 改善:
-  - **API キーとデフォルトモデルの更新:**
-    - **OpenAI:** `DEFAULT_MODEL_OPENAI` から `"gpt-4o"` に更新。
-    - **Mistral AI:** `DEFAULT_MODEL_MISTRAL` から `"mistral-large-latest"` に更新。
-    - **Anthropic の Claude:** `DEFAULT_ANTHROPIC_API_KEY` を追加し、`DEFAULT_MODEL_CLAUDE` から `"claude-3-5-sonnet-20240620"` に更新。
+  - **API keys とデフォルトモデルの更新:**
+    - **OpenAI:** ``DEFAULT_MODEL_OPENAI`` から ``"gpt-4o"`` に更新。
+    - **Mistral AI:** ``DEFAULT_MODEL_MISTRAL`` から ``"mistral-large-latest"`` に更新。
+    - **Anthropic の Claude:** ``DEFAULT_ANTHROPIC_API_KEY`` を追加し、``DEFAULT_MODEL_CLAUDE`` から ``"claude-3-5-sonnet-20240620"`` に更新。
   - **翻訳プロンプトの最適化:**
-    - 直接翻訳と翻訳メモのプロンプトを拡張し、メタデータと特定のフォーマット要素の保持に関する詳細な指示を含めることで、より明確かつ効率的にしました。
+    - 直接翻訳と翻訳ノート用の prompt を拡充し、メタデータや特定のフォーマット要素の保持に関する詳細な指示を含めることで、より明確で効率的にした。
   - **コードのリファクタリング:**
-    - Mistral AI クライアントの初期化に `MistralClient` を `Mistral` クラスへ置換。
-    - 可読性と保守性を高めるために import を再整理。
-    - 翻訳時に元の書式を保持できるよう、テキストの分割とコードブロック処理を改善。
+    - Mistral AI クライアント初期化用の ``MistralClient`` をクラス ``Mistral`` に置き換え。
+    - 可読性と保守性を高めるために imports を再編成。
+    - 元のフォーマットを保持したまま翻訳できるよう、テキストのセグメンテーションと code block の扱いを改善。
   - **出力ファイルの管理:**
-    - 出力ファイル名におけるモデルと言語の順序を逆転（例: `f"{base}-{args.target_lang}-{args.model}.md"`）し、翻訳の整理と検索を容易化。
+    - 出力ファイル名における model と language の順序を逆にした（例: ``f"{base}-{args.target_lang}-{args.model}.md"``）ことで、翻訳の整理と検索を容易にした。
   - **その他の改善:**
     - 不要な空行を削除してコードを整理。
-    - スクリプトの構造と可読性を改善するための細かな調整。
+    - スクリプトの構造と可読性を向上させるための小さな調整。
 - **1.4** 新機能:
-  - 翻訳用 Anthropic の Claude API 対応
-  - より明確で効率的なプロンプト最適化
-  - コード保守性を高めるための細かな調整
+  - 翻訳用の Anthropic Claude API をサポート
+  - より高い明確さと効率のため prompt を最適化
+  - コード保守性を高めるための小さな調整
 - **1.3** 改善と新機能:
-  - コードブロック処理の改善
-  - 出力ファイル処理の改善
-  - 既存ファイル検出の改善
-  - 強制翻訳のための `--force` オプション
-  - 出力ファイル名におけるモデルと言語の順序を逆転
-- **1.2** changelog の修正
-- **1.1** Mistral IA API サポートを追加
-- **1.0** 初期バージョン - OpenAI API サポート
+  - code block の扱いを改善
+  - 出力ファイルの管理を改善
+  - 既存ファイルの検出を改善
+  - 翻訳を強制する ``--force`` オプション
+  - 出力ファイル名における model と language の順序を逆転
+- **1.2** 変更履歴の修正
+- **1.1** Mistral IA API のサポートを追加
+- **1.0** 初期バージョン - OpenAI API のサポート
 
-**gpt-5.4-miniによってfrからjaへ翻訳された記事。**
+**fr から ja へ gpt-5.4-mini で翻訳された記事。**
