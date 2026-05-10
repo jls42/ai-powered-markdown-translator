@@ -5,7 +5,7 @@
 <h4 align="center">📊 Calidad del código</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Estado del Quality Gate"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Estado del control de calidad"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Calificación de seguridad"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Calificación de fiabilidad"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Calificación de mantenibilidad"></a>
@@ -28,20 +28,20 @@
 
 Traductor de archivos Markdown que utiliza **OpenAI**, **Mistral AI**, **Claude (Anthropic)** y **Google Gemini**.
 
-Este script Python traduce archivos Markdown de un idioma fuente a un idioma destino, preservando el formato, los bloques de código y los metadatos front matter.
+Este script Python traduce archivos Markdown de un idioma de origen a un idioma de destino mientras preserva el formato, los bloques de código y los metadatos front matter.
 
-## Características principales
+## Características Principales
 
-- **Multi-proveedor**: compatibilidad con 4 APIs (OpenAI, Mistral, Claude, Gemini)
+- **Multi-Proveedor**: Compatibilidad con 4 APIs (OpenAI, Mistral, Claude, Gemini)
 - **Modelos 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **Modo económico**: opción `--eco` para usar modelos más rápidos y menos costosos
-- **Archivo único**: opción `--file` para traducir un solo archivo
-- **Segmentación inteligente**: gestión de textos largos con límites de tokens por modelo
-- **Conservación del código**: los bloques de código Y el código inline (`` `...` ``) se preservan
-- **Nombre de archivo**: opción `--keep_filename` para conservar el nombre original
-- **Modo noticias**: opción `--news` para proteger las citas en inglés y gestionar las banderas en los artículos de noticias
-- **Configuración .env**: compatibilidad con el archivo `.env` para las claves API
-- **Nota de traducción**: adición opcional de una nota al final del documento
+- **Modo Económico**: Opción `--eco` para usar modelos más rápidos y menos costosos
+- **Archivo Único**: Opción `--file` para traducir un solo archivo
+- **Segmentación Inteligente**: Gestión de textos largos con límites de tokens por modelo
+- **Preservación del Código**: Se preservan los bloques de código Y el código inline (`` `...` ``)
+- **Nombre de Archivo**: Opción `--keep_filename` para conservar el nombre original
+- **Modo Noticias**: Opción `--news` para proteger las citas en inglés y gestionar las banderas por idioma en los artículos de actualidad
+- **Configuración .env**: Compatibilidad con el archivo `.env` para las claves API
+- **Nota de Traducción**: Añadido opcional de una nota al final del documento
 
 ## Instalación
 
@@ -52,9 +52,9 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Herramientas de calidad (opcional pero recomendadas)
+### Herramientas de calidad (opcional, pero recomendado)
 
-El proyecto utiliza [`pre-commit`](https://pre-commit.com) para evitar hacer commits de código mal formateado, vulnerable o que contenga un secreto. Instalación:
+El proyecto utiliza [`pre-commit`](https://pre-commit.com) para evitar hacer commit de código mal formateado, vulnerable o que contenga un secreto. Instalación:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -62,11 +62,11 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Hooks activos: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complejidad), detect-secrets (claves API), mypy (tipado progresivo), Opengrep (SAST), pip-audit (CVE de dependencias), unittest. Véase la sección `CLAUDE.md` _Quality / pre-commit_ para más detalles.
+Hooks activos: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexidad), detect-secrets (claves API), mypy (tipado progresivo), Opengrep (SAST), pip-audit (CVE deps), unittest. Consulta la sección _Calidad / pre-commit_ de `CLAUDE.md` para más detalles.
 
 ## Configuración
 
-Cree un archivo `.env` en la raíz del proyecto o defina las variables de entorno:
+Crea un archivo `.env` en la raíz del proyecto o define las variables de entorno:
 
 ```bash
 # Fichier .env (recommandé)
@@ -113,40 +113,40 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Opciones
 
-| Opción                   | Descripción                                                              |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Archivo Markdown único a traducir                                       |
-| `--source_dir`           | Directorio de origen que contiene los archivos Markdown                  |
-| `--target_dir`           | Directorio de salida para los archivos traducidos                        |
-| `--source_lang`          | Idioma fuente (predeterminado: `fr`)                          |
-| `--target_lang`          | Idioma destino (predeterminado: `en`)                          |
-| `--model`                | Modelo específico a utilizar                                             |
-| `--eco`                  | Usar los modelos económicos                                               |
-| `--use_mistral`          | Usar la API de Mistral AI                                                 |
-| `--use_claude`           | Usar la API de Claude                                                     |
-| `--use_gemini`           | Usar la API de Gemini                                                     |
-| `--force`                | Forzar la retraducción                                                    |
-| `--keep_filename`        | Conservar el nombre de archivo original                                   |
-| `--news`                 | Modo noticias: protege las citas EN, gestiona las banderas por idioma     |
-| `--add_translation_note` | Añadir una nota de traducción                                           |
+| Opción                  | Descripción                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| `--file`                 | Archivo Markdown único para traducir                                |
+| `--source_dir`           | Directorio de origen que contiene los archivos Markdown             |
+| `--target_dir`           | Directorio de salida para los archivos traducidos                   |
+| `--source_lang`          | Idioma de origen (predeterminado: `fr`)                   |
+| `--target_lang`          | Idioma de destino (predeterminado: `en`)                  |
+| `--model`                | Modelo específico a utilizar                                        |
+| `--eco`                  | Usar los modelos económicos                                         |
+| `--use_mistral`          | Usar la API de Mistral AI                                           |
+| `--use_claude`           | Usar la API de Claude                                              |
+| `--use_gemini`           | Usar la API de Gemini                                              |
+| `--force`                | Forzar la retraducción                                              |
+| `--keep_filename`        | Conservar el nombre de archivo original                             |
+| `--news`                 | Modo noticias: protege las citas EN, gestiona las banderas por idioma |
+| `--add_translation_note` | Añadir una nota de traducción                                        |
 | `--note_position`        | Posición de la nota: `top`, `bottom` (predeterminado), o `both` |
 | `--note_format`          | Formato de la nota: `legacy` (predeterminado, párrafo en negrita) o `marker` |
-| `--include_model`        | Incluir el nombre del modelo en el archivo de salida                      |
+| `--include_model`        | Incluir el nombre del modelo en el archivo de salida                 |
 
 ### Nota de traducción: posiciones y formatos
 
-Con `--add_translation_note`, el traductor puede colocar la nota arriba, abajo o en ambos lugares, y renderizarla tanto en formato de texto simple (retrocompatible) como en formato `marker` consumible por un plugin de Markdown.
+Con `--add_translation_note`, el traductor puede colocar la nota arriba, abajo o en ambos lugares, y renderizarla ya sea en formato de texto plano (retrocompatible) o en formato `marker` consumible por un plugin Markdown.
 
 **Posición** (`--note_position`):
 
 - `bottom` (predeterminado): nota al final del archivo, como históricamente.
-- `top` : nota insertada **después del frontmatter YAML** (seguridad de Astro Content Collections, gray-matter, etc.).
-- `both` : nota insertada arriba Y abajo (una sola llamada LLM, contenido reutilizado para ambas ubicaciones).
+- `top`: nota insertada **después del frontmatter YAML** (seguridad de Astro Content Collections, gray-matter, etc.).
+- `both`: nota insertada arriba Y abajo (una sola llamada LLM, contenido reutilizado para ambas ubicaciones).
 
 **Formato** (`--note_format`):
 
-- `legacy` (predeterminado): párrafo en negrita `**...**` — comportamiento estrictamente idéntico a v1.8, byte por byte. Compatible con Hugo, GitHub, GitLab y cualquier renderizador Markdown.
-- `marker` : definición de referencia de enlace Markdown invisible (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) seguida de un blockquote en negrita. Legible de forma nativa en GitHub/GitLab, y utilizable en la compilación por un plugin remark del lado de Astro para producir una banner estilizada (cf. blog jls42.org).
+- `legacy` (predeterminado): párrafo en negrita `**...**` — comportamiento estrictamente idéntico a v1.8, byte a byte. Compatible con Hugo, GitHub, GitLab y cualquier renderizador Markdown.
+- `marker`: definición de referencia de enlace Markdown invisible (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) seguida de un blockquote en negrita. Legible de forma nativa en GitHub/GitLab, y utilizable en la compilación por un plugin remark en Astro para producir un banner estilizado (cf. blog jls42.org).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -163,23 +163,23 @@ python translate.py --file article.mdx --target_lang en \
 
 ### Modelos predeterminados (2026)
 
-| Proveedor | Calidad (predeterminado)         | Económico (`--eco`)            |
-| -------- | ------------------------ | ------------------------------- |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
+| Proveedor | Calidad (predeterminado) | Económico (`--eco`) |
+| --------- | ------------------------ | -------------------------- |
+| OpenAI    | `gpt-5.5`           | `gpt-5.4-mini`             |
+| Claude    | `claude-sonnet-4-6`           | `claude-haiku-4-5-20251001`             |
+| Mistral   | `mistral-large-latest`           | `mistral-small-latest`             |
+| Gemini    | `gemini-3.1-pro-preview`           | `gemini-3.1-flash-lite-preview`             |
 
-> **Recomendación para traducciones largas**: `--use_gemini` (predeterminado = `gemini-3.1-pro-preview` calidad, `--eco` = `gemini-3.1-flash-lite-preview`) tiende a preservar mejor la estructura Markdown en scripts no latinos (PL, JA, ZH, AR, HI), especialmente en modo `--news` donde la fidelidad de los placeholders importa. OpenAI sigue siendo el predeterminado para la retrocompatibilidad.
+> **Recomendación para traducciones long-form**: `--use_gemini` (predeterminado = `gemini-3.1-pro-preview` calidad, `--eco` = `gemini-3.1-flash-lite-preview`) tiende a preservar mejor la estructura markdown en scripts no latinos (PL, JA, ZH, AR, HI), especialmente en modo `--news` donde la fidelidad de los placeholders cuenta. OpenAI sigue siendo el predeterminado por compatibilidad retroactiva.
 
-## Proyectos que utilizan este script
+## Proyectos que usan este script
 
 - **[jls42.org](https://jls42.org)** - Blog personal multilingüe (15 idiomas)
 
 ## Autor
 
 Julien LE SAUX
-Correo electrónico : contact@jls42.org
+Correo: contact@jls42.org
 
 ## Licencia
 

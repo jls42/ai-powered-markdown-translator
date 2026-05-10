@@ -34,14 +34,14 @@
 
 - **多提供商**：支持 4 个 API（OpenAI、Mistral、Claude、Gemini）
 - **2026 模型**：GPT-5.5、Claude Sonnet 4.6、Gemini 3.1 Pro
-- **经济模式**：使用 `--eco` 选项来调用更快、更便宜的模型
-- **单文件**：使用 `--file` 选项翻译单个文件
-- **智能分段**：结合模型的 token 限制处理长文本
-- **代码保留**：代码块以及行内代码（`` `...` ``）都会被保留
-- **文件名**：使用 `--keep_filename` 选项保留原始名称
-- **新闻模式**：使用 `--news` 选项保护英文引文并按语言处理文章中的国旗
+- **经济模式**：选项 `--eco`，用于使用更快、更便宜的模型
+- **单文件**：选项 `--file`，用于翻译单个文件
+- **智能分段**：针对长文本按模型 token 限制进行管理
+- **代码保留**：代码块和行内代码（`` `...` ``）都会被保留
+- **文件名**：选项 `--keep_filename`，用于保留原始名称
+- **新闻模式**：选项 `--news`，用于保护英文引文并处理新闻文章中的语言旗帜
 - **.env 配置**：支持用于 API 密钥的 `.env` 文件
-- **翻译注记**：可在文档末尾附加可选注记
+- **翻译备注**：可在文档末尾附加可选备注
 
 ## 安装
 
@@ -54,7 +54,7 @@ pip install -r requirements.txt
 
 ### 质量工具（可选但推荐）
 
-项目使用 [`pre-commit`](https://pre-commit.com) 来防止提交格式不正确、有漏洞或包含密钥的代码。安装：
+该项目使用 [`pre-commit`](https://pre-commit.com) 来防止提交格式错误、存在漏洞或包含机密信息的代码。安装：
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -62,7 +62,7 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-已启用的 Hook：ruff（lint+format）、shellcheck（bash）、prettier（markdown/yaml/json）、Lizard（复杂度）、detect-secrets（API 密钥）、mypy（渐进式类型检查）、Opengrep（SAST）、pip-audit（CVE 依赖）、unittest。详情参见 `CLAUDE.md` 中的 _Quality / pre-commit_ 章节。
+启用的 hooks：ruff（lint+format）、shellcheck（bash）、prettier（markdown/yaml/json）、Lizard（复杂度）、detect-secrets（API 密钥）、mypy（渐进式类型检查）、Opengrep（SAST）、pip-audit（CVE 依赖）、unittest。详情请参见 `CLAUDE.md` 中的 _Quality / pre-commit_ 部分。
 
 ## 配置
 
@@ -113,7 +113,7 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### 选项
 
-| 选项                   | 说明                                                              |
+| 选项                   | 描述                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
 | `--file`                 | 要翻译的单个 Markdown 文件                                       |
 | `--source_dir`           | 包含 Markdown 文件的源目录                        |
@@ -127,26 +127,26 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_gemini`           | 使用 Gemini API                                                    |
 | `--force`                | 强制重新翻译                                                  |
 | `--keep_filename`        | 保留原始文件名                                     |
-| `--news`                 | 新闻模式：保护英文引文，按语言处理国旗 |
-| `--add_translation_note` | 添加翻译注记                                           |
-| `--note_position`        | 注记位置：`top`、`bottom`（默认）或 `both`                |
-| `--note_format`          | 注记格式：`legacy`（默认，粗体段落）或 `marker`       |
+| `--news`                 | 新闻模式：保护英文引文，按语言处理旗帜 |
+| `--add_translation_note` | 添加翻译备注                                           |
+| `--note_position`        | 备注位置：`top`、`bottom`（默认）或 `both`                |
+| `--note_format`          | 备注格式：`legacy`（默认，加粗段落）或 `marker`       |
 | `--include_model`        | 在输出文件中包含模型名称                       |
 
-### 翻译注记：位置与格式
+### 翻译备注：位置与格式
 
-使用 `--add_translation_note`，翻译器可以将注记放在顶部、底部或两处，并且可以将其呈现为纯文本格式（向后兼容）或可供 Markdown 插件消费的 `marker` 格式。
+使用 `--add_translation_note`，翻译器可以将备注放在顶部、底部或两处，并且可以将其渲染为纯文本格式（向后兼容），或者渲染为可供 Markdown 插件消费的 `marker` 格式。
 
 **位置**（`--note_position`）：
 
-- `bottom`（默认）：注记置于文件末尾，与历史行为一致。
-- `top`：注记插入在 **YAML frontmatter 之后**（适用于 Astro Content Collections、gray-matter 等场景）。
-- `both`：注记同时插入到顶部和底部（只需一次 LLM 调用，内容复用到两个位置）。
+- `bottom`（默认）：备注位于文件末尾，与历史行为一致。
+- `top`：备注插入到 **YAML frontmatter 之后**（Astro Content Collections、gray-matter 等的安全性）。
+- `both`：备注同时插入到顶部和底部（一次 LLM 调用，内容复用于两个位置）。
 
 **格式**（`--note_format`）：
 
-- `legacy`（默认）：粗体段落 `**...**` —— 与 v1.8 的行为逐字节完全一致。兼容 Hugo、GitHub、GitLab 以及任何 Markdown 渲染器。
-- `marker`：不可见的 Markdown 链接引用定义（`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`），后接一个粗体块引用。在 GitHub/GitLab 上可直接阅读，并可在 Astro 侧通过 remark 插件在构建时生成样式化横幅（参见 jls42.org 博客）。
+- `legacy`（默认）：加粗段落 `**...**` — 行为与 v1.8 严格一致，逐字节完全相同。兼容 Hugo、GitHub、GitLab，以及任何 Markdown 渲染器。
+- `marker`：不可见的 Markdown 链接引用定义（`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`），后接一个加粗的 blockquote。可在 GitHub/GitLab 上原生阅读，并且可在构建时通过 Astro 侧的 remark 插件处理为样式化横幅（参见博客 jls42.org）。
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -170,7 +170,7 @@ python translate.py --file article.mdx --target_lang en \
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **长篇翻译建议**：`--use_gemini`（默认 = `gemini-3.1-pro-preview` 质量，`--eco` = `gemini-3.1-flash-lite-preview`）在非拉丁脚本（PL、JA、ZH、AR、HI）的脚本上往往更能保留 markdown 结构，尤其是在 `--news` 模式下，此时占位符的忠实度很重要。为保持向后兼容，OpenAI 仍然是默认值。
+> **长篇翻译建议**：`--use_gemini`（默认 = `gemini-3.1-pro-preview` 质量，`--eco` = `gemini-3.1-flash-lite-preview`）在非拉丁脚本（PL、JA、ZH、AR、HI）中往往能更好地保留 markdown 结构，尤其是在 `--news` 模式下，此时占位符的忠实保留尤为重要。OpenAI 仍然是为了向后兼容的默认选择。
 
 ## 使用此脚本的项目
 
@@ -183,6 +183,6 @@ Julien LE SAUX
 
 ## 许可证
 
-GNU 通用公共许可证第 3 版。参见 [LICENSE](LICENSE)。
+GNU GENERAL PUBLIC LICENSE 第 3 版。参见 [LICENSE](LICENSE)。
 
-**由 gpt-5.4-mini 从 fr 翻译成 zh 的文章。**
+**由 gpt-5.4-mini 将法语翻译成中文的文章。**

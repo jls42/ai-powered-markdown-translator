@@ -192,6 +192,7 @@ class TestQuoteLines(unittest.TestCase):
 
 class TestSourceBuilder(unittest.TestCase):
     def test_source_emits_three_paragraphs_repo_title_description_link(self):
+        # target_lang=ja → label CTA en japonais (cf. _VIEW_PROJECT_LABELS)
         args = _args(source_lang="fr", target_lang="ja", model="gpt-5-mini")
         out = _build_translation_note_source(args)
         parts = out.split("\n\n")
@@ -204,7 +205,7 @@ class TestSourceBuilder(unittest.TestCase):
         )
         self.assertEqual(
             parts[2],
-            "[Voir le projet sur GitHub ↗](https://github.com/jls42/ai-powered-markdown-translator)",
+            "[GitHub でプロジェクトを見る ↗](https://github.com/jls42/ai-powered-markdown-translator)",
         )
 
     def test_source_paragraphs_are_blank_line_separated(self):
@@ -213,6 +214,35 @@ class TestSourceBuilder(unittest.TestCase):
         out = _build_translation_note_source(args)
         # Exactly 2 blank-line separators (3 paragraphs)
         self.assertEqual(out.count("\n\n"), 2)
+
+    def test_source_link_label_localized_per_target_lang(self):
+        """Le label CTA du lien doit suivre target_lang (et non rester en FR)."""
+        cases = {
+            "fr": "Voir le projet sur GitHub ↗",
+            "en": "View project on GitHub ↗",
+            "de": "Projekt auf GitHub ansehen ↗",
+            "es": "Ver proyecto en GitHub ↗",
+            "ja": "GitHub でプロジェクトを見る ↗",
+            "zh": "在 GitHub 上查看项目 ↗",
+            "ar": "عرض المشروع على GitHub ↗",
+        }
+        for target, expected_label in cases.items():
+            with self.subTest(target_lang=target):
+                args = _args(source_lang="fr", target_lang=target, model="gpt-5-mini")
+                out = _build_translation_note_source(args)
+                expected_link = (
+                    f"[{expected_label}](https://github.com/jls42/ai-powered-markdown-translator)"
+                )
+                self.assertIn(expected_link, out)
+
+    def test_source_link_label_falls_back_to_french_for_unknown_target(self):
+        """target_lang inconnu → fallback FR (sécurité, pas de KeyError)."""
+        args = _args(source_lang="fr", target_lang="xx-unknown", model="gpt-5-mini")
+        out = _build_translation_note_source(args)
+        self.assertIn(
+            "[Voir le projet sur GitHub ↗](https://github.com/jls42/ai-powered-markdown-translator)",
+            out,
+        )
 
 
 class TestMarkerBlockThreeParagraphs(unittest.TestCase):

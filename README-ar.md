@@ -2,46 +2,46 @@
 
 🌍 [الفرنسية](README.md) | [الإنجليزية](README-en.md) | [الإسبانية](README-es.md) | [الصينية](README-zh.md) | [الألمانية](README-de.md) | [اليابانية](README-ja.md) | [الكورية](README-ko.md) | [العربية](README-ar.md) | [الهندية](README-hi.md) | [الإيطالية](README-it.md) | [الهولندية](README-nl.md) | [البولندية](README-pl.md) | [البرتغالية](README-pt.md) | [الرومانية](README-ro.md) | [السويدية](README-sv.md)
 
-<h4 align="center">📊 جودة الشيفرة</h4>
+<h4 align="center">📊 جودة الشفرة</h4>
 
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="حالة بوابة الجودة"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="تقييم الأمان"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="تقييم الاعتمادية"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="تقييم الموثوقية"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="تقييم قابلية الصيانة"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="التغطية"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="نسبة التغطية"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="الثغرات"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="الأخطاء"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="روائح الشيفرة"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="مشكلات الشفرة"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="الأسطر المكررة (%)"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="الدَّيْن التقني"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="أسطر الشيفرة"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="الدين التقني"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="أسطر الشفرة"></a>
 </p>
 <p align="center">
   <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="شارة Codacy"></a>
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-مترجم ملفات Markdown باستخدام **OpenAI**، **Mistral AI**، **Claude (Anthropic)** و**Google Gemini**.
+مترجم ملفات Markdown باستخدام **OpenAI** و**Mistral AI** و**Claude (Anthropic)** و**Google Gemini**.
 
-يقوم هذا السكربت بلغة Python بترجمة ملفات Markdown من لغة مصدر إلى لغة هدف مع الحفاظ على التنسيق، وكتل الشيفرة، وبيانات front matter الوصفية.
+يترجم هذا السكربت المكتوب بـ Python ملفات Markdown من لغة مصدر إلى لغة هدف مع الحفاظ على التنسيق وكتل الشفرة وبيانات front matter الوصفية.
 
 ## الميزات الرئيسية
 
-- **متعدد المزوّدين**: دعم 4 واجهات برمجة تطبيقات (OpenAI، Mistral، Claude، Gemini)
+- **متعدد المزودين**: دعم 4 واجهات برمجة تطبيقات (OpenAI، Mistral، Claude، Gemini)
 - **نماذج 2026**: GPT-5.5، Claude Sonnet 4.6، Gemini 3.1 Pro
 - **الوضع الاقتصادي**: خيار `--eco` لاستخدام نماذج أسرع وأقل تكلفة
 - **ملف واحد**: خيار `--file` لترجمة ملف واحد
-- **التجزئة الذكية**: التعامل مع النصوص الطويلة مع حدود الرموز لكل نموذج
-- **الحفاظ على الشيفرة**: تُحفظ كتل الشيفرة وكذلك الشيفرة المضمّنة (`` `...` ``)
+- **التقسيم الذكي**: التعامل مع النصوص الطويلة مع حدود tokens لكل نموذج
+- **الحفاظ على الشفرة**: تُحافَظ على كتل الشفرة والشفرة المضمنة (``...``)
 - **اسم الملف**: خيار `--keep_filename` للاحتفاظ بالاسم الأصلي
 - **وضع الأخبار**: خيار `--news` لحماية الاقتباسات الإنجليزية والتعامل مع الأعلام حسب اللغة في مقالات الأخبار
-- **إعدادات .env**: دعم ملف `.env` لمفاتيح API
-- **ملاحظة الترجمة**: إضافة ملاحظة اختيارية في نهاية المستند
+- **إعداد .env**: دعم ملف `.env` لمفاتيح API
+- **ملاحظة الترجمة**: إضافة اختيارية لملاحظة في نهاية المستند
 
 ## التثبيت
 
@@ -52,9 +52,9 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### أدوات الجودة (اختيارية لكن موصى بها)
+### أدوات الجودة (اختيارية ولكن يُنصح بها)
 
-يستخدم المشروع [`pre-commit`](https://pre-commit.com) لمنع عمل commit لشفرة سيئة التنسيق أو ضعيفة الأمان أو تحتوي على سر. التثبيت:
+يستخدم المشروع [`pre-commit`](https://pre-commit.com) لمنع دمج شفرة غير منسقة جيدًا أو معرضة للثغرات أو تحتوي على سر. التثبيت:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -62,11 +62,11 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-الـ hooks النشطة: ruff (lint+format)، shellcheck (bash)، prettier (markdown/yaml/json)، Lizard (التعقيد)، detect-secrets (مفاتيح API)، mypy (الأنواع التدريجية)، Opengrep (SAST)، pip-audit (اعتمادات CVE)، unittest. راجع القسم `CLAUDE.md` _الجودة / pre-commit_ للتفاصيل.
+الخطافات النشطة: ruff (lint+format)، shellcheck (bash)، prettier (markdown/yaml/json)، Lizard (التعقيد)، detect-secrets (مفاتيح API)، mypy (الكتابة التدريجية)، Opengrep (SAST)، pip-audit (ثغرات CVE في الاعتمادات)، unittest. راجع القسم `CLAUDE.md` _Quality / pre-commit_ للحصول على التفاصيل.
 
 ## الإعداد
 
-أنشئ ملف `.env` في جذر المشروع أو حدّد متغيرات البيئة:
+أنشئ ملف `.env` في جذر المشروع أو عيّن متغيرات البيئة:
 
 ```bash
 # Fichier .env (recommandé)
@@ -120,33 +120,33 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--target_dir`           | دليل الإخراج للملفات المترجمة                          |
 | `--source_lang`          | لغة المصدر (الافتراضي: `fr`)                                             |
 | `--target_lang`          | لغة الهدف (الافتراضي: `en`)                                              |
-| `--model`                | النموذج المحدد المراد استخدامه                                             |
+| `--model`                | نموذج محدد للاستخدام                                             |
 | `--eco`                  | استخدام النماذج الاقتصادية                                         |
-| `--use_mistral`          | استخدام واجهة Mistral AI                                                 |
+| `--use_mistral`          | استخدام واجهة Mistral AI                                               |
 | `--use_claude`           | استخدام واجهة Claude                                                    |
 | `--use_gemini`           | استخدام واجهة Gemini                                                    |
 | `--force`                | فرض إعادة الترجمة                                                  |
 | `--keep_filename`        | الاحتفاظ باسم الملف الأصلي                                     |
-| `--news`                 | وضع الأخبار: يحمي الاقتباسات الإنجليزية، ويتعامل مع الأعلام حسب اللغة |
+| `--news`                 | وضع الأخبار: يحمي الاقتباسات EN، ويدير الأعلام حسب اللغة |
 | `--add_translation_note` | إضافة ملاحظة ترجمة                                           |
 | `--note_position`        | موضع الملاحظة: `top`، `bottom` (الافتراضي)، أو `both`                |
-| `--note_format`          | تنسيق الملاحظة: `legacy` (الافتراضي، فقرة غامقة) أو `marker`       |
+| `--note_format`          | تنسيق الملاحظة: `legacy` (الافتراضي، فقرة بخط عريض) أو `marker`       |
 | `--include_model`        | تضمين اسم النموذج في ملف الإخراج                       |
 
 ### ملاحظة الترجمة: المواضع والتنسيقات
 
-مع `--add_translation_note`، يمكن للمترجم وضع الملاحظة في الأعلى أو الأسفل أو في الموضعين معًا، وجعلها إما بتنسيق نصي بسيط (متوافق مع الإصدارات السابقة) أو بتنسيق `marker` قابل للاستهلاك بواسطة إضافة Markdown.
+مع `--add_translation_note`، يمكن للمترجم وضع الملاحظة في الأعلى أو الأسفل أو في الموضعين معًا، وجعلها إما بتنسيق نص عادي (متوافق مع الإصدارات السابقة) أو بتنسيق `marker` قابل للاستهلاك بواسطة مكوّن إضافي Markdown.
 
 **الموضع** (`--note_position`) :
 
-- `bottom` (الافتراضي): ملاحظة في نهاية الملف، كما كان تاريخيًا.
-- `top` : ملاحظة تُدرج **بعد frontmatter YAML** (أمان Astro Content Collections، gray-matter، إلخ.).
-- `both` : ملاحظة تُدرج في الأعلى وفي الأسفل (استدعاء LLM واحد، والمحتوى يُعاد استخدامه لكلا الموضعين).
+- `bottom` (الافتراضي) : ملاحظة في نهاية الملف، كما كان تاريخيًا.
+- `top` : ملاحظة تُدرج **بعد frontmatter YAML** (سلامة Astro Content Collections، gray-matter، إلخ).
+- `both` : ملاحظة تُدرج في الأعلى **وفي** الأسفل (استدعاء LLM واحد، ويُعاد استخدام المحتوى لكلا الموضعين).
 
 **التنسيق** (`--note_format`) :
 
-- `legacy` (الافتراضي): فقرة غامقة `**...**` — سلوك مطابق تمامًا للإصدار v1.8، حرفيًا بايتًا مقابل بايت. متوافق مع Hugo وGitHub وGitLab وأي مُصيّر Markdown.
-- `marker` : تعريف مرجع رابط Markdown غير مرئي (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) متبوع بblockquote غامق. قابل للقراءة مباشرة على GitHub/GitLab، ويمكن استغلاله أثناء البناء بواسطة إضافة remark على جانب Astro لإنتاج شريط مُنسّق (راجع مدونة jls42.org).
+- `legacy` (الافتراضي) : فقرة بخط عريض `**...**` — سلوك مطابق تمامًا لـ v1.8، حرفًا بحرف. متوافق مع Hugo وGitHub وGitLab، وأي مُصيّر Markdown.
+- `marker` : تعريف مرجع رابط Markdown غير مرئي (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) يتبعه blockquote بخط عريض. قابل للقراءة مباشرة على GitHub/GitLab، ويمكن استغلاله أثناء البناء بواسطة مكوّن إضافي remark على جانب Astro لإنتاج لافتة منسقة (راجع مدونة jls42.org).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -170,7 +170,7 @@ python translate.py --file article.mdx --target_lang en \
 | Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
 | Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
 
-> **توصية الترجمات طويلة الصيغة**: `--use_gemini` (الافتراضي = `gemini-3.1-pro-preview` الجودة، `--eco` = `gemini-3.1-flash-lite-preview`) يميل إلى الحفاظ على بنية markdown بشكل أفضل في السكربتات غير اللاتينية (PL، JA، ZH، AR، HI)، ولا سيما في وضع `--news` حيث تكون دقة الـ placeholders مهمة. يبقى OpenAI هو الافتراضي من أجل التوافق العكسي.
+> **توصية للترجمات الطويلة** : `--use_gemini` (الافتراضي = جودة `gemini-3.1-pro-preview`، `--eco` = `gemini-3.1-flash-lite-preview`) يميل إلى الحفاظ على بنية markdown بشكل أفضل في النصوص غير اللاتينية (PL، JA، ZH، AR، HI)، ولا سيما في وضع `--news` حيث تكون دقة placeholders مهمة. يظل OpenAI هو الافتراضي للتوافق العكسي.
 
 ## المشاريع التي تستخدم هذا السكربت
 
@@ -178,11 +178,11 @@ python translate.py --file article.mdx --target_lang en \
 
 ## المؤلف
 
-Julien LE SAUX  
+Julien LE SAUX
 البريد الإلكتروني: contact@jls42.org
 
 ## الترخيص
 
-GNU GENERAL PUBLIC LICENSE Version 3. انظر [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE الإصدار 3. انظر [LICENSE](LICENSE).
 
 **مقالة مترجمة من الفرنسية إلى العربية باستخدام gpt-5.4-mini.**
