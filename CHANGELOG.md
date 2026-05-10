@@ -2,6 +2,13 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.9.1** Fix i18n du label CTA dans la note de traduction marker (2026-05-10) :
+
+  - **Bug fixé** : le label `[Voir le projet sur GitHub ↗]` du lien CTA dans le bandeau marker en haut des fichiers traduits restait **en français** pour toutes les langues cibles, au lieu de suivre `target_lang`. Le LLM ne le voit jamais (assemblé côté Python pour préserver l'URL et le slug du repo), donc la phase de traduction n'arrivait pas à le rattraper. Régression silencieuse depuis l'ajout du format `marker` en v1.9.
+  - **Fix** : nouvelle constante `_VIEW_PROJECT_LABELS` mappant les 15 langues vers leur label localisé. `_translation_note_invariants(target_lang)` et `_assemble_translation_note_paragraphs(phrase, target_lang)` propagent désormais la langue cible. Fallback `fr` si la langue est inconnue (sécurité, pas de KeyError).
+  - **Tests** : `test_source_emits_three_paragraphs_repo_title_description_link` ajusté (target_lang `ja` → label japonais attendu). 2 nouveaux tests : `test_source_link_label_localized_per_target_lang` (paramétré sur 7 langues couvrant scripts latin, idéographique, abjad) et `test_source_link_label_falls_back_to_french_for_unknown_target`. Total : 40 tests dans `test_translation_note_position.py` (au lieu de 38).
+  - **Backward-compat** : signature avec défaut `target_lang="fr"` — appelants programmatiques externes sans `args.target_lang` continuent de fonctionner sans modification.
+
 - **1.9** Fix silent-failure + outillage qualité complet + note de traduction multi-position (2026-05-07) :
   - **Note de traduction multi-position + format marker "embed card"** :
     - Nouvelles options CLI (additives, défauts inchangés → **non breaking**) :

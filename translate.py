@@ -1436,15 +1436,43 @@ def _validate_news_post(translated_content, original_quotes, attribution_urls, a
         _validate_news_flags_for_other(translated_content, args, len(original_quotes))
 
 
-def _translation_note_invariants():
+# Labels CTA "Voir le projet sur GitHub" localisés par target_lang.
+# Assemblés côté Python (jamais envoyés au LLM) pour préserver l'URL et le
+# slug du repo. Le label texte, lui, doit suivre la langue cible — sinon il
+# fuite en français dans les versions traduites du marker top.
+_VIEW_PROJECT_LABELS = {
+    "fr": "Voir le projet sur GitHub ↗",
+    "en": "View project on GitHub ↗",
+    "de": "Projekt auf GitHub ansehen ↗",
+    "es": "Ver proyecto en GitHub ↗",
+    "it": "Vedi progetto su GitHub ↗",
+    "pt": "Ver projeto no GitHub ↗",
+    "nl": "Bekijk project op GitHub ↗",
+    "pl": "Zobacz projekt na GitHubie ↗",
+    "sv": "Visa projekt på GitHub ↗",
+    "ro": "Vezi proiectul pe GitHub ↗",
+    "ar": "عرض المشروع على GitHub ↗",
+    "hi": "GitHub पर प्रोजेक्ट देखें ↗",
+    "ja": "GitHub でプロジェクトを見る ↗",
+    "ko": "GitHub에서 프로젝트 보기 ↗",
+    "zh": "在 GitHub 上查看项目 ↗",
+}
+
+
+def _translation_note_invariants(target_lang="fr"):
     """Parties INVARIANTES de la note de traduction (jamais envoyées au LLM).
 
     Le titre du repo et l'URL GitHub ne doivent JAMAIS être altérés par le
     LLM (slug, casse, backticks, scheme), donc on les assemble côté Python
     après traduction de la phrase descriptive. Voir `_append_translation_note`.
+
+    Le label CTA du lien suit `target_lang` via `_VIEW_PROJECT_LABELS` pour
+    éviter une fuite FR dans les versions traduites. Fallback `fr` si la
+    langue est inconnue.
     """
     title = "**`ai-powered-markdown-translator`**"
-    link = "[Voir le projet sur GitHub ↗](https://github.com/jls42/ai-powered-markdown-translator)"
+    label = _VIEW_PROJECT_LABELS.get(target_lang, _VIEW_PROJECT_LABELS["fr"])
+    link = f"[{label}](https://github.com/jls42/ai-powered-markdown-translator)"
     return title, link
 
 
@@ -1461,15 +1489,16 @@ def _build_translation_note_phrase(args):
     )
 
 
-def _assemble_translation_note_paragraphs(phrase):
+def _assemble_translation_note_paragraphs(phrase, target_lang="fr"):
     """Forme canonique 3-paragraphes : titre (Python) + phrase + lien (Python).
 
     Appelée à la fois par `_build_translation_note_source` (vue source pour
     documentation/tests) et par `_append_translation_note` (vue runtime avec
     la phrase déjà traduite). Garantit que les deux paths produisent un bloc
-    structurellement identique.
+    structurellement identique. `target_lang` propagé pour localiser le label
+    CTA du lien (cf. `_VIEW_PROJECT_LABELS`).
     """
-    title, link = _translation_note_invariants()
+    title, link = _translation_note_invariants(target_lang)
     return title + "\n\n" + phrase + "\n\n" + link
 
 
@@ -1478,9 +1507,12 @@ def _build_translation_note_source(args):
 
     1. Titre repo (nom du projet en code inline + gras) — invariant assemblé en Python.
     2. Description (phrase explicative) — seule partie traduite par le LLM.
-    3. Lien CTA Markdown avec arrow visible — invariant assemblé en Python.
+    3. Lien CTA Markdown avec arrow visible — invariant assemblé en Python,
+       label localisé selon `args.target_lang`.
     """
-    return _assemble_translation_note_paragraphs(_build_translation_note_phrase(args))
+    return _assemble_translation_note_paragraphs(
+        _build_translation_note_phrase(args), args.target_lang
+    )
 
 
 def _sanitize_model(model):
@@ -1600,7 +1632,9 @@ def _append_translation_note(translated_content, client, args, use_mistral, use_
         phrase_source, client, args, use_mistral, use_claude, use_gemini, True
     ).strip()
     if fmt == "marker":
-        translation_note = _assemble_translation_note_paragraphs(translated_phrase)
+        translation_note = _assemble_translation_note_paragraphs(
+            translated_phrase, args.target_lang
+        )
     else:
         translation_note = translated_phrase
     return _compose_with_notes(translated_content, args, translation_note, fmt)
