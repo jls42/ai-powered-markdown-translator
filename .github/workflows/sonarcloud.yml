@@ -14,14 +14,28 @@ jobs:
   sonarqube:
     name: SonarQube
     runs-on: ubuntu-latest
+    # Les PR ouvertes par Dependabot n'ont PAS accès aux secrets du dépôt :
+    # GitHub les isole dans un scope `dependabot` distinct. `SONAR_TOKEN` y
+    # arrive donc vide et le scanner échoue en 403 sur api.sonarcloud.io, avec
+    # un message qui accuse le token — un échec structurel, sans rapport avec le
+    # contenu de la PR, et qui bloquait les six premières PR de Dependabot.
+    #
+    # Analyser un bump de dépendance n'apporte de toute façon rien à Sonar : ces
+    # PR ne touchent aucun fichier source. On saute le job plutôt que de le
+    # laisser rouge en permanence — un check durablement rouge cesse d'être lu.
+    # L'analyse a bien lieu au push sur main, après merge.
+    #
+    # Alternative si l'analyse par PR devient nécessaire : ajouter SONAR_TOKEN
+    # dans Settings → Secrets → Dependabot (scope distinct des secrets Actions).
+    if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Shallow clones should be disabled for a better relevancy of analysis
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
           cache: pip
@@ -46,6 +60,6 @@ jobs:
           exit "$rc"
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@59db25f34e16620e48ab4bb9e4a5dce155cb5432 # v8.0.0
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
