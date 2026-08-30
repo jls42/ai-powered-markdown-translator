@@ -12,8 +12,15 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 # shellcheck source=scripts/_venv_python.sh
 source scripts/_venv_python.sh
 
-# `-i 0` : bloque dès la 1re violation. Quand translate.py repassera sous
-# le seuil, l'ajouter au scope (pas à `-x`).
+# `-i 0` : bloque dès la 1re violation.
+#
+# translate.py est DANS le scope depuis que le refactor des providers l'a fait
+# repasser sous le seuil : 155 fonctions, CCN moyen 3,3, **zéro dépassement à
+# 12** (le maximum est 7). L'exclusion datait d'une époque où quatre fonctions
+# dépassaient, et CLAUDE.md prévoyait explicitement de la lever à cette
+# condition. Le gate protège désormais le fichier le plus exposé du dépôt
+# contre une régression de complexité, au lieu de la découvrir via SonarCloud
+# après le push.
 exec "$PY" -m lizard \
   --CCN 12 \
   --warnings_only \
@@ -22,4 +29,5 @@ exec "$PY" -m lizard \
   -x "tests/*" \
   -x "scripts/tests/*" \
   -x "translate.py.old" \
+  translate.py \
   scripts/
