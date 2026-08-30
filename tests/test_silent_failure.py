@@ -511,7 +511,7 @@ class TestCodePlaceholders(unittest.TestCase):
     def test_fenced_block_no_lang(self):
         """Fence sans info string ``` → doit être protégée."""
         content = "Texte\n\n```\ncode brut\n```\n\nSuite."
-        protected, blocks, ph = translate._protect_code_blocks(content)
+        protected, blocks, _ph = translate._protect_code_blocks(content)
         self.assertEqual(len(blocks), 1)
         self.assertIn("#CODEBLOCK0#", protected)
         self.assertNotIn("code brut", protected)
@@ -519,7 +519,7 @@ class TestCodePlaceholders(unittest.TestCase):
     def test_fenced_block_hyphenated_lang(self):
         """Fence avec lang hyphené ```python-repl → doit être protégée."""
         content = "```python-repl\n>>> 1+1\n```"
-        protected, blocks, ph = translate._protect_code_blocks(content)
+        protected, blocks, _ph = translate._protect_code_blocks(content)
         self.assertEqual(len(blocks), 1)
         self.assertIn("#CODEBLOCK0#", protected)
 
@@ -760,7 +760,7 @@ class TestMultiProviderStopReasons(unittest.TestCase):
             text="truncated",
         )
         client = MagicMock()
-        client.GenerativeModel.return_value = gen_model
+        client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"Gemini abnormal finish_reason"):
             translate._call_gemini(client, args, "prompt", "segment")
@@ -1128,7 +1128,7 @@ locale: 'pl'
             text=self.TRANSLATED_NEWS,
         )
         client = MagicMock()
-        client.GenerativeModel.return_value = gen_model
+        client.models.generate_content = gen_model.generate_content
         return client
 
     def test_news_pipeline_mistral(self):
@@ -1377,7 +1377,7 @@ class TestPerProviderSilentFailure(unittest.TestCase):
             text=long_fr,
         )
         client = MagicMock()
-        client.GenerativeModel.return_value = gen_model
+        client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(
             RuntimeError, r"untranslated source excerpt|Output language mismatch"
@@ -1425,7 +1425,7 @@ class TestProviderEmptyContent(unittest.TestCase):
             text="",
         )
         client = MagicMock()
-        client.GenerativeModel.return_value = gen_model
+        client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"Gemini returned empty content"):
             translate_fn("Some short source text.", client, args, use_gemini=True)
@@ -1503,7 +1503,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Citation traduite multi-ligne._\n"
             "> — [@source](https://x.com/source)\n"
         )
-        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        protected, quotes, _urls = translate._protect_news_quotes(content, self._args())
         self.assertEqual(len(quotes), 1)
         # Les 3 lignes EN doivent être capturées intégralement dans le quote
         self.assertIn("First line of the EN quote.", quotes[0])
@@ -1558,7 +1558,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Une citation en FR._\n"
             "> — Vasek Mlejnsky, CEO E2B (relayé par [@genspark_ai sur X](https://x.com/genspark_ai/status/2052602512360808652))\n"
         )
-        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        _protected, quotes, urls = translate._protect_news_quotes(content, self._args())
         self.assertEqual(quotes, ["> A quote in EN."])
         # Extraction propre : juste l'URL, sans préfixe FR ni `)` tronqué.
         self.assertEqual(urls, ["https://x.com/genspark_ai/status/2052602512360808652"])
@@ -1574,7 +1574,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Citation._\n"
             "> — via [@source officielle](https://example.com/post/42)\n"
         )
-        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        _protected, _quotes, urls = translate._protect_news_quotes(content, self._args())
         self.assertEqual(urls, ["https://example.com/post/42"])
 
 
@@ -1604,7 +1604,7 @@ class TestGeminiEdgeCases(unittest.TestCase):
             prompt_feedback=feedback,
         )
         client = MagicMock()
-        client.GenerativeModel.return_value = gen_model
+        client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"no candidates.*prompt_feedback"):
             translate._call_gemini(client, args, "prompt", "segment")
@@ -1613,7 +1613,7 @@ class TestGeminiEdgeCases(unittest.TestCase):
         gen_model = MagicMock()
         gen_model.generate_content.return_value = _gemini_blocked_response()
         client = MagicMock()
-        client.GenerativeModel.return_value = gen_model
+        client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"Gemini response has no text|blocked"):
             translate._call_gemini(client, args, "prompt", "segment")

@@ -3,19 +3,26 @@
 import argparse
 import datetime
 import glob
+import json
 import os
 import re
+import shutil
+import signal
+import subprocess
 import sys
+import tempfile
 import time
 import traceback
 import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import anthropic
-import google.generativeai as genai
 from dotenv import load_dotenv
+from google import genai
+from google.genai import errors as genai_errors
+from google.genai import types as genai_types
 from langdetect import DetectorFactory, LangDetectException, detect_langs
-from mistralai import Mistral
+from mistralai.client import Mistral
 from openai import BadRequestError, OpenAI
 
 # Détection de langue déterministe (évite les variations entre runs sur des textes courts)
@@ -48,16 +55,108 @@ DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
 DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
 DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"
 DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"
+DEFAULT_XAI_API_KEY = "votre-cle-api-xai-par-defaut"
 
-DEFAULT_MODEL_OPENAI = "gpt-5.5"
+DEFAULT_MODEL_OPENAI = "gpt-5.6-terra"
 DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
-DEFAULT_MODEL_CLAUDE = "claude-sonnet-4-6"
-DEFAULT_MODEL_GEMINI = "gemini-3.1-pro-preview"
+DEFAULT_MODEL_CLAUDE = "claude-sonnet-5"
+DEFAULT_MODEL_GEMINI = "gemini-3.7-flash"
+DEFAULT_MODEL_GROK = "grok-4.6"
+DEFAULT_MODEL_CODEX = "gpt-5.6-sol"
 
-ECO_MODEL_OPENAI = "gpt-5.4-mini"
+ECO_MODEL_OPENAI = "gpt-5.6-luna"
 ECO_MODEL_MISTRAL = "mistral-small-latest"
-ECO_MODEL_CLAUDE = "claude-haiku-4-5-20251001"
-ECO_MODEL_GEMINI = "gemini-3.1-flash-lite-preview"
+ECO_MODEL_CLAUDE = "claude-haiku-4-5"
+ECO_MODEL_GEMINI = "gemini-3.1-flash-lite"
+# Luna = modèle "fast, high-volume" du plan ChatGPT : 250-2000 messages/5h sur
+# Plus contre 10-100 pour Sol. C'est le seul choix raisonnable pour du batch.
+# xAI n'a aucun palier mini/flash/lite : l'« éco » est une génération
+# antérieure, pas une variante allégée. `grok-4.3` (1M ctx, $1.25/$2.50) reste
+# nettement plus cher que l'éco des autres providers — mistral-small-latest est
+# à $0.15/$0.60. Grok se choisit pour la diversité de modèle, pas pour le prix.
+ECO_MODEL_GROK = "grok-4.3"
+# Le CLI d'abonnement n'expose que grok-4.6 et grok-4.5 (`grok models`) :
+# grok-4.3, le palier économique de l'API, n'y est pas disponible.
+DEFAULT_MODEL_GROK_CLI = "grok-4.6"
+ECO_MODEL_GROK_CLI = "grok-4.5"
+ECO_MODEL_CODEX = "gpt-5.6-luna"
+
+# --- Provider Grok (API xAI, facturé à l'usage) -----------------------------
+# Endpoint compatible OpenAI : le SDK `openai` fonctionne avec ce base_url.
+XAI_BASE_URL = "https://api.x.ai/v1"
+
+# --- Provider Grok CLI (Grok Build, quota d'abonnement Grok) ----------------
+# Même principe que Codex : on pilote le binaire officiel `grok` en mode
+# headless, donc la traduction est décomptée de l'abonnement au lieu d'être
+# facturée au token. xAI documente ce mode pour « CI pipelines, cron jobs, and
+# scripts », et il est ouvert aux abonnés SuperGrok et X Premium+.
+GROK_TIMEOUT = int(os.getenv("GROK_TIMEOUT", "900"))
+# Le prompt part par fichier, jamais par argv : un segment de 16 000 caractères
+# serait visible dans `ps` et flirterait avec ARG_MAX. Le CLI ne lit pas stdin.
+GROK_PROMPT_FILENAME = "prompt.md"
+# Confinement. `--deny` est la seule couche mesurée fail-closed : une règle au
+# préfixe inconnu fait REFUSER le démarrage, donc une évolution du vocabulaire
+# casse la traduction au lieu de retirer la protection en silence. La règle `*`
+# est le catch-all documenté ; les préfixes nommés restent pour que l'intention
+# soit lisible et pour survivre à une éventuelle disparition du catch-all.
+GROK_DENY_RULES = ("*", "Bash", "Edit", "Write", "Read", "Grep", "WebFetch", "WebSearch", "MCPTool")
+# Le compteur de tours est incrémenté APRÈS le tour d'outils : `--max-turns 1`
+# tronquerait la sortie (stopReason=cancelled). Le plancher mesuré est 2 même
+# sur un segment trivial ; 6 laisse de la marge sans lever la borne de coût.
+GROK_MAX_TURNS = 6
+# Variables retirées de l'env du sous-processus. XAI_API_KEY d'abord : la
+# présence d'une clé ferait basculer en facturation à l'usage, ce que ce
+# provider existe pour éviter. GROK_SANDBOX ensuite : héritée d'un shell, elle
+# imposerait un profil que cette machine ne peut pas appliquer, rendant le
+# provider inutilisable avec un message trompeur.
+GROK_STRIPPED_ENV_VARS = ("XAI_API_KEY", "GROK_API_KEY", "GROK_SANDBOX")
+# Réduction de surface, jamais une garantie : ces interrupteurs sont
+# contournables par une politique managée. Le confinement repose sur --deny.
+GROK_ENV_KILL_SWITCHES = {
+    "GROK_CLAUDE_MCPS_ENABLED": "false",
+    "GROK_CLAUDE_HOOKS_ENABLED": "false",
+    "GROK_CLAUDE_SKILLS_ENABLED": "false",
+    "GROK_CLAUDE_AGENTS_ENABLED": "false",
+}
+# Profil sandbox OS, en opt-in explicite via GROK_TRANSLATE_SANDBOX. Sur cette
+# machine aucun profil ne s'applique (AppArmor bloque les user namespaces non
+# privilégiés, et la deny-list runtime-socket échoue sur /run/podman en 0700) :
+# on ne le tente donc pas par défaut, mais on ne retombe JAMAIS silencieusement
+# non plus — un profil demandé et non applicable fait échouer le démarrage.
+GROK_SANDBOX_ENV_VAR = "GROK_TRANSLATE_SANDBOX"
+GROK_AGENT_CONTRACT = (
+    "\n\nIMPORTANT (mode non-interactif) : ne lis aucun fichier, n'exécute aucune "
+    "commande, n'utilise aucun outil. Réponds UNIQUEMENT par le contenu traduit, "
+    "sans préambule, sans commentaire, et sans l'entourer d'un bloc de code."
+)
+
+# --- Provider Codex (CLI officiel, quota d'abonnement ChatGPT) --------------
+# On pilote le binaire `codex` en mode non-interactif plutôt que d'appeler une
+# API : c'est la seule voie documentée comme disponible sur un plan ChatGPT
+# (learn.chatgpt.com/docs/pricing : "Codex SDK, `codex exec`, and scriptable
+# workflows" → plus: available). Les tokens de ~/.codex/auth.json n'authentifient
+# PAS les appels API Platform et ne sont jamais lus ici : l'auth et le refresh
+# restent entièrement gérés par le CLI.
+CODEX_TIMEOUT = int(os.getenv("CODEX_TIMEOUT", "600"))
+# Délai laissé au CLI pour propager SIGTERM à son petit-fils avant le SIGKILL.
+CODEX_TERM_GRACE = 5
+# La famille gpt-5.6 est commune au CLI Codex et à l'API Platform, mais côté
+# compte ChatGPT le serveur applique une allowlist plus étroite : un modèle
+# valide sur l'API peut être refusé ici par un 400 ("model is not supported
+# when using Codex with a ChatGPT account"), sans validation locale préalable.
+CODEX_MODEL_PREFIXES = ("gpt-5.6-",)
+# Variables retirées de l'env du sous-processus : sans ça, une clé API présente
+# dans .env peut faire basculer Codex en facturation à l'usage — exactement ce
+# que ce provider existe pour éviter.
+CODEX_STRIPPED_ENV_VARS = ("OPENAI_API_KEY", "CODEX_API_KEY")
+# Contrat imposé en plus du prompt système : `codex exec` est un agent, pas une
+# API de complétion. Sans ça il peut préfixer sa réponse d'un commentaire.
+CODEX_AGENT_CONTRACT = (
+    "\n\nIMPORTANT (mode non-interactif) : ne lis aucun fichier, n'exécute aucune "
+    "commande, ne pose aucune question. Le contenu à traduire est fourni dans le "
+    "bloc <stdin>. Réponds UNIQUEMENT par le contenu traduit, sans préambule, "
+    "sans commentaire, et sans l'entourer d'un bloc de code."
+)
 
 # Fallback pour les modèles non listés dans MODEL_TOKEN_LIMITS.
 DEFAULT_TOKEN_LIMIT = 128000
@@ -67,6 +166,17 @@ DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
 MODEL_TOKEN_LIMITS = {
+    # OpenAI GPT-5.6 (génération courante). Contexte 1.05M, mais palier
+    # tarifaire à 272K tokens d'input : au-delà, 2x input / 1.5x output sur
+    # la requête entière.
+    "gpt-5.6": 1050000,
+    "grok-4.6": 500000,
+    "grok-4.5": 500000,
+    "grok-4.3": 1000000,
+    "grok-build-0.1": 256000,
+    "gpt-5.6-sol": 1050000,
+    "gpt-5.6-terra": 1050000,
+    "gpt-5.6-luna": 1050000,
     # OpenAI GPT-5.5 series (1M+ context)
     "gpt-5.5": 1050000,
     "gpt-5.5-pro": 1050000,
@@ -75,7 +185,8 @@ MODEL_TOKEN_LIMITS = {
     "gpt-5.4-mini": 400000,
     "gpt-5.4-nano": 400000,
     "gpt-5.4-pro": 400000,
-    # OpenAI GPT-5 series
+    # OpenAI GPT-5 series — retrait annoncé au 2026-12-11 (gpt-5*, o3*),
+    # 2026-10-23 pour o1*/o3-mini/o4-mini/gpt-4.1-nano/gpt-4o.
     "gpt-5.2": 400000,
     "gpt-5.1": 400000,
     "gpt-5": 400000,
@@ -100,38 +211,47 @@ MODEL_TOKEN_LIMITS = {
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
     "chatgpt-4o-latest": 128000,
-    # Anthropic Claude 4.6+ : 1M context au prix standard (Opus 4.7, Opus 4.6,
-    # Sonnet 4.6 explicitement listés dans la doc Anthropic).
-    # Haiku 4.5 reste sur 200K (pas dans la liste 1M).
+    # Anthropic Claude 5
+    "claude-fable-5": 1000000,
+    "claude-opus-5": 1000000,
+    "claude-sonnet-5": 1000000,
+    # Anthropic Claude 4.6+ : 1M context au prix standard (Opus 4.8, 4.7, 4.6,
+    # Sonnet 4.6). Haiku 4.5 reste sur 200K (pas dans la liste 1M).
+    "claude-opus-4-8": 1000000,
     "claude-opus-4-7": 1000000,
     "claude-opus-4-6": 1000000,
     "claude-sonnet-4-6": 1000000,
     # Anthropic Claude 4.5
-    "claude-opus-4-5-20251101": 200000,
+    "claude-opus-4-5": 1000000,
+    "claude-opus-4-5-20251101": 1000000,
     "claude-sonnet-4-5-20250929": 200000,
+    "claude-haiku-4-5": 200000,
     "claude-haiku-4-5-20251001": 200000,
-    # Anthropic Claude 4.x
-    "claude-opus-4-1-20250805": 200000,
-    "claude-sonnet-4-20250514": 200000,
-    # Anthropic Claude 3.x (legacy)
-    "claude-3-5-sonnet-20240620": 200000,
-    "claude-3-7-sonnet-20250219": 200000,
-    # Mistral
-    "mistral-large-latest": 128000,
-    "mistral-small-latest": 128000,
-    "magistral-medium-latest": 40000,
-    "magistral-small-latest": 40000,
-    # Google Gemini
-    "gemini-3.1-pro-preview": 1000000,
-    "gemini-3.1-flash-lite-preview": 1000000,
-    "gemini-3-pro-preview": 1000000,
-    "gemini-3-flash-preview": 1000000,
-    "gemini-2.5-pro": 1000000,
-    "gemini-2.5-flash": 1000000,
-    "gemini-2.5-flash-lite": 1000000,
-    "gemini-2.0-flash": 1000000,
-    "gemini-2.0-flash-lite": 1000000,
-    "gemini-2.0-pro-exp-02-05": 1000000,
+    # Mistral — 256K depuis la génération Large 3 / Small 4. La gamme
+    # Magistral a été retirée le 2026-07-31. Les alias `-latest` fonctionnent
+    # (vérifié par appel réel) mais leur résolution vers une version n'est pas
+    # publiée : les IDs datés sont là pour qui veut épingler.
+    "mistral-large-latest": 256000,
+    "mistral-large-2512": 256000,
+    "mistral-small-2603": 256000,
+    "mistral-medium-latest": 256000,
+    "mistral-small-latest": 256000,
+    "ministral-14b-latest": 256000,
+    "ministral-8b-latest": 256000,
+    "ministral-3b-latest": 256000,
+    # Google Gemini — la limite d'input exacte est 1048576, pas 1000000.
+    # gemini-2.0-* et gemini-3-pro-preview ont été arrêtés en 2026.
+    "gemini-3.7-flash": 1048576,
+    "gemini-3.6-flash": 1048576,
+    "gemini-3.5-flash": 1048576,
+    "gemini-3.5-flash-lite": 1048576,
+    "gemini-3.1-flash-lite": 1048576,
+    "gemini-3.1-pro-preview": 1048576,
+    "gemini-3.1-flash-lite-preview": 1048576,
+    "gemini-3-flash-preview": 1048576,
+    "gemini-2.5-pro": 1048576,
+    "gemini-2.5-flash": 1048576,
+    "gemini-2.5-flash-lite": 1048576,
 }
 
 
@@ -704,24 +824,108 @@ def _call_mistral(client, args, prompt, segment):
     return response.choices[0].message.content.strip()
 
 
+# 32768 : marge sur l'expansion cross-script (FR→JA/ZH/KO/AR/HI peuvent
+# dépasser 16k tokens en sortie pour des segments source de 16k chars).
+CLAUDE_MAX_TOKENS = 32768
+# Plafond d'attente d'un appel non-streamé, en secondes. Doit rester cohérent
+# avec REGEN_JOB_TIMEOUT de regen_translations.sh, qui tue le job en aval.
+CLAUDE_TIMEOUT = float(os.getenv("CLAUDE_TIMEOUT", "900"))
+
+# Types de blocs Anthropic qui ne portent pas de texte traduit. `thinking` et
+# `redacted_thinking` apparaissent sur les modèles à raisonnement adaptatif.
+_CLAUDE_NON_TEXT_BLOCK_TYPES = frozenset(
+    {"thinking", "redacted_thinking", "tool_use", "tool_result"}
+)
+
+
 def _call_claude(client, args, prompt, segment):
     messages = [{"role": "user", "content": prompt + "\n\n" + segment}]
-    # 32768 : marge sur l'expansion cross-script (FR→JA/ZH/KO/AR/HI peuvent
-    # dépasser 16k tokens en sortie pour des segments source de 16k chars).
-    # Sonnet 4.6 et Opus 4.6+ supportent au moins 64k output tokens.
-    response = client.messages.create(model=args.model, max_tokens=32768, messages=messages)
+    # thinking désactivé explicitement : à partir de Sonnet 5, le raisonnement
+    # adaptatif est actif par défaut. Il double les tokens de sortie facturés
+    # et la latence sans rien apporter à une traduction.
+    #
+    # `timeout` explicite : depuis les SDK récents, un appel non-streamé dont
+    # le `max_tokens` laisse présager plus de 10 minutes est refusé côté client
+    # par un ValueError ("Streaming is required..."). Fournir un timeout revient
+    # à assumer l'attente, et évite de passer au streaming pour un appel dont on
+    # n'exploite que la réponse complète.
+    response = client.messages.create(
+        model=args.model,
+        max_tokens=CLAUDE_MAX_TOKENS,
+        thinking={"type": "disabled"},
+        timeout=CLAUDE_TIMEOUT,
+        messages=messages,
+    )
     stop = _reason_name(response.stop_reason)
     if stop not in ("end_turn", "stop_sequence", None):
         raise RuntimeError(f"Claude abnormal stop_reason={stop!r} (model={args.model})")
+    # Écarte les blocs non textuels : les modèles à raisonnement (Sonnet 5 et
+    # au-delà, où la thinking adaptive est active par défaut) intercalent un
+    # bloc `thinking` avant le bloc `text`. Un ThinkingBlock expose `.thinking`
+    # et non `.text` — sans ce filtre, la traduction casserait sur un
+    # AttributeError opaque au premier segment. On exclut par liste négative
+    # plutôt que de n'accepter que `type == "text"` : un bloc au type absent ou
+    # inconnu mais porteur de texte reste exploitable.
+    text_blocks = [
+        block
+        for block in response.content
+        if getattr(block, "type", None) not in _CLAUDE_NON_TEXT_BLOCK_TYPES
+    ]
+    if not text_blocks:
+        types = [getattr(block, "type", "?") for block in response.content]
+        raise RuntimeError(
+            f"Claude n'a renvoyé aucun bloc de texte (model={args.model}, blocs={types})"
+        )
     # Préserve la structure markdown entre blocs : pas de .strip() sur chaque
     # bloc (qui mangerait des newlines structurants), join avec "\n\n" entre
     # blocs distincts, et un seul .strip() global sur la sortie finale.
-    return "\n\n".join(block.text for block in response.content).strip()
+    return "\n\n".join(block.text for block in text_blocks).strip()
+
+
+def _gemini_config(prompt, thinking_level):
+    """Config d'un appel Gemini. Le niveau de raisonnement est explicite : les
+    modèles Gemini 3.x raisonnent par défaut, ce qui se paie sur chaque segment
+    de chaque fichier sans rien apporter à une traduction. L'ancien SDK ne
+    savait pas piloter ce réglage."""
+    config = genai_types.GenerateContentConfig(system_instruction=prompt)
+    if thinking_level is not None:
+        config.thinking_config = genai_types.ThinkingConfig(thinking_level=thinking_level)
+    return config
+
+
+# Du moins coûteux au plus permissif. `minimal` n'est accepté que par une
+# partie du catalogue (flash-lite l'accepte, 3.7-flash et 3.1-pro le refusent
+# par un 400) ; `low` passe partout ; `None` = pas de thinking_config du tout,
+# dernier recours si l'API change encore.
+_GEMINI_THINKING_LEVELS = ("minimal", "low", None)
+
+
+def _gemini_generate_with_fallback(client, args, prompt, segment):
+    """Descend la cascade des niveaux de raisonnement jusqu'à en trouver un que
+    le modèle accepte. Même logique que `_openai_create_with_fallback` : un
+    paramètre d'optimisation ne doit jamais faire échouer une traduction."""
+    last_error = None
+    for level in _GEMINI_THINKING_LEVELS:
+        try:
+            return client.models.generate_content(
+                model=args.model, contents=segment, config=_gemini_config(prompt, level)
+            )
+        except genai_errors.ClientError as e:
+            if "thinking" not in str(e).lower():
+                raise
+            last_error = e
+            print(
+                f"⚠ Gemini refuse thinking_level={level!r} — retry au niveau suivant "
+                f"(model={args.model})",
+                file=sys.stderr,
+            )
+    raise RuntimeError(
+        f"Gemini a refusé tous les niveaux de raisonnement (model={args.model}): {last_error}"
+    )
 
 
 def _call_gemini(client, args, prompt, segment):
-    model = client.GenerativeModel(args.model)
-    response = model.generate_content(prompt + "\n\n" + segment)
+    response = _gemini_generate_with_fallback(client, args, prompt, segment)
     candidates = getattr(response, "candidates", None) or []
     if candidates:
         fr_name = _reason_name(getattr(candidates[0], "finish_reason", None))
@@ -743,6 +947,20 @@ def _call_gemini(client, args, prompt, segment):
         ) from e
 
 
+def _resolve_reasoning_effort(args, eco_default="none"):
+    """Effort de raisonnement effectif : la valeur explicite si l'utilisateur en
+    a passé une, sinon `none` en mode --eco et `medium` autrement.
+
+    Mesuré sur gpt-5.4-mini (--eco) : un `medium` implicite produit 45 reasoning
+    tokens et 65 tokens de sortie pour traduire une phrase de dix mots, contre
+    0 et 14 avec `none`. Sur de la traduction, ce raisonnement n'apporte rien —
+    c'est de la dépense pure, payée sur chaque segment de chaque fichier."""
+    explicit = getattr(args, "reasoning_effort", None)
+    if explicit:
+        return explicit
+    return eco_default if getattr(args, "eco", False) else "medium"
+
+
 def _build_openai_messages(args, prompt, segment):
     if args.model in _O1_SERIES:
         return [{"role": "user", "content": prompt + "\n\n" + segment}]
@@ -753,9 +971,9 @@ def _build_openai_messages(args, prompt, segment):
 
 
 def _openai_extra_kwargs(args, is_translation_note):
-    # reasoning_effort sur GPT-5.x ; default medium pour rester pas cher.
+    # reasoning_effort sur GPT-5.x.
     if args.model.startswith("gpt-5") and not is_translation_note:
-        return {"reasoning_effort": getattr(args, "reasoning_effort", "medium")}
+        return {"reasoning_effort": _resolve_reasoning_effort(args)}
     return {}
 
 
@@ -788,7 +1006,10 @@ def _call_openai(client, args, prompt, segment, is_translation_note):
     response = _openai_create_with_fallback(client, args, messages, extra_kwargs)
     choice = response.choices[0]
     finish = _reason_name(choice.finish_reason)
-    if finish not in ("stop", "STOP", None):
+    # `end_turn` est la forme émise par l'API xAI (endpoint compatible OpenAI)
+    # là où OpenAI émet `stop` : sans elle, toute traduction Grok par clé API
+    # serait rejetée comme un finish_reason anormal.
+    if finish not in ("stop", "STOP", "end_turn", None):
         raise RuntimeError(f"OpenAI abnormal finish_reason={finish!r} (model={args.model})")
     content = choice.message.content
     if content is None:
@@ -804,17 +1025,419 @@ def _call_openai(client, args, prompt, segment, is_translation_note):
     return content.strip()
 
 
-def _dispatch_provider_call(
-    client, args, prompt, segment, use_mistral, use_claude, use_gemini, is_translation_note
-):
+@dataclass
+class _CodexClient:
+    """« Client » du provider Codex. Il n'y a pas de session HTTP à tenir : on
+    porte la config d'invocation du CLI. L'auth vit dans ~/.codex et n'est
+    jamais lue ni écrite ici — le CLI gère le refresh (le refresh_token est à
+    usage unique, toute manipulation externe casserait la session utilisateur)."""
+
+    binary: str
+    timeout: int = CODEX_TIMEOUT
+    reasoning_effort: str = "medium"
+    max_attempts: int = 3
+    backoff_seconds: float = 30.0
+    env_overrides: dict = field(default_factory=dict)
+
+
+def _codex_env(client):
+    """Env du sous-processus, privé des clés API : la raison d'être de ce
+    provider est de consommer l'abonnement ChatGPT, pas de facturer à l'usage.
+    Une clé laissée dans l'env ferait basculer Codex en mode payant sans
+    signal visible."""
+    env = os.environ.copy()
+    for var in CODEX_STRIPPED_ENV_VARS:
+        env.pop(var, None)
+    env.update(client.env_overrides)
+    return env
+
+
+def _codex_argv(client, args, prompt, workdir, output_file):
+    """Argv de `codex exec`. `--ignore-user-config` neutralise les serveurs MCP
+    et la personality de l'utilisateur : ils gonfleraient le contexte de chaque
+    tour, donc la consommation de quota, sans servir la traduction."""
+    return [
+        client.binary,
+        "exec",
+        prompt + CODEX_AGENT_CONTRACT,
+        "--cd",
+        workdir,
+        "--sandbox",
+        "read-only",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--color",
+        "never",
+        "--json",
+        "-o",
+        output_file,
+        "-m",
+        args.model,
+        "-c",
+        f"model_reasoning_effort={client.reasoning_effort}",
+        "-c",
+        "approval_policy=never",
+    ]
+
+
+def _codex_kill_group(proc):
+    """Tue tout le groupe de process. Le `codex` installé par npm est un shim
+    Node qui `spawn` le vrai binaire Rust : celui-ci est un petit-fils et
+    survit à un kill du fils direct, où il continuerait à consommer du quota."""
+    try:
+        pgid = os.getpgid(proc.pid)
+    except (ProcessLookupError, OSError):
+        return
+    try:
+        os.killpg(pgid, signal.SIGTERM)
+        proc.wait(timeout=CODEX_TERM_GRACE)
+    except subprocess.TimeoutExpired:
+        os.killpg(pgid, signal.SIGKILL)
+        proc.wait()
+    except (ProcessLookupError, OSError):
+        pass
+
+
+def _codex_run_process(argv, stdin_data, timeout, env, label, model):
+    """Lance un CLI agentique dans son propre groupe de process et renvoie
+    (returncode, stdout, stderr). Socle commun aux providers Codex et Grok :
+    tous deux sont lancés par un shim qui `spawn` le vrai binaire, lequel
+    survivrait à un kill du fils direct en continuant à consommer du quota.
+
+    `communicate(input=...)` ferme toujours stdin — obligatoire pour Codex, qui
+    lit stdin même quand le prompt est passé en argument et attendrait sinon
+    indéfiniment sans jamais appeler le modèle."""
+    timeout_var = "CODEX_TIMEOUT" if label == "Codex" else "GROK_TIMEOUT"
+    with subprocess.Popen(
+        argv,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        env=env,
+        start_new_session=True,
+    ) as proc:
+        try:
+            stdout, stderr = proc.communicate(input=stdin_data, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            _codex_kill_group(proc)
+            raise RuntimeError(
+                f"{label} CLI timeout après {timeout}s (model={model}). "
+                f"Augmenter {timeout_var} si les segments sont longs."
+            ) from None
+        return proc.returncode, stdout, stderr
+
+
+def _codex_run(client, argv, segment):
+    return _codex_run_process(
+        argv, segment, client.timeout, _codex_env(client), "Codex", argv[argv.index("-m") + 1]
+    )
+
+
+def _codex_unwrap_error(payload):
+    """Déplie le payload d'erreur, double-encodé par le CLI (une chaîne JSON
+    dans le champ `message`). Renvoie un dict, éventuellement vide."""
+    message = payload.get("message", payload) if isinstance(payload, dict) else payload
+    if isinstance(message, str):
+        try:
+            message = json.loads(message)
+        except (ValueError, TypeError):
+            return {"message": message}
+    return message if isinstance(message, dict) else {"message": str(message)}
+
+
+def _codex_error_from_events(stdout):
+    """Extrait le premier événement d'échec du JSONL. Renvoie `None` si le tour
+    s'est bien terminé. Nécessaire car `codex exec` peut sortir en 0 tout en
+    ayant émis un `turn.failed`."""
+    for line in stdout.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if event.get("type") in ("error", "turn.failed"):
+            return _codex_unwrap_error(event.get("error", event))
+    return None
+
+
+def _codex_is_rate_limited(error):
+    """Classe sur la structure du payload, pas sur des sous-chaînes : le mot
+    « quota » apparaît aussi bien dans un 429 récupérable que dans un
+    `insufficient_quota` définitif, et confondre les deux rend le back-off
+    soit inatteignable, soit infini."""
+    if not error:
+        return False
+    if error.get("status") == 429:
+        return True
+    kind = error.get("error", {}) if isinstance(error.get("error"), dict) else {}
+    return kind.get("type") == "rate_limit_exceeded"
+
+
+def _codex_describe_error(error, returncode, stderr):
+    """Message d'erreur exploitable : on cite le modèle et le détail serveur,
+    parce que la cause la plus fréquente est un slug de modèle refusé pour un
+    compte ChatGPT — un cas invisible sans le payload."""
+    if error:
+        detail = error.get("error", error)
+        detail = detail.get("message", detail) if isinstance(detail, dict) else detail
+        return f"Codex CLI a échoué : {detail}"
+    tail = (stderr or "").strip().splitlines()
+    tail = tail[-3:] if tail else ["(stderr vide)"]
+    return f"Codex CLI a quitté avec le code {returncode} : " + " | ".join(tail)
+
+
+def _codex_read_output(output_file, args):
+    """Lit le message final écrit par `-o`. Son absence avec un code retour 0
+    est une silent failure : sans cette garde, le segment repartirait vide."""
+    if not os.path.exists(output_file):
+        raise RuntimeError(
+            f"Codex CLI a retourné 0 sans écrire de message final (model={args.model}). "
+            "Sortie inexploitable."
+        )
+    with open(output_file, encoding="utf-8") as f:
+        return f.read()
+
+
+def _codex_attempt(client, args, prompt, segment):
+    """Une invocation complète du CLI, dans un workdir jetable pour qu'aucune
+    action de l'agent ne puisse toucher au dépôt."""
+    with tempfile.TemporaryDirectory(prefix="translate-codex-") as workdir:
+        output_file = os.path.join(workdir, "codex-last-message.md")
+        argv = _codex_argv(client, args, prompt, workdir, output_file)
+        returncode, stdout, stderr = _codex_run(client, argv, segment)
+        error = _codex_error_from_events(stdout)
+        if returncode != 0 or error:
+            raise _CodexCallError(
+                _codex_describe_error(error, returncode, stderr),
+                rate_limited=_codex_is_rate_limited(error),
+            )
+        return _codex_read_output(output_file, args)
+
+
+class _CodexCallError(RuntimeError):
+    """Échec d'une invocation du CLI, porteur du caractère récupérable ou non.
+    Le CLI n'implémente aucun retry interne (max_retries=0) : le back-off est
+    entièrement à notre charge."""
+
+    def __init__(self, message, rate_limited=False):
+        super().__init__(message)
+        self.rate_limited = rate_limited
+
+
+def _call_codex(client, args, prompt, segment):
+    """Traduit un segment via le CLI Codex, avec back-off sur rate limit.
+    Sur un plan ChatGPT, chaque tour consomme un « message local » de la
+    fenêtre de 5 heures : mieux vaut attendre que perdre le fichier en cours."""
+    last_error = None
+    for attempt in range(1, client.max_attempts + 1):
+        try:
+            return _codex_attempt(client, args, prompt, segment)
+        except _CodexCallError as e:
+            last_error = e
+            if not e.rate_limited or attempt == client.max_attempts:
+                raise
+            delay = client.backoff_seconds * attempt
+            print(
+                f"⚠ Codex rate limit (tentative {attempt}/{client.max_attempts}) — "
+                f"nouvelle tentative dans {delay:.0f}s",
+                file=sys.stderr,
+            )
+            time.sleep(delay)
+    raise last_error  # unreachable, garde de sécurité
+
+
+@dataclass
+class _GrokCliClient:
+    """« Client » du provider Grok CLI : comme pour Codex, il n'y a pas de
+    session HTTP à tenir. L'auth vit dans ~/.grok et n'est jamais lue ici."""
+
+    binary: str
+    timeout: int = GROK_TIMEOUT
+    max_attempts: int = 3
+    backoff_seconds: float = 30.0
+    sandbox_profile: str = ""
+
+
+def _grok_env():
+    """Env du sous-processus : sans clé API (sinon facturation à l'usage) et
+    sans GROK_SANDBOX hérité, plus les interrupteurs de réduction de surface."""
+    env = os.environ.copy()
+    for var in GROK_STRIPPED_ENV_VARS:
+        env.pop(var, None)
+    env.update(GROK_ENV_KILL_SWITCHES)
+    return env
+
+
+def _grok_write_prompt(workdir, prompt, segment):
+    """Écrit le prompt complet dans un fichier : le CLI ne lit pas stdin, et
+    passer 16 000 caractères par argv les exposerait dans `ps`."""
+    path = os.path.join(workdir, GROK_PROMPT_FILENAME)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(prompt + GROK_AGENT_CONTRACT + "\n\n" + segment)
+    return path
+
+
+def _grok_argv(client, args, prompt_file, workdir):
+    argv = [
+        client.binary,
+        "--prompt-file",
+        prompt_file,
+        "--output-format",
+        "json",
+        "--cwd",
+        workdir,
+        "--no-subagents",
+        "--no-plan",
+        "--disable-web-search",
+        "--max-turns",
+        str(GROK_MAX_TURNS),
+        "-m",
+        args.model,
+    ]
+    for rule in GROK_DENY_RULES:
+        argv += ["--deny", rule]
+    if client.sandbox_profile:
+        argv += ["--sandbox", client.sandbox_profile]
+    return argv
+
+
+def _grok_parse_payload(stdout, args):
+    """Le CLI écrit un unique objet JSON sur stdout. Une sortie non-JSON est un
+    échec en soi : on ne devine pas, on lève."""
+    text = (stdout or "").strip()
+    if not text:
+        raise _GrokCallError(f"Grok CLI n'a rien écrit sur stdout (model={args.model})")
+    try:
+        return json.loads(text)
+    except ValueError as e:
+        raise _GrokCallError(
+            f"Sortie Grok CLI illisible (model={args.model}) : {text[:200]!r}"
+        ) from e
+
+
+_GROK_RATE_LIMIT_MARKERS = ("rate limit", "quota", "too many requests", "429")
+
+
+def _grok_check_payload(payload, args):
+    """Contrat de sortie à quatre conditions. `exit == 0` ne prouve rien : une
+    erreur d'authentification, un refus ou un dépassement de tours sortent tous
+    en 0 avec un JSON d'apparence normale."""
+    if payload.get("type") == "error":
+        message = str(payload.get("message", payload))
+        raise _GrokCallError(
+            f"Grok CLI a échoué : {message}",
+            rate_limited=any(m in message.lower() for m in _GROK_RATE_LIMIT_MARKERS),
+        )
+    stop = payload.get("stopReason")
+    if stop is not None and str(stop).lower() not in ("end_turn", "endturn"):
+        raise _GrokCallError(
+            f"Grok CLI stopReason anormal={stop!r} (model={args.model}) — "
+            "réponse potentiellement tronquée",
+            rate_limited=str(stop).lower() in ("max_turn_requests", "rate_limited"),
+        )
+
+
+def _grok_extract_text(payload, args):
+    structured = payload.get("structuredOutput")
+    if isinstance(structured, dict) and structured.get("markdown"):
+        return structured["markdown"]
+    text = payload.get("text")
+    if not text:
+        raise _GrokCallError(
+            f"Grok CLI n'a renvoyé aucun texte (model={args.model}, "
+            f"stopReason={payload.get('stopReason')!r})"
+        )
+    return text
+
+
+class _GrokCallError(RuntimeError):
+    """Échec d'une invocation du CLI Grok, porteur du caractère récupérable."""
+
+    def __init__(self, message, rate_limited=False):
+        super().__init__(message)
+        self.rate_limited = rate_limited
+
+
+def _grok_attempt(client, args, prompt, segment):
+    with tempfile.TemporaryDirectory(prefix="translate-grok-") as workdir:
+        prompt_file = _grok_write_prompt(workdir, prompt, segment)
+        argv = _grok_argv(client, args, prompt_file, workdir)
+        returncode, stdout, stderr = _codex_run_process(
+            argv, None, client.timeout, _grok_env(), "Grok", args.model
+        )
+        if returncode != 0:
+            tail = (stderr or "").strip().splitlines()[-3:] or ["(stderr vide)"]
+            message = " | ".join(tail)
+            raise _GrokCallError(
+                f"Grok CLI a quitté avec le code {returncode} : {message}",
+                rate_limited=any(m in message.lower() for m in _GROK_RATE_LIMIT_MARKERS),
+            )
+        payload = _grok_parse_payload(stdout, args)
+        _grok_check_payload(payload, args)
+        return _grok_extract_text(payload, args)
+
+
+def _call_grok_cli(client, args, prompt, segment):
+    """Traduit un segment via le CLI Grok, avec back-off sur rate limit. Le
+    quota d'abonnement Grok est partagé avec Chat, Imagine et Voice, et aucune
+    commande ne permet de le lire : mieux vaut attendre que le gaspiller."""
+    last_error = None
+    for attempt in range(1, client.max_attempts + 1):
+        try:
+            return _grok_attempt(client, args, prompt, segment)
+        except _GrokCallError as e:
+            last_error = e
+            if not e.rate_limited or attempt == client.max_attempts:
+                raise
+            delay = client.backoff_seconds * attempt
+            print(
+                f"⚠ Grok rate limit (tentative {attempt}/{client.max_attempts}) — "
+                f"nouvelle tentative dans {delay:.0f}s",
+                file=sys.stderr,
+            )
+            time.sleep(delay)
+    raise last_error  # unreachable, garde de sécurité
+
+
+def _resolve_provider(args, use_mistral=False, use_claude=False, use_gemini=False):
+    """Nom du provider à utiliser. Les booléens explicites priment (plusieurs
+    tests appellent `translate(..., use_mistral=True)` avec un Namespace qui
+    n'a aucun attribut `use_*`), `args` ne sert que de repli."""
     if use_mistral:
-        text, provider = _call_mistral(client, args, prompt, segment), "mistral"
-    elif use_claude:
-        text, provider = _call_claude(client, args, prompt, segment), "claude"
-    elif use_gemini:
-        text, provider = _call_gemini(client, args, prompt, segment), "gemini"
+        return "mistral"
+    if use_claude:
+        return "claude"
+    if use_gemini:
+        return "gemini"
+    if getattr(args, "use_codex", False):
+        return "codex"
+    if getattr(args, "use_grok_cli", False):
+        return "grok_cli"
+    if getattr(args, "use_grok", False):
+        return "grok"
+    return "openai"
+
+
+def _dispatch_provider_call(client, args, prompt, segment, provider, is_translation_note):
+    if provider == "mistral":
+        text = _call_mistral(client, args, prompt, segment)
+    elif provider == "claude":
+        text = _call_claude(client, args, prompt, segment)
+    elif provider == "gemini":
+        text = _call_gemini(client, args, prompt, segment)
+    elif provider == "codex":
+        text = _call_codex(client, args, prompt, segment)
+    elif provider == "grok_cli":
+        text = _call_grok_cli(client, args, prompt, segment)
     else:
-        text, provider = _call_openai(client, args, prompt, segment, is_translation_note), "openai"
+        # `grok` (API xAI) inclus : endpoint compatible OpenAI, donc même appel.
+        text = _call_openai(client, args, prompt, segment, is_translation_note)
     # Empty-content guard : un provider qui retourne "" avec finish_reason="stop"
     # produirait sinon un fichier vide marqué success.
     if not text.strip():
@@ -848,9 +1471,7 @@ class _LLMCallSpec:
     client: object
     args: object
     system_instructions: str
-    use_mistral: bool = False
-    use_claude: bool = False
-    use_gemini: bool = False
+    provider: str = "openai"
     is_translation_note: bool = False
 
 
@@ -866,9 +1487,7 @@ def _translate_segment_with_retry(segment, idx, total, spec, max_retries=1):
             spec.args,
             spec.system_instructions,
             segment,
-            spec.use_mistral,
-            spec.use_claude,
-            spec.use_gemini,
+            spec.provider,
             spec.is_translation_note,
         )
         try:
@@ -915,9 +1534,7 @@ def translate(
         client=client,
         args=args,
         system_instructions=system_instructions,
-        use_mistral=use_mistral,
-        use_claude=use_claude,
-        use_gemini=use_gemini,
+        provider=_resolve_provider(args, use_mistral, use_claude, use_gemini),
         is_translation_note=is_translation_note,
     )
     translated_segments = []
@@ -955,7 +1572,13 @@ _INLINE_CODE_REGEX = re.compile(r"(?<!`)(`[^`\n]+?`)(?!`)")
 # Multi-line EN quote bodies (common on long social-media quotes) MUST be captured
 # as a single group to be re-emitted verbatim — see _protect_news_quotes.
 _NEWS_CITATION_REGEX = re.compile(
-    r"(^> (?!— ).+(?:[ \t]*\n^> (?!— ).+)*)[ \t]*\n"
+    # Corps de la citation EN. Il peut couvrir PLUSIEURS paragraphes, donc la
+    # répétition accepte aussi les lignes `>` vides qui les séparent. Elle est
+    # non-gourmande pour s'arrêter au `>` vide qui précède la ligne en italique
+    # (la traduction), et non au premier rencontré : sinon un seul paragraphe
+    # serait protégé et les précédents, laissés au LLM, seraient traduits —
+    # exactement ce que le mode --news existe pour empêcher.
+    r"(^> (?!— ).+(?:[ \t]*\n^>(?![ \t]*—)(?:[ \t]*$|[ \t]+.*))*?)[ \t]*\n"
     r"^>[ \t]*\n"
     r"(^> .+_)[ \t]*"
     r"(?:\n(^> — .+?)[ \t]*)?$",
@@ -2041,15 +2664,42 @@ def _add_provider_args(parser):
         help="Utiliser l'API Gemini de Google pour la traduction",
     )
     parser.add_argument(
+        "--use_grok",
+        action="store_true",
+        help="Utiliser l'API xAI (Grok) — nécessite XAI_API_KEY, facturé à l'usage",
+    )
+    parser.add_argument(
+        "--use_grok_cli",
+        action="store_true",
+        help=(
+            "Utiliser le CLI Grok sur le quota de l'abonnement Grok "
+            "(nécessite `grok login` ; confinement plus faible que --use_codex)"
+        ),
+    )
+    parser.add_argument(
+        "--use_codex",
+        action="store_true",
+        help=(
+            "Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT "
+            "(aucune facturation à l'usage ; nécessite `codex login`)"
+        ),
+    )
+    parser.add_argument(
         "--eco",
         action="store_true",
         help="Utiliser les modèles économiques (mini/flash) au lieu des modèles qualité",
     )
     parser.add_argument(
         "--reasoning_effort",
-        choices=("low", "medium", "high"),
-        default="medium",
-        help="Effort de raisonnement OpenAI GPT-5.x (défaut: medium)",
+        choices=("none", "low", "medium", "high", "xhigh"),
+        default=None,
+        help=(
+            "Effort de raisonnement OpenAI GPT-5.x. Par défaut : 'none' avec "
+            "--eco (le raisonnement n'apporte rien à une traduction et double "
+            "les tokens de sortie), 'medium' sinon. Toutes les valeurs ne sont "
+            "pas acceptées par tous les modèles ; un refus déclenche un retry "
+            "sans le paramètre."
+        ),
     )
 
 
@@ -2141,16 +2791,16 @@ def _init_claude_client(args):
 
 def _init_gemini_client(args):
     args.model = args.model or (ECO_MODEL_GEMINI if args.eco else DEFAULT_MODEL_GEMINI)
-    # Accepte GOOGLE_API_KEY (SDK historique google.generativeai) et GEMINI_API_KEY
-    # (convention AI Studio, cohérent avec @google/genai côté JS/TS).
+    # Accepte GOOGLE_API_KEY et GEMINI_API_KEY (convention AI Studio). Le SDK
+    # google-genai lirait GOOGLE_API_KEY tout seul, mais on la passe
+    # explicitement pour conserver la garde sur la valeur placeholder.
     api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or DEFAULT_GEMINI_API_KEY
     if not api_key or api_key == DEFAULT_GEMINI_API_KEY:
         raise ValueError(
             "Clé API Gemini non spécifiée. Définir GOOGLE_API_KEY ou "
             "GEMINI_API_KEY dans l'environnement ou .env."
         )
-    genai.configure(api_key=api_key)
-    return genai
+    return genai.Client(api_key=api_key)
 
 
 def _init_openai_client(args):
@@ -2163,6 +2813,194 @@ def _init_openai_client(args):
     return OpenAI(api_key=openai_api_key)
 
 
+def _resolve_grok_binary():
+    """Chemin du binaire `grok` : GROK_BIN, puis le PATH, puis l'emplacement
+    d'installation par défaut (~/.grok/bin/grok), que l'installeur officiel
+    n'ajoute pas systématiquement au PATH."""
+    explicit = os.getenv("GROK_BIN")
+    if explicit:
+        return shutil.which(explicit) or (explicit if os.path.isfile(explicit) else None)
+    found = shutil.which("grok")
+    if found:
+        return found
+    home = os.path.join(os.path.expanduser(os.getenv("GROK_HOME", "~/.grok")), "bin", "grok")
+    return home if os.path.isfile(home) else None
+
+
+def _grok_preflight(binary):
+    """Valide binaire et authentification sans consommer un seul token.
+    `grok models` sort en 0 même déconnecté, en écrivant « You are not
+    authenticated. » sur stdout : le code retour ne suffit donc pas."""
+    if binary is None:
+        raise ValueError(
+            "Binaire Grok introuvable. L'installer "
+            "(`curl -fsSL https://x.ai/cli/install.sh | bash`) ou pointer GROK_BIN dessus."
+        )
+    try:
+        result = subprocess.run(
+            [binary, "models"],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+            env=_grok_env(),
+        )
+    except (OSError, subprocess.SubprocessError) as e:
+        raise ValueError(f"Impossible d'exécuter '{binary} models' : {e}") from e
+    if result.returncode != 0:
+        raise ValueError(
+            f"'{binary} models' a échoué (code {result.returncode}) : "
+            f"{(result.stderr or '').strip()[:200]}"
+        )
+    if "not authenticated" in (result.stdout or "").lower():
+        raise ValueError(
+            "Grok CLI n'est pas authentifié. Lancer `grok login` (ou "
+            "`grok login --device-code`) pour utiliser --use_grok_cli sur le "
+            "quota de l'abonnement."
+        )
+
+
+def _grok_sandbox_profile():
+    """Profil sandbox demandé par l'utilisateur, ou chaîne vide.
+
+    Non activé par défaut, et jamais de repli silencieux : sur beaucoup de
+    postes Linux récents aucun profil ne peut s'appliquer (AppArmor bloque les
+    user namespaces non privilégiés depuis Ubuntu 24.04, et la deny-list des
+    sockets de runtime conteneur échoue si /run/podman est en 0700). Un profil
+    intégré qui ne peut pas s'appliquer démarre NON CONFINÉ en silence — d'où
+    l'opt-in explicite, qui fait alors échouer le démarrage plutôt que de
+    laisser croire à une protection absente."""
+    return os.getenv(GROK_SANDBOX_ENV_VAR, "").strip()
+
+
+def _init_grok_cli_client(args):
+    """Provider Grok CLI : traduit sur le quota de l'abonnement Grok via le
+    binaire officiel, sans clé API."""
+    args.model = args.model or (ECO_MODEL_GROK_CLI if args.eco else DEFAULT_MODEL_GROK_CLI)
+    _codex_reject_ci_environment(flag="--use_grok_cli")
+    binary = _resolve_grok_binary()
+    _grok_preflight(binary)
+    profile = _grok_sandbox_profile()
+    if not profile:
+        print(
+            "⚠ Grok CLI lancé sans sandbox OS : le confinement repose sur les "
+            "règles --deny du CLI, pas sur une frontière noyau. Définir "
+            f"{GROK_SANDBOX_ENV_VAR}=read-only pour l'exiger (le démarrage "
+            "échouera si la machine ne peut pas l'appliquer).",
+            file=sys.stderr,
+        )
+    return _GrokCliClient(binary=binary, timeout=GROK_TIMEOUT, sandbox_profile=profile)
+
+
+def _init_grok_client(args):
+    """Provider Grok par clé API xAI (facturé à l'usage). L'endpoint est
+    compatible OpenAI, donc le client et `_call_openai` sont réutilisés tels
+    quels — seul le `base_url` change."""
+    args.model = args.model or (ECO_MODEL_GROK if args.eco else DEFAULT_MODEL_GROK)
+    api_key = os.getenv("XAI_API_KEY", DEFAULT_XAI_API_KEY)
+    if not api_key or api_key == DEFAULT_XAI_API_KEY:
+        raise ValueError(
+            "Clé API xAI non spécifiée. Définir XAI_API_KEY dans l'environnement "
+            "ou .env (clé obtenue sur console.x.ai)."
+        )
+    return OpenAI(api_key=api_key, base_url=os.getenv("XAI_BASE_URL", XAI_BASE_URL))
+
+
+def _codex_reject_ci_environment(flag="--use_codex"):
+    """Refuse de tourner en CI. La doc OpenAI est explicite sur ce workflow :
+    « Do not use this workflow for public or open-source repositories » — or ce
+    dépôt est public. Sur un runner, la voie supportée est une clé API."""
+    ci_vars = [var for var in ("CI", "GITHUB_ACTIONS") if os.getenv(var)]
+    if ci_vars:
+        raise ValueError(
+            f"{flag} est refusé en environnement CI ({', '.join(ci_vars)} défini). "
+            "L'auth d'abonnement ChatGPT n'est pas prévue pour un runner partagé : "
+            "utiliser une clé API (OPENAI_API_KEY) sur ce chemin."
+        )
+
+
+def _resolve_codex_binary():
+    """Chemin du binaire `codex`, ou `None` s'il est introuvable.
+
+    Trois sources, dans l'ordre : `CODEX_BIN` explicite, le `PATH`, puis le
+    package Python officiel `openai-codex-cli-bin`. Ce dernier évite d'imposer
+    une installation npm globale à un projet Python : `pip install
+    openai-codex-cli-bin` suffit alors à rendre `--use_codex` utilisable.
+    Il n'est pas dans requirements.txt à dessein — le binaire pèse ~250 Mo, ce
+    qui serait imposé à tous les utilisateurs pour un provider optionnel."""
+    explicit = os.getenv("CODEX_BIN")
+    if explicit:
+        return shutil.which(explicit) or (explicit if os.path.isfile(explicit) else None)
+    found = shutil.which("codex")
+    if found:
+        return found
+    try:
+        from codex_cli_bin import bundled_codex_path
+
+        return str(bundled_codex_path())
+    except (ImportError, OSError):
+        return None
+
+
+def _codex_preflight(binary):
+    """Valide binaire + auth AVANT le premier segment, pour échouer en 2s au
+    lieu de découvrir le problème après plusieurs fichiers. `codex login
+    status` ne consomme aucun quota."""
+    if binary is None:
+        raise ValueError(
+            "Binaire Codex introuvable. L'installer par pip "
+            "(`pip install openai-codex-cli-bin`) ou par npm "
+            "(`npm install -g @openai/codex`), ou pointer CODEX_BIN dessus."
+        )
+    try:
+        result = subprocess.run(
+            [binary, "login", "status"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as e:
+        raise ValueError(f"Impossible d'exécuter '{binary} login status' : {e}") from e
+    if result.returncode != 0:
+        raise ValueError(
+            "Codex CLI n'est pas authentifié. Lancer `codex login` (connexion "
+            "ChatGPT) pour utiliser --use_codex sur le quota de l'abonnement."
+        )
+
+
+def _codex_warn_unexpected_model(model):
+    """L'allowlist des modèles utilisables sur un compte ChatGPT est appliquée
+    côté serveur : un `gpt-5.4-mini` passé par mimétisme avec le mode --eco des
+    autres providers échouerait en 400 après avoir consommé du temps. On
+    prévient au lieu de bloquer, les slugs évoluant plus vite que cette liste."""
+    if not model.startswith(CODEX_MODEL_PREFIXES):
+        print(
+            f"⚠ Modèle '{model}' inhabituel pour Codex (attendu : "
+            f"{', '.join(p + '*' for p in CODEX_MODEL_PREFIXES)}). "
+            "Les slugs Codex diffèrent des slugs API OpenAI.",
+            file=sys.stderr,
+        )
+
+
+def _init_codex_client(args):
+    """Provider Codex : traduit sur le quota de l'abonnement ChatGPT via le CLI
+    officiel, sans facturation à l'usage. Aucune clé API n'est requise ni
+    utilisée."""
+    args.model = args.model or (ECO_MODEL_CODEX if args.eco else DEFAULT_MODEL_CODEX)
+    _codex_reject_ci_environment()
+    binary = _resolve_codex_binary()
+    _codex_preflight(binary)
+    _codex_warn_unexpected_model(args.model)
+    return _CodexClient(
+        binary=binary,
+        timeout=CODEX_TIMEOUT,
+        # Le CLI Codex n'accepte pas `none` pour model_reasoning_effort : on
+        # retombe sur `low`, la valeur la plus basse qu'il connaisse.
+        reasoning_effort=_resolve_reasoning_effort(args, eco_default="low"),
+    )
+
+
 def _select_provider_client(args):
     if args.use_mistral:
         return _init_mistral_client(args)
@@ -2170,6 +3008,12 @@ def _select_provider_client(args):
         return _init_claude_client(args)
     if args.use_gemini:
         return _init_gemini_client(args)
+    if getattr(args, "use_codex", False):
+        return _init_codex_client(args)
+    if getattr(args, "use_grok_cli", False):
+        return _init_grok_cli_client(args)
+    if getattr(args, "use_grok", False):
+        return _init_grok_client(args)
     return _init_openai_client(args)
 
 

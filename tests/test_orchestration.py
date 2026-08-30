@@ -503,7 +503,7 @@ class TestProviderClientInit(unittest.TestCase):
             patch("translate.genai") as mock_genai,
         ):
             translate._init_gemini_client(args)
-            mock_genai.configure.assert_called_once_with(api_key=gemini_env["GEMINI_API_KEY"])
+            mock_genai.Client.assert_called_once_with(api_key=gemini_env["GEMINI_API_KEY"])
         self.assertEqual(args.model, translate.ECO_MODEL_GEMINI)
 
     def test_init_openai_missing_key_raises(self):
@@ -557,7 +557,7 @@ class TestSelectProviderClient(unittest.TestCase):
             patch("translate.genai") as mock_genai,
         ):
             translate._select_provider_client(args)
-            mock_genai.configure.assert_called_once()
+            mock_genai.Client.assert_called_once()
 
     def test_openai_default_branch(self):
         args = _base_args(model=None)
