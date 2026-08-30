@@ -16,6 +16,7 @@
 #   ./release.sh --local-only    # NON-INTERACTIF : régénère + commit local. Pas de push.
 #   ./release.sh --tag-only      # Phase 2 : checkout main, pull, tag main, push tag, GitHub Release
 #   ./release.sh --dry-run       # affiche tout ce qui serait fait, ne touche à rien
+#                                # composable : `--tag-only --dry-run` simule la phase 2
 #
 # === Flags fins (composables) ===
 #
@@ -51,7 +52,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # === Defaults ===
-MODE="interactive"          # interactive | auto | local-only | tag-only | dry-run
+MODE="interactive"          # interactive | auto | local-only | tag-only
+                            # (--dry-run est un modificateur, pas un mode)
 VERSION=""
 TAG=""
 SKIP_REGEN=false
@@ -76,7 +78,15 @@ while [[ $# -gt 0 ]]; do
       MODE="tag-only"; SKIP_REGEN=true
       shift ;;
     --dry-run)
-      MODE="dry-run"; DRY_RUN=true; ASSUME_YES=true
+      # ORTHOGONAL au mode, volontairement : `--dry-run` ne doit PAS écraser un
+      # `--tag-only` (ni un `--auto`) posé avant lui. Le comportement de
+      # simulation vient entièrement de DRY_RUN, que `run()` consulte ; assigner
+      # MODE="dry-run" ici n'apportait rien — MODE n'est comparé qu'à
+      # "tag-only" — mais faisait basculer `--tag-only --dry-run` dans le mode
+      # principal, qui refuse de tourner depuis main. La simulation échouait
+      # donc sur « Refus de release depuis 'main' », un diagnostic sans rapport
+      # avec ce qu'on cherchait à simuler.
+      DRY_RUN=true; ASSUME_YES=true
       shift ;;
     --version)             VERSION="$2"; shift 2 ;;
     --tag)                 TAG="$2"; shift 2 ;;
