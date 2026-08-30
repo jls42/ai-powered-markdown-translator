@@ -32,16 +32,16 @@
 
 ## 주요 기능
 
-- **다중 Provider**: 4개 API(OpenAI, Mistral, Claude, Gemini) 및 ChatGPT 구독 기반 Codex CLI 지원
+- **다중 Provider**: 4개 API(OpenAI, Mistral, Claude, Gemini)와 ChatGPT 구독 기반 Codex CLI 지원
 - **2026년 모델**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
 - **경제 모드**: 더 빠르고 저렴한 모델을 사용하는 `--eco` 옵션
 - **단일 파일**: 파일 하나만 번역하는 `--file` 옵션
-- **지능형 분할**: 모델별 token 한도를 적용하여 긴 텍스트 처리
-- **코드 보존**: 코드 블록과 inline 코드(`` `...` ``)를 모두 보존
+- **지능형 분할**: 모델별 token 제한을 적용하여 긴 텍스트 처리
+- **코드 보존**: 코드 블록과 inline code(`` `...` ``)를 모두 보존
 - **파일 이름**: 원래 이름을 유지하는 `--keep_filename` 옵션
 - **뉴스 모드**: 뉴스 기사에서 영어 인용문을 보호하고 국기를 처리하는 `--news` 옵션
-- **.env 설정**: API 키를 위한 `.env` 파일 지원
-- **번역 주석**: 문서 끝에 선택적으로 주석 추가
+- **.env 구성**: API 키를 위한 `.env` 파일 지원
+- **번역 메모**: 문서 끝에 메모를 선택적으로 추가
 
 ## 설치
 
@@ -54,7 +54,7 @@ pip install -r requirements.txt
 
 ### 품질 도구(선택 사항이지만 권장)
 
-프로젝트는 서식이 잘못되었거나 취약하거나 비밀 정보가 포함된 코드의 commit을 방지하기 위해 [`pre-commit`](https://pre-commit.com)을 사용합니다. 설치 방법:
+프로젝트에서는 형식이 잘못되었거나 취약하거나 비밀 정보가 포함된 코드의 commit을 방지하기 위해 [`pre-commit`](https://pre-commit.com)을 사용합니다. 설치 방법:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -62,9 +62,9 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-활성 hook: ruff(lint+format), shellcheck(bash), prettier(markdown/yaml/json), Lizard(복잡도), detect-secrets(API 키), mypy(점진적 타입 검사), Opengrep(SAST), pip-audit(CVE 종속성), unittest. 자세한 내용은 `CLAUDE.md`의 _Quality / pre-commit_ 섹션을 참조하세요.
+활성화된 hook: ruff(lint+format), shellcheck(bash), prettier(markdown/yaml/json), Lizard(복잡도), detect-secrets(API 키), mypy(점진적 타입 검사), Opengrep(SAST), pip-audit(종속성 CVE), unittest. 자세한 내용은 `CLAUDE.md`의 _Quality / pre-commit_ 섹션을 참조하세요.
 
-## 설정
+## 구성
 
 프로젝트 루트에 `.env` 파일을 만들거나 환경 변수를 설정하세요.
 
@@ -80,11 +80,12 @@ GOOGLE_API_KEY=votre-clé-api-google
 export OPENAI_API_KEY='votre-clé-api-openai'
 ```
 
-`GEMINI_API_KEY`은 `GOOGLE_API_KEY`의 대안으로 사용할 수 있습니다(AI
-Studio 규칙). 선택적 변수: `XAI_BASE_URL`(xAI endpoint, 기본값
+`GEMINI_API_KEY`은 `GOOGLE_API_KEY`의 대안으로 사용할 수 있습니다(AI Studio 규칙). 선택적 변수: `XAI_BASE_URL`(xAI endpoint, 기본값
 `https://api.x.ai/v1`), `CLAUDE_TIMEOUT`(Anthropic 호출당 초, 기본값
 900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
-그리고 `GROK_TRANSLATE_SANDBOX`(Grok CLI 섹션 참조).
+그리고 `GROK_TRANSLATE_SANDBOX`(Grok CLI 섹션 참조). `regen_translations.sh` 관련 변수:
+`REGEN_PROVIDER`, `REGEN_MODEL` 및
+`REGEN_JOB_TIMEOUT`(job당 상한, 기본값 600초).
 
 ## 사용법
 
@@ -119,13 +120,9 @@ python translate.py --use_grok --source_dir 'content/fr' --target_dir 'content/p
 python translate.py --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
 ```
 
-### ChatGPT 구독으로 번역(`--use_codex`)
+### ChatGPT 구독으로 번역하기(`--use_codex`)
 
-이 provider는 API 키를 전혀 사용하지 않습니다. 공식 Codex CLI를
-비대화형 모드로 제어하므로 번역 사용량은 이미 결제한
-ChatGPT 구독(Plus, Pro, Business 등)의 quota에서 차감됩니다. 이는 이 용도로
-OpenAI가 문서화한 유일한 방법입니다. `~/.codex/auth.json` token은
-Platform API 호출을 인증하지 않으며, 이 스크립트에서는 아예 읽지도 않습니다.
+이 provider는 API 키를 전혀 사용하지 않습니다. 공식 Codex CLI를 비대화형 모드로 구동하므로, 번역 사용량은 이미 결제한 ChatGPT 구독(Plus, Pro, Business 등)의 quota에서 차감됩니다. 이는 OpenAI가 이 용도로 문서화한 유일한 방법입니다. `~/.codex/auth.json`의 token은 API Platform 호출 인증에 사용되지 않으며, 이 스크립트에서 읽지도 않습니다.
 
 **필수 조건:**
 
@@ -137,64 +134,41 @@ npm install -g @openai/codex       # ou l'installation npm globale
 codex login                        # connexion avec le compte ChatGPT
 ```
 
-바이너리는 `CODEX_BIN` 변수, `PATH`,
-Python package `openai-codex-cli-bin` 순서로 검색됩니다. 마지막 항목은 의도적으로
-`requirements.txt`에 포함하지 않았습니다. 용량이 약 250MB이므로 선택적
-provider를 위해 모든 사용자에게 설치하도록 강제하게 되기 때문입니다.
+binary는 다음 순서로 검색됩니다. `CODEX_BIN` 변수, `PATH`, 그리고 Python package `openai-codex-cli-bin`. 마지막 항목은 의도적으로 `requirements.txt`에 포함하지 않았습니다. 용량이 약 250MB이므로 선택적 provider 하나 때문에 모든 사용자에게 설치를 강제하게 되기 때문입니다.
 
 **알아둘 사항:**
 
-- **API 키를 전혀 사용하지 않습니다.** `OPENAI_API_KEY`와 `CODEX_API_KEY`은
-  하위 프로세스의 환경에서 제거되므로 `.env`에 키가
-  있어도 번역이 종량제 결제로 전환되지 않습니다.
-- **segment 하나 = 5시간 plan 창의 «로컬 메시지» 하나**입니다.
-  품질 모델(`gpt-5.6-sol`, 5시간당 메시지 10~100개)보다
-  `--eco`(모델 `gpt-5.6-luna`, Plus에서 5시간당 메시지 250~2,000개)를 사용하세요.
-- API 직접 호출보다 **느립니다**. README 전체 하나에 약 45초가 걸리며,
-  직접 호출하면 몇 초 정도입니다.
-- CI에서는 **거부됩니다**(`CI` 또는 `GITHUB_ACTIONS`이 정의된 경우). 구독 기반
-  인증은 공유 runner용이 아니며, OpenAI는 공개 repository에서 이
-  workflow를 권장하지 않습니다. 이 경로에서는 API 키를 사용하세요.
-- 환경 변수: `CODEX_BIN`(명시적 바이너리 경로) 및
+- **API 키를 사용하지 않습니다.** `OPENAI_API_KEY`과 `CODEX_API_KEY`은
+  하위 process의 환경에서 제거되므로, `.env`에 키가 있어도 번역이 사용량 기반 과금으로 전환되지 않습니다.
+- **segment 하나 = 5시간 plan window의 « 로컬 메시지 » 하나**입니다.
+  품질 모델(`gpt-5.6-sol`, Plus에서 5시간당 메시지 10~100개) 대신
+  `--eco`(모델 `gpt-5.6-luna`, Plus에서 5시간당 메시지 250~2,000개)을 사용하세요.
+- API 직접 호출보다 **느립니다**. README 전체는 약 45초가 걸리며, 직접 호출은 몇 초면 됩니다.
+- CI에서는 **거부됩니다**(`CI` 또는 `GITHUB_ACTIONS`이 설정된 경우). 구독 기반 인증은 공유 runner용으로 설계되지 않았으며, OpenAI는 공개 repository에서 이 workflow를 권장하지 않습니다. 이 경로에서는 API 키를 사용하세요.
+- 환경 변수: `CODEX_BIN`(binary의 명시적 경로) 및
   `CODEX_TIMEOUT`(segment당 초, 기본값 `600`).
 
-### Grok 구독으로 번역(`--use_grok_cli`)
+### Grok 구독으로 번역하기(`--use_grok_cli`)
 
-공식 **Grok Build** CLI를 사용하는 `--use_codex`과 동일한 원리입니다.
-번역 사용량은 token 단위로 청구되는 대신 Grok 구독(SuperGrok / X Premium+)에서
-차감됩니다.
+`--use_codex`와 동일한 원리로 공식 **Grok Build** CLI를 사용합니다. 번역 비용은 token 단위로 청구되는 대신 Grok 구독(SuperGrok / X Premium+)에서 차감됩니다.
 
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
 grok login                                      # ou `grok login --device-code`
 ```
 
-**격리 — 사용 전에 읽으세요.** 이 provider는 구조적으로 `--use_codex`보다
-**취약**하며, 이는 의도된 사항입니다.
+**격리 — 사용 전에 읽으세요.** 이 provider는 구조적으로 `--use_codex`보다 **취약하며**, 이는 의도된 설계입니다.
 
-- Codex는 시스템이 강제하는 경계인 `--sandbox read-only`에서 실행됩니다.
-- 최근의 많은 Linux 환경에서는 Grok sandbox를 **적용할 수 없습니다**.
-  Ubuntu 24.04부터 AppArmor가 권한 없는 user namespace를 차단하며,
-  `/run/podman`이 `0700`에 있으면 container runtime socket의 deny-list가
-  작동하지 않습니다. 그런데 적용할 수 없는 **내장** profile은
-  **격리되지 않은 상태로 조용히** 시작됩니다.
-- 따라서 스크립트는 기본적으로 어떠한 profile도 요청하지 않으며, **절대 조용히
-  fallback하지 않습니다**. 대신 경고를 표시합니다. 격리는 CLI의
-  `--deny` 규칙(catch-all `*` 포함)에 의존합니다. 이는 측정된 유일한
-  _fail-closed_ 계층으로, 알 수 없는 규칙이 있으면 보호를 알리지 않고
-  제거하는 대신 시작을 거부합니다.
-- OS sandbox를 **강제하려면** `GROK_TRANSLATE_SANDBOX=read-only`을 사용하세요.
-  시스템이 이를 지원하지 못하면 시작이 실패하며, 이것이 의도된
-  동작입니다.
+- Codex는 시스템에서 강제하는 경계인 `--sandbox read-only`에서 실행됩니다.
+- 최신 Linux 환경에서는 Grok sandbox를 **적용할 수 없는** 경우가 많습니다. Ubuntu 24.04부터 AppArmor가 권한 없는 user namespace를 차단하며, `/run/podman`가 `0700`에 있으면 container runtime socket의 deny-list가 실패합니다. 적용할 수 없는 **내장** profile은 아무 알림 없이 **격리되지 않은 상태로** 시작됩니다.
+- 따라서 스크립트는 기본적으로 어떤 profile도 요청하지 않으며 **절대로 조용히 fallback하지 않습니다**. 대신 경고를 표시합니다. 격리는 CLI의 `--deny` 규칙(포괄 규칙 `*` 포함)에 의존합니다. 이는 측정된 유일한 _fail-closed_ 계층으로, 알 수 없는 규칙이 있으면 보호 기능을 알리지 않고 제거하는 대신 시작을 거부합니다.
+- OS sandbox를 **강제**하려면 `GROK_TRANSLATE_SANDBOX=read-only`을 사용하세요. 시스템이 이를 준수할 수 없으면 의도한 대로 시작에 실패합니다.
 
-**Quota**: Grok pool은 **주 단위이며 Chat, Imagine 및
-Voice와 공유**되고, 이를 확인할 수 있는 명령은 없습니다. 따라서 batch 처리는
-아무런 알림 없이 대화 용도의 사용량을 잠식할 수 있습니다. 이 때문에
-동시 실행 수를 2로 제한하고 `regen_translations.sh`에 경고를 표시합니다.
+**Quota**: Grok pool은 **주 단위이며 Chat, Imagine 및 Voice와 공유**되고, 이를 조회하는 명령은 없습니다. 따라서 일괄 처리는 아무 알림 없이 대화 사용량을 잠식할 수 있습니다. 이 때문에 동시 실행은 2개로 제한되며 `regen_translations.sh`에 경고가 표시됩니다.
 
-기타 변수: `GROK_BIN`(바이너리 경로), `GROK_TIMEOUT`(기본값 900초).
+기타 변수: `GROK_BIN`(binary 경로), `GROK_TIMEOUT`(기본값 900초).
 
-28개 번역을 다시 생성하려면:
+28개 번역을 재생성하려면:
 
 ```bash
 REGEN_PROVIDER=codex ./regen_translations.sh --force
@@ -228,32 +202,35 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_mistral`          | Mistral AI API 사용                                                |
 | `--use_claude`           | Claude API 사용                                                    |
 | `--use_gemini`           | Gemini API 사용                                                    |
-| `--use_codex`            | ChatGPT 구독 quota로 Codex CLI 사용               |
+| `--use_codex`            | ChatGPT 구독 quota에서 Codex CLI 사용               |
 | `--use_grok`             | xAI API(Grok) 사용 — `XAI_API_KEY` 필요                      |
-| `--use_grok_cli`         | Grok 구독 quota로 Grok CLI 사용                   |
+| `--use_grok_cli`         | Grok 구독 quota에서 Grok CLI 사용                   |
 | `--force`                | 재번역 강제                                                  |
 | `--keep_filename`        | 원래 파일 이름 유지                                     |
 | `--news`                 | 뉴스 모드: 영어 인용문을 보호하고 언어별 국기를 처리 |
-| `--add_translation_note` | 번역 주석 추가                                           |
-| `--note_position`        | 주석 위치: `top`, `bottom`(기본값) 또는 `both`                |
-| `--note_format`          | 주석 형식: `legacy`(기본값, 굵은 문단) 또는 `marker`       |
+| `--add_translation_note` | 번역 메모 추가                                           |
+| `--note_position`        | 메모 위치: `top`, `bottom`(기본값) 또는 `both`                |
+| `--note_format`          | 메모 형식: `legacy`(기본값, 굵은 문단) 또는 `marker`       |
 | `--include_model`        | 출력 파일에 모델 이름 포함                       |
-| `--reasoning_effort`     | GPT-5.x 추론 노력 수준: `none`/`low`/`medium`/`high`/`xhigh`     |
+| `--reasoning_effort`     | GPT-5.x 추론 노력 수준: `none`/`low`/`medium`/`high`/`xhigh`    |
 
-### 번역 주석: 위치와 형식
+> **6개의 provider flag는 서로 배타적입니다.** 이전에는 두 개를 함께 지정해도 아무 경고 없이 허용되어 먼저 검사된 항목으로 결정되었습니다. 따라서 구독 quota 사용을 요청한 번역(`--use_codex`, `--use_grok_cli`)이 경고 없이 사용량 기반 과금으로 처리될 수 있었습니다.
+> 이제 `argparse`은 이러한 조합을 거부합니다.
 
-`--add_translation_note`을 사용하면 translator가 주석을 위쪽, 아래쪽 또는 양쪽에 배치할 수 있으며, 이전 버전과 호환되는 일반 텍스트 형식이나 Markdown plugin에서 사용할 수 있는 `marker` 형식으로 만들 수 있습니다.
+### 번역 메모: 위치와 형식
+
+`--add_translation_note`을 사용하면 translator가 메모를 위쪽, 아래쪽 또는 양쪽에 배치할 수 있으며, 단순 텍스트 형식(이전 버전과 호환)이나 Markdown plugin에서 처리할 수 있는 `marker` 형식으로 만들 수 있습니다.
 
 **위치**(`--note_position`):
 
-- `bottom`(기본값): 기존과 같이 파일 끝에 주석을 배치합니다.
-- `top`: 주석을 **YAML frontmatter 뒤에** 삽입합니다(Astro Content Collections, gray-matter 등의 안전성 보장).
-- `both`: 위와 아래 양쪽에 주석을 삽입합니다(LLM 호출은 한 번만 수행하고 두 위치에서 콘텐츠를 재사용).
+- `bottom`(기본값): 기존과 마찬가지로 파일 끝에 메모를 추가합니다.
+- `top`: **YAML frontmatter 뒤에** 메모를 삽입합니다(Astro Content Collections, gray-matter 등의 안전성 보장).
+- `both`: 위쪽과 아래쪽 모두에 메모를 삽입합니다(LLM 호출은 한 번만 수행하고 두 위치에서 콘텐츠를 재사용).
 
 **형식**(`--note_format`):
 
-- `legacy`(기본값): 굵은 문단 `**...**` — v1.8과 byte-for-byte로 완전히 동일하게 동작합니다. Hugo, GitHub, GitLab 및 모든 Markdown renderer와 호환됩니다.
-- `marker`: 보이지 않는 Markdown link reference definition(`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) 뒤에 굵은 blockquote를 배치합니다. GitHub/GitLab에서 기본적으로 읽을 수 있으며, Astro 측의 remark plugin이 build 시 이를 활용하여 스타일이 적용된 banner를 생성할 수 있습니다(jls42.org blog 참조).
+- `legacy`(기본값): 굵은 문단 `**...**` — v1.8과 byte 단위까지 완전히 동일한 동작입니다. Hugo, GitHub, GitLab 및 모든 Markdown renderer와 호환됩니다.
+- `marker`: 보이지 않는 Markdown link reference definition(`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) 뒤에 굵은 blockquote를 추가합니다. GitHub/GitLab에서 기본적으로 읽을 수 있으며, Astro 측의 remark plugin이 build 과정에서 처리하여 스타일이 적용된 banner를 생성할 수 있습니다(jls42.org 블로그 참조).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -268,7 +245,7 @@ python translate.py --file article.mdx --target_lang en \
     --add_translation_note --note_format marker --note_position both
 ```
 
-### 기본 모델(2026년)
+### 기본 모델(2026)
 
 | Provider | 품질(기본값)       | 경제형(`--eco`)    |
 | -------- | ---------------------- | ----------------------- |
@@ -280,11 +257,11 @@ python translate.py --file article.mdx --target_lang en \
 | Grok API | `grok-4.6`             | `grok-4.3`              |
 | Grok CLI | `grok-4.6`             | `grok-4.5`              |
 
-> **장문 번역 권장 사항**: `--use_gemini`(기본값 = `gemini-3.7-flash`)은 라틴 문자가 아닌 문자 체계(PL, JA, ZH, AR, HI)에서도 Markdown 구조를 충실하게 보존하며, placeholder 충실도가 중요한 `--news` 모드에서도 마찬가지입니다. 이 README의 일본어 번역에서 측정한 결과, `gemini-3.1-pro-preview`과 동일한 구조(목록 21개, 코드 블록 18개, HTML 링크 13개, 이미지 13개, 모든 URL 보존)를 약 6배 낮은 latency로 제공했습니다. 이전 버전과의 호환성을 위해 OpenAI가 기본값으로 유지됩니다.
+> **긴 형식 번역 권장 사항**: `--use_gemini`(기본값 = `gemini-3.7-flash`)은 비라틴 문자 체계(PL, JA, ZH, AR, HI)에서 Markdown 구조를 충실하게 보존하며, placeholder 충실도가 중요한 `--news` 모드에서도 마찬가지입니다. 일본어로 번역된 이 README에서 측정한 결과, `gemini-3.1-pro-preview`과 동일한 구조(목록 21개, 코드 블록 18개, HTML 링크 13개, 이미지 13개, 모든 URL 보존)를 유지하면서 latency는 약 6배 낮았습니다. 이전 버전과의 호환성을 위해 OpenAI가 기본값으로 유지됩니다.
 
 ## 이 스크립트를 사용하는 프로젝트
 
-- **[jls42.org](https://jls42.org)** - 다국어 개인 blog(15개 언어)
+- **[jls42.org](https://jls42.org)** - 다국어 개인 블로그(15개 언어)
 
 ## 작성자
 

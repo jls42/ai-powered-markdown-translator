@@ -2,7 +2,7 @@
 
 🌍 [الفرنسية](README.md) | [الإنجليزية](README-en.md) | [الإسبانية](README-es.md) | [الصينية](README-zh.md) | [الألمانية](README-de.md) | [اليابانية](README-ja.md) | [الكورية](README-ko.md) | [العربية](README-ar.md) | [الهندية](README-hi.md) | [الإيطالية](README-it.md) | [الهولندية](README-nl.md) | [البولندية](README-pl.md) | [البرتغالية](README-pt.md) | [الرومانية](README-ro.md) | [السويدية](README-sv.md)
 
-<h4 align="center">📊 جودة الشيفرة</h4>
+<h4 align="center">📊 جودة الكود</h4>
 
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="حالة بوابة الجودة"></a>
@@ -11,15 +11,15 @@
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="تصنيف قابلية الصيانة"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="تغطية الاختبارات"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="التغطية"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="الثغرات الأمنية"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="الأخطاء البرمجية"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="روائح الشيفرة"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="الأخطاء"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="مشكلات جودة الكود"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="الأسطر المكررة (%)"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="الدين التقني"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="أسطر الشيفرة"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="أسطر الكود"></a>
 </p>
 <p align="center">
   <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="شارة Codacy"></a>
@@ -28,19 +28,19 @@
 
 مترجم لملفات Markdown يستخدم **OpenAI** و**Mistral AI** و**Claude (Anthropic)** و**Google Gemini**.
 
-يترجم سكربت Python هذا ملفات Markdown من لغة مصدر إلى لغة مستهدفة مع الحفاظ على التنسيق وكتل الشيفرة وبيانات front matter الوصفية.
+يترجم سكربت Python هذا ملفات Markdown من لغة مصدر إلى لغة مستهدفة مع الحفاظ على التنسيق وكتل الكود وبيانات front matter الوصفية.
 
 ## الميزات الرئيسية
 
-- **مزودون متعددون**: دعم 4 واجهات API ‏(OpenAI وMistral وClaude وGemini)، بالإضافة إلى CLI الخاص بـCodex ضمن اشتراك ChatGPT
+- **موفرو خدمات متعددون**: دعم 4 واجهات API‏ (OpenAI وMistral وClaude وGemini) بالإضافة إلى CLI الخاص بـCodex ضمن اشتراك ChatGPT
 - **نماذج 2026**: GPT-5.6 Terra وClaude Sonnet 5 وGemini 3.7 Flash
 - **الوضع الاقتصادي**: الخيار `--eco` لاستخدام نماذج أسرع وأقل تكلفة
-- **ملف واحد**: الخيار `--file` لترجمة ملف واحد فقط
-- **تقسيم ذكي**: معالجة النصوص الطويلة وفق حدود tokens لكل نموذج
-- **الحفاظ على الشيفرة**: يُحافظ على كتل الشيفرة وكذلك الشيفرة المضمنة (`` `...` ``)
+- **ملف واحد**: الخيار `--file` لترجمة ملف واحد
+- **تقسيم ذكي**: معالجة النصوص الطويلة وفق حدود الرموز لكل نموذج
+- **الحفاظ على الكود**: يُحافَظ على كتل الكود وكذلك الكود المضمّن (`` `...` ``)
 - **اسم الملف**: الخيار `--keep_filename` للاحتفاظ بالاسم الأصلي
 - **وضع الأخبار**: الخيار `--news` لحماية الاقتباسات الإنجليزية ومعالجة الأعلام في المقالات الإخبارية
-- **إعدادات .env**: دعم الملف `.env` لمفاتيح API
+- **تهيئة .env**: دعم الملف `.env` لمفاتيح API
 - **ملاحظة الترجمة**: إضافة اختيارية لملاحظة في نهاية المستند
 
 ## التثبيت
@@ -54,7 +54,7 @@ pip install -r requirements.txt
 
 ### أدوات الجودة (اختيارية لكن موصى بها)
 
-يستخدم المشروع [`pre-commit`](https://pre-commit.com) لمنع إجراء commit لشيفرة سيئة التنسيق أو تحتوي على ثغرات أو أسرار. للتثبيت:
+يستخدم المشروع [`pre-commit`](https://pre-commit.com) لمنع إيداع كود سيئ التنسيق أو معرّض للثغرات أو يحتوي على سر. للتثبيت:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -62,9 +62,9 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-الـhooks النشطة: ruff ‏(lint+format)، وshellcheck ‏(bash)، وprettier ‏(markdown/yaml/json)، وLizard ‏(التعقيد)، وdetect-secrets ‏(مفاتيح API)، وmypy ‏(التحقق التدريجي من الأنواع)، وOpengrep ‏(SAST)، وpip-audit ‏(ثغرات CVE في التبعيات)، وunittest. راجع قسم _Quality / pre-commit_ في `CLAUDE.md` للتفاصيل.
+الخطافات النشطة: ruff‏ (lint+format)، وshellcheck‏ (bash)، وprettier‏ (markdown/yaml/json)، وLizard‏ (التعقيد)، وdetect-secrets‏ (مفاتيح API)، وmypy‏ (التحقق التدريجي من الأنواع)، وOpengrep‏ (SAST)، وpip-audit‏ (ثغرات CVE في التبعيات)، وunittest. راجع قسم _Quality / pre-commit_ في `CLAUDE.md` للاطلاع على التفاصيل.
 
-## الإعداد
+## التهيئة
 
 أنشئ ملف `.env` في جذر المشروع أو عرّف متغيرات البيئة:
 
@@ -80,11 +80,13 @@ GOOGLE_API_KEY=votre-clé-api-google
 export OPENAI_API_KEY='votre-clé-api-openai'
 ```
 
-يُقبل `GEMINI_API_KEY` بديلاً عن `GOOGLE_API_KEY` ‏(اصطلاح AI
-Studio). المتغيرات الاختيارية: `XAI_BASE_URL` ‏(نقطة نهاية xAI، القيمة الافتراضية
-`https://api.x.ai/v1`)، و`CLAUDE_TIMEOUT` ‏(عدد الثواني لكل استدعاء Anthropic، القيمة الافتراضية
+يُقبل `GEMINI_API_KEY` بوصفه بديلاً عن `GOOGLE_API_KEY` (وفق اصطلاح AI
+Studio). المتغيرات الاختيارية: `XAI_BASE_URL` (نقطة نهاية xAI، القيمة الافتراضية
+`https://api.x.ai/v1`)، و`CLAUDE_TIMEOUT` (عدد الثواني لكل استدعاء Anthropic، القيمة الافتراضية
 900)، و`CODEX_BIN` / `CODEX_TIMEOUT`، و`GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`،
-و`GROK_TRANSLATE_SANDBOX` ‏(راجع قسم Grok CLI).
+و`GROK_TRANSLATE_SANDBOX` (راجع قسم Grok CLI). وبالنسبة إلى
+`regen_translations.sh`:‏ `REGEN_PROVIDER` و`REGEN_MODEL` و
+`REGEN_JOB_TIMEOUT` (الحد الأقصى لكل مهمة، والقيمة الافتراضية 600 ثانية).
 
 ## الاستخدام
 
@@ -94,7 +96,7 @@ Studio). المتغيرات الاختيارية: `XAI_BASE_URL` ‏(نقطة ن
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### ترجمة مجلد
+### ترجمة دليل
 
 ```bash
 # Avec OpenAI (défaut: gpt-5.6-terra)
@@ -119,12 +121,12 @@ python translate.py --use_grok --source_dir 'content/fr' --target_dir 'content/p
 python translate.py --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
 ```
 
-### الترجمة باستخدام اشتراك ChatGPT ‏(`--use_codex`)
+### الترجمة باستخدام اشتراك ChatGPT‏ (`--use_codex`)
 
-لا يستهلك هذا المزود أي مفتاح API: فهو يشغّل CLI الرسمي لـCodex في الوضع
+لا يستخدم هذا الموفّر أي مفتاح API، بل يتحكم في CLI الرسمي الخاص بـCodex في الوضع
 غير التفاعلي، ولذلك تُحتسب الترجمة من حصة اشتراك
-ChatGPT ‏(Plus وPro وBusiness وغيرها) المدفوع مسبقًا. هذه هي الطريقة الوحيدة التي توثقها
-OpenAI لهذا الاستخدام — إذ لا تُستخدم tokens الخاصة بـ`~/.codex/auth.json` للمصادقة على
+ChatGPT المدفوع مسبقًا (Plus أو Pro أو Business…). وهذه هي الطريقة الوحيدة التي توثقها
+OpenAI لهذا الاستخدام — فرُموز `~/.codex/auth.json` لا تصادق على
 استدعاءات API Platform، كما أن هذا السكربت لا يقرأها أصلًا.
 
 **المتطلبات الأساسية:**
@@ -137,65 +139,65 @@ npm install -g @openai/codex       # ou l'installation npm globale
 codex login                        # connexion avec le compte ChatGPT
 ```
 
-يُبحث عن الملف التنفيذي بهذا الترتيب: المتغير `CODEX_BIN`، ثم `PATH`،
-ثم حزمة Python المسماة `openai-codex-cli-bin`. لم تُضمّن الأخيرة عمدًا
-في `requirements.txt`: إذ يبلغ حجمها نحو 250 ميغابايت، ما كان سيفرضها على جميع
-المستخدمين من أجل مزود اختياري.
+يُبحث عن الملف التنفيذي بالترتيب الآتي: المتغير `CODEX_BIN`، ثم `PATH`،
+ثم حزمة Python المسماة `openai-codex-cli-bin`. وقد استُبعدت هذه الأخيرة عمدًا
+من `requirements.txt` لأنها تزن نحو 250 ميغابايت، وهو عبء كان سيُفرض على جميع
+المستخدمين من أجل موفّر اختياري.
 
-**معلومات مهمة:**
+**ما ينبغي معرفته:**
 
 - **لا يُستخدم أي مفتاح API.** تُزال `OPENAI_API_KEY` و`CODEX_API_KEY`
   من بيئة العملية الفرعية، ما يضمن أن وجود مفتاح
-  في `.env` لن يحوّل الترجمة أبدًا إلى نظام الفوترة حسب
+  في `.env` لن يحوّل الترجمة مطلقًا إلى فوترة حسب
   الاستخدام.
-- **كل مقطع يساوي «رسالة محلية» واحدة** ضمن نافذة الخمس ساعات للخطة.
-  استخدم `--eco` ‏(النموذج `gpt-5.6-luna`، من 250 إلى 2 000 رسالة/5 ساعات ضمن Plus)
-  بدلًا من نموذج الجودة (`gpt-5.6-sol`، من 10 إلى 100 رسالة/5 ساعات).
+- **كل مقطع = «رسالة محلية» واحدة** ضمن نافذة الخمس ساعات للخطة.
+  استخدم `--eco` (النموذج `gpt-5.6-luna`، من 250 إلى 2,000 رسالة كل 5 ساعات ضمن Plus)
+  بدلًا من نموذج الجودة (`gpt-5.6-sol`، من 10 إلى 100 رسالة كل 5 ساعات).
 - **أبطأ** من استدعاء API: يستغرق ملف README كامل نحو 45 ثانية، مقابل
-  بضع ثوانٍ عند الاتصال المباشر.
-- **مرفوض في CI** ‏(عند تعريف `CI` أو `GITHUB_ACTIONS`): فالمصادقة عبر
-  الاشتراك غير مخصصة لـrunner مشترك، كما لا توصي OpenAI بسير العمل هذا
-  في المستودعات العامة. استخدم مفتاح API في هذه الحالة.
-- متغيرات البيئة: `CODEX_BIN` ‏(المسار الصريح للملف التنفيذي) و
-  `CODEX_TIMEOUT` ‏(عدد الثواني لكل مقطع، القيمة الافتراضية `600`).
+  بضع ثوانٍ عبر الاستدعاء المباشر.
+- **مرفوض في CI** (عند تعريف `CI` أو `GITHUB_ACTIONS`): المصادقة عبر
+  الاشتراك غير مخصصة لمشغّل مشترك، كما لا توصي OpenAI بهذا
+  المسار في المستودعات العامة. استخدم مفتاح API في هذه الحالة.
+- متغيرات البيئة: `CODEX_BIN` (المسار الصريح للملف التنفيذي) و
+  `CODEX_TIMEOUT` (عدد الثواني لكل مقطع، والقيمة الافتراضية `600`).
 
-### الترجمة باستخدام اشتراك Grok ‏(`--use_grok_cli`)
+### الترجمة باستخدام اشتراك Grok‏ (`--use_grok_cli`)
 
-المبدأ نفسه المستخدم في `--use_codex`، ولكن مع CLI الرسمي **Grok Build**: تُحتسب
-الترجمة من اشتراك Grok ‏(SuperGrok / X Premium+) بدلًا
-من الفوترة حسب token.
+المبدأ نفسه المستخدم في `--use_codex`، لكن مع CLI الرسمي **Grok Build**: تُحتسب
+الترجمة من اشتراك Grok‏ (SuperGrok / X Premium+) بدلًا
+من احتساب تكلفتها لكل رمز.
 
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
 grok login                                      # ou `grok login --device-code`
 ```
 
-**العزل — يجب قراءته قبل الاستخدام.** هذا المزود **أضعف
-بنيويًا** من `--use_codex`، وهذا مقبول عن قصد:
+**العزل — يجب قراءته قبل الاستخدام.** هذا الموفّر **أضعف
+من الناحية البنيوية** من `--use_codex`، وهذا مقصود:
 
-- يعمل Codex في `--sandbox read-only`، وهو حد يفرضه النظام.
-- لا يمكن تطبيق sandbox الخاص بـGrok على كثير من أجهزة Linux
+- يعمل Codex ضمن `--sandbox read-only`، وهو حد يفرضه النظام.
+- يتعذر تطبيق sandbox الخاص بـGrok على العديد من أجهزة Linux
   الحديثة: إذ يحظر AppArmor مساحات أسماء المستخدمين غير المميزة منذ Ubuntu
-  24.04، وتفشل قائمة حظر sockets الخاصة ببيئة تشغيل الحاويات إذا كان
-  `/run/podman` مضبوطًا على `0700`. لكن ملف تعريف **مدمجًا** يتعذر
-  تطبيقه يبدأ العمل **دون عزل وبصمت**.
-- لذلك لا يطلب السكربت أي ملف تعريف افتراضيًا، و**لا يتراجع أبدًا
-  بصمت**: بل يعرض تحذيرًا. يعتمد العزل على قواعد
-  `--deny` الخاصة بـCLI ‏(ومنها قاعدة catch-all ‏`*`)، وهي الطبقة الوحيدة التي ثبت أنها
-  _fail-closed_ — إذ تؤدي أي قاعدة مجهولة إلى رفض بدء التشغيل بدلًا من
-  إزالة الحماية دون تنبيه.
-- **لفرض** sandbox الخاص بنظام التشغيل: `GROK_TRANSLATE_SANDBOX=read-only`. سيفشل
-  بدء التشغيل إذا تعذر على الجهاز الالتزام به، وهذا هو
+  24.04، وتفشل قائمة حظر مقابس بيئة تشغيل الحاويات إذا كان
+  `/run/podman` مضبوطًا على `0700`. أما ملف التعريف **المدمج** الذي يتعذر
+  تطبيقه، فيبدأ التشغيل **من دون عزل وبصمت**.
+- لذلك لا يطلب السكربت أي ملف تعريف افتراضي، و**لا يتراجع أبدًا
+  بصمت**، بل يعرض تحذيرًا. يعتمد العزل على قواعد
+  `--deny` الخاصة بـCLI (ومنها قاعدة catch-all‏ `*`)، وهي الطبقة الوحيدة التي ثبت أنها
+  تعمل وفق مبدأ _fail-closed_ — إذ تؤدي القاعدة غير المعروفة إلى رفض بدء التشغيل بدلًا من
+  إزالة الحماية دون إشعار.
+- **لفرض** sandbox الخاص بنظام التشغيل: `GROK_TRANSLATE_SANDBOX=read-only`.
+  سيفشل بدء التشغيل إذا تعذر على الجهاز احترام هذا الشرط، وهذا هو
   السلوك المقصود.
 
-**الحصة**: حصة Grok **أسبوعية ومشتركة** بين Chat وImagine و
-Voice، ولا يتيح أي أمر الاطلاع عليها. لذلك قد تستهلك المعالجة المجمعة
-جزءًا من استخدامك للمحادثات دون أي تنبيه — ولهذا
-يقتصر التزامن على 2 ويظهر تحذير في `regen_translations.sh`.
+**الحصة**: مجموعة Grok **أسبوعية ومشتركة** مع Chat وImagine و
+Voice، ولا يوجد أمر يتيح الاطلاع عليها. لذلك قد تؤثر المعالجة الدفعية
+في استخدامك للمحادثات دون أي تنبيه — ولهذا يقتصر
+التزامن على 2 ويظهر تحذير في `regen_translations.sh`.
 
-متغيرات أخرى: `GROK_BIN` ‏(مسار الملف التنفيذي)، و`GROK_TIMEOUT` ‏(القيمة الافتراضية 900 ثانية).
+متغيرات أخرى: `GROK_BIN` (مسار الملف التنفيذي)، و`GROK_TIMEOUT` (القيمة الافتراضية 900 ثانية).
 
-لإعادة إنشاء الترجمات الـ28:
+لإعادة توليد الترجمات الـ28:
 
 ```bash
 REGEN_PROVIDER=codex ./regen_translations.sh --force
@@ -220,41 +222,47 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | الخيار                   | الوصف                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
 | `--file`                 | ملف Markdown واحد لترجمته                                       |
-| `--source_dir`           | مجلد المصدر الذي يحتوي على ملفات Markdown                        |
-| `--target_dir`           | مجلد إخراج الملفات المترجمة                          |
-| `--source_lang`          | لغة المصدر (القيمة الافتراضية: `fr`)                                             |
-| `--target_lang`          | اللغة المستهدفة (القيمة الافتراضية: `en`)                                              |
+| `--source_dir`           | دليل المصدر الذي يحتوي على ملفات Markdown                        |
+| `--target_dir`           | دليل إخراج الملفات المترجمة                          |
+| `--source_lang`          | لغة المصدر (الافتراضية: `fr`)                                             |
+| `--target_lang`          | اللغة المستهدفة (الافتراضية: `en`)                                              |
 | `--model`                | نموذج محدد لاستخدامه                                             |
 | `--eco`                  | استخدام النماذج الاقتصادية                                         |
-| `--use_mistral`          | استخدام API الخاص بـMistral AI                                                |
-| `--use_claude`           | استخدام API الخاص بـClaude                                                    |
-| `--use_gemini`           | استخدام API الخاص بـGemini                                                    |
-| `--use_codex`            | استخدام CLI الخاص بـCodex من حصة اشتراك ChatGPT               |
-| `--use_grok`             | استخدام API الخاص بـxAI ‏(Grok) — يتطلب `XAI_API_KEY`                      |
-| `--use_grok_cli`         | استخدام CLI الخاص بـGrok من حصة اشتراك Grok                   |
+| `--use_mistral`          | استخدام API الخاصة بـMistral AI                                                |
+| `--use_claude`           | استخدام API الخاصة بـClaude                                                    |
+| `--use_gemini`           | استخدام API الخاصة بـGemini                                                    |
+| `--use_codex`            | استخدام CLI الخاص بـCodex ضمن حصة اشتراك ChatGPT               |
+| `--use_grok`             | استخدام API الخاصة بـxAI‏ (Grok) — يتطلب `XAI_API_KEY`                      |
+| `--use_grok_cli`         | استخدام CLI الخاص بـGrok ضمن حصة اشتراك Grok                   |
 | `--force`                | فرض إعادة الترجمة                                                  |
 | `--keep_filename`        | الاحتفاظ باسم الملف الأصلي                                     |
 | `--news`                 | وضع الأخبار: يحمي الاقتباسات الإنجليزية ويعالج الأعلام حسب اللغة |
 | `--add_translation_note` | إضافة ملاحظة ترجمة                                           |
-| `--note_position`        | موضع الملاحظة: `top` أو `bottom` ‏(الافتراضي) أو `both`                |
-| `--note_format`          | تنسيق الملاحظة: `legacy` ‏(الافتراضي، فقرة عريضة) أو `marker`       |
+| `--note_position`        | موضع الملاحظة: `top` أو `bottom` (الافتراضي) أو `both`                |
+| `--note_format`          | تنسيق الملاحظة: `legacy` (الافتراضي، فقرة عريضة) أو `marker`       |
 | `--include_model`        | تضمين اسم النموذج في ملف الإخراج                       |
-| `--reasoning_effort`     | جهد استدلال GPT-5.x: ‏`none`/`low`/`medium`/`high`/`xhigh`     |
+| `--reasoning_effort`     | جهد الاستدلال في GPT-5.x:‏ `none`/`low`/`medium`/`high`/`xhigh`    |
+
+> **أعلام الموفّرين الستة متنافية فيما بينها.** كان الجمع بين اثنين منها
+> يُقبل سابقًا بصمت ويُحسم لصالح أول عَلَم يُختبر: وهكذا كان من الممكن أن تتحول
+> ترجمة مطلوبة ضمن حصة اشتراك (`--use_codex`، `--use_grok_cli`)
+> إلى فوترة حسب الاستخدام من دون أي تحذير.
+> يرفض `argparse` الآن هذا الجمع.
 
 ### ملاحظة الترجمة: المواضع والتنسيقات
 
-باستخدام `--add_translation_note`، يستطيع المترجم وضع الملاحظة في الأعلى أو الأسفل أو في الموضعين، وعرضها إما بتنسيق نصي بسيط متوافق مع الإصدارات السابقة، وإما بتنسيق `marker` يمكن أن يستهلكه plugin خاص بـMarkdown.
+باستخدام `--add_translation_note`، يستطيع المترجم وضع الملاحظة في الأعلى أو الأسفل أو في الموضعين، وعرضها إما بتنسيق نصي بسيط متوافق مع الإصدارات السابقة، وإما بتنسيق `marker` يمكن أن تستهلكه إضافة Markdown.
 
 **الموضع** (`--note_position`):
 
-- `bottom` ‏(الافتراضي): الملاحظة في نهاية الملف، كما جرت العادة.
-- `top`: تُدرج الملاحظة **بعد frontmatter الخاص بـYAML** ‏(لضمان التوافق مع Astro Content Collections وgray-matter وغيرها).
+- `bottom` (الافتراضي): ملاحظة في نهاية الملف، كما جرت العادة.
+- `top`: تُدرج الملاحظة **بعد YAML frontmatter** (لضمان التوافق مع Astro Content Collections وgray-matter وغيرها).
 - `both`: تُدرج الملاحظة في الأعلى والأسفل معًا (استدعاء LLM واحد، ويُعاد استخدام المحتوى في الموضعين).
 
 **التنسيق** (`--note_format`):
 
-- `legacy` ‏(الافتراضي): فقرة عريضة `**...**` — سلوك مطابق تمامًا للإصدار v1.8 على مستوى byte-for-byte. متوافق مع Hugo وGitHub وGitLab وأي renderer خاص بـMarkdown.
-- `marker`: تعريف link reference غير مرئي في Markdown ‏(`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`)، يتبعه blockquote عريض. قابل للقراءة مباشرة على GitHub/GitLab، ويمكن أن يستخدمه plugin من نوع remark أثناء build في Astro لإنتاج لافتة منسقة (راجع مدونة jls42.org).
+- `legacy` (الافتراضي): فقرة عريضة `**...**` — سلوك مطابق تمامًا للإصدار v1.8 على مستوى البايتات. متوافق مع Hugo وGitHub وGitLab وأي عارض Markdown.
+- `marker`: تعريف مرجع رابط Markdown غير مرئي (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) يتبعه اقتباس عريض. قابل للقراءة مباشرة على GitHub/GitLab، ويمكن لإضافة remark ضمن Astro استخدامه أثناء البناء لإنتاج لافتة منسقة (راجع مدونة jls42.org).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -271,7 +279,7 @@ python translate.py --file article.mdx --target_lang en \
 
 ### النماذج الافتراضية (2026)
 
-| المزود | الجودة (الافتراضي)       | الاقتصادي (`--eco`)    |
+| الموفّر | الجودة (الافتراضي)       | الاقتصادي (`--eco`)    |
 | -------- | ---------------------- | ----------------------- |
 | OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
 | Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
@@ -281,7 +289,7 @@ python translate.py --file article.mdx --target_lang en \
 | Grok API | `grok-4.6`             | `grok-4.3`              |
 | Grok CLI | `grok-4.6`             | `grok-4.5`              |
 
-> **توصية للترجمات الطويلة**: يحافظ `--use_gemini` ‏(الافتراضي = `gemini-3.7-flash`) بأمانة على بنية markdown في النصوص غير اللاتينية (PL وJA وZH وAR وHI)، بما في ذلك وضع `--news` الذي تكون فيه دقة placeholders مهمة. وقد أظهر القياس على نسخة README هذه المترجمة إلى اليابانية بنية مطابقة لـ`gemini-3.1-pro-preview` ‏(21 قائمة، و18 كتلة شيفرة، و13 رابط HTML، و13 صورة، مع الحفاظ على جميع URLs) بزمن استجابة أقل بنحو 6 أضعاف. يظل OpenAI الخيار الافتراضي حفاظًا على التوافق مع الإصدارات السابقة.
+> **توصية للترجمات الطويلة**: يحافظ `--use_gemini` (الافتراضي = `gemini-3.7-flash`) بأمانة على بنية Markdown في اللغات ذات النصوص غير اللاتينية (PL وJA وZH وAR وHI)، بما في ذلك وضع `--news` حيث تكون دقة العناصر النائبة مهمة. وقد أظهر القياس على ترجمة ملف README هذا إلى اليابانية بنية مطابقة لـ`gemini-3.1-pro-preview` (21 قائمة و18 كتلة كود و13 رابط HTML و13 صورة، مع الحفاظ على جميع عناوين URL) بزمن انتقال أقل بنحو 6 مرات. تظل OpenAI الخيار الافتراضي للحفاظ على التوافق مع الإصدارات السابقة.
 
 ## مشاريع تستخدم هذا السكربت
 
@@ -294,6 +302,6 @@ Julien LE SAUX
 
 ## الترخيص
 
-GNU GENERAL PUBLIC LICENSE Version 3. راجع [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE الإصدار 3. راجع [LICENSE](LICENSE).
 
 **مقال مترجم من الفرنسية إلى العربية باستخدام gpt-5.6-sol.**

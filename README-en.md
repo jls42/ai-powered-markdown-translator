@@ -38,7 +38,7 @@ This Python script translates Markdown files from a source language to a target 
 - **Single File**: `--file` option to translate a single file
 - **Smart Segmentation**: Handles long texts with per-model token limits
 - **Code Preservation**: Code blocks AND inline code (`` `...` ``) are preserved
-- **File Name**: `--keep_filename` option to keep the original name
+- **Filename**: `--keep_filename` option to retain the original filename
 - **News Mode**: `--news` option to protect English quotations and handle flags in news articles
 - **.env Configuration**: Support for the `.env` file for API keys
 - **Translation Note**: Optionally adds a note at the end of the document
@@ -52,7 +52,7 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Quality Tooling (optional but recommended)
+### Quality tooling (optional but recommended)
 
 The project uses [`pre-commit`](https://pre-commit.com) to prevent committing poorly formatted, vulnerable code or code containing a secret. Installation:
 
@@ -84,17 +84,19 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 Studio convention). Optional variables: `XAI_BASE_URL` (xAI endpoint, default
 `https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (seconds per Anthropic call, default
 900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
-and `GROK_TRANSLATE_SANDBOX` (see the Grok CLI section).
+and `GROK_TRANSLATE_SANDBOX` (see the Grok CLI section). For
+`regen_translations.sh`: `REGEN_PROVIDER`, `REGEN_MODEL`, and
+`REGEN_JOB_TIMEOUT` (per-job limit, default 600 s).
 
 ## Usage
 
-### Translate a Single File
+### Translate a single file
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### Translate a Directory
+### Translate a directory
 
 ```bash
 # Avec OpenAI (défaut: gpt-5.6-terra)
@@ -119,13 +121,13 @@ python translate.py --use_grok --source_dir 'content/fr' --target_dir 'content/p
 python translate.py --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
 ```
 
-### Translate Using Your ChatGPT Subscription (`--use_codex`)
+### Translate using your ChatGPT subscription (`--use_codex`)
 
 This provider does not use any API key: it runs the official Codex CLI in
-non-interactive mode, so translation usage is deducted from the quota of the
+non-interactive mode, so the translation is deducted from the quota of the
 already-paid ChatGPT subscription (Plus, Pro, Business…). This is the only method
-documented by OpenAI for this use case—the tokens from `~/.codex/auth.json` do not
-authenticate Platform API calls and, in fact, are never read by this script.
+documented by OpenAI for this use case—`~/.codex/auth.json` tokens do not authenticate
+Platform API calls and, moreover, are never read by this script.
 
 **Prerequisites:**
 
@@ -137,33 +139,33 @@ npm install -g @openai/codex       # ou l'installation npm globale
 codex login                        # connexion avec le compte ChatGPT
 ```
 
-The binary is searched for in this order: the `CODEX_BIN` variable, the `PATH`,
+The binary is searched for in this order: the `CODEX_BIN` variable, `PATH`,
 then the `openai-codex-cli-bin` Python package. The latter is deliberately
-not included in `requirements.txt`: it weighs ~250 MB, which would be imposed on all
+not included in `requirements.txt`: it is approximately 250 MB, which would be imposed on all
 users for an optional provider.
 
-**Important:**
+**Important information:**
 
 - **No API key is used.** `OPENAI_API_KEY` and `CODEX_API_KEY` are
   removed from the subprocess environment, ensuring that a key
-  present in `.env` will never cause the translation to switch to
-  usage-based billing.
+  present in `.env` will never cause the translation to switch to usage-based
+  billing.
 - **One segment = one “local message”** in the plan's 5-hour window.
   Use `--eco` (model `gpt-5.6-luna`, 250–2,000 messages/5 h on Plus)
   rather than the quality model (`gpt-5.6-sol`, 10–100 messages/5 h).
-- **Slower** than an API call: expect ~45 s for a complete README, compared with
+- **Slower** than an API call: expect approximately 45 seconds for a complete README, compared with
   a few seconds directly.
 - **Rejected in CI** (`CI` or `GITHUB_ACTIONS` defined): subscription-based
-  authentication is not intended for a shared runner, and OpenAI advises against
-  this workflow on public repositories. Use an API key for this path.
+  authentication is not intended for a shared runner, and OpenAI advises against this
+  workflow on public repositories. Use an API key for this route.
 - Environment variables: `CODEX_BIN` (explicit binary path) and
   `CODEX_TIMEOUT` (seconds per segment, default `600`).
 
-### Translate Using Your Grok Subscription (`--use_grok_cli`)
+### Translate using your Grok subscription (`--use_grok_cli`)
 
-The same principle as `--use_codex`, using the official **Grok Build** CLI:
-translation usage is deducted from the Grok subscription (SuperGrok / X Premium+)
-instead of being billed per token.
+The same principle as `--use_codex`, using the official **Grok Build** CLI: the
+translation is deducted from the Grok subscription (SuperGrok / X Premium+) instead
+of being billed per token.
 
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
@@ -174,23 +176,23 @@ grok login                                      # ou `grok login --device-code`
 than `--use_codex`, and this is intentional:
 
 - Codex runs in `--sandbox read-only`, a boundary enforced by the system.
-- The Grok sandbox **cannot be applied** on many recent Linux systems:
-  AppArmor has blocked unprivileged user namespaces since Ubuntu
-  24.04, and the container runtime socket deny-list fails if
-  `/run/podman` is set to `0700`. However, a **built-in** profile that cannot
-  be applied starts **unconfined, silently**.
+- Grok's sandbox **cannot be applied** on many recent Linux
+  workstations: AppArmor has blocked unprivileged user namespaces since Ubuntu
+  24.04, and the container runtime socket denylist fails if
+  `/run/podman` is set to `0700`. An **integrated** profile that cannot
+  be applied therefore starts **unconfined, silently**.
 - The script therefore requests no profile by default and **never falls back
   silently**: it displays a warning. Confinement relies on the CLI's
-  `--deny` rules (including the `*` catch-all), the only layer measured
-  as _fail-closed_—an unknown rule prevents startup rather than
+  `--deny` rules (including the catch-all `*`), the only layer measured as
+  _fail-closed_—an unknown rule prevents startup instead of
   removing protection without notice.
 - To **require** the OS sandbox: `GROK_TRANSLATE_SANDBOX=read-only`.
   Startup will fail if the machine cannot honor it, which is the
   intended behavior.
 
 **Quota**: the Grok pool is **weekly and shared** with Chat, Imagine, and
-Voice, and no command can display it. Batch processing can therefore
-eat into your conversational usage without any notification—hence
+Voice, and no command can display it. Batch processing may therefore
+reduce your conversational usage without any indication—hence
 concurrency limited to 2 and a warning in `regen_translations.sh`.
 
 Other variables: `GROK_BIN` (binary path), `GROK_TIMEOUT` (default 900 s).
@@ -207,7 +209,7 @@ REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
 REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
 ```
 
-### Economy Mode
+### Economy mode
 
 Uses faster, less expensive models (gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite):
 
@@ -224,26 +226,32 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--target_dir`           | Output directory for translated files                                    |
 | `--source_lang`          | Source language (default: `fr`)                                 |
 | `--target_lang`          | Target language (default: `en`)                                 |
-| `--model`                | Specific model to use                                                    |
-| `--eco`                  | Use economy models                                                       |
+| `--model`                | Specific model to use                                                     |
+| `--eco`                  | Use economy models                                                        |
 | `--use_mistral`          | Use the Mistral AI API                                                    |
 | `--use_claude`           | Use the Claude API                                                        |
 | `--use_gemini`           | Use the Gemini API                                                        |
 | `--use_codex`            | Use the Codex CLI with the ChatGPT subscription quota                     |
 | `--use_grok`             | Use the xAI API (Grok)—requires `XAI_API_KEY`                             |
 | `--use_grok_cli`         | Use the Grok CLI with the Grok subscription quota                         |
-| `--force`                | Force retranslation                                                      |
-| `--keep_filename`        | Keep the original file name                                               |
+| `--force`                | Force retranslation                                                       |
+| `--keep_filename`        | Retain the original filename                                              |
 | `--news`                 | News mode: protects EN quotations, handles flags by language              |
-| `--add_translation_note` | Add a translation note                                                     |
+| `--add_translation_note` | Add a translation note                                                    |
 | `--note_position`        | Note position: `top`, `bottom` (default), or `both` |
 | `--note_format`          | Note format: `legacy` (default, bold paragraph) or `marker`    |
 | `--include_model`        | Include the model name in the output file                                 |
 | `--reasoning_effort`     | GPT-5.x reasoning effort: `none`/`low`/`medium`/`high`/`xhigh` |
 
-### Translation Note: Positions and Formats
+> **The six provider flags are mutually exclusive.** Combining two
+> was previously accepted silently and resolved to the first one tested: a
+> translation requested using a subscription quota (`--use_codex`, `--use_grok_cli`)
+> could therefore be billed based on usage without any warning.
+> `argparse` now rejects the combination.
 
-With `--add_translation_note`, the translator can place the note at the top, at the bottom, or in both locations, and render it either as plain text format (backward-compatible) or as `marker` format consumable by a Markdown plugin.
+### Translation note: positions and formats
+
+With `--add_translation_note`, the translator can place the note at the top, at the bottom, or in both locations, and render it either as plain text (backward-compatible) or in a `marker` format consumable by a Markdown plugin.
 
 **Position** (`--note_position`):
 
@@ -254,7 +262,7 @@ With `--add_translation_note`, the translator can place the note at the top, at 
 **Format** (`--note_format`):
 
 - `legacy` (default): bold paragraph `**...**`—behavior strictly identical to v1.8, byte-for-byte. Compatible with Hugo, GitHub, GitLab, and any Markdown renderer.
-- `marker`: invisible Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a bold blockquote. Natively readable on GitHub/GitLab and usable at build time by an Astro-side remark plugin to produce a styled banner (see the jls42.org blog).
+- `marker`: invisible Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a bold blockquote. Natively readable on GitHub/GitLab and usable at build time by a remark plugin in Astro to produce a styled banner (see the jls42.org blog).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -269,21 +277,21 @@ python translate.py --file article.mdx --target_lang en \
     --add_translation_note --note_format marker --note_position both
 ```
 
-### Default Models (2026)
+### Default models (2026)
 
 | Provider | Quality (default)      | Economy (`--eco`) |
-| -------- | ---------------------- | ------------------------ |
+| -------- | ---------------------- | ------------------------- |
 | OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`           |
 | Claude   | `claude-sonnet-5`        | `claude-haiku-4-5`           |
-| Mistral  | `mistral-large-latest`        | `mistral-small-latest`          |
-| Gemini   | `gemini-3.7-flash`       | `gemini-3.1-flash-lite`          |
-| Codex    | `gpt-5.6-sol`       | `gpt-5.6-luna`          |
-| Grok API | `grok-4.6`       | `grok-4.3`          |
-| Grok CLI | `grok-4.6`       | `grok-4.5`          |
+| Mistral  | `mistral-large-latest`        | `mistral-small-latest`           |
+| Gemini   | `gemini-3.7-flash`        | `gemini-3.1-flash-lite`           |
+| Codex    | `gpt-5.6-sol`        | `gpt-5.6-luna`           |
+| Grok API | `grok-4.6`        | `grok-4.3`           |
+| Grok CLI | `grok-4.6`        | `grok-4.5`           |
 
-> **Recommendation for long-form translations**: `--use_gemini` (default = `gemini-3.7-flash`) faithfully preserves Markdown structure for non-Latin scripts (PL, JA, ZH, AR, HI), including in `--news` mode where placeholder fidelity matters. Measured on this README translated into Japanese: structure identical to `gemini-3.1-pro-preview` (21 lists, 18 code blocks, 13 HTML links, 13 images, all URLs preserved) with ~6x lower latency. OpenAI remains the default for backward compatibility.
+> **Long-form translation recommendation**: `--use_gemini` (default = `gemini-3.7-flash`) faithfully preserves Markdown structure for non-Latin scripts (PL, JA, ZH, AR, HI), including in `--news` mode where placeholder fidelity matters. Measured on this README translated into Japanese: structure identical to `gemini-3.1-pro-preview` (21 lists, 18 code blocks, 13 HTML links, 13 images, all URLs preserved) with approximately 6x lower latency. OpenAI remains the default for backward compatibility.
 
-## Projects Using This Script
+## Projects using this script
 
 - **[jls42.org](https://jls42.org)** - Multilingual personal blog (15 languages)
 

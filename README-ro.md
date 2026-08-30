@@ -1,4 +1,4 @@
-# Traducător de Markdown bazat pe AI
+# Traducător Markdown bazat pe AI
 
 🌍 [Franceză](README.md) | [Engleză](README-en.md) | [Spaniolă](README-es.md) | [Chineză](README-zh.md) | [Germană](README-de.md) | [Japoneză](README-ja.md) | [Coreeană](README-ko.md) | [Arabă](README-ar.md) | [Hindi](README-hi.md) | [Italiană](README-it.md) | [Neerlandeză](README-nl.md) | [Poloneză](README-pl.md) | [Portugheză](README-pt.md) | [Română](README-ro.md) | [Suedeză](README-sv.md)
 
@@ -28,19 +28,19 @@
 
 Traducător de fișiere Markdown care utilizează **OpenAI**, **Mistral AI**, **Claude (Anthropic)** și **Google Gemini**.
 
-Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă, păstrând în același timp formatarea, blocurile de cod și metadatele front matter.
+Acest script Python traduce fișiere Markdown dintr-o limbă sursă într-o limbă țintă, păstrând formatarea, blocurile de cod și metadatele front matter.
 
 ## Caracteristici principale
 
-- **Multi-Provider**: Compatibilitate cu 4 API-uri (OpenAI, Mistral, Claude, Gemini) + CLI-ul Codex cu abonament ChatGPT
+- **Furnizori multipli**: Suport pentru 4 API-uri (OpenAI, Mistral, Claude, Gemini) + CLI-ul Codex cu abonament ChatGPT
 - **Modele 2026**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
 - **Mod economic**: Opțiunea `--eco` pentru utilizarea unor modele mai rapide și mai puțin costisitoare
 - **Fișier unic**: Opțiunea `--file` pentru traducerea unui singur fișier
-- **Segmentare inteligentă**: Gestionarea textelor lungi cu limite de tokenuri pentru fiecare model
+- **Segmentare inteligentă**: Gestionarea textelor lungi cu limite de tokens pentru fiecare model
 - **Păstrarea codului**: Blocurile de cod ȘI codul inline (`` `...` ``) sunt păstrate
 - **Numele fișierului**: Opțiunea `--keep_filename` pentru păstrarea numelui original
-- **Mod News**: Opțiunea `--news` pentru protejarea citatelor în engleză și gestionarea drapelelor în articolele de actualitate
-- **Configurare .env**: Compatibilitate cu fișierul `.env` pentru cheile API
+- **Mod News**: Opțiunea `--news` pentru protejarea citatelor în engleză și gestionarea steagurilor în articolele de știri
+- **Configurare .env**: Suport pentru fișierul `.env` destinat cheilor API
 - **Notă de traducere**: Adăugarea opțională a unei note la sfârșitul documentului
 
 ## Instalare
@@ -52,9 +52,9 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Instrumente pentru calitate (opționale, dar recomandate)
+### Instrumente pentru calitate (opțional, dar recomandat)
 
-Proiectul utilizează [`pre-commit`](https://pre-commit.com) pentru a împiedica efectuarea de commituri cu cod formatat incorect, vulnerabil sau care conține un secret. Instalare:
+Proiectul utilizează [`pre-commit`](https://pre-commit.com) pentru a împiedica trimiterea în commit a codului formatat incorect, vulnerabil sau care conține un secret. Instalare:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -62,7 +62,7 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Hook-uri active: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexitate), detect-secrets (chei API), mypy (tipizare progresivă), Opengrep (SAST), pip-audit (CVE ale dependențelor), unittest. Consultați secțiunea _Quality / pre-commit_ din `CLAUDE.md` pentru detalii.
+Hook-uri active: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexitate), detect-secrets (chei API), mypy (tipizare progresivă), Opengrep (SAST), pip-audit (CVE pentru dependențe), unittest. Consultați secțiunea _Quality / pre-commit_ din `CLAUDE.md` pentru detalii.
 
 ## Configurare
 
@@ -82,9 +82,11 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 
 `GEMINI_API_KEY` este acceptată ca alternativă la `GOOGLE_API_KEY` (convenția AI
 Studio). Variabile opționale: `XAI_BASE_URL` (endpoint xAI, implicit
-`https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (secunde per apel Anthropic, implicit
+`https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (secunde pentru fiecare apel Anthropic, implicit
 900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
-și `GROK_TRANSLATE_SANDBOX` (consultați secțiunea Grok CLI).
+și `GROK_TRANSLATE_SANDBOX` (consultați secțiunea Grok CLI). Pentru
+`regen_translations.sh`: `REGEN_PROVIDER`, `REGEN_MODEL` și
+`REGEN_JOB_TIMEOUT` (limită per job, implicit 600 s).
 
 ## Utilizare
 
@@ -124,7 +126,7 @@ python translate.py --use_grok_cli --eco --file 'README.md' --target_dir . --tar
 Acest provider nu consumă nicio cheie API: controlează CLI-ul oficial Codex în mod
 neinteractiv, astfel încât traducerea este dedusă din cota abonamentului
 ChatGPT (Plus, Pro, Business…) deja plătit. Aceasta este singura metodă documentată de
-OpenAI pentru această utilizare — tokenurile `~/.codex/auth.json` nu autentifică
+OpenAI pentru această utilizare — token-urile `~/.codex/auth.json` nu autentifică
 apelurile către API Platform și, de altfel, nu sunt citite niciodată de acest script.
 
 **Cerințe preliminare:**
@@ -139,29 +141,29 @@ codex login                        # connexion avec le compte ChatGPT
 
 Executabilul este căutat în această ordine: variabila `CODEX_BIN`, `PATH`,
 apoi pachetul Python `openai-codex-cli-bin`. Acesta din urmă nu este inclus în mod intenționat
-în `requirements.txt`: ocupă aproximativ 250 Mo, ceea ce ar fi impus tuturor
+în `requirements.txt`: are aproximativ 250 MB, ceea ce ar impune această dimensiune tuturor
 utilizatorilor pentru un provider opțional.
 
 **De știut:**
 
 - **Nu este utilizată nicio cheie API.** `OPENAI_API_KEY` și `CODEX_API_KEY` sunt
   eliminate din mediul subprocesului, ceea ce garantează că o cheie
-  prezentă în `.env` nu va comuta niciodată traducerea la facturarea în funcție de
+  prezentă în `.env` nu va trece niciodată traducerea la facturarea în funcție de
   utilizare.
 - **Un segment = un „mesaj local”** din fereastra de 5 ore a planului.
   Utilizați `--eco` (modelul `gpt-5.6-luna`, 250-2 000 de mesaje/5 h pe Plus)
   în locul modelului de calitate (`gpt-5.6-sol`, 10-100 de mesaje/5 h).
-- **Mai lent** decât un apel API: aproximativ 45 s pentru un README complet, față de
+- **Mai lent** decât un apel API: estimați aproximativ 45 s pentru un README complet, față de
   câteva secunde în mod direct.
 - **Refuzat în CI** (dacă `CI` sau `GITHUB_ACTIONS` este definită): autentificarea prin
   abonament nu este concepută pentru un runner partajat, iar OpenAI descurajează acest
-  workflow în depozitele publice. Utilizați o cheie API pentru această metodă.
-- Variabile de mediu: `CODEX_BIN` (calea explicită către executabil) și
+  workflow în depozitele publice. Utilizați o cheie API pentru această cale.
+- Variabile de mediu: `CODEX_BIN` (cale explicită către executabil) și
   `CODEX_TIMEOUT` (secunde per segment, implicit `600`).
 
 ### Traducerea folosind abonamentul Grok (`--use_grok_cli`)
 
-Același principiu ca pentru `--use_codex`, cu CLI-ul oficial **Grok Build**:
+Același principiu ca pentru `--use_codex`, folosind CLI-ul oficial **Grok Build**:
 traducerea este dedusă din abonamentul Grok (SuperGrok / X Premium+), în loc
 să fie facturată per token.
 
@@ -175,25 +177,25 @@ slab** decât `--use_codex`, iar acest lucru este asumat:
 
 - Codex rulează în `--sandbox read-only`, o limită impusă de sistem.
 - Sandbox-ul Grok **nu poate fi aplicat** pe multe sisteme Linux
-  recente: AppArmor blochează user namespaces neprivilegiate începând cu Ubuntu
-  24.04, iar deny-list-ul socketurilor runtime-ului de containere eșuează dacă
-  `/run/podman` este în `0700`. Însă un profil **integrat** care nu poate fi
-  aplicat pornește **neizolat, în tăcere**.
-- Prin urmare, scriptul nu solicită implicit niciun profil și **nu revine niciodată
-  în tăcere** la un mod alternativ: afișează un avertisment. Izolarea se bazează pe
-  regulile `--deny` ale CLI-ului (inclusiv catch-all-ul `*`), singurul nivel măsurat
-  _fail-closed_ — o regulă necunoscută determină refuzul pornirii, în loc să
+  recente: AppArmor blochează user namespaces fără privilegii începând cu Ubuntu
+  24.04, iar deny-list pentru socket-urile runtime-ului de containere eșuează dacă
+  `/run/podman` se află în `0700`. Însă un profil **integrat** care nu poate fi
+  aplicat pornește **fără izolare, în tăcere**.
+- Prin urmare, scriptul nu solicită implicit niciun profil și **nu recurge niciodată
+  în tăcere** la o alternativă: afișează un avertisment. Izolarea se bazează pe
+  regulile `--deny` ale CLI-ului (inclusiv regula generală `*`), singurul nivel măsurat
+  _fail-closed_ — o regulă necunoscută determină refuzarea pornirii, în loc să
   elimine protecția fără avertisment.
 - Pentru a **impune** sandbox-ul sistemului de operare: `GROK_TRANSLATE_SANDBOX=read-only`.
   Pornirea va eșua dacă sistemul nu îl poate aplica, acesta fiind
   comportamentul dorit.
 
-**Cotă**: pool-ul Grok este **săptămânal și partajat** cu Chat, Imagine și
+**Cotă**: fondul Grok este **săptămânal și partajat** cu Chat, Imagine și
 Voice și nicio comandă nu permite consultarea lui. Prin urmare, o procesare în lot poate
-reduce utilizarea conversațională fără nicio notificare — de aici
+consuma din utilizarea conversațională fără nicio notificare — de aici
 concurența limitată la 2 și avertismentul din `regen_translations.sh`.
 
-Alte variabile: `GROK_BIN` (calea executabilului), `GROK_TIMEOUT` (implicit 900 s).
+Alte variabile: `GROK_BIN` (calea către executabil), `GROK_TIMEOUT` (implicit 900 s).
 
 Pentru regenerarea celor 28 de traduceri:
 
@@ -217,44 +219,50 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Opțiuni
 
-| Opțiune                   | Descriere                                                              |
+| Opțiune                  | Descriere                                                                |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Un singur fișier Markdown de tradus                                       |
-| `--source_dir`           | Directorul sursă care conține fișierele Markdown                        |
-| `--target_dir`           | Directorul de ieșire pentru fișierele traduse                          |
-| `--source_lang`          | Limba sursă (implicit: `fr`)                                             |
-| `--target_lang`          | Limba țintă (implicit: `en`)                                              |
-| `--model`                | Modelul specific care trebuie utilizat                                             |
-| `--eco`                  | Utilizarea modelelor economice                                         |
-| `--use_mistral`          | Utilizarea API-ului Mistral AI                                                |
-| `--use_claude`           | Utilizarea API-ului Claude                                                    |
-| `--use_gemini`           | Utilizarea API-ului Gemini                                                    |
-| `--use_codex`            | Utilizarea CLI-ului Codex din cota abonamentului ChatGPT               |
-| `--use_grok`             | Utilizarea API-ului xAI (Grok) — necesită `XAI_API_KEY`                      |
-| `--use_grok_cli`         | Utilizarea CLI-ului Grok din cota abonamentului Grok                   |
-| `--force`                | Forțarea retraducerii                                                  |
-| `--keep_filename`        | Păstrarea numelui original al fișierului                                     |
-| `--news`                 | Mod actualități: protejează citatele EN, gestionează drapelele în funcție de limbă |
-| `--add_translation_note` | Adăugarea unei note de traducere                                           |
-| `--note_position`        | Poziția notei: `top`, `bottom` (implicit) sau `both`                |
-| `--note_format`          | Formatul notei: `legacy` (implicit, paragraf aldin) sau `marker`       |
-| `--include_model`        | Includerea numelui modelului în fișierul de ieșire                       |
-| `--reasoning_effort`     | Efortul de raționament GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`     |
+| `--file`                 | Un singur fișier Markdown de tradus                                      |
+| `--source_dir`           | Directorul sursă care conține fișierele Markdown                         |
+| `--target_dir`           | Directorul de ieșire pentru fișierele traduse                            |
+| `--source_lang`          | Limba sursă (implicit: `fr`)                                    |
+| `--target_lang`          | Limba țintă (implicit: `en`)                                    |
+| `--model`                | Modelul specific de utilizat                                             |
+| `--eco`                  | Utilizează modelele economice                                            |
+| `--use_mistral`          | Utilizează API-ul Mistral AI                                             |
+| `--use_claude`           | Utilizează API-ul Claude                                                 |
+| `--use_gemini`           | Utilizează API-ul Gemini                                                 |
+| `--use_codex`            | Utilizează CLI-ul Codex din cota abonamentului ChatGPT                    |
+| `--use_grok`             | Utilizează API-ul xAI (Grok) — necesită `XAI_API_KEY`                    |
+| `--use_grok_cli`         | Utilizează CLI-ul Grok din cota abonamentului Grok                       |
+| `--force`                | Forțează retraducerea                                                    |
+| `--keep_filename`        | Păstrează numele original al fișierului                                  |
+| `--news`                 | Mod știri: protejează citatele EN, gestionează steagurile după limbă     |
+| `--add_translation_note` | Adaugă o notă de traducere                                                |
+| `--note_position`        | Poziția notei: `top`, `bottom` (implicit) sau `both`           |
+| `--note_format`          | Formatul notei: `legacy` (implicit, paragraf aldin) sau `marker`          |
+| `--include_model`        | Include numele modelului în fișierul de ieșire                           |
+| `--reasoning_effort`     | Efort de raționament GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`    |
 
-### Nota de traducere: poziții și formate
+> **Cele șase flag-uri de provider se exclud reciproc.** Combinarea a două
+> era acceptată anterior în tăcere și se rezolva prin alegerea primului verificat: o
+> traducere solicitată din cota abonamentului (`--use_codex`, `--use_grok_cli`)
+> putea astfel ajunge să fie facturată în funcție de utilizare, fără niciun avertisment.
+> `argparse` refuză acum combinația.
 
-Cu `--add_translation_note`, translator-ul poate plasa nota în partea de sus, în partea de jos sau în ambele locuri și o poate reda fie în format text simplu (compatibil cu versiunile anterioare), fie în format `marker`, utilizabil de un plugin Markdown.
+### Notă de traducere: poziții și formate
+
+Cu `--add_translation_note`, translator-ul poate plasa nota sus, jos sau în ambele locuri și o poate reda fie în format text simplu (compatibil cu versiunile anterioare), fie în format `marker` utilizabil de un plugin Markdown.
 
 **Poziție** (`--note_position`):
 
-- `bottom` (implicit): nota la sfârșitul fișierului, ca până acum.
-- `top`: nota inserată **după frontmatter-ul YAML** (siguranță pentru Astro Content Collections, gray-matter etc.).
-- `both`: nota inserată sus ȘI jos (un singur apel LLM, conținut reutilizat pentru ambele amplasări).
+- `bottom` (implicit): nota la sfârșitul fișierului, ca și până acum.
+- `top`: nota inserată **după frontmatter-ul YAML** (compatibilitate cu Astro Content Collections, gray-matter etc.).
+- `both`: nota inserată sus ȘI jos (un singur apel LLM, conținut reutilizat pentru ambele poziții).
 
 **Format** (`--note_format`):
 
 - `legacy` (implicit): paragraf aldin `**...**` — comportament strict identic cu v1.8, byte-for-byte. Compatibil cu Hugo, GitHub, GitLab și orice renderer Markdown.
-- `marker`: definiție Markdown invizibilă a unei referințe de link (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`), urmată de un blockquote aldin. Poate fi citită nativ pe GitHub/GitLab și utilizată la build de un plugin remark în Astro pentru a genera un banner stilizat (cf. blogul jls42.org).
+- `marker`: definiție invizibilă a unei referințe de link Markdown (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`), urmată de un blockquote aldin. Lizibil nativ pe GitHub/GitLab și utilizabil în timpul build-ului de un plugin remark în Astro pentru a produce un banner stilizat (consultați blogul jls42.org).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -271,17 +279,17 @@ python translate.py --file article.mdx --target_lang en \
 
 ### Modele implicite (2026)
 
-| Provider | Calitate (implicit)       | Economic (`--eco`)    |
-| -------- | ---------------------- | ----------------------- |
-| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
-| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
-| Mistral  | `mistral-large-latest` | `mistral-small-latest`  |
-| Gemini   | `gemini-3.7-flash`     | `gemini-3.1-flash-lite` |
-| Codex    | `gpt-5.6-sol`          | `gpt-5.6-luna`          |
-| Grok API | `grok-4.6`             | `grok-4.3`              |
-| Grok CLI | `grok-4.6`             | `grok-4.5`              |
+| Provider | Calitate (implicit)     | Economic (`--eco`) |
+| -------- | ---------------------- | -------------------------- |
+| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`            |
+| Claude   | `claude-sonnet-5`        | `claude-haiku-4-5`            |
+| Mistral  | `mistral-large-latest`        | `mistral-small-latest`            |
+| Gemini   | `gemini-3.7-flash`        | `gemini-3.1-flash-lite`            |
+| Codex    | `gpt-5.6-sol`        | `gpt-5.6-luna`            |
+| Grok API | `grok-4.6`        | `grok-4.3`            |
+| Grok CLI | `grok-4.6`        | `grok-4.5`            |
 
-> **Recomandare pentru traduceri long-form**: `--use_gemini` (implicit = `gemini-3.7-flash`) păstrează cu fidelitate structura Markdown pentru scrierile non-latine (PL, JA, ZH, AR, HI), inclusiv în modul `--news`, unde fidelitatea placeholderelor este importantă. Măsurat pe acest README tradus în japoneză: structură identică cu `gemini-3.1-pro-preview` (21 de liste, 18 blocuri de cod, 13 linkuri HTML, 13 imagini, toate URL-urile păstrate), cu o latență de aproximativ 6 ori mai mică. OpenAI rămâne opțiunea implicită pentru compatibilitatea cu versiunile anterioare.
+> **Recomandare pentru traduceri long-form**: `--use_gemini` (implicit = `gemini-3.7-flash`) păstrează fidel structura markdown pentru sistemele de scriere non-latine (PL, JA, ZH, AR, HI), inclusiv în modul `--news`, unde fidelitatea placeholder-elor este importantă. Măsurat pe acest README tradus în japoneză: structură identică cu `gemini-3.1-pro-preview` (21 de liste, 18 blocuri de cod, 13 linkuri HTML, 13 imagini, toate URL-urile păstrate), cu o latență de aproximativ 6 ori mai mică. OpenAI rămâne opțiunea implicită pentru compatibilitatea cu versiunile anterioare.
 
 ## Proiecte care utilizează acest script
 

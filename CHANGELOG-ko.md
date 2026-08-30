@@ -2,130 +2,144 @@
 
 🌍 [프랑스어](CHANGELOG.md) | [영어](CHANGELOG-en.md) | [스페인어](CHANGELOG-es.md) | [중국어](CHANGELOG-zh.md) | [독일어](CHANGELOG-de.md) | [일본어](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [아랍어](CHANGELOG-ar.md) | [힌디어](CHANGELOG-hi.md) | [이탈리아어](CHANGELOG-it.md) | [네덜란드어](CHANGELOG-nl.md) | [폴란드어](CHANGELOG-pl.md) | [포르투갈어](CHANGELOG-pt.md) | [루마니아어](CHANGELOG-ro.md) | [스웨덴어](CHANGELOG-sv.md)
 
-- **1.10.0** Provider `--use_codex`(ChatGPT 구독 할당량), SDK 및 모델 업데이트, 여러 문단으로 된 뉴스 인용문 수정(2026-08-29):
+- **1.10.0** Provider `--use_codex`(ChatGPT 구독 할당량), SDK 및 모델 업데이트, 여러 문단으로 된 뉴스 인용 수정(2026-08-29):
 
-  - **새로운 Grok provider 두 개**: `--use_grok`(xAI API, `XAI_API_KEY` 키, 사용량 기반 과금) 및 `--use_grok_cli`(공식 Grok Build CLI, Grok 구독에서 차감 — `--use_codex`와 같은 원리).
-    - **API 모드, 약 40줄**: xAI endpoint가 OpenAI와 호환되므로 client와 `_call_openai`는 그대로 재사용하며, `base_url`만 변경됩니다. 단 하나의 조정만 필요했고 이는 모두에게 유용합니다. 이제 `finish_reason`은 OpenAI가 `stop`을 내보내는 곳에서 xAI가 내보내는 형식인 `end_turn`을 허용합니다. 모델: `grok-4.6`(품질) 및 `grok-4.3`(경제성). 참고로 Grok의 경제형 모델은 여전히 저장소에서 가장 비쌉니다. 백만 개당 $1.25/$2.50으로, `mistral-small-latest`의 $0.15/$0.60과 비교됩니다. 이 provider는 가격이 아니라 모델 다양성을 위해 선택하는 것입니다.
-    - **CLI 모드**: Codex를 본떠 만들었지만 실제 환경에서 요구되는 네 가지 차이가 있습니다. prompt는 파일을 통해 전달되고(`--prompt-file`, CLI는 stdin을 읽지 않으며 argv의 segment는 `ps`에 노출됨), 출력은 stdout의 단일 JSON 객체이며(JSONL도 `-o` 파일도 아님), 구독에서는 `grok-4.6`과 `grok-4.5`만 제공되고, sandbox는 적용할 수 없습니다(아래 참조). subprocess 실행은 이미 테스트된 Codex provider의 나머지 부분을 건드리지 않고 `_codex_run_process`에서 Codex와 함께 공통화했습니다.
-    - **`exit 0`만으로는 아무것도 입증되지 않음, 실측 완료**: 인증되지 않은 상태에서 CLI는 **stdout**에 `{"type":"error","message":"Not signed in."}`을 쓰고 종료 코드 **0**을 반환합니다. 거부되거나 turn 한도를 초과해도 동일하게 동작합니다. 따라서 출력 규약은 네 가지 조건을 동시에 요구합니다. 종료 코드 0, 오류 payload 없음, `stopReason == end_turn`, 비어 있지 않은 텍스트입니다. preflight도 같은 논리를 따릅니다. `grok models`는 연결이 끊긴 상태에서도 0으로 종료되며, stdout에 « not authenticated »가 있는지를 통해서만 판단할 수 있습니다.
-    - **격리: 의도적으로 채택하고 문서화한 비대칭성.** Codex는 `--sandbox read-only`에서 실행되지만, Grok의 sandbox는 최근의 많은 Linux 시스템에서 적용할 수 없습니다. 이는 `sudo` 없이는 우회할 수 없는 두 가지 독립적인 시스템 원인 때문입니다. Ubuntu 24.04부터 AppArmor가 권한 없는 user namespace를 차단하며(`bwrap: setting up uid map: Permission denied`, Grok 외부에서도 재현됨), `/run/podman`이 `0700`에 있을 때 container runtime socket의 deny-list가 실패합니다(resolver는 `ErrorKind::NotFound`만 처리하며 EACCES는 치명적 오류가 됨). 핵심 함정은 적용할 수 없는 **내장** profile이 **아무 경고 없이 격리되지 않은 상태로 실행된다**는 점입니다. 따라서 script는 기본적으로 어떤 profile도 요청하지 않으며 절대로 조용히 fallback하지 않고 stderr에 경고합니다. 보호는 CLI의 `--deny` 규칙에 의존하며, catch-all `*`도 포함됩니다. 이는 실측된 유일한 _fail-closed_ 계층입니다(알 수 없는 접두사의 규칙이 있으면 실행을 거부함). `GROK_TRANSLATE_SANDBOX=read-only`을 사용하면 이를 필수로 지정할 수 있으며, 이 경우 시스템이 이를 준수할 수 없으면 실행이 실패합니다.
-    - **안전장치**: `XAI_API_KEY`, `GROK_API_KEY`, `GROK_SANDBOX`을 subprocess 환경에서 제거합니다(키가 하나라도 있으면 사용량 기반 과금으로 전환되며, 상속된 `GROK_SANDBOX`은 적용할 수 없는 profile을 오해의 소지가 있는 메시지와 함께 강제함). MCP/hooks/skills/agents 스위치를 비활성화하고, `--disable-web-search`, `--no-subagents`, `--no-plan`, 일회용 workdir, CI에서의 실행 거부, process group을 종료하는 timeout, rate limit 시 back-off를 적용합니다. `--max-turns`은 1이 아니라 6으로 고정됩니다. 카운터는 tool turn 이후 증가하므로 1로 설정하면 출력이 잘립니다.
-    - **할당량**: Grok pool은 주 단위이며 **Chat, Imagine, Voice와 공유**되고, 이를 표시하는 명령은 없습니다. `account/rateLimits/read`으로 사용량을 산출할 수 있는 Codex와 대조적입니다. 따라서 `regen_translations.sh`은 동시 실행 수를 2로 제한하고 이를 명시적으로 경고합니다.
-    - **테스트**: 새 파일 `tests/test_grok_provider.py`(24개 테스트). 전체 suite는 **290개 테스트**입니다.
-  - **버그 수정 — 여러 문단으로 된 영어 인용문이 일부만 보호됨(`--news` 모드)**: `_NEWS_CITATION_REGEX`은 인용문 본문으로 **연속된** `>` 줄만 허용했습니다. 인용문이 여러 문단에 걸쳐 있으면(빈 `>` 줄로 구분됨) 마지막 문단만 포착되어 placeholder로 대체되고 앞선 문단들은 LLM으로 전달되어 번역된 상태로 돌아왔습니다. 이는 `--news`이 보장하려는 것과 정확히 반대였습니다. 이제 반복 패턴은 내부의 빈 `>` 줄을 허용하고 non-greedy 방식으로 동작하여, 처음 만나는 빈 줄이 아니라 이탤릭체 줄 앞의 빈 `>`에서 멈춥니다.
-    - **실측된 규모**: 실제 기사 198개의 corpus에서 인용문 419개 중 11개가 영향을 받았습니다. regression은 없습니다. 새 regex는 정확히 같은 수의 인용문을 포착하며, 여러 문단으로 된 본문만 확장됩니다(동일한 본문 408개, 확장된 본문 11개). 또한 `> — …` attribution 줄은 여전히 본문에 포함될 수 없습니다(lookahead 유지).
-    - **end-to-end 검증**: 69KB 기사를 ja/ar로 번역해 확인했습니다. 이전에는 인용문의 첫 문단이 일본어로 `> GLM-5.3がオープンウェイト化。` 처리되고 아랍어에서도 마찬가지로 번역되었지만, 이제는 `> GLM-5.3 is now open-weight.` 상태로 유지됩니다. 영어 인용문 줄 수는 source와 같은 10줄로 9줄에서 복구됩니다.
-    - 참고: 이 결함은 인용문의 존재 여부만 확인하고 완전성은 검사하지 않는 downstream validator로는 탐지되지 않았습니다.
-  - **기본 provider에서 실측된 비용 절감**: `_openai_extra_kwargs`은 모델명이 `gpt-5`으로 시작하면 `--eco`에서도 `reasoning_effort="medium"`을 전송했습니다. `gpt-5.4-mini`에서 열 단어로 된 문장을 번역해 측정한 결과는 `medium` → reasoning token 45개와 출력 token 65개, `none` → 0개와 14개였습니다. reasoning은 번역에 아무런 이점이 없으며 모든 파일의 모든 segment에서 비용이 청구되고 있었습니다. 기본값은 `--eco`에서 `none`이 되고 그 외에는 `medium`로 유지됩니다. CLI에서 명시적으로 전달한 값은 계속 우선합니다. 이제 `--reasoning_effort`은 `low`/`medium`/`high` 외에도 `none`과 `xhigh`을 허용합니다(모든 모델이 모든 값을 허용하는 것은 아닙니다. 예를 들어 `minimal`은 `gpt-5.4-mini`에서 거부됩니다. 기존의 매개변수 없는 retry가 이 경우를 처리합니다).
-  - **SDK 업데이트 및 Gemini 마이그레이션**: `google-generativeai`(지원이 2025-11-30에 종료되고 저장소가 보관 처리됨)을 통합 SDK **`google-genai`**로 교체했습니다. `genai.Client(api_key=...)` 다음에 `client.models.generate_content(model=, contents=, config=)`를 사용하며, system prompt는 segment에 이어 붙이는 대신 `system_instruction`로 전달합니다. `mistralai`은 **2.9.4**로 올라갑니다(import는 `from mistralai.client import Mistral`이 되며 이전 것은 `ImportError`을 발생시킵니다. wheel에서 확인함). `anthropic`은 **0.125.0**, `openai`은 **2.54.0**으로 올라갑니다. 이는 venv에 두 HTTP stack이 공존하지 않도록 `httpx2`로 전환하기 전의 마지막 버전입니다. 이에 따라 `httpx` 0.28.1과 `pydantic` 2.13.5의 제한도 해제했습니다.
-  - **문서가 아닌 실제 테스트에서 포착한 regression 두 건**:
-    - `anthropic` ≥ 1.0은 `max_tokens`상 10분을 초과할 것으로 예상되는 non-streaming 호출을 client 측에서 거부합니다(`ValueError: Streaming is required...`). 이 안전장치는 0.34.2에는 없었으며 `max_tokens=32768`을 사용하는 모든 Claude 호출을 중단시켰습니다. 명시적인 `timeout`(`CLAUDE_TIMEOUT`, 기본값 900초)으로 수정하여, 전체 응답만 사용하는 호출을 streaming으로 전환하지 않아도 됩니다.
-    - `thinking_level="minimal"`은 Gemini catalogue의 일부에서만 허용됩니다. `gemini-3.1-flash-lite`은 이를 지원하지만 `gemini-3.7-flash`와 `gemini-3.1-pro-preview`은 400 오류로 거부합니다. 이에 따라 `_gemini_generate_with_fallback`에는 기존 OpenAI fallback을 본뜬 `minimal` → `low` → thinking_config 없음의 cascade가 적용됩니다. 최적화 매개변수 때문에 번역이 실패해서는 안 됩니다.
-  - **기본 모델 갱신**, 각각 실제 호출로 검증: OpenAI `gpt-5.5` → **`gpt-5.6-terra`**(28개 batch에서 −60%) 및 `gpt-5.4-mini` → **`gpt-5.6-luna`**(−73%), Claude `claude-sonnet-4-6` → **`claude-sonnet-5`**(더 저렴하고 최신) 및 `claude-haiku-4-5-20251001` → **`claude-haiku-4-5`**(날짜가 없는 canonical ID), Gemini `gemini-3.1-pro-preview` → **`gemini-3.7-flash`** 및 `gemini-3.1-flash-lite-preview` → **`gemini-3.1-flash-lite`**(stable version이며 `3.5-flash-lite`보다 저렴함). Mistral은 변경되지 않았으며 `mistral-large-latest`이 네 모델 중 최고의 가성비를 계속 제공합니다. 참고로 `gemini-3.1-pro-preview`보다 최신인 Gemini Pro 제품군 모델은 존재하지 않습니다. 2026년 5월 발표된 Gemini 3.5 Pro는 출시되지 않았으며 3.5/3.6/3.7 계열은 전부 Flash입니다.
-  - **Gemini 전환 전 실측 A/B 테스트**: `README.md`를 `gemini-3.1-pro-preview`과 `gemini-3.7-flash`로 각각 일본어 번역했습니다. 구조는 완전히 동일했고(목록 21개, code block 18개, HTML link 13개, image 13개, 모든 URL 보존), 소요 시간은 **48초 대비 8초**였습니다. 이 두 모델을 번역이나 비라틴 문자 script에서 비교한 공개 benchmark가 없으므로, 이 측정이 없었다면 전환은 단순한 추정에 의존했을 것입니다.
-  - **Claude 응답 block 필터링**: `_call_claude`은 type을 필터링하지 않고 `block.text for block in response.content`을 수행했습니다. adaptive reasoning 모델(Sonnet 5 이상)은 `thinking` block을 중간에 삽입하는데, 이 block은 `.text`가 아닌 `.thinking`을 노출합니다. 따라서 첫 segment에서 불투명한 `AttributeError`으로 인해 번역이 중단될 수 있었습니다. 이제 `thinking`, `redacted_thinking`, `tool_use`, `tool_result` block은 제외됩니다(텍스트를 포함한 알 수 없는 type을 허용하도록 negative list 사용). 텍스트 block이 전혀 없는 응답에는 명시적인 오류가 발생합니다. 모든 호출에 `thinking={"type": "disabled"}`을 전달합니다.
-  - **`MODEL_TOKEN_LIMITS` 재동기화**: 폐기일이 지난 모델을 제거했습니다(`magistral-*` 제품군은 2026-07-31, `gemini-2.0-*`은 2026-06-01, `gemini-3-pro-preview`은 2026-03-09에 폐기됨, `claude-3-5-sonnet-20240620`, `claude-3-7-sonnet-20250219`, `claude-opus-4-1-20250805`, `claude-sonnet-4-20250514`). 한도 수정: Mistral 128K → **256K**(Large 3 / Small 4 세대), Gemini 1,000,000 → **1,048,576**(실제 input 한도), `claude-opus-4-5` 200K → **1M**, `gpt-5.6-*` 제품군 400K → **1.05M**. Claude 5(`claude-sonnet-5`, `claude-opus-5`, `claude-fable-5`), `claude-opus-4-8`, Gemini 3.5/3.6/3.7, `mistral-medium-latest`, `ministral-*` 제품군을 추가했습니다. 참고로 이 한도들은 여전히 참고용이며, `translate()`은 segmentation을 `min(16000, limite)`으로 제한합니다.
-  - **Provider `--use_codex`**: 사용량에 따라 과금되는 API를 호출하는 대신 공식 Codex CLI(`codex exec`)를 비대화형 모드로 구동하는 다섯 번째 provider입니다. 번역 사용량은 이미 결제한 ChatGPT 구독 할당량에서 차감됩니다. 이는 OpenAI가 이 용도로 문서화한 유일한 방법입니다. 요금제별 이용 가능 기능 표에는 “Codex SDK, `codex exec`, and scriptable workflows”가 Plus/Pro/Business/Enterprise에서 제공된다고 명시되어 있으며, `~/.codex/auth.json`의 token은 API Platform 호출 인증에 사용되지 않습니다. 또한 이 스크립트는 해당 token을 절대 읽지 않으며, 인증과 갱신은 계속 CLI에서 관리합니다.
-  - **npm뿐 아니라 pip로도 설치할 수 있는 Codex 바이너리**: `_resolve_codex_binary()`은 `CODEX_BIN`, 이어서 `PATH`, 마지막으로 OpenAI가 배포하는 공식 Python package **`openai-codex-cli-bin`**에서 바이너리를 찾습니다. 이는 `openai-codex` SDK의 dependency입니다. 따라서 Python 프로젝트에서 `--use_codex`을 사용하기 위해 더 이상 npm 전역 설치가 필요하지 않습니다. 이 package는 `requirements.txt`에 추가되지 않습니다. 바이너리 크기가 약 250MB이므로 선택적 provider를 위해 모든 사용자에게 설치를 강제하게 되기 때문입니다. 전체 과정을 검증했습니다. `codex`가 `PATH`에 없는 상태에서도 package에 포함된 바이너리를 찾아 6초 만에 전체 번역을 완료합니다.
-  - **“구독 모드” 보장**: 하위 process의 환경에서 `OPENAI_API_KEY`과 `CODEX_API_KEY`을 제거합니다. 이 보호 장치가 없으면 `.env`에 있는 key 때문에 아무런 표시 없이 Codex가 사용량 기반 과금으로 전환될 수 있습니다. 이는 바로 이 provider가 방지하려는 상황입니다.
-  - **테스트로 고정한 CLI 함정**:
-    - `codex exec`은 prompt가 인자로 전달되더라도 stdin을 **읽습니다**. stdin을 닫지 않으면 명령은 모델을 한 번도 호출하지 않은 채 timeout까지 기다립니다. 재현 결과 180초 후 exit 124, 0바이트였습니다. 따라서 `communicate(input=...)`은 필수입니다.
-    - npm으로 설치한 `codex`은 실제 Rust 바이너리를 `spawn`하는 Node shim입니다. 이 바이너리는 Python process의 **손자 process**이므로 `subprocess.run(timeout=)`의 `SIGKILL` 이후에도 살아남아 계속 할당량을 소비할 수 있습니다. 따라서 `Popen(start_new_session=True)`과 `os.killpg`이 필요합니다.
-    - CLI는 `turn.failed`을 출력하고도 종료 코드 0을 반환할 수 있습니다. 따라서 반환 코드뿐 아니라 JSONL 출력(`--json`)도 검사하며, 종료 코드가 0인데 `-o` 파일이 없으면 빈 segment를 생성하는 대신 명시적인 오류를 발생시킵니다.
-  - **rate limit에 대한 back-off**: CLI는 내부적으로 retry를 전혀 구현하지 않습니다(`max_retries = 0`). 분류는 부분 문자열이 아니라 JSON payload 구조(`status: 429` / `error.type`)를 기준으로 수행합니다. “quota”라는 단어는 복구 가능한 429와 영구적인 `insufficient_quota` 양쪽에 모두 나타나기 때문입니다.
-  - **CI 보호 장치**: `CI` 또는 `GITHUB_ACTIONS`이 정의되어 있으면 `--use_codex`을 거부합니다. 구독 인증은 공유 runner용으로 설계되지 않았으며, OpenAI도 공개 repository에서 이 workflow를 사용하지 말 것을 명시적으로 권고합니다.
-  - **모델**: `gpt-5.6-sol`(품질)과 `gpt-5.6-luna`(`--eco`)입니다. `gpt-5.6-*` 계열은 CLI와 API Platform에서 공통으로 제공되지만 ChatGPT 계정이 모든 모델을 사용할 수 있는 것은 아닙니다. allowlist는 로컬 검증 없이 서버 측에서 적용되며, 일반적이지 않은 모델을 지정하면 경고가 발생합니다. Plus 요금제에서 Luna는 5시간 window당 250~2,000개의 message를 제공하는 반면 Sol은 10~100개를 제공합니다. 따라서 모든 batch 처리에는 `--eco` 모드를 권장합니다.
-  - **수정된 bug — 전체 작업이 성공했는데도 `regen_translations.sh`이 오류로 종료됨**: `trap ... EXIT`은 `main()`의 `local` 변수인 `failed_log`을 참조했지만, trap이 실행될 때는 이 변수가 더 이상 존재하지 않았습니다. `set -u`에서 이로 인해 `failed_log: unbound variable`이 발생하여 28개 번역이 모두 올바른데도 스크립트가 종료 코드 1로 끝났습니다. 이 문제는 재생성 직후 가장 비용이 많이 드는 단계에서 `release.sh --auto`(`set -e`)을 중단시킬 수 있었습니다. 변수를 전역으로 바꾸고 trap이 변수의 존재 여부를 검사하도록 했습니다. 유용한 부수 효과로, 지금까지 이 오류에 가려졌던 실제 번역 실패가 마지막 요약에 다시 표시됩니다.
-  - **`REGEN_MODEL`**: provider의 기본값보다 우선하여 특정 모델을 강제하는 `regen_translations.sh`의 새로운 환경 변수입니다. 예를 들어 처리량 중심 모델인 `--eco` 대신 구독 할당량의 고급 모델로 재생성하려면 `REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol`을 사용할 수 있습니다.
-  - **`regen_translations.sh`**: 명시적으로 opt-in할 때 사용할 수 있는 `REGEN_PROVIDER=codex`입니다. 사용자가 모르는 사이 구독 할당량을 소비하지 않도록 자동 감지는 절대 하지 않습니다. 병렬 처리를 시작하기 전에 token을 한 번 순차적으로 갱신합니다. Codex refresh는 회전식 일회용이므로 동시 job이 `codex login` session을 무효화할 수 있기 때문입니다. 동시 실행 수는 4로 줄어듭니다.
-  - **관련 refactor**: `_dispatch_provider_call`은 전체 chain에 네 번째 boolean을 전달하는 대신 provider 이름을 반환하는 `_resolve_provider()`을 사용하여 parameter 수가 8개에서 6개로 줄었습니다. 최소한의 `Namespace`으로 `translate(..., use_mistral=True)`을 호출하는 테스트를 보존하기 위해 명시적 boolean은 계속 `args`보다 우선합니다.
-  - **테스트**: argv, 정리된 환경, 서문 금지 contract, silent failure, timeout/killpg, back-off, preflight, provider 결정, Gemini reasoning cascade, Claude block 필터링, 여러 paragraph로 구성된 news citation을 다루는 새 파일 `tests/test_codex_provider.py`(41개 테스트)을 추가했습니다. 전체 suite는 259개 테스트입니다.
-  - **실제 검증**: 프로젝트의 `README.md`를 Codex로 **14개 언어**로 번역한 결과, reference 번역과 구조가 완전히 동일했습니다. code block 14개, 제목 24개, table 행 25개, HTML link 13개, image 13개, URL 19개가 유지되었고, code block은 문자 단위까지 동일했으며 placeholder 잔여물은 0개였습니다. `--news` 모드에서 69KB 분량의 보도 기사를 처리했을 때 `gpt-5.6-luna`과 `gpt-5.6-sol` 출력은 en/ja/ar 모두에서 후속 application validator를 통과했습니다. `account/rateLimits/read`로 측정한 사용량은 `--eco` 모드에서 계수기의 반올림 기준보다 낮은 수준, 즉 5시간 window의 0%로 유지되었습니다.
+  - **이 PR 검토에서 도출된 수정 사항** — 다섯 검토 에이전트가 diff를 면밀히 조사했으며, 아래 문제는 모두 수정 전에 **측정을 통해 재현**되었고, 그중 두 가지는 같은 버전의 앞선 변경에서 도입된 회귀였습니다.
 
-- **1.9.2** 중첩 괄호 또는 프랑스어 접두사가 있는 news 출처 URL 추출 수정(2026-05-11):
+    - **회귀 수정 — `_NEWS_CITATION_REGEX`에 지수적 backtracking이 발생했습니다.** 여러 문단 수정에서 반복문 안에 `(?:[ \t]*$|[ \t]+.*)`가 도입되었습니다. `[ \t]+`과 `.*` 사이의 공백 분배가 모호하며, 이 모호성이 반복할 때마다 증폭되었습니다. 패턴과 일치하지 않는 `>   texte` 줄들—완전히 적법한 Markdown 들여쓰기—을 대상으로 측정한 결과, **14줄에 2,589ms**가 걸렸으며 수정 후에는 0.04ms였고, 한 줄이 추가될 때마다 약 9배씩 증가했습니다. `--news` 모드에서는 규격에 맞지 않는 긴 blockquote 하나만으로도 원인을 파악할 수 없는 채 번역이 작업 timeout까지 멈췄습니다. 이제 반복문은 전체 줄을 한 덩어리로 소비하여(`\n^>(?![ \t]*—).*`) 각 반복에서 일치할 수 있는 방식이 하나만 남습니다. 실제 기사 231개의 corpus에서 검증한 결과, 캡처 차이는 **0건**이고 인용 423개가 동일하며 여러 문단으로 된 본문 14개도 계속 확장됩니다.
+    - **Provider flag 두 개를 동시에 사용하면 아무런 알림 없이 사용량 기반 요금이 청구되었습니다.** `--use_codex --use_mistral`이 허용되었으며, `_select_provider_client`은 Mistral을 먼저 검사하고 `_resolve_provider`은 명시적인 boolean을 우선하므로 둘 다 Mistral로 귀결되었습니다. 따라서 사용자는 구독 할당량을 요청했지만 아무런 경고 없이 사용량 기반 요금을 청구받았습니다. 이는 바로 `--use_codex`이 방지하기 위해 존재하는 장애 유형입니다. 이제 여섯 provider flag 모두 `add_mutually_exclusive_group`을 거칩니다. **동작 변경 사항**: 지금까지 조용히 허용되었던 두 provider를 결합한 명령줄은 이제 `argument --use_mistral: not allowed with argument --use_codex`에서 실패합니다.
+    - **작업 완료 gate는 자체 probe가 실패해도 초록색으로 표시되었습니다.** `scripts/check-release-ready.sh`의 13개 검사 중 4개가 반환 코드를 전혀 확인하지 않고 “stdout을 캡처하고 비어 있으면 결론을 내리는” 패턴을 따랐습니다. 예외(파일 이름 변경, `FileNotFoundError`)가 stderr에 기록되고 stdout은 비어 있어 검사가 “문제없음”으로 결론 내렸습니다. 이를 방지하려고 작성한 script 안에서 “`exit 0` 하나만으로는 아무것도 증명할 수 없다”는 함정이 재현된 것입니다. 이제 `probe()` helper가 반환 코드 0과 종료 sentinel을 **모두** 요구하며, probe는 marker 집합이 비어 있으면 결론을 내리지 않습니다. 빈 집합에 대한 assertion은 언제나 참이기 때문입니다. 입증 사례로, 위의 상호 배타적 group을 추가하면서 provider flag가 `*_group` 객체를 거치게 되었고, 이전 regex `parser\.add_argument\(`은 더 이상 이에 일치하지 않았습니다. **21개 중 6개 flag**가 아무런 알림 없이 범위에서 빠졌지만 gate는 초록색이었습니다.
+    - **Secret scan은 provider 여섯 개 중 네 개를 놓쳤습니다.** `[A-Za-z0-9]` class는 하이픈을 제외합니다. `sk-proj-…`(현재 OpenAI 형식)과 `sk-ant-api03-…`는 두 번째 하이픈에서 끊겼고, `AIza…`은 포함되지 않았습니다. 패턴을 확장하고 `.secrets.baseline`은 scan에서 제외했습니다. 또한 `.env` guard는 index만 보는 `git diff --cached`을 조회했습니다. 최악의 경우인 **이미 commit된** `.env`은 절대 나타나지 않았습니다. 이제 `git ls-files`을 조회합니다.
+    - **Codex의 “token warm-up”은 실제 warm-up이 아니었습니다.** 측정 결과 `codex login status`은 `~/.codex/auth.json`을 건드리지 않으며(mtime과 크기가 그대로임), 도움말에는 “로그인 상태 표시”라고 되어 있습니다. 그런데도 주석은 token을 “한 번 순차적으로” 갱신하여 일회용 rotating token의 동시 갱신 위험을 없앤다고 주장했습니다. 선언된 보호 기능은 존재하지 않았습니다. 이제 주석은 코드가 실제로 수행하는 작업을 설명하며, 진짜 대응책은 여전히 `max_jobs=4`입니다. 또한 검사는 이전에 무시했던 `CODEX_BIN`을 따릅니다. `PATH`의 `codex`이 없는 시스템에서는 “인증되지 않음”으로 실패하여 잘못된 진단을 내렸습니다.
+    - **`.env`을 subshell에서 source하고 있었습니다.** `detect_provider`은 command substitution 안에서 호출되므로 export가 상위 shell로 전달되지 않았습니다. `.env`에 정의된 `GROK_BIN`, `GROK_HOME` 또는 `REGEN_MODEL`은 `main()` 안에서 수행되는 조회에 보이지 않았고, 올바른 설정에서도 “Grok binary를 찾을 수 없음”으로 결론 내렸습니다.
+    - **동시 실행 수가 명시된 상한을 50% 초과했습니다.** Guard가 README/CHANGELOG 쌍을 실행한 뒤에 배치되어 측정된 최대치가 **`max_jobs=2`에서 3**이었습니다. 주간 할당량을 Chat/Imagine/Voice와 공유하고 측정할 수도 없는 Grok에서 script가 스스로 정한 상한조차 지키지 못한 것입니다. 한편 최종 개수는 표시만 하고 28과 비교하지 않아 파일이 누락되어도 감지하지 못했습니다.
+    - **Grok 출력 계약: 이제 `stopReason`이 없으면 실패합니다.** 명시된 계약은 `end_turn`을 요구하지만, 코드는 “`end_turn` **또는 없음**”을 적용했습니다. 해당 field가 없는 payload나 CLI 업데이트로 field 이름이 바뀐 payload는 guard를 아무 효과 없이 조용히 통과시켰습니다. 또한 `max_turn_requests`은 더 이상 rate limit으로 분류하지 않습니다. 이는 turn budget이 소진된 경우이므로 재시도해도 같은 결과가 나오며 90초의 대기 시간만 추가되기 때문입니다. 그리고 `quota`은 rate limit marker에서 제외됩니다. `_codex_is_rate_limited`의 docstring에 이미 적혀 있었지만 Grok에는 적용되지 않았던 바로 그 이유 때문입니다.
+    - **Gemini cascade는 모델별로 memoization됩니다.** 기본 모델이 거부하는데도 segment마다 `minimal`부터 다시 시작했습니다. 정상 경로에서 segment마다 400 응답을 한 번씩 왕복하고 같은 경고를 다시 출력한 것입니다. 경고가 수백 번 반복되면 더 이상 읽히지 않으며, 그렇게 경고가 가림막으로 변합니다.
+    - **기타**: CI의 거부 메시지가 Codex로 하드코딩되어 `--use_grok_cli` 사용자를 `XAI_API_KEY` 대신 `OPENAI_API_KEY`으로 안내했습니다. `provider.capitalize()`은 “Grok_cli”와 “Openai”라고 표시했습니다. Subprocess 기반부의 주석은 “shim”을 두 CLI 모두에 일반화했지만 Grok binary는 native ELF입니다. 올바른 근거는 “자체 subprocess를 spawn하는 agent”입니다. `subprocess`에 대한 SAST finding 12개는 근거와 함께 `# nosec` / `# nosemgrep`으로 표시했습니다. `shell=True`을 사용하지 않는 list 형식이라 injection이 불가능하고 문서 내용은 argv를 거치지 않습니다.
+    - **더 이상 agent subprocess에 secret이 유입되지 않습니다.** 이름을 나열한 deny-list는 **과금** invariant만 보호했습니다(`OPENAI_API_KEY` 없는 Codex, `XAI_API_KEY` 없는 Grok). 측정 결과 **그 밖의 secret 7개**가 여전히 각 subprocess에 유입되었습니다. Anthropic, Mistral, Google, Gemini key, 다른 CLI의 key, 그리고 secret은 아니지만 traffic을 우회시키는 `OPENAI_BASE_URL`입니다. 그런데 이 두 CLI는 **agent**이며, Grok agent는 많은 Linux 시스템에서 적용 가능한 OS sandbox 없이 실행됩니다. 이제 filtering은 이름 목록이 아니라 **이름 패턴**(`API_KEY`, `_TOKEN`, `SECRET`, `PASSWORD`, `CREDENTIALS`)을 기반으로 하므로, 이 코드가 알지 못하더라도 사용자가 `.env`에 추가한 변수까지 포함합니다. CLI에는 이들 변수가 전혀 필요하지 않습니다. 인증 정보는 환경 변수가 아니라 `~/.codex`과 `~/.grok`에 있습니다. 강화된 환경에서 두 provider 각각을 사용해 **실제 번역을 성공적으로 완료**하여 이를 검증했습니다.
+    - **테스트**: 새 파일 `tests/test_review_hardening.py`(테스트 21개)은 provider flag의 상호 배타성, `stopReason` 계약, 뉴스 regex의 선형성, CI 거부 메시지, Gemini memoization, subprocess 환경에 어떠한 secret도 없음을 보장합니다. 마지막 assertion은 **일반적**이어서 어떤 목록에도 이름이 없는 key에서도 실패합니다. 반면 기존 정리 테스트는 자체 상수를 그대로 비춘 것에 불과하여 자체 loop의 고장 외에는 아무것도 감지할 수 없었습니다. 전체 suite는 **311개 테스트**입니다.
+  - **새로운 Grok provider 두 개**: `--use_grok`(xAI API, `XAI_API_KEY` 키, 사용량 기반 과금)와 `--use_grok_cli`(공식 Grok Build CLI, Grok 구독에서 차감 — `--use_codex`와 동일한 원리).
+    - **API 모드, 약 40줄**: xAI endpoint는 OpenAI와 호환되므로 client와 `_call_openai`을 그대로 재사용하며, `base_url`만 변경된다. 단 하나의 조정만 필요했고 이는 모두에게 유용하다. 이제 `finish_reason`은 OpenAI가 `stop`을 내보내는 곳에서 xAI가 내보내는 형식인 `end_turn`을 허용한다. 모델: `grok-4.6`(품질)과 `grok-4.3`(경제형). 참고로 Grok의 경제형도 저장소에서 가장 비싸다. 백만 개당 $1.25/$2.50로, `mistral-small-latest`의 $0.15/$0.60와 대비된다. 이 provider는 가격이 아니라 모델 다양성을 위해 선택하는 것이다.
+    - **CLI 모드**: Codex를 본떠 구현했지만 실제 환경에서 요구되는 네 가지 차이가 있다. prompt는 파일로 전달되며(`--prompt-file`, CLI가 stdin을 읽지 않고 argv의 segment는 `ps`에 노출됨), 출력은 stdout의 단일 JSON 객체이고(JSONL도 `-o` 파일도 아님), 구독에서는 `grok-4.6`과 `grok-4.5`만 제공되며, sandbox를 적용할 수 없다(아래 참조). subprocess 실행은 `_codex_run_process`에서 Codex와 공통화했으며, 이미 테스트된 Codex provider의 나머지 부분은 건드리지 않았다.
+    - **`exit 0`은 아무것도 증명하지 않으며, 이를 측정으로 확인함**: 인증되지 않은 상태에서도 CLI는 **stdout**에 `{"type":"error","message":"Not signed in."}`을 쓰고 반환 코드 **0**을 낸다. 거부되거나 turn 제한을 초과해도 동일하게 동작한다. 따라서 출력 contract에는 네 조건이 동시에 필요하다. 반환 코드 0, 오류 payload 없음, `stopReason == end_turn`, 비어 있지 않은 text이다. preflight도 같은 논리를 따른다. 연결이 끊긴 상태에서도 `grok models`은 0으로 종료되며, stdout에 « 인증되지 않음 »이 있는지를 통해서만 판단할 수 있다.
+    - **격리: 의도적으로 선택하고 문서화한 비대칭성.** Codex는 `--sandbox read-only`에서 실행되지만, Grok의 sandbox는 최근의 많은 Linux 환경에서 적용할 수 없다. `sudo` 없이는 우회할 수 없는 두 가지 독립적인 시스템 원인이 있기 때문이다. Ubuntu 24.04부터 AppArmor가 권한 없는 user namespace를 차단하며(`bwrap: setting up uid map: Permission denied`, Grok 외부에서도 재현됨), `/run/podman`이 `0700` 상태일 때 container runtime socket의 deny-list가 실패한다(resolver는 `ErrorKind::NotFound`만 처리하며 EACCES는 치명적인 오류가 됨). 핵심 함정은 적용할 수 없는 **내장** profile이 **아무 경고 없이 격리되지 않은 상태로 실행된다**는 것이다. 따라서 script는 기본적으로 어떤 profile도 요청하지 않고 절대 조용히 fallback하지 않으며, stderr에 경고한다. 보호는 CLI의 `--deny` 규칙에 의존하고 catch-all `*`도 포함한다. 이는 측정상 유일한 _fail-closed_ 계층이다(알 수 없는 prefix의 규칙이 있으면 시작을 거부함). `GROK_TRANSLATE_SANDBOX=read-only`을 사용하면 이를 필수로 지정할 수 있으며, 이 경우 시스템이 이를 준수할 수 없으면 시작에 실패한다.
+    - **안전장치**: `XAI_API_KEY`, `GROK_API_KEY`, `GROK_SANDBOX`는 subprocess 환경에서 제거된다(API key가 있으면 사용량 기반 과금으로 전환되고, 상속된 `GROK_SANDBOX`는 적용 불가능한 profile을 오해를 부르는 message와 함께 강제하기 때문임). MCP/hooks/skills/agents switch를 비활성화하고, `--disable-web-search`, `--no-subagents`, `--no-plan`, 일회용 workdir, CI에서의 거부, process group을 종료하는 timeout, rate limit 시 back-off를 적용한다. `--max-turns`은 1이 아니라 6으로 설정한다. counter는 tool turn 후에 증가하므로 1이면 출력이 잘리기 때문이다.
+    - **할당량**: Grok pool은 주간 단위이며 **Chat, Imagine, Voice와 공유**되고, 이를 표시하는 command가 없다. 이는 `account/rateLimits/read`으로 사용량을 산출할 수 있는 Codex와 대조된다. 따라서 `regen_translations.sh`은 동시 실행 수를 2로 제한하고 명시적으로 경고한다.
+    - **테스트**: 새 파일 `tests/test_grok_provider.py`(테스트 24개). 전체 suite는 **테스트 290개**.
+  - **수정된 버그 — 여러 문단으로 된 영어 인용문이 일부만 보호되었음(`--news` 모드)**: `_NEWS_CITATION_REGEX`은 인용문 본문으로 **연속된** `>` 줄만 허용했다. 인용문이 빈 `>` 줄로 구분된 여러 문단에 걸치면 마지막 문단만 포착되어 placeholder로 대체되고, 앞 문단들은 LLM으로 전달되어 번역되었다. 이는 `--news`이 보장하려는 것과 정확히 반대였다. 이제 반복 표현은 내부의 빈 `>` 줄을 허용하며 non-greedy 방식으로 작동하여, 처음 만난 빈 줄이 아니라 기울임꼴 줄 앞의 빈 `>`에서 멈춘다.
+    - **측정된 범위**: 실제 article 198개로 구성된 corpus에서 인용문 419개 중 11개가 해당했다. regression은 없었다. 새 regex는 정확히 같은 수의 인용문을 포착하며, 여러 문단으로 된 본문만 확장된다(동일한 본문 408개, 확장된 본문 11개). attribution 줄 `> — …`은 기존 lookahead를 유지했으므로 여전히 본문에 포함될 수 없다.
+    - **end-to-end 검증**: ja/ar로 번역한 69 ko article에서 이전에는 일본어로 `> GLM-5.3がオープンウェイト化。`이 되고 아랍어에서도 마찬가지로 번역되던 인용문의 첫 문단이 이제 `> GLM-5.3 is now open-weight.`로 유지된다. 영어 인용문 줄 수는 source와 동일한 10줄로, 기존 9줄에서 복원된다.
+    - 참고: 이 결함은 인용문의 존재 여부만 확인하고 완전성은 검사하지 않는 downstream validator에서 감지되지 않았다.
+  - **기본 provider에서 측정된 비용 절감**: `_openai_extra_kwargs`은 모델 이름이 `gpt-5`로 시작하면 `--eco`에서도 `reasoning_effort="medium"`을 전송했다. 열 단어로 된 문장을 번역하도록 `gpt-5.4-mini`에서 측정한 결과, `medium`은 reasoning token 45개와 출력 token 65개였고 `none`은 각각 0개와 14개였다. 번역에는 reasoning이 아무 이점도 없는데 모든 파일의 모든 segment마다 비용이 청구되고 있었다. 기본값은 `--eco`에서 `none`이 되고, 그 외에는 `medium`로 유지된다. CLI에서 명시적으로 전달된 값은 계속 우선한다. 이제 `--reasoning_effort`은 `low`/`medium`/`high` 외에도 `none`과 `xhigh`을 허용한다. 모든 모델이 이 값들을 전부 허용하는 것은 아니다. 예를 들어 `minimal`은 `gpt-5.4-mini`에서 거부되지만, 기존의 parameter 없는 retry가 이 경우를 처리한다.
+  - **SDK 업데이트 및 Gemini 마이그레이션**: `google-generativeai`(2025-11-30 지원 종료, 저장소 보관 처리)을 통합 SDK인 **`google-genai`**로 교체했다. `genai.Client(api_key=...)` 다음 `client.models.generate_content(model=, contents=, config=)`를 사용하며, system prompt는 segment에 이어 붙이는 대신 `system_instruction`로 전달한다. `mistralai`은 **2.9.4**로 올렸다(import는 `from mistralai.client import Mistral`이 되며, 이전 방식은 `ImportError`을 발생시킴. wheel에서 확인함). `anthropic`은 **0.125.0**, `openai`은 **2.54.0**으로 올렸다. venv에 HTTP stack 두 개가 공존하지 않도록 `httpx2`로 전환하기 전의 마지막 버전들이다. 이에 따라 `httpx` 0.28.1과 `pydantic` 2.13.5의 제한도 해제했다.
+  - **문서가 아니라 실제 테스트로 발견한 regression 두 가지**:
+    - `anthropic` ≥ 1.0은 `max_tokens`가 10분을 초과할 것으로 예상되는 non-streaming 호출을 client 측에서 거부한다(`ValueError: Streaming is required...`). 이 안전장치는 0.34.2에 없었으며 `max_tokens=32768`을 사용한 모든 Claude 호출을 망가뜨렸다. 명시적인 `timeout`(`CLAUDE_TIMEOUT`, 기본 900 s)으로 수정했으며, 전체 response만 사용하는 호출을 streaming으로 전환하지 않아도 된다.
+    - `thinking_level="minimal"`은 Gemini catalog의 일부에서만 허용된다. `gemini-3.1-flash-lite`은 지원하지만 `gemini-3.7-flash`와 `gemini-3.1-pro-preview`은 400으로 거부한다. 따라서 OpenAI에 이미 있는 fallback을 본떠 `_gemini_generate_with_fallback`에 `minimal` → `low` → thinking_config 없음의 cascade를 적용했다. 최적화 parameter 때문에 번역이 실패해서는 안 된다.
+  - **갱신된 기본 모델**, 각각 실제 호출로 검증함: OpenAI `gpt-5.5` → **`gpt-5.6-terra`**(28개 batch에서 −60%) 및 `gpt-5.4-mini` → **`gpt-5.6-luna`**(−73%), Claude `claude-sonnet-4-6` → **`claude-sonnet-5`**(더 저렴하고 최신) 및 `claude-haiku-4-5-20251001` → **`claude-haiku-4-5`**(날짜 없는 canonical ID), Gemini `gemini-3.1-pro-preview` → **`gemini-3.7-flash`** 및 `gemini-3.1-flash-lite-preview` → **`gemini-3.1-flash-lite`**(stable version이며 `3.5-flash-lite`보다 저렴함). Mistral은 변경하지 않았으며, `mistral-large-latest`이 여전히 네 모델 중 비용 대비 품질이 가장 좋다. 참고: `gemini-3.1-pro-preview`보다 최신인 Gemini Pro 계열 모델은 없다. 2026년 5월에 발표된 Gemini 3.5 Pro는 출시되지 않았으며, 3.5/3.6/3.7 계열은 전부 Flash만 존재한다.
+  - **Gemini 전환 전 측정한 A/B**: `README.md`을 `gemini-3.1-pro-preview`과 `gemini-3.7-flash`로 각각 일본어 번역했다. 구조는 완전히 동일했으며(list 21개, code block 18개, HTML link 13개, image 13개, 모든 URL 보존), 소요 시간은 **48 s 대비 8 s**였다. 이 두 모델의 번역 또는 비라틴 문자 script 성능을 비교하는 공개 benchmark가 없으므로, 이 측정이 없었다면 전환은 단순한 추정에 의존했을 것이다.
+  - **Claude response block 필터링**: `_call_claude`은 type을 필터링하지 않고 `block.text for block in response.content`을 수행했다. adaptive reasoning 모델(Sonnet 5 이상)은 `thinking` block을 사이에 삽입하는데, 이 block은 `.text`이 아니라 `.thinking`을 노출한다. 따라서 첫 segment에서 불투명한 `AttributeError`으로 인해 번역이 실패했을 것이다. 이제 `thinking`, `redacted_thinking`, `tool_use`, `tool_result` block을 제외한다. text를 포함하는 알 수 없는 type도 허용할 수 있도록 negative list를 사용했다. text block이 하나도 없는 response는 명시적인 오류를 발생시킨다. 모든 호출에 `thinking={"type": "disabled"}`을 전달한다.
+  - **`MODEL_TOKEN_LIMITS` 재동기화**: 지원 종료일이 지난 모델을 제거했다(`magistral-*` 계열은 2026-07-31, `gemini-2.0-*`은 2026-06-01, `gemini-3-pro-preview`는 2026-03-09에 종료되었으며, 그 밖에 `claude-3-5-sonnet-20240620`, `claude-3-7-sonnet-20250219`, `claude-opus-4-1-20250805`, `claude-sonnet-4-20250514` 제거). 제한을 수정했다. Mistral 128K → **256K**(Large 3 / Small 4 세대), Gemini 1 000 000 → **1 048 576**(실제 input 제한), `claude-opus-4-5` 200K → **1M**, `gpt-5.6-*` 계열 400K → **1.05M**. Claude 5(`claude-sonnet-5`, `claude-opus-5`, `claude-fable-5`), `claude-opus-4-8`, Gemini 3.5/3.6/3.7, `mistral-medium-latest`, `ministral-*` 계열을 추가했다. 참고: `translate()`이 segmentation을 `min(16000, limite)`으로 제한하므로 이 제한값들은 여전히 참고용이다.
+  - **Provider `--use_codex`**: 사용량에 따라 과금되는 API를 호출하는 대신 공식 Codex CLI(`codex exec`)를 비대화형 모드로 구동하는 다섯 번째 provider입니다. 번역 사용량은 이미 결제한 ChatGPT 구독 할당량에서 차감됩니다. 이는 OpenAI가 이 용도로 문서화한 유일한 방식입니다. 요금제별 제공 기능 표에는 “Codex SDK, `codex exec`, and scriptable workflows”가 Plus/Pro/Business/Enterprise에서 제공된다고 명시되어 있으며, `~/.codex/auth.json`의 token으로는 API Platform 호출을 인증할 수 없습니다. 또한 이 스크립트는 해당 token을 절대 읽지 않으며, 인증과 갱신은 계속 CLI가 관리합니다.
+  - **npm뿐 아니라 pip로도 설치할 수 있는 Codex 바이너리**: `_resolve_codex_binary()`은 `CODEX_BIN`, `PATH`, OpenAI가 배포하는 공식 Python package **`openai-codex-cli-bin`** 순으로 바이너리를 찾습니다. 이 package는 `openai-codex` SDK의 dependency입니다. 따라서 이제 Python 프로젝트에서 `--use_codex`을 사용하기 위해 npm 전역 설치가 필요하지 않습니다. 이 package는 `requirements.txt`에 추가되지 않습니다. 바이너리 크기가 약 250MB이므로 선택 사항인 provider를 위해 모든 사용자에게 이를 설치하도록 강제할 수 있기 때문입니다. 전체 과정을 검증했습니다. `codex`가 `PATH`에 없어도 package에 포함된 바이너리를 찾아 6초 만에 전체 번역을 완료합니다.
+  - **“구독 모드” 보장**: 하위 프로세스 환경에서 `OPENAI_API_KEY`과 `CODEX_API_KEY`을 제거합니다. 이 보호 조치가 없으면 `.env`에 존재하는 key로 인해 아무런 가시적 알림 없이 Codex가 사용량 기반 과금으로 전환될 수 있습니다. 이는 바로 이 provider가 방지하려는 상황입니다.
+  - **테스트로 방지한 CLI 함정**:
+    - `codex exec`은 prompt가 인자로 전달되어도 stdin을 **읽습니다**. stdin을 닫지 않으면 명령은 model을 호출하지 않은 채 timeout까지 대기합니다. 실제 재현 결과 180초 후 exit 124, 0바이트였습니다. 따라서 `communicate(input=...)`은 필수입니다.
+    - npm으로 설치한 `codex`은 실제 Rust 바이너리를 `spawn`하는 Node shim입니다. 이 바이너리는 Python process의 **손자 프로세스**이므로 `subprocess.run(timeout=)`의 `SIGKILL` 이후에도 살아남아 할당량을 계속 소모할 수 있습니다. 따라서 `Popen(start_new_session=True)`과 `os.killpg`을 사용합니다.
+    - CLI는 `turn.failed`을 출력하고도 0으로 종료될 수 있습니다. 반환 코드뿐 아니라 JSONL 출력(`--json`)도 검사하며, 반환 코드가 0인데 `-o` 파일이 없으면 빈 segment를 생성하는 대신 명시적인 오류를 발생시킵니다.
+  - **Rate limit back-off**: CLI는 내부 retry를 전혀 구현하지 않습니다(`max_retries = 0`). 분류는 부분 문자열이 아니라 JSON payload 구조(`status: 429` / `error.type`)를 기준으로 수행합니다. “quota”라는 단어는 복구 가능한 429와 영구적인 `insufficient_quota`에 모두 나타나기 때문입니다.
+  - **CI 보호 조치**: `CI` 또는 `GITHUB_ACTIONS`이 정의되어 있으면 `--use_codex`을 거부합니다. 구독 인증은 공유 runner용으로 설계되지 않았으며, OpenAI도 공개 repository에서 이 workflow를 사용하지 말 것을 명시적으로 권고합니다.
+  - **Model**: `gpt-5.6-sol`(품질)과 `gpt-5.6-luna`(`--eco`)입니다. `gpt-5.6-*` 계열은 CLI와 API Platform에서 공통으로 제공되지만, ChatGPT 계정이 모든 model에 접근할 수 있는 것은 아닙니다. allowlist는 로컬 검증 없이 server 측에서 적용되며, 일반적이지 않은 model을 지정하면 경고가 발생합니다. Plus 요금제에서 Luna는 5시간 단위 기간마다 250~2,000개의 message를 제공하지만 Sol은 10~100개를 제공합니다. 따라서 모든 batch 처리에는 `--eco` 모드를 권장합니다.
+  - **수정된 버그 — 전체 작업에 성공해도 `regen_translations.sh`이 오류로 종료됨**: `trap ... EXIT`은 trap 실행 시점에는 더 이상 존재하지 않는 `main()`의 `local` 변수인 `failed_log`을 참조했습니다. `set -u` 환경에서는 이로 인해 `failed_log: unbound variable`이 발생하여 28개의 번역이 모두 올바른데도 스크립트가 1로 종료되었습니다. 이 문제는 재생성 직후 가장 비용이 많이 드는 단계에서 `release.sh --auto`(`set -e`)을 중단시킬 수 있었습니다. 변수를 전역으로 변경하고 trap이 변수의 존재 여부를 검사하도록 했습니다. 유용한 부수 효과로, 지금까지 이 오류에 가려졌던 실제 번역 실패가 최종 요약에 다시 표시됩니다.
+  - **`REGEN_MODEL`**: `regen_translations.sh`의 새로운 환경 변수로, provider의 기본값보다 우선하여 특정 model을 강제합니다. 예를 들어 처리량 중심의 `--eco` model 대신 구독 할당량의 고급 model로 다시 생성하려면 `REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol`을 사용합니다.
+  - **`regen_translations.sh`**: 명시적으로 선택할 때만 `REGEN_PROVIDER=codex`을 사용할 수 있습니다. 사용자 모르게 구독 할당량을 소모하지 않도록 자동 감지는 절대 하지 않습니다. 병렬 처리를 시작하기 전에 token을 순차적으로 한 번 갱신합니다. Codex refresh는 회전식 일회용이므로 동시 job이 `codex login` session을 무효화할 수 있기 때문입니다. 동시 실행 수는 4로 제한됩니다.
+  - **관련 refactor**: 전체 호출 체계에 네 번째 boolean을 전달하는 대신 provider 이름을 반환하는 `_resolve_provider()`을 사용하여 `_dispatch_provider_call`의 parameter 수를 8개에서 6개로 줄였습니다. 최소한의 `Namespace`으로 `translate(..., use_mistral=True)`을 호출하는 테스트를 유지하기 위해 명시적 boolean이 `args`보다 계속 우선합니다.
+  - **테스트**: argv, 정리된 환경, 서문 방지 contract, silent failure, timeout/killpg, back-off, preflight, provider resolution, Gemini reasoning cascade, Claude block filtering, 여러 문단으로 된 news citation을 다루는 새로운 파일 `tests/test_codex_provider.py`(48개 테스트)을 추가했습니다. 전체 test suite는 290개 테스트입니다.
+  - **실제 검증**: 프로젝트의 `README.md`을 Codex로 **14개 언어**로 번역한 결과 reference 번역과 구조가 완전히 동일했습니다. code block 14개, heading 24개, table row 25개, HTML link 13개, image 13개, URL 19개가 유지되었고, code block은 문자 단위까지 동일했으며 placeholder 잔여물은 0개였습니다. `--news` 모드에서 69KB 분량의 보도 기사를 처리한 결과 `gpt-5.6-luna`과 `gpt-5.6-sol` 출력 모두 en/ja/ar에 대한 후속 application validator를 통과했습니다. `account/rateLimits/read`로 측정한 사용량은 `--eco` 모드에서 계수기의 반올림 기준 미만, 즉 5시간 단위 기간의 0%에 머물렀습니다.
 
-  - **수정된 bug**: `_protect_news_quotes`의 출처 URL 추출은 regex `re.search(r"\((.+?)\)", attribution)`을 사용했습니다. 이는 괄호 사이를 lazy capture하는 방식입니다. `(relayé par [@user sur X](https://x.com/.../123))` 같은 출처에서는 괄호가 중첩되어 있습니다. 즉, 바깥쪽 `(`와 markdown link의 `]()`이 함께 있으므로 첫 번째 `)`에서 capture가 끝났습니다. 그 결과 마지막 `)`이 없고 프랑스어 접두사까지 포함된 잘린 문자열 `relayé par [@user sur X](https://x.com/.../123`이 생성되었습니다. 이에 따라 `_validate_news_post`은 번역 출력에서 이 문자열을 찾다가 항상 실패했습니다. 원인은 `)`이 잘렸고 “relayé par”가 `relayed by`/`weitergeleitet von`/… 등으로 번역되었다는 두 가지였습니다. low → medium → high → gpt-5.5의 전체 cascade가 통과할 수 없었습니다.
-  - **수정 사항**: regex를 `re.search(r"\]\(([^)]+)\)", attribution)`으로 변경했습니다. markdown link의 `](url)`을 구체적으로 대상으로 삼아 프랑스어 접두사나 잘림 없이 **순수 URL만** capture하며, 번역 중에는 placeholder `#URL{N}#`가 이 불변성을 보존합니다. 다음 두 가지 문제 pattern을 모두 안정적으로 처리합니다.
+- **1.9.2** 중첩 괄호 또는 프랑스어 접두사가 포함된 news 출처 표시 URL 추출 수정(2026-05-11):
+
+  - **수정된 버그**: `_protect_news_quotes`의 출처 표시 URL 추출에는 `re.search(r"\((.+?)\)", attribution)` regex, 즉 괄호 사이의 lazy capture를 사용했습니다. `(relayé par [@user sur X](https://x.com/.../123))` 같은 출처 표시에서는 괄호가 중첩되어 있습니다. 즉, 바깥쪽 `(`와 Markdown link의 `]()`가 함께 있으므로 첫 번째 `)`에서 capture가 끝났습니다. 그 결과 프랑스어 접두사를 포함하면서 잘린 문자열인 `relayé par [@user sur X](https://x.com/.../123`이 생성되었고 마지막 `)`도 누락되었습니다. 그 결과 `_validate_news_post`은 번역된 출력에서 이 문자열을 찾다가 항상 실패했습니다. 원인은 `)`이 잘린 데다 “relayé par”가 `relayed by`/`weitergeleitet von`/…로 번역된다는 두 가지였습니다. low → medium → high → gpt-5.5 전체 cascade가 모두 통과할 수 없었습니다.
+  - **수정 사항**: regex를 `re.search(r"\]\(([^)]+)\)", attribution)`으로 변경했습니다. Markdown link의 `](url)`만 정확히 대상으로 삼고, 프랑스어 접두사나 잘림 없이 **순수 URL만** capture합니다. 이 값은 번역 중 `#URL{N}#` placeholder로 보존됩니다. 다음 두 문제 pattern을 모두 안정적으로 처리합니다.
     - `(relayé par [@account sur X](url))` — 중첩 괄호
-    - `via [@source](url)` 또는 `selon [@author](url)` — 바깥쪽 괄호가 없는 프랑스어 접두사
-  - **테스트**: `test_silent_failure.py`의 `TestNewsCitationExtraction` class에 2개를 새로 추가했습니다.
-    - `test_extract_attribution_url_with_nested_parens`(Genspark CEO E2B bug를 정확히 재현한 case)
-    - `test_extract_attribution_url_with_french_prefix`(`via`이 포함된 변형)
-  - **coverage 공백**: `check-editorial-coverage.py`은 편집 문법을 검증하지만 translator가 번역할 수 있는지는 검증하지 않습니다. 가능한 개선 사항(v1.9.2 범위 밖)으로는 게시 **전에** 위험한 pattern을 감지할 수 있도록 dry-run으로 출처 추출을 모의 실행하는 검사를 추가하는 방법이 있습니다.
+    - `via [@source](url)` 또는 `selon [@author](url)` — 바깥 괄호가 없는 프랑스어 접두사
+  - **테스트**: `test_silent_failure.py` 파일의 `TestNewsCitationExtraction` class에 2개를 추가했습니다.
+    - `test_extract_attribution_url_with_nested_parens`(Genspark CEO E2B 버그를 정확히 재현한 사례)
+    - `test_extract_attribution_url_with_french_prefix`(`via`을 사용한 변형)
+  - **테스트 범위의 공백**: `check-editorial-coverage.py`은 편집 문법을 검증하지만 translator를 통한 번역 가능성은 검증하지 않습니다. 향후 개선 사항으로, v1.9.2 범위 밖에서 출처 표시 추출을 dry-run으로 시뮬레이션하여 게시 **전** 위험한 pattern을 감지하는 검사를 추가할 수 있습니다.
 
-- **1.9.1** 번역 note marker의 CTA label 국제화 수정(2026-05-10):
+- **1.9.1** 번역 marker 안내문의 CTA label i18n 수정(2026-05-10):
 
-  - **수정된 bug**: 번역된 파일 상단의 marker banner에서 CTA link의 `[Voir le projet sur GitHub ↗]` label이 `target_lang`을 따르지 않고 모든 대상 언어에서 **프랑스어**로 남아 있었습니다. LLM은 이 부분을 전혀 보지 못합니다. repository의 URL과 slug를 보존하기 위해 Python 측에서 조립되므로 번역 단계에서도 수정할 수 없었습니다. v1.9에서 `marker` 형식을 추가한 뒤부터 이어진 silent regression입니다.
-  - **수정 사항**: 15개 언어를 각각 현지화된 label에 연결하는 새 상수 `_VIEW_PROJECT_LABELS`을 추가했습니다. 이제 `_translation_note_invariants(target_lang)`과 `_assemble_translation_note_paragraphs(phrase, target_lang)`이 대상 언어를 전달합니다. 알 수 없는 언어에는 `fr`을 fallback으로 사용합니다. 이는 안전성을 위한 것으로 KeyError를 방지합니다.
-  - **테스트**: `test_source_emits_three_paragraphs_repo_title_description_link`을 조정했습니다. 대상 언어 `ja`에 일본어 label이 예상되도록 했습니다. `test_source_link_label_localized_per_target_lang`(Latin 문자, 표의문자, abjad를 포괄하는 7개 언어를 parameter화)과 `test_source_link_label_falls_back_to_french_for_unknown_target` 테스트 2개를 새로 추가했습니다. `test_translation_note_position.py`의 테스트는 총 40개로, 기존 38개에서 늘었습니다.
-  - **하위 호환성**: 기본값이 있는 signature `target_lang="fr"`을 사용하므로 `args.target_lang`이 없는 외부 프로그램 호출자도 수정 없이 계속 작동합니다.
-- **1.9** 무반응 실패 수정 + 종합 품질 도구 + 다중 위치 번역 메모 (2026-05-07):
-  - **다중 위치 번역 메모 + "embed card" 마커 형식**:
+  - **수정된 버그**: 번역 파일 상단의 marker banner에 있는 CTA link의 `[Voir le projet sur GitHub ↗]` label이 `target_lang`을 따르지 않고 모든 대상 언어에서 **프랑스어**로 남았습니다. URL과 repository slug를 보존하기 위해 Python 측에서 조립되므로 LLM은 이를 전혀 보지 못했고, 번역 단계에서도 수정할 수 없었습니다. v1.9에서 `marker` format을 추가한 이후 발생한 조용한 regression이었습니다.
+  - **수정 사항**: 15개 언어를 각각 현지화된 label에 mapping하는 새로운 constant `_VIEW_PROJECT_LABELS`을 추가했습니다. 이제 `_translation_note_invariants(target_lang)`과 `_assemble_translation_note_paragraphs(phrase, target_lang)`이 대상 언어를 전달합니다. 알 수 없는 언어에는 `fr` fallback을 적용하여 KeyError를 방지합니다.
+  - **테스트**: `test_source_emits_three_paragraphs_repo_title_description_link`을 조정했습니다. target_lang `ja`에 대해 일본어 label을 예상합니다. `test_source_link_label_localized_per_target_lang`과 `test_source_link_label_falls_back_to_french_for_unknown_target` 테스트 2개를 새로 추가했습니다. 전자는 라틴 문자, 표의문자, abjad를 포괄하는 7개 언어로 parameter화했습니다. `test_translation_note_position.py`의 테스트는 38개에서 총 40개로 늘었습니다.
+  - **하위 호환성**: 기본값이 있는 signature `target_lang="fr"`을 사용하므로 `args.target_lang` 없이 호출하는 외부 programmatic caller도 수정 없이 계속 작동합니다.
+- **1.9** 자동 실패 수정 + 완전한 품질 도구 체계 + 다중 위치 번역 주석 (2026-05-07):
+  - **다중 위치 번역 주석 + "embed card" 마커 형식**:
     - 새로운 CLI 옵션 추가(기본값 변경 없음 → **호환성 유지**):
-      - `--note_position {top,bottom,both}`(기본값: `bottom`): 번역된 파일의 상단, 하단 또는 두 위치 모두에 메모를 배치합니다.
-      - `--note_format {legacy,marker}`(기본값: `legacy`):
-        - `legacy`은 v1.8 동작(굵은 문단 `**…**`)을 **바이트 단위로 완전히 동일하게** 재현합니다.
-        - `marker`는 보이지 않는 Markdown 링크 참조 정의(`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`)와 함께 "GitHub 저장소 embed card" 형태의 렌더링을 위해 구성된 **3개 문단의 blockquote**를 출력합니다. 여기에는 인라인 코드로 표시된 프로젝트 제목(`**\`ai-powered-markdown-translator\`\*\*`), LLM이 번역한 설명 및 화살표가 표시되는 CTA 링크(`[Voir le projet sur GitHub ↗](URL)`)가 포함됩니다. 빌드 시 remark 플러그인에서 활용할 수 있습니다(참고: jls42.org 블로그 → `remark-translation-banner` 플러그인).
-    - **LLM에 절대 전송되지 않는 불변 요소**: 저장소 제목과 GitHub URL은 설명 문장이 번역된 후 Python 측에서 조합됩니다. LLM에는 `ai-powered-markdown-translator` 슬러그와 `https://github.com/jls42/...`가 절대 노출되지 않으므로 renderer, 대소문자 또는 scheme이 변경되지 않습니다.
-    - **Frontmatter 인식 삽입**: `top` 또는 `both` 모드에서는 YAML frontmatter를 닫는 `---` 블록 **뒤에** 메모가 삽입됩니다(Astro Content Collections / gray-matter 안전성 보장). `_split_frontmatter` helper는 파일 시작 부분의 `---\n…\n---\n`를 감지하여 무결성을 보존합니다. 닫는 fence가 없는 열린 frontmatter에서는 **`RuntimeError`를 발생시키며**, 잘못된 위치에 메모가 포함된 파일을 쓰는 대신 해당 파일을 `failed_files`에 보고합니다.
-    - **Whitelist 방식의 모델 sanitizer**: `_sanitize_model`는 `[A-Za-z0-9._:/-]`에 포함되지 않은 모든 문자를 `_`로 바꾸며, 결과가 비어 있으면 `unknown`을 사용합니다. Astro remark 플러그인 측 validator와 일치하도록 하며 마커 형식을 깨뜨릴 수 있는 문자(공백, 따옴표, 괄호, 쉼표 등)를 무력화합니다.
-    - **내부 refactor**: `_append_translation_note`(단일 모놀리식 함수) → 7개의 순수 helper(`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder와 composer를 분리했습니다(builder는 구분자 없는 순수 블록을 반환하고 composer는 위치에 따라 `\n\n`를 적용). 프로덕션 코드와 소스 helper가 동일한 3문단 assembler를 공유합니다.
-    - **공백 줄을 보존하는 `_quote_lines`**: 각 줄 앞에 `> `를 붙이고 빈 줄은 `>`만 있는 줄로 변환합니다. 이를 통해 mdast는 blockquote를 줄바꿈이 포함된 단일 문단이 아니라 서로 구분된 3개 문단(제목 / 설명 / 링크)으로 인식할 수 있습니다.
-    - **적응형 `_build_translation_note_block`**: LLM이 보존한 문단 수에 따라 처리합니다(3개 = 완전한 card 형식, 2개 = 문장 + 링크, 1개 = fallback). Markdown 링크 `](`가 감지되면 1문단 fallback은 더 이상 **`**...**`로 감싸지 않습니다**(링크 주위의 `<strong>` 렌더링이 불안정하기 때문).
-    - **상위 호환성**: `_compose_with_notes` 측의 `getattr(args, "note_position", "bottom")` 및 `getattr(args, "note_format", "legacy")` — 이러한 속성이 없는 Namespace(기존 테스트와 외부 프로그래밍 방식 호출)도 수정 없이 계속 작동합니다.
-  - **긴 번역에서 발생하는 무반응 실패 수정**:
-    - 모든 provider(OpenAI, Mistral, Claude, Gemini)에 번역 후 언어 검증 적용: 결정론적 계층(소스 발췌문이 그대로 발견되는지 확인) + 확률적 계층(`langdetect`)
-    - `finish_reason` / `stop_reason` whitelist: whitelist에 없는 모든 상태(truncation, content_filter 등)에서 `RuntimeError` 발생
-    - Claude의 `max_tokens`: `4096` → `32768`(16k segment의 잠재적 truncation 방지 및 FR→JA/ZH/KO/AR/HI 교차 문자 체계를 위한 여유 확보)
-    - Heading 인식 segmentation: segment 후반부의 H2/H3를 우선하여 각 segment가 의미적으로 완전한 section으로 시작하도록 개선
-    - 0이 아닌 exit code까지 오류 전파: `translate_markdown_file`가 형식화된 상태 `success` / `failure` / `skipped`를 반환하며, 단일 파일 및 batch 처리에서 하나 이상의 파일이 실패하면 `main()`이 `sys.exit(1)`을 반환
-    - 모든 provider에 empty-content guard 적용, 소스/출력 sanity ratio 검사(500자 이상이며 5% 미만이면 거부), 코드 placeholder 검증(`#CODEBLOCK`/`#INLINECODE`), LLM 처리 후 정규화(heading에 붙은 구분자/링크), `reasoning_effort` 없는 `BadRequestError` retry
+      - `--note_position {top,bottom,both}` (기본값: `bottom`): 번역된 파일의 상단, 하단 또는 양쪽 모두에 주석을 배치합니다.
+      - `--note_format {legacy,marker}` (기본값: `legacy`):
+        - `legacy`은 v1.8의 동작을 **byte-for-byte**로 정확히 재현합니다(굵은 단락 `**…**`).
+        - `marker`는 보이지 않는 Markdown link reference definition(`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`)을 생성한 뒤, "GitHub repo embed card" 형태의 렌더링을 위해 구성된 **3개 단락의 blockquote**를 추가합니다. 여기에는 inline code로 된 프로젝트 제목(`**\`ai-powered-markdown-translator\`\*\*`), LLM이 번역한 설명, 그리고 화살표가 표시되는 CTA 링크(`[Voir le projet sur GitHub ↗](URL)`)가 포함됩니다. 빌드 시 remark plugin으로 활용할 수 있습니다(jls42.org 블로그의 `remark-translation-banner` plugin 참조).
+    - **LLM에 절대 전송되지 않는 불변 요소**: repo 제목과 GitHub URL은 설명 문구를 번역한 후 Python 측에서 조합됩니다. LLM은 `ai-powered-markdown-translator` slug나 `https://github.com/jls42/...`를 전혀 보지 않으므로 renderer, 대소문자 또는 scheme이 변경되지 않습니다.
+    - **Frontmatter 인식 삽입**: `top` 또는 `both` 모드에서는 YAML frontmatter의 닫는 `---` 블록 **뒤에** 주석이 삽입됩니다(Astro Content Collections / gray-matter 안전성). `_split_frontmatter` helper는 파일 시작 부분의 `---\n…\n---\n`을 감지하여 무결성을 보존합니다. 닫는 fence 없이 열린 frontmatter에는 **`RuntimeError`를 발생**시켜, 주석이 잘못 배치된 파일을 쓰는 대신 해당 파일이 `failed_files`에 보고되도록 합니다.
+    - **Whitelist 기반 모델 sanitizer**: `_sanitize_model`는 `[A-Za-z0-9._:/-]` 외의 모든 문자를 `_`로 치환하고, 결과가 비어 있으면 `unknown`을 사용합니다. Astro remark plugin 측 validator와 동작을 일치시키며 marker 형식을 깨뜨릴 수 있는 문자(공백, 따옴표, 괄호, 쉼표 등)를 무력화합니다.
+    - **내부 refactor**: `_append_translation_note`(단일 monolithic 함수) → 7개의 순수 helper(`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder와 composer를 분리했습니다(builder는 구분자 없는 순수 블록을 반환하고, composer는 위치에 따라 `\n\n`를 적용). 프로덕션 코드와 source helper가 동일한 3단락 assembler를 공유합니다.
+    - **빈 줄을 보존하는 `_quote_lines`**: 각 줄 앞에 `> `를 붙이고 빈 줄은 `>`만 있는 줄로 변환합니다. 이를 통해 mdast가 blockquote를 줄바꿈이 포함된 단일 단락이 아니라 서로 구분된 3개 단락(제목 / 설명 / 링크)으로 인식할 수 있습니다.
+    - **적응형 `_build_translation_note_block`**: LLM이 보존한 단락 수에 따라 동작합니다(3개 = 완전한 card 형식, 2개 = 문구 + 링크, 1개 = fallback). Markdown 링크 `](`가 감지되면 1단락 fallback을 더 이상 **`**...**`로 감싸지 않습니다**(링크 주위의 `<strong>` 렌더링이 불안정하기 때문).
+    - **상위 호환성**: `_compose_with_notes` 측의 `getattr(args, "note_position", "bottom")` 및 `getattr(args, "note_format", "legacy")` — 해당 속성이 없는 Namespace(기존 테스트와 외부 프로그래밍 방식 호출)도 수정 없이 계속 작동합니다.
+  - **긴 번역에서 발생하던 자동 실패 수정**:
+    - 모든 provider(OpenAI, Mistral, Claude, Gemini)에 번역 후 언어 검증 적용: 결정론적 계층(source 일부가 그대로 발견되는지 검사) + 확률론적 계층(`langdetect`)
+    - `finish_reason` / `stop_reason` whitelist: whitelist에 없는 모든 상태(truncation, content_filter 등)에 `RuntimeError` 발생
+    - Claude의 `max_tokens`: `4096` → `32768`(16k segment에서 잠재적 truncation 방지, FR→JA/ZH/KO/AR/HI의 cross-script 변환 여유 확보)
+    - Heading 인식 segmentation: segment 후반부의 H2/H3에 우선순위를 부여하여 각 segment가 의미상 완전한 section으로 시작하도록 함
+    - 오류를 0이 아닌 exit code까지 전파: `translate_markdown_file`가 형식화된 상태 `success` / `failure` / `skipped`를 반환하며, 하나 이상의 파일이 실패하면 `main()`이 `sys.exit(1)` 처리(single-file 및 batch)
+    - 모든 provider에 empty-content guard 적용, source/output sanity ratio(500자 이상에서 5% 미만이면 거부), code placeholder 검증(`#CODEBLOCK`/`#INLINECODE`), LLM 처리 후 정규화(heading에 붙은 구분자/링크), `reasoning_effort` 없이 `BadRequestError` retry
     - `langdetect==1.0.9` 의존성 추가
-  - **Pre-commit 품질 도구**("완전한 EurekAI 유형", 14개 hook):
-    - Pre-commit: ruff(lint+format), shellcheck, prettier(md/yaml/json), detect-secrets(4개의 API key 보호), Lizard(CCN ≤ 12), pre-commit-hooks v5(공백, EOF, 대용량 파일, shebang 등)
+  - **Pre-commit 품질 도구 체계**("완전한 EurekAI 유형", 14개 hook):
+    - Pre-commit: ruff(lint+format), shellcheck, prettier(md/yaml/json), detect-secrets(API key 4개 보호), Lizard(CCN ≤ 12), pre-commit-hooks v5(공백, EOF, 대용량 파일, shebang 등)
     - Pre-push: mypy(점진적 lax 모드), Opengrep SAST(translate.py + scripts/), pip-audit(초기 reporting 모드), unittest discover(tests/ + scripts/tests/)
     - `./venv/bin/python`를 사용하는 `scripts/`의 로컬 wrapper
     - `scripts/audit_verdict.py`: 11개의 unittest가 포함된 pip-audit JSON parser로, jls42-astro parser를 Python으로 이식한 버전
-    - 초기 ruff 위반 7건 수정: B904(raise from) ×2, B007(사용되지 않는 dirs), C408(dict literal), C419(list-comp), SIM105(contextlib.suppress), SIM110(any())
-    - Lizard에서 `translate.py`를 일시적으로 제외(CCN 21~47인 함수 4개, refactor 예정) — scripts/에는 엄격한 gate 적용
-  - **SonarCloud + 포괄적 coverage**:
-    - GitHub Actions workflow `SonarCloud`(sonarcloud.yml + sonar-project.properties): 모든 push와 pull request에서 분석하며 `coverage.xml`을 통해 coverage 측정
-    - README 상단에 SonarCloud badge 11개 추가(Quality Gate, Security/Reliability/Maintainability 등급, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
-    - `tests/test_silent_failure.py`(`unittest` 표준 라이브러리): 무반응 실패 오류 체인의 여섯 연결 단계를 검증
-    - `tests/test_orchestration.py`(+79개 테스트): `translate.py`의 orchestration 계층 검증(`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallback, o1-series prompt 형식, `_validate_translation_output`의 early-return 분기)
-    - `scripts/tests/test_audit_verdict.py`: subprocess를 통해 `main()`(stdin/stdout)와 `if __name__ == "__main__"` 블록의 coverage 확보
-    - **새 코드의 coverage**: 75.5% → 약 98%(translate.py 98%, scripts/audit_verdict.py 97%)
-  - **테스트**: `tests/test_translation_note_position.py`에서 위치 × 형식 조합(`marker+top|bottom|both` 및 `legacy+top|bottom|both` E2E 포함), 여러 줄 prefix 적용, 바이트 단위 상위 호환성(golden literal), sanitizer, frontmatter 분리(닫히지 않은 fence에서 오류 발생 포함), 3문단 형식, 2문단 fallback, 1문단 + Markdown 링크 guard 및 제목과 URL이 LLM에 절대 전송되지 않음을 assert하는 핵심 보호 장치 `TestLLMPayloadExcludesInvariants`를 검증합니다. **190개 테스트 통과**, regression 0건.
-  - 문서: badge가 포함된 `README.md`(프랑스어 + 14개 번역), `CLAUDE.md`(pre-commit workflow + 상세 CI watch), 28개 번역 재생성
-- **1.8** `--news` 모드 + 2026년 모델 갱신(2026-03-17, tag `v1.8`):
+    - 초기 ruff 위반 7건 수정: B904(raise from) ×2, B007(unused dirs), C408(dict literal), C419(list-comp), SIM105(contextlib.suppress), SIM110(any())
+    - Lizard에서 `translate.py`을 임시 제외(CCN 21~47인 함수 4개, refactor 예정) — scripts/에는 엄격한 gate 적용
+  - **SonarCloud + 포괄적인 coverage**:
+    - GitHub Actions workflow `SonarCloud`(sonarcloud.yml + sonar-project.properties): 모든 push와 pull-request에서 분석하고 `coverage.xml`를 통해 coverage 측정
+    - README 상단에 SonarCloud badge 11개 추가(Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
+    - `tests/test_silent_failure.py`(`unittest` stdlib): 자동 실패 오류 체인의 6개 연결 고리를 모두 검증
+    - `tests/test_orchestration.py`(테스트 79개 추가): `translate.py`의 orchestration 계층 검증(`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallback, o1-series prompt 형식, `_validate_translation_output`의 early-return branch)
+    - `scripts/tests/test_audit_verdict.py`: subprocess를 통해 `main()`(stdin/stdout)과 `if __name__ == "__main__"` 블록의 coverage 확보
+    - **새 코드의 Coverage**: 75.5% → 약 98%(translate.py 98%, scripts/audit_verdict.py 97%)
+  - **테스트**: `tests/test_translation_note_position.py`에서 위치 × 형식 조합(`marker+top|bottom|both` 및 `legacy+top|bottom|both` E2E 포함), 여러 줄 prefix 처리, byte-for-byte 상위 호환성(golden literal), sanitizer, frontmatter split(닫히지 않은 fence에서의 raise 포함), 3단락 형식, 2단락 fallback, 1단락 + Markdown 링크 guard, 그리고 제목과 URL이 LLM에 절대 전송되지 않음을 assert하는 핵심 안전장치 `TestLLMPayloadExcludesInvariants`를 검증합니다. **190개 테스트 통과**, 회귀 0건.
+  - 문서: badge가 포함된 `README.md`(프랑스어 + 번역 14개), `CLAUDE.md`(pre-commit workflow + 상세한 CI watch), 번역 28개 재생성
+- **1.8** `--news` 모드 + 2026년 모델 업데이트(2026-03-17, tag `v1.8`):
   - 기본 모델 업데이트(2026년 3월):
     - OpenAI 고품질: `gpt-5` → `gpt-5.4`
     - OpenAI 경제형: `gpt-5-mini` → `gpt-5.4-mini`
     - Gemini 고품질: `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
   - `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`(400k) 및 `gemini-3.1-pro-preview`(1M)의 token 한도 추가
-  - 초기 `--news` 모드: placeholder `#NEWSQUOTE\d+#`를 통한 영어 인용문 보호, `LANG_FLAGS` mapping(15개 언어), 대상 언어별 flag 처리
-  - 복원 전에 news placeholder 검증(회귀 문제: LLM이 placeholder를 삭제하면 인용문이 없는 출력이 아무런 오류 없이 생성됨)
-  - `regen_translations.sh` script를 이식 가능하게 개선(절대 경로 사용, pwd 의존성 제거)
-  - README/CHANGELOG의 language bar에 프랑스어 링크 추가, 28개 번역 재생성
+  - 초기 `--news` 모드: `#NEWSQUOTE\d+#` placeholder를 통한 영어 인용문 보호, `LANG_FLAGS` mapping(15개 언어), 대상 언어별 flag 관리
+  - 복원 전 news placeholder 검증(회귀 문제: placeholder를 삭제한 LLM이 인용문 없는 출력을 자동으로 생성했음)
+  - `regen_translations.sh` script의 이식성 개선(절대 경로 사용, pwd 의존성 제거)
+  - README/CHANGELOG의 language bar에 프랑스어 링크 추가, 번역 28개 재생성
 - **1.7** 새로운 기능:
   - 번역 시 원본 파일명을 유지하는 `--keep_filename` 옵션
   - API key를 자동으로 불러오기 위한 `.env` 파일 지원
-  - **인라인 코드 보존**: 이제 번역 중 backtick(`` `...` ``)이 보호됩니다.
+  - **Inline code 보존**: 이제 번역 중 backtick(`` `...` ``)이 보호됩니다
   - System prompt 개선:
     - YAML frontmatter의 따옴표 처리 개선
     - Template 변수 `{variable}` 보호
-    - 요청하지 않은 번역자 메모 금지
-  - 364개 파일에서 성공적으로 테스트(jls42.org 블로그 migration)
+    - 요청하지 않은 번역자 주석 금지
+  - 364개 파일에서 성공적으로 테스트(jls42.org 블로그 마이그레이션)
 - **1.6** 새로운 기능:
-  - 번역용 Google Gemini API 지원(`--use_gemini`)
+  - 번역을 위한 Google Gemini API 지원(`--use_gemini`)
   - 2026년 기본 모델 업데이트:
     - OpenAI: `gpt-5`(고품질), `gpt-5-mini`(경제형)
     - Claude: `claude-sonnet-4-5`(고품질), `claude-haiku-4-5`(경제형)
     - Gemini: `gemini-3-pro-preview`(고품질), `gemini-3-flash-preview`(경제형)
   - 더 빠르고 저렴한 모델을 사용하기 위한 경제형 모드(`--eco`)
-  - 디렉터리를 탐색하지 않는 단일 파일 번역(`--file`)
-  - 단순화된 새로운 파일명 pattern: `{base}-{lang}.md`
-  - 모델 이름이 포함된 기존 형식을 유지하기 위한 `--include_model` 옵션
+  - 디렉터리를 순회하지 않는 단일 파일 번역(`--file`)
+  - 단순화된 새로운 명명 pattern: `{base}-{lang}.md`
+  - 모델명이 포함된 기존 형식을 유지하는 `--include_model` 옵션
   - 목록에 없는 모델에 기본 token 한도(128k)를 적용하여 지원
   - README를 14개 언어로 번역
 - **1.5** 개선 사항:
@@ -134,22 +148,22 @@
     - **Mistral AI:** `DEFAULT_MODEL_MISTRAL`에서 `"mistral-large-latest"`로 업데이트.
     - **Anthropic Claude:** `DEFAULT_ANTHROPIC_API_KEY` 추가 및 `DEFAULT_MODEL_CLAUDE`에서 `"claude-3-5-sonnet-20240620"`로 업데이트.
   - **번역 prompt 최적화:**
-    - 직접 번역과 번역 메모용 prompt를 더 명확하고 효율적으로 개선했으며, metadata와 특정 서식 요소 보존에 관한 상세 지침을 포함했습니다.
+    - 직접 번역과 번역 주석을 위한 prompt를 더욱 명확하고 효율적으로 보강했으며, metadata 및 특정 formatting 요소 보존에 관한 상세 지침을 포함했습니다.
   - **코드 refactor:**
-    - Mistral AI client 초기화를 위해 `MistralClient`을 `Mistral` class로 교체했습니다.
-    - 가독성과 유지보수성을 높이도록 import를 재구성했습니다.
-    - 번역 시 원본 서식을 보존하도록 텍스트 segmentation과 코드 블록 처리를 개선했습니다.
+    - Mistral AI client 초기화를 위해 `MistralClient`을 `Mistral` class로 교체.
+    - 가독성과 유지보수성 향상을 위한 import 재구성.
+    - 번역 시 원본 formatting을 보존하도록 텍스트 segmentation과 code block 처리 개선.
   - **출력 파일 관리:**
-    - 출력 파일명에서 모델과 언어의 순서를 바꾸어(예: `f"{base}-{args.target_lang}-{args.model}.md"`) 번역 파일을 더 쉽게 정리하고 찾을 수 있게 했습니다.
+    - 출력 파일명에서 모델과 언어의 순서를 변경(예: `f"{base}-{args.target_lang}-{args.model}.md"`)하여 번역본의 정리와 검색을 용이하게 함.
   - **기타 개선 사항:**
-    - 불필요한 빈 줄을 제거하여 코드를 정리했습니다.
-    - Script의 구조와 가독성을 개선하기 위한 소규모 조정을 적용했습니다.
+    - 불필요한 빈 줄을 제거하여 코드 정리.
+    - Script 구조와 가독성 향상을 위한 소규모 조정.
 - **1.4** 새로운 기능:
-  - 번역용 Anthropic Claude API 지원
-  - 더 명확하고 효율적인 prompt로 최적화
+  - 번역을 위한 Anthropic Claude API 지원
+  - 명확성과 효율성을 높이기 위한 prompt 최적화
   - 코드 유지보수성 향상을 위한 소규모 조정
 - **1.3** 개선 사항 및 새로운 기능:
-  - 코드 블록 처리 개선
+  - Code block 처리 개선
   - 출력 파일 관리 개선
   - 기존 파일 감지 개선
   - 번역을 강제하는 `--force` 옵션
