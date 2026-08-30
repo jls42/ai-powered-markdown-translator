@@ -8,7 +8,7 @@ import os
 import re
 import shutil
 import signal
-import subprocess
+import subprocess  # nosec B404 — pilote les CLI Codex et Grok, cf. _codex_run_process
 import sys
 import tempfile
 import time
@@ -821,14 +821,21 @@ def _call_mistral(client, args, prompt, segment):
     finish = _reason_name(response.choices[0].finish_reason)
     if finish not in ("stop", "STOP", None):
         raise RuntimeError(f"Mistral abnormal finish_reason={finish!r} (model={args.model})")
-    return response.choices[0].message.content.strip()
+    # Même garde que sur le chemin OpenAI : un `content` à None produisait un
+    # AttributeError opaque sur `.strip()` au lieu d'un message exploitable.
+    content = response.choices[0].message.content
+    if content is None:
+        raise RuntimeError(f"Mistral returned no content (model={args.model})")
+    return content.strip()
 
 
 # 32768 : marge sur l'expansion cross-script (FR→JA/ZH/KO/AR/HI peuvent
 # dépasser 16k tokens en sortie pour des segments source de 16k chars).
 CLAUDE_MAX_TOKENS = 32768
-# Plafond d'attente d'un appel non-streamé, en secondes. Doit rester cohérent
-# avec REGEN_JOB_TIMEOUT de regen_translations.sh, qui tue le job en aval.
+# Plafond d'attente d'un appel Claude non-streamé. Doit rester SUPÉRIEUR
+# à la durée d'un segment, mais l'utilisateur doit savoir qu'en regen le
+# job est tué avant : REGEN_JOB_TIMEOUT vaut 600 s contre 900 s ici, donc
+# c'est `timeout` qui tranche en premier (sortie 124, échec consigné).
 CLAUDE_TIMEOUT = float(os.getenv("CLAUDE_TIMEOUT", "900"))
 
 # Types de blocs Anthropic qui ne portent pas de texte traduit. `thinking` et
@@ -900,14 +907,26 @@ def _gemini_config(prompt, thinking_level):
 _GEMINI_THINKING_LEVELS = ("minimal", "low", None)
 
 
+# Niveau accepté par modèle, mémorisé au premier segment. Sans ce cache, la
+# cascade repartait de `minimal` pour CHAQUE segment de CHAQUE fichier — or le
+# modèle par défaut (gemini-3.7-flash) refuse `minimal` : le chemin nominal
+# payait donc un aller-retour 400 par segment, et réimprimait le même
+# avertissement à chaque fois. Un warning répété des centaines de fois sur un
+# regen cesse d'être lu, et c'est ainsi qu'il devient un masque.
+_GEMINI_ACCEPTED_THINKING_LEVEL: dict[str, str | None] = {}
+
+
 def _gemini_generate_with_fallback(client, args, prompt, segment):
     """Descend la cascade des niveaux de raisonnement jusqu'à en trouver un que
-    le modèle accepte. Même logique que `_openai_create_with_fallback` : un
-    paramètre d'optimisation ne doit jamais faire échouer une traduction."""
+    le modèle accepte, puis mémorise ce niveau pour les segments suivants. Même
+    logique que `_openai_create_with_fallback` : un paramètre d'optimisation ne
+    doit jamais faire échouer une traduction."""
+    known = _GEMINI_ACCEPTED_THINKING_LEVEL.get(args.model)
+    levels = (known,) if args.model in _GEMINI_ACCEPTED_THINKING_LEVEL else _GEMINI_THINKING_LEVELS
     last_error = None
-    for level in _GEMINI_THINKING_LEVELS:
+    for level in levels:
         try:
-            return client.models.generate_content(
+            response = client.models.generate_content(
                 model=args.model, contents=segment, config=_gemini_config(prompt, level)
             )
         except genai_errors.ClientError as e:
@@ -919,6 +938,12 @@ def _gemini_generate_with_fallback(client, args, prompt, segment):
                 f"(model={args.model})",
                 file=sys.stderr,
             )
+            # Un niveau mémorisé qui devient invalide (changement côté API) doit
+            # rendre la main à la cascade complète plutôt que boucler dessus.
+            _GEMINI_ACCEPTED_THINKING_LEVEL.pop(args.model, None)
+        else:
+            _GEMINI_ACCEPTED_THINKING_LEVEL[args.model] = level
+            return response
     raise RuntimeError(
         f"Gemini a refusé tous les niveaux de raisonnement (model={args.model}): {last_error}"
     )
@@ -947,18 +972,30 @@ def _call_gemini(client, args, prompt, segment):
         ) from e
 
 
-def _resolve_reasoning_effort(args, eco_default="none"):
+def _resolve_reasoning_effort(args, eco_default="none", floor=None):
     """Effort de raisonnement effectif : la valeur explicite si l'utilisateur en
-    a passé une, sinon `none` en mode --eco et `medium` autrement.
+    a passé une, sinon `eco_default` en mode --eco et `medium` autrement.
 
-    Mesuré sur gpt-5.4-mini (--eco) : un `medium` implicite produit 45 reasoning
-    tokens et 65 tokens de sortie pour traduire une phrase de dix mots, contre
-    0 et 14 avec `none`. Sur de la traduction, ce raisonnement n'apporte rien —
-    c'est de la dépense pure, payée sur chaque segment de chaque fichier."""
+    Mesuré sur le modèle éco d'alors : un `medium` implicite produit 45
+    reasoning tokens et 65 tokens de sortie pour traduire une phrase de dix
+    mots, contre 0 et 14 avec `none`. Sur de la traduction, ce raisonnement
+    n'apporte rien — c'est de la dépense pure, payée sur chaque segment de
+    chaque fichier.
+
+    `floor` remonte une valeur que le provider n'accepte pas, y compris quand
+    elle est passée explicitement : le CLI Codex refuse `none`, et la valeur
+    explicite contournait jusqu'ici le repli sur `low`."""
     explicit = getattr(args, "reasoning_effort", None)
-    if explicit:
-        return explicit
-    return eco_default if getattr(args, "eco", False) else "medium"
+    effort = explicit or (eco_default if getattr(args, "eco", False) else "medium")
+    if floor and effort == "none":
+        if explicit:
+            print(
+                f"⚠ reasoning_effort={explicit!r} n'est pas accepté par ce provider "
+                f"— repli sur {floor!r}",
+                file=sys.stderr,
+            )
+        return floor
+    return effort
 
 
 def _build_openai_messages(args, prompt, segment):
@@ -1094,23 +1131,49 @@ def _codex_kill_group(proc):
         os.killpg(pgid, signal.SIGTERM)
         proc.wait(timeout=CODEX_TERM_GRACE)
     except subprocess.TimeoutExpired:
-        os.killpg(pgid, signal.SIGKILL)
-        proc.wait()
-    except (ProcessLookupError, OSError):
+        # Le SIGKILL a son propre try : une exception levée DEPUIS une clause
+        # except n'est pas rattrapée par les clauses sœurs. Si le groupe meurt
+        # entre l'expiration du délai de grâce et cet appel, le
+        # ProcessLookupError remontait tel quel — l'appelant recevait une trace
+        # opaque au lieu du RuntimeError « timeout après Ns » qui nomme la
+        # cause et la variable d'environnement à augmenter.
+        try:
+            os.killpg(pgid, signal.SIGKILL)
+            proc.wait()
+        except (ProcessLookupError, OSError):
+            pass
+    except OSError:
+        # ProcessLookupError est une sous-classe d'OSError : la mentionner
+        # séparément était redondant.
         pass
 
 
 def _codex_run_process(argv, stdin_data, timeout, env, label, model):
     """Lance un CLI agentique dans son propre groupe de process et renvoie
-    (returncode, stdout, stderr). Socle commun aux providers Codex et Grok :
-    tous deux sont lancés par un shim qui `spawn` le vrai binaire, lequel
-    survivrait à un kill du fils direct en continuant à consommer du quota.
+    (returncode, stdout, stderr). Socle commun aux providers Codex et Grok.
+
+    Le groupe de process n'est pas une précaution de principe : ces deux CLI
+    sont des agents, qui lancent leurs propres sous-process. Codex ajoute un
+    niveau — installé par npm, `codex` est un shim Node qui `spawn` le binaire
+    Rust, petit-fils du process Python qui survivrait au kill du fils direct en
+    continuant à consommer du quota (vérifié : shebang `#!/usr/bin/env node`).
+    Le binaire Grok est en revanche un ELF natif, sans shim, et le binaire
+    Codex installé par pip aussi — la raison « shim » ne vaut donc pas partout,
+    contrairement à ce qu'affirmait une version antérieure de ce commentaire ;
+    la raison « agent qui spawn » vaut pour les deux.
 
     `communicate(input=...)` ferme toujours stdin — obligatoire pour Codex, qui
     lit stdin même quand le prompt est passé en argument et attendrait sinon
     indéfiniment sans jamais appeler le modèle."""
     timeout_var = "CODEX_TIMEOUT" if label == "Codex" else "GROK_TIMEOUT"
-    with subprocess.Popen(
+    # nosec B603 — nosemgrep: dangerous-subprocess-use, dangerous-subprocess-use-audit
+    # argv est une LISTE (jamais shell=True) construite par _codex_argv/_grok_argv :
+    # binaire résolu et validé par le préflight, flags littéraux, et `args.model`
+    # placé en valeur juste après `-m` — une valeur commençant par `--` y est donc
+    # consommée comme valeur du flag, pas réinterprétée en drapeau. Le contenu du
+    # document ne transite JAMAIS par argv : il part par stdin (Codex) ou par
+    # fichier (Grok, --prompt-file).
+    with subprocess.Popen(  # nosec B603
         argv,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
@@ -1314,14 +1377,30 @@ def _grok_parse_payload(stdout, args):
     if not text:
         raise _GrokCallError(f"Grok CLI n'a rien écrit sur stdout (model={args.model})")
     try:
-        return json.loads(text)
+        payload = json.loads(text)
     except ValueError as e:
         raise _GrokCallError(
             f"Sortie Grok CLI illisible (model={args.model}) : {text[:200]!r}"
         ) from e
+    # Une liste ou une chaîne sont du JSON parfaitement valide : sans ce
+    # contrôle, `_grok_check_payload` levait un AttributeError sur `.get()`,
+    # hors du type d'erreur que la boucle de back-off sait interpréter.
+    if not isinstance(payload, dict):
+        raise _GrokCallError(
+            f"Sortie Grok CLI de type inattendu ({type(payload).__name__}, "
+            f"model={args.model}) : {text[:200]!r}"
+        )
+    return payload
 
 
-_GROK_RATE_LIMIT_MARKERS = ("rate limit", "quota", "too many requests", "429")
+# `quota` en est volontairement absent, pour la raison que le docstring de
+# `_codex_is_rate_limited` explique déjà : le mot apparaît aussi bien dans un
+# 429 récupérable que dans un « quota exhausted, upgrade your plan » définitif.
+# Le garder faisait attendre 90 s avant d'échouer quand même sur une erreur
+# irrécupérable. Le CLI Grok n'exposant pas de champ structuré dans son payload
+# d'erreur, l'inspection de chaînes reste ici contrainte — d'où le choix de
+# marqueurs non ambigus uniquement.
+_GROK_RATE_LIMIT_MARKERS = ("rate limit", "rate_limit", "too many requests", "429")
 
 
 def _grok_check_payload(payload, args):
@@ -1334,12 +1413,27 @@ def _grok_check_payload(payload, args):
             f"Grok CLI a échoué : {message}",
             rate_limited=any(m in message.lower() for m in _GROK_RATE_LIMIT_MARKERS),
         )
+    # Un `stopReason` ABSENT est un échec, pas un succès : la version
+    # précédente sautait la vérification dans ce cas (`if stop is not None`),
+    # si bien qu'un payload `{"text": "..."}` — champ jamais émis, ou renommé
+    # par une mise à jour du CLI — passait le contrat sans que rien ne le
+    # signale. La garde serait alors devenue un no-op silencieux, et une
+    # réponse tronquée sur dépassement de tours serait partie sur disque.
     stop = payload.get("stopReason")
-    if stop is not None and str(stop).lower() not in ("end_turn", "endturn"):
+    if stop is None:
+        raise _GrokCallError(
+            f"Grok CLI n'a pas émis de stopReason (model={args.model}) — "
+            "contrat de sortie non vérifiable, réponse refusée"
+        )
+    if str(stop).lower() not in ("end_turn", "endturn"):
         raise _GrokCallError(
             f"Grok CLI stopReason anormal={stop!r} (model={args.model}) — "
             "réponse potentiellement tronquée",
-            rate_limited=str(stop).lower() in ("max_turn_requests", "rate_limited"),
+            # `max_turn_requests` n'est PAS un rate limit : c'est le budget de
+            # tours (--max-turns) qui est épuisé. Retenter avec la même borne
+            # reproduit le résultat à l'identique, au prix de 90 s d'attente
+            # sur une erreur déterministe.
+            rate_limited=str(stop).lower() == "rate_limited",
         )
 
 
@@ -1424,6 +1518,19 @@ def _resolve_provider(args, use_mistral=False, use_claude=False, use_gemini=Fals
     return "openai"
 
 
+# `provider` sert de clé de dispatch, pas de libellé : `.capitalize()` affichait
+# « Grok_cli » et « Openai » à l'utilisateur.
+_PROVIDER_LABELS = {
+    "openai": "OpenAI",
+    "mistral": "Mistral",
+    "claude": "Claude",
+    "gemini": "Gemini",
+    "codex": "Codex CLI",
+    "grok": "Grok (API xAI)",
+    "grok_cli": "Grok CLI",
+}
+
+
 def _dispatch_provider_call(client, args, prompt, segment, provider, is_translation_note):
     if provider == "mistral":
         text = _call_mistral(client, args, prompt, segment)
@@ -1441,7 +1548,9 @@ def _dispatch_provider_call(client, args, prompt, segment, provider, is_translat
     # Empty-content guard : un provider qui retourne "" avec finish_reason="stop"
     # produirait sinon un fichier vide marqué success.
     if not text.strip():
-        raise RuntimeError(f"{provider.capitalize()} returned empty content (model={args.model})")
+        raise RuntimeError(
+            f"{_PROVIDER_LABELS[provider]} returned empty content (model={args.model})"
+        )
     return text
 
 
@@ -2659,25 +2768,34 @@ def _add_provider_args(parser):
         type=str,
         help="Modèle GPT à utiliser pour la traduction, la valeur par défaut dépend de l'API sélectionnée",
     )
-    parser.add_argument(
+    # Groupe exclusif : deux flags provider simultanés étaient acceptés en
+    # silence, et la précédence divergeait entre _select_provider_client (qui
+    # teste Mistral en premier) et _resolve_provider (qui donne priorité aux
+    # booléens explicites). `--use_codex --use_mistral` instanciait donc un
+    # client Mistral ET dispatchait vers Mistral : la traduction partait en
+    # facturation à l'usage alors que l'utilisateur avait demandé son quota
+    # d'abonnement — exactement ce que --use_codex existe pour empêcher, et
+    # sans le moindre avertissement. argparse refuse désormais la combinaison.
+    provider_group = parser.add_mutually_exclusive_group()
+    provider_group.add_argument(
         "--use_mistral", action="store_true", help="Utiliser l'API Mistral AI pour la traduction"
     )
-    parser.add_argument(
+    provider_group.add_argument(
         "--use_claude",
         action="store_true",
         help="Utiliser l'API Claude d'Anthropic pour la traduction",
     )
-    parser.add_argument(
+    provider_group.add_argument(
         "--use_gemini",
         action="store_true",
         help="Utiliser l'API Gemini de Google pour la traduction",
     )
-    parser.add_argument(
+    provider_group.add_argument(
         "--use_grok",
         action="store_true",
         help="Utiliser l'API xAI (Grok) — nécessite XAI_API_KEY, facturé à l'usage",
     )
-    parser.add_argument(
+    provider_group.add_argument(
         "--use_grok_cli",
         action="store_true",
         help=(
@@ -2685,7 +2803,7 @@ def _add_provider_args(parser):
             "(nécessite `grok login` ; confinement plus faible que --use_codex)"
         ),
     )
-    parser.add_argument(
+    provider_group.add_argument(
         "--use_codex",
         action="store_true",
         help=(
@@ -2846,7 +2964,10 @@ def _grok_preflight(binary):
             "(`curl -fsSL https://x.ai/cli/install.sh | bash`) ou pointer GROK_BIN dessus."
         )
     try:
-        result = subprocess.run(
+        # nosec B603 — nosemgrep: dangerous-subprocess-use, dangerous-subprocess-use-audit
+        # Liste littérale ; `binary` vient de GROK_BIN/PATH, donc d'un
+        # environnement qui a déjà l'exécution de code sur cette machine.
+        result = subprocess.run(  # nosec B603
             [binary, "models"],
             capture_output=True,
             text=True,
@@ -2915,16 +3036,29 @@ def _init_grok_client(args):
     return OpenAI(api_key=api_key, base_url=os.getenv("XAI_BASE_URL", XAI_BASE_URL))
 
 
+# Voie de repli à conseiller quand le mode abonnement est refusé. Le message
+# était codé en dur pour Codex : un utilisateur de --use_grok_cli lisait
+# « L'auth d'abonnement ChatGPT » et se voyait orienté vers OPENAI_API_KEY,
+# alors que son repli est XAI_API_KEY / --use_grok.
+_CLI_PROVIDER_CI_FALLBACK = {
+    "--use_codex": ("ChatGPT", "OPENAI_API_KEY", "l'API OpenAI"),
+    "--use_grok_cli": ("Grok", "XAI_API_KEY", "--use_grok"),
+}
+
+
 def _codex_reject_ci_environment(flag="--use_codex"):
     """Refuse de tourner en CI. La doc OpenAI est explicite sur ce workflow :
     « Do not use this workflow for public or open-source repositories » — or ce
     dépôt est public. Sur un runner, la voie supportée est une clé API."""
     ci_vars = [var for var in ("CI", "GITHUB_ACTIONS") if os.getenv(var)]
     if ci_vars:
+        plan, env_var, fallback = _CLI_PROVIDER_CI_FALLBACK.get(
+            flag, ("ChatGPT", "OPENAI_API_KEY", "l'API OpenAI")
+        )
         raise ValueError(
             f"{flag} est refusé en environnement CI ({', '.join(ci_vars)} défini). "
-            "L'auth d'abonnement ChatGPT n'est pas prévue pour un runner partagé : "
-            "utiliser une clé API (OPENAI_API_KEY) sur ce chemin."
+            f"L'auth d'abonnement {plan} n'est pas prévue pour un runner partagé : "
+            f"utiliser {fallback} avec une clé API ({env_var}) sur ce chemin."
         )
 
 
@@ -2962,7 +3096,9 @@ def _codex_preflight(binary):
             "(`npm install -g @openai/codex`), ou pointer CODEX_BIN dessus."
         )
     try:
-        result = subprocess.run(
+        # nosec B603 — nosemgrep: dangerous-subprocess-use, dangerous-subprocess-use-audit
+        # Liste littérale ; même raisonnement que _grok_preflight pour CODEX_BIN.
+        result = subprocess.run(  # nosec B603
             [binary, "login", "status"],
             capture_output=True,
             text=True,
@@ -3006,7 +3142,7 @@ def _init_codex_client(args):
         timeout=CODEX_TIMEOUT,
         # Le CLI Codex n'accepte pas `none` pour model_reasoning_effort : on
         # retombe sur `low`, la valeur la plus basse qu'il connaisse.
-        reasoning_effort=_resolve_reasoning_effort(args, eco_default="low"),
+        reasoning_effort=_resolve_reasoning_effort(args, eco_default="low", floor="low"),
     )
 
 
