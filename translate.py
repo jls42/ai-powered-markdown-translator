@@ -1211,7 +1211,7 @@ def _codex_run_process(argv, stdin_data, timeout, env, label, model):
     # ligne immédiatement précédente : plus haut, il n'est pas pris en compte.
     # nosemgrep
     with subprocess.Popen(  # nosec B603
-        argv,
+        argv,  # nosemgrep — la finding est ancrée sur l'argument, pas sur l'appel
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -3007,7 +3007,7 @@ def _grok_preflight(binary):
         # environnement qui a déjà l'exécution de code sur cette machine.
         # nosemgrep
         result = subprocess.run(  # nosec B603
-            [binary, "models"],
+            [binary, "models"],  # nosemgrep
             capture_output=True,
             text=True,
             timeout=60,
@@ -3138,7 +3138,7 @@ def _codex_preflight(binary):
         # Liste littérale ; même raisonnement que _grok_preflight pour CODEX_BIN.
         # nosemgrep
         result = subprocess.run(  # nosec B603
-            [binary, "login", "status"],
+            [binary, "login", "status"],  # nosemgrep
             capture_output=True,
             text=True,
             timeout=30,
