@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
+import subprocess  # nosec B404 — la suite simule les CLI, elle n'en lance aucun
 import sys
 import types
 import unittest
@@ -88,6 +88,8 @@ class _FakePopen:
     def communicate(self, **kwargs):
         self.communicate_kwargs = kwargs
         if self._timeout:
+            # nosemgrep: dangerous-subprocess-use — TimeoutExpired est une classe
+            # d'exception levée par un faux Popen, pas un lancement de process.
             raise subprocess.TimeoutExpired(cmd=self.argv, timeout=kwargs.get("timeout"))
         if self.final_message is not None:
             output_file = self.argv[self.argv.index("-o") + 1]
@@ -316,11 +318,7 @@ class TestProviderResolution(unittest.TestCase):
             self.assertRaises(RuntimeError) as ctx,
         ):
             translate._dispatch_provider_call(_client(), _args(), "PROMPT", "SEG", "codex", False)
-        self.assertIn("Codex returned empty content", str(ctx.exception))
-
-
-if __name__ == "__main__":
-    unittest.main()
+        self.assertIn("Codex CLI returned empty content", str(ctx.exception))
 
 
 class TestReasoningEffortResolution(unittest.TestCase):
@@ -426,6 +424,13 @@ class TestGeminiThinkingFallback(unittest.TestCase):
         client = MagicMock()
         client.models.generate_content = generate_content
         return client, calls
+
+    def setUp(self):
+        # Le niveau accepté est mémorisé au niveau du module pour éviter un
+        # aller-retour 400 par segment en production. C'est un état global :
+        # sans cette remise à zéro, un test qui a déjà fait accepter `low` sur
+        # gemini-3.7-flash ferait sauter la cascade au test suivant.
+        translate._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
 
     def test_first_level_accepted_stops_cascade(self):
         client, calls = self._client_refusing(0)
@@ -603,3 +608,7 @@ class TestCodexBinaryResolution(unittest.TestCase):
         ):
             client = translate._init_codex_client(_args(model=None))
         self.assertEqual(client.binary, "/pkg/bin/codex")
+
+
+if __name__ == "__main__":
+    unittest.main()

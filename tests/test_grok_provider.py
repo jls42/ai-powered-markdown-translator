@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
+import subprocess  # nosec B404 — la suite simule les CLI, elle n'en lance aucun
 import sys
 import unittest
 from argparse import Namespace
@@ -78,6 +78,8 @@ class _FakePopen:
     def communicate(self, **kwargs):
         self.communicate_kwargs = kwargs
         if self._timeout:
+            # nosemgrep: dangerous-subprocess-use — TimeoutExpired est une classe
+            # d'exception levée par un faux Popen, pas un lancement de process.
             raise subprocess.TimeoutExpired(cmd=self.argv, timeout=kwargs.get("timeout"))
         return self._stdout, self._stderr
 

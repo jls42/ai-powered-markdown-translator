@@ -919,7 +919,7 @@ REGEN_SCRIPT = os.path.abspath(
 class TestDetectProvider(unittest.TestCase):
     """Teste detect_provider() de regen_translations.sh.
 
-    Comportement : OpenAI gpt-5.4-mini par défaut. Fallback Gemini Flash si
+    Comportement : OpenAI par défaut. Fallback Gemini Flash si
     OPENAI_API_KEY absent/placeholder mais GOOGLE_API_KEY valide. Override
     explicite via REGEN_PROVIDER=openai|gemini.
     """
@@ -971,13 +971,17 @@ class TestDetectProvider(unittest.TestCase):
         self.assertIn("ERROR", stderr)
 
     def test_openai_key_picks_openai(self):
-        """OPENAI_API_KEY valide dans .env → --eco (OpenAI gpt-5.4-mini par défaut)."""
+        """OPENAI_API_KEY valide dans .env → --eco (OpenAI par défaut)."""
         stdout, stderr, rc = self._run_detect(
             env_content=f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n"
         )
         self.assertEqual(rc, 0)
         self.assertEqual(stdout, "--eco")
-        self.assertIn("OpenAI gpt-5.4-mini", stderr)
+        # On asserte le PROVIDER, pas le nom du modèle : celui-ci change à
+        # chaque renouvellement du catalogue, et un test qui le fige devient
+        # un rappel de mise à jour plutôt qu'une garantie de comportement.
+        self.assertIn("OpenAI", stderr)
+        self.assertIn("--eco", stderr)
 
     def test_both_keys_prefers_openai(self):
         """OPENAI et GOOGLE valides → OpenAI par défaut (priorité OpenAI)."""
@@ -1396,7 +1400,7 @@ class TestProviderEmptyContent(unittest.TestCase):
             "", finish_reason="stop"
         )
         args = _base_args()
-        with self.assertRaisesRegex(RuntimeError, r"Openai returned empty content"):
+        with self.assertRaisesRegex(RuntimeError, r"OpenAI returned empty content"):
             translate_fn("Some short source text.", mock_client, args)
 
     def test_mistral_empty_content_raises(self):
