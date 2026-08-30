@@ -1,14 +1,20 @@
 #!/bin/bash
 set -euo pipefail
-# Regenerate README and CHANGELOG translations in parallel (10 jobs max).
+# Regenerate README and CHANGELOG translations in parallel.
+# Concurrence : 10 jobs par défaut, 4 pour Codex, 2 pour Grok CLI (quotas
+# d'abonnement, cf. main()).
 #
 # Usage:
 #   ./regen_translations.sh           # skip si fichier existe
 #   ./regen_translations.sh --force   # réécrit les fichiers existants
 #
-# Provider auto-détecté via detect_provider :
-#   - GOOGLE_API_KEY valide (env ou .env)  → Gemini Flash (--use_gemini --eco)
-#   - sinon                                → fallback OpenAI gpt-5.4-mini (--eco) avec WARNING
+# Provider auto-détecté via detect_provider, dans cet ordre :
+#   - OPENAI_API_KEY valide (env ou .env)  → OpenAI --eco (gpt-5.6-luna)
+#   - sinon GOOGLE/GEMINI_API_KEY valide   → Gemini Flash (--use_gemini --eco)
+#   - sinon                                → abort (aucune clé exploitable)
+#
+# REGEN_PROVIDER force le choix : gemini | openai | codex | grok | grok_cli.
+# REGEN_MODEL force un modèle par-dessus le défaut du provider.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -17,18 +23,30 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Stderr : message de log (info ou warning).
 # Le caller utilise: PROVIDER_FLAGS=$(detect_provider)
 #
-# Priorité par défaut : OpenAI gpt-5.4-mini (--eco). Fallback Gemini Flash si
+# Priorité par défaut : OpenAI en --eco. Fallback Gemini Flash si
 # OPENAI_API_KEY absente/placeholder mais GOOGLE_API_KEY valide. L'utilisateur
 # peut forcer Gemini avec REGEN_PROVIDER=gemini./regen_translations.sh.
-detect_provider() {
-  # Charge .env si présent. set -a/+a exporte toutes les variables assignées
-  # pour qu'elles soient héritées par les sous-processus (python translate.py).
+# Charge .env si présent. set -a/+a exporte toutes les variables assignées pour
+# qu'elles soient héritées par les sous-processus (python translate.py).
+#
+# Appelé DEUX fois volontairement : depuis detect_provider (que les tests
+# sourcent et invoquent isolément) et depuis main(). detect_provider est
+# appelée en substitution de commande — donc dans un sous-shell — si bien que
+# ses exports ne remontaient pas : un GROK_BIN ou un REGEN_MODEL défini dans
+# .env restait invisible aux lectures faites dans main(), qui concluait
+# « binaire Grok introuvable » sur une configuration pourtant correcte.
+# Sourcer un fichier d'affectations deux fois est idempotent.
+load_env() {
   if [[ -f .env ]]; then
     set -a
     # shellcheck disable=SC1091
     source .env
     set +a
   fi
+}
+
+detect_provider() {
+  load_env
 
   # Placeholders exacts définis dans translate.py (DEFAULT_*_API_KEY)
   local openai_placeholder="votre-cle-api-openai-par-defaut"
@@ -47,7 +65,7 @@ detect_provider() {
       ;;
     openai)
       echo "--eco"
-      echo "[regen] REGEN_PROVIDER=openai → --eco (OpenAI gpt-5.4-mini)" >&2
+      echo "[regen] REGEN_PROVIDER=openai → --eco (OpenAI, modèle éco courant)" >&2
       return
       ;;
     grok_cli)
@@ -82,7 +100,7 @@ detect_provider() {
   # release.sh validerait "28 fichiers présents" contre des traductions stales.
   if [[ -n "$openai_key" ]] && [[ "$openai_key" != "$openai_placeholder" ]]; then
     echo "--eco"
-    echo "[regen] OpenAI gpt-5.4-mini détecté → --eco (par défaut)" >&2
+    echo "[regen] OpenAI détecté (OPENAI_API_KEY) → --eco (par défaut)" >&2
   elif [[ -n "$gemini_key" ]] && [[ "$gemini_key" != "$gemini_placeholder" ]] && [[ "$gemini_key" != "your-google-api-key" ]]; then
     echo "--use_gemini --eco"
     echo "[regen] WARNING: OPENAI_API_KEY absent → fallback Gemini Flash --use_gemini --eco" >&2
@@ -104,6 +122,10 @@ main() {
 
   # shellcheck disable=SC1091
   source venv/bin/activate
+
+  # Avant toute lecture de GROK_BIN / GROK_HOME / REGEN_MODEL ci-dessous :
+  # detect_provider tourne dans un sous-shell et ne peut pas les exporter ici.
+  load_env
 
   if [[ ! -f translate.py ]]; then
     echo "ERROR: translate.py not found in $SCRIPT_DIR" >&2
@@ -139,13 +161,27 @@ main() {
     max_jobs=2
   fi
   if [[ "$provider_flags" == *--use_codex* ]]; then
-    # Le refresh du token Codex est rotatif et à usage unique : si plusieurs
-    # jobs le déclenchent en même temps, tous sauf un échouent et la session
-    # `codex login` de l'utilisateur est invalidée. On le rafraîchit donc une
-    # fois, séquentiellement, avant d'ouvrir le parallélisme — après quoi le
-    # token est frais pour toute la durée du regen.
-    echo "[regen] Codex : warm-up du token (évite les refresh concurrents)..."
-    if ! codex login status >/dev/null 2>&1; then
+    # Contrôle d'authentification avant d'ouvrir le parallélisme, pour échouer
+    # en 2 s plutôt qu'après plusieurs fichiers.
+    #
+    # Ce n'est PAS un warm-up de token, contrairement à ce qu'affirmait la
+    # version précédente : mesuré, `codex login status` ne touche pas à
+    # ~/.codex/auth.json (mtime et taille inchangés), son aide dit « Show login
+    # status ». Le risque de refresh concurrents — le token est rotatif et à
+    # usage unique — reste donc entier, et c'est la raison de max_jobs=4 plutôt
+    # qu'un simple contrôle d'auth. Un vrai warm-up demanderait une traduction
+    # séquentielle avant d'ouvrir le parallélisme (coût : 1 message de quota).
+    #
+    # Le binaire est résolu comme dans translate.py (CODEX_BIN puis PATH) :
+    # invoquer `codex` nu faisait échouer le regen avec « non authentifié » sur
+    # un poste où seul CODEX_BIN est défini — un diagnostic trompeur.
+    local codex_bin="${CODEX_BIN:-$(command -v codex || true)}"
+    if [[ -z "$codex_bin" || ! -x "$codex_bin" ]]; then
+      echo "[regen] ERROR: binaire Codex introuvable (${codex_bin:-aucun}) — l'installer ou définir CODEX_BIN" >&2
+      exit 1
+    fi
+    echo "[regen] Codex : contrôle d'authentification..."
+    if ! "$codex_bin" login status >/dev/null 2>&1; then
       echo "[regen] ERROR: Codex CLI non authentifié — lancer 'codex login'" >&2
       exit 1
     fi
@@ -177,28 +213,39 @@ main() {
     fi
   }
 
+  # La garde est AVANT chaque lancement, et non après la paire : placée après,
+  # elle laissait relancer deux jobs dès qu'il n'en restait qu'un, soit un pic
+  # mesuré de 3 pour max_jobs=2. Sur Grok, dont le quota hebdomadaire est
+  # partagé avec Chat/Imagine/Voice et non mesurable, dépasser de 50 % la borne
+  # que le script s'impose n'est pas anodin.
   for lang in $langs; do
+    while [[ "$(jobs -r | wc -l)" -ge "$max_jobs" ]]; do sleep 1; done
     echo "[README] -> $lang"
     run_one README.md "$lang" &
 
+    while [[ "$(jobs -r | wc -l)" -ge "$max_jobs" ]]; do sleep 1; done
     echo "[CHANGELOG] -> $lang"
     run_one CHANGELOG.md "$lang" &
-
-    while [[ "$(jobs -r | wc -l)" -ge "$max_jobs" ]]; do
-      sleep 1
-    done
   done
 
   wait
   echo "=== DONE ==="
 
-  local count
-  count=$(find . -maxdepth 1 -type f \( -name 'README-*.md' -o -name 'CHANGELOG-*.md' \) | wc -l)
-  echo "Fichiers de traduction présents: $count"
+  # Le compte était affiché sans jamais être comparé à 28 : un fichier manquant
+  # passait donc inaperçu. Le motif exclut aussi les artefacts `--include_model`
+  # (README-en-gpt-5.6-luna.md), qui gonflaient le total sans être des cibles.
+  local count expected=28
+  count=$(find . -maxdepth 1 -type f \
+    \( -name 'README-??.md' -o -name 'CHANGELOG-??.md' \) | wc -l)
+  echo "Fichiers de traduction présents: $count/$expected"
 
   if [[ -s "$failed_log" ]]; then
     echo "ERROR: certains fichiers ont échoué :" >&2
     cat "$failed_log" >&2
+    exit 1
+  fi
+  if [[ "$count" -ne "$expected" ]]; then
+    echo "ERROR: $count fichiers de traduction au lieu de $expected" >&2
     exit 1
   fi
 }
