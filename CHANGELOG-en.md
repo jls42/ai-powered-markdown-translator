@@ -2,121 +2,160 @@
 
 🌍 [French](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Spanish](CHANGELOG-es.md) | [Chinese](CHANGELOG-zh.md) | [German](CHANGELOG-de.md) | [Japanese](CHANGELOG-ja.md) | [Korean](CHANGELOG-ko.md) | [Arabic](CHANGELOG-ar.md) | [Hindi](CHANGELOG-hi.md) | [Italian](CHANGELOG-it.md) | [Dutch](CHANGELOG-nl.md) | [Polish](CHANGELOG-pl.md) | [Portuguese](CHANGELOG-pt.md) | [Romanian](CHANGELOG-ro.md) | [Swedish](CHANGELOG-sv.md)
 
-- **1.9.2** Fix news attribution URL extraction with nested parentheses or FR prefix (2026-05-11) :
+- **1.10.0** `--use_codex` provider (ChatGPT subscription quota), SDK and model updates, fix for multi-paragraph news citations (2026-08-29):
 
-  - **Bug fixed**: extracting attribution URLs in `_protect_news_quotes` used regex `re.search(r"\((.+?)\)", attribution)` (lazy capture between parentheses). On an attribution of the type `(relayé par [@user sur X](https://x.com/.../123))` (nested parentheses: outer `(` + markdown link `]()`), the capture stopped at the first `)` encountered → truncated string + including the FR prefix: `relayé par [@user sur X](https://x.com/.../123` (without final `)`). Consequence: `_validate_news_post` looked for this string in the translated output and failed systematically (two reasons: truncated `)` + "relayé par" translated into `relayed by`/`weitergeleitet von`/...). The full low → medium → high → gpt-5.5 cascade could not pass.
-  - **Fix**: the regex becomes `re.search(r"\]\(([^)]+)\)", attribution)` — it specifically targets the `](url)` of the markdown link, captures **only the pure URL** (without FR prefix or truncation), invariant preserved by placeholders `#URL{N}#` during translation. Robust to the two problematic patterns:
-    - `(relayé par [@account sur X](url))` — nested parentheses
-    - `via [@source](url)` or `selon [@author](url)` — FR prefix without enclosing parentheses
-  - **Tests**: 2 new ones in `test_silent_failure.py` class `TestNewsCitationExtraction` :
-    - `test_extract_attribution_url_with_nested_parens` (exact case reproducing the Genspark CEO E2B bug)
+  - **Two new Grok providers**: `--use_grok` (xAI API, `XAI_API_KEY` key, usage-based billing) and `--use_grok_cli` (official Grok Build CLI, deducted from the Grok subscription—same principle as `--use_codex`).
+    - **API mode, ~40 lines**: since the xAI endpoint is OpenAI-compatible, the client and `_call_openai` are reused as-is; only `base_url` changes. Only one adaptation was necessary, and it benefits everyone: `finish_reason` now accepts `end_turn`, the form emitted by xAI where OpenAI emits `stop`. Models: `grok-4.6` (quality) and `grok-4.3` (economy). Note that Grok’s economy model remains the most expensive in the repository—$1.25/$2.50 per million versus $0.15/$0.60 for `mistral-small-latest`: this provider is chosen for model diversity, not price.
+    - **CLI mode**: modeled after Codex, with four differences imposed by real-world constraints—the prompt is sent through a file (`--prompt-file`, the CLI does not read stdin and a segment in argv would be visible in `ps`), output is a single JSON object on stdout (neither JSONL nor a `-o` file), the subscription exposes only `grok-4.6` and `grok-4.5`, and the sandbox cannot be applied (see below). Subprocess launching is shared with Codex in `_codex_run_process`, without touching the rest of the already-tested Codex provider.
+    - **`exit 0` proves nothing, as measured**: when unauthenticated, the CLI writes `{"type":"error","message":"Not signed in."}` to **stdout** with exit code **0**. A refusal or exceeding the turn limit behaves the same way. The output contract therefore requires four simultaneous conditions: exit code 0, no error payload, `stopReason == end_turn`, and non-empty text. The preflight follows the same logic: `grok models` exits with 0 even when logged out; only the presence of “not authenticated” in stdout makes it possible to determine the state.
+    - **Confinement: a deliberate and documented asymmetry.** While Codex runs in `--sandbox read-only`, Grok’s sandbox is unusable on many recent Linux systems for two independent system-level reasons that cannot be worked around without `sudo`: AppArmor has blocked unprivileged user namespaces since Ubuntu 24.04 (`bwrap: setting up uid map: Permission denied`, reproduced outside Grok), and the container-runtime socket denylist fails when `/run/podman` is set to `0700` (the resolver only catches `ErrorKind::NotFound`; EACCES becomes fatal). The central trap: an **integrated** profile that cannot be applied **silently starts without confinement**. The script therefore requests no profile by default and never falls back silently—it warns on stderr. Protection relies on the CLI’s `--deny` rules, including the catch-all `*`, the only measured _fail-closed_ layer (a rule with an unknown prefix causes startup to be rejected). `GROK_TRANSLATE_SANDBOX=read-only` can be used to require it, in which case startup fails if the machine cannot honor it.
+    - **Safeguards**: `XAI_API_KEY`, `GROK_API_KEY`, and `GROK_SANDBOX` are removed from the subprocess environment (a key would switch to usage-based billing; an inherited `GROK_SANDBOX` would impose an unusable profile with a misleading message), MCP/hooks/skills/agents switches are disabled, `--disable-web-search`, `--no-subagents`, `--no-plan`, disposable workdir, refusal to run in CI, timeout that kills the process group, and rate-limit backoff. `--max-turns` is set to 6 rather than 1: the counter is incremented after the tool turn, and 1 would truncate the output.
+    - **Quota**: the Grok pool is weekly and **shared with Chat, Imagine, and Voice**, and no command exposes it—unlike Codex, whose `account/rateLimits/read` makes it possible to quantify consumption. `regen_translations.sh` therefore limits concurrency to 2 and provides an explicit warning.
+    - **Tests**: new `tests/test_grok_provider.py` file (24 tests). Full suite now at **290 tests**.
+  - **Bug fixed—multi-paragraph EN citations were only partially protected (`--news` mode)**: `_NEWS_CITATION_REGEX` accepted only a sequence of **consecutive** `>` lines as the citation body. As soon as a citation spanned multiple paragraphs (separated by an empty `>` line), only the last one was captured and replaced by the placeholder; the preceding paragraphs were sent to the LLM and came back translated—the exact opposite of what `--news` exists to guarantee. The repetition now accepts internal empty `>` lines and is non-greedy, stopping at the empty `>` preceding the italicized line rather than at the first one encountered.
+    - **Measured scope** across a real corpus of 198 articles: 11 affected citations out of 419. No regressions—the new regex captures exactly the same number of citations; only multi-paragraph bodies are extended (408 unchanged bodies, 11 extended), and the `> — …` attribution line still cannot be absorbed into the body (lookahead preserved).
+    - **End-to-end proof** on a 69 KB article translated into ja/ar: the first paragraph of a citation, previously rendered as `> GLM-5.3がオープンウェイト化。` in Japanese and likewise translated into Arabic, now remains `> GLM-5.3 is now open-weight.`. The number of English citation lines returns from 9 to 10, matching the source.
+    - Note: this defect was not detected by downstream validators, which check that the citation is present without checking that it is complete.
+  - **Measured savings on the default provider**: `_openai_extra_kwargs` sent `reasoning_effort="medium"` whenever the model started with `gpt-5`, including in `--eco`. Measurement using `gpt-5.4-mini` to translate a ten-word sentence: `medium` → 45 reasoning tokens and 65 output tokens; `none` → 0 and 14. Reasoning adds nothing to a translation, and it was being paid for on every segment of every file. The default becomes `none` in `--eco` and remains `medium` otherwise; an explicit value passed via the CLI still takes precedence. `--reasoning_effort` now accepts `none` and `xhigh` in addition to `low`/`medium`/`high` (not all are accepted by every model: `minimal`, for example, is rejected by `gpt-5.4-mini`—the existing retry without the parameter covers this case).
+  - **SDK update and Gemini migration**: `google-generativeai` (support ended on 2025-11-30, repository archived) is replaced by the unified **`google-genai`** SDK—`genai.Client(api_key=...)` followed by `client.models.generate_content(model=, contents=, config=)`, with the system prompt passed through `system_instruction` instead of being concatenated with the segment. `mistralai` moves to **2.9.4** (the import becomes `from mistralai.client import Mistral`; the old one raises `ImportError`, verified in the wheel), `anthropic` to **0.125.0**, and `openai` to **2.54.0**—the latest versions before the switch to `httpx2`, to avoid maintaining two HTTP stacks in the venv. `httpx` 0.28.1 and `pydantic` 2.13.5 are unblocked accordingly.
+  - **Two regressions caught by real tests, not by the documentation**:
+    - `anthropic` ≥ 1.0 rejects, client-side, a non-streamed call whose `max_tokens` implies more than 10 minutes (`ValueError: Streaming is required...`). This safeguard did not exist in 0.34.2 and broke every Claude call with `max_tokens=32768`. Fixed with an explicit `timeout` (`CLAUDE_TIMEOUT`, 900 s by default), avoiding a switch to streaming for a call where only the complete response is used.
+    - `thinking_level="minimal"` is accepted by only part of the Gemini catalog: `gemini-3.1-flash-lite` supports it, while `gemini-3.7-flash` and `gemini-3.1-pro-preview` reject it with a 400. Hence `_gemini_generate_with_fallback`, a `minimal` → `low` → no thinking_config fallback chain, modeled after the existing OpenAI fallback—an optimization parameter must never cause a translation to fail.
+  - **Default models refreshed**, each validated with a real call: OpenAI `gpt-5.5` → **`gpt-5.6-terra`** (−60% on a batch of 28) and `gpt-5.4-mini` → **`gpt-5.6-luna`** (−73%); Claude `claude-sonnet-4-6` → **`claude-sonnet-5`** (cheaper and newer) and `claude-haiku-4-5-20251001` → **`claude-haiku-4-5`** (canonical ID without a date); Gemini `gemini-3.1-pro-preview` → **`gemini-3.7-flash`** and `gemini-3.1-flash-lite-preview` → **`gemini-3.1-flash-lite`** (stable version and cheaper than `3.5-flash-lite`). Mistral is unchanged, with `mistral-large-latest` remaining the best value of the four. Note: there is no Pro-tier Gemini model newer than `gemini-3.1-pro-preview`—Gemini 3.5 Pro, announced in May 2026, was never released; the 3.5/3.6/3.7 line is exclusively Flash.
+  - **A/B test measured before switching Gemini**: `README.md` translated into Japanese with `gemini-3.1-pro-preview` and then `gemini-3.7-flash`. Strictly identical structure (21 lists, 18 code blocks, 13 HTML links, 13 images, all URLs preserved), in **8 s versus 48 s**. Since no public benchmark compares these two models on translation or non-Latin scripts, the switch would otherwise have rested on a mere assumption.
+  - **Claude response-block filtering**: `_call_claude` performed `block.text for block in response.content` without filtering by type. Models with adaptive reasoning (Sonnet 5 and later) interleave a `thinking` block, which exposes `.thinking` rather than `.text`—translation would have failed with an opaque `AttributeError` on the first segment. `thinking`, `redacted_thinking`, `tool_use`, and `tool_result` blocks are now discarded (a denylist, to remain tolerant of an unknown type containing text), and a response without any text block raises an explicit error. `thinking={"type": "disabled"}` is passed to every call.
+  - **`MODEL_TOKEN_LIMITS` resynchronized**: removal of models whose retirement date has passed (the `magistral-*` range retired on 2026-07-31, `gemini-2.0-*` on 2026-06-01, `gemini-3-pro-preview` on 2026-03-09, `claude-3-5-sonnet-20240620`, `claude-3-7-sonnet-20250219`, `claude-opus-4-1-20250805`, `claude-sonnet-4-20250514`). Limit corrections: Mistral 128K → **256K** (Large 3 / Small 4 generation), Gemini 1,000,000 → **1,048,576** (actual input limit), `claude-opus-4-5` 200K → **1M**, `gpt-5.6-*` family 400K → **1.05M**. Added Claude 5 (`claude-sonnet-5`, `claude-opus-5`, `claude-fable-5`), `claude-opus-4-8`, Gemini 3.5/3.6/3.7, `mistral-medium-latest`, and the `ministral-*` range. Note: these limits remain indicative, as `translate()` caps segmentation at `min(16000, limite)`.
+  - **Provider `--use_codex`**: fifth provider that drives the official Codex CLI (`codex exec`) in non-interactive mode instead of calling a usage-billed API. Translation usage is deducted from the already-paid ChatGPT subscription quota. This is the only path documented by OpenAI for this use case: the plan availability matrix lists “Codex SDK, `codex exec`, and scriptable workflows” as available on Plus/Pro/Business/Enterprise, while `~/.codex/auth.json` tokens do not authenticate Platform API calls (and are never read by this script—the CLI continues to manage authentication and its refresh).
+  - **Codex binary installable via pip, no longer only via npm**: `_resolve_codex_binary()` looks for the binary in `CODEX_BIN`, then in `PATH`, then in the official Python package **`openai-codex-cli-bin`** published by OpenAI (the dependency of the `openai-codex` SDK). A Python project therefore no longer needs a global npm installation to use `--use_codex`. The package is not added to `requirements.txt`: the binary is ~250 MB, which would burden every user for an optional provider. Verified end to end: with `codex` absent from `PATH`, resolution finds the packaged binary and a complete translation finishes in 6 seconds.
+  - **“Subscription mode” guarantee**: `OPENAI_API_KEY` and `CODEX_API_KEY` are removed from the subprocess environment. Without this safeguard, a key present in `.env` could switch Codex to usage-based billing without any visible indication—exactly what this provider exists to prevent.
+  - **CLI pitfalls locked down by tests**:
+    - `codex exec` reads stdin **even** when the prompt is passed as an argument: without closing stdin, the command waits until timeout without ever calling the model (reproduced: exit 124 after 180 seconds, zero bytes). `communicate(input=...)` is therefore mandatory.
+    - The `codex` installed by npm is a Node shim that `spawn` the actual Rust binary: the latter is a **grandchild** of the Python process and survives the `SIGKILL` of `subprocess.run(timeout=)`, where it would continue consuming quota. Hence `Popen(start_new_session=True)` + `os.killpg`.
+    - The CLI may exit with 0 while having emitted an `turn.failed`: the JSONL output (`--json`) is inspected in addition to the return code, and the absence of the `-o` file with a 0 code raises an explicit error instead of producing an empty segment.
+  - **Rate-limit backoff**: the CLI implements no internal retry (`max_retries = 0`). Classification is based on the JSON payload structure (`status: 429` / `error.type`), not substrings—the word “quota” appears both in a recoverable 429 and in a permanent `insufficient_quota`.
+  - **CI safeguard**: `--use_codex` is rejected if `CI` or `GITHUB_ACTIONS` is defined. Subscription authentication is not intended for a shared runner, and OpenAI explicitly advises against this workflow on public repositories.
+  - **Models**: `gpt-5.6-sol` (quality) and `gpt-5.6-luna` (`--eco`). The `gpt-5.6-*` family is shared by the CLI and Platform API, but a ChatGPT account is not entitled to all of it: the allowlist is enforced server-side, with no local validation, and an unusual model triggers a warning. On a Plus plan, Luna offers 250–2,000 messages per 5-hour window versus 10–100 for Sol: `--eco` is the recommended mode for all batch processing.
+  - **Fixed bug—`regen_translations.sh` exited with an error despite complete success**: the `trap ... EXIT` referenced `failed_log`, a `local` variable from `main()` that no longer exists when the trap runs. Under `set -u`, this raised `failed_log: unbound variable` and caused the script to exit with 1 even though all 28 translations were correct—which would have interrupted `release.sh --auto` (`set -e`) immediately after regeneration, at the most expensive stage. The variable is now global, and the trap checks whether it exists. Useful side effect: genuine translation failures, previously masked by this error, are visible again in the final summary.
+  - **`REGEN_MODEL`**: new `regen_translations.sh` environment variable that forces a specific model over the provider default, for example `REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol` to regenerate using the subscription quota's premium model rather than the volume-oriented `--eco` model.
+  - **`regen_translations.sh`**: `REGEN_PROVIDER=codex` available through explicit opt-in (never auto-detected, to avoid consuming subscription quota without the user's knowledge). The token is refreshed once sequentially before enabling parallelism—because the Codex refresh is rotating and single-use, concurrent jobs would invalidate the `codex login` session—and concurrency is reduced to 4.
+  - **Related refactor**: `_dispatch_provider_call` goes from 8 to 6 parameters via a `_resolve_provider()` that returns a provider name, rather than a fourth boolean propagated throughout the entire chain. Explicit booleans retain priority over `args` to preserve tests that call `translate(..., use_mistral=True)` with a minimal `Namespace`.
+  - **Tests**: new `tests/test_codex_provider.py` file (41 tests) covering argv, sanitized environment, anti-preamble contract, silent failures, timeout/killpg, backoff, preflight, provider resolution, Gemini reasoning cascade, Claude block filtering, and multi-paragraph news citations. Full suite at 259 tests.
+  - **Real-world validation**: the project's `README.md` translated into all **14 languages** via Codex has a structure strictly identical to the reference translations (14 code blocks, 24 headings, 25 table rows, 13 HTML links, 13 images, 19 URLs, code blocks identical character for character, zero remaining placeholders). On a 69 KB news article in `--news` mode, both the `gpt-5.6-luna` and `gpt-5.6-sol` outputs pass the downstream application validator for en/ja/ar. Usage measured via `account/rateLimits/read`: remained below the counter's rounding threshold (0% of the 5-hour window) in `--eco` mode.
+
+- **1.9.2** Fix news attribution URL extraction with nested parentheses or an FR prefix (2026-05-11):
+
+  - **Fixed bug**: attribution URL extraction in `_protect_news_quotes` used the regex `re.search(r"\((.+?)\)", attribution)` (lazy capture between parentheses). On an attribution such as `(relayé par [@user sur X](https://x.com/.../123))` (nested parentheses: enclosing `(` + `]()` from the Markdown link), the capture stopped at the first `)` encountered → truncated string that also included the FR prefix: `relayé par [@user sur X](https://x.com/.../123` (without the final `)`). As a result, `_validate_news_post` searched for this string in the translated output and systematically failed (for two reasons: truncated `)` + “relayé par” translated as `relayed by`/`weitergeleitet von`/...). The entire low → medium → high → gpt-5.5 cascade could not pass.
+  - **Fix**: the regex is now `re.search(r"\]\(([^)]+)\)", attribution)`—it specifically targets the `](url)` of the Markdown link and captures **only the raw URL** (without the FR prefix or truncation), an invariant preserved by the `#URL{N}#` placeholders during translation. Robust against both problematic patterns:
+    - `(relayé par [@account sur X](url))`—nested parentheses
+    - `via [@source](url)` or `selon [@author](url)`—FR prefix without enclosing parentheses
+  - **Tests**: 2 new tests in `test_silent_failure.py`, class `TestNewsCitationExtraction`:
+    - `test_extract_attribution_url_with_nested_parens` (exact reproduction of the Genspark CEO E2B bug)
     - `test_extract_attribution_url_with_french_prefix` (variant with `via`)
-  - **Coverage gap**: `check-editorial-coverage.py` validates editorial syntax but not translatability by the translator. A possible improvement (out of scope v1.9.2) would be a check that simulates attribution extraction in dry-run to detect risky patterns BEFORE publication.
+  - **Coverage gap**: `check-editorial-coverage.py` validates the editorial syntax but not translatability by the translator. A possible improvement (outside the scope of v1.9.2) would be a check that simulates attribution extraction in a dry run to detect risky patterns BEFORE publication.
 
-- **1.9.1** Fix i18n of the CTA label in the translation marker note (2026-05-10) :
+- **1.9.1** Fix CTA label i18n in the marker translation note (2026-05-10):
 
-  - **Bug fixed**: the label `[Voir le projet sur GitHub ↗]` of the CTA link in the marker banner at the top of translated files remained **in French** for all target languages, instead of following `target_lang`. The LLM never sees it (assembled on the Python side to preserve the URL and repo slug), so the translation phase could not catch it. Silent regression since the addition of the `marker` format in v1.9.
-  - **Fix**: new constant `_VIEW_PROJECT_LABELS` mapping the 15 languages to their localized label. `_translation_note_invariants(target_lang)` and `_assemble_translation_note_paragraphs(phrase, target_lang)` now propagate the target language. Fallback `fr` if the language is unknown (safety, no KeyError).
-  - **Tests**: `test_source_emits_three_paragraphs_repo_title_description_link` adjusted (target_lang `ja` → expected Japanese label). 2 new tests: `test_source_link_label_localized_per_target_lang` (parameterized on 7 languages covering Latin, ideographic, abjad scripts) and `test_source_link_label_falls_back_to_french_for_unknown_target`. Total: 40 tests in `test_translation_note_position.py` (instead of 38).
-  - **Backward compat**: signature with default `target_lang="fr"` — external programmatic callers without `args.target_lang` continue to work unchanged.
-
-- **1.9** Fix silent-failure + complete quality tooling + multi-position translation note (2026-05-07) :
-  - **Multi-position translation note + "embed card" marker format** :
-    - New CLI options (additive, defaults unchanged → **non breaking**) :
-      - `--note_position {top,bottom,both}` (default: `bottom`) : places the note at the top, bottom, or both places in the translated file.
-      - `--note_format {legacy,marker}` (default: `legacy`) :
+  - **Fixed bug**: the `[Voir le projet sur GitHub ↗]` label of the CTA link in the marker banner at the top of translated files remained **in French** for all target languages instead of following `target_lang`. The LLM never sees it (it is assembled on the Python side to preserve the repository URL and slug), so the translation phase could not correct it. Silent regression since the `marker` format was added in v1.9.
+  - **Fix**: new `_VIEW_PROJECT_LABELS` constant mapping the 15 languages to their localized labels. `_translation_note_invariants(target_lang)` and `_assemble_translation_note_paragraphs(phrase, target_lang)` now propagate the target language. `fr` fallback if the language is unknown (safe, no KeyError).
+  - **Tests**: `test_source_emits_three_paragraphs_repo_title_description_link` updated (target_lang `ja` → expected Japanese label). 2 new tests: `test_source_link_label_localized_per_target_lang` (parameterized across 7 languages covering Latin, ideographic, and abjad scripts) and `test_source_link_label_falls_back_to_french_for_unknown_target`. Total: 40 tests in `test_translation_note_position.py` (up from 38).
+  - **Backward compatibility**: signature with default `target_lang="fr"`—external programmatic callers without `args.target_lang` continue to work unchanged.
+- **1.9** Silent-failure fix + comprehensive quality tooling + multi-position translation note (2026-05-07):
+  - **Multi-position translation note + "embed card" marker format**:
+    - New CLI options (additive, unchanged defaults → **non-breaking**):
+      - `--note_position {top,bottom,both}` (default: `bottom`): places the note at the top, bottom, or both locations in the translated file.
+      - `--note_format {legacy,marker}` (default: `legacy`):
         - `legacy` strictly reproduces the v1.8 behavior (bold paragraph `**…**`) **byte-for-byte**.
-        - `marker` emits an invisible Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a **3-paragraph blockquote** structured for a "GitHub repo embed card" rendering: project title in inline code (`**\`ai-powered-markdown-translator\`\*\*`), description translated by the LLM, and CTA link (`[Voir le projet sur GitHub ↗](URL)`) with visible arrow. Usable at build time by a remark plugin (cf. blog jls42.org → plugin `remark-translation-banner`).
-    - **Invariants never sent to the LLM**: repo title and GitHub URL are assembled on the Python side after translating the descriptive sentence. The LLM never sees slug `ai-powered-markdown-translator` nor `https://github.com/jls42/...`, guaranteeing that no renderer/casing/scheme is altered.
-    - **Frontmatter-aware insertion**: in `top` or `both` mode, the note is inserted **after the closing `---` block** of the YAML frontmatter (Astro Content Collections / gray-matter safety). Helper `_split_frontmatter` detects `---\n…\n---\n` at the start of the file and preserves its integrity; **raises `RuntimeError`** on open frontmatter without a closing fence (the file is reported in `failed_files` instead of being written with a misplaced note).
-    - **Whitelist model sanitizer**: `_sanitize_model` replaces any character outside `[A-Za-z0-9._:/-]` with `_`, fallback `unknown` if empty. Aligns with the validator on the Astro remark plugin side and neutralizes characters that would break the marker format (space, quote, parenthesis, comma, etc.).
-    - **Internal refactor**: `_append_translation_note` (1 monolithic function) → 7 pure helpers (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder/composer separated (the builder returns a pure block without a separator, the composer applies the `\n\n` according to position); production and source helper share the same 3-paragraph assembler.
-    - **`_quote_lines` blank-preserving**: prefixes each line with `> `, turning blank lines into `>` only. Allows mdast to see 3 distinct paragraphs in the blockquote (title / description / link) instead of one paragraph with line breaks.
-    - **`_build_translation_note_block` adaptive**: depending on the number of paragraphs preserved by the LLM (3 = full card format, 2 = sentence + link, 1 = fallback). The 1-paragraph fallback **no longer wraps in `**...**`** when a Markdown link `](` is detected (fragile rendering of `<strong>` around a link).
-    - **Backward compatibility**: `getattr(args, "note_position", "bottom")` and `getattr(args, "note_format", "legacy")` on the `_compose_with_notes` side — Namespaces without these attributes (existing tests, external programmatic calls) continue to work unchanged.
-  - **Silent-failure fixes on long translations** :
-    - Post-translation language validation on all providers (OpenAI, Mistral, Claude, Gemini): deterministic layer (source excerpt recovered verbatim) + probabilistic layer (`langdetect`)
-    - Whitelist `finish_reason` / `stop_reason` : raise `RuntimeError` on any state outside the whitelist (truncation, content_filter, etc.)
-    - `max_tokens` Claude: `4096` → `32768` (avoids latent truncation on 16k segments, cross-script margin FR→JA/ZH/KO/AR/HI)
-    - Heading-aware segmentation: H2/H3 priority in the 2nd half of the segment (each segment starts with a complete semantic section)
-    - Error propagation up to a non-zero exit code: `translate_markdown_file` returns a typed status `success` / `failure` / `skipped`, `main()` `sys.exit(1)` if at least one file failed (single-file and batch)
-    - Empty-content guard on all providers, source/output sanity ratio (≥ 500 chars, < 5% = reject), code placeholder validation (`#CODEBLOCK`/`#INLINECODE`), post-LLM normalization (separators/links stuck to a heading), `BadRequestError` retry without `reasoning_effort`
-    - Added dependency `langdetect==1.0.9`
-  - **Pre-commit quality tooling** ("full EurekAI type", 14 hooks) :
-    - Pre-commit: ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 protected API keys), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, etc.)
+        - `marker` emits an invisible Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a structured **3-paragraph blockquote** for "GitHub repo embed card"-style rendering: project title in inline code (`**\`ai-powered-markdown-translator\`\*\*`), description translated by the LLM, and CTA link (`[Voir le projet sur GitHub ↗](URL)`) with a visible arrow. Usable at build time by a remark plugin (see the jls42.org blog → `remark-translation-banner` plugin).
+    - **Invariants never sent to the LLM**: the repository title and GitHub URL are assembled in Python after the descriptive sentence is translated. The LLM never sees the `ai-powered-markdown-translator` slug or `https://github.com/jls42/...`, ensuring that no renderer, casing, or scheme is altered.
+    - **Frontmatter-aware insertion**: in `top` or `both` mode, the note is inserted **after the closing `---` block** of the YAML frontmatter (Astro Content Collections / gray-matter safety). The `_split_frontmatter` helper detects `---\n…\n---\n` at the beginning of the file and preserves its integrity; it **raises `RuntimeError`** for open frontmatter without a closing fence (the file is reported in `failed_files` instead of being written with a misplaced note).
+    - **Whitelist-based model sanitizer**: `_sanitize_model` replaces every character outside `[A-Za-z0-9._:/-]` with `_`, falling back to `unknown` if empty. This matches the Astro remark plugin's validator and neutralizes characters that would break the marker format (spaces, quotation marks, parentheses, commas, etc.).
+    - **Internal refactor**: `_append_translation_note` (1 monolithic function) → 7 pure helpers (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`). Builder and composer separated (the builder returns a pure block without a separator, while the composer applies the `\n\n` according to position); production and the source helper share the same 3-paragraph assembler.
+    - **Blank-preserving `_quote_lines`**: prefixes each line with `> `, turning empty lines into `>` alone. This allows mdast to see 3 distinct paragraphs in the blockquote (title / description / link) instead of a single paragraph with line breaks.
+    - **Adaptive `_build_translation_note_block`**: based on the number of paragraphs preserved by the LLM (3 = complete card format, 2 = sentence + link, 1 = fallback). The 1-paragraph fallback **is no longer wrapped in `**...**`** when a Markdown link `](` is detected (fragile rendering of `<strong>` around a link).
+    - **Backward compatibility**: `getattr(args, "note_position", "bottom")` and `getattr(args, "note_format", "legacy")` on `_compose_with_notes` — Namespaces without these attributes (existing tests, external programmatic calls) continue to work unchanged.
+  - **Silent-failure fix for long translations**:
+    - Post-translation language validation across all providers (OpenAI, Mistral, Claude, Gemini): deterministic layer (source excerpt found verbatim) + probabilistic layer (`langdetect`)
+    - `finish_reason` / `stop_reason` whitelist: raise `RuntimeError` for any state outside the whitelist (truncation, content_filter, etc.)
+    - Claude `max_tokens`: `4096` → `32768` (prevents latent truncation on 16k segments, with cross-script headroom for FR→JA/ZH/KO/AR/HI)
+    - Heading-aware segmentation: prioritizes H2/H3 headings in the second half of the segment (each segment begins with a complete semantic section)
+    - Error propagation through to a non-zero exit code: `translate_markdown_file` returns a typed `success` / `failure` / `skipped` status, `main()` `sys.exit(1)` if at least one file failed (single-file and batch)
+    - Empty-content guard across all providers, source/output sanity ratio (≥ 500 chars, < 5% = rejected), code placeholder validation (`#CODEBLOCK`/`#INLINECODE`), post-LLM normalization (separators/links attached to a heading), `BadRequestError` retry without `reasoning_effort`
+    - Added `langdetect==1.0.9` dependency
+  - **Pre-commit quality tooling** ("complete EurekAI-style setup," 14 hooks):
+    - Pre-commit: ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 protected API keys), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large files, shebangs, etc.)
     - Pre-push: mypy (progressive lax mode), Opengrep SAST (translate.py + scripts/), pip-audit (initial reporting mode), unittest discover (tests/ + scripts/tests/)
     - Local wrappers in `scripts/` that use `./venv/bin/python`
-    - `scripts/audit_verdict.py`: JSON parser pip-audit with 11 unittest tests, Python port adapted from the jls42-astro parser
+    - `scripts/audit_verdict.py`: pip-audit JSON parser with 11 unittest tests, an adapted Python port of the jls42-astro parser
     - 7 initial ruff violations fixed: B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
-    - Lizard temporarily excludes `translate.py` (4 functions at CCN 21-47, refactor planned) — strict gate on scripts/
-  - **SonarCloud + exhaustive coverage** :
-    - GitHub Actions workflow `SonarCloud` (sonarcloud.yml + sonar-project.properties) : analysis on every push and pull request, coverage via `coverage.xml`
+    - Lizard temporarily excludes `translate.py` (4 functions with CCN 21–47, refactor planned) — strict gate on scripts/
+  - **SonarCloud + comprehensive coverage**:
+    - GitHub Actions workflow `SonarCloud` (sonarcloud.yml + sonar-project.properties): analysis on every push and pull request, coverage via `coverage.xml`
     - 11 SonarCloud badges at the top of the README (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
-    - `tests/test_silent_failure.py` (`unittest` stdlib) : covers the six links in the silent-failure error chain
-    - `tests/test_orchestration.py` (+79 tests) : covers the orchestration layer of `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallbacks, o1-series prompt format, early-return branches of `_validate_translation_output`)
-    - `scripts/tests/test_audit_verdict.py` : coverage of `main()` (stdin/stdout) and the `if __name__ == "__main__"` block via subprocess
-    - **Coverage on new code** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
-  - **Tests** : `tests/test_translation_note_position.py` covers the position × format matrix (incl. E2E `marker+top|bottom|both` and `legacy+top|bottom|both`), multi-line prefixing, byte-for-byte backward compatibility (golden literal), the sanitizer, frontmatter split (incl. raise on unclosed fence), the 3-paragraph format, the 2-paragraph fallback, the 1-paragraph guard + Markdown link, and a critical safeguard `TestLLMPayloadExcludesInvariants` that asserts title+URL are never sent to the LLM. **190 tests pass**, 0 regression.
-  - Documentation : `README.md` (FR + 14 translations) with badges, `CLAUDE.md` (detailed pre-commit workflow + CI watch), 28 regenerated translations
-- **1.8** `--news` mode + 2026 model bump (2026-03-17, tag `v1.8`) :
-  - Default models updated (March 2026) :
-    - OpenAI quality : `gpt-5` → `gpt-5.4`
-    - OpenAI economical : `gpt-5-mini` → `gpt-5.4-mini`
-    - Gemini quality : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
-  - Added token limits for `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) and `gemini-3.1-pro-preview` (1M)
-  - Initial `--news` mode: protection of EN citations with placeholders `#NEWSQUOTE\d+#`, `LANG_FLAGS` mapping (15 languages), flag handling by target language
-  - Validation of news placeholders before restoration (regression: a LLM that removed the placeholder silently produced output without citation)
-  - `regen_translations.sh` script made portable (absolute paths, no dependency on the pwd)
-  - French link added in the README/CHANGELOG language bars, 28 translations regenerated
-- **1.7** New features :
-  - Option `--keep_filename` to keep the original filename when translating
+    - `tests/test_silent_failure.py` (`unittest` stdlib): covers all six links in the silent-failure error chain
+    - `tests/test_orchestration.py` (+79 tests): covers the `translate.py` orchestration layer (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallbacks, o1-series prompt format, `_validate_translation_output` early-return branches)
+    - `scripts/tests/test_audit_verdict.py`: coverage of `main()` (stdin/stdout) and the `if __name__ == "__main__"` block via subprocess
+    - **Coverage on new code**: 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
+  - **Tests**: `tests/test_translation_note_position.py` covers the position × format matrix (including E2E `marker+top|bottom|both` and `legacy+top|bottom|both`), multi-line prefixing, byte-for-byte backward compatibility (golden literal), the sanitizer, frontmatter splitting (including raising on an unclosed fence), the 3-paragraph format, the 2-paragraph fallback, the 1-paragraph + Markdown link guard, and a critical `TestLLMPayloadExcludesInvariants` safeguard asserting that the title and URL are never sent to the LLM. **190 tests pass**, 0 regressions.
+  - Documentation: `README.md` (FR + 14 translations) with badges, `CLAUDE.md` (pre-commit workflow + detailed CI watch), 28 translations regenerated
+- **1.8** `--news` mode + 2026 model bump (2026-03-17, tag `v1.8`):
+  - Updated default models (March 2026):
+    - OpenAI quality: `gpt-5` → `gpt-5.4`
+    - OpenAI economy: `gpt-5-mini` → `gpt-5.4-mini`
+    - Gemini quality: `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+  - Added token limits for `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k), and `gemini-3.1-pro-preview` (1M)
+  - Initial `--news` mode: protection of EN quotations with `#NEWSQUOTE\d+#` placeholders, `LANG_FLAGS` mapping (15 languages), target-language flag handling
+  - Validation of news placeholders before restoration (regression: an LLM that removed the placeholder silently produced output without the quotation)
+  - Made the `regen_translations.sh` script portable (absolute paths, no dependency on pwd)
+  - Added a French link to the README/CHANGELOG language bars, regenerated 28 translations
+- **1.7** New features:
+  - `--keep_filename` option to preserve the original filename during translation
   - Support for the `.env` file to load API keys automatically
-  - **Inline code preservation** : backticks (`` `...` ``) are now protected during translation
-  - System prompt improvement :
-    - Better handling of quotes in YAML frontmatter
+  - **Inline code preservation**: backticks (`` `...` ``) are now protected during translation
+  - Improved system prompt:
+    - Better handling of quotation marks in YAML frontmatter
     - Protection of template variables `{variable}`
-    - Ban on unsolicited translator notes
+    - Prohibition of unsolicited translator's notes
   - Successfully tested on 364 files (jls42.org blog migration)
-- **1.6** New features :
+- **1.6** New features:
   - Support for the Google Gemini API for translation (`--use_gemini`)
-  - Default model updates for 2026 :
-    - OpenAI : `gpt-5` (quality), `gpt-5-mini` (eco)
-    - Claude : `claude-sonnet-4-5` (quality), `claude-haiku-4-5` (eco)
-    - Gemini : `gemini-3-pro-preview` (quality), `gemini-3-flash-preview` (eco)
-  - Economy mode (`--eco`) to use faster and cheaper models
+  - Updated 2026 default models:
+    - OpenAI: `gpt-5` (quality), `gpt-5-mini` (economy)
+    - Claude: `claude-sonnet-4-5` (quality), `claude-haiku-4-5` (economy)
+    - Gemini: `gemini-3-pro-preview` (quality), `gemini-3-flash-preview` (economy)
+  - Economy mode (`--eco`) for using faster, less expensive models
   - Single-file translation (`--file`) without traversing a directory
   - New simplified naming pattern: `{base}-{lang}.md`
-  - Option `--include_model` to keep the old format with the model name
+  - `--include_model` option to preserve the old format with the model name
   - Support for unlisted models with a default token limit (128k)
   - README translated into 14 languages
-- **1.5** Improvements :
+- **1.5** Improvements:
   - **API key and default model updates:**
     - **OpenAI:** Updated from `DEFAULT_MODEL_OPENAI` to `"gpt-4o"`.
     - **Mistral AI:** Updated from `DEFAULT_MODEL_MISTRAL` to `"mistral-large-latest"`.
-    - **Anthropic Claude:** Added `DEFAULT_ANTHROPIC_API_KEY` and updated `DEFAULT_MODEL_CLAUDE` to `"claude-3-5-sonnet-20240620"`.
+    - **Anthropic Claude:** Added `DEFAULT_ANTHROPIC_API_KEY` and updated from `DEFAULT_MODEL_CLAUDE` to `"claude-3-5-sonnet-20240620"`.
   - **Translation prompt optimization:**
-    - The prompts for direct translations and translation notes were enriched for better clarity and efficiency, including detailed instructions on preserving metadata and specific formatting elements.
-  - **Code refactor:**
-    - Replacement of `MistralClient` by class `Mistral` for initializing the Mistral AI client.
-    - Reorganization of imports for better readability and maintenance.
-    - Improvement of text segmentation and code block handling to preserve original formatting during translation.
+    - Prompts for direct translations and translation notes were enhanced for greater clarity and efficiency, including detailed instructions on preserving metadata and specific formatting elements.
+  - **Code refactoring:**
+    - Replaced `MistralClient` with the `Mistral` class for Mistral AI client initialization.
+    - Reorganized imports for improved readability and maintainability.
+    - Improved text segmentation and code block handling to preserve the original formatting during translation.
   - **Output file management:**
-    - Reversal of the model and language in output filenames (for example, `f"{base}-{args.target_lang}-{args.model}.md"`), making it easier to organize and search translations.
+    - Reversed the model and language in output filenames (for example, `f"{base}-{args.target_lang}-{args.model}.md"`), making translations easier to organize and find.
   - **Miscellaneous improvements:**
-    - Cleanup of the code by removing unnecessary blank lines.
-    - Minor adjustments to improve the structure and readability of the script.
-- **1.4** New features :
-  - Support for the Anthropic Claude API for translation
+    - Cleaned up the code by removing unnecessary blank lines.
+    - Made minor adjustments to improve the script's structure and readability.
+- **1.4** New features:
+  - Support for Anthropic's Claude API for translation
   - Prompt optimization for greater clarity and efficiency
   - Minor adjustments to improve code maintainability
-- **1.3** Improvements and new features :
+- **1.3** Improvements and new features:
   - Improved code block handling
-  - Improved output file management
-  - Improved detection of existing files
-  - Option `--force` to force translation
-  - Reversal of the model and language in the output filename
+  - Improved output file handling
+  - Improved existing-file detection
+  - `--force` option to force translation
+  - Reversed the model and language in the output filename
 - **1.2** Changelog fix
 - **1.1** Added support for the Mistral AI API
-- **1.0** Initial version - Support for the OpenAI API
+- **1.0** Initial release - OpenAI API support
 
-**Translated article from fr to en with gpt-5.4-mini.**
+**Article translated from fr to en with gpt-5.6-sol.**

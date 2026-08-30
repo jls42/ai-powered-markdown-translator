@@ -1,20 +1,20 @@
-# AI-gedreven Markdown-vertaler
+# AI-aangedreven Markdown-vertaler
 
 🌍 [Frans](README.md) | [Engels](README-en.md) | [Spaans](README-es.md) | [Chinees](README-zh.md) | [Duits](README-de.md) | [Japans](README-ja.md) | [Koreaans](README-ko.md) | [Arabisch](README-ar.md) | [Hindi](README-hi.md) | [Italiaans](README-it.md) | [Nederlands](README-nl.md) | [Pools](README-pl.md) | [Portugees](README-pt.md) | [Roemeens](README-ro.md) | [Zweeds](README-sv.md)
 
 <h4 align="center">📊 Codekwaliteit</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Quality Gate-status"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Beveiligingsscore"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Betrouwbaarheidsscore"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Onderhoudbaarheidsscore"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Status van Quality Gate"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Beveiligingsbeoordeling"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Betrouwbaarheidsbeoordeling"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Onderhoudbaarheidsbeoordeling"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Dekking"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Kwetsbaarheden"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Bugs"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code smells"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Gedupliceerde regels (%)"></a>
@@ -26,22 +26,22 @@
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-Markdown-bestandsvertaler met behulp van **OpenAI**, **Mistral AI**, **Claude (Anthropic)** en **Google Gemini**.
+Vertaler voor Markdown-bestanden die gebruikmaakt van **OpenAI**, **Mistral AI**, **Claude (Anthropic)** en **Google Gemini**.
 
-Dit Python-script vertaalt Markdown-bestanden van een brontaal naar een doeltaal, terwijl de opmaak, codeblokken en frontmatter-metagegevens behouden blijven.
+Dit Python-script vertaalt Markdown-bestanden van een brontaal naar een doeltaal, met behoud van de opmaak, codeblokken en frontmatter-metadata.
 
 ## Belangrijkste kenmerken
 
-- **Multi-provider**: Ondersteuning voor 4 API's (OpenAI, Mistral, Claude, Gemini)
-- **Modellen 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **Ecomodus**: Optie `--eco` om snellere en goedkopere modellen te gebruiken
-- **Eén bestand**: Optie `--file` om één enkel bestand te vertalen
-- **Slimme segmentatie**: Verwerking van lange teksten met tokenlimieten per model
-- **Codebehoud**: Zowel codeblokken ALS inline code (`` `...` ``) worden behouden
+- **Multi-Provider**: Ondersteuning voor 4 API's (OpenAI, Mistral, Claude, Gemini) + de Codex CLI via een ChatGPT-abonnement
+- **Modellen van 2026**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
+- **Voordelige modus**: Optie `--eco` om snellere en goedkopere modellen te gebruiken
+- **Eén bestand**: Optie `--file` om één bestand te vertalen
+- **Intelligente segmentatie**: Verwerking van lange teksten met tokenlimieten per model
+- **Behoud van code**: Codeblokken EN inlinecode (`` `...` ``) blijven behouden
 - **Bestandsnaam**: Optie `--keep_filename` om de oorspronkelijke naam te behouden
-- **Nieuwsmode**: Optie `--news` om Engelse citaten te beschermen en vlaggen in nieuwsartikelen te beheren
+- **Nieuwsmodus**: Optie `--news` om Engelse citaten te beschermen en vlaggen in nieuwsartikelen te verwerken
 - **.env-configuratie**: Ondersteuning voor het bestand `.env` voor API-sleutels
-- **Vertaalnotitie**: Optionele toevoeging van een notitie aan het einde van het document
+- **Vertaalnotitie**: Optioneel toevoegen van een notitie aan het einde van het document
 
 ## Installatie
 
@@ -52,9 +52,9 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Kwaliteitstooling (optioneel maar aanbevolen)
+### Kwaliteitstools (optioneel maar aanbevolen)
 
-Het project gebruikt [`pre-commit`](https://pre-commit.com) om te voorkomen dat slecht geformatteerde, kwetsbare of geheimen bevattende code wordt gecommit. Installatie:
+Het project gebruikt [`pre-commit`](https://pre-commit.com) om te voorkomen dat slecht opgemaakte of kwetsbare code, of code met een geheim, wordt gecommit. Installatie:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -62,15 +62,16 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Actieve hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexiteit), detect-secrets (API-sleutels), mypy (stapsgewijze typering), Opengrep (SAST), pip-audit (CVE-afhankelijkheden), unittest. Zie `CLAUDE.md` sectie _Quality / pre-commit_ voor details.
+Actieve hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexiteit), detect-secrets (API-sleutels), mypy (progressieve typering), Opengrep (SAST), pip-audit (CVE's van dependencies), unittest. Zie de sectie _Quality / pre-commit_ in `CLAUDE.md` voor details.
 
 ## Configuratie
 
-Maak een bestand `.env` aan in de root van het project of definieer de omgevingsvariabelen:
+Maak een bestand `.env` in de hoofdmap van het project of stel de omgevingsvariabelen in:
 
 ```bash
 # Fichier .env (recommandé)
 OPENAI_API_KEY=votre-clé-api-openai
+XAI_API_KEY=votre-clé-api-xai
 MISTRAL_API_KEY=votre-clé-api-mistral
 ANTHROPIC_API_KEY=votre-clé-api-anthropic
 GOOGLE_API_KEY=votre-clé-api-google
@@ -79,9 +80,15 @@ GOOGLE_API_KEY=votre-clé-api-google
 export OPENAI_API_KEY='votre-clé-api-openai'
 ```
 
+`GEMINI_API_KEY` wordt geaccepteerd als alternatief voor `GOOGLE_API_KEY` (AI
+Studio-conventie). Optionele variabelen: `XAI_BASE_URL` (xAI-endpoint, standaard
+`https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (seconden per Anthropic-aanroep, standaard
+900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
+en `GROK_TRANSLATE_SANDBOX` (zie de sectie over Grok CLI).
+
 ## Gebruik
 
-### Een enkel bestand vertalen
+### Eén bestand vertalen
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
@@ -90,7 +97,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Een map vertalen
 
 ```bash
-# Avec OpenAI (défaut: gpt-5.5)
+# Avec OpenAI (défaut: gpt-5.6-terra)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -101,11 +108,110 @@ python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content
 
 # Avec Gemini
 python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
+
+# Avec Codex (sur le quota de l'abonnement ChatGPT, sans facturation à l'usage)
+python translate.py --use_codex --eco --file 'README.md' --target_dir . --target_lang 'it'
+
+# Avec Grok par l'API xAI (nécessite XAI_API_KEY, facturé à l'usage)
+python translate.py --use_grok --source_dir 'content/fr' --target_dir 'content/pt' --target_lang 'pt'
+
+# Avec Grok sur le quota de l'abonnement Grok (nécessite `grok login`)
+python translate.py --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
 ```
 
-### Ecomodus
+### Vertalen via je ChatGPT-abonnement (`--use_codex`)
 
-Gebruikt snellere en goedkopere modellen (gpt-5.4-mini, claude-haiku, gemini-flash):
+Deze provider gebruikt geen API-sleutel: hij stuurt de officiële Codex CLI aan in
+niet-interactieve modus, waardoor de vertaling wordt afgetrokken van het quotum
+van het reeds betaalde ChatGPT-abonnement (Plus, Pro, Business…). Dit is de
+enige door OpenAI gedocumenteerde methode voor dit gebruik — tokens van
+`~/.codex/auth.json` verifiëren geen aanroepen naar de Platform API en worden
+bovendien nooit door dit script gelezen.
+
+**Vereisten:**
+
+```bash
+# Le binaire `codex`, au choix :
+pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo)
+npm install -g @openai/codex       # ou l'installation npm globale
+
+codex login                        # connexion avec le compte ChatGPT
+```
+
+Het uitvoerbare bestand wordt in deze volgorde gezocht: de variabele `CODEX_BIN`, de `PATH`,
+en vervolgens het Python-package `openai-codex-cli-bin`. Dit laatste is bewust
+niet opgenomen in `requirements.txt`: het is ongeveer 250 MB groot, wat anders aan alle
+gebruikers zou worden opgelegd voor een optionele provider.
+
+**Goed om te weten:**
+
+- **Er wordt geen API-sleutel gebruikt.** `OPENAI_API_KEY` en `CODEX_API_KEY` worden
+  uit de omgeving van het subprocess verwijderd, zodat een sleutel die
+  aanwezig is in `.env` er nooit toe leidt dat de vertaling op basis van
+  gebruik wordt gefactureerd.
+- **Eén segment = één ‘lokaal bericht’** binnen het venster van 5 uur van het abonnement.
+  Gebruik `--eco` (model `gpt-5.6-luna`, 250-2.000 berichten/5 uur bij Plus)
+  in plaats van het kwaliteitsmodel (`gpt-5.6-sol`, 10-100 berichten/5 uur).
+- **Langzamer** dan een API-aanroep: reken op ongeveer 45 s voor een volledige README,
+  tegenover enkele seconden bij een rechtstreekse aanroep.
+- **Geweigerd in CI** (`CI` of `GITHUB_ACTIONS` ingesteld): authenticatie via
+  een abonnement is niet bedoeld voor een gedeelde runner en OpenAI raadt deze
+  workflow af voor openbare repositories. Gebruik hiervoor een API-sleutel.
+- Omgevingsvariabelen: `CODEX_BIN` (expliciet pad naar het uitvoerbare bestand) en
+  `CODEX_TIMEOUT` (seconden per segment, standaard `600`).
+
+### Vertalen via je Grok-abonnement (`--use_grok_cli`)
+
+Hetzelfde principe als `--use_codex`, met de officiële **Grok Build** CLI: de
+vertaling wordt afgetrokken van het Grok-abonnement (SuperGrok / X Premium+) in
+plaats van per token te worden gefactureerd.
+
+```bash
+curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
+grok login                                      # ou `grok login --device-code`
+```
+
+**Isolatie — lezen vóór gebruik.** Deze provider is structureel **zwakker**
+dan `--use_codex`, en dat is een bewuste keuze:
+
+- Codex draait in `--sandbox read-only`, een door het systeem opgelegde grens.
+- De sandbox van Grok **kan niet worden toegepast** op veel recente Linux-systemen:
+  AppArmor blokkeert niet-bevoorrechte user namespaces sinds Ubuntu 24.04,
+  en de denylist voor sockets van de container-runtime faalt als
+  `/run/podman` op `0700` staat. Een **ingebouwd** profiel dat niet kan
+  worden toegepast, start echter **stilzwijgend zonder isolatie**.
+- Het script vraagt daarom standaard geen profiel aan en **valt nooit
+  stilzwijgend terug**: het toont een waarschuwing. De isolatie berust op de
+  `--deny`-regels van de CLI (waaronder de catch-all `*`), de enige
+  gemeten _fail-closed_-laag — een onbekende regel zorgt ervoor dat het opstarten
+  wordt geweigerd in plaats van de beveiliging zonder melding te verwijderen.
+- Om de OS-sandbox **verplicht te stellen**: `GROK_TRANSLATE_SANDBOX=read-only`. Het
+  opstarten mislukt als de machine deze niet kan toepassen, wat het
+  gewenste gedrag is.
+
+**Quotum**: de Grok-pool is **wekelijks en gedeeld** met Chat, Imagine en
+Voice, en er bestaat geen opdracht om deze uit te lezen. Een batchverwerking kan
+daardoor je gebruik voor gesprekken verminderen zonder dat dit ergens wordt
+gemeld — vandaar een gelijktijdigheidslimiet van 2 en een waarschuwing in
+`regen_translations.sh`.
+
+Andere variabelen: `GROK_BIN` (pad naar het uitvoerbare bestand), `GROK_TIMEOUT` (standaard 900 s).
+
+Voor het opnieuw genereren van de 28 vertalingen:
+
+```bash
+REGEN_PROVIDER=codex ./regen_translations.sh --force
+
+# Sur un modèle précis plutôt que le défaut --eco du provider
+REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+
+# Sur le quota de l'abonnement Grok
+REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
+```
+
+### Voordelige modus
+
+Gebruikt snellere en goedkopere modellen (gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -113,40 +219,44 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Opties
 
-| Optie                   | Beschrijving                                                              |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Eén enkel Markdown-bestand om te vertalen                                       |
-| `--source_dir`           | Bronmap met de Markdown-bestanden                        |
-| `--target_dir`           | Uitvoermap voor de vertaalde bestanden                          |
-| `--source_lang`          | Brontaal (standaard: `fr`)                                             |
-| `--target_lang`          | Doeltaal (standaard: `en`)                                              |
-| `--model`                | Specifiek te gebruiken model                                             |
-| `--eco`                  | Gebruik de budgetmodellen                                         |
-| `--use_mistral`          | Gebruik de Mistral AI API                                                |
-| `--use_claude`           | Gebruik de Claude API                                                    |
-| `--use_gemini`           | Gebruik de Gemini API                                                    |
-| `--force`                | Opnieuw vertalen forceren                                                  |
-| `--keep_filename`        | Oorspronkelijke bestandsnaam behouden                                     |
-| `--news`                 | Nieuwsmode: beschermt EN-citaten, beheert vlaggen per taal |
-| `--add_translation_note` | Voeg een vertaalnotitie toe                                           |
-| `--note_position`        | Positie van de notitie: `top`, `bottom` (standaard), of `both`                |
-| `--note_format`          | Notitie-indeling: `legacy` (standaard, vetgedrukte alinea) of `marker`       |
-| `--include_model`        | Neem de modelnaam op in het uitvoerbestand                       |
+| Optie                    | Beschrijving                                                              |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `--file`           | Eén te vertalen Markdown-bestand                                          |
+| `--source_dir`           | Bronmap met de Markdown-bestanden                                         |
+| `--target_dir`           | Uitvoermap voor de vertaalde bestanden                                    |
+| `--source_lang`           | Brontaal (standaard: `fr`)                                      |
+| `--target_lang`           | Doeltaal (standaard: `en`)                                      |
+| `--model`           | Specifiek te gebruiken model                                              |
+| `--eco`           | De voordelige modellen gebruiken                                         |
+| `--use_mistral`           | De Mistral AI API gebruiken                                              |
+| `--use_claude`           | De Claude API gebruiken                                                  |
+| `--use_gemini`           | De Gemini API gebruiken                                                  |
+| `--use_codex`           | De Codex CLI gebruiken met het quotum van het ChatGPT-abonnement         |
+| `--use_grok`           | De xAI API (Grok) gebruiken — vereist `XAI_API_KEY`                      |
+| `--use_grok_cli`           | De Grok CLI gebruiken met het quotum van het Grok-abonnement             |
+| `--force`           | Opnieuw vertalen afdwingen                                               |
+| `--keep_filename`           | De oorspronkelijke bestandsnaam behouden                                 |
+| `--news`           | Nieuwsmodus: beschermt EN-citaten en verwerkt vlaggen per taal           |
+| `--add_translation_note`           | Een vertaalnotitie toevoegen                                             |
+| `--note_position`           | Positie van de notitie: `top`, `bottom` (standaard) of `both` |
+| `--note_format`           | Indeling van de notitie: `legacy` (standaard, vetgedrukte alinea) of `marker` |
+| `--include_model`           | De modelnaam opnemen in het uitvoerbestand                               |
+| `--reasoning_effort`           | Redeneerinspanning van GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh` |
 
-### Vertaalnotitie: posities en formaten
+### Vertaalnotitie: posities en indelingen
 
-Met `--add_translation_note` kan de vertaler de notitie bovenaan, onderaan of op beide plaatsen zetten, en deze weergeven in een eenvoudig tekstformaat (achterwaarts compatibel) of in `marker`-formaat dat door een Markdown-plugin kan worden gebruikt.
+Met `--add_translation_note` kan de vertaler de notitie bovenaan, onderaan of op beide plaatsen zetten en deze weergeven als eenvoudige tekstindeling (achterwaarts compatibel) of als `marker`-indeling die door een Markdown-plugin kan worden verwerkt.
 
-**Positie** (`--note_position`) :
+**Positie** (`--note_position`):
 
-- `bottom` (standaard) : notitie aan het einde van het bestand, zoals historisch.
-- `top` : notitie ingevoegd **na de YAML-frontmatter** (veilig voor Astro Content Collections, gray-matter, enz.).
-- `both` : notitie bovenaan EN onderaan ingevoegd (één enkele LLM-aanroep, inhoud hergebruikt voor beide plaatsen).
+- `bottom` (standaard): notitie aan het einde van het bestand, zoals van oudsher.
+- `top`: notitie ingevoegd **na de YAML-frontmatter** (veilig voor Astro Content Collections, gray-matter enz.).
+- `both`: notitie bovenaan EN onderaan ingevoegd (één LLM-aanroep, inhoud hergebruikt voor beide posities).
 
-**Formaat** (`--note_format`) :
+**Indeling** (`--note_format`):
 
-- `legacy` (standaard) : vetgedrukte alinea `**...**` — strikt identiek gedrag aan v1.8, byte-for-byte. Compatibel met Hugo, GitHub, GitLab en elke Markdown-renderer.
-- `marker` : onzichtbare Markdown-linkreferentiedefinitie (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) gevolgd door een vetgedrukte blockquote. Native leesbaar op GitHub/GitLab, en bruikbaar tijdens de build via een remark-plugin aan Astro-zijde om een gestileerde banner te produceren (zie blog jls42.org).
+- `legacy` (standaard): vetgedrukte alinea `**...**` — gedrag strikt identiek aan v1.8, byte-for-byte. Compatibel met Hugo, GitHub, GitLab en elke Markdown-renderer.
+- `marker`: onzichtbare Markdown-linkreferentiedefinitie (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`), gevolgd door een vetgedrukt blockquote. Rechtstreeks leesbaar op GitHub/GitLab en tijdens het bouwen te verwerken door een remark-plugin aan de Astro-kant om een gestileerde banner te produceren (zie blog jls42.org).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -163,26 +273,29 @@ python translate.py --file article.mdx --target_lang en \
 
 ### Standaardmodellen (2026)
 
-| Aanbieder | Kwaliteit (standaard)         | Budget (`--eco`)            |
-| -------- | ------------------------ | ------------------------------- |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
+| Provider | Kwaliteit (standaard)  | Voordelig (`--eco`) |
+| -------- | ---------------------- | -------------------------- |
+| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`             |
+| Claude   | `claude-sonnet-5`        | `claude-haiku-4-5`             |
+| Mistral  | `mistral-large-latest`        | `mistral-small-latest`            |
+| Gemini   | `gemini-3.7-flash`       | `gemini-3.1-flash-lite`            |
+| Codex    | `gpt-5.6-sol`       | `gpt-5.6-luna`            |
+| Grok API | `grok-4.6`       | `grok-4.3`            |
+| Grok CLI | `grok-4.6`       | `grok-4.5`            |
 
-> **Aanbeveling voor langvormvertalingen** : `--use_gemini` (standaard = `gemini-3.1-pro-preview` kwaliteit, `--eco` = `gemini-3.1-flash-lite-preview`) neigt ertoe de markdownstructuur beter te behouden op niet-Latijnse scripts (PL, JA, ZH, AR, HI), vooral in `--news`-modus waar de nauwkeurigheid van placeholders telt. OpenAI blijft de standaard voor achterwaartse compatibiliteit.
+> **Aanbeveling voor lange vertalingen**: `--use_gemini` (standaard = `gemini-3.7-flash`) behoudt de Markdown-structuur nauwkeurig bij niet-Latijnse schriften (PL, JA, ZH, AR, HI), ook in de modus `--news` waarin de getrouwheid van placeholders van belang is. Gemeten op deze naar het Japans vertaalde README: structuur identiek aan `gemini-3.1-pro-preview` (21 lijsten, 18 codeblokken, 13 HTML-links, 13 afbeeldingen, alle URL's behouden) met ongeveer 6x minder latentie. OpenAI blijft de standaard voor achterwaartse compatibiliteit.
 
 ## Projecten die dit script gebruiken
 
-- **[jls42.org](https://jls42.org)** - Meertalige persoonlijke blog (15 talen)
+- **[jls42.org](https://jls42.org)** - Persoonlijke meertalige blog (15 talen)
 
 ## Auteur
 
 Julien LE SAUX
-E-mail : contact@jls42.org
+E-mail: contact@jls42.org
 
 ## Licentie
 
-GNU GENERAL PUBLIC LICENSE versie 3. Zie [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Version 3. Zie [LICENSE](LICENSE).
 
-**Artikel vertaald van fr naar nl met gpt-5.4-mini.**
+**Artikel vertaald van het Frans naar het Nederlands met gpt-5.6-sol.**

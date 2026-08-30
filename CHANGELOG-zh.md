@@ -2,121 +2,160 @@
 
 🌍 [法语](CHANGELOG.md) | [英语](CHANGELOG-en.md) | [西班牙语](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [德语](CHANGELOG-de.md) | [日语](CHANGELOG-ja.md) | [韩语](CHANGELOG-ko.md) | [阿拉伯语](CHANGELOG-ar.md) | [印地语](CHANGELOG-hi.md) | [意大利语](CHANGELOG-it.md) | [荷兰语](CHANGELOG-nl.md) | [波兰语](CHANGELOG-pl.md) | [葡萄牙语](CHANGELOG-pt.md) | [罗马尼亚语](CHANGELOG-ro.md) | [瑞典语](CHANGELOG-sv.md)
 
-- **1.9.2** 修复带嵌套括号或 FR 前缀的 news 归因 URL 提取（2026-05-11）：
+- **1.10.0** 新增 Provider `--use_codex`（ChatGPT 订阅配额）、更新 SDK 和模型，并修复多段落新闻引文问题（2026-08-29）：
 
-  - **修复的 Bug**：在 `_protect_news_quotes` 中提取归因 URL 时使用了正则 `re.search(r"\((.+?)\)", attribution)`（括号内的惰性捕获）。对于类似 `(relayé par [@user sur X](https://x.com/.../123))` 的归因（嵌套括号：外层 `(` + markdown link 的 `]()`），捕获会在遇到第一个 `)` 时停止 → 字符串被截断且带上 FR 前缀：`relayé par [@user sur X](https://x.com/.../123`（没有最终的 `)`）。结果：`_validate_news_post` 会在翻译输出中查找这段字符串并且总是失败（两个原因：`)` 被截断 + “relayé par” 被翻译为 `relayed by`/`weitergeleitet von`/...）。完整的 low → medium → high → gpt-5.5 级联都无法通过。
-  - **修复**：正则改为 `re.search(r"\]\(([^)]+)\)", attribution)` —— 精确针对 markdown link 的 `](url)`，**只捕获纯 URL**（不含 FR 前缀且不截断），翻译过程中由占位符 `#URL{N}#` 保持不变。对这两种问题模式都具备鲁棒性：
-    - `(relayé par [@account sur X](url))` — 嵌套括号
-    - `via [@source](url)` 或 `selon [@author](url)` — 没有外层括号的 FR 前缀
-  - **测试**：`test_silent_failure.py` 类中新增 2 个测试：
-    - `TestNewsCitationExtraction`（Genspark CEO E2B bug 的精确复现）
-    - `test_extract_attribution_url_with_nested_parens`（带 `test_extract_attribution_url_with_french_prefix` 的变体）
-  - **覆盖缺口**：`via` 只验证编辑语法，不验证 translator 的可翻译性。一个可能的改进（超出 v1.9.2 范围）是增加一个 dry-run 的归因提取模拟检查，在发布前提前发现高风险模式。
+  - **两个新的 Grok Provider**：`--use_grok`（xAI API，使用 `XAI_API_KEY` 密钥，按用量计费）和 `--use_grok_cli`（官方 Grok Build CLI，从 Grok 订阅额度中扣除——原理与 `--use_codex` 相同）。
+    - **API 模式，约 40 行代码**：由于 xAI 端点兼容 OpenAI，客户端和 `_call_openai` 均原样复用，仅更改 `base_url`。只需进行一项适配，而且所有 Provider 都能从中受益：`finish_reason` 现在接受 `end_turn`，这是 xAI 输出的形式，而 OpenAI 输出的是 `stop`。模型：`grok-4.6`（高质量）和 `grok-4.3`（经济型）。需要注意的是，Grok 的经济型模型仍是仓库中最昂贵的——每百万 token 为 $1.25/$2.50，而 `mistral-small-latest` 为 $0.15/$0.60：选择此 Provider 是为了模型多样性，而非价格。
+    - **CLI 模式**：以 Codex 为蓝本，但因实际条件存在四项必要差异——提示词通过文件传入（`--prompt-file`，CLI 不读取 stdin，而 argv 中的片段会在 `ps` 中可见）；输出是 stdout 上的单个 JSON 对象（既非 JSONL，也不写入 `-o` 文件）；订阅仅提供 `grok-4.6` 和 `grok-4.5`；且无法应用 sandbox（见下文）。子进程启动逻辑与 Codex 一同提取至 `_codex_run_process`，未改动已测试过的 Codex Provider 其余部分。
+    - **`exit 0` 本身不能证明任何事，实测结果如下**：未认证时，CLI 会将 `{"type":"error","message":"Not signed in."}` 写入 **stdout**，且返回码为 **0**。请求被拒绝或超出轮数限制时也是如此。因此，输出契约要求同时满足四个条件：返回码为 0、不含错误 payload、`stopReason == end_turn`，且文本非空。预检遵循相同逻辑：即使处于未登录状态，`grok models` 也会以 0 退出，只有 stdout 中出现“not authenticated”才能据此判断。
+    - **隔离：明确接受并记录这种不对称性。** Codex 运行于 `--sandbox read-only`，而 Grok 的 sandbox 在许多较新的 Linux 机器上无法使用，原因是两个彼此独立的系统问题，若无 `sudo` 就无法绕过：自 Ubuntu 24.04 起，AppArmor 会阻止非特权 user namespace（`bwrap: setting up uid map: Permission denied`，已在 Grok 之外复现）；当 `/run/podman` 处于 `0700` 状态时，容器 runtime socket 的 deny-list 会失败（resolver 只处理 `ErrorKind::NotFound`，EACCES 会成为致命错误）。核心陷阱是：无法应用的**内置**配置会在**毫无提示的情况下以非隔离方式启动**。因此，脚本默认不请求任何配置，也绝不会静默回退——它会在 stderr 上发出警告。保护依赖于 CLI 的 `--deny` 规则，其中包括兜底的 `*`；这是唯一经过实测的 _fail-closed_ 层（使用未知前缀的规则会导致启动被拒绝）。可通过 `GROK_TRANSLATE_SANDBOX=read-only` 强制要求启用该层；若机器无法满足要求，启动便会失败。
+    - **防护措施**：从子进程环境中移除 `XAI_API_KEY`、`GROK_API_KEY` 和 `GROK_SANDBOX`（存在密钥会切换为按用量计费；继承的 `GROK_SANDBOX` 会强制使用无法应用的配置，并给出误导性消息），禁用 MCP/hooks/skills/agents 开关，并设置 `--disable-web-search`、`--no-subagents`、`--no-plan`、一次性 workdir、CI 环境拒绝运行、超时后终止整个进程组，以及遇到 rate limit 时执行 back-off。`--max-turns` 设为 6 而不是 1：计数器会在工具轮次结束后递增，设为 1 会截断输出。
+    - **配额**：Grok 的配额池按周计算，并且**与 Chat、Imagine 和 Voice 共享**，没有任何命令可以显示它——这不同于 Codex，后者可通过 `account/rateLimits/read` 量化消耗。因此，`regen_translations.sh` 将并发限制为 2，并给出明确警告。
+    - **测试**：新增文件 `tests/test_grok_provider.py`（24 项测试）。完整测试套件共 **290 项测试**。
+  - **已修复的 Bug——英语多段落引文仅有部分受到保护（`--news` 模式）**：`_NEWS_CITATION_REGEX` 仅接受由**连续的** `>` 行构成的引文正文。一旦引文跨越多个段落（中间由一个空的 `>` 行分隔），便只有最后一个段落会被捕获并替换为占位符；之前的段落会被发送给 LLM，并在返回时遭到翻译——这与 `--news` 所要保证的目标完全相反。重复模式现在可接受内部空的 `>` 行，并改为非贪婪匹配，从而在斜体行之前的空 `>` 处停止，而非遇到第一个空行就停止。
+    - **实测影响范围**：在包含 198 篇文章的真实语料库中，419 条引文里有 11 条受影响。没有出现回归——新 regex 捕获的引文数量完全相同，只扩展了多段落正文（408 个正文保持不变，11 个得到扩展），且署名行 `> — …` 仍不会被吸收到正文中（保留了 lookahead）。
+    - **端到端验证**：对一篇 69 ko 的文章进行日语和阿拉伯语翻译；某条引文的第一段此前在日语中被翻译为 `> GLM-5.3がオープンウェイト化。`，在阿拉伯语中也同样遭到翻译，现在则保持为 `> GLM-5.3 is now open-weight.`。英语引文的行数从 9 恢复为 10，与源文一致。
+    - 需要注意的是，下游验证器未能发现此缺陷，因为它们只检查引文是否存在，而不检查引文是否完整。
+  - **默认 Provider 的实测成本节省**：只要模型名称以 `gpt-5` 开头，`_openai_extra_kwargs` 就会发送 `reasoning_effort="medium"`，即使处于 `--eco` 模式也不例外。使用 `gpt-5.4-mini` 翻译一个十词句子的测量结果：`medium` → 45 个 reasoning token 和 65 个输出 token；`none` → 0 和 14。推理对翻译毫无帮助，却会在每个文件的每个片段上产生费用。现在，`--eco` 模式下的默认值改为 `none`，其他情况下仍为 `medium`；通过 CLI 显式传入的值仍具有优先权。除 `low`/`medium`/`high` 外，`--reasoning_effort` 现在还接受 `none` 和 `xhigh`（并非所有模型都接受全部取值：例如 `gpt-5.4-mini` 会拒绝 `minimal`——现有的无参数重试机制可处理这种情况）。
+  - **SDK 更新与 Gemini 迁移**：`google-generativeai`（已于 2025-11-30 终止支持，仓库已归档）被统一 SDK **`google-genai`** 取代——先使用 `genai.Client(api_key=...)`，再使用 `client.models.generate_content(model=, contents=, config=)`；系统提示词通过 `system_instruction` 传递，而不再与片段拼接。`mistralai` 升级至 **2.9.4**（import 改为 `from mistralai.client import Mistral`；旧写法会抛出 `ImportError`，已在 wheel 中验证），`anthropic` 升级至 **0.125.0**，`openai` 升级至 **2.54.0**——这些是切换到 `httpx2` 之前的最后版本，以避免在 venv 中同时保留两套 HTTP 栈。因此也解除了对 `httpx` 0.28.1 和 `pydantic` 2.13.5 的限制。
+  - **两项由真实测试而非文档发现的回归**：
+    - `anthropic` ≥ 1.0 会在客户端拒绝预计耗时超过 10 分钟的非流式调用（依据 `max_tokens` 判断，`ValueError: Streaming is required...`）。此防护在 0.34.2 中并不存在，会导致所有使用 `max_tokens=32768` 的 Claude 调用失败。现已通过显式设置 `timeout` 修复（`CLAUDE_TIMEOUT`，默认 900 s），从而避免为了只使用完整响应的调用而切换到 streaming。
+    - 只有 Gemini 产品目录中的部分模型接受 `thinking_level="minimal"`：`gemini-3.1-flash-lite` 支持它，而 `gemini-3.7-flash` 和 `gemini-3.1-pro-preview` 会以 400 拒绝。因此新增 `_gemini_generate_with_fallback`，按 `minimal` → `low` → 不使用 thinking_config 的顺序逐级回退，仿照已有的 OpenAI fallback——优化参数绝不能导致翻译失败。
+  - **更新默认模型**，每个模型均通过真实调用验证：OpenAI `gpt-5.5` → **`gpt-5.6-terra`**（在一个包含 28 项的 batch 上降低 60%）以及 `gpt-5.4-mini` → **`gpt-5.6-luna`**（降低 73%）；Claude `claude-sonnet-4-6` → **`claude-sonnet-5`**（价格更低且更新）以及 `claude-haiku-4-5-20251001` → **`claude-haiku-4-5`**（不含日期的规范 ID）；Gemini `gemini-3.1-pro-preview` → **`gemini-3.7-flash`** 以及 `gemini-3.1-flash-lite-preview` → **`gemini-3.1-flash-lite`**（稳定版本，且比 `3.5-flash-lite` 更便宜）。Mistral 保持不变，`mistral-large-latest` 仍是四者中性价比最佳的选择。需要注意的是，并不存在比 `gemini-3.1-pro-preview` 更新的 Gemini Pro 系列模型——2026 年 5 月发布消息的 Gemini 3.5 Pro 从未推出；3.5/3.6/3.7 系列全部为 Flash。
+  - **切换 Gemini 前进行的实测 A/B 对比**：使用 `gemini-3.1-pro-preview` 和 `gemini-3.7-flash` 分别将 `README.md` 翻译成日语。结构完全一致（21 个列表、18 个代码块、13 个 HTML 链接、13 张图片，所有 URL 均保留），耗时分别为 **8 s 和 48 s**。由于没有任何公开 benchmark 比较这两个模型在翻译或非拉丁文字脚本方面的表现，否则此次切换只能建立在简单推测之上。
+  - **Claude 响应块过滤**：`_call_claude` 原本直接执行 `block.text for block in response.content`，未按类型过滤。采用自适应推理的模型（Sonnet 5 及以上版本）会插入一个 `thinking` 块，该块提供 `.thinking` 而非 `.text`——翻译会在第一个片段处因不透明的 `AttributeError` 而失败。现在会排除 `thinking`、`redacted_thinking`、`tool_use` 和 `tool_result` 块（采用负面列表，以继续兼容携带文本的未知类型），若响应中没有任何文本块，则会抛出明确错误。每次调用都会传入 `thinking={"type": "disabled"}`。
+  - **重新同步 `MODEL_TOKEN_LIMITS`**：删除退役日期已过的模型（`magistral-*` 系列于 2026-07-31 退役，`gemini-2.0-*` 于 2026-06-01 退役，`gemini-3-pro-preview` 于 2026-03-09 退役，以及 `claude-3-5-sonnet-20240620`、`claude-3-7-sonnet-20250219`、`claude-opus-4-1-20250805`、`claude-sonnet-4-20250514`）。修正限制：Mistral 128K → **256K**（Large 3 / Small 4 代），Gemini 1 000 000 → **1 048 576**（实际 input 限制），`claude-opus-4-5` 200K → **1M**，`gpt-5.6-*` 系列 400K → **1.05M**。新增 Claude 5（`claude-sonnet-5`、`claude-opus-5`、`claude-fable-5`）、`claude-opus-4-8`、Gemini 3.5/3.6/3.7、`mistral-medium-latest` 和 `ministral-*` 系列。需要注意的是，这些限制仍仅供参考，因为 `translate()` 会将分段上限设为 `min(16000, limite)`。
+  - **Provider `--use_codex`**：第五个 provider，它以非交互模式驱动官方 Codex CLI（`codex exec`），而不是调用按使用量计费的 API。翻译用量从已付费的 ChatGPT 订阅配额中扣除。这是 OpenAI 针对此用途记录的唯一途径：按套餐划分的可用性矩阵将“Codex SDK、`codex exec` 和可编程工作流”列为 Plus/Pro/Business/Enterprise 可用功能，而 `~/.codex/auth.json` 的 token 无法验证对 API Platform 的调用（并且此脚本从不读取它们——身份验证及其刷新仍由 CLI 管理）。
+  - **可通过 pip 安装的 Codex 二进制文件，不再仅限于 npm**：`_resolve_codex_binary()` 依次在 `CODEX_BIN`、`PATH`，然后在 OpenAI 发布的官方 Python 包 **`openai-codex-cli-bin`** 中查找二进制文件（它是 SDK `openai-codex` 的依赖项）。因此，Python 项目无需再全局安装 npm 即可使用 `--use_codex`。该包未添加至 `requirements.txt`：二进制文件大小约为 250 MB，如果加入，所有用户都必须承担这一可选 provider 的开销。已经过端到端验证：当 `codex` 不在 `PATH` 中时，解析流程会找到打包的二进制文件，并在 6 秒内完成完整翻译。
+  - **“订阅模式”保障**：从子进程环境中移除 `OPENAI_API_KEY` 和 `CODEX_API_KEY`。若无此防护，`.env` 中存在的密钥可能会让 Codex 在没有任何可见提示的情况下切换为按使用量计费——而避免这种情况正是此 provider 存在的目的。
+  - **通过测试锁定 CLI 陷阱**：
+    - 即使 prompt 作为参数传递，`codex exec` **仍会**读取 stdin：如果不关闭 stdin，该命令会一直等待到超时，且永远不会调用模型（已复现：180 秒后以 exit 124 退出，零字节）。因此，`communicate(input=...)` 是必需的。
+    - 通过 npm 安装的 `codex` 是一个 Node shim，它通过 `spawn` 启动真正的 Rust 二进制文件：后者是 Python 进程的**孙进程**，会在 `subprocess.run(timeout=)` 的 `SIGKILL` 之后继续存活，并继续消耗配额。因此需要 `Popen(start_new_session=True)` + `os.killpg`。
+    - CLI 可能以 0 退出，却仍然发出了 `turn.failed`：除了返回码之外，还会检查 JSONL 输出（`--json`）；如果返回码为 0 但缺少 `-o` 文件，则会抛出明确错误，而不是生成空片段。
+  - **rate limit 退避**：CLI 不实现任何内部 retry（`max_retries = 0`）。分类依据 JSON payload 的结构（`status: 429` / `error.type`），而不是子字符串——“quota”一词既会出现在可恢复的 429 中，也会出现在永久性的 `insufficient_quota` 中。
+  - **CI 防护**：如果定义了 `CI` 或 `GITHUB_ACTIONS`，则拒绝 `--use_codex`。订阅身份验证不适用于共享 runner，OpenAI 也明确不建议在公共仓库中使用此工作流。
+  - **模型**：`gpt-5.6-sol`（质量）和 `gpt-5.6-luna`（`--eco`）。`gpt-5.6-*` 系列由 CLI 和 API Platform 共用，但 ChatGPT 账户并非有权使用其中所有模型：allowlist 在服务器端执行，不进行本地验证，使用不常见的模型会触发警告。在 Plus 套餐中，Luna 每个 5 小时窗口可提供 250-2,000 条消息，而 Sol 仅为 10-100 条：对于任何批量处理，都推荐使用 `--eco` 模式。
+  - **已修复的 Bug——尽管完全成功，`regen_translations.sh` 仍会报错退出**：`trap ... EXIT` 引用了 `failed_log`，它是 `main()` 中的 `local` 变量，在 trap 执行时已不存在。在 `set -u` 下，这会引发 `failed_log: unbound variable`，导致脚本以 1 退出，尽管 28 个翻译结果均正确——这会在重新生成之后、成本最高的阶段中断 `release.sh --auto`（`set -e`）。该变量现改为全局变量，trap 会检查它是否存在。一个有益的副作用是：此前被此错误掩盖的真实翻译失败，现在会重新显示在最终摘要中。
+  - **`REGEN_MODEL`**：`regen_translations.sh` 的新环境变量，可强制指定模型并覆盖 provider 的默认值，例如使用 `REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol`，在订阅配额的高端模型上重新生成，而不是使用面向吞吐量的 `--eco` 模型。
+  - **`regen_translations.sh`**：`REGEN_PROVIDER=codex` 仅通过明确选择加入的方式提供（绝不自动检测，以免在用户不知情的情况下消耗订阅配额）。在启用并行处理之前，token 会先按顺序刷新一次——因为 Codex refresh 具有轮换性且仅可使用一次，并发 job 会使 `codex login` session 失效——并发数则降至 4。
+  - **相关重构**：`_dispatch_provider_call` 通过返回 provider 名称的 `_resolve_provider()`，将参数数量从 8 个减少到 6 个，而不是在整个调用链中传播第四个 boolean。显式 boolean 的优先级仍高于 `args`，以保留使用最小化 `Namespace` 调用 `translate(..., use_mistral=True)` 的测试。
+  - **测试**：新增文件 `tests/test_codex_provider.py`（41 项测试），覆盖 argv、清理后的环境、禁止前言的契约、静默失败、timeout/killpg、退避、preflight、provider 解析、Gemini reasoning 级联、Claude block 过滤以及多段落 news 引用。完整测试套件共 259 项测试。
+  - **实际验证**：项目的 `README.md` 通过 Codex 翻译为 **14 种语言**后，其结构与参考翻译严格一致（14 个代码块、24 个标题、25 行表格、13 个 HTML 链接、13 张图片、19 个 URL，代码块逐字符完全一致，placeholder 残留为零）。对于一篇 69 KB 的新闻文章，在 `--news` 模式下，`gpt-5.6-luna` 和 `gpt-5.6-sol` 的输出均通过 en/ja/ar 下游应用验证器。通过 `account/rateLimits/read` 测得的消耗量：在 `--eco` 模式下始终低于计数器的舍入阈值（5 小时窗口的 0%）。
 
-- **1.9.1** 修复 marker 翻译说明中 CTA 标签的 i18n（2026-05-10）：
+- **1.9.2** 修复包含嵌套括号或 FR 前缀的 news 署名 URL 提取问题（2026-05-11）：
 
-  - **修复的 Bug**：翻译文件顶部 marker 横幅中的 CTA 链接标签 `check-editorial-coverage.py` 对所有目标语言都仍然是**法语**，而不是跟随 `[Voir le projet sur GitHub ↗]`。LLM 从未看到它（为保留 URL 和仓库 slug 而在 Python 侧组装），因此翻译阶段无法将其修正。自 v1.9 引入 `target_lang` 格式以来出现的静默回归。
-  - **修复**：新增常量 `marker`，将 15 种语言映射到各自本地化标签。`_VIEW_PROJECT_LABELS` 和 `_translation_note_invariants(target_lang)` 现在会传递目标语言。若语言未知则使用 `_assemble_translation_note_paragraphs(phrase, target_lang)` 回退（安全处理，不会触发 KeyError）。
-  - **测试**：已调整 `fr`（target_lang `test_source_emits_three_paragraphs_repo_title_description_link` → 预期日语标签）。新增 2 个测试：`ja`（参数化 7 种语言，覆盖拉丁、表意、辅音文字脚本）和 `test_source_link_label_localized_per_target_lang`。总计：`test_source_link_label_falls_back_to_french_for_unknown_target` 中有 40 个测试（原为 38）。
-  - **向后兼容**：带默认值 `test_translation_note_position.py` 的签名——没有 `target_lang="fr"` 的外部程序化调用仍可直接正常工作。
+  - **已修复的 Bug**：`_protect_news_quotes` 中的署名 URL 提取使用正则表达式 `re.search(r"\((.+?)\)", attribution)`（括号之间的 lazy capture）。对于 `(relayé par [@user sur X](https://x.com/.../123))` 形式的署名（嵌套括号：外层 `(` + markdown link 的 `]()`），捕获会在遇到第一个 `)` 时停止 → 得到截断且包含 FR 前缀的字符串：`relayé par [@user sur X](https://x.com/.../123`（缺少末尾的 `)`）。后果是：`_validate_news_post` 会在翻译输出中查找此字符串，并必然失败（两个原因：`)` 被截断 + “relayé par”被翻译为 `relayed by`/`weitergeleitet von`/……）。完整的 low → medium → high → gpt-5.5 级联均无法通过。
+  - **修复**：正则表达式改为 `re.search(r"\]\(([^)]+)\)", attribution)`——专门定位 markdown link 的 `](url)`，并且**仅捕获纯 URL**（不包含 FR 前缀，也不会截断）；在翻译期间，`#URL{N}#` placeholder 会保持其不变。可稳健处理两种有问题的模式：
+    - `(relayé par [@account sur X](url))`——嵌套括号
+    - `via [@source](url)` 或 `selon [@author](url)`——没有外层括号的 FR 前缀
+  - **测试**：在 `test_silent_failure.py` 的 `TestNewsCitationExtraction` 类中新增 2 项测试：
+    - `test_extract_attribution_url_with_nested_parens`（精确复现 Genspark CEO E2B Bug 的案例）
+    - `test_extract_attribution_url_with_french_prefix`（包含 `via` 的变体）
+  - **覆盖缺口**：`check-editorial-coverage.py` 验证编辑语法，但不验证 translator 是否能够翻译。一个可能的改进（不在 v1.9.2 范围内）是增加一项检查，以 dry-run 方式模拟署名提取，从而在发布**之前**检测高风险模式。
 
-- **1.9** 修复静默失败 + 完整质量工具链 + 多位置翻译说明（2026-05-07）：
-  - **多位置翻译说明 + marker “embed card” 格式**：
-    - 新的 CLI 选项（新增项，默认值不变 → **非破坏性**）：
-      - `args.target_lang`（默认：`--note_position {top,bottom,both}`）：将说明放在译文文件的顶部、底部，或两处都放。
-      - `bottom`（默认：`--note_format {legacy,marker}`）：
-        - `legacy` 严格逐字节复现 v1.8 的行为（粗体段落 `legacy`）**byte-for-byte**。
-        - `**…**` 输出一个不可见的 Markdown link reference definition（`marker`），后接一个结构化的 **3 段 blockquote**，用于呈现类似 “GitHub repo embed card” 的效果：项目标题使用 inline code（`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`ai-powered-markdown-translator\`**\`），由 LLM 翻译的描述，以及带可见箭头的 CTA 链接（`\*\*`）。可在构建时通过 remark 插件使用（参见 jls42.org 博客 → `[Voir le projet sur GitHub ↗](URL)` 插件）。
-    - **永不发送给 LLM 的不变量**：仓库标题和 GitHub URL 会在翻译描述语句后由 Python 侧组装。LLM 永远看不到 slug `remark-translation-banner` 也看不到 `ai-powered-markdown-translator`，从而保证不会更改任何渲染器/大小写/协议。
-    - **感知 frontmatter 的插入**：在 `https://github.com/jls42/...` 或 `top` 模式下，说明会插入到 YAML frontmatter 关闭 `both` 之后（保障 Astro Content Collections / gray-matter 安全）。Helper `---` 会检测文件开头的 `_split_frontmatter` 并保持其完整性；如果 frontmatter 已开启但没有关闭 fence，则**抛出 `---\n…\n---\n`**（文件会回到 `RuntimeError`，而不是写入一个位置错误的说明）。
-    - **白名单模型清理器**：`failed_files` 会将所有 `_sanitize_model` 之外的字符替换为 `[A-Za-z0-9._:/-]`，若结果为空则回退为 `_`。与 Astro remark 插件侧的校验器对齐，并消除会破坏 marker 格式的字符（空格、引号、括号、逗号等）。
-    - **内部重构**：`unknown`（1 个单体函数）→ 7 个纯 helper（`_append_translation_note`、`_translation_note_invariants`、`_build_translation_note_phrase`、`_assemble_translation_note_paragraphs`、`_build_translation_note_source`、`_sanitize_model`、`_quote_lines`、`_split_frontmatter`、`_build_translation_note_block`）。builder/composer 分离（builder 返回一个不带分隔符的纯块，composer 按位置应用 `_compose_with_notes`）；生产代码和 helper source 共享同一个 3 段组装器。
-    - **`\n\n` blank-preserving**：给每一行加上 `_quote_lines` 前缀，并将空行转换为仅包含 `> `。这使 mdast 能在 blockquote 中看到 3 个不同的段落（标题 / 描述 / 链接），而不是一个带换行的单段落。
-    - **`>` 自适应**：根据 LLM 保留下来的段落数量来判断（3 = 完整卡片格式，2 = 句子 + 链接，1 = 回退）。当检测到 markdown 链接 `_build_translation_note_block` 时，1 段回退**不再包裹在 `**...**` 中**（链接周围的 `](` 渲染较脆弱）。
-    - **向后兼容**：`<strong>` 和 `getattr(args, "note_position", "bottom")` 侧的 `getattr(args, "note_format", "legacy")` —— 没有这些属性的 Namespace（现有测试、外部程序化调用）仍可正常运行，无需修改。
-  - **长文本翻译静默失败修复**：
-    - 所有 provider（OpenAI、Mistral、Claude、Gemini）都做翻译后语言验证：确定性层（逐字找回源文本）+ 概率层（`_compose_with_notes`）
-    - `langdetect` / `finish_reason` 白名单：对任何不在白名单中的状态（truncation、content_filter 等）直接抛出 `stop_reason`
-    - `RuntimeError` Claude：`max_tokens` → `4096`（避免 16k 分段上的潜在截断，为 FR→JA/ZH/KO/AR/HI 跨脚本留出余量）
-    - 感知标题的分段：在分段后半部分优先 H2/H3（每个分段都以一个完整语义 section 开始）
-    - 错误传播到非零退出码：`32768` 返回类型化状态 `translate_markdown_file` / `success` / `failure`，`skipped` 若至少有一个文件失败则返回 `main()` `sys.exit(1)`（单文件和批处理都适用）
-    - 所有 provider 都增加空内容守卫、源/输出长度比 sanity check（≥ 500 字符，< 5% = 拒绝）、代码占位符校验（`#CODEBLOCK`/`#INLINECODE`）、LLM 后规范化（分隔符/链接与 heading 紧贴）、`BadRequestError` 后重试且不带 `reasoning_effort`
+- **1.9.1** 修复翻译 marker 说明中 CTA 标签的 i18n 问题（2026-05-10）：
+
+  - **已修复的 Bug**：译文文件顶部 marker 横幅中 CTA 链接的 `[Voir le projet sur GitHub ↗]` 标签对所有目标语言都仍为**法语**，而不是遵循 `target_lang`。LLM 永远看不到该标签（它在 Python 侧组装，以保留 URL 和仓库 slug），因此翻译阶段无法纠正它。自 v1.9 添加 `marker` 格式以来，这一直是一个静默回归。
+  - **修复**：新增常量 `_VIEW_PROJECT_LABELS`，将 15 种语言映射到各自的本地化标签。`_translation_note_invariants(target_lang)` 和 `_assemble_translation_note_paragraphs(phrase, target_lang)` 现在会传播目标语言。若语言未知，则 fallback 到 `fr`（确保安全，避免 KeyError）。
+  - **测试**：调整 `test_source_emits_three_paragraphs_repo_title_description_link`（target_lang `ja` → 预期为日语标签）。新增 2 项测试：`test_source_link_label_localized_per_target_lang`（对 7 种语言进行参数化，涵盖拉丁字母、表意文字和 abjad）以及 `test_source_link_label_falls_back_to_french_for_unknown_target`。`test_translation_note_position.py` 中共计 40 项测试（原为 38 项）。
+  - **向后兼容性**：签名使用默认值 `target_lang="fr"`——未提供 `args.target_lang` 的外部程序调用方无需修改即可继续工作。
+- **1.9** 修复 silent-failure + 完整质量工具链 + 多位置翻译说明（2026-05-07）：
+  - **多位置翻译说明 + "embed card" marker 格式**：
+    - 新增 CLI 选项（仅增量添加，默认行为不变 → **非 breaking**）：
+      - `--note_position {top,bottom,both}`（默认：`bottom`）：将说明放置在译文文件顶部、底部或同时放置在两处。
+      - `--note_format {legacy,marker}`（默认：`legacy`）：
+        - `legacy` 严格复现 v1.8 的行为（粗体段落 `**…**`），达到 **byte-for-byte** 一致。
+        - `marker` 输出一个不可见的 Markdown link reference definition（`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`），随后是结构化的 **3 段 blockquote**，以实现类似 "GitHub repo embed card" 的渲染效果：使用 inline code 显示项目标题（`**\`ai-powered-markdown-translator\`\*\*`）、由 LLM 翻译的描述，以及带可见箭头的 CTA 链接（`[Voir le projet sur GitHub ↗](URL)`）。构建时可由 remark plugin 使用（参见 jls42.org 博客 → plugin `remark-translation-banner`）。
+    - **绝不发送给 LLM 的不变量**：repo 标题和 GitHub URL 在描述语句翻译完成后由 Python 端组装。LLM 永远不会看到 slug `ai-powered-markdown-translator` 或 `https://github.com/jls42/...`，从而确保任何 renderer、大小写或 scheme 都不会被更改。
+    - **可感知 Frontmatter 的插入**：在 `top` 或 `both` 模式下，说明会插入到 YAML frontmatter 结束的 `---` 块**之后**（保障 Astro Content Collections / gray-matter 的安全性）。Helper `_split_frontmatter` 检测文件开头的 `---\n…\n---\n` 并保持其完整性；若 frontmatter 已开启但缺少结束 fence，则**抛出 `RuntimeError`**（该文件会被记录到 `failed_files` 中，而不会在说明位置错误的情况下写入）。
+    - **模型白名单 sanitizer**：`_sanitize_model` 将 `[A-Za-z0-9._:/-]` 之外的所有字符替换为 `_`，若结果为空则 fallback 到 `unknown`。这与 Astro remark plugin 端的 validator 保持一致，并中和可能破坏 marker 格式的字符（空格、引号、括号、逗号等）。
+    - **内部重构**：`_append_translation_note`（1 个单体函数）→ 7 个纯 helper（`_translation_note_invariants`、`_build_translation_note_phrase`、`_assemble_translation_note_paragraphs`、`_build_translation_note_source`、`_sanitize_model`、`_quote_lines`、`_split_frontmatter`、`_build_translation_note_block`、`_compose_with_notes`）。builder 与 composer 分离（builder 返回不含分隔符的纯块，composer 根据位置应用 `\n\n`）；生产代码和源 helper 共用同一个 3 段组装器。
+    - **`_quote_lines` 保留空行**：为每一行添加 `> ` 前缀，并将空行转换为单独的 `>`。这使 mdast 能够在 blockquote 中识别出 3 个不同的段落（标题 / 描述 / 链接），而不是一个带换行符的单段落。
+    - **自适应 `_build_translation_note_block`**：根据 LLM 保留的段落数量处理（3 = 完整 card 格式，2 = 语句 + 链接，1 = fallback）。当检测到 Markdown 链接 `](` 时，单段 fallback **不再用 `**...**` 包裹**（在链接周围使用 `<strong>` 会导致渲染不稳定）。
+    - **向后兼容**：在 `_compose_with_notes` 端使用 `getattr(args, "note_position", "bottom")` 和 `getattr(args, "note_format", "legacy")`——缺少这些属性的 Namespace（现有测试、外部编程调用）无需修改即可继续工作。
+  - **修复长篇翻译中的 silent-failure**：
+    - 对所有 provider（OpenAI、Mistral、Claude、Gemini）执行译后语言验证：确定性层（在输出中发现源文原句）+ 概率层（`langdetect`）
+    - `finish_reason` / `stop_reason` 白名单：遇到任何不在白名单内的状态（truncation、content_filter 等）时抛出 `RuntimeError`
+    - Claude 的 `max_tokens`：`4096` → `32768`（避免 16k segment 出现潜在 truncation，并为 FR→JA/ZH/KO/AR/HI 跨文字系统转换预留空间）
+    - 可感知 heading 的 segmentation：优先选择 segment 后半部分的 H2/H3（使每个 segment 都从完整的语义 section 开始）
+    - 将错误传播至非零 exit code：`translate_markdown_file` 返回类型化状态 `success` / `failure` / `skipped`；只要至少一个文件失败，`main()` 就会 `sys.exit(1)`（适用于 single-file 和 batch）
+    - 所有 provider 均加入 empty-content guard、源文/输出 sanity ratio（源文 ≥ 500 个字符且输出少于 5% 时拒绝）、代码 placeholder 验证（`#CODEBLOCK`/`#INLINECODE`）、LLM 后规范化（修复与 heading 粘连的分隔符/链接），以及不带 `reasoning_effort` 的 `BadRequestError` retry
     - 新增依赖 `langdetect==1.0.9`
-  - **质量工具链 pre-commit**（“完整 EurekAI 类型”，14 个 hook）：
-    - Pre-commit：ruff（lint+format）、shellcheck、prettier（md/yaml/json）、detect-secrets（4 个受保护 API key）、Lizard（CCN ≤ 12）、pre-commit-hooks v5（空白字符、EOF、large-files、shebang 等）
-    - Pre-push：mypy（渐进式宽松模式）、Opengrep SAST（translate.py + scripts/）、pip-audit（初始报告模式）、unittest discover（tests/ + scripts/tests/）
-    - `scripts/` 中的本地 wrapper 使用 `./venv/bin/python`
-    - `scripts/audit_verdict.py`：带 11 个 unittest 的 pip-audit JSON 解析器，源自 jls42-astro 解析器的 Python 适配版
-    - 修复了 7 个初始 ruff 违规：B904（raise from）×2、B007（unused dirs）、C408（dict literal）、C419（list-comp）、SIM105（contextlib.suppress）、SIM110（any()）
-    - Lizard 临时排除 `translate.py`（4 个函数的 CCN 为 21-47，重构已规划）——对 scripts/ 保持严格门禁
-  - **SonarCloud + 完整覆盖率**：
-    - GitHub Actions 工作流 `SonarCloud`（sonarcloud.yml + sonar-project.properties）：每次 push 和 pull-request 都分析，coverage 通过 `coverage.xml` 获取
-    - README 顶部有 11 个 SonarCloud 徽章（Quality Gate、Security/Reliability/Maintainability 评级、Coverage、Vulnerabilities、Bugs、Code Smells、Duplicated Lines、Technical Debt、Lines of Code）
-    - `tests/test_silent_failure.py`（`unittest` stdlib）：覆盖静默失败错误链的六个环节
-    - `tests/test_orchestration.py`（+79 tests）：覆盖 `translate.py` 的编排层（`_resolve_*_filename`、`_existing_translation_exists`、`_record_translation_status`、`_write_output_file`、`translate_directory`、`_validate_input_paths`、`_init_*_client`、`_select_provider_client`、`_normalize_collapsed_markdown`、`_cleanup_source_flag`、`_validate_news_flags_*`、`_openai_create_with_fallback` TypeError + BadRequestError 回退、o1-series 提示格式、`_validate_translation_output` 的 early-return 分支）
-    - `scripts/tests/test_audit_verdict.py`：通过 subprocess 覆盖 `main()`（stdin/stdout）以及 `if __name__ == "__main__"` 块
-    - **新代码覆盖率**：75.5% → 约 98%（translate.py 98%，scripts/audit_verdict.py 97%）
-  - **测试**：`tests/test_translation_note_position.py` 覆盖 position × format 矩阵（包括 E2E `marker+top|bottom|both` 和 `legacy+top|bottom|both`）、多行前缀、逐字节向后兼容（golden literal）、清理器、frontmatter 分割（包括对未关闭 fence 的 raise）、3 段格式、2 段回退、1 段 + Markdown 链接守卫，以及一个关键护栏 `TestLLMPayloadExcludesInvariants`，断言标题+URL 永远不会发送给 LLM。**190 个测试通过**，0 回归。
-  - 文档：`README.md`（法语 + 14 种翻译）带徽章，`CLAUDE.md`（详细的 pre-commit 工作流 + CI 监控），重新生成了 28 个翻译
-- **1.8** `--news` 模式 + 2026 模型升级（2026-03-17，标签 `v1.8`）：
-  - 默认模型已更新（2026 年 3 月）：
-    - OpenAI 质量：`gpt-5` → `gpt-5.4`
-    - OpenAI 经济：`gpt-5-mini` → `gpt-5.4-mini`
-    - Gemini 质量：`gemini-3-pro-preview` → `gemini-3.1-pro-preview`
-  - 为 `gpt-5.4`、`gpt-5.4-mini`、`gpt-5.4-nano`（400k）以及 `gemini-3.1-pro-preview`（1M）添加 token 限制
-  - `--news` 模式初版：使用占位符 `#NEWSQUOTE\d+#` 保护英文引文，`LANG_FLAGS` 映射（15 种语言），按目标语言处理标记
-  - 在恢复前验证 news 占位符（回归：会删掉占位符的 LLM 会静默地产生没有引文的输出）
-  - `regen_translations.sh` 脚本改为可移植（绝对路径，不依赖 pwd）
-  - README/CHANGELOG 的 language bars 中新增法语链接，重新生成了 28 个翻译
-- **1.7** 新内容：
-  - `--keep_filename` 选项：翻译时保留原始文件名
-  - 支持 `.env` 文件，可自动加载 API 密钥
-  - **保留 inline code**：反引号（`` `...` ``）现在在翻译过程中受到保护
-  - 系统提示改进：
+  - **pre-commit 质量工具链**（“完整 EurekAI 类型”，14 个 hook）：
+    - Pre-commit：ruff（lint+format）、shellcheck、prettier（md/yaml/json）、detect-secrets（保护 4 个 API key）、Lizard（CCN ≤ 12）、pre-commit-hooks v5（whitespace、EOF、large-files、shebangs 等）
+    - Pre-push：mypy（渐进式 lax 模式）、Opengrep SAST（translate.py + scripts/）、pip-audit（初始 reporting 模式）、unittest discover（tests/ + scripts/tests/）
+    - `scripts/` 中使用 `./venv/bin/python` 的本地 wrapper
+    - `scripts/audit_verdict.py`：pip-audit JSON parser，包含 11 个 unittest，基于 jls42-astro parser 改编的 Python 移植版本
+    - 修复了最初的 7 个 ruff 违规：B904（raise from）×2、B007（unused dirs）、C408（dict literal）、C419（list-comp）、SIM105（contextlib.suppress）、SIM110（any()）
+    - Lizard 暂时排除 `translate.py`（4 个函数的 CCN 为 21-47，已规划重构）——对 scripts/ 实施严格 gate
+  - **SonarCloud + 全面覆盖率**：
+    - GitHub Actions workflow `SonarCloud`（sonarcloud.yml + sonar-project.properties）：每次 push 和 pull-request 时执行分析，通过 `coverage.xml` 获取 coverage
+    - README 顶部添加 11 个 SonarCloud badge（Quality Gate、Security/Reliability/Maintainability ratings、Coverage、Vulnerabilities、Bugs、Code Smells、Duplicated Lines、Technical Debt、Lines of Code）
+    - `tests/test_silent_failure.py`（`unittest` stdlib）：覆盖 silent-failure 错误链的六个环节
+    - `tests/test_orchestration.py`（+79 个测试）：覆盖 `translate.py` 的 orchestration 层（`_resolve_*_filename`、`_existing_translation_exists`、`_record_translation_status`、`_write_output_file`、`translate_directory`、`_validate_input_paths`、`_init_*_client`、`_select_provider_client`、`_normalize_collapsed_markdown`、`_cleanup_source_flag`、`_validate_news_flags_*`、`_openai_create_with_fallback` TypeError + BadRequestError fallback、o1-series prompt 格式、`_validate_translation_output` 的 early-return 分支）
+    - `scripts/tests/test_audit_verdict.py`：通过 subprocess 覆盖 `main()`（stdin/stdout）和 `if __name__ == "__main__"` 块
+    - **新代码覆盖率**：75.5% → ~98%（translate.py 98%，scripts/audit_verdict.py 97%）
+  - **测试**：`tests/test_translation_note_position.py` 覆盖位置 × 格式矩阵（包括 E2E `marker+top|bottom|both` 和 `legacy+top|bottom|both`）、多行前缀处理、byte-for-byte 向后兼容性（golden literal）、sanitizer、frontmatter 拆分（包括未关闭 fence 时抛出异常）、3 段格式、2 段 fallback、单段 + Markdown 链接 guard，以及关键防护测试 `TestLLMPayloadExcludesInvariants`，该测试断言标题和 URL 绝不会发送给 LLM。**190 个测试通过**，0 项回归。
+  - 文档：`README.md`（法语 + 14 种译文）及 badge、`CLAUDE.md`（pre-commit workflow + 详细的 CI 监视流程），重新生成 28 份译文
+- **1.8** `--news` 模式 + 2026 年模型升级（2026-03-17，tag `v1.8`）：
+  - 更新默认模型（2026 年 3 月）：
+    - OpenAI 高质量模式：`gpt-5` → `gpt-5.4`
+    - OpenAI 经济模式：`gpt-5-mini` → `gpt-5.4-mini`
+    - Gemini 高质量模式：`gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+  - 为 `gpt-5.4`、`gpt-5.4-mini`、`gpt-5.4-nano`（400k）和 `gemini-3.1-pro-preview`（1M）新增 token 限制
+  - 初始 `--news` 模式：使用 placeholder `#NEWSQUOTE\d+#` 保护英文引用、`LANG_FLAGS` 映射（15 种语言）、按目标语言管理旗帜
+  - 在恢复前验证 news placeholder（回归问题：LLM 删除 placeholder 时，会静默生成缺少引用的输出）
+  - 使脚本 `regen_translations.sh` 可移植（绝对路径，不依赖 pwd）
+  - 在 README/CHANGELOG 的 language bar 中新增法语链接，重新生成 28 份译文
+- **1.7** 新增功能：
+  - 新增 `--keep_filename` 选项，用于在翻译时保留原始文件名
+  - 支持通过 `.env` 文件自动加载 API key
+  - **保留 inline code**：现在会在翻译期间保护反引号（`` `...` ``）
+  - 改进 system prompt：
     - 更好地处理 YAML frontmatter 中的引号
-    - 保护模板变量 `{variable}`
-    - 禁止未要求的译者注释
+    - 保护 template 变量 `{variable}`
+    - 禁止添加未经请求的译者注
   - 已在 364 个文件上成功测试（jls42.org 博客迁移）
-- **1.6** 新内容：
-  - 支持 Google Gemini API 用于翻译（`--use_gemini`）
-  - 更新 2026 默认模型：
-    - OpenAI：`gpt-5`（质量）、`gpt-5-mini`（经济）
-    - Claude：`claude-sonnet-4-5`（质量）、`claude-haiku-4-5`（经济）
-    - Gemini：`gemini-3-pro-preview`（质量）、`gemini-3-flash-preview`（经济）
-  - 经济模式（`--eco`），用于使用更快且成本更低的模型
-  - 单文件翻译（`--file`），无需遍历目录
-  - 新的简化命名模式：`{base}-{lang}.md`
-  - 选项 `--include_model`，用于保留带模型名的旧格式
-  - 支持未列出的模型，默认 token 上限（128k）
+- **1.6** 新增功能：
+  - 支持使用 Google Gemini API 进行翻译（`--use_gemini`）
+  - 更新 2026 年默认模型：
+    - OpenAI：`gpt-5`（高质量）、`gpt-5-mini`（经济）
+    - Claude：`claude-sonnet-4-5`（高质量）、`claude-haiku-4-5`（经济）
+    - Gemini：`gemini-3-pro-preview`（高质量）、`gemini-3-flash-preview`（经济）
+  - 经济模式（`--eco`），用于采用速度更快、成本更低的模型
+  - 翻译单个文件（`--file`），无需遍历目录
+  - 新的简化命名 pattern：`{base}-{lang}.md`
+  - 新增 `--include_model` 选项，用于保留包含模型名称的旧格式
+  - 支持未列出的模型，并采用默认 token 限制（128k）
   - README 已翻译为 14 种语言
 - **1.5** 改进：
-  - **更新 API 密钥和默认模型：**
-    - **OpenAI：** 从 `DEFAULT_MODEL_OPENAI` 更新为 `"gpt-4o"`。
-    - **Mistral AI：** 从 `DEFAULT_MODEL_MISTRAL` 更新为 `"mistral-large-latest"`。
-    - **Anthropic Claude：** 新增 `DEFAULT_ANTHROPIC_API_KEY`，并将 `DEFAULT_MODEL_CLAUDE` 更新为 `"claude-3-5-sonnet-20240620"`。
-  - **翻译提示词优化：**
-    - 直接翻译和翻译说明的提示词均已增强，以提升清晰度和效率，并包含关于保留元数据和特定格式元素的详细说明。
+  - **更新 API key 和默认模型：**
+    - **OpenAI：**从 `DEFAULT_MODEL_OPENAI` 更新为 `"gpt-4o"`。
+    - **Mistral AI：**从 `DEFAULT_MODEL_MISTRAL` 更新为 `"mistral-large-latest"`。
+    - **Anthropic Claude：**新增 `DEFAULT_ANTHROPIC_API_KEY`，并将 `DEFAULT_MODEL_CLAUDE` 更新为 `"claude-3-5-sonnet-20240620"`。
+  - **优化翻译 prompt：**
+    - 丰富了直接翻译和翻译说明所用的 prompt，以提高清晰度和效率，其中包括有关保留 metadata 和特定格式元素的详细指令。
   - **代码重构：**
-    - 用类 `MistralClient` 替换 `Mistral`，用于初始化 Mistral AI 客户端。
-    - 重组导入以提升可读性和维护性。
-    - 改进文本分段和代码块处理，在翻译时保留原始格式。
+    - 使用 `Mistral` class 替代 `MistralClient`，以初始化 Mistral AI client。
+    - 重新组织 import，以提高可读性和可维护性。
+    - 改进文本 segmentation 和代码块处理，以便在翻译期间保留原始格式。
   - **输出文件管理：**
-    - 输出文件名中的模型与语言顺序互换（例如 `f"{base}-{args.target_lang}-{args.model}.md"`），从而更便于整理和查找译文。
+    - 交换输出文件名中的模型和语言顺序（例如 `f"{base}-{args.target_lang}-{args.model}.md"`），从而简化译文的组织和查找。
   - **其他改进：**
-    - 删除不必要的空行，清理代码。
-    - 做了细微调整以提升脚本结构和可读性。
-- **1.4** 新内容：
-  - 支持 Anthropic Claude API 用于翻译
-  - 优化提示词，提升清晰度和效率
-  - 做了细微调整以提升代码维护性
-- **1.3** 改进与新功能：
-  - 更好的代码块处理
-  - 更好的输出文件管理
+    - 清理代码，删除不必要的空行。
+    - 进行细微调整，以改善脚本的结构和可读性。
+- **1.4** 新增功能：
+  - 支持使用 Anthropic Claude API 进行翻译
+  - 优化 prompt，以提高清晰度和效率
+  - 进行细微调整，以提高代码可维护性
+- **1.3** 改进与新增功能：
+  - 改进代码块处理
+  - 改进输出文件管理
   - 改进现有文件检测
-  - 选项 `--force`，用于强制翻译
-  - 输出文件名中的模型与语言顺序互换
+  - 新增 `--force` 选项，用于强制翻译
+  - 交换输出文件名中的模型和语言顺序
 - **1.2** 修复 changelog
-- **1.1** 增加对 Mistral IA API 的支持
-- **1.0** 初始版本 - 支持 OpenAI API
+- **1.1** 新增 Mistral AI API 支持
+- **1.0** 初始版本——支持 OpenAI API
 
-**使用 gpt-5.4-mini 从法语翻译成中文的文章。**
+**使用 gpt-5.6-sol 将文章从法语翻译成中文。**

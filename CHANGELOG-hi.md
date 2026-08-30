@@ -1,122 +1,161 @@
-### परिवर्तन-सूची
+### बदलाव-सूची
 
-🌍 [फ़्रेंच](CHANGELOG.md) | [अंग्रेज़ी](CHANGELOG-en.md) | [स्पैनिश](CHANGELOG-es.md) | [चीनी](CHANGELOG-zh.md) | [जर्मन](CHANGELOG-de.md) | [जापानी](CHANGELOG-ja.md) | [कोरियाई](CHANGELOG-ko.md) | [अरबी](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [इतालवी](CHANGELOG-it.md) | [डच](CHANGELOG-nl.md) | [पोलिश](CHANGELOG-pl.md) | [पुर्तगाली](CHANGELOG-pt.md) | [रोमानियाई](CHANGELOG-ro.md) | [स्वीडिश](CHANGELOG-sv.md)
+🌍 [फ़्रांसीसी](CHANGELOG.md) | [अंग्रेज़ी](CHANGELOG-en.md) | [स्पेनी](CHANGELOG-es.md) | [चीनी](CHANGELOG-zh.md) | [जर्मन](CHANGELOG-de.md) | [जापानी](CHANGELOG-ja.md) | [कोरियाई](CHANGELOG-ko.md) | [अरबी](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [इतालवी](CHANGELOG-it.md) | [डच](CHANGELOG-nl.md) | [पोलिश](CHANGELOG-pl.md) | [पुर्तगाली](CHANGELOG-pt.md) | [रोमानियाई](CHANGELOG-ro.md) | [स्वीडिश](CHANGELOG-sv.md)
 
-- **1.9.2** nested parentheses या FR उपसर्ग के साथ समाचार attribution URL निष्कर्षण का सुधार (2026-05-11) :
+- **1.10.0** Provider `--use_codex` (ChatGPT सदस्यता कोटा), SDK और मॉडलों का अद्यतन, बहु-पैराग्राफ़ news उद्धरणों में सुधार (2026-08-29):
 
-  - **बग सुधारा गया** : `_protect_news_quotes` में attribution URLs का निष्कर्षण `re.search(r"\((.+?)\)", attribution)` रेगेक्स (parentheses के बीच lazy capture) का उपयोग करता था। `(relayé par [@user sur X](https://x.com/.../123))` प्रकार की attribution पर (nested parentheses : `(` बाहरी + markdown link की `]()`), capture पहले मिले हुए `)` पर रुक जाता था → कटी हुई शृंखला + FR उपसर्ग शामिल: `relayé par [@user sur X](https://x.com/.../123` (बिना अंतिम `)` के)। परिणाम: `_validate_news_post` अनुवादित आउटपुट में इस शृंखला को खोजता था और हमेशा विफल हो जाता था (दो कारण: कटी हुई `)` + "relayé par" का `relayed by`/`weitergeleitet von`/... में अनुवाद)। low → medium → high → gpt-5.5 की पूरी cascade पास नहीं हो सकती थी।
-  - **सुधार** : रेगेक्स अब `re.search(r"\]\(([^)]+)\)", attribution)` बन गया है — यह विशेष रूप से markdown link के `](url)` को लक्षित करता है, और **केवल शुद्ध URL** को कैप्चर करता है (बिना FR उपसर्ग या truncation के), जिसे अनुवाद के दौरान placeholders `#URL{N}#` द्वारा अपरिवर्तित रखा जाता है। यह दोनों समस्याग्रस्त पैटर्न के लिए मजबूत है :
-    - `(relayé par [@account sur X](url))` — nested parentheses
-    - `via [@source](url)` या `selon [@author](url)` — बाहरी parentheses के बिना FR उपसर्ग
-  - **परीक्षण** : `test_silent_failure.py` class `TestNewsCitationExtraction` में 2 नए :
-    - `test_extract_attribution_url_with_nested_parens` (Genspark CEO E2B बग का सटीक पुनरुत्पादित मामला)
-    - `test_extract_attribution_url_with_french_prefix` ( `via` के साथ एक variant)
-  - **कवरेज में कमी** : `check-editorial-coverage.py` संपादकीय syntax को मान्य करता है, लेकिन translator द्वारा अनुवादनीयता को नहीं। एक संभावित सुधार (v1.9.2 के scope के बाहर) ऐसा check होगा जो जोखिमपूर्ण patterns को प्रकाशन से पहले पहचानने के लिए dry-run में attribution extraction का अनुकरण करे।
+  - **दो नए Grok providers**: `--use_grok` (xAI API, कुंजी `XAI_API_KEY`, उपयोग के अनुसार बिलिंग) और `--use_grok_cli` (आधिकारिक Grok Build CLI, Grok सदस्यता से कटौती—`--use_codex` जैसा ही सिद्धांत)।
+    - **API मोड, ~40 पंक्तियाँ**: चूँकि xAI endpoint OpenAI-संगत है, client और `_call_openai` को ज्यों का त्यों पुनः उपयोग किया गया है; केवल `base_url` बदलता है। केवल एक अनुकूलन आवश्यक था और उसका लाभ सभी को मिलता है: `finish_reason` अब `end_turn` स्वीकार करता है, जिसे xAI उस स्थान पर उत्सर्जित करता है जहाँ OpenAI `stop` उत्सर्जित करता है। मॉडल: `grok-4.6` (गुणवत्ता) और `grok-4.3` (किफ़ायती)। ध्यान दें कि Grok का किफ़ायती मॉडल फिर भी repository का सबसे महँगा है—प्रति मिलियन $1.25/$2.50, जबकि `mistral-small-latest` के लिए $0.15/$0.60: यह provider मॉडल-विविधता के लिए चुना जाता है, कीमत के लिए नहीं।
+    - **CLI मोड**: Codex के अनुरूप, लेकिन वास्तविक परिस्थितियों से अनिवार्य चार अंतरों के साथ—prompt फ़ाइल द्वारा भेजा जाता है (`--prompt-file`, CLI stdin नहीं पढ़ता और argv में कोई segment `ps` में दिखाई देगा), output stdout पर एकल JSON object है (न JSONL, न `-o` फ़ाइल), सदस्यता केवल `grok-4.6` और `grok-4.5` उपलब्ध कराती है, और sandbox लागू नहीं किया जा सकता (नीचे देखें)। उप-प्रक्रिया का प्रारंभ Codex के साथ `_codex_run_process` में साझा किया गया है, पहले से परीक्षित Codex provider के शेष भाग को छुए बिना।
+    - **`exit 0` कुछ सिद्ध नहीं करता—मापकर सत्यापित**: authentication न होने पर CLI **stdout** पर `{"type":"error","message":"Not signed in."}` लिखता है और return code **0** देता है। अस्वीकृति या turn सीमा पार होने पर भी व्यवहार ऐसा ही होता है। इसलिए output contract को एक साथ चार शर्तें चाहिए: return code 0, error payload का अभाव, `stopReason == end_turn`, और गैर-रिक्त text। preflight भी यही तर्क अपनाता है: disconnected होने पर भी `grok models` 0 के साथ समाप्त होता है; केवल stdout में “not authenticated” की उपस्थिति से निष्कर्ष निकाला जा सकता है।
+    - **परिरोधन: स्वीकार्य और प्रलेखित विषमता।** जहाँ Codex `--sandbox read-only` में चलता है, वहीं Grok का sandbox कई हालिया Linux मशीनों पर लागू नहीं किया जा सकता, इसके दो स्वतंत्र system कारण हैं जिन्हें `sudo` के बिना टाला नहीं जा सकता: Ubuntu 24.04 से AppArmor unprivileged user namespaces को रोकता है (`bwrap: setting up uid map: Permission denied`, Grok के बाहर भी पुनरुत्पादित), और container runtime sockets की deny-list तब विफल होती है जब `/run/podman`, `0700` में हो (resolver केवल `ErrorKind::NotFound` को सँभालता है, EACCES घातक हो जाता है)। मुख्य जाल: ऐसा **एकीकृत** profile जो लागू नहीं हो सकता, **चुपचाप बिना परिरोधन के शुरू हो जाता है**। इसलिए script मूल रूप से कोई profile नहीं माँगती और कभी चुपचाप fallback नहीं करती—वह stderr पर चेतावनी देती है। सुरक्षा CLI के `--deny` नियमों पर आधारित है, जिसमें catch-all `*` भी शामिल है; यही मापी गई एकमात्र _fail-closed_ परत है (अज्ञात prefix वाला नियम startup को अस्वीकार करवा देता है)। `GROK_TRANSLATE_SANDBOX=read-only` से इसे अनिवार्य किया जा सकता है; ऐसी स्थिति में मशीन द्वारा इसे पूरा न कर पाने पर startup विफल हो जाता है।
+    - **सुरक्षा-उपाय**: `XAI_API_KEY`, `GROK_API_KEY` और `GROK_SANDBOX` को उप-प्रक्रिया के environment से हटा दिया जाता है (एक कुंजी उपयोग-आधारित बिलिंग सक्रिय कर देगी; विरासत में मिला `GROK_SANDBOX` भ्रामक संदेश के साथ अनुपयोगी profile थोप देगा), MCP/hooks/skills/agents switches निष्क्रिय किए गए हैं, `--disable-web-search`, `--no-subagents`, `--no-plan`, disposable workdir, CI में अस्वीकृति, process group को समाप्त करने वाला timeout, rate limit पर back-off। `--max-turns` को 1 के बजाय 6 पर निर्धारित किया गया है: counter tool turn के बाद बढ़ता है और 1 output को काट देगा।
+    - **कोटा**: Grok pool साप्ताहिक है और **Chat, Imagine तथा Voice के साथ साझा होता है**, और कोई command इसे प्रदर्शित नहीं करती—इसके विपरीत Codex में `account/rateLimits/read` से खपत की गणना की जा सकती है। इसलिए `regen_translations.sh` concurrency को 2 तक सीमित करता है और स्पष्ट चेतावनी देता है।
+    - **परीक्षण**: नई फ़ाइल `tests/test_grok_provider.py` (24 परीक्षण)। पूरी suite में **290 परीक्षण**।
+  - **सुधारा गया bug—बहु-पैराग्राफ़ EN उद्धरण केवल आंशिक रूप से सुरक्षित थे (`--news` मोड)**: `_NEWS_CITATION_REGEX` उद्धरण के body के रूप में केवल **क्रमागत** `>` पंक्तियों की शृंखला स्वीकार करता था। जैसे ही कोई उद्धरण कई पैराग्राफ़ों में फैला होता था (एक रिक्त `>` पंक्ति से अलग), केवल अंतिम पैराग्राफ़ capture होकर placeholder से बदला जाता था; पहले वाले LLM को भेज दिए जाते और अनूदित होकर लौटते—यह उस गारंटी के ठीक उलट था जिसके लिए `--news` मौजूद है। repetition अब आंतरिक रिक्त `>` पंक्तियाँ स्वीकार करती है और non-greedy हो गई है, ताकि वह italic पंक्ति से पहले वाली रिक्त `>` पर रुके, न कि पहली मिली रिक्त पंक्ति पर।
+    - **वास्तविक परिमाण का मापन** 198 लेखों के corpus पर: 419 में से 11 उद्धरण प्रभावित थे। कोई regression नहीं—नई regex ठीक उतने ही उद्धरण capture करती है; केवल बहु-पैराग्राफ़ bodies विस्तृत हुए हैं (408 bodies समान, 11 विस्तृत), और attribution पंक्ति `> — …` अब भी body में समाहित नहीं हो सकती (lookahead बरकरार है)।
+    - **End-to-end प्रमाण** ja/ar में अनूदित 69 KB के एक लेख पर: किसी उद्धरण का पहला पैराग्राफ़, जो पहले जापानी में `> GLM-5.3がオープンウェイト化。` प्रस्तुत किया जाता था और अरबी में भी इसी तरह अनूदित होता था, अब `> GLM-5.3 is now open-weight.` ही रहता है। अंग्रेज़ी उद्धरण-पंक्तियों की संख्या 9 से वापस 10 हो जाती है, यानी source के बराबर।
+    - ध्यान दें: downstream validators इस दोष का पता नहीं लगाते थे, क्योंकि वे उद्धरण की पूर्णता जाँचे बिना केवल उसकी उपस्थिति सत्यापित करते हैं।
+  - **मूल provider पर मापी गई बचत**: मॉडल का नाम `gpt-5` से शुरू होते ही `_openai_extra_kwargs`, `--eco` में भी `reasoning_effort="medium"` भेजता था। दस शब्दों का एक वाक्य अनूदित करने के लिए `gpt-5.4-mini` पर मापन: `medium` → 45 reasoning tokens और 65 output tokens; `none` → 0 और 14। अनुवाद में reasoning से कोई लाभ नहीं मिलता और हर फ़ाइल के प्रत्येक segment पर इसका भुगतान होता था। `--eco` में default अब `none` है और अन्यथा `medium` रहता है; CLI में दी गई explicit value अब भी प्राथमिक है। `--reasoning_effort` अब `low`/`medium`/`high` के अतिरिक्त `none` और `xhigh` भी स्वीकार करता है (सभी values हर मॉडल द्वारा स्वीकार नहीं की जातीं: उदाहरण के लिए `gpt-5.4-mini`, `minimal` को अस्वीकार करता है—parameter के बिना मौजूदा retry इस स्थिति को सँभालता है)।
+  - **SDK अद्यतन और Gemini migration**: `google-generativeai` (support 2025-11-30 को समाप्त, repository archived) को एकीकृत SDK **`google-genai`** से बदला गया है—`genai.Client(api_key=...)`, फिर `client.models.generate_content(model=, contents=, config=)`, और system prompt को segment के साथ जोड़ने के बजाय `system_instruction` में भेजा गया है। `mistralai` अब **2.9.4** है (import अब `from mistralai.client import Mistral` हो गया है; पुराना वाला `ImportError` उत्पन्न करता है, wheel में सत्यापित), `anthropic` अब **0.125.0** और `openai` अब **2.54.0** है—`httpx2` पर migration से पहले के नवीनतम संस्करण, ताकि venv में दो HTTP stacks साथ न रहें। फलस्वरूप `httpx` 0.28.1 और `pydantic` 2.13.5 को भी unblock किया गया है।
+  - **दो regressions जिन्हें वास्तविक परीक्षणों ने पकड़ा, documentation ने नहीं**:
+    - `anthropic` ≥ 1.0 client की ओर से ऐसे non-streamed call को अस्वीकार करता है जिसका `max_tokens` 10 मिनट से अधिक समय का संकेत देता है (`ValueError: Streaming is required...`)। यह सुरक्षा-उपाय 0.34.2 में नहीं था और `max_tokens=32768` वाले हर Claude call को तोड़ देता था। इसे explicit `timeout` (`CLAUDE_TIMEOUT`, मूल रूप से 900 s) से ठीक किया गया, जिससे ऐसे call के लिए streaming पर जाने की आवश्यकता नहीं पड़ती जिसकी केवल संपूर्ण response उपयोग की जाती है।
+    - `thinking_level="minimal"` Gemini catalog के केवल एक भाग द्वारा स्वीकार किया जाता है: `gemini-3.1-flash-lite` इसका support करता है, जबकि `gemini-3.7-flash` और `gemini-3.1-pro-preview` इसे 400 के साथ अस्वीकार करते हैं। इसलिए `_gemini_generate_with_fallback`, `minimal` → `low` → बिना thinking_config की cascade है, जो पहले से मौजूद OpenAI fallback के अनुरूप है—optimization parameter के कारण अनुवाद कभी विफल नहीं होना चाहिए।
+  - **मूल मॉडल नवीनीकृत**, प्रत्येक को वास्तविक call से सत्यापित किया गया: OpenAI `gpt-5.5` → **`gpt-5.6-terra`** (28 के batch पर −60%) और `gpt-5.4-mini` → **`gpt-5.6-luna`** (−73%); Claude `claude-sonnet-4-6` → **`claude-sonnet-5`** (सस्ता और अधिक नया) तथा `claude-haiku-4-5-20251001` → **`claude-haiku-4-5`** (तारीख़-रहित canonical ID); Gemini `gemini-3.1-pro-preview` → **`gemini-3.7-flash`** और `gemini-3.1-flash-lite-preview` → **`gemini-3.1-flash-lite`** (स्थिर संस्करण और `3.5-flash-lite` से सस्ता)। Mistral अपरिवर्तित है; `mistral-large-latest` चारों में सर्वोत्तम गुणवत्ता-मूल्य अनुपात बना हुआ है। ध्यान दें: `gemini-3.1-pro-preview` से नया कोई Gemini Pro-श्रेणी मॉडल मौजूद नहीं है—मई 2026 में घोषित Gemini 3.5 Pro कभी जारी नहीं हुआ; 3.5/3.6/3.7 श्रृंखला केवल Flash है।
+  - **Gemini बदलने से पहले मापा गया A/B**: `README.md` का जापानी में पहले `gemini-3.1-pro-preview` और फिर `gemini-3.7-flash` से अनुवाद किया गया। संरचना पूरी तरह समान रही (21 सूचियाँ, 18 code blocks, 13 HTML links, 13 images, सभी URLs सुरक्षित), और समय **48 s की तुलना में 8 s** रहा। चूँकि इन दोनों मॉडलों की अनुवाद या non-Latin scripts पर तुलना करने वाला कोई सार्वजनिक benchmark नहीं है, इसके बिना परिवर्तन केवल अनुमान पर आधारित होता।
+  - **Claude response blocks का filtering**: `_call_claude` type को filter किए बिना `block.text for block in response.content` करता था। adaptive reasoning वाले मॉडल (Sonnet 5 और उसके बाद के) बीच में `thinking` block डालते हैं, जो `.text` के बजाय `.thinking` उपलब्ध कराता है—अनुवाद पहले segment पर ही एक अस्पष्ट `AttributeError` के कारण टूट जाता। `thinking`, `redacted_thinking`, `tool_use` और `tool_result` blocks को अब हटा दिया जाता है (negative list, ताकि text रखने वाले अज्ञात type के प्रति सहिष्णुता बनी रहे), और किसी text block के बिना response स्पष्ट error उत्पन्न करती है। हर call में `thinking={"type": "disabled"}` भेजा जाता है।
+  - **`MODEL_TOKEN_LIMITS` पुनः समन्वित**: जिन मॉडलों की retirement date बीत चुकी है उन्हें हटाया गया (`magistral-*` श्रेणी 2026-07-31 को retired, `gemini-2.0-*` 2026-06-01 को, `gemini-3-pro-preview` 2026-03-09 को, `claude-3-5-sonnet-20240620`, `claude-3-7-sonnet-20250219`, `claude-opus-4-1-20250805`, `claude-sonnet-4-20250514`)। सीमाओं में सुधार: Mistral 128K → **256K** (Large 3 / Small 4 generation), Gemini 1 000 000 → **1 048 576** (वास्तविक input सीमा), `claude-opus-4-5` 200K → **1M**, `gpt-5.6-*` परिवार 400K → **1.05M**। Claude 5 (`claude-sonnet-5`, `claude-opus-5`, `claude-fable-5`), `claude-opus-4-8`, Gemini 3.5/3.6/3.7, `mistral-medium-latest` और `ministral-*` श्रेणी जोड़ी गई। ध्यान दें: ये सीमाएँ केवल संकेतात्मक हैं, क्योंकि `translate()` segmentation को `min(16000, limite)` पर सीमित करता है।
+  - **Provider `--use_codex`** : पाँचवाँ provider, जो उपयोग-आधारित शुल्क वाली API को कॉल करने के बजाय आधिकारिक Codex CLI (`codex exec`) को गैर-संवादात्मक मोड में संचालित करता है। अनुवाद की गणना पहले से भुगतान किए गए ChatGPT सदस्यता कोटे में होती है। इस उपयोग के लिए OpenAI द्वारा प्रलेखित यह एकमात्र तरीका है: योजना-वार उपलब्धता मैट्रिक्स में « Codex SDK, `codex exec`, और स्क्रिप्ट-योग्य कार्यप्रवाह » को Plus/Pro/Business/Enterprise पर उपलब्ध बताया गया है, जबकि `~/.codex/auth.json` के tokens API Platform कॉल को प्रमाणित नहीं करते (और यह स्क्रिप्ट उन्हें कभी पढ़ती भी नहीं है—प्रमाणीकरण और उसका refresh CLI द्वारा ही प्रबंधित होता है)।
+  - **Codex बाइनरी अब केवल npm से ही नहीं, pip से भी इंस्टॉल की जा सकती है** : `_resolve_codex_binary()` पहले `CODEX_BIN`, फिर `PATH`, और उसके बाद OpenAI द्वारा प्रकाशित आधिकारिक Python package **`openai-codex-cli-bin`** में बाइनरी खोजता है (यह `openai-codex` SDK की dependency है)। इसलिए अब किसी Python project को `--use_codex` उपयोग करने के लिए वैश्विक npm installation की आवश्यकता नहीं है। package को `requirements.txt` में नहीं जोड़ा गया है: बाइनरी का आकार ~250 MB है, जिसे वैकल्पिक provider के लिए सभी उपयोगकर्ताओं पर थोपना पड़ता। आरंभ से अंत तक सत्यापित: `PATH` में `codex` अनुपस्थित होने पर resolution पैकेज की गई बाइनरी खोज लेता है और पूरा अनुवाद 6 सेकंड में संपन्न हो जाता है।
+  - **« सदस्यता मोड » की गारंटी** : `OPENAI_API_KEY` और `CODEX_API_KEY` को subprocess के environment से हटा दिया जाता है। इस सुरक्षा के बिना `.env` में मौजूद कोई key, बिना किसी दृश्य संकेत के Codex को उपयोग-आधारित billing पर स्विच कर सकती थी—ठीक वही स्थिति, जिससे बचने के लिए यह provider बनाया गया है।
+  - **परीक्षणों द्वारा सुरक्षित किए गए CLI के जोखिम** :
+    - argument में prompt दिए जाने पर भी `codex exec` stdin को पढ़ता है: stdin बंद न करने पर command मॉडल को कभी कॉल किए बिना timeout तक प्रतीक्षा करती रहती है (पुनरुत्पादित: 180 सेकंड बाद exit 124, शून्य byte)। इसलिए `communicate(input=...)` अनिवार्य है।
+    - npm से इंस्टॉल किया गया `codex` एक Node shim है, जो वास्तविक Rust बाइनरी को `spawn` करता है: यह Python process का **पोता process** होता है और `subprocess.run(timeout=)` के `SIGKILL` के बाद भी जीवित रहता है, जहाँ यह कोटा खर्च करना जारी रख सकता था। इसी कारण `Popen(start_new_session=True)` + `os.killpg`।
+    - `turn.failed` उत्सर्जित करने के बावजूद CLI 0 के साथ बाहर निकल सकता है: return code के अतिरिक्त JSONL output (`--json`) का निरीक्षण किया जाता है और code 0 के साथ `-o` file अनुपस्थित होने पर खाली segment बनाने के बजाय स्पष्ट error उत्पन्न होती है।
+  - **Rate limit पर back-off** : CLI कोई आंतरिक retry लागू नहीं करता (`max_retries = 0`)। वर्गीकरण substring के आधार पर नहीं, बल्कि JSON payload की संरचना (`status: 429` / `error.type`) के आधार पर होता है—क्योंकि « quota » शब्द पुनर्प्राप्त किए जा सकने वाले 429 और स्थायी `insufficient_quota`, दोनों में दिखाई देता है।
+  - **CI सुरक्षा** : `CI` या `GITHUB_ACTIONS` परिभाषित होने पर `--use_codex` अस्वीकार कर दिया जाता है। सदस्यता-आधारित प्रमाणीकरण साझा runner के लिए अभिप्रेत नहीं है और OpenAI सार्वजनिक repositories पर इस workflow को स्पष्ट रूप से हतोत्साहित करता है।
+  - **मॉडल** : `gpt-5.6-sol` (गुणवत्ता) और `gpt-5.6-luna` (`--eco`)। `gpt-5.6-*` परिवार CLI और API Platform दोनों में समान है, लेकिन ChatGPT account को इसके सभी मॉडलों की पात्रता नहीं मिलती: allowlist server की ओर लागू होती है, बिना स्थानीय validation के, और कोई असामान्य मॉडल warning उत्पन्न करता है। Plus plan पर Luna प्रति 5 घंटे की window में 250-2,000 messages देता है, जबकि Sol 10-100 देता है: किसी भी batch processing के लिए `--eco` अनुशंसित मोड है।
+  - **ठीक किया गया bug—पूर्ण सफलता के बावजूद `regen_translations.sh` error के साथ बाहर निकलता था** : `trap ... EXIT`, `main()` के एक `local` variable `failed_log` को संदर्भित करता था, जो trap के चलने के समय अस्तित्व में नहीं रहता। `set -u` के अंतर्गत इससे `failed_log: unbound variable` उत्पन्न होता और सभी 28 अनुवाद सही होने के बावजूद script code 1 के साथ बाहर निकलती—जिससे सबसे महँगे चरण में regeneration के तुरंत बाद `release.sh --auto` (`set -e`) रुक जाता। variable को global बना दिया गया है और trap उसके अस्तित्व की जाँच करता है। उपयोगी पार्श्व प्रभाव: वास्तविक अनुवाद विफलताएँ, जो अब तक इस error से छिप जाती थीं, अंतिम सारांश में फिर से दिखाई देती हैं।
+  - **`REGEN_MODEL`** : `regen_translations.sh` का नया environment variable, जो provider के default पर किसी निश्चित model को प्राथमिकता देता है; उदाहरण के लिए volume-उन्मुख `--eco` मॉडल के बजाय सदस्यता कोटे के उच्च-स्तरीय मॉडल पर regeneration करने के लिए `REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol`।
+  - **`regen_translations.sh`** : स्पष्ट opt-in के रूप में उपलब्ध `REGEN_PROVIDER=codex` (कभी स्वतः detect नहीं किया जाता, ताकि उपयोगकर्ता की जानकारी के बिना सदस्यता कोटा खर्च न हो)। parallelism आरंभ करने से पहले token को क्रमिक रूप से एक बार refresh किया जाता है—क्योंकि Codex refresh rotating और एक-बार उपयोग वाला है, concurrent jobs `codex login` session को अमान्य कर देते—और concurrency घटाकर 4 कर दी जाती है।
+  - **संबंधित refactor** : पूरी शृंखला में चौथा boolean प्रसारित करने के बजाय provider का नाम लौटाने वाले `_resolve_provider()` के माध्यम से `_dispatch_provider_call` के parameters 8 से घटकर 6 हो गए हैं। `translate(..., use_mistral=True)` को न्यूनतम `Namespace` के साथ कॉल करने वाले tests को सुरक्षित रखने के लिए स्पष्ट booleans को `args` पर अब भी प्राथमिकता मिलती है।
+  - **परीक्षण** : नई file `tests/test_codex_provider.py` (41 tests), जिसमें argv, शुद्ध किया गया environment, preamble-विरोधी contract, silent failures, timeout/killpg, back-off, preflight, provider resolution, Gemini reasoning cascade, Claude blocks की filtering और बहु-अनुच्छेदीय news citations शामिल हैं। पूरा suite 259 tests का है।
+  - **वास्तविक validation** : Codex के माध्यम से project के `README.md` का **14 भाषाओं** में अनुवाद संदर्भ अनुवादों के बिल्कुल समान संरचना देता है (14 code blocks, 24 headings, table की 25 rows, 13 HTML links, 13 images, 19 URLs, अक्षर-दर-अक्षर समान code blocks और placeholder का शून्य अवशेष)। `--news` mode में 69 KB के news article पर `gpt-5.6-luna` और `gpt-5.6-sol`, दोनों outputs en/ja/ar के लिए downstream application validator में सफल होते हैं। `account/rateLimits/read` के माध्यम से मापी गई खपत: `--eco` mode में counter के rounding threshold से नीचे रही (5 घंटे की window का 0%)।
 
-- **1.9.1** translation note marker में CTA label का i18n सुधार (2026-05-10) :
+- **1.9.2** नेस्टेड कोष्ठकों या FR prefix वाली news attribution URL extraction का सुधार (2026-05-11) :
 
-  - **बग सुधारा गया** : files के ऊपर marker banner में CTA link का `[Voir le projet sur GitHub ↗]` label सभी target भाषाओं के लिए **फ़्रेंच** ही बना रहता था, जबकि उसे `target_lang` का पालन करना चाहिए था। LLM इसे कभी नहीं देखता (URL और repo slug को सुरक्षित रखने के लिए Python side पर assemble किया जाता है), इसलिए translation phase इसे ठीक नहीं कर पाती थी। v1.9 में `marker` format जोड़ने के बाद से यह एक मौन regression था।
-  - **सुधार** : `_VIEW_PROJECT_LABELS` नाम की नई constant, जो 15 भाषाओं को उनके localized label से map करती है। `_translation_note_invariants(target_lang)` और `_assemble_translation_note_paragraphs(phrase, target_lang)` अब target language को propagate करते हैं। भाषा अज्ञात होने पर `fr` fallback (सुरक्षा, कोई KeyError नहीं)।
-  - **परीक्षण** : `test_source_emits_three_paragraphs_repo_title_description_link` समायोजित (target_lang `ja` → अपेक्षित जापानी label)। 2 नए परीक्षण : `test_source_link_label_localized_per_target_lang` (7 भाषाओं पर parameterized, जो latin, ideographic, abjad scripts को कवर करता है) और `test_source_link_label_falls_back_to_french_for_unknown_target`. कुल : `test_translation_note_position.py` में 40 परीक्षण (38 के बजाय)।
-  - **Backward-compat** : default `target_lang="fr"` के साथ signature — बिना `args.target_lang` के बाहरी programmatic callers बिना बदलाव के काम करते रहेंगे।
+  - **ठीक किया गया bug** : `_protect_news_quotes` में attribution URLs की extraction के लिए regex `re.search(r"\((.+?)\)", attribution)` (कोष्ठकों के बीच lazy capture) का उपयोग होता था। `(relayé par [@user sur X](https://x.com/.../123))` जैसी attribution पर (नेस्टेड कोष्ठक: बाहरी `(` + markdown link का `]()`), capture पहले मिले `)` पर रुक जाता था → कटी हुई string, जिसमें FR prefix भी शामिल था: `relayé par [@user sur X](https://x.com/.../123` (अंतिम `)` के बिना)। परिणामस्वरूप `_validate_news_post` translated output में इस string को खोजता और हमेशा विफल रहता था (दो कारण: कटा हुआ `)` + "relayé par" का `relayed by`/`weitergeleitet von`/... में अनुवाद)। पूर्ण low → medium → high → gpt-5.5 cascade सफल नहीं हो सकती थी।
+  - **सुधार** : regex अब `re.search(r"\]\(([^)]+)\)", attribution)` है—यह विशेष रूप से markdown link के `](url)` को लक्षित करता है और **केवल शुद्ध URL** capture करता है (न FR prefix, न कटाव), जिसे अनुवाद के दौरान `#URL{N}#` placeholders अपरिवर्तित रखते हैं। दोनों समस्याग्रस्त patterns के लिए सुदृढ़:
+    - `(relayé par [@account sur X](url))` — नेस्टेड कोष्ठक
+    - `via [@source](url)` या `selon [@author](url)` — बाहरी कोष्ठकों के बिना FR prefix
+  - **परीक्षण** : `test_silent_failure.py` की `TestNewsCitationExtraction` class में 2 नए tests:
+    - `test_extract_attribution_url_with_nested_parens` (Genspark CEO E2B bug का ठीक वही पुनरुत्पादित मामला)
+    - `test_extract_attribution_url_with_french_prefix` (`via` वाला variant)
+  - **कवरेज में कमी** : `check-editorial-coverage.py` संपादकीय syntax को validate करता है, लेकिन translator द्वारा उसकी अनुवाद-योग्यता को नहीं। एक संभावित सुधार (v1.9.2 के scope से बाहर) ऐसा check होगा, जो publication से **पहले** जोखिमपूर्ण patterns का पता लगाने हेतु dry-run में attribution extraction का simulation करे।
 
-- **1.9** silent-failure सुधार + पूर्ण गुणवत्ता tooling + multi-position translation note (2026-05-07) :
-  - **Multi-position translation note + "embed card" marker format** :
-    - नए CLI विकल्प (additive, defaults अपरिवर्तित → **non breaking**) :
-      - `--note_position {top,bottom,both}` (default : `bottom`) : translated file में note को ऊपर, नीचे, या दोनों जगह रखता है।
-      - `--note_format {legacy,marker}` (default : `legacy`) :
-        - `legacy` v1.8 के व्यवहार को **byte-for-byte** सख्ती से दोहराता है (bold paragraph `**…**`)।
-        - `marker` एक अदृश्य Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) उत्सर्जित करता है, जिसके बाद एक **3-पैराग्राफ blockquote** आता है, जिसे "GitHub repo embed card" जैसा render करने के लिए संरचित किया गया है : inline code में प्रोजेक्ट शीर्षक (`**\`ai-powered-markdown-translator\`\*\*`), LLM द्वारा अनुवादित description, और visible arrow के साथ CTA link (`[Voir le projet sur GitHub ↗](URL)`)। build के समय remark plugin द्वारा उपयोगी (cf. blog jls42.org → plugin `remark-translation-banner`)।
-    - **ऐसे invariants जो कभी LLM को नहीं भेजे जाते** : repo title और GitHub URL अनुवाद के बाद Python side पर assemble किए जाते हैं। LLM कभी भी slug `ai-powered-markdown-translator` या `https://github.com/jls42/...` नहीं देखता, जिससे यह सुनिश्चित होता है कि कोई renderer/case/scheme बदला न जाए।
-    - **Frontmatter-aware insertion** : `top` या `both` मोड में, note YAML frontmatter के समापन `---` block के **बाद** डाली जाती है (Astro Content Collections / gray-matter सुरक्षा)। Helper `_split_frontmatter` file की शुरुआत में `---\n…\n---\n` का पता लगाता है और उसकी integrity सुरक्षित रखता है ; यह बंद fence के बिना खुले frontmatter पर `RuntimeError` फेंकता है (file को गलत जगह note के साथ लिखने के बजाय `failed_files` में भेजा जाता है)।
-    - **Whitelist model sanitizer** : `_sanitize_model` `[A-Za-z0-9._:/-]` के बाहर के किसी भी character को `_` से बदल देता है, खाली होने पर `unknown` fallback। यह Astro remark plugin-side validator के अनुरूप है और ऐसे characters को neutralize करता है जो marker format तोड़ सकते थे (space, quote, parenthesis, comma, आदि)।
-    - **आंतरिक refactor** : `_append_translation_note` (1 monolithic function) → 7 pure helpers (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`)। Builder/composer अलग किए गए (builder separator के बिना शुद्ध block लौटाता है, composer स्थिति के अनुसार `\n\n` लागू करता है) ; production और source helper एक ही 3-पैराग्राफ assembler साझा करते हैं।
-    - **`_quote_lines` blank-preserving** : प्रत्येक line को `> ` से prefix करता है, खाली lines को केवल `>` में बदलकर। इससे mdast को blockquote में 3 अलग-अलग paragraphs दिखते हैं (शीर्षक / विवरण / लिंक) बजाय line-breaks वाले एक ही paragraph के।
-    - **`_build_translation_note_block` adaptive** : इस आधार पर कि LLM ने कितने paragraphs संरक्षित किए (3 = पूर्ण card format, 2 = वाक्य + लिंक, 1 = fallback)। 1-पैराग्राफ fallback अब तब `**...**` से घेरता नहीं है जब Markdown link `](` का पता चलता है (`<strong>` के चारों ओर fragile rendering)।
-    - **Backward compatibility** : `getattr(args, "note_position", "bottom")` और `getattr(args, "note_format", "legacy")` `_compose_with_notes` side पर — इन attributes के बिना namespaces (existing tests, external programmatic calls) बिना बदलाव के काम करते रहते हैं।
-  - **लंबी translations पर silent-failure सुधार** :
-    - सभी providers (OpenAI, Mistral, Claude, Gemini) पर post-translation भाषा validation : deterministic layer (verbatim source excerpt मिला) + probabilistic layer (`langdetect`)
-    - `finish_reason` / `stop_reason` whitelist : whitelist के बाहर की किसी भी state (truncation, content_filter, आदि) पर `RuntimeError` फेंकना
-    - `max_tokens` Claude : `4096` → `32768` (16k segments पर latent truncation से बचाता है, FR→JA/ZH/KO/AR/HI cross-script margin)
-    - Heading-aware segmentation : segment के दूसरे आधे भाग में H2/H3 को प्राथमिकता (हर segment एक पूर्ण semantic section से शुरू होता है)
-    - त्रुटियों का propagation non-zero exit code तक : `translate_markdown_file` typed status `success` / `failure` / `skipped` लौटाता है, `main()` अगर कम-से-कम एक file विफल हुई हो तो `sys.exit(1)` करता है (single-file और batch)
-    - सभी providers पर empty-content guard, source/output sanity ratio (≥ 500 chars, < 5% = अस्वीकार), code placeholders validation (`#CODEBLOCK`/`#INLINECODE`), post-LLM normalization (heading से चिपके separators/links), `BadRequestError` retry बिना `reasoning_effort`
-    - dependency `langdetect==1.0.9` जोड़ी गई
-  - **पूर्व-commit गुणवत्ता tooling** ("पूर्ण EurekAI type", 14 hooks) :
-    - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 protected API keys), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs, आदि)
-    - Pre-push : mypy (धीरे-धीरे lax mode), Opengrep SAST (translate.py + scripts/), pip-audit (प्रारंभिक reporting mode), unittest discover (tests/ + scripts/tests/)
-    - स्थानीय wrappers `scripts/` में जो `./venv/bin/python` का उपयोग करते हैं
-    - `scripts/audit_verdict.py` : 11 unittest tests के साथ pip-audit JSON parser, jls42-astro parser का अनुकूलित Python port
-    - 7 प्रारंभिक ruff violations सुधारे गए : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
-    - Lizard अस्थायी रूप से `translate.py` को exclude करता है (CCN 21-47 वाली 4 functions, refactor योजनाबद्ध) — scripts/ पर strict gate
-  - **SonarCloud + पूर्ण कवरेज** :
-    - GitHub Actions workflow `SonarCloud` (sonarcloud.yml + sonar-project.properties) : हर push और pull-request पर analysis, coverage `coverage.xml` के माध्यम से
+- **1.9.1** translation marker note में CTA label के i18n का सुधार (2026-05-10) :
+
+  - **ठीक किया गया bug** : translated files के शीर्ष पर marker banner में CTA link का `[Voir le projet sur GitHub ↗]` label, `target_lang` का अनुसरण करने के बजाय सभी target languages में **फ़्रांसीसी** ही रहता था। LLM इसे कभी नहीं देखता (repo का URL और slug सुरक्षित रखने के लिए इसे Python की ओर assemble किया जाता है), इसलिए translation phase इसे सुधार नहीं पाता था। v1.9 में `marker` format जोड़ने के बाद से यह silent regression मौजूद था।
+  - **सुधार** : 15 भाषाओं को उनके localized label से map करने वाला नया constant `_VIEW_PROJECT_LABELS`। `_translation_note_invariants(target_lang)` और `_assemble_translation_note_paragraphs(phrase, target_lang)` अब target language को आगे प्रसारित करते हैं। language अज्ञात होने पर `fr` fallback (सुरक्षा, कोई KeyError नहीं)।
+  - **परीक्षण** : `test_source_emits_three_paragraphs_repo_title_description_link` समायोजित किया गया (target_lang `ja` → अपेक्षित जापानी label)। 2 नए tests: `test_source_link_label_localized_per_target_lang` (Latin, ideographic और abjad scripts को शामिल करने वाली 7 भाषाओं पर parameterized) और `test_source_link_label_falls_back_to_french_for_unknown_target`। कुल: `test_translation_note_position.py` में 40 tests (38 के बजाय)।
+  - **पिछड़ी संगतता** : default `target_lang="fr"` वाली signature—`args.target_lang` के बिना बाहरी programmatic callers बिना किसी बदलाव के काम करना जारी रखते हैं।
+- **1.9** मौन-विफलता सुधार + संपूर्ण गुणवत्ता उपकरण + बहु-स्थिति अनुवाद नोट (2026-05-07) :
+  - **बहु-स्थिति अनुवाद नोट + "embed card" मार्कर प्रारूप** :
+    - नए CLI विकल्प (योगात्मक, डिफ़ॉल्ट अपरिवर्तित → **non breaking**) :
+      - `--note_position {top,bottom,both}` (डिफ़ॉल्ट : `bottom`) : अनुवादित फ़ाइल में नोट को ऊपर, नीचे या दोनों स्थानों पर रखता है।
+      - `--note_format {legacy,marker}` (डिफ़ॉल्ट : `legacy`) :
+        - `legacy` v1.8 के व्यवहार (बोल्ड अनुच्छेद `**…**`) को सख्ती से **byte-for-byte** पुनरुत्पादित करता है।
+        - `marker` एक अदृश्य Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) उत्सर्जित करता है, जिसके बाद "GitHub repo embed card" जैसे रेंडरिंग के लिए संरचित **3-अनुच्छेदों वाला blockquote** आता है : inline code में प्रोजेक्ट का शीर्षक (`**\`ai-powered-markdown-translator\`\*\*`), LLM द्वारा अनुवादित विवरण और दिखाई देने वाले तीर सहित CTA लिंक (`[Voir le projet sur GitHub ↗](URL)`)। बिल्ड के समय remark plugin द्वारा उपयोग योग्य (देखें blog jls42.org → plugin `remark-translation-banner`)।
+    - **LLM को कभी न भेजे जाने वाले अपरिवर्तनीय तत्व** : विवरणात्मक वाक्यांश के अनुवाद के बाद repo शीर्षक और GitHub URL को Python की ओर संयोजित किया जाता है। LLM कभी भी slug `ai-powered-markdown-translator` या `https://github.com/jls42/...` नहीं देखता, जिससे यह सुनिश्चित होता है कि कोई renderer/case/scheme परिवर्तित न हो।
+    - **Frontmatter-aware प्रविष्टि** : `top` या `both` मोड में नोट को YAML frontmatter के समापन **`---` ब्लॉक के बाद** डाला जाता है (Astro Content Collections / gray-matter सुरक्षा)। Helper `_split_frontmatter` फ़ाइल की शुरुआत में `---\n…\n---\n` का पता लगाता है और उसकी अखंडता बनाए रखता है; समापन fence के बिना खुले frontmatter पर **`RuntimeError` उत्पन्न करता है** (गलत स्थान पर नोट सहित लिखे जाने के बजाय फ़ाइल `failed_files` में रिपोर्ट होती है)।
+    - **Whitelist मॉडल sanitizer** : `_sanitize_model`, `[A-Za-z0-9._:/-]` से बाहर के प्रत्येक वर्ण को `_` से बदलता है और रिक्त होने पर `unknown` fallback देता है। यह Astro remark plugin की ओर के validator के अनुरूप है और marker प्रारूप को बिगाड़ सकने वाले वर्णों (रिक्ति, उद्धरण-चिह्न, कोष्ठक, अल्पविराम आदि) को निष्क्रिय करता है।
+    - **आंतरिक refactor** : `_append_translation_note` (1 विशाल फ़ंक्शन) → 7 शुद्ध helpers (`_translation_note_invariants`, `_build_translation_note_phrase`, `_assemble_translation_note_paragraphs`, `_build_translation_note_source`, `_sanitize_model`, `_quote_lines`, `_split_frontmatter`, `_build_translation_note_block`, `_compose_with_notes`)। Builder/composer अलग किए गए हैं (builder बिना separator वाला शुद्ध ब्लॉक लौटाता है, composer स्थिति के अनुसार `\n\n` लागू करता है); production और source helper समान 3-अनुच्छेदीय assembler साझा करते हैं।
+    - **`_quote_lines` में रिक्त पंक्तियों का संरक्षण** : प्रत्येक पंक्ति के आगे `> ` लगाता है और रिक्त पंक्तियों को केवल `>` में बदलता है। इससे mdast, blockquote में line-breaks वाले एक अनुच्छेद के बजाय 3 अलग अनुच्छेद (शीर्षक / विवरण / लिंक) देख पाता है।
+    - **अनुकूली `_build_translation_note_block`** : LLM द्वारा संरक्षित अनुच्छेदों की संख्या के अनुसार (3 = पूरा card प्रारूप, 2 = वाक्यांश + लिंक, 1 = fallback)। Markdown लिंक `](` मिलने पर 1-अनुच्छेद fallback को अब **`**...**` में नहीं लपेटा जाता** (`<strong>` को लिंक के चारों ओर रेंडर करना नाज़ुक था)।
+    - **पश्चगामी संगतता** : `_compose_with_notes` की ओर `getattr(args, "note_position", "bottom")` और `getattr(args, "note_format", "legacy")` — इन attributes के बिना Namespace (मौजूदा परीक्षण और बाहरी प्रोग्रामेटिक कॉल) बिना किसी बदलाव के काम करना जारी रखते हैं।
+  - **लंबे अनुवादों में मौन-विफलता का सुधार** :
+    - सभी providers (OpenAI, Mistral, Claude, Gemini) पर अनुवाद के बाद भाषा सत्यापन : नियतात्मक परत (स्रोत अंश का हूबहू मिलना) + प्रायिकता-आधारित परत (`langdetect`)
+    - `finish_reason` / `stop_reason` whitelist : whitelist से बाहर की किसी भी स्थिति (truncation, content_filter आदि) पर `RuntimeError` उत्पन्न करना
+    - Claude के लिए `max_tokens` : `4096` → `32768` (16k segments पर छिपी हुई truncation से बचता है, FR→JA/ZH/KO/AR/HI cross-script के लिए अतिरिक्त स्थान)
+    - Heading-aware segmentation : segment के दूसरे आधे भाग में H2/H3 को प्राथमिकता (प्रत्येक segment एक पूर्ण अर्थगत अनुभाग से शुरू होता है)
+    - त्रुटियों को non-zero exit code तक प्रसारित करना : `translate_markdown_file` एक typed status `success` / `failure` / `skipped` लौटाता है, कम-से-कम एक फ़ाइल विफल होने पर `main()` `sys.exit(1)` देता है (single-file और batch)
+    - सभी providers पर empty-content guard, source/output sanity ratio (≥ 500 chars, < 5% = अस्वीकृति), code placeholders का सत्यापन (`#CODEBLOCK`/`#INLINECODE`), LLM के बाद normalization (heading से चिपके separators/links), `BadRequestError` के बिना `reasoning_effort` retry
+    - `langdetect==1.0.9` dependency जोड़ी गई
+  - **Pre-commit गुणवत्ता उपकरण** ("संपूर्ण EurekAI प्रकार", 14 hooks) :
+    - Pre-commit : ruff (lint+format), shellcheck, prettier (md/yaml/json), detect-secrets (4 API keys सुरक्षित), Lizard (CCN ≤ 12), pre-commit-hooks v5 (whitespace, EOF, large-files, shebangs आदि)
+    - Pre-push : mypy (क्रमिक lax mode), Opengrep SAST (translate.py + scripts/), pip-audit (प्रारंभिक reporting mode), unittest discover (tests/ + scripts/tests/)
+    - `scripts/` में स्थानीय wrappers, जो `./venv/bin/python` का उपयोग करते हैं
+    - `scripts/audit_verdict.py` : 11 unittest वाला pip-audit JSON parser, jls42-astro parser का अनुकूलित Python port
+    - 7 प्रारंभिक ruff उल्लंघन सुधारे गए : B904 (raise from) ×2, B007 (unused dirs), C408 (dict literal), C419 (list-comp), SIM105 (contextlib.suppress), SIM110 (any())
+    - Lizard अस्थायी रूप से `translate.py` को बाहर रखता है (CCN 21-47 वाले 4 फ़ंक्शन, refactor नियोजित) — scripts/ पर सख्त gate
+  - **SonarCloud + व्यापक coverage** :
+    - GitHub Actions workflow `SonarCloud` (sonarcloud.yml + sonar-project.properties) : प्रत्येक push और pull-request पर विश्लेषण, `coverage.xml` के माध्यम से coverage
     - README के शीर्ष पर 11 SonarCloud badges (Quality Gate, Security/Reliability/Maintainability ratings, Coverage, Vulnerabilities, Bugs, Code Smells, Duplicated Lines, Technical Debt, Lines of Code)
-    - `tests/test_silent_failure.py` (`unittest` stdlib) : silent-failure error chain के छह links को कवर करता है
-    - `tests/test_orchestration.py` (+79 tests) : `translate.py` (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallbacks, o1-series prompt format, `_validate_translation_output` के early-return branches) की orchestration layer को कवर करता है
-    - `scripts/tests/test_audit_verdict.py` : `main()` (stdin/stdout) और `if __name__ == "__main__"` block की subprocess के माध्यम से कवरेज
-    - **नई code पर coverage** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
-  - **परीक्षण** : `tests/test_translation_note_position.py` position × format matrix को कवर करता है (incl. E2E `marker+top|bottom|both` और `legacy+top|bottom|both`), multi-line prefixing, byte-for-byte backward compatibility (golden literal), sanitizer, frontmatter split (incl. बंद न हुए fence पर raise), 3-पैराग्राफ format, 2-पैराग्राफ fallback, 1-पैराग्राफ guard + Markdown link, और एक critical guardrail `TestLLMPayloadExcludesInvariants` जो assert करता है कि title+URL कभी LLM को नहीं भेजे जाते। **190 परीक्षण pass**, 0 regression।
-  - Documentation : `README.md` (FR + 14 अनुवाद) badges के साथ, `CLAUDE.md` (detailed pre-commit workflow + CI watch), 28 regenerated अनुवाद
-- **1.8** `--news` मोड + 2026 model bump (2026-03-17, tag `v1.8`) :
-  - डिफ़ॉल्ट मॉडल अपडेट (मार्च 2026) :
-    - OpenAI quality : `gpt-5` → `gpt-5.4`
-    - OpenAI economical : `gpt-5-mini` → `gpt-5.4-mini`
-    - Gemini quality : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
-  - `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) और `gemini-3.1-pro-preview` (1M) के लिए token limits जोड़े गए
-  - प्रारंभिक `--news` मोड : placeholders `#NEWSQUOTE\d+#` के साथ EN citations की सुरक्षा, `LANG_FLAGS` mapping (15 भाषाएँ), target language के अनुसार flags का प्रबंधन
-  - restoration से पहले news placeholders की validation (regression : placeholder हटाने वाला LLM citation के बिना मौन output देता था)
-  - `regen_translations.sh` script portable बनाया गया (absolute paths, pwd पर निर्भरता नहीं)
-  - README/CHANGELOG language bars में फ़्रेंच लिंक जोड़ा गया, 28 अनुवाद पुनः उत्पन्न किए गए
+    - `tests/test_silent_failure.py` (`unittest` stdlib) : मौन-विफलता त्रुटि शृंखला की सभी छह कड़ियों को कवर करता है
+    - `tests/test_orchestration.py` (+79 परीक्षण) : `translate.py` की orchestration परत को कवर करता है (`_resolve_*_filename`, `_existing_translation_exists`, `_record_translation_status`, `_write_output_file`, `translate_directory`, `_validate_input_paths`, `_init_*_client`, `_select_provider_client`, `_normalize_collapsed_markdown`, `_cleanup_source_flag`, `_validate_news_flags_*`, `_openai_create_with_fallback` TypeError + BadRequestError fallbacks, o1-series prompt format, `_validate_translation_output` की early-return branches)
+    - `scripts/tests/test_audit_verdict.py` : subprocess के माध्यम से `main()` (stdin/stdout) और `if __name__ == "__main__"` ब्लॉक की coverage
+    - **नए code पर Coverage** : 75.5% → ~98% (translate.py 98%, scripts/audit_verdict.py 97%)
+  - **परीक्षण** : `tests/test_translation_note_position.py` स्थिति × प्रारूप matrix (E2E `marker+top|bottom|both` और `legacy+top|bottom|both` सहित), बहु-पंक्ति prefixing, byte-for-byte पश्चगामी संगतता (golden literal), sanitizer, frontmatter split (बंद न किए गए fence पर raise सहित), 3-अनुच्छेद प्रारूप, 2-अनुच्छेद fallback, 1-अनुच्छेद guard + Markdown लिंक और महत्वपूर्ण सुरक्षा-जाँच `TestLLMPayloadExcludesInvariants` को कवर करता है, जो assert करती है कि शीर्षक+URL कभी LLM को नहीं भेजे जाते। **190 परीक्षण सफल**, 0 regression।
+  - दस्तावेज़ीकरण : `README.md` (FR + 14 अनुवाद) badges सहित, `CLAUDE.md` (pre-commit workflow + विस्तृत CI निगरानी), 28 अनुवाद पुनः बनाए गए
+- **1.8** `--news` मोड + 2026 models bump (2026-03-17, tag `v1.8`) :
+  - डिफ़ॉल्ट models अपडेट किए गए (मार्च 2026) :
+    - OpenAI गुणवत्ता : `gpt-5` → `gpt-5.4`
+    - OpenAI किफ़ायती : `gpt-5-mini` → `gpt-5.4-mini`
+    - Gemini गुणवत्ता : `gemini-3-pro-preview` → `gemini-3.1-pro-preview`
+  - `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` (400k) और `gemini-3.1-pro-preview` (1M) के लिए token सीमाएँ जोड़ी गईं
+  - प्रारंभिक `--news` मोड : placeholders `#NEWSQUOTE\d+#` के साथ EN उद्धरणों की सुरक्षा, `LANG_FLAGS` mapping (15 भाषाएँ), लक्ष्य भाषा के अनुसार flags का प्रबंधन
+  - पुनर्स्थापन से पहले news placeholders का सत्यापन (regression : placeholder हटाने वाला LLM चुपचाप उद्धरण-विहीन output बनाता था)
+  - `regen_translations.sh` script को पोर्टेबल बनाया गया (पूर्ण paths, pwd पर कोई dependency नहीं)
+  - README/CHANGELOG की language bars में Français लिंक जोड़ा गया, 28 अनुवाद पुनः बनाए गए
 - **1.7** नई सुविधाएँ :
-  - translation के दौरान मूल filename बनाए रखने के लिए `--keep_filename` विकल्प
-  - API keys को स्वतः लोड करने के लिए `.env` फ़ाइल का समर्थन
-  - **inline code की सुरक्षा** : backticks (`` `...` ``) अब translation के दौरान सुरक्षित हैं
+  - अनुवाद के दौरान मूल फ़ाइल नाम बनाए रखने के लिए `--keep_filename` विकल्प
+  - API keys को स्वतः load करने के लिए `.env` फ़ाइल का समर्थन
+  - **Inline code संरक्षण** : backticks (`` `...` ``) अब अनुवाद के दौरान सुरक्षित रहते हैं
   - system prompt में सुधार :
-    - YAML frontmatter में quotes का बेहतर प्रबंधन
+    - YAML frontmatter में उद्धरण-चिह्नों का बेहतर प्रबंधन
     - template variables `{variable}` की सुरक्षा
-    - अनचाही translator notes पर रोक
-  - 364 files (jls42.org blog migration) पर सफलतापूर्वक परीक्षण किया गया
+    - अनचाहे अनुवादक नोट्स पर रोक
+  - 364 फ़ाइलों पर सफलतापूर्वक परीक्षण किया गया (jls42.org blog migration)
 - **1.6** नई सुविधाएँ :
-  - translation के लिए Google Gemini API का समर्थन (`--use_gemini`)
-  - 2026 डिफ़ॉल्ट मॉडल अपडेट :
-    - OpenAI : `gpt-5` (quality), `gpt-5-mini` (eco)
-    - Claude : `claude-sonnet-4-5` (quality), `claude-haiku-4-5` (eco)
-    - Gemini : `gemini-3-pro-preview` (quality), `gemini-3-flash-preview` (eco)
-  - economical mode (`--eco`) ताकि तेज़ और कम लागत वाले model उपयोग किए जा सकें
-  - directory में जाए बिना single file translation (`--file`)
-  - नया सरल naming pattern : `{base}-{lang}.md`
-  - model नाम के साथ पुराना format बनाए रखने के लिए `--include_model` विकल्प
-  - default token limit (128k) के साथ सूचीबद्ध न किए गए models का समर्थन
-  - 14 भाषाओं में अनुवादित README
+  - अनुवाद के लिए Google Gemini API का समर्थन (`--use_gemini`)
+  - डिफ़ॉल्ट 2026 models का अपडेट :
+    - OpenAI : `gpt-5` (गुणवत्ता), `gpt-5-mini` (किफ़ायती)
+    - Claude : `claude-sonnet-4-5` (गुणवत्ता), `claude-haiku-4-5` (किफ़ायती)
+    - Gemini : `gemini-3-pro-preview` (गुणवत्ता), `gemini-3-flash-preview` (किफ़ायती)
+  - तेज़ और कम लागत वाले models के उपयोग हेतु किफ़ायती मोड (`--eco`)
+  - directory को खोजे बिना एकल फ़ाइल का अनुवाद (`--file`)
+  - नया सरलीकृत naming pattern : `{base}-{lang}.md`
+  - model नाम वाला पुराना प्रारूप बनाए रखने के लिए `--include_model` विकल्प
+  - डिफ़ॉल्ट token सीमा (128k) के साथ असूचीबद्ध models का समर्थन
+  - README का 14 भाषाओं में अनुवाद
 - **1.5** सुधार :
   - **API keys और डिफ़ॉल्ट models का अपडेट :**
-    - **OpenAI :** `DEFAULT_MODEL_OPENAI` से `"gpt-4o"` तक अपडेट।
-    - **Mistral AI :** `DEFAULT_MODEL_MISTRAL` से `"mistral-large-latest"` तक अपडेट।
-    - **Claude d'Anthropic :** `DEFAULT_ANTHROPIC_API_KEY` जोड़ा गया और `DEFAULT_MODEL_CLAUDE` से `"claude-3-5-sonnet-20240620"` तक अपडेट।
-  - **translation prompts का अनुकूलन :**
-    - direct translations और translation notes के prompts को बेहतर स्पष्टता और दक्षता के लिए समृद्ध किया गया, जिसमें metadata और विशिष्ट formatting elements की सुरक्षा पर विस्तृत निर्देश शामिल हैं।
-  - **code refactorization :**
+    - **OpenAI :** `DEFAULT_MODEL_OPENAI` से `"gpt-4o"` में अपडेट।
+    - **Mistral AI :** `DEFAULT_MODEL_MISTRAL` से `"mistral-large-latest"` में अपडेट।
+    - **Anthropic Claude :** `DEFAULT_ANTHROPIC_API_KEY` जोड़ा गया और `DEFAULT_MODEL_CLAUDE` को `"claude-3-5-sonnet-20240620"` में अपडेट किया गया।
+  - **अनुवाद prompts का अनुकूलन :**
+    - प्रत्यक्ष अनुवादों और अनुवाद नोट्स के prompts को अधिक स्पष्टता और दक्षता के लिए समृद्ध किया गया, जिसमें metadata और विशिष्ट formatting तत्वों के संरक्षण पर विस्तृत निर्देश शामिल हैं।
+  - **Code refactoring :**
     - Mistral AI client initialization के लिए `MistralClient` को `Mistral` class से बदला गया।
-    - बेहतर पठनीयता और maintenance के लिए imports का पुनर्गठन।
-    - translation के दौरान मूल formatting को सुरक्षित रखने के लिए text segmentation और code blocks handling में सुधार।
-  - **output files का प्रबंधन :**
-    - output files के नाम में model और language को उलट दिया गया (उदाहरण के लिए, `f"{base}-{args.target_lang}-{args.model}.md"`), जिससे translations का संगठन और खोज आसान हुई।
+    - बेहतर पठनीयता और रखरखाव के लिए imports का पुनर्गठन।
+    - अनुवाद के दौरान मूल formatting बनाए रखने के लिए text segmentation और code blocks के प्रबंधन में सुधार।
+  - **Output फ़ाइलों का प्रबंधन :**
+    - output फ़ाइल नामों में model और भाषा का क्रम उलटा गया (उदाहरण के लिए, `f"{base}-{args.target_lang}-{args.model}.md"`), जिससे अनुवादों को व्यवस्थित करना और खोजना आसान हुआ।
   - **विविध सुधार :**
-    - अनावश्यक blank lines हटाकर code साफ़ किया गया।
+    - अनावश्यक रिक्त पंक्तियाँ हटाकर code की सफ़ाई।
     - script की संरचना और पठनीयता सुधारने के लिए छोटे समायोजन।
 - **1.4** नई सुविधाएँ :
-  - translation के लिए Anthropic Claude API का समर्थन
+  - अनुवाद के लिए Anthropic Claude API का समर्थन
   - अधिक स्पष्टता और दक्षता के लिए prompts का अनुकूलन
-  - code maintenance सुधारने के लिए छोटे समायोजन
+  - code रखरखाव सुधारने के लिए छोटे समायोजन
 - **1.3** सुधार और नई सुविधाएँ :
   - code blocks का बेहतर प्रबंधन
-  - output files का बेहतर प्रबंधन
-  - existing files detection में सुधार
-  - translation को बाध्य करने के लिए `--force` विकल्प
-  - output file के नाम में model और language का उलटाव
-- **1.2** Changelog का सुधार
-- **1.1** Mistral IA API समर्थन जोड़ा गया
+  - output फ़ाइलों का बेहतर प्रबंधन
+  - मौजूदा फ़ाइलों की बेहतर पहचान
+  - अनुवाद बाध्य करने के लिए `--force` विकल्प
+  - output फ़ाइल नाम में model और भाषा का क्रम उलटा गया
+- **1.2** changelog का सुधार
+- **1.1** Mistral AI API समर्थन जोड़ा गया
 - **1.0** प्रारंभिक संस्करण - OpenAI API समर्थन
 
-**gpt-5.4-mini के साथ fr से hi में अनुवादित लेख।**
+**लेख का fr से hi में अनुवाद gpt-5.6-sol के साथ किया गया।**

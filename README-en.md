@@ -32,16 +32,16 @@ This Python script translates Markdown files from a source language to a target 
 
 ## Key Features
 
-- **Multi-Provider**: Support for 4 APIs (OpenAI, Mistral, Claude, Gemini)
-- **2026 Models**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
-- **Economy Mode**: Option `--eco` to use faster, lower-cost models
-- **Single File**: Option `--file` to translate a single file
-- **Intelligent Segmentation**: Handles long texts with model token limits
+- **Multi-Provider**: Support for 4 APIs (OpenAI, Mistral, Claude, Gemini) + the Codex CLI with a ChatGPT subscription
+- **2026 Models**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
+- **Economy Mode**: `--eco` option to use faster, less expensive models
+- **Single File**: `--file` option to translate a single file
+- **Smart Segmentation**: Handles long texts with per-model token limits
 - **Code Preservation**: Code blocks AND inline code (`` `...` ``) are preserved
-- **File Name**: Option `--keep_filename` to keep the original name
-- **News Mode**: Option `--news` to protect English quotes and handle flags in news articles
+- **File Name**: `--keep_filename` option to keep the original name
+- **News Mode**: `--news` option to protect English quotations and handle flags in news articles
 - **.env Configuration**: Support for the `.env` file for API keys
-- **Translation Note**: Optional note added at the end of the document
+- **Translation Note**: Optionally adds a note at the end of the document
 
 ## Installation
 
@@ -52,9 +52,9 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Quality tooling (optional but recommended)
+### Quality Tooling (optional but recommended)
 
-The project uses [`pre-commit`](https://pre-commit.com) to prevent committing badly formatted, vulnerable, or secret-containing code. Installation:
+The project uses [`pre-commit`](https://pre-commit.com) to prevent committing poorly formatted, vulnerable code or code containing a secret. Installation:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -62,15 +62,16 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Active hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexity), detect-secrets (API keys), mypy (gradual typing), Opengrep (SAST), pip-audit (CVE deps), unittest. See `CLAUDE.md` section _Quality / pre-commit_ for details.
+Active hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (complexity), detect-secrets (API keys), mypy (progressive typing), Opengrep (SAST), pip-audit (dependency CVEs), unittest. See the _Quality / pre-commit_ section in `CLAUDE.md` for details.
 
 ## Configuration
 
-Create a `.env` file in the project root or define the environment variables:
+Create a `.env` file at the project root or define the environment variables:
 
 ```bash
 # Fichier .env (recommandé)
 OPENAI_API_KEY=votre-clé-api-openai
+XAI_API_KEY=votre-clé-api-xai
 MISTRAL_API_KEY=votre-clé-api-mistral
 ANTHROPIC_API_KEY=votre-clé-api-anthropic
 GOOGLE_API_KEY=votre-clé-api-google
@@ -79,18 +80,24 @@ GOOGLE_API_KEY=votre-clé-api-google
 export OPENAI_API_KEY='votre-clé-api-openai'
 ```
 
+`GEMINI_API_KEY` is accepted as an alternative to `GOOGLE_API_KEY` (AI
+Studio convention). Optional variables: `XAI_BASE_URL` (xAI endpoint, default
+`https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (seconds per Anthropic call, default
+900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
+and `GROK_TRANSLATE_SANDBOX` (see the Grok CLI section).
+
 ## Usage
 
-### Translate a single file
+### Translate a Single File
 
 ```bash
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
-### Translate a directory
+### Translate a Directory
 
 ```bash
-# Avec OpenAI (défaut: gpt-5.5)
+# Avec OpenAI (défaut: gpt-5.6-terra)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -101,11 +108,108 @@ python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content
 
 # Avec Gemini
 python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
+
+# Avec Codex (sur le quota de l'abonnement ChatGPT, sans facturation à l'usage)
+python translate.py --use_codex --eco --file 'README.md' --target_dir . --target_lang 'it'
+
+# Avec Grok par l'API xAI (nécessite XAI_API_KEY, facturé à l'usage)
+python translate.py --use_grok --source_dir 'content/fr' --target_dir 'content/pt' --target_lang 'pt'
+
+# Avec Grok sur le quota de l'abonnement Grok (nécessite `grok login`)
+python translate.py --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
 ```
 
-### Economy mode
+### Translate Using Your ChatGPT Subscription (`--use_codex`)
 
-Uses faster, lower-cost models (gpt-5.4-mini, claude-haiku, gemini-flash):
+This provider does not use any API key: it runs the official Codex CLI in
+non-interactive mode, so translation usage is deducted from the quota of the
+already-paid ChatGPT subscription (Plus, Pro, Business…). This is the only method
+documented by OpenAI for this use case—the tokens from `~/.codex/auth.json` do not
+authenticate Platform API calls and, in fact, are never read by this script.
+
+**Prerequisites:**
+
+```bash
+# Le binaire `codex`, au choix :
+pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo)
+npm install -g @openai/codex       # ou l'installation npm globale
+
+codex login                        # connexion avec le compte ChatGPT
+```
+
+The binary is searched for in this order: the `CODEX_BIN` variable, the `PATH`,
+then the `openai-codex-cli-bin` Python package. The latter is deliberately
+not included in `requirements.txt`: it weighs ~250 MB, which would be imposed on all
+users for an optional provider.
+
+**Important:**
+
+- **No API key is used.** `OPENAI_API_KEY` and `CODEX_API_KEY` are
+  removed from the subprocess environment, ensuring that a key
+  present in `.env` will never cause the translation to switch to
+  usage-based billing.
+- **One segment = one “local message”** in the plan's 5-hour window.
+  Use `--eco` (model `gpt-5.6-luna`, 250–2,000 messages/5 h on Plus)
+  rather than the quality model (`gpt-5.6-sol`, 10–100 messages/5 h).
+- **Slower** than an API call: expect ~45 s for a complete README, compared with
+  a few seconds directly.
+- **Rejected in CI** (`CI` or `GITHUB_ACTIONS` defined): subscription-based
+  authentication is not intended for a shared runner, and OpenAI advises against
+  this workflow on public repositories. Use an API key for this path.
+- Environment variables: `CODEX_BIN` (explicit binary path) and
+  `CODEX_TIMEOUT` (seconds per segment, default `600`).
+
+### Translate Using Your Grok Subscription (`--use_grok_cli`)
+
+The same principle as `--use_codex`, using the official **Grok Build** CLI:
+translation usage is deducted from the Grok subscription (SuperGrok / X Premium+)
+instead of being billed per token.
+
+```bash
+curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
+grok login                                      # ou `grok login --device-code`
+```
+
+**Confinement—read before use.** This provider is structurally **weaker**
+than `--use_codex`, and this is intentional:
+
+- Codex runs in `--sandbox read-only`, a boundary enforced by the system.
+- The Grok sandbox **cannot be applied** on many recent Linux systems:
+  AppArmor has blocked unprivileged user namespaces since Ubuntu
+  24.04, and the container runtime socket deny-list fails if
+  `/run/podman` is set to `0700`. However, a **built-in** profile that cannot
+  be applied starts **unconfined, silently**.
+- The script therefore requests no profile by default and **never falls back
+  silently**: it displays a warning. Confinement relies on the CLI's
+  `--deny` rules (including the `*` catch-all), the only layer measured
+  as _fail-closed_—an unknown rule prevents startup rather than
+  removing protection without notice.
+- To **require** the OS sandbox: `GROK_TRANSLATE_SANDBOX=read-only`.
+  Startup will fail if the machine cannot honor it, which is the
+  intended behavior.
+
+**Quota**: the Grok pool is **weekly and shared** with Chat, Imagine, and
+Voice, and no command can display it. Batch processing can therefore
+eat into your conversational usage without any notification—hence
+concurrency limited to 2 and a warning in `regen_translations.sh`.
+
+Other variables: `GROK_BIN` (binary path), `GROK_TIMEOUT` (default 900 s).
+
+To regenerate the 28 translations:
+
+```bash
+REGEN_PROVIDER=codex ./regen_translations.sh --force
+
+# Sur un modèle précis plutôt que le défaut --eco du provider
+REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+
+# Sur le quota de l'abonnement Grok
+REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
+```
+
+### Economy Mode
+
+Uses faster, less expensive models (gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -115,38 +219,42 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 | Option                   | Description                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Single Markdown file to translate                                       |
+| `--file`                 | Single Markdown file to translate                                        |
 | `--source_dir`           | Source directory containing Markdown files                               |
-| `--target_dir`           | Output directory for translated files                                   |
-| `--source_lang`          | Source language (default: `fr`)                                             |
-| `--target_lang`          | Target language (default: `en`)                                              |
-| `--model`                | Specific model to use                                                   |
-| `--eco`                  | Use economy models                                                     |
-| `--use_mistral`          | Use the Mistral AI API                                                |
-| `--use_claude`           | Use the Claude API                                                    |
-| `--use_gemini`           | Use the Gemini API                                                    |
-| `--force`                | Force re-translation                                                  |
-| `--keep_filename`        | Keep the original file name                                     |
-| `--news`                 | News mode: protects EN quotes, handles language flags |
-| `--add_translation_note` | Add a translation note                                           |
-| `--note_position`        | Note position: `top`, `bottom` (default), or `both`                |
-| `--note_format`          | Note format: `legacy` (default, bold paragraph) or `marker`       |
-| `--include_model`        | Include the model name in the output file                       |
+| `--target_dir`           | Output directory for translated files                                    |
+| `--source_lang`          | Source language (default: `fr`)                                 |
+| `--target_lang`          | Target language (default: `en`)                                 |
+| `--model`                | Specific model to use                                                    |
+| `--eco`                  | Use economy models                                                       |
+| `--use_mistral`          | Use the Mistral AI API                                                    |
+| `--use_claude`           | Use the Claude API                                                        |
+| `--use_gemini`           | Use the Gemini API                                                        |
+| `--use_codex`            | Use the Codex CLI with the ChatGPT subscription quota                     |
+| `--use_grok`             | Use the xAI API (Grok)—requires `XAI_API_KEY`                             |
+| `--use_grok_cli`         | Use the Grok CLI with the Grok subscription quota                         |
+| `--force`                | Force retranslation                                                      |
+| `--keep_filename`        | Keep the original file name                                               |
+| `--news`                 | News mode: protects EN quotations, handles flags by language              |
+| `--add_translation_note` | Add a translation note                                                     |
+| `--note_position`        | Note position: `top`, `bottom` (default), or `both` |
+| `--note_format`          | Note format: `legacy` (default, bold paragraph) or `marker`    |
+| `--include_model`        | Include the model name in the output file                                 |
+| `--reasoning_effort`     | GPT-5.x reasoning effort: `none`/`low`/`medium`/`high`/`xhigh` |
 
-### Translation note: positions and formats
+### Translation Note: Positions and Formats
 
-With `--add_translation_note`, the translator can place the note at the top, bottom, or both, and render it either as plain text (backward-compatible) or as `marker` format consumable by a Markdown plugin.
+With `--add_translation_note`, the translator can place the note at the top, at the bottom, or in both locations, and render it either as plain text format (backward-compatible) or as `marker` format consumable by a Markdown plugin.
 
-**Position** (`--note_position`) :
+**Position** (`--note_position`):
 
-- `bottom` (default): note at the end of the file, as historically.
-- `top`: note inserted **after the YAML front matter** (Astro Content Collections safety, gray-matter, etc.).
-- `both`: note inserted at the top AND at the bottom (a single LLM call, content reused for both placements).
+- `bottom` (default): note at the end of the file, as before.
+- `top`: note inserted **after the YAML front matter** (safe for Astro Content Collections, gray-matter, etc.).
+- `both`: note inserted at the top AND bottom (a single LLM call, with content reused for both placements).
 
-**Format** (`--note_format`) :
+**Format** (`--note_format`):
 
-- `legacy` (default): bold paragraph `**...**` — behavior strictly identical to v1.8, byte-for-byte. Compatible with Hugo, GitHub, GitLab, and any Markdown renderer.
-- `marker`: invisible Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a bold blockquote. Natively readable on GitHub/GitLab, and usable at build time by a remark plugin on the Astro side to produce a stylized banner (see jls42.org blog).
+- `legacy` (default): bold paragraph `**...**`—behavior strictly identical to v1.8, byte-for-byte. Compatible with Hugo, GitHub, GitLab, and any Markdown renderer.
+- `marker`: invisible Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a bold blockquote. Natively readable on GitHub/GitLab and usable at build time by an Astro-side remark plugin to produce a styled banner (see the jls42.org blog).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -163,14 +271,17 @@ python translate.py --file article.mdx --target_lang en \
 
 ### Default Models (2026)
 
-| Provider | Quality (default)         | Economy (`--eco`)            |
-| -------- | ------------------------ | ------------------------------- |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
+| Provider | Quality (default)      | Economy (`--eco`) |
+| -------- | ---------------------- | ------------------------ |
+| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`           |
+| Claude   | `claude-sonnet-5`        | `claude-haiku-4-5`           |
+| Mistral  | `mistral-large-latest`        | `mistral-small-latest`          |
+| Gemini   | `gemini-3.7-flash`       | `gemini-3.1-flash-lite`          |
+| Codex    | `gpt-5.6-sol`       | `gpt-5.6-luna`          |
+| Grok API | `grok-4.6`       | `grok-4.3`          |
+| Grok CLI | `grok-4.6`       | `grok-4.5`          |
 
-> **Long-form translation recommendation** : `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3.1-flash-lite-preview`) tends to better preserve markdown structure on non-Latin scripts (PL, JA, ZH, AR, HI), especially in `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
+> **Recommendation for long-form translations**: `--use_gemini` (default = `gemini-3.7-flash`) faithfully preserves Markdown structure for non-Latin scripts (PL, JA, ZH, AR, HI), including in `--news` mode where placeholder fidelity matters. Measured on this README translated into Japanese: structure identical to `gemini-3.1-pro-preview` (21 lists, 18 code blocks, 13 HTML links, 13 images, all URLs preserved) with ~6x lower latency. OpenAI remains the default for backward compatibility.
 
 ## Projects Using This Script
 
@@ -178,11 +289,11 @@ python translate.py --file article.mdx --target_lang en \
 
 ## Author
 
-Julien LE SAUX  
+Julien LE SAUX
 Email: contact@jls42.org
 
 ## License
 
 GNU GENERAL PUBLIC LICENSE Version 3. See [LICENSE](LICENSE).
 
-**Article translated from fr to en with gpt-5.4-mini.**
+**Article translated from fr to en with gpt-5.6-sol.**
