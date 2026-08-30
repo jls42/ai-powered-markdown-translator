@@ -2,6 +2,44 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Definition of Done — ne jamais annoncer « c'est bon » sans preuve
+
+**Règle absolue : avant de déclarer un travail terminé, fiable, prêt à commiter
+ou prêt à releaser, exécuter `./scripts/check-release-ready.sh` et coller son
+verdict.** Une impression de complétude n'est pas une preuve : ce script a été
+créé après plusieurs « c'est prêt » démentis ensuite par une vérification
+(flag non documenté, traduction périmée, script sortant en erreur malgré un
+succès, provider non testé de bout en bout).
+
+```bash
+./scripts/check-release-ready.sh          # 12 vérifications, ~40 s
+./scripts/check-release-ready.sh --full   # + hooks pre-push (mypy, SAST, audit), ~3 min
+```
+
+Ce qu'il vérifie : tests `tests/` et `scripts/tests/`, hooks pre-commit (et
+pre-push en `--full`), **chaque flag argparse présent dans le README**, **chaque
+`os.getenv` documenté**, les 28 traductions (présence, structure, URLs,
+placeholders, couverture des flags), la version du CHANGELOG et son extraction
+par `release.sh`, et l'absence de secret dans les fichiers suivis.
+
+Points de méthode qui ont coûté cher et que le script encode :
+
+- **La fraîcheur des traductions se mesure au CONTENU, pas aux dates.**
+  `prettier` réécrit les sources sans en changer le sens : comparer des
+  timestamps produit des faux positifs à chaque passage de hook.
+- **Un `exit 0` ne prouve rien.** Ni pour `codex exec`, ni pour `grok`, ni pour
+  `regen_translations.sh` (dont un `trap` masquait les vrais échecs).
+  Toujours valider une condition métier, jamais le seul code retour.
+- **Un fichier non suivi par git échappe aux hooks.** `pre-commit` ne scanne que
+  l'index : `git add` un nouveau fichier AVANT de croire qu'il est propre.
+- **Mesurer plutôt que déduire.** Deux agents de recherche se sont contredits
+  sur la disponibilité d'un modèle Gemini ; un appel réel de 30 secondes a
+  tranché. Face à un doute vérifiable, vérifier.
+
+Si une vérification échoue, le travail continue — on ne rend pas la main sur un
+« presque ». Pour enchaîner les corrections sans supervision, `/loop` permet de
+reprendre la tâche jusqu'à ce que le script passe au vert.
+
 ## Claude Code Workflow
 
 - **Commits**: Utiliser le skill `/helping-with-commits` pour tous les commits
@@ -178,10 +216,10 @@ source venv/bin/activate
 # Translate a single file
 python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
 
-# Translate a directory with OpenAI (default: gpt-5.5)
+# Translate a directory with OpenAI (default: gpt-5.6-terra)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
-# Use economic models (--eco): gpt-5.4-mini, claude-haiku, gemini-flash
+# Use economic models (--eco): gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 # Translate with Mistral AI
@@ -233,6 +271,12 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 - `MISTRAL_API_KEY`
 - `ANTHROPIC_API_KEY`
 - `GOOGLE_API_KEY` (for Gemini)
+- `XAI_API_KEY` (for Grok via the xAI API)
+- `GEMINI_API_KEY` accepted as an alternative to `GOOGLE_API_KEY`
+
+Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
+`CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
+`GROK_TRANSLATE_SANDBOX`, `REGEN_PROVIDER`, `REGEN_MODEL`.
 
 ## Recommended Usage
 
@@ -242,7 +286,85 @@ For batch translations (README, CHANGELOG, blog articles), use `--eco` mode:
 python translate.py --file README.md --target_dir . --source_lang fr --target_lang en --eco --add_translation_note
 ```
 
-This uses faster/cheaper models (gpt-5.4-mini) which are sufficient for documentation translation.
+This uses faster/cheaper models (gpt-5.6-luna) which are sufficient for documentation translation.
+
+### Provider Codex (`--use_codex`) — quota d'abonnement ChatGPT
+
+Cinquième provider : pilote le binaire `codex` officiel en sous-processus au lieu
+d'appeler une API. La traduction est décomptée du quota de l'abonnement ChatGPT,
+pas facturée à l'usage.
+
+```bash
+python translate.py --use_codex --eco --file README.md --target_dir . --target_lang it
+REGEN_PROVIDER=codex ./regen_translations.sh --force   # opt-in explicite
+REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+```
+
+Coût réel mesuré : régénérer les 28 traductions (70 turns) avec `gpt-5.6-sol` a
+consommé **1 point de pourcentage** de la fenêtre de 5 h sur un plan Plus, et
+rien sur la fenêtre hebdomadaire. La fourchette officielle « 10-100 messages »
+est calibrée sur des sessions agentiques longues, pas sur des appels one-shot.
+
+Points à connaître avant de toucher à ce code :
+
+- **Le binaire vient de `CODEX_BIN`, du `PATH`, ou du package pip
+  `openai-codex-cli-bin`** (officiel OpenAI, ~250 Mo, hors `requirements.txt`
+  car le provider est optionnel). Pas besoin de npm.
+- **Ne jamais lire ni écrire `~/.codex/auth.json`.** Le `refresh_token` est
+  rotatif et à usage unique : toute manipulation externe casse la session
+  `codex login` de l'utilisateur. L'auth est déléguée au CLI, point.
+- **`codex exec` lit stdin même quand le prompt est en argv.** Sans
+  `communicate(input=...)` (ou `</dev/null`), la commande attend jusqu'au
+  timeout sans jamais appeler le modèle.
+- **Le timeout doit tuer le groupe de process.** Le `codex` de npm est un shim
+  Node ; le vrai binaire Rust est un petit-fils qui survit à
+  `subprocess.run(timeout=)` et continue à consommer du quota. D'où
+  `Popen(start_new_session=True)` + `os.killpg`.
+- **Exit code 0 ne veut pas dire succès** : inspecter la sortie JSONL
+  (`turn.failed`/`error`) et l'existence du fichier `-o`.
+- **Les clés API sont retirées de l'env du sous-processus.** C'est la garantie
+  que le mode abonnement ne bascule pas silencieusement en facturation à
+  l'usage — verrouillé par `test_env_strips_api_keys`.
+- **Allowlist de modèles côté serveur** : la famille `gpt-5.6-*` est commune au
+  CLI et à l'API Platform, mais un compte ChatGPT n'y a pas forcément droit à
+  tout. Un modèle refusé donne un 400 « model is not supported when using Codex
+  with a ChatGPT account », sans validation locale préalable.
+- **Quota** : 1 segment = 1 « message local » de la fenêtre 5 h. Sur Plus, Luna
+  offre 250-2 000 msg/5 h contre 10-100 pour Sol → toujours `--eco` en batch.
+  Quota lisible en direct via `codex app-server` (RPC `account/rateLimits/read`).
+- **Refusé en CI** : l'auth par abonnement n'est pas prévue pour un runner
+  partagé, et OpenAI déconseille ce workflow sur les dépôts publics.
+
+### Providers Grok (`--use_grok` API / `--use_grok_cli` abonnement)
+
+```bash
+python translate.py --use_grok --file README.md --target_dir . --target_lang pt      # clé XAI_API_KEY
+python translate.py --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
+REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
+```
+
+- **Mode API** : endpoint compatible OpenAI (`https://api.x.ai/v1`), donc le
+  client et `_call_openai` sont réutilisés tels quels ; seul le `base_url`
+  change. Une seule adaptation a été nécessaire : xAI émet `finish_reason:
+end_turn` là où OpenAI émet `stop`.
+- **Mode CLI** : le CLI n'expose que `grok-4.6` et `grok-4.5` sur abonnement —
+  `grok-4.3`, palier éco de l'API, n'y est pas disponible.
+- **`exit 0` ne prouve rien** : non authentifié, refus ou dépassement de tours
+  sortent tous en 0. Le contrat de sortie exige les quatre : code retour 0, pas
+  de `{"type":"error"}` sur stdout, `stopReason == end_turn`, texte non vide.
+- **Le prompt part par fichier** (`--prompt-file`) : le CLI ne lit pas stdin, et
+  un segment en argv serait visible dans `ps`.
+- **Confinement plus faible que Codex, et c'est assumé.** Le sandbox OS de Grok
+  ne s'applique pas sur beaucoup de postes Linux (AppArmor + deny-list
+  runtime-socket sur `/run/podman` en 0700), et un profil **intégré** qui échoue
+  démarre **non confiné en silence**. On ne demande donc aucun profil par
+  défaut, sans jamais retomber silencieusement : la protection repose sur
+  `--deny` (catch-all `*` inclus), seule couche mesurée fail-closed. Opt-in
+  strict via `GROK_TRANSLATE_SANDBOX`.
+- **`--max-turns 1` est à proscrire** : le compteur est incrémenté après le tour
+  d'outils, la sortie serait tronquée. Le plancher mesuré est 2.
+- **Quota non mesurable** : pool hebdomadaire partagé avec Chat, Imagine et
+  Voice, aucune commande ne l'expose. D'où `max_jobs=2` au regen.
 
 ## Key Constants
 
@@ -251,11 +373,27 @@ This uses faster/cheaper models (gpt-5.4-mini) which are sufficient for document
 
 ### Default Models (2026)
 
-| Provider | Quality (default)        | Economic (`--eco`)              |
-| -------- | ------------------------ | ------------------------------- |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
+| Provider | Quality (default)      | Economic (`--eco`)      |
+| -------- | ---------------------- | ----------------------- |
+| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
+| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
+| Mistral  | `mistral-large-latest` | `mistral-small-latest`  |
+| Gemini   | `gemini-3.7-flash`     | `gemini-3.1-flash-lite` |
+| Codex    | `gpt-5.6-sol`          | `gpt-5.6-luna`          |
+| Grok API | `grok-4.6`             | `grok-4.3`              |
+| Grok CLI | `grok-4.6`             | `grok-4.5`              |
 
-> **Recommendation for long-form translations** : `--use_gemini` (default = `gemini-3.1-pro-preview` quality, `--eco` = `gemini-3.1-flash-lite-preview`) tends to produce more reliable structure preservation on non-Latin scripts (PL, JA, ZH, AR, HI), particularly for `--news` mode where placeholder fidelity matters. OpenAI remains the default for backward compatibility.
+### Model lifecycle — dates to watch (audited 2026-08-29)
+
+| Échéance       | Impact                                                                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **2026-10-15** | `claude-haiku-4-5` : date-plancher de retrait annoncée par Anthropic — la plus proche de tout le catalogue utilisé ici.                          |
+| **2027-01-01** | Gemini 3.6/3.7 Flash : fin de la promo, prix **doublé** ($0.75/$3.75 → $1.50/$7.50).                                                             |
+| —              | `claude-sonnet-5` : le tarif d'intro $2/$10 **est devenu** le prix standard ; la hausse prévue au 2026-09-01 n'aura pas lieu.                    |
+| —              | Gemini 3.5 Pro **ne sortira jamais** (remplacé par Gemini 4) : `gemini-3.1-pro-preview` reste le seul Pro, et il est en preview depuis toujours. |
+
+Audit du 2026-08-29 : les modèles par défaut des 5 providers sont les plus récents
+disponibles chez chaque fournisseur. Aucune génération postérieure n'est GA
+(GPT-5.7/6, Gemini 3.8/4, Sonnet 5.x, Haiku 5 = rumeurs ou pré-entraînement).
+
+> **Recommendation for long-form translations** : `--use_gemini` (default = `gemini-3.7-flash`) preserves markdown structure reliably on non-Latin scripts (PL, JA, ZH, AR, HI), including `--news` mode where placeholder fidelity matters. Measured on this README translated to Japanese: structure identical to `gemini-3.1-pro-preview` (21 lists, 18 code fences, 13 HTML links, 13 images, all URLs preserved) at ~6x lower latency. OpenAI remains the default for backward compatibility.
