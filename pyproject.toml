@@ -26,5 +26,7 @@ strict_equality = true
 exclude = ["translate\\.py\\.old$", "venv/", "traductions_.*", "tests/fixtures/"]
 
 [[tool.mypy.overrides]]
-module = ["dotenv", "mistralai.*", "anthropic.*", "google.*", "langdetect.*", "openai.*", "tqdm.*"]
+# tqdm retiré : il ne fait plus partie des dépendances depuis la régénération
+# de requirements.txt, et `warn_unused_configs` signalait la section morte.
+module = ["dotenv", "mistralai.*", "anthropic.*", "google.*", "langdetect.*", "openai.*"]
 ignore_missing_imports = true
