@@ -1159,9 +1159,11 @@ def _codex_kill_group(proc):
     """Tue tout le groupe de process. Le `codex` installé par npm est un shim
     Node qui `spawn` le vrai binaire Rust : celui-ci est un petit-fils et
     survit à un kill du fils direct, où il continuerait à consommer du quota."""
+    # ProcessLookupError est une sous-classe d'OSError : la capture est écrite
+    # `except OSError` partout, sans la mentionner séparément.
     try:
         pgid = os.getpgid(proc.pid)
-    except (ProcessLookupError, OSError):
+    except OSError:
         return
     try:
         os.killpg(pgid, signal.SIGTERM)
@@ -1176,11 +1178,9 @@ def _codex_kill_group(proc):
         try:
             os.killpg(pgid, signal.SIGKILL)
             proc.wait()
-        except (ProcessLookupError, OSError):
+        except OSError:
             pass
     except OSError:
-        # ProcessLookupError est une sous-classe d'OSError : la mentionner
-        # séparément était redondant.
         pass
 
 
