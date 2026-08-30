@@ -276,7 +276,8 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 
 Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
-`GROK_TRANSLATE_SANDBOX`, `REGEN_PROVIDER`, `REGEN_MODEL`.
+`GROK_TRANSLATE_SANDBOX`, `REGEN_PROVIDER`, `REGEN_MODEL`,
+`REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen).
 
 ## Recommended Usage
 

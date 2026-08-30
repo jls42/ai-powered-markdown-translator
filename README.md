@@ -84,7 +84,9 @@ export OPENAI_API_KEY='votre-clé-api-openai'
 Studio). Variables optionnelles : `XAI_BASE_URL` (endpoint xAI, défaut
 `https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (secondes par appel Anthropic, défaut
 900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
-et `GROK_TRANSLATE_SANDBOX` (voir la section Grok CLI).
+et `GROK_TRANSLATE_SANDBOX` (voir la section Grok CLI). Côté
+`regen_translations.sh` : `REGEN_PROVIDER`, `REGEN_MODEL` et
+`REGEN_JOB_TIMEOUT` (plafond par job, défaut 600 s).
 
 ## Utilisation
 
