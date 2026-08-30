@@ -2586,7 +2586,17 @@ def _translate_pipeline(content, config):
 
 def _read_translatable_source(file_path, relative_file_path):
     """Lit le fichier source. Retourne (content, status) où status est `None`
-    si OK, `"skipped"` si vide (le caller propage)."""
+    si OK, `"skipped"` si vide (le caller propage).
+
+    Aucune garde de périmètre ici, contrairement aux chemins d'ÉCRITURE : ce
+    chemin est soit `--file`, que l'utilisateur nomme explicitement et dont la
+    lecture est la raison d'être du programme, soit une entrée produite par
+    `os.walk` sous `--source_dir`. Il n'existe pas de racine dont il faudrait
+    l'empêcher de sortir — la limite est celle des droits du processus.
+    """
+    # NOSONAR pythonsecurity:S8707 — lecture d'un chemin nommé par l'utilisateur,
+    # sans périmètre à faire respecter (cf. docstring). Les chemins d'écriture,
+    # eux, sont bornés par _ensure_within_directory.
     with open(file_path, encoding="utf-8") as f:
         content = f.read()
     if not content:
@@ -2715,6 +2725,10 @@ def _process_one_markdown_file(file, root, ctx):
     output_file = _resolve_output_filename(file, base, ctx.config.args)
     relative_path = os.path.relpath(root, ctx.input_dir)
     output_path = os.path.join(ctx.output_dir, relative_path, output_file)
+    # Avant le makedirs, et non après : celui-ci s'exécute avant le premier
+    # appel au modèle, donc une arborescence hors périmètre serait créée même
+    # si la traduction échouait ensuite.
+    _ensure_within_directory(ctx.output_dir, output_path)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     already_exists = _existing_translation_exists(
@@ -2925,13 +2939,66 @@ def _build_arg_parser():
     return parser
 
 
+# Composants de nom de fichier fournis en ligne de commande. `--target_lang` et
+# `--model` sont interpolés dans le nom du fichier de sortie
+# (`{base}-{target_lang}.md`) : sans contrôle, une valeur contenant un
+# séparateur de chemin sort du répertoire cible.
+#
+# Mesuré avant correction, avec --target_dir out/ :
+#   --target_lang '../../../../../../tmp/EVASION'
+#     → nom calculé  : doc-../../../../../../tmp/EVASION.md
+#     → écriture     : /tmp/EVASION.md
+# En mode répertoire c'est pire : `os.makedirs(os.path.dirname(...))` a lieu
+# AVANT le premier appel au modèle, donc l'arborescence hors périmètre est
+# créée même si la traduction échoue ensuite.
+_FILENAME_COMPONENT_FLAGS = ("target_lang", "source_lang", "model")
+
+
+def _reject_path_separators_in_components(args):
+    """Refuse tout composant de nom de fichier porteur d'un séparateur.
+
+    Contrôle en amont, pour échouer avec un message qui nomme le flag fautif
+    plutôt que de laisser la garde de périmètre parler d'un chemin calculé.
+    """
+    separators = [sep for sep in (os.sep, os.altsep, "/") if sep]
+    for flag in _FILENAME_COMPONENT_FLAGS:
+        value = getattr(args, flag, None)
+        if not isinstance(value, str) or not value:
+            continue
+        if any(sep in value for sep in separators) or value in (".", ".."):
+            raise ValueError(
+                f"--{flag} ne peut pas contenir de séparateur de chemin "
+                f"(valeur reçue : {value!r}) : cette valeur est interpolée dans "
+                "le nom du fichier de sortie."
+            )
+
+
+def _ensure_within_directory(base_dir, path, what="chemin de sortie"):
+    """Garde de périmètre : `path` doit rester sous `base_dir`.
+
+    Deuxième couche, indépendante du contrôle des composants : elle attrape
+    tout chemin calculé qui sortirait du répertoire cible, quelle qu'en soit
+    l'origine. `realpath` des deux côtés pour que la comparaison résiste aux
+    liens symboliques et aux `..` intermédiaires.
+    """
+    base = os.path.realpath(base_dir)
+    resolved = os.path.realpath(path)
+    if resolved != base and not resolved.startswith(base + os.sep):
+        raise ValueError(f"{what} sort du répertoire cible : {resolved!r} n'est pas sous {base!r}")
+    return resolved
+
+
 def _validate_input_paths(args):
+    _reject_path_separators_in_components(args)
     if args.file:
         if not os.path.isfile(args.file):
             raise ValueError(f"Le fichier spécifié n'existe pas : {args.file}")
     elif not os.path.isdir(args.source_dir):
         raise ValueError(f"Le répertoire source spécifié n'existe pas : {args.source_dir}")
     if not os.path.exists(args.target_dir):
+        # `target_dir` est nommé par l'utilisateur : c'est la racine choisie, pas
+        # un chemin calculé. Rien à valider ici — c'est ce qui est écrit DEDANS
+        # qui doit rester dedans, ce que garantit _ensure_within_directory.
         os.makedirs(args.target_dir)
 
 
@@ -3225,6 +3292,7 @@ def _build_translation_config(args, client):
 def _run_single_file(args, client):
     output_file = _resolve_single_output_filename(args)
     output_path = os.path.join(args.target_dir, output_file)
+    _ensure_within_directory(args.target_dir, output_path)
     config = _build_translation_config(args, client)
     status = translate_markdown_file(args.file, output_path, config)
     # default-fail: tout statut hors {"success", "skipped"} compte comme échec

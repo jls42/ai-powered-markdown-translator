@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import os
 import sys
+import tempfile
 import time
 import unittest
 from argparse import Namespace
@@ -337,6 +338,75 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
             ):
                 self.assertEqual(env.get("PATH"), "/usr/bin")
                 self.assertEqual(env.get("HOME"), "/home/u")
+
+
+class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
+    """`--target_lang` était interpolé sans contrôle dans le nom de sortie.
+
+    Mesuré avant correction, avec --target_dir out/ :
+        --target_lang '../../../../../../tmp/EVASION'
+          → nom calculé : doc-../../../../../../tmp/EVASION.md
+          → écriture    : /tmp/EVASION.md
+
+    En mode répertoire, `os.makedirs` s'exécute AVANT le premier appel au
+    modèle : l'arborescence hors périmètre était donc créée même quand la
+    traduction échouait ensuite. Signalé par SonarCloud (pythonsecurity:S8707),
+    et confirmé sur le vrai chemin de code — ce n'était pas un faux positif.
+    """
+
+    def _args(self, **over):
+        base = {
+            "target_lang": "en",
+            "source_lang": "fr",
+            "model": "gpt-5.6-luna",
+            "file": "doc.md",
+            "target_dir": "/tmp/out",
+            "keep_filename": False,
+            "include_model": False,
+        }
+        base.update(over)
+        return Namespace(**base)
+
+    def test_path_separator_in_target_lang_is_refused(self):
+        args = self._args(target_lang="../../../tmp/evasion")
+        with self.assertRaises(ValueError) as ctx:
+            translate._reject_path_separators_in_components(args)
+        self.assertIn("target_lang", str(ctx.exception))
+
+    def test_path_separator_in_model_is_refused(self):
+        args = self._args(model="../../evil")
+        with self.assertRaises(ValueError) as ctx:
+            translate._reject_path_separators_in_components(args)
+        self.assertIn("model", str(ctx.exception))
+
+    def test_bare_dotdot_is_refused(self):
+        args = self._args(target_lang="..")
+        with self.assertRaises(ValueError):
+            translate._reject_path_separators_in_components(args)
+
+    def test_ordinary_values_pass(self):
+        translate._reject_path_separators_in_components(self._args())
+        translate._reject_path_separators_in_components(self._args(target_lang="zh-Hant"))
+
+    def test_perimeter_guard_accepts_paths_inside(self):
+        with tempfile.TemporaryDirectory() as base:
+            inside = os.path.join(base, "sub", "doc-en.md")
+            self.assertEqual(
+                translate._ensure_within_directory(base, inside),
+                os.path.realpath(inside),
+            )
+
+    def test_perimeter_guard_refuses_escape(self):
+        """Seconde couche, indépendante du contrôle des composants.
+
+        Elle attrape tout chemin calculé sortant du périmètre, quelle qu'en
+        soit l'origine — un futur composant interpolé, un refactor du calcul.
+        """
+        with tempfile.TemporaryDirectory() as base:
+            outside = os.path.join(base, "..", "EVADE.md")
+            with self.assertRaises(ValueError) as ctx:
+                translate._ensure_within_directory(base, outside)
+        self.assertIn("sort du répertoire cible", str(ctx.exception))
 
 
 if __name__ == "__main__":
