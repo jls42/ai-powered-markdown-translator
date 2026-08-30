@@ -1236,42 +1236,46 @@ class TestValidateNewsPost(unittest.TestCase):
 
     def test_raw_quote_missing_raises(self):
         translated = "Sortie sans la citation source.\n"
+        args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"citation EN brute non restaurée"):
             translate._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=[],
-                args=self._args(),
+                args=args,
             )
 
     def test_attribution_url_missing_raises(self):
         translated = "> A decade in the making.\n> 🇵🇱 _trad_\n"
+        args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"URL d'attribution.*manquante"):
             translate._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=["https://x.com/google"],
-                args=self._args(),
+                args=args,
             )
 
     def test_residual_xml_placeholder_raises(self):
         translated = '> A decade in the making.\n> 🇵🇱 _trad_\n<NEWSQUOTE id="1"/>\n'
+        args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
             translate._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=[],
-                args=self._args(),
+                args=args,
             )
 
     def test_residual_legacy_placeholder_raises(self):
         translated = "> A decade in the making.\n> 🇵🇱 _trad_\n#NEWSQUOTE1#\n"
+        args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
             translate._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=[],
-                args=self._args(),
+                args=args,
             )
 
 

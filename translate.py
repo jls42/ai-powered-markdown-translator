@@ -61,10 +61,18 @@ DEFAULT_MODEL_OPENAI = "gpt-5.6-terra"
 DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
 DEFAULT_MODEL_CLAUDE = "claude-sonnet-5"
 DEFAULT_MODEL_GEMINI = "gemini-3.7-flash"
-DEFAULT_MODEL_GROK = "grok-4.6"
+# Volontairement écrit en toutes lettres ici, dans DEFAULT_MODEL_GROK_CLI et
+# dans MODEL_TOKEN_LIMITS, plutôt que factorisé (SonarCloud python:S1192).
+# Les catalogues API et CLI de Grok sont indépendants — le CLI n'expose pas
+# grok-4.3, palier éco de l'API — et la coïncidence actuelle des valeurs
+# qualité est un hasard de calendrier. Un alias ferait suivre silencieusement
+# le défaut CLI à toute évolution du défaut API. Même raisonnement pour
+# ECO_MODEL_OPENAI / ECO_MODEL_CODEX, et pour les clés de MODEL_TOKEN_LIMITS,
+# qui est un catalogue destiné à être lu, pas un jeu de références.
+DEFAULT_MODEL_GROK = "grok-4.6"  # NOSONAR python:S1192
 DEFAULT_MODEL_CODEX = "gpt-5.6-sol"
 
-ECO_MODEL_OPENAI = "gpt-5.6-luna"
+ECO_MODEL_OPENAI = "gpt-5.6-luna"  # NOSONAR python:S1192 — cf. DEFAULT_MODEL_GROK
 ECO_MODEL_MISTRAL = "mistral-small-latest"
 ECO_MODEL_CLAUDE = "claude-haiku-4-5"
 ECO_MODEL_GEMINI = "gemini-3.1-flash-lite"

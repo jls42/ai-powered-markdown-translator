@@ -150,8 +150,10 @@ class TestCodexCall(unittest.TestCase):
     def test_missing_output_file_raises_instead_of_returning_empty(self):
         """Silent-failure guard : code retour 0 mais aucun message final."""
         fake = _FakePopen(final_message=None)
+        client = _client()
+        args = _args()
         with patch("translate.subprocess.Popen", fake), self.assertRaises(RuntimeError) as ctx:
-            translate._call_codex(_client(), _args(), "PROMPT", "SEG")
+            translate._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("sans écrire de message final", str(ctx.exception))
 
     def test_turn_failed_raises_even_with_returncode_zero(self):
@@ -171,14 +173,18 @@ class TestCodexCall(unittest.TestCase):
             {"type": "turn.failed", "error": {"message": payload}},
         )
         fake = _FakePopen(returncode=0, stdout=stdout)
+        client = _client()
+        args = _args()
         with patch("translate.subprocess.Popen", fake), self.assertRaises(RuntimeError) as ctx:
-            translate._call_codex(_client(), _args(), "PROMPT", "SEG")
+            translate._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("not supported when using Codex", str(ctx.exception))
 
     def test_nonzero_returncode_raises_with_stderr_tail(self):
         fake = _FakePopen(returncode=1, stdout="")
+        client = _client()
+        args = _args()
         with patch("translate.subprocess.Popen", fake), self.assertRaises(RuntimeError) as ctx:
-            translate._call_codex(_client(), _args(), "PROMPT", "SEG")
+            translate._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("code 1", str(ctx.exception))
 
     def test_timeout_kills_process_group(self):
@@ -186,13 +192,15 @@ class TestCodexCall(unittest.TestCase):
         petit-fils qui survivrait à un kill du fils direct et continuerait à
         consommer du quota."""
         fake = _FakePopen(timeout=True)
+        client = _client(timeout=42)
+        args = _args()
         with (
             patch("translate.subprocess.Popen", fake),
             patch("translate.os.getpgid", return_value=4242),
             patch("translate.os.killpg") as killpg,
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_codex(_client(timeout=42), _args(), "PROMPT", "SEG")
+            translate._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("timeout après 42s", str(ctx.exception))
         killpg.assert_called_once()
         self.assertEqual(killpg.call_args[0][0], 4242)
@@ -228,11 +236,13 @@ class TestCodexRateLimitBackoff(unittest.TestCase):
             calls.append(argv)
             return _FakePopen(stdout=stdout)(argv, **kwargs)
 
+        client = _client()
+        args = _args()
         with (
             patch("translate.subprocess.Popen", popen_factory),
             self.assertRaises(RuntimeError),
         ):
-            translate._call_codex(_client(), _args(), "PROMPT", "SEG")
+            translate._call_codex(client, args, "PROMPT", "SEG")
         self.assertEqual(len(calls), 1)
 
 
@@ -251,11 +261,12 @@ class TestCodexInit(unittest.TestCase):
             self.assertEqual(eco.model, translate.ECO_MODEL_CODEX)
 
     def test_refuses_ci_environment(self):
+        args = _args(model=None)
         with (
             patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=False),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._init_codex_client(_args(model=None))
+            translate._init_codex_client(args)
         self.assertIn("CI", str(ctx.exception))
 
     def test_preflight_rejects_missing_binary(self):
@@ -314,11 +325,13 @@ class TestProviderResolution(unittest.TestCase):
         call.assert_called_once()
 
     def test_dispatch_empty_content_guard_names_codex(self):
+        client = _client()
+        args = _args()
         with (
             patch("translate._call_codex", return_value="   "),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._dispatch_provider_call(_client(), _args(), "PROMPT", "SEG", "codex", False)
+            translate._dispatch_provider_call(client, args, "PROMPT", "SEG", "codex", False)
         self.assertIn("Codex CLI returned empty content", str(ctx.exception))
 
 
@@ -397,8 +410,9 @@ class TestClaudeBlockFiltering(unittest.TestCase):
         response = self._response(self._block("thinking", thinking="..."))
         client = MagicMock()
         client.messages.create.return_value = response
+        args = _args(model="claude-sonnet-5")
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_claude(client, _args(model="claude-sonnet-5"), "PROMPT", "SEG")
+            translate._call_claude(client, args, "PROMPT", "SEG")
         self.assertIn("aucun bloc de texte", str(ctx.exception))
 
 
@@ -454,8 +468,9 @@ class TestGeminiThinkingFallback(unittest.TestCase):
 
     def test_all_levels_refused_raises(self):
         client, _ = self._client_refusing(99)
+        args = _args(model="gemini-3.7-flash")
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
+            translate._call_gemini(client, args, "P", "SEG")
         self.assertIn("refusé tous les niveaux", str(ctx.exception))
 
     def test_unrelated_client_error_is_not_retried(self):
@@ -471,8 +486,9 @@ class TestGeminiThinkingFallback(unittest.TestCase):
 
         client = MagicMock()
         client.models.generate_content = generate_content
+        args = _args(model="gemini-3.7-flash")
         with self.assertRaises(translate.genai_errors.ClientError):
-            translate._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
+            translate._call_gemini(client, args, "P", "SEG")
         self.assertEqual(len(calls), 1)
 
     def test_system_instruction_carries_the_prompt(self):

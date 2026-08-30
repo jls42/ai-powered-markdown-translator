@@ -21,9 +21,13 @@ FAILURES=0
 # Compteur dérivé des pass() réellement émis : le total était codé en dur
 # (« 12 »), donc faux dès qu'une vérification était ajoutée.
 CHECKS=0
-pass() { printf '  \033[32m✓\033[0m %s\n' "$1"; CHECKS=$((CHECKS + 1)); }
-fail() { printf '  \033[31m✗\033[0m %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
-section() { printf '\n\033[1m%s\033[0m\n' "$1"; }
+# `local msg="$1"` et `return 0` explicites : sans eux, le statut de sortie de
+# ces helpers est celui de leur dernière commande, ce qui les rend fragiles dès
+# qu'on les enchaîne (`pass "x" && …`). Le script existant pour produire un
+# verdict fiable, autant que ses primitives en aient un.
+pass() { local msg="$1"; printf '  \033[32m✓\033[0m %s\n' "$msg"; CHECKS=$((CHECKS + 1)); return 0; }
+fail() { local msg="$1"; printf '  \033[31m✗\033[0m %s\n' "$msg"; FAILURES=$((FAILURES + 1)); return 0; }
+section() { local title="$1"; printf '\n\033[1m%s\033[0m\n' "$title"; return 0; }
 
 PY=./venv/bin/python
 [[ -x "$PY" ]] || { echo "venv absent : python -m venv venv && pip install -r requirements.txt"; exit 1; }

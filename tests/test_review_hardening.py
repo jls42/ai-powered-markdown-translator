@@ -91,18 +91,21 @@ class TestGrokStopReasonIsMandatory(unittest.TestCase):
         return Namespace(model="grok-4.6")
 
     def test_missing_stop_reason_is_refused(self):
+        args = self._args()
         with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload({"text": "trad"}, self._args())
+            translate._grok_check_payload({"text": "trad"}, args)
         self.assertIn("stopReason", str(ctx.exception))
 
     def test_renamed_stop_reason_field_is_refused(self):
         payload = {"type": "result", "text": "trad", "stop_reason": "max_turn_requests"}
+        args = self._args()
         with self.assertRaises(translate._GrokCallError):
-            translate._grok_check_payload(payload, self._args())
+            translate._grok_check_payload(payload, args)
 
     def test_null_stop_reason_is_refused(self):
+        args = self._args()
         with self.assertRaises(translate._GrokCallError):
-            translate._grok_check_payload({"text": "t", "stopReason": None}, self._args())
+            translate._grok_check_payload({"text": "t", "stopReason": None}, args)
 
     def test_end_turn_still_accepted(self):
         translate._grok_check_payload({"text": "t", "stopReason": "end_turn"}, self._args())
@@ -113,10 +116,9 @@ class TestGrokStopReasonIsMandatory(unittest.TestCase):
         Le classer récupérable faisait attendre 90 s de back-off avant de
         rejouer à l'identique une erreur déterministe (`--max-turns` inchangé).
         """
+        args = self._args()
         with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload(
-                {"text": "t", "stopReason": "max_turn_requests"}, self._args()
-            )
+            translate._grok_check_payload({"text": "t", "stopReason": "max_turn_requests"}, args)
         self.assertFalse(ctx.exception.rate_limited)
 
     def test_quota_marker_is_not_treated_as_rate_limit(self):
@@ -126,14 +128,16 @@ class TestGrokStopReasonIsMandatory(unittest.TestCase):
         elle vaut aussi pour Grok.
         """
         payload = {"type": "error", "message": "quota exhausted, upgrade your plan"}
+        args = self._args()
         with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload(payload, self._args())
+            translate._grok_check_payload(payload, args)
         self.assertFalse(ctx.exception.rate_limited)
 
     def test_real_rate_limit_is_still_retryable(self):
         payload = {"type": "error", "message": "429 Too Many Requests — rate limit reached"}
+        args = self._args()
         with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload(payload, self._args())
+            translate._grok_check_payload(payload, args)
         self.assertTrue(ctx.exception.rate_limited)
 
 

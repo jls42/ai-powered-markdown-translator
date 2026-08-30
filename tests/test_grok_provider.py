@@ -146,37 +146,45 @@ class TestGrokCliCall(unittest.TestCase):
         """Mesuré : non authentifié, le CLI écrit {"type":"error"} sur stdout
         et sort en 0."""
         payload = json.dumps({"type": "error", "message": "Not signed in."})
+        client = _client()
+        args = _args()
         with (
             patch("translate.subprocess.Popen", _FakePopen(stdout=payload, returncode=0)),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
+            translate._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("Not signed in", str(ctx.exception))
 
     def test_abnormal_stop_reason_raises(self):
         payload = json.dumps({"text": "partial", "stopReason": "cancelled"})
+        client = _client()
+        args = _args()
         with (
             patch("translate.subprocess.Popen", _FakePopen(stdout=payload)),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
+            translate._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("stopReason anormal", str(ctx.exception))
 
     def test_empty_text_raises(self):
         payload = json.dumps({"text": "", "stopReason": "end_turn"})
+        client = _client()
+        args = _args()
         with (
             patch("translate.subprocess.Popen", _FakePopen(stdout=payload)),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
+            translate._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("aucun texte", str(ctx.exception))
 
     def test_non_json_stdout_raises(self):
+        client = _client()
+        args = _args()
         with (
             patch("translate.subprocess.Popen", _FakePopen(stdout="oops not json")),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
+            translate._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("illisible", str(ctx.exception))
 
     def test_structured_output_takes_precedence(self):
@@ -192,13 +200,15 @@ class TestGrokCliCall(unittest.TestCase):
         self.assertEqual(out, "# Titre")
 
     def test_timeout_kills_process_group(self):
+        client = _client(timeout=42)
+        args = _args()
         with (
             patch("translate.subprocess.Popen", _FakePopen(timeout=True)),
             patch("translate.os.getpgid", return_value=4242),
             patch("translate.os.killpg") as killpg,
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(_client(timeout=42), _args(), "PROMPT", "SEG")
+            translate._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("Grok CLI timeout après 42s", str(ctx.exception))
         killpg.assert_called_once()
 
@@ -248,11 +258,12 @@ class TestGrokCliInit(unittest.TestCase):
             self.assertTrue(translate._resolve_grok_binary().endswith("/.grok/bin/grok"))
 
     def test_refuses_ci_environment(self):
+        args = _args(model=None)
         with (
             patch.dict(os.environ, {"CI": "true"}, clear=False),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._init_grok_cli_client(_args(model=None))
+            translate._init_grok_cli_client(args)
         self.assertIn("--use_grok_cli", str(ctx.exception))
 
     def test_eco_uses_model_available_on_subscription(self):
@@ -270,8 +281,9 @@ class TestGrokCliInit(unittest.TestCase):
 
 class TestGrokApiMode(unittest.TestCase):
     def test_requires_api_key(self):
+        args = _args(model=None)
         with patch.dict(os.environ, {}, clear=True), self.assertRaises(ValueError) as ctx:
-            translate._init_grok_client(_args(model=None))
+            translate._init_grok_client(args)
         self.assertIn("XAI_API_KEY", str(ctx.exception))
 
     def test_uses_xai_base_url(self):
