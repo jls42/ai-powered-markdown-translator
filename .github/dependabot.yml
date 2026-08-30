@@ -18,6 +18,18 @@ updates:
       time: "06:00"
       timezone: Europe/Paris
     open-pull-requests-limit: 10
+    # requirements.txt est la fermeture transitive ENTIÈREMENT ÉPINGLÉE, pas une
+    # liste de dépendances directes. Sans ce filtre, Dependabot propose des bumps
+    # de paquets transitifs pris isolément, qui violent les contraintes de leur
+    # parent — deux cas observés dès la première salve :
+    #   - pydantic_core 2.46.5 → 2.48.0, incompatible avec pydantic==2.13.5
+    #     (« ResolutionImpossible » à l'installation) ;
+    #   - websockets 16.1.1 → 17.1, alors que google-genai==2.20.0 exige
+    #     websockets<17.0.
+    # Les transitifs suivent leur parent ; leur mise à niveau passe par la
+    # régénération complète du fichier, décrite dans CLAUDE.md.
+    allow:
+      - dependency-type: direct
     commit-message:
       prefix: "chore(deps)"
     labels:
