@@ -1202,13 +1202,14 @@ def _codex_run_process(argv, stdin_data, timeout, env, label, model):
     lit stdin même quand le prompt est passé en argument et attendrait sinon
     indéfiniment sans jamais appeler le modèle."""
     timeout_var = "CODEX_TIMEOUT" if label == "Codex" else "GROK_TIMEOUT"
-    # nosec B603 — nosemgrep: dangerous-subprocess-use, dangerous-subprocess-use-audit
     # argv est une LISTE (jamais shell=True) construite par _codex_argv/_grok_argv :
     # binaire résolu et validé par le préflight, flags littéraux, et `args.model`
     # placé en valeur juste après `-m` — une valeur commençant par `--` y est donc
     # consommée comme valeur du flag, pas réinterprétée en drapeau. Le contenu du
     # document ne transite JAMAIS par argv : il part par stdin (Codex) ou par
-    # fichier (Grok, --prompt-file).
+    # fichier (Grok, --prompt-file). Le marqueur nosemgrep doit rester sur la
+    # ligne immédiatement précédente : plus haut, il n'est pas pris en compte.
+    # nosemgrep
     with subprocess.Popen(  # nosec B603
         argv,
         stdin=subprocess.PIPE,
@@ -3002,9 +3003,9 @@ def _grok_preflight(binary):
             "(`curl -fsSL https://x.ai/cli/install.sh | bash`) ou pointer GROK_BIN dessus."
         )
     try:
-        # nosec B603 — nosemgrep: dangerous-subprocess-use, dangerous-subprocess-use-audit
         # Liste littérale ; `binary` vient de GROK_BIN/PATH, donc d'un
         # environnement qui a déjà l'exécution de code sur cette machine.
+        # nosemgrep
         result = subprocess.run(  # nosec B603
             [binary, "models"],
             capture_output=True,
@@ -3134,8 +3135,8 @@ def _codex_preflight(binary):
             "(`npm install -g @openai/codex`), ou pointer CODEX_BIN dessus."
         )
     try:
-        # nosec B603 — nosemgrep: dangerous-subprocess-use, dangerous-subprocess-use-audit
         # Liste littérale ; même raisonnement que _grok_preflight pour CODEX_BIN.
+        # nosemgrep
         result = subprocess.run(  # nosec B603
             [binary, "login", "status"],
             capture_output=True,

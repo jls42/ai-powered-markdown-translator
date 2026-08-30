@@ -604,10 +604,7 @@ class TestCleanupSourceFlag(unittest.TestCase):
         """Quand cible=en, le bloc `> 🇫🇷 _trad_` orphelin doit être supprimé."""
         args = _base_args(news=True, source_lang="fr", target_lang="en")
         translated = (
-            "> Some EN quote.\n"
-            ">\n"
-            "> 🇫🇷 _Citation traduite._\n"
-            "> — [@source](https://x.com/s)\n"
+            "> Some EN quote.\n>\n> 🇫🇷 _Citation traduite._\n> — [@source](https://x.com/s)\n"
         )
         out = translate._cleanup_source_flag(translated, args)
         self.assertNotIn("🇫🇷", out)

@@ -987,8 +987,7 @@ class TestDetectProvider(unittest.TestCase):
         """OPENAI et GOOGLE valides → OpenAI par défaut (priorité OpenAI)."""
         stdout, stderr, rc = self._run_detect(
             env_content=(
-                f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n"
-                f"GOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n"
+                f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\nGOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n"
             )
         )
         self.assertEqual(rc, 0)
@@ -1210,8 +1209,7 @@ class TestRestoreNewsQuotesCount(unittest.TestCase):
 
     def test_duplicate_placeholder_raises(self):
         translated = (
-            '<NEWSQUOTE id="0"/>\n>\n> 🇵🇱 _trad._\n\n'
-            '<NEWSQUOTE id="0"/>\n>\n> Doublon parasite.\n'
+            '<NEWSQUOTE id="0"/>\n>\n> 🇵🇱 _trad._\n\n<NEWSQUOTE id="0"/>\n>\n> Doublon parasite.\n'
         )
         with self.assertRaisesRegex(RuntimeError, r"restauré 2 fois"):
             translate._restore_news_quotes(translated, ["> Quote source EN."])
@@ -1257,7 +1255,7 @@ class TestValidateNewsPost(unittest.TestCase):
             )
 
     def test_residual_xml_placeholder_raises(self):
-        translated = "> A decade in the making.\n" "> 🇵🇱 _trad_\n" '<NEWSQUOTE id="1"/>\n'
+        translated = '> A decade in the making.\n> 🇵🇱 _trad_\n<NEWSQUOTE id="1"/>\n'
         with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
             translate._validate_news_post(
                 translated,
@@ -1267,7 +1265,7 @@ class TestValidateNewsPost(unittest.TestCase):
             )
 
     def test_residual_legacy_placeholder_raises(self):
-        translated = "> A decade in the making.\n" "> 🇵🇱 _trad_\n" "#NEWSQUOTE1#\n"
+        translated = "> A decade in the making.\n> 🇵🇱 _trad_\n#NEWSQUOTE1#\n"
         with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
             translate._validate_news_post(
                 translated,
@@ -1487,7 +1485,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
         self.assertEqual(urls, ["https://x.com/g"])
 
     def test_extract_without_attribution(self):
-        content = "## Section\n\n" "> A short EN quote.\n" ">\n" "> 🇫🇷 _Une courte citation EN._\n"
+        content = "## Section\n\n> A short EN quote.\n>\n> 🇫🇷 _Une courte citation EN._\n"
         protected, quotes, urls = translate._protect_news_quotes(content, self._args())
         self.assertIn('<NEWSQUOTE id="0"/>', protected)
         self.assertEqual(quotes, ["> A short EN quote."])

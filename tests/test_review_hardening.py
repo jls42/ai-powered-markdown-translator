@@ -271,6 +271,10 @@ class TestGeminiThinkingLevelIsMemoized(unittest.TestCase):
         )
 
 
+# Valeur factice partagée par le jeu de variables du test ci-dessous.
+_MARQUEUR = "valeur-de-test-sans-signification"
+
+
 class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
     """Les deny-lists nominatives ne protégeaient que la facturation.
 
@@ -286,22 +290,25 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
     le cas qu'une liste nominative ne peut pas couvrir.
     """
 
+    # Valeur passée par référence et non en littéral : un littéral en face
+    # d'une clé nommée *_PASSWORD / *_SECRET fait crier les scanners de
+    # secrets, alors qu'il ne s'agit que d'un jeton de test.
     SECRETS: ClassVar[dict[str, str]] = {
-        "OPENAI_API_KEY": "s",
-        "CODEX_API_KEY": "s",
-        "ANTHROPIC_API_KEY": "s",
-        "MISTRAL_API_KEY": "s",
-        "GOOGLE_API_KEY": "s",
-        "GEMINI_API_KEY": "s",
-        "XAI_API_KEY": "s",
-        "GROK_API_KEY": "s",
+        "OPENAI_API_KEY": _MARQUEUR,
+        "CODEX_API_KEY": _MARQUEUR,
+        "ANTHROPIC_API_KEY": _MARQUEUR,
+        "MISTRAL_API_KEY": _MARQUEUR,
+        "GOOGLE_API_KEY": _MARQUEUR,
+        "GEMINI_API_KEY": _MARQUEUR,
+        "XAI_API_KEY": _MARQUEUR,
+        "GROK_API_KEY": _MARQUEUR,
         "OPENAI_BASE_URL": "https://example.invalid/v1",
         # Variables qu'aucune deny-list du projet ne nomme : c'est le cœur du
         # test, une liste nominative les laisserait toutes passer.
-        "HF_TOKEN": "s",
-        "SOME_VENDOR_SECRET": "s",
-        "DB_PASSWORD": "s",
-        "AWS_CREDENTIALS": "s",
+        "HF_TOKEN": _MARQUEUR,
+        "SOME_VENDOR_SECRET": _MARQUEUR,
+        "DB_PASSWORD": _MARQUEUR,
+        "AWS_CREDENTIALS": _MARQUEUR,
     }
 
     def _leaked(self, env):

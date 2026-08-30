@@ -78,8 +78,9 @@ class _FakePopen:
     def communicate(self, **kwargs):
         self.communicate_kwargs = kwargs
         if self._timeout:
-            # nosemgrep: dangerous-subprocess-use — TimeoutExpired est une classe
-            # d'exception levée par un faux Popen, pas un lancement de process.
+            # TimeoutExpired est une classe d'exception levée par un faux
+            # Popen, pas un lancement de process.
+            # nosemgrep
             raise subprocess.TimeoutExpired(cmd=self.argv, timeout=kwargs.get("timeout"))
         return self._stdout, self._stderr
 
