@@ -50,11 +50,29 @@ detect_provider() {
       echo "[regen] REGEN_PROVIDER=openai → --eco (OpenAI gpt-5.4-mini)" >&2
       return
       ;;
+    grok_cli)
+      # Quota d'abonnement Grok. Jamais auto-détecté, comme codex.
+      echo "--use_grok_cli --eco"
+      echo "[regen] REGEN_PROVIDER=grok_cli → --use_grok_cli --eco (quota abonnement Grok)" >&2
+      return
+      ;;
+    grok)
+      echo "--use_grok --eco"
+      echo "[regen] REGEN_PROVIDER=grok → --use_grok --eco (API xAI, facturé à l'usage)" >&2
+      return
+      ;;
+    codex)
+      # Jamais auto-détecté : consomme le quota de l'abonnement ChatGPT, ce qui
+      # doit rester un choix explicite. Opt-in uniquement.
+      echo "--use_codex --eco"
+      echo "[regen] REGEN_PROVIDER=codex → --use_codex --eco (quota abonnement ChatGPT)" >&2
+      return
+      ;;
     "")
       # Pas d'override → tomber dans l'auto-détection ci-dessous
       ;;
     *)
-      echo "[regen] WARNING: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: gemini|openai), auto-détection" >&2
+      echo "[regen] WARNING: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: gemini|openai|codex|grok|grok_cli), auto-détection" >&2
       ;;
   esac
 
@@ -95,11 +113,54 @@ main() {
   local provider_flags
   provider_flags=$(detect_provider)
 
+  # REGEN_MODEL force un modèle précis, par-dessus le défaut du provider.
+  # Utile pour monter en gamme sur un provider dont le mode --eco vise le
+  # volume (ex: REGEN_MODEL=gpt-5.6-sol avec REGEN_PROVIDER=codex).
+  if [[ -n "${REGEN_MODEL:-}" ]]; then
+    provider_flags="$provider_flags --model ${REGEN_MODEL}"
+    echo "[regen] REGEN_MODEL=${REGEN_MODEL} → override du modèle par défaut" >&2
+  fi
+
   local max_jobs=10
+  if [[ "$provider_flags" == *--use_grok_cli* ]]; then
+    # Le quota Grok est un pool hebdomadaire PARTAGÉ avec Chat, Imagine et
+    # Voice, et aucune commande ne permet de le lire : un regen complet peut
+    # donc entamer l'usage conversationnel sans que rien ne le signale.
+    local grok_bin="${GROK_BIN:-$(command -v grok || echo "${GROK_HOME:-$HOME/.grok}/bin/grok")}"
+    if [[ ! -x "$grok_bin" ]]; then
+      echo "[regen] ERROR: binaire Grok introuvable ($grok_bin) — installer le CLI ou définir GROK_BIN" >&2
+      exit 1
+    fi
+    if ! "$grok_bin" models 2>/dev/null | grep -qi "logged in"; then
+      echo "[regen] ERROR: Grok CLI non authentifié — lancer 'grok login'" >&2
+      exit 1
+    fi
+    echo "[regen] ATTENTION : le quota Grok est partagé avec Chat/Imagine/Voice et n'est pas mesurable."
+    max_jobs=2
+  fi
+  if [[ "$provider_flags" == *--use_codex* ]]; then
+    # Le refresh du token Codex est rotatif et à usage unique : si plusieurs
+    # jobs le déclenchent en même temps, tous sauf un échouent et la session
+    # `codex login` de l'utilisateur est invalidée. On le rafraîchit donc une
+    # fois, séquentiellement, avant d'ouvrir le parallélisme — après quoi le
+    # token est frais pour toute la durée du regen.
+    echo "[regen] Codex : warm-up du token (évite les refresh concurrents)..."
+    if ! codex login status >/dev/null 2>&1; then
+      echo "[regen] ERROR: Codex CLI non authentifié — lancer 'codex login'" >&2
+      exit 1
+    fi
+    # Chaque tour Codex consomme un message du plan et dure ~45s : on limite la
+    # concurrence pour ne pas déclencher de rate limit sur la fenêtre 5h.
+    max_jobs=4
+  fi
   local langs="ar de en es hi it ja ko nl pl pt ro sv zh"
-  local failed_log
+  # Volontairement global, pas `local` : le trap EXIT s'exécute APRÈS la sortie
+  # de main(), où une variable locale n'existe plus. Avec `set -u`, le trap
+  # levait alors "failed_log: unbound variable" et faisait sortir le script en 1
+  # même quand les 28 traductions étaient correctes — ce qui interrompait
+  # `release.sh --auto` (set -e) juste après la régénération.
   failed_log=$(mktemp)
-  trap 'rm -f "$failed_log"' EXIT
+  trap 'if [[ -n "${failed_log:-}" ]]; then rm -f "$failed_log"; fi' EXIT
 
   # Timeout par job : si un appel API hang, le job sort en 124 et est consigné
   # comme échec plutôt que de figer toute la release indéfiniment.
