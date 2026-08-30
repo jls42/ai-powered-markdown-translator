@@ -12,7 +12,7 @@ créé après plusieurs « c'est prêt » démentis ensuite par une vérificatio
 succès, provider non testé de bout en bout).
 
 ```bash
-./scripts/check-release-ready.sh          # 12 vérifications, ~40 s
+./scripts/check-release-ready.sh          # 13 vérifications, ~40 s
 ./scripts/check-release-ready.sh --full   # + hooks pre-push (mypy, SAST, audit), ~3 min
 ```
 
@@ -392,7 +392,7 @@ end_turn` là où OpenAI émet `stop`.
 | —              | `claude-sonnet-5` : le tarif d'intro $2/$10 **est devenu** le prix standard ; la hausse prévue au 2026-09-01 n'aura pas lieu.                    |
 | —              | Gemini 3.5 Pro **ne sortira jamais** (remplacé par Gemini 4) : `gemini-3.1-pro-preview` reste le seul Pro, et il est en preview depuis toujours. |
 
-Audit du 2026-08-29 : les modèles par défaut des 5 providers sont les plus récents
+Audit du 2026-08-29 : les modèles par défaut des 7 providers sont les plus récents
 disponibles chez chaque fournisseur. Aucune génération postérieure n'est GA
 (GPT-5.7/6, Gemini 3.8/4, Sonnet 5.x, Haiku 5 = rumeurs ou pré-entraînement).
 

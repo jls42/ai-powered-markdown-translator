@@ -241,6 +241,12 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--include_model`        | Inclure le nom du modèle dans le fichier de sortie                       |
 | `--reasoning_effort`     | Effort de raisonnement GPT-5.x : `none`/`low`/`medium`/`high`/`xhigh`    |
 
+> **Les six flags de provider sont mutuellement exclusifs.** En combiner deux
+> était auparavant accepté en silence et résolvait vers le premier testé : une
+> traduction demandée sur quota d'abonnement (`--use_codex`, `--use_grok_cli`)
+> pouvait ainsi partir en facturation à l'usage sans aucun avertissement.
+> `argparse` refuse désormais la combinaison.
+
 ### Note de traduction : positions et formats
 
 Avec `--add_translation_note`, le translator peut placer la note en haut, en bas, ou aux deux endroits, et la rendre soit en format texte simple (rétrocompatible) soit en format `marker` consommable par un plugin Markdown.
