@@ -18,18 +18,40 @@ updates:
       time: "06:00"
       timezone: Europe/Paris
     open-pull-requests-limit: 10
-    # requirements.txt est la fermeture transitive ENTIÈREMENT ÉPINGLÉE, pas une
-    # liste de dépendances directes. Sans ce filtre, Dependabot propose des bumps
-    # de paquets transitifs pris isolément, qui violent les contraintes de leur
-    # parent — deux cas observés dès la première salve :
+    # requirements.txt est la fermeture transitive ENTIÈREMENT ÉPINGLÉE. Sans
+    # filtre, Dependabot y bumpe des paquets transitifs pris isolément, qui
+    # violent les contraintes de leur parent — deux cas observés :
     #   - pydantic_core 2.46.5 → 2.48.0, incompatible avec pydantic==2.13.5
     #     (« ResolutionImpossible » à l'installation) ;
     #   - websockets 16.1.1 → 17.1, alors que google-genai==2.20.0 exige
     #     websockets<17.0.
-    # Les transitifs suivent leur parent ; leur mise à niveau passe par la
-    # régénération complète du fichier, décrite dans CLAUDE.md.
+    #
+    # `dependency-type: direct` NE SUFFIT PAS, et c'est mesuré : Dependabot a
+    # rouvert le cas pydantic_core (PR #17) alors que ce filtre était actif. Sur
+    # un fichier entièrement épinglé et sans manifeste séparé, il n'a aucun
+    # graphe de dépendances — chaque ligne du fichier est « directe » de son
+    # point de vue. Le filtre n'a donc rien à discriminer.
+    #
+    # D'où une allowlist NOMMÉE, qui reprend les dépendances réellement
+    # importées par translate.py, plus certifi (magasin de CA, donc enjeu de
+    # sécurité) et les quatre outils de requirements-dev.txt. Les transitifs
+    # suivent leur parent ; leur mise à niveau passe par la régénération
+    # complète du fichier, décrite dans CLAUDE.md.
+    #
+    # À garder aligné avec DIRECT_DEPS de scripts/check-deps-fresh.sh, qui
+    # applique la même liste au gate de fin de travail.
     allow:
-      - dependency-type: direct
+      - dependency-name: openai
+      - dependency-name: anthropic
+      - dependency-name: mistralai
+      - dependency-name: google-genai
+      - dependency-name: langdetect
+      - dependency-name: python-dotenv
+      - dependency-name: certifi
+      - dependency-name: detect-secrets
+      - dependency-name: pip-audit
+      - dependency-name: mypy
+      - dependency-name: lizard
     commit-message:
       prefix: "chore(deps)"
     labels:
