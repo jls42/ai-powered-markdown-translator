@@ -22,6 +22,7 @@ import time
 import unittest
 from argparse import Namespace
 from types import SimpleNamespace
+from typing import ClassVar
 from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -268,6 +269,67 @@ class TestGeminiThinkingLevelIsMemoized(unittest.TestCase):
             ["minimal", "low", "low"],
             "le 2e segment doit repartir du niveau accepté, sans re-tenter 'minimal'",
         )
+
+
+class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
+    """Les deny-lists nominatives ne protégeaient que la facturation.
+
+    Mesuré avant correction : Codex et Grok recevaient chacun **sept** secrets
+    dans leur environnement — les clés Anthropic, Mistral, Google, Gemini,
+    celle de l'autre CLI, et `OPENAI_BASE_URL`. L'invariant strict tenait
+    (Codex sans OPENAI_API_KEY, Grok sans XAI_API_KEY), mais ces deux CLI sont
+    des agents, et celui de Grok tourne sans sandbox OS applicable sur beaucoup
+    de postes Linux.
+
+    L'assertion est **générique** et non un miroir de la constante : elle
+    échouerait sur une clé qu'aucune deny-list ne nomme, ce qui est précisément
+    le cas qu'une liste nominative ne peut pas couvrir.
+    """
+
+    SECRETS: ClassVar[dict[str, str]] = {
+        "OPENAI_API_KEY": "s",
+        "CODEX_API_KEY": "s",
+        "ANTHROPIC_API_KEY": "s",
+        "MISTRAL_API_KEY": "s",
+        "GOOGLE_API_KEY": "s",
+        "GEMINI_API_KEY": "s",
+        "XAI_API_KEY": "s",
+        "GROK_API_KEY": "s",
+        "OPENAI_BASE_URL": "https://example.invalid/v1",
+        # Variables qu'aucune deny-list du projet ne nomme : c'est le cœur du
+        # test, une liste nominative les laisserait toutes passer.
+        "HF_TOKEN": "s",
+        "SOME_VENDOR_SECRET": "s",
+        "DB_PASSWORD": "s",
+        "AWS_CREDENTIALS": "s",
+    }
+
+    def _leaked(self, env):
+        return sorted(name for name in self.SECRETS if name in env)
+
+    def test_codex_subprocess_receives_no_secret(self):
+        with patch.dict(os.environ, self.SECRETS, clear=False):
+            env = translate._codex_env(translate._CodexClient(binary="/bin/true"))
+        self.assertEqual(self._leaked(env), [])
+
+    def test_grok_subprocess_receives_no_secret(self):
+        with patch.dict(os.environ, self.SECRETS, clear=False):
+            env = translate._grok_env()
+        self.assertEqual(self._leaked(env), [])
+
+    def test_variables_needed_by_the_cli_survive(self):
+        """Un filtrage trop large casserait les deux CLI.
+
+        Vérifié aussi par un appel réel : traduction complète aboutie via Codex
+        et via Grok CLI avec cet environnement.
+        """
+        with patch.dict(os.environ, {"PATH": "/usr/bin", "HOME": "/home/u"}, clear=False):
+            for env in (
+                translate._codex_env(translate._CodexClient(binary="/bin/true")),
+                translate._grok_env(),
+            ):
+                self.assertEqual(env.get("PATH"), "/usr/bin")
+                self.assertEqual(env.get("HOME"), "/home/u")
 
 
 if __name__ == "__main__":

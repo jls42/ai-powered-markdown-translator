@@ -1077,6 +1077,36 @@ class _CodexClient:
     env_overrides: dict = field(default_factory=dict)
 
 
+# Motifs de noms de variables retirés de l'environnement des sous-processus
+# agentiques, en plus des listes explicites par provider.
+#
+# Les deny-lists nommées ne protégeaient que l'invariant de FACTURATION (Codex
+# sans OPENAI_API_KEY, Grok sans XAI_API_KEY). Mesuré : sept autres secrets
+# entraient quand même dans le sous-processus — les clés Anthropic, Mistral,
+# Google, Gemini, plus celle de l'autre CLI. Or ces deux CLI sont des agents :
+# Codex tourne en `--sandbox read-only`, mais le sandbox de Grok est
+# inapplicable sur beaucoup de postes Linux et la protection y repose sur les
+# seules règles `--deny`. Aucun des deux n'a besoin de la clé d'un autre
+# fournisseur — l'authentification vit dans ~/.codex et ~/.grok, jamais dans
+# l'environnement.
+#
+# Le filtrage est par motif et non par liste nominative, pour couvrir les
+# variables qu'un utilisateur ajoute dans son `.env` sans que ce code le sache.
+_SECRET_ENV_NAME_PATTERNS = ("API_KEY", "_TOKEN", "SECRET", "PASSWORD", "CREDENTIALS")
+
+
+def _strip_secret_env(env, keep=()):
+    """Retire de `env` toute variable dont le nom évoque un secret.
+
+    `keep` permet de conserver explicitement une variable nécessaire au CLI ;
+    aucune ne l'est aujourd'hui, l'auth des deux providers étant sur disque.
+    """
+    for name in [k for k in env if k not in keep]:
+        if any(pattern in name.upper() for pattern in _SECRET_ENV_NAME_PATTERNS):
+            del env[name]
+    return env
+
+
 def _codex_env(client):
     """Env du sous-processus, privé des clés API : la raison d'être de ce
     provider est de consommer l'abonnement ChatGPT, pas de facturer à l'usage.
@@ -1085,6 +1115,12 @@ def _codex_env(client):
     env = os.environ.copy()
     for var in CODEX_STRIPPED_ENV_VARS:
         env.pop(var, None)
+    _strip_secret_env(env)
+    # OPENAI_BASE_URL n'est pas un secret mais réoriente le trafic : hérité d'un
+    # `.env`, il ferait sortir la traduction du chemin d'abonnement sans signal.
+    env.pop("OPENAI_BASE_URL", None)
+    # Après le stripping : un override explicite doit rester souverain, mais
+    # aucun appelant n'en fournit aujourd'hui.
     env.update(client.env_overrides)
     return env
 
@@ -1333,6 +1369,8 @@ def _grok_env():
     env = os.environ.copy()
     for var in GROK_STRIPPED_ENV_VARS:
         env.pop(var, None)
+    _strip_secret_env(env)
+    env.pop("OPENAI_BASE_URL", None)
     env.update(GROK_ENV_KILL_SWITCHES)
     return env
 
