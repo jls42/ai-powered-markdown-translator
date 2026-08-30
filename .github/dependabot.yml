@@ -1,0 +1,59 @@
+# Mises à jour de version automatiques.
+#
+# Sans ce fichier, GitHub n'active QUE les « security updates » : Dependabot ne
+# propose alors une PR que pour une dépendance visée par une CVE. C'est ce qui
+# s'est passé ici — urllib3 et idna ont bien été bumpés, mais `openai` a dérivé
+# de 2.54 à 3.6 et `anthropic` de 0.125 à 1.2 sans qu'aucune alerte ne parte,
+# `certifi` accumulant au passage deux ans de retard sur son magasin de CA.
+#
+# Les « version updates » configurées ci-dessous couvrent ce trou.
+
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Paris
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - dependencies
+    groups:
+      # Le bruit est l'ennemi de la mise à jour : un patch bump par PR finit
+      # ignoré. Les mineures et correctifs partent groupés — une PR par semaine,
+      # que la CI valide en bloc.
+      routine:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch
+      # Les majeures restent SÉPARÉES et non groupées : chacune peut casser le
+      # code de façon invisible à la doc. Deux précédents mesurés dans ce dépôt :
+      # anthropic ≥ 1.0 refuse côté client un appel non-streamé à max_tokens
+      # élevé, et google-genai a changé toute la surface d'appel. Une majeure
+      # exige une validation par appel réel, provider par provider.
+      # (Aucun `update-types` ici : le groupe ne capte que ce qui reste.)
+    # Aucune exclusion. Toute `ignore:` ajoutée ici doit nommer la raison ET la
+    # condition de levée — une exclusion sans date de péremption est la façon la
+    # plus discrète de recréer le retard qu'on vient de corriger.
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Paris
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - dependencies
+    groups:
+      actions:
+        applies-to: version-updates
+        patterns:
+          - "*"

@@ -32,8 +32,8 @@ Ce script Python traduit des fichiers Markdown d'une langue source vers une lang
 
 ## Caractéristiques Principales
 
-- **Multi-Provider**: Support de 4 APIs (OpenAI, Mistral, Claude, Gemini)
-- **Modèles 2026**: GPT-5.5, Claude Sonnet 4.6, Gemini 3.1 Pro
+- **Multi-Provider**: Support de 4 APIs (OpenAI, Mistral, Claude, Gemini) + le CLI Codex sur abonnement ChatGPT
+- **Modèles 2026**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
 - **Mode Économique**: Option `--eco` pour utiliser des modèles plus rapides et moins coûteux
 - **Fichier Unique**: Option `--file` pour traduire un seul fichier
 - **Segmentation Intelligente**: Gestion des textes longs avec limites de tokens par modèle
@@ -71,6 +71,7 @@ Créez un fichier `.env` à la racine du projet ou définissez les variables d'e
 ```bash
 # Fichier .env (recommandé)
 OPENAI_API_KEY=votre-clé-api-openai
+XAI_API_KEY=votre-clé-api-xai
 MISTRAL_API_KEY=votre-clé-api-mistral
 ANTHROPIC_API_KEY=votre-clé-api-anthropic
 GOOGLE_API_KEY=votre-clé-api-google
@@ -78,6 +79,14 @@ GOOGLE_API_KEY=votre-clé-api-google
 # Ou via export
 export OPENAI_API_KEY='votre-clé-api-openai'
 ```
+
+`GEMINI_API_KEY` est accepté comme alternative à `GOOGLE_API_KEY` (convention AI
+Studio). Variables optionnelles : `XAI_BASE_URL` (endpoint xAI, défaut
+`https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (secondes par appel Anthropic, défaut
+900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
+et `GROK_TRANSLATE_SANDBOX` (voir la section Grok CLI). Côté
+`regen_translations.sh` : `REGEN_PROVIDER`, `REGEN_MODEL` et
+`REGEN_JOB_TIMEOUT` (plafond par job, défaut 600 s).
 
 ## Utilisation
 
@@ -90,7 +99,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### Traduire un répertoire
 
 ```bash
-# Avec OpenAI (défaut: gpt-5.5)
+# Avec OpenAI (défaut: gpt-5.6-terra)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -101,11 +110,108 @@ python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content
 
 # Avec Gemini
 python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
+
+# Avec Codex (sur le quota de l'abonnement ChatGPT, sans facturation à l'usage)
+python translate.py --use_codex --eco --file 'README.md' --target_dir . --target_lang 'it'
+
+# Avec Grok par l'API xAI (nécessite XAI_API_KEY, facturé à l'usage)
+python translate.py --use_grok --source_dir 'content/fr' --target_dir 'content/pt' --target_lang 'pt'
+
+# Avec Grok sur le quota de l'abonnement Grok (nécessite `grok login`)
+python translate.py --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
+```
+
+### Traduire sur son abonnement ChatGPT (`--use_codex`)
+
+Ce provider ne consomme aucune clé API : il pilote le CLI Codex officiel en mode
+non-interactif, donc la traduction est décomptée du quota de l'abonnement
+ChatGPT (Plus, Pro, Business…) déjà payé. C'est la seule voie documentée par
+OpenAI pour cet usage — les tokens de `~/.codex/auth.json` n'authentifient pas
+les appels à l'API Platform, et ne sont d'ailleurs jamais lus par ce script.
+
+**Prérequis :**
+
+```bash
+# Le binaire `codex`, au choix :
+pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo)
+npm install -g @openai/codex       # ou l'installation npm globale
+
+codex login                        # connexion avec le compte ChatGPT
+```
+
+Le binaire est cherché dans cet ordre : la variable `CODEX_BIN`, le `PATH`,
+puis le package Python `openai-codex-cli-bin`. Ce dernier n'est volontairement
+pas dans `requirements.txt` : il pèse ~250 Mo, ce qui serait imposé à tous les
+utilisateurs pour un provider optionnel.
+
+**À savoir :**
+
+- **Aucune clé API n'est utilisée.** `OPENAI_API_KEY` et `CODEX_API_KEY` sont
+  retirées de l'environnement du sous-processus, ce qui garantit qu'une clé
+  présente dans `.env` ne fera jamais basculer la traduction en facturation à
+  l'usage.
+- **Un segment = un « message local »** de la fenêtre de 5 heures du plan.
+  Utiliser `--eco` (modèle `gpt-5.6-luna`, 250-2 000 messages/5 h sur Plus)
+  plutôt que le modèle qualité (`gpt-5.6-sol`, 10-100 messages/5 h).
+- **Plus lent** qu'un appel API : compter ~45 s pour un README complet, contre
+  quelques secondes en direct.
+- **Refusé en CI** (`CI` ou `GITHUB_ACTIONS` défini) : l'authentification par
+  abonnement n'est pas prévue pour un runner partagé, et OpenAI déconseille ce
+  workflow sur les dépôts publics. Utiliser une clé API sur ce chemin.
+- Variables d'environnement : `CODEX_BIN` (chemin explicite du binaire) et
+  `CODEX_TIMEOUT` (secondes par segment, défaut `600`).
+
+### Traduire sur son abonnement Grok (`--use_grok_cli`)
+
+Même principe que `--use_codex`, avec le CLI officiel **Grok Build** : la
+traduction est décomptée de l'abonnement Grok (SuperGrok / X Premium+) au lieu
+d'être facturée au token.
+
+```bash
+curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
+grok login                                      # ou `grok login --device-code`
+```
+
+**Confinement — à lire avant usage.** Ce provider est structurellement **plus
+faible** que `--use_codex`, et c'est assumé :
+
+- Codex tourne en `--sandbox read-only`, une frontière imposée par le système.
+- Le sandbox de Grok **ne peut pas s'appliquer** sur beaucoup de postes Linux
+  récents : AppArmor bloque les user namespaces non privilégiés depuis Ubuntu
+  24.04, et la deny-list des sockets de runtime conteneur échoue si
+  `/run/podman` est en `0700`. Or un profil **intégré** qui ne peut pas
+  s'appliquer démarre **non confiné, en silence**.
+- Le script ne demande donc aucun profil par défaut, et **ne retombe jamais
+  silencieusement** : il affiche un avertissement. Le confinement repose sur les
+  règles `--deny` du CLI (dont le catch-all `*`), la seule couche mesurée
+  _fail-closed_ — une règle inconnue fait refuser le démarrage plutôt que de
+  retirer la protection sans le dire.
+- Pour **exiger** le sandbox OS : `GROK_TRANSLATE_SANDBOX=read-only`. Le
+  démarrage échouera si la machine ne peut pas l'honorer, ce qui est le
+  comportement voulu.
+
+**Quota** : le pool Grok est **hebdomadaire et partagé** avec Chat, Imagine et
+Voice, et aucune commande ne permet de le lire. Un traitement par lot peut donc
+entamer ton usage conversationnel sans que rien ne le signale — d'où une
+concurrence limitée à 2 et un avertissement dans `regen_translations.sh`.
+
+Autres variables : `GROK_BIN` (chemin du binaire), `GROK_TIMEOUT` (défaut 900 s).
+
+Pour la régénération des 28 traductions :
+
+```bash
+REGEN_PROVIDER=codex ./regen_translations.sh --force
+
+# Sur un modèle précis plutôt que le défaut --eco du provider
+REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+
+# Sur le quota de l'abonnement Grok
+REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
 ```
 
 ### Mode économique
 
-Utilise des modèles plus rapides et moins coûteux (gpt-5.4-mini, claude-haiku, gemini-flash) :
+Utilise des modèles plus rapides et moins coûteux (gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite) :
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -125,6 +231,9 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_mistral`          | Utiliser l'API Mistral AI                                                |
 | `--use_claude`           | Utiliser l'API Claude                                                    |
 | `--use_gemini`           | Utiliser l'API Gemini                                                    |
+| `--use_codex`            | Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT               |
+| `--use_grok`             | Utiliser l'API xAI (Grok) — nécessite `XAI_API_KEY`                      |
+| `--use_grok_cli`         | Utiliser le CLI Grok sur le quota de l'abonnement Grok                   |
 | `--force`                | Forcer la re-traduction                                                  |
 | `--keep_filename`        | Conserver le nom de fichier original                                     |
 | `--news`                 | Mode actualités : protège les citations EN, gère les drapeaux par langue |
@@ -132,6 +241,13 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--note_position`        | Position de la note : `top`, `bottom` (défaut), ou `both`                |
 | `--note_format`          | Format de la note : `legacy` (défaut, paragraphe gras) ou `marker`       |
 | `--include_model`        | Inclure le nom du modèle dans le fichier de sortie                       |
+| `--reasoning_effort`     | Effort de raisonnement GPT-5.x : `none`/`low`/`medium`/`high`/`xhigh`    |
+
+> **Les six flags de provider sont mutuellement exclusifs.** En combiner deux
+> était auparavant accepté en silence et résolvait vers le premier testé : une
+> traduction demandée sur quota d'abonnement (`--use_codex`, `--use_grok_cli`)
+> pouvait ainsi partir en facturation à l'usage sans aucun avertissement.
+> `argparse` refuse désormais la combinaison.
 
 ### Note de traduction : positions et formats
 
@@ -163,14 +279,17 @@ python translate.py --file article.mdx --target_lang en \
 
 ### Modèles par défaut (2026)
 
-| Provider | Qualité (défaut)         | Économique (`--eco`)            |
-| -------- | ------------------------ | ------------------------------- |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
+| Provider | Qualité (défaut)       | Économique (`--eco`)    |
+| -------- | ---------------------- | ----------------------- |
+| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
+| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
+| Mistral  | `mistral-large-latest` | `mistral-small-latest`  |
+| Gemini   | `gemini-3.7-flash`     | `gemini-3.1-flash-lite` |
+| Codex    | `gpt-5.6-sol`          | `gpt-5.6-luna`          |
+| Grok API | `grok-4.6`             | `grok-4.3`              |
+| Grok CLI | `grok-4.6`             | `grok-4.5`              |
 
-> **Recommandation traductions long-form** : `--use_gemini` (défaut = `gemini-3.1-pro-preview` qualité, `--eco` = `gemini-3.1-flash-lite-preview`) tend à mieux préserver la structure markdown sur les scripts non-latins (PL, JA, ZH, AR, HI), notamment en mode `--news` où la fidélité des placeholders compte. OpenAI reste le défaut pour la rétrocompatibilité.
+> **Recommandation traductions long-form** : `--use_gemini` (défaut = `gemini-3.7-flash`) préserve fidèlement la structure markdown sur les scripts non-latins (PL, JA, ZH, AR, HI), y compris en mode `--news` où la fidélité des placeholders compte. Mesuré sur ce README traduit en japonais : structure identique à `gemini-3.1-pro-preview` (21 listes, 18 blocs de code, 13 liens HTML, 13 images, toutes les URLs préservées) pour ~6x moins de latence. OpenAI reste le défaut pour la rétrocompatibilité.
 
 ## Projets utilisant ce script
 

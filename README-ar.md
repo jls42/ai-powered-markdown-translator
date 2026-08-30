@@ -2,45 +2,45 @@
 
 🌍 [الفرنسية](README.md) | [الإنجليزية](README-en.md) | [الإسبانية](README-es.md) | [الصينية](README-zh.md) | [الألمانية](README-de.md) | [اليابانية](README-ja.md) | [الكورية](README-ko.md) | [العربية](README-ar.md) | [الهندية](README-hi.md) | [الإيطالية](README-it.md) | [الهولندية](README-nl.md) | [البولندية](README-pl.md) | [البرتغالية](README-pt.md) | [الرومانية](README-ro.md) | [السويدية](README-sv.md)
 
-<h4 align="center">📊 جودة الشفرة</h4>
+<h4 align="center">📊 جودة الكود</h4>
 
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="حالة بوابة الجودة"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="تقييم الأمان"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="تقييم الموثوقية"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="تقييم قابلية الصيانة"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="تصنيف الأمان"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="تصنيف الموثوقية"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="تصنيف قابلية الصيانة"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="نسبة التغطية"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="الثغرات"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="التغطية"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="الثغرات الأمنية"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="الأخطاء"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="مشكلات الشفرة"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="مشكلات جودة الكود"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="الأسطر المكررة (%)"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="الدين التقني"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="أسطر الشفرة"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="أسطر الكود"></a>
 </p>
 <p align="center">
   <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="شارة Codacy"></a>
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-مترجم ملفات Markdown باستخدام **OpenAI** و**Mistral AI** و**Claude (Anthropic)** و**Google Gemini**.
+مترجم لملفات Markdown يستخدم **OpenAI** و**Mistral AI** و**Claude (Anthropic)** و**Google Gemini**.
 
-يترجم هذا السكربت المكتوب بـ Python ملفات Markdown من لغة مصدر إلى لغة هدف مع الحفاظ على التنسيق وكتل الشفرة وبيانات front matter الوصفية.
+يترجم سكربت Python هذا ملفات Markdown من لغة مصدر إلى لغة مستهدفة مع الحفاظ على التنسيق وكتل الكود وبيانات front matter الوصفية.
 
 ## الميزات الرئيسية
 
-- **متعدد المزودين**: دعم 4 واجهات برمجة تطبيقات (OpenAI، Mistral، Claude، Gemini)
-- **نماذج 2026**: GPT-5.5، Claude Sonnet 4.6، Gemini 3.1 Pro
-- **الوضع الاقتصادي**: خيار `--eco` لاستخدام نماذج أسرع وأقل تكلفة
-- **ملف واحد**: خيار `--file` لترجمة ملف واحد
-- **التقسيم الذكي**: التعامل مع النصوص الطويلة مع حدود tokens لكل نموذج
-- **الحفاظ على الشفرة**: تُحافَظ على كتل الشفرة والشفرة المضمنة (``...``)
-- **اسم الملف**: خيار `--keep_filename` للاحتفاظ بالاسم الأصلي
-- **وضع الأخبار**: خيار `--news` لحماية الاقتباسات الإنجليزية والتعامل مع الأعلام حسب اللغة في مقالات الأخبار
-- **إعداد .env**: دعم ملف `.env` لمفاتيح API
+- **موفرو خدمات متعددون**: دعم 4 واجهات API‏ (OpenAI وMistral وClaude وGemini) بالإضافة إلى CLI الخاص بـCodex ضمن اشتراك ChatGPT
+- **نماذج 2026**: GPT-5.6 Terra وClaude Sonnet 5 وGemini 3.7 Flash
+- **الوضع الاقتصادي**: الخيار `--eco` لاستخدام نماذج أسرع وأقل تكلفة
+- **ملف واحد**: الخيار `--file` لترجمة ملف واحد
+- **تقسيم ذكي**: معالجة النصوص الطويلة وفق حدود الرموز لكل نموذج
+- **الحفاظ على الكود**: يُحافَظ على كتل الكود وكذلك الكود المضمّن (`` `...` ``)
+- **اسم الملف**: الخيار `--keep_filename` للاحتفاظ بالاسم الأصلي
+- **وضع الأخبار**: الخيار `--news` لحماية الاقتباسات الإنجليزية ومعالجة الأعلام في المقالات الإخبارية
+- **تهيئة .env**: دعم الملف `.env` لمفاتيح API
 - **ملاحظة الترجمة**: إضافة اختيارية لملاحظة في نهاية المستند
 
 ## التثبيت
@@ -52,9 +52,9 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### أدوات الجودة (اختيارية ولكن يُنصح بها)
+### أدوات الجودة (اختيارية لكن موصى بها)
 
-يستخدم المشروع [`pre-commit`](https://pre-commit.com) لمنع دمج شفرة غير منسقة جيدًا أو معرضة للثغرات أو تحتوي على سر. التثبيت:
+يستخدم المشروع [`pre-commit`](https://pre-commit.com) لمنع إيداع كود سيئ التنسيق أو معرّض للثغرات أو يحتوي على سر. للتثبيت:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -62,15 +62,16 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-الخطافات النشطة: ruff (lint+format)، shellcheck (bash)، prettier (markdown/yaml/json)، Lizard (التعقيد)، detect-secrets (مفاتيح API)، mypy (الكتابة التدريجية)، Opengrep (SAST)، pip-audit (ثغرات CVE في الاعتمادات)، unittest. راجع القسم `CLAUDE.md` _Quality / pre-commit_ للحصول على التفاصيل.
+الخطافات النشطة: ruff‏ (lint+format)، وshellcheck‏ (bash)، وprettier‏ (markdown/yaml/json)، وLizard‏ (التعقيد)، وdetect-secrets‏ (مفاتيح API)، وmypy‏ (التحقق التدريجي من الأنواع)، وOpengrep‏ (SAST)، وpip-audit‏ (ثغرات CVE في التبعيات)، وunittest. راجع قسم _Quality / pre-commit_ في `CLAUDE.md` للاطلاع على التفاصيل.
 
-## الإعداد
+## التهيئة
 
-أنشئ ملف `.env` في جذر المشروع أو عيّن متغيرات البيئة:
+أنشئ ملف `.env` في جذر المشروع أو عرّف متغيرات البيئة:
 
 ```bash
 # Fichier .env (recommandé)
 OPENAI_API_KEY=votre-clé-api-openai
+XAI_API_KEY=votre-clé-api-xai
 MISTRAL_API_KEY=votre-clé-api-mistral
 ANTHROPIC_API_KEY=votre-clé-api-anthropic
 GOOGLE_API_KEY=votre-clé-api-google
@@ -78,6 +79,14 @@ GOOGLE_API_KEY=votre-clé-api-google
 # Ou via export
 export OPENAI_API_KEY='votre-clé-api-openai'
 ```
+
+يُقبل `GEMINI_API_KEY` بوصفه بديلاً عن `GOOGLE_API_KEY` (وفق اصطلاح AI
+Studio). المتغيرات الاختيارية: `XAI_BASE_URL` (نقطة نهاية xAI، القيمة الافتراضية
+`https://api.x.ai/v1`)، و`CLAUDE_TIMEOUT` (عدد الثواني لكل استدعاء Anthropic، القيمة الافتراضية
+900)، و`CODEX_BIN` / `CODEX_TIMEOUT`، و`GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`،
+و`GROK_TRANSLATE_SANDBOX` (راجع قسم Grok CLI). وبالنسبة إلى
+`regen_translations.sh`:‏ `REGEN_PROVIDER` و`REGEN_MODEL` و
+`REGEN_JOB_TIMEOUT` (الحد الأقصى لكل مهمة، والقيمة الافتراضية 600 ثانية).
 
 ## الاستخدام
 
@@ -90,7 +99,7 @@ python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'e
 ### ترجمة دليل
 
 ```bash
-# Avec OpenAI (défaut: gpt-5.5)
+# Avec OpenAI (défaut: gpt-5.6-terra)
 python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
@@ -101,11 +110,108 @@ python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content
 
 # Avec Gemini
 python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
+
+# Avec Codex (sur le quota de l'abonnement ChatGPT, sans facturation à l'usage)
+python translate.py --use_codex --eco --file 'README.md' --target_dir . --target_lang 'it'
+
+# Avec Grok par l'API xAI (nécessite XAI_API_KEY, facturé à l'usage)
+python translate.py --use_grok --source_dir 'content/fr' --target_dir 'content/pt' --target_lang 'pt'
+
+# Avec Grok sur le quota de l'abonnement Grok (nécessite `grok login`)
+python translate.py --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
+```
+
+### الترجمة باستخدام اشتراك ChatGPT‏ (`--use_codex`)
+
+لا يستخدم هذا الموفّر أي مفتاح API، بل يتحكم في CLI الرسمي الخاص بـCodex في الوضع
+غير التفاعلي، ولذلك تُحتسب الترجمة من حصة اشتراك
+ChatGPT المدفوع مسبقًا (Plus أو Pro أو Business…). وهذه هي الطريقة الوحيدة التي توثقها
+OpenAI لهذا الاستخدام — فرُموز `~/.codex/auth.json` لا تصادق على
+استدعاءات API Platform، كما أن هذا السكربت لا يقرأها أصلًا.
+
+**المتطلبات الأساسية:**
+
+```bash
+# Le binaire `codex`, au choix :
+pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo)
+npm install -g @openai/codex       # ou l'installation npm globale
+
+codex login                        # connexion avec le compte ChatGPT
+```
+
+يُبحث عن الملف التنفيذي بالترتيب الآتي: المتغير `CODEX_BIN`، ثم `PATH`،
+ثم حزمة Python المسماة `openai-codex-cli-bin`. وقد استُبعدت هذه الأخيرة عمدًا
+من `requirements.txt` لأنها تزن نحو 250 ميغابايت، وهو عبء كان سيُفرض على جميع
+المستخدمين من أجل موفّر اختياري.
+
+**ما ينبغي معرفته:**
+
+- **لا يُستخدم أي مفتاح API.** تُزال `OPENAI_API_KEY` و`CODEX_API_KEY`
+  من بيئة العملية الفرعية، ما يضمن أن وجود مفتاح
+  في `.env` لن يحوّل الترجمة مطلقًا إلى فوترة حسب
+  الاستخدام.
+- **كل مقطع = «رسالة محلية» واحدة** ضمن نافذة الخمس ساعات للخطة.
+  استخدم `--eco` (النموذج `gpt-5.6-luna`، من 250 إلى 2,000 رسالة كل 5 ساعات ضمن Plus)
+  بدلًا من نموذج الجودة (`gpt-5.6-sol`، من 10 إلى 100 رسالة كل 5 ساعات).
+- **أبطأ** من استدعاء API: يستغرق ملف README كامل نحو 45 ثانية، مقابل
+  بضع ثوانٍ عبر الاستدعاء المباشر.
+- **مرفوض في CI** (عند تعريف `CI` أو `GITHUB_ACTIONS`): المصادقة عبر
+  الاشتراك غير مخصصة لمشغّل مشترك، كما لا توصي OpenAI بهذا
+  المسار في المستودعات العامة. استخدم مفتاح API في هذه الحالة.
+- متغيرات البيئة: `CODEX_BIN` (المسار الصريح للملف التنفيذي) و
+  `CODEX_TIMEOUT` (عدد الثواني لكل مقطع، والقيمة الافتراضية `600`).
+
+### الترجمة باستخدام اشتراك Grok‏ (`--use_grok_cli`)
+
+المبدأ نفسه المستخدم في `--use_codex`، لكن مع CLI الرسمي **Grok Build**: تُحتسب
+الترجمة من اشتراك Grok‏ (SuperGrok / X Premium+) بدلًا
+من احتساب تكلفتها لكل رمز.
+
+```bash
+curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
+grok login                                      # ou `grok login --device-code`
+```
+
+**العزل — يجب قراءته قبل الاستخدام.** هذا الموفّر **أضعف
+من الناحية البنيوية** من `--use_codex`، وهذا مقصود:
+
+- يعمل Codex ضمن `--sandbox read-only`، وهو حد يفرضه النظام.
+- يتعذر تطبيق sandbox الخاص بـGrok على العديد من أجهزة Linux
+  الحديثة: إذ يحظر AppArmor مساحات أسماء المستخدمين غير المميزة منذ Ubuntu
+  24.04، وتفشل قائمة حظر مقابس بيئة تشغيل الحاويات إذا كان
+  `/run/podman` مضبوطًا على `0700`. أما ملف التعريف **المدمج** الذي يتعذر
+  تطبيقه، فيبدأ التشغيل **من دون عزل وبصمت**.
+- لذلك لا يطلب السكربت أي ملف تعريف افتراضي، و**لا يتراجع أبدًا
+  بصمت**، بل يعرض تحذيرًا. يعتمد العزل على قواعد
+  `--deny` الخاصة بـCLI (ومنها قاعدة catch-all‏ `*`)، وهي الطبقة الوحيدة التي ثبت أنها
+  تعمل وفق مبدأ _fail-closed_ — إذ تؤدي القاعدة غير المعروفة إلى رفض بدء التشغيل بدلًا من
+  إزالة الحماية دون إشعار.
+- **لفرض** sandbox الخاص بنظام التشغيل: `GROK_TRANSLATE_SANDBOX=read-only`.
+  سيفشل بدء التشغيل إذا تعذر على الجهاز احترام هذا الشرط، وهذا هو
+  السلوك المقصود.
+
+**الحصة**: مجموعة Grok **أسبوعية ومشتركة** مع Chat وImagine و
+Voice، ولا يوجد أمر يتيح الاطلاع عليها. لذلك قد تؤثر المعالجة الدفعية
+في استخدامك للمحادثات دون أي تنبيه — ولهذا يقتصر
+التزامن على 2 ويظهر تحذير في `regen_translations.sh`.
+
+متغيرات أخرى: `GROK_BIN` (مسار الملف التنفيذي)، و`GROK_TIMEOUT` (القيمة الافتراضية 900 ثانية).
+
+لإعادة توليد الترجمات الـ28:
+
+```bash
+REGEN_PROVIDER=codex ./regen_translations.sh --force
+
+# Sur un modèle précis plutôt que le défaut --eco du provider
+REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+
+# Sur le quota de l'abonnement Grok
+REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
 ```
 
 ### الوضع الاقتصادي
 
-يستخدم نماذج أسرع وأقل تكلفة (gpt-5.4-mini، claude-haiku، gemini-flash) :
+يستخدم نماذج أسرع وأقل تكلفة (gpt-5.6-luna وclaude-haiku-4-5 وgemini-3.1-flash-lite):
 
 ```bash
 python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -115,38 +221,48 @@ python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 | الخيار                   | الوصف                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | ملف Markdown واحد للترجمة                                       |
+| `--file`                 | ملف Markdown واحد لترجمته                                       |
 | `--source_dir`           | دليل المصدر الذي يحتوي على ملفات Markdown                        |
-| `--target_dir`           | دليل الإخراج للملفات المترجمة                          |
-| `--source_lang`          | لغة المصدر (الافتراضي: `fr`)                                             |
-| `--target_lang`          | لغة الهدف (الافتراضي: `en`)                                              |
-| `--model`                | نموذج محدد للاستخدام                                             |
+| `--target_dir`           | دليل إخراج الملفات المترجمة                          |
+| `--source_lang`          | لغة المصدر (الافتراضية: `fr`)                                             |
+| `--target_lang`          | اللغة المستهدفة (الافتراضية: `en`)                                              |
+| `--model`                | نموذج محدد لاستخدامه                                             |
 | `--eco`                  | استخدام النماذج الاقتصادية                                         |
-| `--use_mistral`          | استخدام واجهة Mistral AI                                               |
-| `--use_claude`           | استخدام واجهة Claude                                                    |
-| `--use_gemini`           | استخدام واجهة Gemini                                                    |
+| `--use_mistral`          | استخدام API الخاصة بـMistral AI                                                |
+| `--use_claude`           | استخدام API الخاصة بـClaude                                                    |
+| `--use_gemini`           | استخدام API الخاصة بـGemini                                                    |
+| `--use_codex`            | استخدام CLI الخاص بـCodex ضمن حصة اشتراك ChatGPT               |
+| `--use_grok`             | استخدام API الخاصة بـxAI‏ (Grok) — يتطلب `XAI_API_KEY`                      |
+| `--use_grok_cli`         | استخدام CLI الخاص بـGrok ضمن حصة اشتراك Grok                   |
 | `--force`                | فرض إعادة الترجمة                                                  |
 | `--keep_filename`        | الاحتفاظ باسم الملف الأصلي                                     |
-| `--news`                 | وضع الأخبار: يحمي الاقتباسات EN، ويدير الأعلام حسب اللغة |
+| `--news`                 | وضع الأخبار: يحمي الاقتباسات الإنجليزية ويعالج الأعلام حسب اللغة |
 | `--add_translation_note` | إضافة ملاحظة ترجمة                                           |
-| `--note_position`        | موضع الملاحظة: `top`، `bottom` (الافتراضي)، أو `both`                |
-| `--note_format`          | تنسيق الملاحظة: `legacy` (الافتراضي، فقرة بخط عريض) أو `marker`       |
+| `--note_position`        | موضع الملاحظة: `top` أو `bottom` (الافتراضي) أو `both`                |
+| `--note_format`          | تنسيق الملاحظة: `legacy` (الافتراضي، فقرة عريضة) أو `marker`       |
 | `--include_model`        | تضمين اسم النموذج في ملف الإخراج                       |
+| `--reasoning_effort`     | جهد الاستدلال في GPT-5.x:‏ `none`/`low`/`medium`/`high`/`xhigh`    |
+
+> **أعلام الموفّرين الستة متنافية فيما بينها.** كان الجمع بين اثنين منها
+> يُقبل سابقًا بصمت ويُحسم لصالح أول عَلَم يُختبر: وهكذا كان من الممكن أن تتحول
+> ترجمة مطلوبة ضمن حصة اشتراك (`--use_codex`، `--use_grok_cli`)
+> إلى فوترة حسب الاستخدام من دون أي تحذير.
+> يرفض `argparse` الآن هذا الجمع.
 
 ### ملاحظة الترجمة: المواضع والتنسيقات
 
-مع `--add_translation_note`، يمكن للمترجم وضع الملاحظة في الأعلى أو الأسفل أو في الموضعين معًا، وجعلها إما بتنسيق نص عادي (متوافق مع الإصدارات السابقة) أو بتنسيق `marker` قابل للاستهلاك بواسطة مكوّن إضافي Markdown.
+باستخدام `--add_translation_note`، يستطيع المترجم وضع الملاحظة في الأعلى أو الأسفل أو في الموضعين، وعرضها إما بتنسيق نصي بسيط متوافق مع الإصدارات السابقة، وإما بتنسيق `marker` يمكن أن تستهلكه إضافة Markdown.
 
-**الموضع** (`--note_position`) :
+**الموضع** (`--note_position`):
 
-- `bottom` (الافتراضي) : ملاحظة في نهاية الملف، كما كان تاريخيًا.
-- `top` : ملاحظة تُدرج **بعد frontmatter YAML** (سلامة Astro Content Collections، gray-matter، إلخ).
-- `both` : ملاحظة تُدرج في الأعلى **وفي** الأسفل (استدعاء LLM واحد، ويُعاد استخدام المحتوى لكلا الموضعين).
+- `bottom` (الافتراضي): ملاحظة في نهاية الملف، كما جرت العادة.
+- `top`: تُدرج الملاحظة **بعد YAML frontmatter** (لضمان التوافق مع Astro Content Collections وgray-matter وغيرها).
+- `both`: تُدرج الملاحظة في الأعلى والأسفل معًا (استدعاء LLM واحد، ويُعاد استخدام المحتوى في الموضعين).
 
-**التنسيق** (`--note_format`) :
+**التنسيق** (`--note_format`):
 
-- `legacy` (الافتراضي) : فقرة بخط عريض `**...**` — سلوك مطابق تمامًا لـ v1.8، حرفًا بحرف. متوافق مع Hugo وGitHub وGitLab، وأي مُصيّر Markdown.
-- `marker` : تعريف مرجع رابط Markdown غير مرئي (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) يتبعه blockquote بخط عريض. قابل للقراءة مباشرة على GitHub/GitLab، ويمكن استغلاله أثناء البناء بواسطة مكوّن إضافي remark على جانب Astro لإنتاج لافتة منسقة (راجع مدونة jls42.org).
+- `legacy` (الافتراضي): فقرة عريضة `**...**` — سلوك مطابق تمامًا للإصدار v1.8 على مستوى البايتات. متوافق مع Hugo وGitHub وGitLab وأي عارض Markdown.
+- `marker`: تعريف مرجع رابط Markdown غير مرئي (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) يتبعه اقتباس عريض. قابل للقراءة مباشرة على GitHub/GitLab، ويمكن لإضافة remark ضمن Astro استخدامه أثناء البناء لإنتاج لافتة منسقة (راجع مدونة jls42.org).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -163,16 +279,19 @@ python translate.py --file article.mdx --target_lang en \
 
 ### النماذج الافتراضية (2026)
 
-| المزوّد | الجودة (الافتراضي)         | الاقتصادي (`--eco`)            |
-| -------- | ------------------------ | ------------------------------- |
-| OpenAI   | `gpt-5.5`                | `gpt-5.4-mini`                  |
-| Claude   | `claude-sonnet-4-6`      | `claude-haiku-4-5-20251001`     |
-| Mistral  | `mistral-large-latest`   | `mistral-small-latest`          |
-| Gemini   | `gemini-3.1-pro-preview` | `gemini-3.1-flash-lite-preview` |
+| الموفّر | الجودة (الافتراضي)       | الاقتصادي (`--eco`)    |
+| -------- | ---------------------- | ----------------------- |
+| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
+| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
+| Mistral  | `mistral-large-latest` | `mistral-small-latest`  |
+| Gemini   | `gemini-3.7-flash`     | `gemini-3.1-flash-lite` |
+| Codex    | `gpt-5.6-sol`          | `gpt-5.6-luna`          |
+| Grok API | `grok-4.6`             | `grok-4.3`              |
+| Grok CLI | `grok-4.6`             | `grok-4.5`              |
 
-> **توصية للترجمات الطويلة** : `--use_gemini` (الافتراضي = جودة `gemini-3.1-pro-preview`، `--eco` = `gemini-3.1-flash-lite-preview`) يميل إلى الحفاظ على بنية markdown بشكل أفضل في النصوص غير اللاتينية (PL، JA، ZH، AR، HI)، ولا سيما في وضع `--news` حيث تكون دقة placeholders مهمة. يظل OpenAI هو الافتراضي للتوافق العكسي.
+> **توصية للترجمات الطويلة**: يحافظ `--use_gemini` (الافتراضي = `gemini-3.7-flash`) بأمانة على بنية Markdown في اللغات ذات النصوص غير اللاتينية (PL وJA وZH وAR وHI)، بما في ذلك وضع `--news` حيث تكون دقة العناصر النائبة مهمة. وقد أظهر القياس على ترجمة ملف README هذا إلى اليابانية بنية مطابقة لـ`gemini-3.1-pro-preview` (21 قائمة و18 كتلة كود و13 رابط HTML و13 صورة، مع الحفاظ على جميع عناوين URL) بزمن انتقال أقل بنحو 6 مرات. تظل OpenAI الخيار الافتراضي للحفاظ على التوافق مع الإصدارات السابقة.
 
-## المشاريع التي تستخدم هذا السكربت
+## مشاريع تستخدم هذا السكربت
 
 - **[jls42.org](https://jls42.org)** - مدونة شخصية متعددة اللغات (15 لغة)
 
@@ -183,6 +302,6 @@ Julien LE SAUX
 
 ## الترخيص
 
-GNU GENERAL PUBLIC LICENSE الإصدار 3. انظر [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE الإصدار 3. راجع [LICENSE](LICENSE).
 
-**مقالة مترجمة من الفرنسية إلى العربية باستخدام gpt-5.4-mini.**
+**مقال مترجم من الفرنسية إلى العربية باستخدام gpt-5.6-sol.**
