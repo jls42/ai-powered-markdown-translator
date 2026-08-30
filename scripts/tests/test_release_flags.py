@@ -39,8 +39,11 @@ def _run_release(*flags: str) -> str:
     # veut que le test échoue VITE et sur la bonne raison (bannière absente),
     # pas qu'il traîne sur un chemin qu'il n'aurait jamais dû emprunter.
     try:
-        proc = subprocess.run(  # nosec B603 — liste littérale, script du dépôt
-            ["bash", str(RELEASE_SH), *flags],  # nosemgrep
+        proc = subprocess.run(  # nosec B603 — chemin absolu du script du dépôt
+            # Chemin ABSOLU du script, et pas `["bash", ...]` : un `bash` nu se
+            # résout via le PATH (Bandit B607), et surtout on veut exercer
+            # l'invocation telle qu'un utilisateur la fait — shebang compris.
+            [str(RELEASE_SH), *flags],  # nosemgrep
             cwd=ROOT,
             capture_output=True,
             text=True,
