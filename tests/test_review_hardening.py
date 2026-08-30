@@ -364,7 +364,10 @@ class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
             "source_lang": "fr",
             "model": "gpt-5.6-luna",
             "file": "doc.md",
-            "target_dir": "/tmp/out",
+            # Chemin factice jamais écrit : un littéral sous /tmp ferait
+            # crier les scanners (usage non sûr de répertoire temporaire)
+            # alors que ces tests ne touchent pas au système de fichiers.
+            "target_dir": os.path.join("chemin", "factice", "out"),
             "keep_filename": False,
             "include_model": False,
         }

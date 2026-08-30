@@ -2732,11 +2732,12 @@ def _process_one_markdown_file(file, root, ctx):
     base, _ext = os.path.splitext(file)
     output_file = _resolve_output_filename(file, base, ctx.config.args)
     relative_path = os.path.relpath(root, ctx.input_dir)
-    output_path = os.path.join(ctx.output_dir, relative_path, output_file)
     # Avant le makedirs, et non après : celui-ci s'exécute avant le premier
     # appel au modèle, donc une arborescence hors périmètre serait créée même
     # si la traduction échouait ensuite.
-    _ensure_within_directory(ctx.output_dir, output_path)
+    output_path = _ensure_within_directory(
+        ctx.output_dir, os.path.join(ctx.output_dir, relative_path, output_file)
+    )
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     already_exists = _existing_translation_exists(
@@ -2962,18 +2963,22 @@ def _build_arg_parser():
 _FILENAME_COMPONENT_FLAGS = ("target_lang", "source_lang", "model")
 
 
+def _looks_like_path_component(value):
+    """True si `value` porte un séparateur de chemin ou désigne un répertoire."""
+    if value in (".", ".."):
+        return True
+    return any(sep and sep in value for sep in (os.sep, os.altsep, "/"))
+
+
 def _reject_path_separators_in_components(args):
     """Refuse tout composant de nom de fichier porteur d'un séparateur.
 
     Contrôle en amont, pour échouer avec un message qui nomme le flag fautif
     plutôt que de laisser la garde de périmètre parler d'un chemin calculé.
     """
-    separators = [sep for sep in (os.sep, os.altsep, "/") if sep]
     for flag in _FILENAME_COMPONENT_FLAGS:
         value = getattr(args, flag, None)
-        if not isinstance(value, str) or not value:
-            continue
-        if any(sep in value for sep in separators) or value in (".", ".."):
+        if isinstance(value, str) and value and _looks_like_path_component(value):
             raise ValueError(
                 f"--{flag} ne peut pas contenir de séparateur de chemin "
                 f"(valeur reçue : {value!r}) : cette valeur est interpolée dans "
@@ -2993,7 +2998,13 @@ def _ensure_within_directory(base_dir, path, what="chemin de sortie"):
     resolved = os.path.realpath(path)
     if resolved != base and not resolved.startswith(base + os.sep):
         raise ValueError(f"{what} sort du répertoire cible : {resolved!r} n'est pas sous {base!r}")
-    return resolved
+    # On renvoie le chemin NORMALISÉ, pas le realpath : la comparaison ci-dessus
+    # a besoin de résoudre les liens symboliques, mais l'écriture doit rester au
+    # chemin que l'utilisateur reconnaît. Les appelants consomment cette valeur
+    # de retour au lieu de la variable d'origine — la validation fait ainsi
+    # partie du flot de données, et non d'un simple effet de bord qu'un lecteur
+    # (ou un analyseur) pourrait croire optionnel.
+    return os.path.normpath(path)
 
 
 def _validate_input_paths(args):
@@ -3299,8 +3310,9 @@ def _build_translation_config(args, client):
 
 def _run_single_file(args, client):
     output_file = _resolve_single_output_filename(args)
-    output_path = os.path.join(args.target_dir, output_file)
-    _ensure_within_directory(args.target_dir, output_path)
+    output_path = _ensure_within_directory(
+        args.target_dir, os.path.join(args.target_dir, output_file)
+    )
     config = _build_translation_config(args, client)
     status = translate_markdown_file(args.file, output_path, config)
     # default-fail: tout statut hors {"success", "skipped"} compte comme échec
