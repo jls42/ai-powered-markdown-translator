@@ -108,15 +108,35 @@ class TestGrokCliCall(unittest.TestCase):
     def test_argv_carries_deny_catch_all(self):
         """`--deny` est la seule couche fail-closed : la règle `*` doit y être."""
         fake = _FakePopen()
+        client = _client()
+        args = _args()
         with patch("translate.subprocess.Popen", fake):
-            translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
+            translate._call_grok_cli(client, args, "PROMPT", "SEG")
         argv = fake.argv
         denied = [argv[i + 1] for i, a in enumerate(argv) if a == "--deny"]
         self.assertIn("*", denied)
         for tool in ("Bash", "Edit", "Write", "MCPTool"):
-            self.assertIn(tool, denied)
+            self.assertIn(f"{tool}(*)", denied)
         self.assertIn("--disable-web-search", argv)
         self.assertIn("--no-subagents", argv)
+
+    def test_named_deny_rules_use_the_validated_prefix_form(self):
+        """Le nom nu n'est PAS validé par le CLI, la forme `Prefix(*)` l'est.
+
+        Mesuré sur grok 1.0.13 : `--deny 'CeciNestPasUnOutil(*)'` refuse le
+        démarrage (« unknown tool prefix »), tandis que le même nom sans
+        parenthèses est accepté en silence. Avec des noms nus, un renommage
+        d'outil côté xAI retirerait donc la protection sans aucun signal — sur
+        un poste où le sandbox OS ne s'applique déjà pas. Ce test empêche un
+        retour à la forme non validée.
+        """
+        named = [r for r in translate.GROK_DENY_RULES if r != "*"]
+        self.assertTrue(named, "les règles nommées ne doivent pas disparaître")
+        for rule in named:
+            self.assertTrue(
+                rule.endswith("(*)"),
+                f"règle {rule!r} sous forme nue : le CLI ne la valide pas",
+            )
 
     def test_no_sandbox_flag_unless_opted_in(self):
         """Un profil intégré qui ne peut pas s'appliquer démarre NON confiné en

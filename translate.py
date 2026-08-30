@@ -107,7 +107,25 @@ GROK_PROMPT_FILENAME = "prompt.md"
 # casse la traduction au lieu de retirer la protection en silence. La règle `*`
 # est le catch-all documenté ; les préfixes nommés restent pour que l'intention
 # soit lisible et pour survivre à une éventuelle disparition du catch-all.
-GROK_DENY_RULES = ("*", "Bash", "Edit", "Write", "Read", "Grep", "WebFetch", "WebSearch", "MCPTool")
+# Forme `Prefix(*)` et non le nom nu : mesuré sur grok 1.0.13, le CLI ne valide
+# QUE la forme parenthésée. `--deny 'CeciNestPasUnOutil(*)'` refuse le démarrage
+# (« unknown tool prefix »), tandis que `--deny 'CeciNestPasUnOutil'` est accepté
+# en silence. Avec les noms nus, un renommage d'outil côté xAI aurait donc retiré
+# la protection sans le moindre signal — exactement le fail-open que ce
+# confinement existe pour éviter, et sur un poste où le sandbox OS ne s'applique
+# déjà pas. Les huit préfixes ci-dessous ont été vérifiés un à un comme connus du
+# CLI ; le catch-all `*` reste sous sa forme littérale, seule acceptée.
+GROK_DENY_RULES = (
+    "*",
+    "Bash(*)",
+    "Edit(*)",
+    "Write(*)",
+    "Read(*)",
+    "Grep(*)",
+    "WebFetch(*)",
+    "WebSearch(*)",
+    "MCPTool(*)",
+)
 # Le compteur de tours est incrémenté APRÈS le tour d'outils : `--max-turns 1`
 # tronquerait la sortie (stopReason=cancelled). Le plancher mesuré est 2 même
 # sur un segment trivial ; 6 laisse de la marge sans lever la borne de coût.
@@ -1115,11 +1133,16 @@ def _strip_secret_env(env, keep=()):
     return env
 
 
-def _codex_env(client):
-    """Env du sous-processus, privé des clés API : la raison d'être de ce
-    provider est de consommer l'abonnement ChatGPT, pas de facturer à l'usage.
-    Une clé laissée dans l'env ferait basculer Codex en mode payant sans
-    signal visible."""
+def _codex_env_base():
+    """Environnement expurgé pour tout sous-processus Codex, préflight compris.
+
+    Extrait de `_codex_env` parce que `_codex_preflight` appelait
+    `subprocess.run` SANS `env=` : il transmettait donc `os.environ` entier —
+    donc tout le `.env` chargé par `load_dotenv` — au binaire Codex. Mesuré :
+    sept secrets atteignaient le préflight, contre zéro pour son homologue Grok
+    qui passait bien `env=_grok_env()`. L'invariant que `_strip_secret_env`
+    existe pour tenir était contredit à quelques lignes de là.
+    """
     env = os.environ.copy()
     for var in CODEX_STRIPPED_ENV_VARS:
         env.pop(var, None)
@@ -1127,6 +1150,15 @@ def _codex_env(client):
     # OPENAI_BASE_URL n'est pas un secret mais réoriente le trafic : hérité d'un
     # `.env`, il ferait sortir la traduction du chemin d'abonnement sans signal.
     env.pop("OPENAI_BASE_URL", None)
+    return env
+
+
+def _codex_env(client):
+    """Env du sous-processus, privé des clés API : la raison d'être de ce
+    provider est de consommer l'abonnement ChatGPT, pas de facturer à l'usage.
+    Une clé laissée dans l'env ferait basculer Codex en mode payant sans
+    signal visible."""
+    env = _codex_env_base()
     # Après le stripping : un override explicite doit rester souverain, mais
     # aucun appelant n'en fournit aujourd'hui.
     env.update(client.env_overrides)
@@ -3239,6 +3271,7 @@ def _codex_preflight(binary):
             text=True,
             timeout=30,
             check=False,
+            env=_codex_env_base(),
         )
     except (OSError, subprocess.SubprocessError) as e:
         raise ValueError(f"Impossible d'exécuter '{binary} login status' : {e}") from e
