@@ -94,6 +94,16 @@ else
   printf '  \033[33m~\033[0m hooks pre-push non exécutés (utiliser --full)\n'
 fi
 
+# Le retard de dépendances ne se voyait nulle part dans ce verdict : Dependabot
+# ne proposait rien hors CVE, et rien ici ne le mesurait. D'où ce contrôle.
+if DEPS_OUT=$(./scripts/check-deps-fresh.sh 2>&1); then
+  pass "dépendances directes à jour (majeures)"
+  # Les mineures ne font pas échouer, mais doivent rester lisibles.
+  printf '%s\n' "$DEPS_OUT" | grep -q '⚠' && printf '  \033[33m~\033[0m %s\n' "$(printf '%s' "$DEPS_OUT" | grep '⚠' | head -1)"
+else
+  fail "dépendances en retard — $(printf '%s' "$DEPS_OUT" | grep '✗' | head -1)"
+fi
+
 section "3. Documentation synchronisée avec le code"
 # `\.add_argument\(` et non `parser\.add_argument\(` : les flags provider
 # passent par un add_mutually_exclusive_group, donc par un objet `*_group`.

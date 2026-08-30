@@ -12,7 +12,7 @@ créé après plusieurs « c'est prêt » démentis ensuite par une vérificatio
 succès, provider non testé de bout en bout).
 
 ```bash
-./scripts/check-release-ready.sh          # 13 vérifications, ~40 s
+./scripts/check-release-ready.sh          # 14 vérifications, ~45 s
 ./scripts/check-release-ready.sh --full   # + hooks pre-push (mypy, SAST, audit), ~3 min
 ```
 
@@ -68,6 +68,48 @@ reprendre la tâche jusqu'à ce que le script passe au vert.
      - **`ruff-format` peut fusionner deux f-strings adjacents sur une seule ligne**, ce qui crée une concaténation implicite que Sonar S5799 (`Merge these implicitly concatenated strings; or did you forget a comma?`) flag comme Code Smell Major. Préférer une seule f-string au lieu de deux f-strings sur des lignes séparées si le contenu peut tenir sous la limite de longueur.
      - detect-secrets régénère parfois `.secrets.baseline` en pre-commit ; bien `git add` la baseline AVANT le commit suivant (sinon le pre-commit hook re-mute la baseline en boucle).
      - Hooks pre-push lents (~30s mypy + 5s SAST + 10s pip-audit + tests) : si on enchaîne plusieurs petits commits, préférer batcher en local et un seul `git push` à la fin.
+
+## Fraîcheur des dépendances — deux filets, parce qu'un seul a déjà lâché
+
+**Le retard de dépendances est passé inaperçu pendant des mois.** Dependabot
+tournait, mais sans `.github/dependabot.yml` GitHub n'active que les _security
+updates_ : il ne propose une PR que pour une dépendance visée par une CVE. Il a
+donc bien bumpé `urllib3` et `idna`, pendant qu'`openai` dérivait de 2.54 à 3.6,
+`anthropic` de 0.125 à 1.2, et que `certifi` — le magasin de certificats racine
+qui valide TLS pour tous les appels providers — accumulait deux ans de retard.
+
+Deux mesures, volontairement redondantes :
+
+1. **`.github/dependabot.yml`** active les _version updates_ hebdomadaires (pip
+   et github-actions). Mineures et correctifs sont groupés en une PR — un patch
+   bump par PR finit ignoré, et le bruit est l'ennemi de la mise à jour. Les
+   **majeures restent séparées** : chacune peut casser le code sans que la doc
+   le dise.
+
+2. **`./scripts/check-deps-fresh.sh`**, câblé dans le gate de fin de travail.
+   Dependabot _propose_, il ne garantit pas : ses PR peuvent s'empiler sans
+   être mergées. Ce contrôle rend le retard visible dans le verdict du projet.
+   - retard de **majeure** → échec ;
+   - retard de mineure/correctif → avertissement. Échouer sur chaque patch
+     rendrait le gate rouge en permanence, donc ignoré — précisément le mode de
+     défaillance qu'on cherche à éviter ;
+   - PyPI injoignable → skip explicite en local, **fail-closed en CI**. Un
+     contrôle qui ne s'est pas exécuté n'est pas un succès.
+
+**Une majeure de SDK se valide par un appel réel, provider par provider.** Deux
+précédents mesurés : `anthropic` ≥ 1.0 refuse côté client un appel non-streamé
+dont le `max_tokens` laisse présager plus de 10 minutes — invisible dans la
+doc, attrapé seulement par un vrai appel ; et `google-genai` a changé toute la
+surface d'appel par rapport à `google-generativeai`.
+
+**`requirements.txt` doit être la fermeture complète**, pas la liste des
+imports. Il lui manquait `google-auth`, `cryptography` et la pile
+`opentelemetry` — présents dans le venv de travail mais jamais déclarés, si
+bien qu'une install fraîche ne reproduisait pas l'environnement testé. Le
+régénérer par `pip freeze` d'un venv construit à partir des seules dépendances
+directes évite à la fois ce trou et l'accumulation d'orphelins (`tokenizers` et
+`huggingface-hub`, reliquats de `mistralai` 1.x, n'étaient plus requis par
+rien).
 
 ## Quality / pre-commit (workflow)
 
