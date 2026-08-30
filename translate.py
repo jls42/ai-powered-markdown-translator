@@ -2455,7 +2455,13 @@ def _write_output_file(output_path, translated_content, force, relative_output_p
             f"Le fichier '{relative_output_path}' existe déjà, aucune traduction n'est effectuée."
         )
         return "skipped"
-    with open(clean_output_path, "w", encoding="utf-8") as f:
+    # NOSONAR pythonsecurity:S8707 — chemin borné en amont par
+    # _ensure_within_directory, dont les deux appelants consomment la valeur
+    # de retour. Le moteur de contamination de Sonar ne reconnaît que ses
+    # propres assainisseurs et ne peut pas suivre une fonction maison ; la
+    # garde est vérifiée par tests, et l'évasion mesurée avant correctif
+    # (--target_lang '../../tmp/X' → /tmp/X.md) est aujourd'hui refusée.
+    with open(clean_output_path, "w", encoding="utf-8") as f:  # NOSONAR
         f.write(translated_content)
     return "success"
 
@@ -2605,7 +2611,7 @@ def _read_translatable_source(file_path, relative_file_path):
     # NOSONAR pythonsecurity:S8707 — lecture d'un chemin nommé par l'utilisateur,
     # sans périmètre à faire respecter (cf. docstring). Les chemins d'écriture,
     # eux, sont bornés par _ensure_within_directory.
-    with open(file_path, encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:  # NOSONAR pythonsecurity:S8707
         content = f.read()
     if not content:
         print(f"Le fichier '{relative_file_path}' est vide, aucune traduction n'est effectuée.")
@@ -2762,7 +2768,10 @@ def translate_directory(input_dir, output_dir, config):
     input_dir = os.path.abspath(input_dir)
     output_dir = os.path.abspath(output_dir)
     if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+        # NOSONAR pythonsecurity:S8707 — création de la RACINE que l'utilisateur
+        # a nommée (--target_dir), pas d'un chemin calculé. Il n'existe pas de
+        # périmètre dont l'empêcher de sortir ; ce qui est écrit DEDANS, si.
+        os.makedirs(output_dir)  # NOSONAR
     output_base_dir = os.path.basename(output_dir)
 
     ctx = _DirectoryWalkContext(
@@ -3018,7 +3027,8 @@ def _validate_input_paths(args):
         # `target_dir` est nommé par l'utilisateur : c'est la racine choisie, pas
         # un chemin calculé. Rien à valider ici — c'est ce qui est écrit DEDANS
         # qui doit rester dedans, ce que garantit _ensure_within_directory.
-        os.makedirs(args.target_dir)
+        # NOSONAR pythonsecurity:S8707 — cf. ci-dessus.
+        os.makedirs(args.target_dir)  # NOSONAR
 
 
 def _init_mistral_client(args):
