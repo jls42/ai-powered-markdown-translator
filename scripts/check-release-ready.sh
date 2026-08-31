@@ -258,6 +258,18 @@ if [[ -n "$CHANGELOG_VERSION" ]]; then
   else
     fail "version absente de $((14 - N)) CHANGELOG traduits"
   fi
+  # `[project] version` est le premier endroit du dépôt à porter la version sans
+  # que rien ne la vérifie — et l'enjeu est IRRÉVERSIBLE : PyPI n'autorise pas la
+  # réutilisation d'un numéro. La source de vérité reste le CHANGELOG ; ceci
+  # interdit simplement aux deux de diverger.
+  PYPROJECT_VERSION=$($PY -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])' 2>/dev/null)
+  if [[ -z "$PYPROJECT_VERSION" ]]; then
+    fail "version illisible dans pyproject.toml — [project] absent ou TOML invalide"
+  elif [[ "$PYPROJECT_VERSION" == "$CHANGELOG_VERSION" ]]; then
+    pass "pyproject.toml et CHANGELOG annoncent la même version"
+  else
+    fail "pyproject.toml annonce $PYPROJECT_VERSION, le CHANGELOG $CHANGELOG_VERSION"
+  fi
 else
   fail "aucune version lisible en tête du CHANGELOG"
 fi
