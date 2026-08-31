@@ -377,6 +377,17 @@ if ! $DRY_RUN; then
   echo ""
 fi
 
+# La liste ci-dessus est NOMINATIVE par choix (jamais `git add -A`, qui
+# ramasserait __pycache__/ et compagnie). Le revers est qu'un fichier suivi mais
+# absent de la liste est laissé de côté SANS UN MOT : recensés au moment de
+# l'ajout du paquet, seize fichiers suivis étaient dans ce cas, dont tous les
+# workflows. Le choix reste bon ; ce qui ne l'était pas, c'est son silence.
+LEFT_OUT=$(git diff --name-only 2>/dev/null | tr '\n' ' ')
+if [[ -n "${LEFT_OUT// /}" ]]; then
+  warn "Modifiés mais NON stagés (hors de la liste nominative) : $LEFT_OUT"
+  warn "Les ajouter à la main s'ils font partie de la release, ou compléter cette liste."
+fi
+
 RELEASE_NOTES=$(extract_release_notes "$VERSION")
 COMMIT_TITLE="release: v$VERSION"
 COMMIT_MSG=$(printf "%s\n\n%s\n" "$COMMIT_TITLE" "$RELEASE_NOTES")
