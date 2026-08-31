@@ -1,6 +1,6 @@
 # Traducteur de Markdown AI-Powered
 
-🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | [中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md) | [한국어](README-ko.md) | [العربية](README-ar.md) | [हिन्दी](README-hi.md) | [Italiano](README-it.md) | [Nederlands](README-nl.md) | [Polski](README-pl.md) | [Português](README-pt.md) | [Română](README-ro.md) | [Svenska](README-sv.md)
+🌍 [Français](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [English](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Español](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [中文](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [Deutsch](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [日本語](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [한국어](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [العربية](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [हिन्दी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italiano](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Nederlands](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Português](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Română](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Svenska](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
 
 <h4 align="center">📊 Qualité du code</h4>
 
@@ -45,12 +45,37 @@ Ce script Python traduit des fichiers Markdown d'une langue source vers une lang
 
 ## Installation
 
+### Pour utiliser l'outil
+
+```bash
+pip install ai-powered-markdown-translator
+```
+
+La commande `aipmt` est alors disponible partout. Si le répertoire des scripts
+de Python n'est pas dans votre `PATH`, `python -m aipmt` fait exactement la même
+chose. Python 3.10 ou plus récent.
+
+Pour une installation isolée du reste de vos paquets :
+
+```bash
+pipx install ai-powered-markdown-translator
+```
+
+### Pour contribuer au projet
+
+Le dépôt cloné reste nécessaire pour développer : c'est là que vivent les tests,
+les 28 traductions et tout l'outillage qualité.
+
 ```bash
 git clone https://github.com/jls42/ai-powered-markdown-translator.git
 cd ai-powered-markdown-translator
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+`requirements.txt` est un **lock entièrement épinglé**, reflet exact de
+l'environnement testé. Les bornes publiées dans `pyproject.toml` sont
+volontairement plus larges : elles n'imposent rien à vos autres paquets.
 
 ### Outillage qualité (optionnel mais recommandé)
 
@@ -66,7 +91,9 @@ Hooks actifs : ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/js
 
 ## Configuration
 
-Créez un fichier `.env` à la racine du projet ou définissez les variables d'environnement :
+Créez un fichier `.env` **dans le répertoire depuis lequel vous lancez la
+commande** (il est cherché là, puis dans les répertoires parents), ou
+définissez les variables d'environnement :
 
 ```bash
 # Fichier .env (recommandé)
@@ -93,32 +120,32 @@ et `GROK_TRANSLATE_SANDBOX` (voir la section Grok CLI). Côté
 ### Traduire un fichier unique
 
 ```bash
-python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
+aipmt --file 'document.md' --target_dir 'output/' --target_lang 'en'
 ```
 
 ### Traduire un répertoire
 
 ```bash
 # Avec OpenAI (défaut: gpt-5.6-terra)
-python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
+aipmt --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Avec Mistral AI
-python translate.py --use_mistral --source_dir 'content/fr' --target_dir 'content/es' --target_lang 'es'
+aipmt --use_mistral --source_dir 'content/fr' --target_dir 'content/es' --target_lang 'es'
 
 # Avec Claude
-python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content/de' --target_lang 'de'
+aipmt --use_claude --source_dir 'content/fr' --target_dir 'content/de' --target_lang 'de'
 
 # Avec Gemini
-python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
+aipmt --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
 
 # Avec Codex (sur le quota de l'abonnement ChatGPT, sans facturation à l'usage)
-python translate.py --use_codex --eco --file 'README.md' --target_dir . --target_lang 'it'
+aipmt --use_codex --eco --file 'README.md' --target_dir . --target_lang 'it'
 
 # Avec Grok par l'API xAI (nécessite XAI_API_KEY, facturé à l'usage)
-python translate.py --use_grok --source_dir 'content/fr' --target_dir 'content/pt' --target_lang 'pt'
+aipmt --use_grok --source_dir 'content/fr' --target_dir 'content/pt' --target_lang 'pt'
 
 # Avec Grok sur le quota de l'abonnement Grok (nécessite `grok login`)
-python translate.py --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
+aipmt --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
 ```
 
 ### Traduire sur son abonnement ChatGPT (`--use_codex`)
@@ -214,7 +241,7 @@ REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
 Utilise des modèles plus rapides et moins coûteux (gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite) :
 
 ```bash
-python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
+aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 ```
 
 ### Options
@@ -266,14 +293,14 @@ Avec `--add_translation_note`, le translator peut placer la note en haut, en bas
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
-python translate.py --file article.mdx --target_lang en --add_translation_note
+aipmt --file article.mdx --target_lang en --add_translation_note
 
 # Format marker, note en haut uniquement (Astro)
-python translate.py --file article.mdx --target_lang en \
+aipmt --file article.mdx --target_lang en \
     --add_translation_note --note_format marker --note_position top
 
 # Format marker en haut ET en bas
-python translate.py --file article.mdx --target_lang en \
+aipmt --file article.mdx --target_lang en \
     --add_translation_note --note_format marker --note_position both
 ```
 
@@ -302,4 +329,4 @@ Email : contact@jls42.org
 
 ## Licence
 
-GNU GENERAL PUBLIC LICENSE Version 3. Voir [LICENSE](LICENSE).
+GNU GENERAL PUBLIC LICENSE Version 3. Voir [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
