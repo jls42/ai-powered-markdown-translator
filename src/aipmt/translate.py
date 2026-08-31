@@ -17,7 +17,7 @@ import unicodedata
 from dataclasses import dataclass, field
 
 import anthropic
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types as genai_types
@@ -28,7 +28,12 @@ from openai import BadRequestError, OpenAI
 # Détection de langue déterministe (évite les variations entre runs sur des textes courts)
 DetectorFactory.seed = 0
 
-load_dotenv()
+# `usecwd=True` : sans lui, `find_dotenv` remonte depuis le fichier appelant —
+# donc depuis site-packages une fois l'outil installé — et ignore en silence le
+# `.env` du répertoire de travail. Mesuré sur un point d'entrée console réel :
+# `find_dotenv()` renvoie '' là où `find_dotenv(usecwd=True)` trouve le fichier.
+# Depuis le dépôt cloné, les deux formes donnent le même résultat.
+load_dotenv(find_dotenv(usecwd=True))
 
 EXCLUDE_PATTERNS = ["traductions_", "venv", "PRIVACY.md"]
 
@@ -2979,7 +2984,7 @@ def _add_news_args(parser):
 
 
 def _build_arg_parser():
-    parser = argparse.ArgumentParser(description="Traduit les fichiers Markdown.")
+    parser = argparse.ArgumentParser(prog="aipmt", description="Traduit les fichiers Markdown.")
     _add_io_args(parser)
     _add_lang_args(parser)
     _add_provider_args(parser)

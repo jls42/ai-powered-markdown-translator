@@ -114,7 +114,7 @@ section "3. Documentation synchronisée avec le code"
 if probe "flags documentés" <<'PYEOF'
 import re, sys
 EXPECTED_FLAGS = 21
-code = open("translate.py", encoding="utf-8").read()
+code = open("src/aipmt/translate.py", encoding="utf-8").read()
 readme = open("README.md", encoding="utf-8").read()
 flags = set(re.findall(r'\.add_argument\(\s*"(--[a-z_]+)"', code))
 if len(flags) < EXPECTED_FLAGS:
@@ -137,7 +137,7 @@ fi
 # annonce « chaque os.getenv documenté ».
 if probe "variables d'environnement" <<'PYEOF'
 import re, sys
-code = open("translate.py", encoding="utf-8").read()
+code = open("src/aipmt/translate.py", encoding="utf-8").read()
 docs = open("README.md", encoding="utf-8").read() + open("CLAUDE.md", encoding="utf-8").read()
 env = set(re.findall(r'os\.getenv\(\s*"([A-Z_]+)"', code))
 for const in re.findall(r'os\.getenv\(\s*([A-Z_]+)\s*[,)]', code):
@@ -209,7 +209,7 @@ if probe "fraîcheur des traductions" <<'PYEOF'
 import re, sys
 readme = open("README.md", encoding="utf-8").read()
 # Repères : chaque flag documenté doit se retrouver dans les traductions.
-keys = [f"`{f}`" for f in re.findall(r'\.add_argument\(\s*"(--[a-z_]+)"', open("translate.py", encoding="utf-8").read())]
+keys = [f"`{f}`" for f in re.findall(r'\.add_argument\(\s*"(--[a-z_]+)"', open("src/aipmt/translate.py", encoding="utf-8").read())]
 keys = [k for k in keys if k in readme]
 # Sans ce garde-fou, une regex qui cesse de matcher vide `keys` et rend
 # l'assertion « aucun repère absent » vraie pour les 14 langues — vert en
@@ -332,9 +332,11 @@ for command in commands:
 # --- 3. Anti-ensemble-vide : le README doit décrire AU MOINS UNE façon de lancer ---
 # Sans ce point, les règles 1 et 2 seraient toutes deux vraies sur un README qui
 # n'explique plus du tout comment lancer l'outil — vertes en ne vérifiant rien.
+# Évalué SEULEMENT si rien d'autre n'a été trouvé : quand les règles ci-dessus
+# ont un diagnostic précis à donner, il vaut mieux que ce garde générique.
 readme = (root / "README.md").read_text(encoding="utf-8")
 runnable = [s for s in set(INVOKE.findall(readme)) if (root / s).exists()] + commands
-if not runnable:
+if not runnable and not problems:
     sys.exit("README.md ne documente aucune invocation réalisable — contrôle vide")
 
 # --- 4. Le hook Lizard doit encore se DÉCLENCHER sur le module principal ---

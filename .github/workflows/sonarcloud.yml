@@ -54,8 +54,8 @@ jobs:
           # 1re suite échoue). Aligné sur scripts/run-unittest.sh.
           set +e
           rc=0
-          coverage run --source=translate,scripts -m unittest discover tests || rc=$?
-          coverage run --append --source=translate,scripts -m unittest discover scripts/tests || rc=$?
+          coverage run --source=src,scripts -m unittest discover tests || rc=$?
+          coverage run --append --source=src,scripts -m unittest discover scripts/tests || rc=$?
           coverage xml -o coverage.xml
           exit "$rc"
 
@@ -65,7 +65,7 @@ jobs:
       # Rien dans le step ci-dessus ne transforme cet avertissement en échec.
       # Un simple renommage de fichier ferait donc passer le rapport de 1453 à
       # 141 statements, et le projet apparaîtrait sain parce qu'il ne serait
-      # presque plus analysé. Mesuré : `translate.py` pèse 1312 des 1453
+      # presque plus analysé. Mesuré : le module principal pèse 1312 des 1453
       # statements, soit 90 % du rapport.
       - name: Plancher de couverture (le rapport doit être complet)
         run: |

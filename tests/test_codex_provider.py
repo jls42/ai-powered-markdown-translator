@@ -22,10 +22,11 @@ from argparse import Namespace
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-# Permet d'importer translate.py depuis le parent
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
+# l'arbre source, et une erreur d'empaquetage devient visible.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-import translate
+from aipmt import translate
 
 
 def _args(**overrides):
@@ -108,7 +109,7 @@ class TestCodexCall(unittest.TestCase):
         quand le prompt est en argv, donc `input=` doit toujours être fourni
         (sans quoi le CLI attend jusqu'au timeout sans appeler le modèle)."""
         fake = _FakePopen(final_message="Translated body")
-        with patch("translate.subprocess.Popen", fake):
+        with patch("aipmt.translate.subprocess.Popen", fake):
             out = translate._call_codex(_client(), _args(), "PROMPT", "SEGMENT")
         self.assertEqual(out, "Translated body")
         self.assertEqual(fake.communicate_kwargs["input"], "SEGMENT")
@@ -116,7 +117,7 @@ class TestCodexCall(unittest.TestCase):
 
     def test_argv_carries_safety_and_model_flags(self):
         fake = _FakePopen()
-        with patch("translate.subprocess.Popen", fake):
+        with patch("aipmt.translate.subprocess.Popen", fake):
             translate._call_codex(_client(reasoning_effort="low"), _args(), "PROMPT", "SEG")
         argv = fake.argv
         self.assertEqual(argv[:2], ["codex", "exec"])
@@ -129,7 +130,7 @@ class TestCodexCall(unittest.TestCase):
     def test_prompt_carries_agent_contract(self):
         """Sans ce contrat, l'agent peut préfixer sa réponse d'un commentaire."""
         fake = _FakePopen()
-        with patch("translate.subprocess.Popen", fake):
+        with patch("aipmt.translate.subprocess.Popen", fake):
             translate._call_codex(_client(), _args(), "PROMPT", "SEG")
         self.assertTrue(fake.argv[2].startswith("PROMPT"))
         self.assertIn("Réponds UNIQUEMENT", fake.argv[2])
@@ -140,7 +141,10 @@ class TestCodexCall(unittest.TestCase):
         précisément pour éviter."""
         fake = _FakePopen()
         env = {"OPENAI_API_KEY": "sk-should-not-leak", "CODEX_API_KEY": "x", "PATH": "/usr/bin"}
-        with patch.dict(os.environ, env, clear=False), patch("translate.subprocess.Popen", fake):
+        with (
+            patch.dict(os.environ, env, clear=False),
+            patch("aipmt.translate.subprocess.Popen", fake),
+        ):
             translate._call_codex(_client(), _args(), "PROMPT", "SEG")
         child_env = fake.kwargs["env"]
         self.assertNotIn("OPENAI_API_KEY", child_env)
@@ -152,7 +156,10 @@ class TestCodexCall(unittest.TestCase):
         fake = _FakePopen(final_message=None)
         client = _client()
         args = _args()
-        with patch("translate.subprocess.Popen", fake), self.assertRaises(RuntimeError) as ctx:
+        with (
+            patch("aipmt.translate.subprocess.Popen", fake),
+            self.assertRaises(RuntimeError) as ctx,
+        ):
             translate._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("sans écrire de message final", str(ctx.exception))
 
@@ -175,7 +182,10 @@ class TestCodexCall(unittest.TestCase):
         fake = _FakePopen(returncode=0, stdout=stdout)
         client = _client()
         args = _args()
-        with patch("translate.subprocess.Popen", fake), self.assertRaises(RuntimeError) as ctx:
+        with (
+            patch("aipmt.translate.subprocess.Popen", fake),
+            self.assertRaises(RuntimeError) as ctx,
+        ):
             translate._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("not supported when using Codex", str(ctx.exception))
 
@@ -183,7 +193,10 @@ class TestCodexCall(unittest.TestCase):
         fake = _FakePopen(returncode=1, stdout="")
         client = _client()
         args = _args()
-        with patch("translate.subprocess.Popen", fake), self.assertRaises(RuntimeError) as ctx:
+        with (
+            patch("aipmt.translate.subprocess.Popen", fake),
+            self.assertRaises(RuntimeError) as ctx,
+        ):
             translate._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("code 1", str(ctx.exception))
 
@@ -195,9 +208,9 @@ class TestCodexCall(unittest.TestCase):
         client = _client(timeout=42)
         args = _args()
         with (
-            patch("translate.subprocess.Popen", fake),
-            patch("translate.os.getpgid", return_value=4242),
-            patch("translate.os.killpg") as killpg,
+            patch("aipmt.translate.subprocess.Popen", fake),
+            patch("aipmt.translate.os.getpgid", return_value=4242),
+            patch("aipmt.translate.os.killpg") as killpg,
             self.assertRaises(RuntimeError) as ctx,
         ):
             translate._call_codex(client, args, "PROMPT", "SEG")
@@ -219,8 +232,8 @@ class TestCodexRateLimitBackoff(unittest.TestCase):
             return fake(argv, **kwargs)
 
         with (
-            patch("translate.subprocess.Popen", popen_factory),
-            patch("translate.time.sleep") as sleep,
+            patch("aipmt.translate.subprocess.Popen", popen_factory),
+            patch("aipmt.translate.time.sleep") as sleep,
         ):
             out = translate._call_codex(_client(), _args(), "PROMPT", "SEG")
         self.assertEqual(out, "Done")
@@ -239,7 +252,7 @@ class TestCodexRateLimitBackoff(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("translate.subprocess.Popen", popen_factory),
+            patch("aipmt.translate.subprocess.Popen", popen_factory),
             self.assertRaises(RuntimeError),
         ):
             translate._call_codex(client, args, "PROMPT", "SEG")
@@ -249,7 +262,7 @@ class TestCodexRateLimitBackoff(unittest.TestCase):
 class TestCodexInit(unittest.TestCase):
     def test_defaults_and_eco_models(self):
         with (
-            patch("translate._codex_preflight"),
+            patch("aipmt.translate._codex_preflight"),
             patch.dict(os.environ, {"CI": "", "GITHUB_ACTIONS": ""}, clear=False),
         ):
             args = _args(model=None)
@@ -279,7 +292,7 @@ class TestCodexInit(unittest.TestCase):
 
     def test_preflight_reports_unexecutable_binary(self):
         with (
-            patch("translate.subprocess.run", side_effect=OSError("Permission denied")),
+            patch("aipmt.translate.subprocess.run", side_effect=OSError("Permission denied")),
             self.assertRaises(ValueError) as ctx,
         ):
             translate._codex_preflight("/pkg/bin/codex")
@@ -287,8 +300,8 @@ class TestCodexInit(unittest.TestCase):
 
     def test_preflight_rejects_logged_out_cli(self):
         with (
-            patch("translate.shutil.which", return_value="/usr/bin/codex"),
-            patch("translate.subprocess.run", return_value=MagicMock(returncode=1)),
+            patch("aipmt.translate.shutil.which", return_value="/usr/bin/codex"),
+            patch("aipmt.translate.subprocess.run", return_value=MagicMock(returncode=1)),
             self.assertRaises(ValueError) as ctx,
         ):
             translate._codex_preflight("codex")
@@ -312,12 +325,12 @@ class TestProviderResolution(unittest.TestCase):
 
     def test_select_provider_client_tolerates_missing_use_codex(self):
         args = _args(model=None, use_mistral=False, use_claude=False, use_gemini=False)
-        with patch("translate._init_openai_client", return_value="openai-client") as init:
+        with patch("aipmt.translate._init_openai_client", return_value="openai-client") as init:
             self.assertEqual(translate._select_provider_client(args), "openai-client")
         init.assert_called_once()
 
     def test_dispatch_routes_to_codex(self):
-        with patch("translate._call_codex", return_value="translated") as call:
+        with patch("aipmt.translate._call_codex", return_value="translated") as call:
             out = translate._dispatch_provider_call(
                 _client(), _args(), "PROMPT", "SEG", "codex", False
             )
@@ -328,7 +341,7 @@ class TestProviderResolution(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("translate._call_codex", return_value="   "),
+            patch("aipmt.translate._call_codex", return_value="   "),
             self.assertRaises(RuntimeError) as ctx,
         ):
             translate._dispatch_provider_call(client, args, "PROMPT", "SEG", "codex", False)
@@ -582,14 +595,14 @@ class TestCodexBinaryResolution(unittest.TestCase):
     def test_explicit_codex_bin_wins(self):
         with (
             patch.dict(os.environ, {"CODEX_BIN": "/custom/codex"}, clear=False),
-            patch("translate.shutil.which", side_effect=lambda b: b),
+            patch("aipmt.translate.shutil.which", side_effect=lambda b: b),
         ):
             self.assertEqual(translate._resolve_codex_binary(), "/custom/codex")
 
     def test_path_used_when_no_explicit_bin(self):
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("translate.shutil.which", return_value="/usr/bin/codex"),
+            patch("aipmt.translate.shutil.which", return_value="/usr/bin/codex"),
         ):
             self.assertEqual(translate._resolve_codex_binary(), "/usr/bin/codex")
 
@@ -597,7 +610,7 @@ class TestCodexBinaryResolution(unittest.TestCase):
         """Cas npm absent : le binaire installé par pip doit être trouvé."""
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("translate.shutil.which", return_value=None),
+            patch("aipmt.translate.shutil.which", return_value=None),
             patch.dict(sys.modules, {"codex_cli_bin": self._fake_package()}),
         ):
             self.assertEqual(translate._resolve_codex_binary(), "/pkg/bin/codex")
@@ -605,7 +618,7 @@ class TestCodexBinaryResolution(unittest.TestCase):
     def test_returns_none_when_nothing_available(self):
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("translate.shutil.which", return_value=None),
+            patch("aipmt.translate.shutil.which", return_value=None),
             patch.dict(sys.modules, {"codex_cli_bin": None}),
         ):
             self.assertIsNone(translate._resolve_codex_binary())
@@ -619,8 +632,8 @@ class TestCodexBinaryResolution(unittest.TestCase):
 
     def test_init_uses_resolved_binary(self):
         with (
-            patch("translate._resolve_codex_binary", return_value="/pkg/bin/codex"),
-            patch("translate._codex_preflight"),
+            patch("aipmt.translate._resolve_codex_binary", return_value="/pkg/bin/codex"),
+            patch("aipmt.translate._codex_preflight"),
             patch.dict(os.environ, {"CI": "", "GITHUB_ACTIONS": ""}, clear=False),
         ):
             client = translate._init_codex_client(_args(model=None))

@@ -12,19 +12,20 @@ Lancement : python -m unittest discover tests/ -v
 """
 
 import os
-import subprocess  # nosec B404 — utilisé pour tester le CLI translate.py
+import subprocess  # nosec B404 — utilisé pour tester la CLI aipmt
 import sys
 import tempfile
 import unittest
 from argparse import Namespace
 from unittest.mock import MagicMock, patch
 
-# Permet d'importer translate.py depuis le parent
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
+# l'arbre source, et une erreur d'empaquetage devient visible.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-import translate
-from translate import segment_text, translate_markdown_file
-from translate import translate as translate_fn
+from aipmt import translate
+from aipmt.translate import segment_text, translate_markdown_file
+from aipmt.translate import translate as translate_fn
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "fixtures", "long_fr_excerpt.txt")
 
@@ -224,13 +225,11 @@ class TestSilentFailure(unittest.TestCase):
         """main() avec --file doit sys.exit(1) quand translate_markdown_file retourne 'failure'."""
         with (
             patch.dict(os.environ, _fake_openai_env()),
-            patch("translate.translate_markdown_file", return_value="failure"),
-            patch("translate.OpenAI"),
+            patch("aipmt.translate.translate_markdown_file", return_value="failure"),
+            patch("aipmt.translate.OpenAI"),
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
-            patch(
-                "sys.argv", ["translate.py", "--file", "/source/fake.md", "--target_dir", "/dest"]
-            ),
+            patch("sys.argv", ["aipmt", "--file", "/source/fake.md", "--target_dir", "/dest"]),
         ):
             with self.assertRaises(SystemExit) as cm:
                 translate.main()
@@ -242,16 +241,16 @@ class TestSilentFailure(unittest.TestCase):
         with (
             patch.dict(os.environ, _fake_openai_env()),
             patch(
-                "translate.translate_directory",
+                "aipmt.translate.translate_directory",
                 return_value={"failed": ["a.md"], "skipped": []},
             ),
-            patch("translate.OpenAI"),
+            patch("aipmt.translate.OpenAI"),
             patch("os.path.isdir", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
                 "sys.argv",
                 [
-                    "translate.py",
+                    "aipmt",
                     "--source_dir",
                     "/source/src",
                     "--target_dir",
@@ -702,7 +701,7 @@ class TestHindiTechnicalReadmeValidation(unittest.TestCase):
         )
         args = _base_args(source_lang="en", target_lang="hi", news=False)
 
-        with patch("translate.detect_langs", return_value=[MagicMock(lang="en", prob=0.86)]):
+        with patch("aipmt.translate.detect_langs", return_value=[MagicMock(lang="en", prob=0.86)]):
             translate._validate_translation_output(
                 source_segment, translated, args, is_translation_note=False
             )
@@ -720,7 +719,7 @@ class TestHindiTechnicalReadmeValidation(unittest.TestCase):
 
         with (
             patch(
-                "translate.detect_langs",
+                "aipmt.translate.detect_langs",
                 return_value=[MagicMock(lang="en", prob=0.95), MagicMock(lang="hi", prob=0.05)],
             ),
             self.assertRaisesRegex(RuntimeError, r"Output language mismatch"),
@@ -1314,10 +1313,10 @@ class TestMainExitsOnRealSilentFailure(unittest.TestCase):
 
             with (
                 patch.dict(os.environ, _fake_openai_env()),
-                patch("translate.OpenAI", return_value=mock_instance),
+                patch("aipmt.translate.OpenAI", return_value=mock_instance),
                 patch(
                     "sys.argv",
-                    ["translate.py", "--file", src_path, "--target_dir", tmpdir],
+                    ["aipmt", "--file", src_path, "--target_dir", tmpdir],
                 ),
             ):
                 with self.assertRaises(SystemExit) as cm:

@@ -18,10 +18,10 @@ import unittest
 from argparse import Namespace
 from unittest.mock import MagicMock
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-import translate
-from translate import (
+from aipmt import translate
+from aipmt.translate import (
     _append_translation_note,
     _build_translation_note_block,
     _build_translation_note_source,

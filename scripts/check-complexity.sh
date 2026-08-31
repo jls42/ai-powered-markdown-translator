@@ -15,7 +15,7 @@ source scripts/_venv_python.sh
 # à 12**. Le gate protège le fichier le plus exposé du dépôt contre une
 # régression de complexité, au lieu de la découvrir via SonarCloud après le push.
 SCOPE=(
-  translate.py
+  src/aipmt/translate.py
   scripts/
 )
 

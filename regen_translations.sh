@@ -19,7 +19,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Détection du provider de traduction selon les clés d'API disponibles.
-# Stdout : flags à injecter dans `python translate.py` (ex: "--eco" ou "--use_gemini --eco").
+# Stdout : flags à injecter dans `python -m aipmt` (ex: "--eco" ou "--use_gemini --eco").
 # Stderr : message de log (info ou warning).
 # Le caller utilise: PROVIDER_FLAGS=$(detect_provider)
 #
@@ -27,7 +27,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # OPENAI_API_KEY absente/placeholder mais GOOGLE_API_KEY valide. L'utilisateur
 # peut forcer Gemini avec REGEN_PROVIDER=gemini./regen_translations.sh.
 # Charge .env si présent. set -a/+a exporte toutes les variables assignées pour
-# qu'elles soient héritées par les sous-processus (python translate.py).
+# qu'elles soient héritées par les sous-processus (python -m aipmt).
 #
 # Appelé DEUX fois volontairement : depuis detect_provider (que les tests
 # sourcent et invoquent isolément) et depuis main(). detect_provider est
@@ -48,12 +48,12 @@ load_env() {
 detect_provider() {
   load_env
 
-  # Placeholders exacts définis dans translate.py (DEFAULT_*_API_KEY)
+  # Placeholders exacts définis dans le module (DEFAULT_*_API_KEY)
   local openai_placeholder="votre-cle-api-openai-par-defaut"
   local gemini_placeholder="votre-cle-api-gemini-par-defaut"
   local openai_key="${OPENAI_API_KEY:-}"
   # Accepte GOOGLE_API_KEY (SDK historique) ET GEMINI_API_KEY (convention AI Studio),
-  # cohérent avec _init_gemini_client() dans translate.py.
+  # cohérent avec _init_gemini_client() dans le module.
   local gemini_key="${GOOGLE_API_KEY:-${GEMINI_API_KEY:-}}"
 
   # Override explicite via REGEN_PROVIDER=gemini ou REGEN_PROVIDER=openai
@@ -127,8 +127,8 @@ main() {
   # detect_provider tourne dans un sous-shell et ne peut pas les exporter ici.
   load_env
 
-  if [[ ! -f translate.py ]]; then
-    echo "ERROR: translate.py not found in $SCRIPT_DIR" >&2
+  if [[ ! -f src/aipmt/translate.py ]]; then
+    echo "ERROR: src/aipmt/translate.py not found in $SCRIPT_DIR" >&2
     exit 1
   fi
 
@@ -172,7 +172,7 @@ main() {
     # qu'un simple contrôle d'auth. Un vrai warm-up demanderait une traduction
     # séquentielle avant d'ouvrir le parallélisme (coût : 1 message de quota).
     #
-    # Le binaire est résolu comme dans translate.py (CODEX_BIN puis PATH) :
+    # Le binaire est résolu comme dans le module (CODEX_BIN puis PATH) :
     # invoquer `codex` nu faisait échouer le regen avec « non authentifié » sur
     # un poste où seul CODEX_BIN est défini — un diagnostic trompeur.
     local codex_bin="${CODEX_BIN:-$(command -v codex || true)}"
@@ -206,7 +206,8 @@ main() {
     local file="$1" lang="$2"
     # provider_flags et force_flag sont visibles ici via dynamic scoping bash
     # shellcheck disable=SC2086
-    if ! timeout "$job_timeout" python translate.py --file "$file" --target_dir . \
+    if ! PYTHONPATH="$SCRIPT_DIR/src" timeout "$job_timeout" python -m aipmt \
+        --file "$file" --target_dir . \
         --source_lang fr --target_lang "$lang" \
         $provider_flags --add_translation_note $force_flag; then
       echo "$file -> $lang" >> "$failed_log"

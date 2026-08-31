@@ -24,7 +24,7 @@
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
-# Dépendances réellement importées par translate.py, plus certifi : celui-ci
+# Dépendances réellement importées par le module, plus certifi : celui-ci
 # n'est pas importé mais embarque le magasin de CA qui valide TLS pour tous les
 # appels providers. Un retard y est un problème de sécurité, pas de confort.
 DIRECT_DEPS="openai anthropic mistralai google-genai langdetect python-dotenv certifi"
