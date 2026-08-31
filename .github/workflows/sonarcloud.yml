@@ -59,6 +59,44 @@ jobs:
           coverage xml -o coverage.xml
           exit "$rc"
 
+      # `coverage run --source=module_absent` n'échoue PAS : il émet un
+      # « CoverageWarning: Module ... was never imported » sur stderr, unittest
+      # sort en 0, et `coverage xml` produit quand même un rapport — amputé.
+      # Rien dans le step ci-dessus ne transforme cet avertissement en échec.
+      # Un simple renommage de fichier ferait donc passer le rapport de 1453 à
+      # 141 statements, et le projet apparaîtrait sain parce qu'il ne serait
+      # presque plus analysé. Mesuré : `translate.py` pèse 1312 des 1453
+      # statements, soit 90 % du rapport.
+      - name: Plancher de couverture (le rapport doit être complet)
+        run: |
+          python - <<'EOF'
+          import sys
+          import xml.etree.ElementTree as ET
+
+          FLOOR = 1000
+          classes = ET.parse("coverage.xml").getroot().findall(".//class")
+          per_file = {c.get("filename"): len(c.findall("lines/line")) for c in classes}
+          total = sum(per_file.values())
+          biggest, biggest_n = max(per_file.items(), key=lambda kv: kv[1], default=("(aucun)", 0))
+
+          print(f"{total} statements dans {len(per_file)} fichier(s)")
+          for name, n in sorted(per_file.items(), key=lambda kv: -kv[1]):
+              print(f"  {n:5d}  {name}")
+
+          # Deux planchers plutôt qu'un : le total attrape un effondrement
+          # global, le plus gros fichier attrape la sortie du module principal
+          # du périmètre — sans coder son chemin en dur, donc sans devoir être
+          # réécrit à chaque réorganisation du dépôt.
+          if total < FLOOR:
+              sys.exit(f"✗ {total} statements seulement (plancher {FLOOR}) : le rapport est amputé.")
+          if biggest_n < FLOOR:
+              sys.exit(
+                  f"✗ le plus gros fichier mesuré est {biggest} avec {biggest_n} statements "
+                  f"(plancher {FLOOR}) : le module principal est sorti de --source."
+              )
+          print(f"✓ rapport complet — {biggest} pèse {biggest_n} statements")
+          EOF
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
         env:
