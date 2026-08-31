@@ -838,12 +838,28 @@ class TestModuleEntrypoint(unittest.TestCase):
     def test_module_entrypoint_invokes_main(self):
         import subprocess  # nosec B404 — test exécute la CLI aipmt
 
-        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
+        # `src/` et non la racine : `python -m aipmt` a besoin que le paquet soit
+        # importable, et c'est le cwd que Python ajoute à sys.path.
+        package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
         env = os.environ.copy()
         env["OPENAI_API_KEY"] = "fixture-openai-key-not-placeholder"  # pragma: allowlist secret
-        proc = subprocess.run(  # nosec B603 — test exécute la CLI du repo via sys.executable
-            [sys.executable, "-m", "aipmt", "--file", "/source/__inexistant_xyz_orchestration"],
-            cwd=repo_root,
+        # Trois marqueurs `nosemgrep`, comme dans scripts/tests/test_release_flags.py :
+        # les deux règles de la famille `dangerous-subprocess-use` s'ancrent sur des
+        # lignes différentes — l'une sur l'appel, l'autre sur l'argument — et un
+        # marqueur ne vaut que pour sa ligne ou celle qui la précède immédiatement.
+        # L'appel est sûr : forme liste, jamais `shell=True`, et le seul élément non
+        # littéral est `sys.executable`. Le SAST local ne le voyait pas (il exclut
+        # `*test*`) ; Codacy, lui, scanne tout.
+        # argv sorti de l'appel A DESSEIN : en ligne, il dépassait 100 colonnes et
+        # `ruff-format` éclatait la liste sur huit lignes, déplaçant le marqueur de
+        # la ligne d'ouverture vers la ligne de fermeture — donc hors de portée de
+        # la règle, qui s'ancre sur le début du nœud. Le formateur ne peut plus
+        # séparer le marqueur de ce qu'il couvre.
+        argv = [sys.executable, "-m", "aipmt", "--file", "/source/__inexistant_xyz"]
+        # nosemgrep
+        proc = subprocess.run(  # nosec B603 # nosemgrep — CLI du repo via sys.executable
+            argv,  # nosemgrep
+            cwd=package_root,
             env=env,
             capture_output=True,
             text=True,
