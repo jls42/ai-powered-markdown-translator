@@ -1,0 +1,52 @@
+name: Dependencies
+
+# Vérifie que les fichiers de dépendances SE RÉSOLVENT. Volontairement sans
+# aucun secret, pour que ce job tourne aussi sur les PR ouvertes par Dependabot,
+# que GitHub prive des secrets du dépôt.
+#
+# Raison d'être : le seul job qui exécutait `pip install` était celui de
+# SonarCloud, et c'est lui qui attrapait les bumps de dépendances invalides. En
+# le sautant pour Dependabot — parce qu'il échouait en 403 faute de token — on a
+# supprimé la seule garde qui vérifiait la cohérence du fichier. Une PR
+# proposant un bump incompatible est alors apparue TOUTE VERTE (#17,
+# pydantic_core 2.46.5 → 2.48.0, incompatible avec pydantic==2.13.5), donc
+# mergeable en l'état.
+#
+# Ce job rétablit la garde là où elle a du sens, sans dépendre d'un secret.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    name: Résolution des dépendances
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Résoudre requirements.txt
+        run: |
+          # `--dry-run` résout sans installer : on veut le verdict du solveur,
+          # pas l'environnement. `--quiet` garde la sortie lisible ; l'erreur de
+          # résolution, elle, reste affichée.
+          python -m pip install --upgrade pip
+          python -m pip install --dry-run --quiet -r requirements.txt
+
+      - name: Résoudre requirements-dev.txt
+        run: |
+          # Les deux fichiers cohabitent dans le même environnement : les
+          # résoudre ensemble est le seul test fidèle, un conflit ne se voyant
+          # pas si on les prend séparément.
+          python -m pip install --dry-run --quiet -r requirements.txt -r requirements-dev.txt
