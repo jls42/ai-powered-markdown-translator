@@ -22,7 +22,7 @@
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Linhas de código"></a>
 </p>
 <p align="center">
-  <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="Distintivo Codacy"></a>
+  <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="Badge do Codacy"></a>
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
@@ -32,16 +32,16 @@ Este script Python traduz arquivos Markdown de um idioma de origem para um idiom
 
 ## Principais características
 
-- **Multi-Provider**: Suporte a 4 APIs (OpenAI, Mistral, Claude, Gemini) + a CLI Codex com assinatura ChatGPT
+- **Multi-Provider**: suporte a 4 APIs (OpenAI, Mistral, Claude, Gemini) + o CLI Codex em assinaturas do ChatGPT
 - **Modelos 2026**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
-- **Modo econômico**: Opção `--eco` para usar modelos mais rápidos e baratos
-- **Arquivo único**: Opção `--file` para traduzir um único arquivo
-- **Segmentação inteligente**: Gerenciamento de textos longos com limites de tokens por modelo
-- **Preservação do código**: Os blocos de código E o código inline (`` `...` ``) são preservados
-- **Nome do arquivo**: Opção `--keep_filename` para manter o nome original
-- **Modo News**: Opção `--news` para proteger citações em inglês e gerenciar bandeiras em artigos de notícias
-- **Configuração .env**: Suporte ao arquivo `.env` para chaves de API
-- **Nota de tradução**: Adição opcional de uma nota ao final do documento
+- **Modo econômico**: opção `--eco` para usar modelos mais rápidos e baratos
+- **Arquivo único**: opção `--file` para traduzir um único arquivo
+- **Segmentação inteligente**: gerenciamento de textos longos com limites de tokens por modelo
+- **Preservação de código**: blocos de código E código inline (`` `...` ``) são preservados
+- **Nome do arquivo**: opção `--keep_filename` para manter o nome original
+- **Modo News**: opção `--news` para proteger citações em inglês e gerenciar bandeiras em artigos de notícias
+- **Configuração .env**: suporte ao arquivo `.env` para chaves de API
+- **Nota de tradução**: adição opcional de uma nota ao final do documento
 
 ## Instalação
 
@@ -51,7 +51,7 @@ Este script Python traduz arquivos Markdown de um idioma de origem para um idiom
 pip install ai-powered-markdown-translator
 ```
 
-O comando `aipmt` fica então disponível em qualquer lugar. Se o diretório dos scripts
+O comando `aipmt` ficará disponível em qualquer lugar. Se o diretório dos scripts
 do Python não estiver no seu `PATH`, `python -m aipmt` faz exatamente a mesma
 coisa. Python 3.10 ou mais recente.
 
@@ -73,7 +73,7 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-`requirements.txt` é um **lock totalmente fixado**, um reflexo exato do
+`requirements.txt` é um **lock totalmente fixado**, reflexo exato do
 ambiente testado. Os limites publicados em `pyproject.toml` são
 intencionalmente mais amplos: eles não impõem nada aos seus outros pacotes.
 
@@ -91,23 +91,44 @@ Hooks ativos: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/jso
 
 ## Configuração
 
-Crie um arquivo `.env` **no diretório a partir do qual você executa o
-comando** (ele é procurado nesse local e, depois, nos diretórios pais), ou
-defina as variáveis de ambiente:
+As chaves são procuradas em **três locais**, do mais prioritário ao menos prioritário.
+Cada um apenas preenche o que o anterior deixou vazio.
+
+|     | Onde                                            | Para quê                             |
+| --- | ----------------------------------------------- | ------------------------------------- |
+| 1   | Variáveis de ambiente                           | CI, contêineres, substituição pontual |
+| 2   | `.env` do diretório atual (ou de um pai) | uma chave própria do projeto          |
+| 3   | `~/.config/aipmt/.env`                                  | **instalado uma vez, vale em todo lugar** |
+
+Depois de um `pip install`, a opção mais simples é a terceira:
 
 ```bash
-# Fichier .env (recommandé)
+mkdir -p ~/.config/aipmt
+cat > ~/.config/aipmt/.env <<'EOF'
 OPENAI_API_KEY=votre-clé-api-openai
 XAI_API_KEY=votre-clé-api-xai
 MISTRAL_API_KEY=votre-clé-api-mistral
 ANTHROPIC_API_KEY=votre-clé-api-anthropic
 GOOGLE_API_KEY=votre-clé-api-google
-
-# Ou via export
-export OPENAI_API_KEY='votre-clé-api-openai'
+EOF
+chmod 600 ~/.config/aipmt/.env
 ```
 
-`GEMINI_API_KEY` é aceito como alternativa a `GOOGLE_API_KEY` (convenção AI
+Este arquivo segue `XDG_CONFIG_HOME` quando a variável designa um caminho absoluto
+(caso contrário, ela é ignorada, como prescrito pela especificação), e `%APPDATA%`
+no Windows.
+
+A segunda opção continua sendo útil quando um repositório tem sua própria chave: um `.env` na raiz
+tem precedência sobre a configuração do usuário, sem modificá-la. E uma variável já definida no ambiente tem precedência sobre as duas:
+
+```bash
+export OPENAI_API_KEY='une-clé-le-temps-d-une-commande'
+```
+
+Se nenhuma chave for encontrada, o comando não exibe um rastreamento de chamada: ele
+enumera os três locais com seus caminhos exatos.
+
+`GEMINI_API_KEY` é aceito como alternativa a `GOOGLE_API_KEY` (convenção do AI
 Studio). Variáveis opcionais: `XAI_BASE_URL` (endpoint xAI, padrão
 `https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (segundos por chamada Anthropic, padrão
 900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
@@ -148,11 +169,11 @@ aipmt --use_grok --source_dir 'content/fr' --target_dir 'content/pt' --target_la
 aipmt --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
 ```
 
-### Traduzir usando sua assinatura ChatGPT (`--use_codex`)
+### Traduzir usando sua assinatura do ChatGPT (`--use_codex`)
 
-Este provider não consome nenhuma chave de API: ele controla a CLI Codex oficial em modo
+Este provider não consome nenhuma chave de API: ele controla o CLI Codex oficial em modo
 não interativo; portanto, a tradução é descontada da cota da assinatura
-ChatGPT (Plus, Pro, Business…) já paga. Este é o único caminho documentado pela
+ChatGPT (Plus, Pro, Business…) já paga. Esta é a única forma documentada pela
 OpenAI para esse uso — os tokens de `~/.codex/auth.json` não autenticam
 chamadas à API Platform e, além disso, nunca são lidos por este script.
 
@@ -167,19 +188,19 @@ codex login                        # connexion avec le compte ChatGPT
 ```
 
 O binário é procurado nesta ordem: a variável `CODEX_BIN`, o `PATH`,
-e depois o pacote Python `openai-codex-cli-bin`. Este último não está
-intencionalmente em `requirements.txt`: ele ocupa ~250 MB, o que seria imposto a todos os
-usuários por um provider opcional.
+e depois o pacote Python `openai-codex-cli-bin`. Este último não está intencionalmente
+em `requirements.txt`: ele ocupa cerca de 250 MB, o que seria imposto a todos os
+usuários para um provider opcional.
 
-**É importante saber:**
+**Saiba mais:**
 
 - **Nenhuma chave de API é usada.** `OPENAI_API_KEY` e `CODEX_API_KEY` são
-  removidas do ambiente do subprocesso, garantindo que uma chave presente em
-  `.env` nunca faça a tradução mudar para cobrança por uso.
-- **Um segmento = uma «mensagem local»** da janela de 5 horas do plano.
-  Use `--eco` (modelo `gpt-5.6-luna`, 250–2 000 mensagens/5 h no Plus)
+  removidas do ambiente do subprocesso, garantindo que uma chave presente em `.env`
+  nunca fará a tradução mudar para cobrança conforme o uso.
+- **Um segmento = uma “mensagem local”** da janela de 5 horas do plano.
+  Use `--eco` (modelo `gpt-5.6-luna`, 250–2.000 mensagens/5 h no Plus)
   em vez do modelo de qualidade (`gpt-5.6-sol`, 10–100 mensagens/5 h).
-- **Mais lento** que uma chamada de API: conte ~45 s para um README completo, contra
+- **Mais lento** que uma chamada de API: considere cerca de 45 s para um README completo, contra
   alguns segundos diretamente.
 - **Recusado em CI** (`CI` ou `GITHUB_ACTIONS` definido): a autenticação por
   assinatura não foi projetada para um runner compartilhado, e a OpenAI desaconselha esse
@@ -187,11 +208,11 @@ usuários por um provider opcional.
 - Variáveis de ambiente: `CODEX_BIN` (caminho explícito do binário) e
   `CODEX_TIMEOUT` (segundos por segmento, padrão `600`).
 
-### Traduzir usando sua assinatura Grok (`--use_grok_cli`)
+### Traduzir usando sua assinatura do Grok (`--use_grok_cli`)
 
-O mesmo princípio de `--use_codex`, com a CLI oficial **Grok Build**: a
-tradução é descontada da assinatura Grok (SuperGrok / X Premium+) em vez de
-ser cobrada por token.
+O mesmo princípio de `--use_codex`, com o CLI oficial **Grok Build**:
+a tradução é descontada da assinatura Grok (SuperGrok / X Premium+) em vez
+de ser cobrada por token.
 
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
@@ -199,26 +220,26 @@ grok login                                      # ou `grok login --device-code`
 ```
 
 **Isolamento — leia antes de usar.** Este provider é estruturalmente **mais
-fraco** que `--use_codex`, e isso é assumido:
+fraco** que `--use_codex`, e isso é intencional:
 
 - O Codex é executado em `--sandbox read-only`, uma fronteira imposta pelo sistema.
 - O sandbox do Grok **não pode ser aplicado** em muitos sistemas Linux
   recentes: o AppArmor bloqueia user namespaces não privilegiados desde o Ubuntu
-  24.04, e a deny-list dos sockets de runtime de contêiner falha quando
-  `/run/podman` está em `0700`. Porém, um perfil **integrado** que não pode
-  ser aplicado inicia **sem isolamento, silenciosamente**.
-- Por isso, o script não solicita nenhum perfil por padrão e **nunca recua silenciosamente**:
-  ele exibe um aviso. O isolamento depende das regras `--deny` da CLI (incluindo o catch-all
-  `*`), a única camada medida _fail-closed_ — uma regra desconhecida faz a inicialização
-  ser recusada em vez de remover a proteção sem informar.
+  24.04, e a deny-list dos sockets de runtime de contêiner falha se
+  `/run/podman` estiver em `0700`. Porém, um perfil **integrado** que não pode
+  ser aplicado é iniciado **sem isolamento, silenciosamente**.
+- Portanto, o script não solicita nenhum perfil por padrão e **nunca recorre silenciosamente**
+  a uma alternativa: ele exibe um aviso. O isolamento depende das
+  regras `--deny` do CLI (incluindo o catch-all `*`), a única camada medida
+  _fail-closed_ — uma regra desconhecida faz o início ser recusado, em vez de remover a proteção sem avisar.
 - Para **exigir** o sandbox do sistema operacional: `GROK_TRANSLATE_SANDBOX=read-only`. A
-  inicialização falhará se a máquina não puder respeitá-lo, que é o
+  inicialização falhará se a máquina não puder cumpri-lo, que é o
   comportamento desejado.
 
 **Cota**: o pool do Grok é **semanal e compartilhado** com Chat, Imagine e
-Voice, e nenhum comando permite consultá-lo. Portanto, um processamento em lote pode
-consumir seu uso conversacional sem que nada indique isso — daí a
-concorrência limitada a 2 e um aviso em `regen_translations.sh`.
+Voice, e nenhum comando permite consultá-lo. Um processamento em lote pode, portanto,
+consumir seu uso conversacional sem que nada sinalize isso — daí a concorrência
+limitada a 2 e um aviso em `regen_translations.sh`.
 
 Outras variáveis: `GROK_BIN` (caminho do binário), `GROK_TIMEOUT` (padrão 900 s).
 
@@ -244,49 +265,48 @@ aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Opções
 
-| Opção                   | Descrição                                                              |
+| Opção                    | Descrição                                                              |
 | ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Arquivo Markdown único a ser traduzido                                       |
-| `--source_dir`           | Diretório de origem contendo os arquivos Markdown                        |
-| `--target_dir`           | Diretório de saída dos arquivos traduzidos                          |
-| `--source_lang`          | Idioma de origem (padrão: `fr`)                                             |
-| `--target_lang`          | Idioma de destino (padrão: `en`)                                              |
-| `--model`                | Modelo específico a ser usado                                             |
-| `--eco`                  | Usar modelos econômicos                                         |
-| `--use_mistral`          | Usar a API Mistral AI                                                |
-| `--use_claude`                  | Usar a API Claude                                                    |
-| `--use_gemini`                  | Usar a API Gemini                                                    |
-| `--use_codex`             | Usar a CLI Codex com a cota da assinatura ChatGPT               |
-| `--use_grok`             | Usar a API xAI (Grok) — requer `XAI_API_KEY`                      |
-| `--use_grok_cli`         | Usar a CLI Grok com a cota da assinatura Grok                   |
-| `--force`                | Forçar a retradução                                                  |
-| `--keep_filename`        | Manter o nome original do arquivo                                     |
-| `--news`                 | Modo notícias: protege citações EN e gerencia bandeiras por idioma |
-| `--add_translation_note` | Adicionar uma nota de tradução                                           |
-| `--note_position`        | Posição da nota: `top`, `bottom` (padrão) ou `both`                |
-| `--note_format`          | Formato da nota: `legacy` (padrão, parágrafo em negrito) ou `marker`       |
-| `--include_model`        | Incluir o nome do modelo no arquivo de saída                       |
-| `--reasoning_effort`     | Esforço de raciocínio GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`    |
+| `--file`            | Arquivo Markdown único a ser traduzido                                 |
+| `--source_dir`            | Diretório de origem contendo os arquivos Markdown                       |
+| `--target_dir`            | Diretório de saída para os arquivos traduzidos                         |
+| `--source_lang`            | Idioma de origem (padrão: `fr`)                              |
+| `--target_lang`            | Idioma de destino (padrão: `en`)                             |
+| `--model`            | Modelo específico a ser usado                                          |
+| `--eco`            | Usar os modelos econômicos                                            |
+| `--use_mistral`            | Usar a API Mistral AI                                                   |
+| `--use_claude`            | Usar a API Claude                                                       |
+| `--use_gemini`            | Usar a API Gemini                                                       |
+| `--use_codex`            | Usar o CLI Codex na cota da assinatura ChatGPT                         |
+| `--use_grok`            | Usar a API xAI (Grok) — requer `XAI_API_KEY`                          |
+| `--use_grok_cli`            | Usar o CLI Grok na cota da assinatura Grok                             |
+| `--force`            | Forçar a retradução                                                     |
+| `--keep_filename`            | Manter o nome original do arquivo                                      |
+| `--news`            | Modo notícias: protege citações em EN e gerencia bandeiras por idioma |
+| `--add_translation_note`            | Adicionar uma nota de tradução                                         |
+| `--note_position`            | Posição da nota: `top`, `bottom` (padrão) ou `both` |
+| `--note_format`            | Formato da nota: `legacy` (padrão, parágrafo em negrito) ou `marker` |
+| `--include_model`            | Incluir o nome do modelo no arquivo de saída                            |
+| `--reasoning_effort`            | Esforço de raciocínio GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh` |
 
-> **As seis flags de provider são mutuamente exclusivas.** Combinar duas
-> anteriormente era aceito silenciosamente e resolvia para a primeira testada: uma
-> tradução solicitada usando a cota da assinatura (`--use_codex`, `--use_grok_cli`)
-> poderia assim ser cobrada por uso sem qualquer aviso.
+> **Os seis flags de provider são mutuamente exclusivos.** Antes, combinar dois
+> era aceito silenciosamente e resolvia para o primeiro testado: uma tradução solicitada com cota de assinatura (`--use_codex`, `--use_grok_cli`)
+> podia, assim, ser encaminhada para cobrança conforme o uso sem qualquer aviso.
 > `argparse` agora recusa a combinação.
 
 ### Nota de tradução: posições e formatos
 
-Com `--add_translation_note`, o translator pode colocar a nota no topo, na parte inferior ou em ambos os locais, e renderizá-la em formato de texto simples (retrocompatível) ou no formato `marker` consumível por um plugin Markdown.
+Com `--add_translation_note`, o translator pode posicionar a nota no topo, na parte inferior ou em ambos os locais, e renderizá-la em formato de texto simples (retrocompatível) ou no formato `marker`, consumível por um plugin Markdown.
 
 **Posição** (`--note_position`):
 
 - `bottom` (padrão): nota no final do arquivo, como historicamente.
 - `top`: nota inserida **após o frontmatter YAML** (segurança para Astro Content Collections, gray-matter etc.).
-- `both`: nota inserida no topo E na parte inferior (uma única chamada LLM, conteúdo reutilizado para os dois locais).
+- `both`: nota inserida no topo E na parte inferior (uma única chamada LLM, conteúdo reutilizado para ambas as posições).
 
 **Formato** (`--note_format`):
 
-- `legacy` (padrão): parágrafo em negrito `**...**` — comportamento estritamente idêntico ao da v1.8, byte por byte. Compatível com Hugo, GitHub, GitLab e qualquer renderer Markdown.
+- `legacy` (padrão): parágrafo em negrito `**...**` — comportamento estritamente idêntico ao da v1.8, byte-for-byte. Compatível com Hugo, GitHub, GitLab e qualquer renderer Markdown.
 - `marker`: definição invisível de referência de link Markdown (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) seguida de um blockquote em negrito. Legível nativamente no GitHub/GitLab e utilizável durante o build por um plugin remark no Astro para produzir um banner estilizado (cf. blog jls42.org).
 
 ```bash
@@ -304,15 +324,15 @@ aipmt --file article.mdx --target_lang en \
 
 ### Modelos padrão (2026)
 
-| Provider | Qualidade (padrão)       | Econômico (`--eco`)    |
-| -------- | ---------------------- | ----------------------- |
-| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
-| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
-| Mistral  | `mistral-large-latest` | `mistral-small-latest`  |
-| Gemini   | `gemini-3.7-flash`     | `gemini-3.1-flash-lite` |
-| Codex    | `gpt-5.6-sol`          | `gpt-5.6-luna`          |
-| Grok API | `grok-4.6`             | `grok-4.3`              |
-| Grok CLI | `grok-4.6`             | `grok-4.5`              |
+| Provider | Qualidade (padrão)  | Econômico (`--eco`) |
+| -------- | ------------------- | --------------------------- |
+| OpenAI   | `gpt-5.6-terra`      | `gpt-5.6-luna`              |
+| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`              |
+| Mistral  | `mistral-large-latest`      | `mistral-small-latest`              |
+| Gemini   | `gemini-3.7-flash`      | `gemini-3.1-flash-lite`              |
+| Codex    | `gpt-5.6-sol`      | `gpt-5.6-luna`              |
+| Grok API | `grok-4.6`     | `grok-4.3`              |
+| Grok CLI | `grok-4.6`     | `grok-4.5`              |
 
 > **Recomendação para traduções long-form**: `--use_gemini` (padrão = `gemini-3.7-flash`) preserva fielmente a estrutura Markdown em scripts não latinos (PL, JA, ZH, AR, HI), inclusive no modo `--news`, em que a fidelidade dos placeholders é importante. Medido neste README traduzido para japonês: estrutura idêntica à de `gemini-3.1-pro-preview` (21 listas, 18 blocos de código, 13 links HTML, 13 imagens, todas as URLs preservadas) com cerca de 6 vezes menos latência. OpenAI continua sendo o padrão por compatibilidade retroativa.
 
@@ -327,6 +347,6 @@ E-mail: contact@jls42.org
 
 ## Licença
 
-GNU GENERAL PUBLIC LICENSE Versão 3. Consulte [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
+GNU GENERAL PUBLIC LICENSE Versão 3. Veja [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
 
 **Artigo traduzido do francês para o português com gpt-5.6-luna.**

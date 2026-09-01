@@ -1,6 +1,6 @@
 # AI-Powered Markdown Translator
 
-🌍 [Français](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [English](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Español](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [中文](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [Deutsch](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [日本語](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [한국어](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [العربية](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [हिन्दी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italiano](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Nederlands](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Português](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Română](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Svenska](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
+🌍 [French](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [English](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Spanish](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [Chinese](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [German](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [Japanese](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [Korean](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [Arabic](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [Hindi](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italian](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Dutch](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polish](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Portuguese](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Romanian](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Swedish](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
 
 <h4 align="center">📊 Code Quality</h4>
 
@@ -34,12 +34,12 @@ This Python script translates Markdown files from a source language into a targe
 
 - **Multi-Provider**: Support for 4 APIs (OpenAI, Mistral, Claude, Gemini) + the Codex CLI through a ChatGPT subscription
 - **2026 Models**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
-- **Economic Mode**: `--eco` option to use faster and less expensive models
-- **Single File**: `--file` option to translate a single file
-- **Smart Segmentation**: Handling of long texts with model-specific token limits
+- **Economy Mode**: `--eco` option for using faster and less expensive models
+- **Single File**: `--file` option for translating a single file
+- **Smart Segmentation**: Long-text handling with per-model token limits
 - **Code Preservation**: Code blocks AND inline code (`` `...` ``) are preserved
-- **File Name**: `--keep_filename` option to keep the original name
-- **News Mode**: `--news` option to protect English quotations and handle flags in news articles
+- **File Name**: `--keep_filename` option for keeping the original name
+- **News Mode**: `--news` option for protecting English quotations and handling flags in news articles
 - **.env Configuration**: Support for the `.env` file for API keys
 - **Translation Note**: Optional addition of a note at the end of the document
 
@@ -63,8 +63,8 @@ pipx install ai-powered-markdown-translator
 
 ### To contribute to the project
 
-The cloned repository remains necessary for development: this is where the tests,
-the 28 translations, and all quality tooling live.
+The cloned repository is still required for development: this is where the tests,
+the 28 translations, and all the quality tooling live.
 
 ```bash
 git clone https://github.com/jls42/ai-powered-markdown-translator.git
@@ -73,9 +73,9 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-`requirements.txt` is a **fully pinned lockfile**, an exact reflection of
+`requirements.txt` is a **fully pinned lock file**, an exact reflection of
 the tested environment. The bounds published in `pyproject.toml` are
-intentionally broader: they impose nothing on your other packages.
+intentionally broader: they impose no requirements on your other packages.
 
 ### Quality tooling (optional but recommended)
 
@@ -91,28 +91,50 @@ Active hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/jso
 
 ## Configuration
 
-Create a `.env` file **in the directory from which you run the
-command** (it is searched there, then in parent directories), or
-define the environment variables:
+Keys are searched for in **three locations**, from highest to lowest priority.
+Each one only fills in what the previous one leaves empty.
+
+|     | Where                                            | What for                             |
+| --- | --------------------------------------------- | ------------------------------------- |
+| 1   | Environment variables                     | CI, containers, one-off override |
+| 2   | `.env` in the current directory (or a parent) | a key specific to a project            |
+| 3   | `~/.config/aipmt/.env`                        | **installed once, available everywhere**   |
+
+The simplest option after a `pip install` is the third:
 
 ```bash
-# Fichier .env (recommandé)
+mkdir -p ~/.config/aipmt
+cat > ~/.config/aipmt/.env <<'EOF'
 OPENAI_API_KEY=votre-clé-api-openai
 XAI_API_KEY=votre-clé-api-xai
 MISTRAL_API_KEY=votre-clé-api-mistral
 ANTHROPIC_API_KEY=votre-clé-api-anthropic
 GOOGLE_API_KEY=votre-clé-api-google
-
-# Ou via export
-export OPENAI_API_KEY='votre-clé-api-openai'
+EOF
+chmod 600 ~/.config/aipmt/.env
 ```
+
+This file follows `XDG_CONFIG_HOME` when the variable designates an absolute path
+(otherwise it is ignored, as prescribed by the specification), and `%APPDATA%`
+on Windows.
+
+The second remains useful when a repository has its own key: an `.env` at its root
+then takes precedence over the user configuration without modifying it. And a variable
+already defined in the environment takes precedence over both:
+
+```bash
+export OPENAI_API_KEY='une-clé-le-temps-d-une-commande'
+```
+
+If no key is found, the command does not display a call trace: it
+lists the three locations with their exact paths.
 
 `GEMINI_API_KEY` is accepted as an alternative to `GOOGLE_API_KEY` (AI
 Studio convention). Optional variables: `XAI_BASE_URL` (xAI endpoint, default
 `https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (seconds per Anthropic call, default
 900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
-and `GROK_TRANSLATE_SANDBOX` (see the Grok CLI section). On the
-`regen_translations.sh` side: `REGEN_PROVIDER`, `REGEN_MODEL`, and
+and `GROK_TRANSLATE_SANDBOX` (see the Grok CLI section). For
+`regen_translations.sh`: `REGEN_PROVIDER`, `REGEN_MODEL`, and
 `REGEN_JOB_TIMEOUT` (per-job limit, default 600 s).
 
 ## Usage
@@ -148,14 +170,13 @@ aipmt --use_grok --source_dir 'content/fr' --target_dir 'content/pt' --target_la
 aipmt --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
 ```
 
-### Translate through your ChatGPT subscription (`--use_codex`)
+### Translate using a ChatGPT subscription (`--use_codex`)
 
-This provider consumes no API key: it drives the official Codex CLI in
-non-interactive mode, so translation is deducted from the quota of the
-already-paid ChatGPT subscription (Plus, Pro, Business…). This is the only
-documented route by OpenAI for this use case — `~/.codex/auth.json` tokens do not
-authenticate calls to the Platform API, and are not read by this script
-either.
+This provider consumes no API key: it controls the official Codex CLI in
+non-interactive mode, so the translation is deducted from the quota of the
+already-paid ChatGPT subscription (Plus, Pro, Business…). This is the only route documented by
+OpenAI for this use case — `~/.codex/auth.json` tokens do not authenticate
+calls to the Platform API, and are never read by this script in any case.
 
 **Prerequisites:**
 
@@ -168,56 +189,56 @@ codex login                        # connexion avec le compte ChatGPT
 ```
 
 The binary is searched for in this order: the `CODEX_BIN` variable, the `PATH`,
-then the Python package `openai-codex-cli-bin`. The latter is deliberately
+then the `openai-codex-cli-bin` Python package. The latter is deliberately
 not included in `requirements.txt`: it weighs ~250 MB, which would be imposed on all
 users for an optional provider.
 
-**Things to know:**
+**What to know:**
 
 - **No API key is used.** `OPENAI_API_KEY` and `CODEX_API_KEY` are
   removed from the subprocess environment, ensuring that a key present in
   `.env` can never switch the translation to pay-per-use billing.
-- **One segment = one “local message”** in the plan’s 5-hour window.
+- **One segment = one “local message”** from the plan’s 5-hour window.
   Use `--eco` (model `gpt-5.6-luna`, 250–2,000 messages/5 h on Plus)
   rather than the quality model (`gpt-5.6-sol`, 10–100 messages/5 h).
 - **Slower** than an API call: allow ~45 s for a complete README, compared with
   a few seconds directly.
-- **Rejected in CI** (`CI` or `GITHUB_ACTIONS` defined): subscription
-  authentication is not intended for a shared runner, and OpenAI discourages
-  this workflow on public repositories. Use an API key on this path.
+- **Rejected in CI** (`CI` or `GITHUB_ACTIONS` defined): subscription authentication
+  is not intended for a shared runner, and OpenAI discourages this workflow on public
+  repositories. Use an API key for this path.
 - Environment variables: `CODEX_BIN` (explicit binary path) and
   `CODEX_TIMEOUT` (seconds per segment, default `600`).
 
-### Translate through your Grok subscription (`--use_grok_cli`)
+### Translate using a Grok subscription (`--use_grok_cli`)
 
-The same principle as `--use_codex`, with the official **Grok Build** CLI:
-translation is deducted from the Grok subscription (SuperGrok / X Premium+)
-instead of being billed per token.
+The same principle as `--use_codex`, using the official **Grok Build** CLI:
+the translation is deducted from the Grok subscription (SuperGrok / X Premium+) instead
+of being billed per token.
 
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
 grok login                                      # ou `grok login --device-code`
 ```
 
-**Sandboxing — read before use.** This provider is structurally **weaker
-than `--use_codex`**, and this is intentional:
+**Confinement — read before use.** This provider is structurally **weaker
+than `--use_codex`, and this is intentional:
 
 - Codex runs in `--sandbox read-only`, a boundary imposed by the system.
 - Grok’s sandbox **cannot be applied** on many recent Linux systems:
-  AppArmor blocks unprivileged user namespaces since Ubuntu 24.04, and the
-  container runtime socket deny-list fails if `/run/podman` is in `0700`. Yet an **integrated**
-  profile that cannot be applied starts **unconfined, silently**.
+  AppArmor blocks unprivileged user namespaces starting with Ubuntu 24.04, and the
+  container runtime socket deny-list fails if `/run/podman` is `0700`. Yet an
+  **integrated** profile that cannot be applied starts **unconfined, silently**.
 - The script therefore requests no profile by default, and **never silently
-  falls back**: it displays a warning. Sandboxing relies on the CLI’s
+  falls back**: it displays a warning. Confinement relies on the CLI’s
   `--deny` rules (including the `*` catch-all), the only
-  _fail-closed_ layer that has been measured — an unknown rule causes startup
-  to be refused rather than removing protection without saying so.
-- To **require** the OS sandbox: `GROK_TRANSLATE_SANDBOX=read-only`. Startup will fail if the
-  machine cannot honor it, which is the intended behavior.
+  _fail-closed_ layer measured — an unknown rule causes startup to be refused rather than
+  removing protection without saying so.
+- To **require** the OS sandbox: `GROK_TRANSLATE_SANDBOX=read-only`. Startup
+  will fail if the machine cannot honor it, which is the intended behavior.
 
 **Quota**: the Grok pool is **weekly and shared** with Chat, Imagine, and
-Voice, and no command can read it. A batch job can therefore consume your
-conversational usage without anything indicating it — hence a concurrency
+Voice, and no command allows it to be read. A batch process may therefore consume
+your conversational usage without anything indicating it — hence a concurrency
 limit of 2 and a warning in `regen_translations.sh`.
 
 Other variables: `GROK_BIN` (binary path), `GROK_TIMEOUT` (default 900 s).
@@ -234,7 +255,7 @@ REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
 REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
 ```
 
-### Economic mode
+### Economy mode
 
 Uses faster and less expensive models (gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite):
 
@@ -252,29 +273,31 @@ aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--source_lang`          | Source language (default: `fr`)                                             |
 | `--target_lang`          | Target language (default: `en`)                                              |
 | `--model`                | Specific model to use                                             |
-| `--eco`                  | Use economic models                                         |
+| `--eco`                  | Use economy models                                         |
 | `--use_mistral`          | Use the Mistral AI API                                                |
-| `--use_claude`                  | Use the Claude API                                                    |
-| `--use_gemini`                  | Use the Gemini API                                                    |
+| `--use_claude`           | Use the Claude API                                                    |
+| `--use_gemini`           | Use the Gemini API                                                    |
 | `--use_codex`            | Use the Codex CLI on the ChatGPT subscription quota               |
 | `--use_grok`             | Use the xAI API (Grok) — requires `XAI_API_KEY`                      |
 | `--use_grok_cli`         | Use the Grok CLI on the Grok subscription quota                   |
 | `--force`                | Force retranslation                                                  |
 | `--keep_filename`        | Keep the original file name                                     |
-| `--news`                 | News mode: protects EN quotations, handles flags by language |
+| `--news`                 | News mode: protects EN quotations and handles flags by language |
 | `--add_translation_note` | Add a translation note                                           |
 | `--note_position`        | Note position: `top`, `bottom` (default), or `both`                |
 | `--note_format`          | Note format: `legacy` (default, bold paragraph) or `marker`       |
 | `--include_model`        | Include the model name in the output file                       |
 | `--reasoning_effort`     | GPT-5.x reasoning effort: `none`/`low`/`medium`/`high`/`xhigh`    |
 
-> **The six provider flags are mutually exclusive.** Combining two was previously silently accepted and resolved to the first one tested: a translation requested on subscription quota (`--use_codex`, `--use_grok_cli`)
-> could thus be billed as pay-per-use without any warning.
+> **The six provider flags are mutually exclusive.** Combining two of them
+> used to be silently accepted and resolved to the first one tested: a
+> translation requested on subscription quota (`--use_codex`, `--use_grok_cli`)
+> could thus be billed pay-per-use without any warning.
 > `argparse` now rejects the combination.
 
 ### Translation note: positions and formats
 
-With `--add_translation_note`, the translator can place the note at the top, bottom, or both places, and render it either in plain-text format (backward compatible) or in `marker` format consumable by a Markdown plugin.
+With `--add_translation_note`, the translator can place the note at the top, bottom, or both locations, and render it either in plain text format (backward compatible) or in `marker` format consumable by a Markdown plugin.
 
 **Position** (`--note_position`):
 
@@ -285,7 +308,7 @@ With `--add_translation_note`, the translator can place the note at the top, bot
 **Format** (`--note_format`):
 
 - `legacy` (default): bold paragraph `**...**` — behavior strictly identical to v1.8, byte-for-byte. Compatible with Hugo, GitHub, GitLab, and any Markdown renderer.
-- `marker`: invisible Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a bold blockquote. Natively readable on GitHub/GitLab, and usable at build time by an Astro-side remark plugin to produce a stylized banner (see jls42.org blog).
+- `marker`: invisible Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) followed by a bold blockquote. Natively readable on GitHub/GitLab, and usable at build time by a remark plugin on Astro to produce a styled banner (see the jls42.org blog).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -302,7 +325,7 @@ aipmt --file article.mdx --target_lang en \
 
 ### Default models (2026)
 
-| Provider | Quality (default)       | Economic (`--eco`)    |
+| Provider | Quality (default)       | Economy (`--eco`)    |
 | -------- | ---------------------- | ----------------------- |
 | OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
 | Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
@@ -312,7 +335,7 @@ aipmt --file article.mdx --target_lang en \
 | Grok API | `grok-4.6`             | `grok-4.3`              |
 | Grok CLI | `grok-4.6`             | `grok-4.5`              |
 
-> **Long-form translation recommendation**: `--use_gemini` (default = `gemini-3.7-flash`) faithfully preserves Markdown structure for non-Latin scripts (PL, JA, ZH, AR, HI), including in `--news` mode where placeholder fidelity matters. Measured on this README translated into Japanese: structure identical to `gemini-3.1-pro-preview` (21 lists, 18 code blocks, 13 HTML links, 13 images, all URLs preserved) with ~6x less latency. OpenAI remains the default for backward compatibility.
+> **Recommendation for long-form translations**: `--use_gemini` (default = `gemini-3.7-flash`) faithfully preserves Markdown structure for non-Latin scripts (PL, JA, ZH, AR, HI), including in `--news` mode where placeholder fidelity matters. Measured on this README translated into Japanese: structure identical to `gemini-3.1-pro-preview` (21 lists, 18 code blocks, 13 HTML links, 13 images, all URLs preserved) with ~6x less latency. OpenAI remains the default for backward compatibility.
 
 ## Projects using this script
 
