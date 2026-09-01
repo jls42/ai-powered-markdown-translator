@@ -138,7 +138,7 @@ class TestMissingKeyMessageIsActionable(unittest.TestCase):
 
     def test_every_provider_message_shows_the_user_config_path(self) -> None:
         """Aucun provider ne doit garder l'ancien message tronqué."""
-        args = type("Args", (), {"model": None, "eco": True})
+        Args = type("Args", (), {"model": None, "eco": True})
         initialisers = (
             translate._init_openai_client,
             translate._init_claude_client,
@@ -159,12 +159,17 @@ class TestMissingKeyMessageIsActionable(unittest.TestCase):
         )
         without_keys = {k: v for k, v in os.environ.items() if k not in key_vars}
         for initialiser in initialisers:
+            # Instance construite HORS du bloc `assertRaises` : deux appels
+            # susceptibles de lever à l'intérieur, et le test passerait pour la
+            # mauvaise raison si c'était la construction qui échouait. Une
+            # instance neuve par provider, parce que `_init_*` écrit args.model.
+            provider_args = Args()
             with (
                 self.subTest(initialiser.__name__),
                 patch.dict(os.environ, without_keys, clear=True),
             ):
                 with self.assertRaises(ValueError) as raised:
-                    initialiser(args())
+                    initialiser(provider_args)
                 self.assertIn(translate._user_config_path(), str(raised.exception))
 
 
