@@ -91,21 +91,43 @@ Hooks actifs : ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/js
 
 ## Configuration
 
-Créez un fichier `.env` **dans le répertoire depuis lequel vous lancez la
-commande** (il est cherché là, puis dans les répertoires parents), ou
-définissez les variables d'environnement :
+Les clés sont cherchées à **trois endroits**, du plus prioritaire au moindre.
+Chacun ne fait que combler ce que le précédent laisse vide.
+
+|     | Où                                            | Pour quoi                             |
+| --- | --------------------------------------------- | ------------------------------------- |
+| 1   | Variables d'environnement                     | CI, conteneurs, dérogation ponctuelle |
+| 2   | `.env` du répertoire courant (ou d'un parent) | une clé propre à un projet            |
+| 3   | `~/.config/aipmt/.env`                        | **installé une fois, vaut partout**   |
+
+Le plus simple après un `pip install` est le troisième :
 
 ```bash
-# Fichier .env (recommandé)
+mkdir -p ~/.config/aipmt
+cat > ~/.config/aipmt/.env <<'EOF'
 OPENAI_API_KEY=votre-clé-api-openai
 XAI_API_KEY=votre-clé-api-xai
 MISTRAL_API_KEY=votre-clé-api-mistral
 ANTHROPIC_API_KEY=votre-clé-api-anthropic
 GOOGLE_API_KEY=votre-clé-api-google
-
-# Ou via export
-export OPENAI_API_KEY='votre-clé-api-openai'
+EOF
+chmod 600 ~/.config/aipmt/.env
 ```
+
+Ce fichier suit `XDG_CONFIG_HOME` quand la variable désigne un chemin absolu
+(sinon elle est ignorée, comme le prescrit la spécification), et `%APPDATA%`
+sous Windows.
+
+Le second reste utile quand un dépôt a sa propre clé : un `.env` à sa racine
+l'emporte alors sur la configuration utilisateur, sans la modifier. Et une
+variable déjà définie dans l'environnement l'emporte sur les deux :
+
+```bash
+export OPENAI_API_KEY='une-clé-le-temps-d-une-commande'
+```
+
+Si aucune clé n'est trouvée, la commande n'affiche pas de trace d'appel : elle
+énumère les trois emplacements avec leur chemin exact.
 
 `GEMINI_API_KEY` est accepté comme alternative à `GOOGLE_API_KEY` (convention AI
 Studio). Variables optionnelles : `XAI_BASE_URL` (endpoint xAI, défaut

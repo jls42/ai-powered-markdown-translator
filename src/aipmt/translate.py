@@ -28,12 +28,56 @@ from openai import BadRequestError, OpenAI
 # Détection de langue déterministe (évite les variations entre runs sur des textes courts)
 DetectorFactory.seed = 0
 
-# `usecwd=True` : sans lui, `find_dotenv` remonte depuis le fichier appelant —
-# donc depuis site-packages une fois l'outil installé — et ignore en silence le
-# `.env` du répertoire de travail. Mesuré sur un point d'entrée console réel :
-# `find_dotenv()` renvoie '' là où `find_dotenv(usecwd=True)` trouve le fichier.
-# Depuis le dépôt cloné, les deux formes donnent le même résultat.
-load_dotenv(find_dotenv(usecwd=True))
+
+def _user_config_path():
+    """Fichier de configuration utilisateur, à l'emplacement conventionnel de l'OS.
+
+    C'est la couche « installé une fois, marche partout » : sans elle, une CLI
+    installée n'a que la variable d'environnement et le `.env` du répertoire
+    courant — donc rien de persistant hors d'un projet donné.
+
+    `find_dotenv` remonte certes jusqu'à la racine du système et trouverait un
+    `~/.env` quand on travaille sous son répertoire personnel — mais pas quand
+    on travaille ailleurs. Cette couverture accidentelle dépend de l'endroit
+    d'où l'on lance la commande ; celle-ci n'en dépend pas.
+    """
+    if os.name == "nt":
+        base = os.getenv("APPDATA") or os.path.join(os.path.expanduser("~"), "AppData", "Roaming")
+    else:
+        # La spécification XDG impose un chemin ABSOLU et demande d'ignorer la
+        # variable sinon. Sans ce contrôle, un `XDG_CONFIG_HOME` relatif ferait
+        # dépendre l'emplacement de la configuration du répertoire courant —
+        # exactement le défaut qu'on corrige ici.
+        base = os.getenv("XDG_CONFIG_HOME") or ""
+        if not os.path.isabs(base):
+            base = os.path.join(os.path.expanduser("~"), ".config")
+    return os.path.join(base, "aipmt", ".env")
+
+
+def _load_configuration():
+    """Charge les clés selon TROIS couches, de la plus prioritaire à la moindre.
+
+    1. variables d'environnement déjà définies — CI, conteneurs, override ponctuel
+    2. `.env` du projet, cherché depuis le répertoire courant puis les parents
+    3. `_user_config_path()`, la configuration utilisateur persistante
+
+    La priorité n'est pas codée : elle découle de `override=False`, valeur par
+    défaut de `load_dotenv`, qui ne remplace jamais une variable déjà définie.
+    Chaque couche ne fait donc que combler ce que la précédente a laissé vide.
+
+    `usecwd=True` est indispensable à la couche 2 : sans lui, `find_dotenv`
+    remonte depuis le fichier APPELANT — donc depuis site-packages une fois
+    l'outil installé — et ignore en silence le `.env` du répertoire de travail.
+    Mesuré sur un point d'entrée console réel : `find_dotenv()` renvoie `''` là
+    où `find_dotenv(usecwd=True)` trouve le fichier. Depuis le dépôt cloné, les
+    deux formes donnent le même résultat, ce qui explique que le défaut soit
+    resté invisible tant que l'outil n'était pas installable.
+    """
+    load_dotenv(find_dotenv(usecwd=True))
+    load_dotenv(_user_config_path())
+
+
+_load_configuration()
 
 EXCLUDE_PATTERNS = ["traductions_", "venv", "PRIVACY.md"]
 
@@ -3068,13 +3112,31 @@ def _validate_input_paths(args):
         os.makedirs(args.target_dir)  # NOSONAR
 
 
+def _missing_key_message(provider, variables, hint=""):
+    """Message d'absence de clé qui dit OÙ mettre la clé, chemin exact compris.
+
+    Le message précédent — « Définir X dans l'environnement ou .env » — était
+    exact et inexploitable : quelqu'un qui vient d'installer l'outil n'a ni
+    l'un ni l'autre, et rien ne lui disait où créer le second ni qu'une
+    configuration utilisateur existait. Une erreur de configuration doit
+    montrer l'emplacement, pas le nommer.
+    """
+    names = " ou ".join(variables)
+    return (
+        f"Clé API {provider} non spécifiée.{hint}\n"
+        f"Définir {names} à l'un de ces trois endroits, du plus prioritaire au moindre :\n"
+        f"  1. variable d'environnement  →  export {variables[0]}=votre-cle\n"
+        f"  2. .env du projet            →  {os.path.join(os.getcwd(), '.env')}\n"
+        f"  3. configuration utilisateur →  {_user_config_path()}\n"
+        f"     (vaut pour toutes vos sessions ; créer le répertoire si besoin)"
+    )
+
+
 def _init_mistral_client(args):
     args.model = args.model or (ECO_MODEL_MISTRAL if args.eco else DEFAULT_MODEL_MISTRAL)
     api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
     if not api_key or api_key == DEFAULT_MISTRAL_API_KEY:
-        raise ValueError(
-            "Clé API Mistral non spécifiée. Définir MISTRAL_API_KEY dans l'environnement ou .env."
-        )
+        raise ValueError(_missing_key_message("Mistral", ["MISTRAL_API_KEY"]))
     return Mistral(api_key=api_key)
 
 
@@ -3082,9 +3144,7 @@ def _init_claude_client(args):
     args.model = args.model or (ECO_MODEL_CLAUDE if args.eco else DEFAULT_MODEL_CLAUDE)
     api_key = os.getenv("ANTHROPIC_API_KEY", DEFAULT_ANTHROPIC_API_KEY)
     if not api_key or api_key == DEFAULT_ANTHROPIC_API_KEY:
-        raise ValueError(
-            "Clé API Claude non spécifiée. Définir ANTHROPIC_API_KEY dans l'environnement ou .env."
-        )
+        raise ValueError(_missing_key_message("Claude", ["ANTHROPIC_API_KEY"]))
     return anthropic.Anthropic(api_key=api_key)
 
 
@@ -3095,10 +3155,7 @@ def _init_gemini_client(args):
     # explicitement pour conserver la garde sur la valeur placeholder.
     api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or DEFAULT_GEMINI_API_KEY
     if not api_key or api_key == DEFAULT_GEMINI_API_KEY:
-        raise ValueError(
-            "Clé API Gemini non spécifiée. Définir GOOGLE_API_KEY ou "
-            "GEMINI_API_KEY dans l'environnement ou .env."
-        )
+        raise ValueError(_missing_key_message("Gemini", ["GOOGLE_API_KEY", "GEMINI_API_KEY"]))
     return genai.Client(api_key=api_key)
 
 
@@ -3106,9 +3163,7 @@ def _init_openai_client(args):
     args.model = args.model or (ECO_MODEL_OPENAI if args.eco else DEFAULT_MODEL_OPENAI)
     openai_api_key = os.getenv("OPENAI_API_KEY", DEFAULT_OPENAI_API_KEY)
     if not openai_api_key or openai_api_key == DEFAULT_OPENAI_API_KEY:
-        raise ValueError(
-            "Clé API OpenAI non spécifiée. Définir OPENAI_API_KEY dans l'environnement ou .env."
-        )
+        raise ValueError(_missing_key_message("OpenAI", ["OPENAI_API_KEY"]))
     return OpenAI(api_key=openai_api_key)
 
 
@@ -3202,8 +3257,7 @@ def _init_grok_client(args):
     api_key = os.getenv("XAI_API_KEY", DEFAULT_XAI_API_KEY)
     if not api_key or api_key == DEFAULT_XAI_API_KEY:
         raise ValueError(
-            "Clé API xAI non spécifiée. Définir XAI_API_KEY dans l'environnement "
-            "ou .env (clé obtenue sur console.x.ai)."
+            _missing_key_message("xAI", ["XAI_API_KEY"], hint=" Clé à obtenir sur console.x.ai.")
         )
     return OpenAI(api_key=api_key, base_url=os.getenv("XAI_BASE_URL", XAI_BASE_URL))
 
@@ -3377,8 +3431,21 @@ def _run_directory(args, client):
 def main():
     """Entrée CLI : exit(1) si au moins un fichier a échoué, exit(0) sinon."""
     args = _build_arg_parser().parse_args()
-    _validate_input_paths(args)
-    client = _select_provider_client(args)
+    # `ValueError` EXCLUSIVEMENT, et seulement sur la phase de CONFIGURATION.
+    # Une clé absente ou un chemin invalide sont des erreurs d'utilisation :
+    # elles méritent un message, pas une trace d'appel pointant vers
+    # site-packages, où l'utilisateur n'a rien à faire.
+    #
+    # Le périmètre est étroit à dessein. Envelopper toute l'exécution
+    # transformerait un vrai bug survenu pendant la traduction en message
+    # rassurant — précisément le mode de défaillance que ce dépôt traque. Tout
+    # ce qui n'est pas une ValueError de configuration garde sa trace complète.
+    try:
+        _validate_input_paths(args)
+        client = _select_provider_client(args)
+    except ValueError as err:
+        print(f"✗ {err}", file=sys.stderr)
+        sys.exit(2)
 
     if args.model not in MODEL_TOKEN_LIMITS:
         print(

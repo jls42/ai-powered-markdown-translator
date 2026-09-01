@@ -372,6 +372,30 @@ Contenu de `src/aipmt/translate.py` :
 
 ## Environment Variables
 
+Les clés sont résolues en **trois couches**, de la plus prioritaire à la moindre :
+variable d'environnement → `.env` du répertoire courant (ou d'un parent) →
+`~/.config/aipmt/.env`. La priorité n'est pas codée : elle découle de
+`override=False`, valeur par défaut de `load_dotenv`, chaque couche ne comblant
+que ce que la précédente a laissé vide (`_load_configuration`).
+
+La troisième couche existe parce qu'une CLI installée n'en avait aucune de
+persistante. `find_dotenv` remonte jusqu'à la racine du système et trouvait donc
+un `~/.env` **quand on travaillait sous son répertoire personnel**, mais rien
+ailleurs — une couverture qui dépendait de l'endroit d'où l'on lançait la
+commande. `_user_config_path()` suit `XDG_CONFIG_HOME` s'il est ABSOLU (la
+spécification demande d'ignorer une valeur relative, sans quoi l'emplacement
+redeviendrait fonction du répertoire courant) et `APPDATA` sous Windows.
+
+Le trousseau système (`keyring`) a été écarté comme défaut : il échoue en
+headless — serveur, conteneur, CI — c'est-à-dire le cas d'usage même d'une
+traduction par lot. Un flag `--api-key` l'a été aussi : la clé atterrirait dans
+l'historique du shell et serait visible dans `ps`.
+
+Sans clé, `main()` n'affiche plus de trace d'appel. Le filet est **étroit à
+dessein** : `except ValueError` sur la seule phase de configuration. Envelopper
+toute l'exécution transformerait un vrai bug survenu pendant la traduction en
+message rassurant, exactement le mode de défaillance que ce dépôt traque.
+
 Required API keys (set one based on which API you use). Use `.env` file or export:
 
 - `OPENAI_API_KEY`
@@ -384,7 +408,8 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
 `GROK_TRANSLATE_SANDBOX`, `REGEN_PROVIDER`, `REGEN_MODEL`,
-`REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen).
+`REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen),
+`XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
 
 ## Recommended Usage
 
