@@ -336,7 +336,7 @@ traîner un jeu de 14 CHANGELOG sur un quart d'heure.
 
 ## Project Overview
 
-AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), and Google Gemini APIs to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
+AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex) and Grok subscription CLIs, with no per-use billing — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
 
 ## Commands
 
