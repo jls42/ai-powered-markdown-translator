@@ -12,7 +12,7 @@ name = "ai-powered-markdown-translator"
 # déplacerait la logique dans un endroit qu'aucun gate n'exerce ; ici, la
 # cohérence des deux est vérifiée par check-release-ready.sh. L'enjeu est
 # irréversible — PyPI n'autorise pas la réutilisation d'un numéro de version.
-version = "1.11.0"
+version = "1.11.1"
 description = "Traduit des fichiers Markdown avec OpenAI, Claude, Mistral, Gemini, Grok ou Codex, en préservant la mise en forme, les blocs de code et le front matter."
 readme = "README.md"
 # 3.10 et non 3.12 : aucune syntaxe postérieure à PEP 604 dans le module
