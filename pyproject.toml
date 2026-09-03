@@ -1,3 +1,79 @@
+[build-system]
+# setuptools >= 77 pour l'expression SPDX de `license` (PEP 639). Le venv de
+# Python 3.12 n'embarque plus setuptools : `python -m build` l'installe dans son
+# environnement isolé à partir d'ici.
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-powered-markdown-translator"
+# Version LITTÉRALE et non `dynamic` : la source de vérité reste CHANGELOG.md,
+# dont release.sh extrait le numéro. Un hook de build qui lirait le CHANGELOG
+# déplacerait la logique dans un endroit qu'aucun gate n'exerce ; ici, la
+# cohérence des deux est vérifiée par check-release-ready.sh. L'enjeu est
+# irréversible — PyPI n'autorise pas la réutilisation d'un numéro de version.
+version = "1.11.0"
+description = "Traduit des fichiers Markdown avec OpenAI, Claude, Mistral, Gemini, Grok ou Codex, en préservant la mise en forme, les blocs de code et le front matter."
+readme = "README.md"
+# 3.10 et non 3.12 : aucune syntaxe postérieure à PEP 604 dans le module
+# (vérifié : ni match/case, ni except*, ni tomllib, ni type X =), et aucun des
+# 41 paquets épinglés n'exige plus que 3.10 (interrogation de leur
+# `requires_python` sur PyPI). Ce poste n'ayant que 3.12, la promesse est
+# mesurée par la matrice de .github/workflows/tests.yml — pas déduite.
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [{ name = "Julien LS" }]
+keywords = ["markdown", "translation", "openai", "anthropic", "mistral", "gemini", "grok", "i18n", "cli"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: French",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Localization",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+# Bornes BASSES uniquement, et surtout AUCUN plafond. requirements.txt reste le
+# lock testé ; ceci est le contrat public, et imposer les versions exactes du
+# lock provoquerait des conflits chez tout utilisateur ayant d'autres paquets.
+#
+# Pas de `<N+1` non plus : un plafond entrerait en contradiction frontale avec
+# scripts/check-deps-fresh.sh, qui fait ÉCHOUER le gate de release sur tout
+# retard de majeure. Publier `openai<2` reviendrait à déclarer publiquement une
+# contrainte que le projet s'interdit à lui-même.
+#
+# Planchers validés ensemble : résolution pip, construction réelle des quatre
+# clients SDK, puis suite de tests. Contre-épreuve `openai==1.0.0` →
+# ResolutionImpossible, ce qui prouve que le jeu discrimine.
+#
+# certifi n'y figure pas : il n'est pas importé, il arrive par les SDK. Il reste
+# surveillé par check-deps-fresh.sh, où l'enjeu est le magasin de CA.
+dependencies = [
+    "openai>=1.58.1",
+    "anthropic>=0.47.0",
+    "mistralai>=2.0.0",
+    "google-genai>=1.51.0",
+    "langdetect>=1.0.9",
+    "python-dotenv>=1.2.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/jls42/ai-powered-markdown-translator"
+Repository = "https://github.com/jls42/ai-powered-markdown-translator"
+Changelog = "https://github.com/jls42/ai-powered-markdown-translator/blob/main/CHANGELOG.md"
+Issues = "https://github.com/jls42/ai-powered-markdown-translator/issues"
+
+[project.scripts]
+aipmt = "aipmt:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.ruff]
 target-version = "py312"
 line-length = 100

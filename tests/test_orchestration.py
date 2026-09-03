@@ -1,4 +1,4 @@
-"""Couverture supplémentaire de la couche orchestration de translate.py.
+"""Couverture supplémentaire de la couche orchestration de aipmt.translate.
 
 Ces tests ciblent volontairement les helpers et branches non exercés par
 test_silent_failure.py : provider init, sélection client, validation des
@@ -17,10 +17,11 @@ import unittest
 from argparse import Namespace
 from unittest.mock import MagicMock, patch
 
-# Permet d'importer translate.py depuis le parent
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
+# l'arbre source, et une erreur d'empaquetage devient visible.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-import translate
+from aipmt import translate
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -91,7 +92,8 @@ class TestValidateTranslationOutputShortCircuits(unittest.TestCase):
         # Sortie >= 100 chars pour atteindre la couche langdetect.
         translated = "1234567890" * 12  # 120 chars de chiffres → langdetect lève
         with patch(
-            "translate.detect_langs", side_effect=translate.LangDetectException(0, "no features")
+            "aipmt.translate.detect_langs",
+            side_effect=translate.LangDetectException(0, "no features"),
         ):
             translate._validate_translation_output("Source longue.", translated, args, False)
 
@@ -461,14 +463,17 @@ class TestProviderClientInit(unittest.TestCase):
         args = _base_args()
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
-            patch("translate.Mistral") as mock_cls,
+            patch("aipmt.translate.Mistral") as mock_cls,
         ):
             client = translate._init_mistral_client(args)
             mock_cls.assert_called_once_with(api_key=_FAKE_MISTRAL_ENV["MISTRAL_API_KEY"])
             self.assertIs(client, mock_cls.return_value)
         # eco override applique aussi le modèle économique
         args2 = _base_args(eco=True, model=None)
-        with patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True), patch("translate.Mistral"):
+        with (
+            patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
+            patch("aipmt.translate.Mistral"),
+        ):
             translate._init_mistral_client(args2)
         self.assertEqual(args2.model, translate.ECO_MODEL_MISTRAL)
 
@@ -481,7 +486,7 @@ class TestProviderClientInit(unittest.TestCase):
         args = _base_args(model=None)
         with (
             patch.dict(os.environ, _FAKE_CLAUDE_ENV, clear=True),
-            patch("translate.anthropic") as mock_anthropic,
+            patch("aipmt.translate.anthropic") as mock_anthropic,
         ):
             translate._init_claude_client(args)
             mock_anthropic.Anthropic.assert_called_once_with(
@@ -500,7 +505,7 @@ class TestProviderClientInit(unittest.TestCase):
         args = _base_args(model=None, eco=True)
         with (
             patch.dict(os.environ, gemini_env, clear=True),
-            patch("translate.genai") as mock_genai,
+            patch("aipmt.translate.genai") as mock_genai,
         ):
             translate._init_gemini_client(args)
             mock_genai.Client.assert_called_once_with(api_key=gemini_env["GEMINI_API_KEY"])
@@ -522,7 +527,7 @@ class TestProviderClientInit(unittest.TestCase):
         args = _base_args(model=None)
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV, clear=True),
-            patch("translate.OpenAI") as mock_cls,
+            patch("aipmt.translate.OpenAI") as mock_cls,
         ):
             translate._init_openai_client(args)
             mock_cls.assert_called_once_with(api_key=_FAKE_OPENAI_ENV["OPENAI_API_KEY"])
@@ -536,7 +541,7 @@ class TestSelectProviderClient(unittest.TestCase):
         args = _base_args(use_mistral=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
-            patch("translate.Mistral") as mock_cls,
+            patch("aipmt.translate.Mistral") as mock_cls,
         ):
             translate._select_provider_client(args)
             mock_cls.assert_called_once()
@@ -545,7 +550,7 @@ class TestSelectProviderClient(unittest.TestCase):
         args = _base_args(use_claude=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_CLAUDE_ENV, clear=True),
-            patch("translate.anthropic") as mock_anthropic,
+            patch("aipmt.translate.anthropic") as mock_anthropic,
         ):
             translate._select_provider_client(args)
             mock_anthropic.Anthropic.assert_called_once()
@@ -554,7 +559,7 @@ class TestSelectProviderClient(unittest.TestCase):
         args = _base_args(use_gemini=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_GEMINI_ENV, clear=True),
-            patch("translate.genai") as mock_genai,
+            patch("aipmt.translate.genai") as mock_genai,
         ):
             translate._select_provider_client(args)
             mock_genai.Client.assert_called_once()
@@ -563,7 +568,7 @@ class TestSelectProviderClient(unittest.TestCase):
         args = _base_args(model=None)
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV, clear=True),
-            patch("translate.OpenAI") as mock_cls,
+            patch("aipmt.translate.OpenAI") as mock_cls,
         ):
             translate._select_provider_client(args)
             mock_cls.assert_called_once()
@@ -735,26 +740,26 @@ class TestRunSingleAndDirectory(unittest.TestCase):
 
     def test_run_single_file_failure_listed(self):
         args = _base_args(file="/source/foo.md", target_dir="/dest")
-        with patch("translate.translate_markdown_file", return_value="failure"):
+        with patch("aipmt.translate.translate_markdown_file", return_value="failure"):
             failed = translate._run_single_file(args, MagicMock())
         self.assertEqual(failed, ["/source/foo.md"])
 
     def test_run_single_file_success_empty(self):
         args = _base_args(file="/source/foo.md", target_dir="/dest")
-        with patch("translate.translate_markdown_file", return_value="success"):
+        with patch("aipmt.translate.translate_markdown_file", return_value="success"):
             failed = translate._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
 
     def test_run_single_file_skipped_empty(self):
         args = _base_args(file="/source/foo.md", target_dir="/dest")
-        with patch("translate.translate_markdown_file", return_value="skipped"):
+        with patch("aipmt.translate.translate_markdown_file", return_value="skipped"):
             failed = translate._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
 
     def test_run_directory_dict_with_failed(self):
         args = _base_args(source_dir="/source/src", target_dir="/source/dst")
         with patch(
-            "translate.translate_directory",
+            "aipmt.translate.translate_directory",
             return_value={"failed": ["a.md"], "skipped": []},
         ):
             self.assertEqual(translate._run_directory(args, MagicMock()), ["a.md"])
@@ -763,7 +768,7 @@ class TestRunSingleAndDirectory(unittest.TestCase):
         """Default-fail : si translate_directory renvoie une dict mal formée
         (sans clé 'failed'), on traite comme un échec."""
         args = _base_args(source_dir="/source/src", target_dir="/source/dst")
-        with patch("translate.translate_directory", return_value={"oops": []}):
+        with patch("aipmt.translate.translate_directory", return_value={"oops": []}):
             failed = translate._run_directory(args, MagicMock())
         self.assertTrue(failed)
 
@@ -774,14 +779,14 @@ class TestMainModelWarning(unittest.TestCase):
     def test_unknown_model_prints_warning(self):
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV),
-            patch("translate.translate_markdown_file", return_value="success"),
-            patch("translate.OpenAI"),
+            patch("aipmt.translate.translate_markdown_file", return_value="success"),
+            patch("aipmt.translate.OpenAI"),
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
                 "sys.argv",
                 [
-                    "translate.py",
+                    "aipmt",
                     "--file",
                     "/source/fake.md",
                     "--target_dir",
@@ -804,14 +809,16 @@ class TestMainCleansUpMistralClient(unittest.TestCase):
     def test_mistral_branch_executes_del(self):
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV),
-            patch("translate.translate_directory", return_value={"failed": [], "skipped": []}),
-            patch("translate.Mistral"),
+            patch(
+                "aipmt.translate.translate_directory", return_value={"failed": [], "skipped": []}
+            ),
+            patch("aipmt.translate.Mistral"),
             patch("os.path.isdir", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
                 "sys.argv",
                 [
-                    "translate.py",
+                    "aipmt",
                     "--use_mistral",
                     "--source_dir",
                     "/source/src",
@@ -829,14 +836,30 @@ class TestModuleEntrypoint(unittest.TestCase):
     le script avec une invocation rapide qui sort en erreur (validation paths)."""
 
     def test_module_entrypoint_invokes_main(self):
-        import subprocess  # nosec B404 — test exécute translate.py CLI
+        import subprocess  # nosec B404 — test exécute la CLI aipmt
 
-        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        # `src/` et non la racine : `python -m aipmt` a besoin que le paquet soit
+        # importable, et c'est le cwd que Python ajoute à sys.path.
+        package_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
         env = os.environ.copy()
         env["OPENAI_API_KEY"] = "fixture-openai-key-not-placeholder"  # pragma: allowlist secret
-        proc = subprocess.run(  # nosec B603 — test exécute translate.py du repo via sys.executable
-            [sys.executable, "translate.py", "--file", "/source/__inexistant_xyz_orchestration"],
-            cwd=repo_root,
+        # Trois marqueurs `nosemgrep`, comme dans scripts/tests/test_release_flags.py :
+        # les deux règles de la famille `dangerous-subprocess-use` s'ancrent sur des
+        # lignes différentes — l'une sur l'appel, l'autre sur l'argument — et un
+        # marqueur ne vaut que pour sa ligne ou celle qui la précède immédiatement.
+        # L'appel est sûr : forme liste, jamais `shell=True`, et le seul élément non
+        # littéral est `sys.executable`. Le SAST local ne le voyait pas (il exclut
+        # `*test*`) ; Codacy, lui, scanne tout.
+        # argv sorti de l'appel A DESSEIN : en ligne, il dépassait 100 colonnes et
+        # `ruff-format` éclatait la liste sur huit lignes, déplaçant le marqueur de
+        # la ligne d'ouverture vers la ligne de fermeture — donc hors de portée de
+        # la règle, qui s'ancre sur le début du nœud. Le formateur ne peut plus
+        # séparer le marqueur de ce qu'il couvre.
+        argv = [sys.executable, "-m", "aipmt", "--file", "/source/__inexistant_xyz"]
+        # nosemgrep
+        proc = subprocess.run(  # nosec B603 # nosemgrep — CLI du repo via sys.executable
+            argv,  # nosemgrep
+            cwd=package_root,
             env=env,
             capture_output=True,
             text=True,

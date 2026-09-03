@@ -80,7 +80,7 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-commit]
-        files: ^(translate|scripts/.*|tests/.*)\.py$
+        files: ^(src/.*|scripts/.*|tests/.*)\.py$
 
       # mypy lax au démarrage (filet de sécurité progressif)
       - id: mypy
@@ -92,7 +92,7 @@ repos:
 
       # SAST scan via Opengrep. ~30s, pre-push uniquement. Skip si opengrep absent.
       - id: check-security-sast
-        name: Opengrep SAST scan (translate.py + scripts/)
+        name: Opengrep SAST scan (src/ + scripts/)
         entry: scripts/check-security-sast.sh
         language: system
         pass_filenames: false

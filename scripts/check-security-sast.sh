@@ -3,7 +3,7 @@
 # Couvre SSRF, injection de commandes, secrets hardcodés, path traversal,
 # désérialisation non sûre, etc.
 #
-# Scope : translate.py + scripts/ (le code Python qui fait des appels externes).
+# Scope : src/ + scripts/ (le code Python qui fait des appels externes).
 # Severity : ERROR uniquement. Configs : security-audit + default + python.
 #
 # Si opengrep n'est pas dans le PATH, le hook se dégrade gracieusement
@@ -44,4 +44,4 @@ exec opengrep scan \
   --exclude=traductions_ \
   --exclude=tests/fixtures \
   --exclude='*test*' \
-  translate.py scripts/
+  src/ scripts/

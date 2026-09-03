@@ -64,7 +64,7 @@ reprendre la tâche jusqu'à ce que le script passe au vert.
          | python3 -c "import json,sys; d=json.load(sys.stdin); print('total:', d.get('total', 0)); [print(f\"  [{i['severity']}] {i['type']} {i['rule']} {i['component'].split(':')[-1]}:{i.get('line','?')} - {i['message']}\") for i in d.get('issues', [])]"
        ```
        Délai d'indexation Sonar : ~60-90s après le push (ré-exécuter si `total` reflète encore l'ancien commit).
-     - `translate.py` est temporairement exclu du gate Lizard local (CCN > 12 sur 4 fonctions, refactor planifié) — mais SonarCloud le scanne quand même côté serveur. Une régression CCN sur translate.py sera signalée par Sonar pas par le pre-push.
+     - Le gate Lizard local couvre `src/` et `scripts/`, et son scope est désormais fail-closed : un chemin absent fait échouer le script au lieu d'être ignoré en silence (`lizard` sort en 0 en annonçant « 0 file analyzed »).
      - **`ruff-format` peut fusionner deux f-strings adjacents sur une seule ligne**, ce qui crée une concaténation implicite que Sonar S5799 (`Merge these implicitly concatenated strings; or did you forget a comma?`) flag comme Code Smell Major. Préférer une seule f-string au lieu de deux f-strings sur des lignes séparées si le contenu peut tenir sous la limite de longueur.
      - detect-secrets régénère parfois `.secrets.baseline` en pre-commit ; bien `git add` la baseline AVANT le commit suivant (sinon le pre-commit hook re-mute la baseline en boucle).
      - Hooks pre-push lents (~30s mypy + 5s SAST + 10s pip-audit + tests) : si on enchaîne plusieurs petits commits, préférer batcher en local et un seul `git push` à la fin.
@@ -135,9 +135,9 @@ Le premier `pre-commit run --all-files` télécharge les environnements des hook
 | pre-commit | prettier                       | Format JSON/YAML/MD (28 traductions exclues)                                    |
 | pre-commit | pre-commit-hooks v5            | Trailing-whitespace, EOF, check-yaml/toml, large-files, merge-conflict, shebang |
 | pre-commit | detect-secrets                 | Détection de fuites d'API keys (4 providers utilisés)                           |
-| pre-commit | check-complexity (Lizard)      | CCN <= 12, scope `scripts/` (translate.py exclu, refactor TODO)                 |
+| pre-commit | check-complexity (Lizard)      | CCN <= 12, scope `src/` + `scripts/`, existence des chemins vérifiée            |
 | pre-push   | mypy (lax)                     | Type-checking des fonctions déjà annotées (durcissement progressif)             |
-| pre-push   | check-security-sast (Opengrep) | SAST sur translate.py + scripts/ (graceful skip si binaire absent)              |
+| pre-push   | check-security-sast (Opengrep) | SAST sur src/ + scripts/ (graceful skip si binaire absent)                      |
 | pre-push   | check-pip-audit                | Audit deps (mode reporting initial, durcir après bump)                          |
 | pre-push   | unittest                       | Tests `tests/` + `scripts/tests/`                                               |
 
@@ -163,12 +163,27 @@ mypy est en mode **Lax** au démarrage (`disallow_untyped_defs = false`, `check_
 Trajectoire :
 
 1. **Phase 1 (actuel)** : mypy lax, 0 effort initial. Filet de sécurité quand on ajoute des annotations.
-2. **Phase 2** : annoter les fonctions critiques de `translate.py` (`segment_text`, `translate`, `translate_markdown_file`). Bumper `check_untyped_defs = true`.
+2. **Phase 2** : annoter les fonctions critiques de `src/aipmt/translate.py` (`segment_text`, `translate`, `translate_markdown_file`). Bumper `check_untyped_defs = true`.
 3. **Phase 3** : `disallow_untyped_defs = true` (mypy strict). Tout le code annoté.
 
-### Lizard CCN — refactor planifié de translate.py
+### Lizard CCN — scope et fail-closed
 
-Le seuil est 12 (futur 8). Plusieurs fonctions de `translate.py` (notamment `translate`, `translate_markdown_file`, `translate_directory`, `main`) dépassent le seuil. Le fichier est temporairement exclu de Lizard **par scope** : la commande ne reçoit que `scripts/` en argument (cf. `scripts/check-complexity.sh`). Le refactor est un travail dédié à mener dans une PR séparée ; le gate s'applique strictement aux nouveaux scripts pour empêcher la régression. Quand `translate.py` repassera sous le seuil, l'ajouter au scope de la commande (pas à `-x`). Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python translate.py`.
+Le seuil est 12 (futur 8). `src/aipmt/translate.py` est **dans** le scope depuis que
+le refactor des providers l'a fait repasser dessous : 158 fonctions, CCN moyen
+3,3, zéro dépassement. L'exclusion documentée ici auparavant ne correspondait
+plus au script depuis ce refactor.
+
+Le scope vit dans un tableau `SCOPE` en tête de `scripts/check-complexity.sh`,
+dont **chaque entrée est vérifiée existante avant l'analyse**. Sans cette garde,
+un simple déplacement de fichier désarmait le gate en silence : `lizard` ignore
+un chemin absent, sort en 0 et n'écrit rien. Mesuré sur une copie migrée — de
+158 fonctions / 2247 nloc à 3 fonctions / 34 nloc, sortie de zéro octet.
+
+Le hook `files:` de `.pre-commit-config.yaml` doit suivre le même chemin : une
+regex qui ne matche plus ne fait pas échouer pre-commit, elle fait **sauter** le
+hook. La 7ᵉ section de `check-release-ready.sh` confronte les deux.
+
+Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python src/aipmt/translate.py`.
 
 ### Gestion du baseline detect-secrets
 
@@ -186,7 +201,7 @@ git ls-files --cached -z | xargs -0 detect-secrets scan \
 detect-secrets audit .secrets.baseline
 ```
 
-Findings actuels (tous faux positifs attendus) : 4 placeholders `votre-cle-api-*-par-defaut` dans translate.py (OpenAI/Anthropic/Mistral/Google), 1 exemple dans README.md, 1 fixture dans tests/test_silent_failure.py. À auditer ponctuellement pour passer `is_secret: false`.
+Findings actuels (tous faux positifs attendus) : 4 placeholders `votre-cle-api-*-par-defaut` dans `src/aipmt/translate.py` (OpenAI/Anthropic/Mistral/Google), 1 exemple dans README.md, 1 fixture dans tests/test_silent_failure.py. À auditer ponctuellement pour passer `is_secret: false`.
 
 ### Pré-requis lors du clone sur une autre machine
 
@@ -236,6 +251,48 @@ Le script vérifie l'auth gh via `gh api user --jq .login` puis valide que le lo
 - Affiche les commandes manuelles
 - Pour réauthentifier : `gh auth login`
 
+#### Phase 3 — Publication sur PyPI (automatique)
+
+La GitHub Release créée en phase 2 déclenche `.github/workflows/publish.yml`,
+qui construit, vérifie et téléverse. **Rien à lancer à la main.**
+
+Le workflow publie par **Trusted Publishing (OIDC)** : aucun jeton d'API n'est
+stocké dans le dépôt. GitHub émet un jeton d'identité pour ce workflow de ce
+dépôt, et PyPI le vérifie. Un secret volé n'existe pas s'il n'y a pas de secret
+— et l'incident des PR Dependabot a déjà montré qu'un secret de dépôt n'arrive
+pas partout où on croit.
+
+Configuration unique, côté <https://pypi.org> → _Publishing_ → _Add a new
+publisher_ :
+
+```
+owner       = jls42
+repository  = ai-powered-markdown-translator
+workflow    = publish.yml
+environment = pypi          # et un second publisher avec `testpypi`
+```
+
+Trois gardes, dans cet ordre, parce que **PyPI n'autorise jamais la
+réutilisation d'un numéro de version** :
+
+1. `twine check --strict` — un README que PyPI refuse de rendre est accepté à
+   l'upload puis affiché en texte brut ; ça ne se voit qu'après coup, et après
+   coup il est trop tard.
+2. La version de `pyproject.toml` doit égaler le tag de la release.
+3. `check-release-ready.sh` impose déjà que cette version égale celle du
+   CHANGELOG, qui reste la source de vérité.
+
+Pour un essai sans conséquence : `workflow_dispatch` avec `target = testpypi`.
+
+**Piège local** : `python -m build` sans argument construit la sdist puis le
+wheel _depuis la sdist_, ce qui exige d'extraire une archive tar. Le paquet
+Ubuntu `python3.12 3.12.3-1ubuntu0.15` échoue là-dessus
+(`AttributeError: module 'posixpath' has no attribute 'ALLOW_MISSING'`) : leur
+rétroportage de sécurité a patché `tarfile` sans rétroporter la constante de
+`posixpath`. C'est un bug de la distribution, pas du paquet — la CI n'est pas
+touchée. En local, utiliser `python -m build --sdist --wheel`, qui construit
+les deux depuis l'arbre source.
+
 #### Régénération seule (sans release)
 
 ```bash
@@ -256,31 +313,31 @@ AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic),
 source venv/bin/activate
 
 # Translate a single file
-python translate.py --file 'document.md' --target_dir 'output/' --target_lang 'en'
+aipmt --file 'document.md' --target_dir 'output/' --target_lang 'en'
 
 # Translate a directory with OpenAI (default: gpt-5.6-terra)
-python translate.py --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
+aipmt --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
 # Use economic models (--eco): gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite
-python translate.py --eco --source_dir 'content/fr' --target_dir 'content/en'
+aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 # Translate with Mistral AI
-python translate.py --use_mistral --source_dir 'content/fr' --target_dir 'content/es' --target_lang 'es'
+aipmt --use_mistral --source_dir 'content/fr' --target_dir 'content/es' --target_lang 'es'
 
 # Translate with Claude
-python translate.py --use_claude --source_dir 'content/fr' --target_dir 'content/de' --target_lang 'de'
+aipmt --use_claude --source_dir 'content/fr' --target_dir 'content/de' --target_lang 'de'
 
 # Translate with Gemini
-python translate.py --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
+aipmt --use_gemini --source_dir 'content/fr' --target_dir 'content/ja' --target_lang 'ja'
 
 # Force retranslation of existing files
-python translate.py --force --source_dir 'content/fr' --target_dir 'content/en'
+aipmt --force --source_dir 'content/fr' --target_dir 'content/en'
 
 # Add translation note at end of document
-python translate.py --add_translation_note --source_dir 'content/fr' --target_dir 'content/en'
+aipmt --add_translation_note --source_dir 'content/fr' --target_dir 'content/en'
 
 # News mode: protect EN quotes, manage flags per language
-python translate.py --news --file 'article.md' --target_dir 'output/' --target_lang 'es'
+aipmt --news --file 'article.md' --target_dir 'output/' --target_lang 'es'
 ```
 
 ### Install dependencies
@@ -291,7 +348,15 @@ pip install -r requirements.txt
 
 ## Architecture
 
-**Single-file script**: `translate.py` contains all logic:
+**Installable package, single-module logic**: le paquet est `src/aipmt/`, et toute
+la logique tient dans `src/aipmt/translate.py`. `__init__.py` n'expose que `main`
+(cité par `[project.scripts] aipmt`), `__main__.py` permet `python -m aipmt`.
+
+Le nom d'import est `aipmt` et **jamais** `translate` : le paquet PyPI `translate`
+(v3.8.1, actif) installe un répertoire homonyme qui masquerait le module — le
+point d'entrée casse alors sur `AttributeError` et `pip check` ne voit rien.
+
+Contenu de `src/aipmt/translate.py` :
 
 - **API clients**: OpenAI, Mistral, Claude (Anthropic), and Gemini are initialized based on CLI flags
 - **Text segmentation**: `segment_text()` splits long documents at natural breakpoints (sentences, paragraphs, headers) respecting model token limits defined in `MODEL_TOKEN_LIMITS`
@@ -307,6 +372,30 @@ pip install -r requirements.txt
 
 ## Environment Variables
 
+Les clés sont résolues en **trois couches**, de la plus prioritaire à la moindre :
+variable d'environnement → `.env` du répertoire courant (ou d'un parent) →
+`~/.config/aipmt/.env`. La priorité n'est pas codée : elle découle de
+`override=False`, valeur par défaut de `load_dotenv`, chaque couche ne comblant
+que ce que la précédente a laissé vide (`_load_configuration`).
+
+La troisième couche existe parce qu'une CLI installée n'en avait aucune de
+persistante. `find_dotenv` remonte jusqu'à la racine du système et trouvait donc
+un `~/.env` **quand on travaillait sous son répertoire personnel**, mais rien
+ailleurs — une couverture qui dépendait de l'endroit d'où l'on lançait la
+commande. `_user_config_path()` suit `XDG_CONFIG_HOME` s'il est ABSOLU (la
+spécification demande d'ignorer une valeur relative, sans quoi l'emplacement
+redeviendrait fonction du répertoire courant) et `APPDATA` sous Windows.
+
+Le trousseau système (`keyring`) a été écarté comme défaut : il échoue en
+headless — serveur, conteneur, CI — c'est-à-dire le cas d'usage même d'une
+traduction par lot. Un flag `--api-key` l'a été aussi : la clé atterrirait dans
+l'historique du shell et serait visible dans `ps`.
+
+Sans clé, `main()` n'affiche plus de trace d'appel. Le filet est **étroit à
+dessein** : `except ValueError` sur la seule phase de configuration. Envelopper
+toute l'exécution transformerait un vrai bug survenu pendant la traduction en
+message rassurant, exactement le mode de défaillance que ce dépôt traque.
+
 Required API keys (set one based on which API you use). Use `.env` file or export:
 
 - `OPENAI_API_KEY`
@@ -319,14 +408,15 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
 `GROK_TRANSLATE_SANDBOX`, `REGEN_PROVIDER`, `REGEN_MODEL`,
-`REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen).
+`REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen),
+`XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
 
 ## Recommended Usage
 
 For batch translations (README, CHANGELOG, blog articles), use `--eco` mode:
 
 ```bash
-python translate.py --file README.md --target_dir . --source_lang fr --target_lang en --eco --add_translation_note
+aipmt --file README.md --target_dir . --source_lang fr --target_lang en --eco --add_translation_note
 ```
 
 This uses faster/cheaper models (gpt-5.6-luna) which are sufficient for documentation translation.
@@ -338,7 +428,7 @@ d'appeler une API. La traduction est décomptée du quota de l'abonnement ChatGP
 pas facturée à l'usage.
 
 ```bash
-python translate.py --use_codex --eco --file README.md --target_dir . --target_lang it
+aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 REGEN_PROVIDER=codex ./regen_translations.sh --force   # opt-in explicite
 REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
 ```
@@ -381,8 +471,8 @@ Points à connaître avant de toucher à ce code :
 ### Providers Grok (`--use_grok` API / `--use_grok_cli` abonnement)
 
 ```bash
-python translate.py --use_grok --file README.md --target_dir . --target_lang pt      # clé XAI_API_KEY
-python translate.py --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
+aipmt --use_grok --file README.md --target_dir . --target_lang pt      # clé XAI_API_KEY
+aipmt --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
 REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
 ```
 

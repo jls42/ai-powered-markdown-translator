@@ -4,4 +4,4 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 # shellcheck source=scripts/_venv_python.sh
 source scripts/_venv_python.sh
-exec "$PY" -m mypy translate.py tests/ scripts/
+exec "$PY" -m mypy src/ tests/ scripts/

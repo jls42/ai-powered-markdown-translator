@@ -270,7 +270,7 @@ else
   warn "Tests skipped (--skip-tests)"
 fi
 
-python -c "import translate" || { err "import translate échoue"; exit 1; }
+PYTHONPATH=src python -c "import aipmt" || { err "import aipmt échoue"; exit 1; }
 ok "Import OK"
 
 # === Étape 1: Extraction version ===
@@ -348,7 +348,11 @@ if ! confirm "Procéder au git add ciblé + commit ?"; then
 fi
 
 # Add ciblé (jamais -A) : fichier par fichier, pas de répertoire (évite __pycache__/, .pyc, etc.)
-run git add CHANGELOG.md CLAUDE.md README.md requirements.txt translate.py .gitignore
+run git add CHANGELOG.md CLAUDE.md README.md requirements.txt .gitignore
+# Le paquet, fichier par fichier : __init__.py et __main__.py sont neufs et
+# ne sont couverts par aucune autre règle. Omis, ils seraient absents du
+# commit de release ET invisibles aux hooks, qui ne scannent que l'index.
+run git add src/aipmt/__init__.py src/aipmt/__main__.py src/aipmt/translate.py
 run git add tests/test_silent_failure.py tests/fixtures/long_fr_excerpt.txt
 run git add regen_translations.sh release.sh
 
@@ -371,6 +375,17 @@ if ! $DRY_RUN; then
   log "Fichiers stagés:"
   git diff --cached --name-only | sed 's/^/  /'
   echo ""
+fi
+
+# La liste ci-dessus est NOMINATIVE par choix (jamais `git add -A`, qui
+# ramasserait __pycache__/ et compagnie). Le revers est qu'un fichier suivi mais
+# absent de la liste est laissé de côté SANS UN MOT : recensés au moment de
+# l'ajout du paquet, seize fichiers suivis étaient dans ce cas, dont tous les
+# workflows. Le choix reste bon ; ce qui ne l'était pas, c'est son silence.
+LEFT_OUT=$(git diff --name-only 2>/dev/null | tr '\n' ' ')
+if [[ -n "${LEFT_OUT// /}" ]]; then
+  warn "Modifiés mais NON stagés (hors de la liste nominative) : $LEFT_OUT"
+  warn "Les ajouter à la main s'ils font partie de la release, ou compléter cette liste."
 fi
 
 RELEASE_NOTES=$(extract_release_notes "$VERSION")

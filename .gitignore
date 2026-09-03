@@ -43,3 +43,8 @@ traductions_*/
 translate_all.sh
 translate_blog.sh
 translate_babelfishai.sh
+
+# Artefacts de construction du paquet (python -m build)
+build/
+dist/
+*.egg-info/

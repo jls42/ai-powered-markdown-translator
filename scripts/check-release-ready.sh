@@ -114,7 +114,7 @@ section "3. Documentation synchronisée avec le code"
 if probe "flags documentés" <<'PYEOF'
 import re, sys
 EXPECTED_FLAGS = 21
-code = open("translate.py", encoding="utf-8").read()
+code = open("src/aipmt/translate.py", encoding="utf-8").read()
 readme = open("README.md", encoding="utf-8").read()
 flags = set(re.findall(r'\.add_argument\(\s*"(--[a-z_]+)"', code))
 if len(flags) < EXPECTED_FLAGS:
@@ -137,7 +137,7 @@ fi
 # annonce « chaque os.getenv documenté ».
 if probe "variables d'environnement" <<'PYEOF'
 import re, sys
-code = open("translate.py", encoding="utf-8").read()
+code = open("src/aipmt/translate.py", encoding="utf-8").read()
 docs = open("README.md", encoding="utf-8").read() + open("CLAUDE.md", encoding="utf-8").read()
 env = set(re.findall(r'os\.getenv\(\s*"([A-Z_]+)"', code))
 for const in re.findall(r'os\.getenv\(\s*([A-Z_]+)\s*[,)]', code):
@@ -209,7 +209,7 @@ if probe "fraîcheur des traductions" <<'PYEOF'
 import re, sys
 readme = open("README.md", encoding="utf-8").read()
 # Repères : chaque flag documenté doit se retrouver dans les traductions.
-keys = [f"`{f}`" for f in re.findall(r'\.add_argument\(\s*"(--[a-z_]+)"', open("translate.py", encoding="utf-8").read())]
+keys = [f"`{f}`" for f in re.findall(r'\.add_argument\(\s*"(--[a-z_]+)"', open("src/aipmt/translate.py", encoding="utf-8").read())]
 keys = [k for k in keys if k in readme]
 # Sans ce garde-fou, une regex qui cesse de matcher vide `keys` et rend
 # l'assertion « aucun repère absent » vraie pour les 14 langues — vert en
@@ -258,6 +258,18 @@ if [[ -n "$CHANGELOG_VERSION" ]]; then
   else
     fail "version absente de $((14 - N)) CHANGELOG traduits"
   fi
+  # `[project] version` est le premier endroit du dépôt à porter la version sans
+  # que rien ne la vérifie — et l'enjeu est IRRÉVERSIBLE : PyPI n'autorise pas la
+  # réutilisation d'un numéro. La source de vérité reste le CHANGELOG ; ceci
+  # interdit simplement aux deux de diverger.
+  PYPROJECT_VERSION=$($PY -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])' 2>/dev/null)
+  if [[ -z "$PYPROJECT_VERSION" ]]; then
+    fail "version illisible dans pyproject.toml — [project] absent ou TOML invalide"
+  elif [[ "$PYPROJECT_VERSION" == "$CHANGELOG_VERSION" ]]; then
+    pass "pyproject.toml et CHANGELOG annoncent la même version"
+  else
+    fail "pyproject.toml annonce $PYPROJECT_VERSION, le CHANGELOG $CHANGELOG_VERSION"
+  fi
 else
   fail "aucune version lisible en tête du CHANGELOG"
 fi
@@ -283,6 +295,97 @@ if [[ -z "$LEAK" ]]; then
   pass "aucune clé API dans les fichiers suivis"
 else
   fail "clé API potentielle dans : $LEAK"
+fi
+
+section "7. Gates et doc non désarmés"
+# Quatre angles morts recensés en préparant la publication du paquet. Chacun
+# laissait un contrôle au vert en ayant cessé de vérifier quoi que ce soit — le
+# mode de défaillance que ce script existe pour rendre impossible. Ils sont
+# posés AVANT la migration, pour qu'ils virent au rouge PENDANT : un gate écrit
+# après coup ne prouve rien, un gate qui vire au rouge au bon moment prouve
+# qu'il mord.
+if probe "outillage et doc non désarmés" <<'PYEOF'
+import pathlib
+import re
+import sys
+
+problems = []
+root = pathlib.Path(".")
+
+# --- 1. La doc ne doit pas enseigner une invocation impossible ---
+# La sonde de fraîcheur ci-dessus s'ancre sur les FLAGS argparse, c'est-à-dire
+# précisément ce qu'un renommage de fichier ne change pas : mesuré sur une copie
+# migrée, les 15 README continuaient de documenter `python translate.py` et elle
+# annonçait « aucune traduction périmée ». On vérifie ici la FORME d'invocation,
+# pas les options.
+docs = sorted(root.glob("README*.md")) + sorted(root.glob("CHANGELOG*.md"))
+if len(docs) < 30:
+    sys.exit(f"{len(docs)} fichiers de doc trouvés, 30 au minimum attendus")
+INVOKE = re.compile(r"python3?\s+([^\s`'\"]+\.py)\b")
+for doc in docs:
+    for script in sorted(set(INVOKE.findall(doc.read_text(encoding="utf-8")))):
+        if not (root / script).exists():
+            problems.append(f"{doc.name} documente `python {script}` — fichier absent")
+
+# --- 2. Une commande console déclarée doit être documentée dans les 15 README ---
+scripts_block = re.search(
+    r"^\[project\.scripts\]\s*$(.*?)(?=^\[|\Z)",
+    pathlib.Path("pyproject.toml").read_text(encoding="utf-8"),
+    re.M | re.S,
+)
+commands = (
+    re.findall(r"^\s*([A-Za-z0-9_.-]+)\s*=", scripts_block.group(1), re.M) if scripts_block else []
+)
+for command in commands:
+    for doc in [root / "README.md"] + sorted(root.glob("README-*.md")):
+        if not re.search(rf"\b{re.escape(command)}\b", doc.read_text(encoding="utf-8")):
+            problems.append(f"{doc.name} ne documente pas la commande `{command}`")
+
+# --- 3. Anti-ensemble-vide : le README doit décrire AU MOINS UNE façon de lancer ---
+# Sans ce point, les règles 1 et 2 seraient toutes deux vraies sur un README qui
+# n'explique plus du tout comment lancer l'outil — vertes en ne vérifiant rien.
+# Évalué SEULEMENT si rien d'autre n'a été trouvé : quand les règles ci-dessus
+# ont un diagnostic précis à donner, il vaut mieux que ce garde générique.
+readme = (root / "README.md").read_text(encoding="utf-8")
+runnable = [s for s in set(INVOKE.findall(readme)) if (root / s).exists()] + commands
+if not runnable and not problems:
+    sys.exit("README.md ne documente aucune invocation réalisable — contrôle vide")
+
+# --- 4. Le hook Lizard doit encore se DÉCLENCHER sur le module principal ---
+# `files:` ne fait pas échouer pre-commit quand il ne matche plus : il fait
+# SAUTER le hook. Combiné à un scope Lizard périmé, c'est un double aveuglement
+# — le gate ne s'exécuterait plus ET n'analyserait plus rien s'il s'exécutait.
+config = pathlib.Path(".pre-commit-config.yaml").read_text(encoding="utf-8")
+hook = re.search(r"id: check-complexity\b(.*?)(?=\n      - id:|\Z)", config, re.S)
+if not hook:
+    sys.exit("hook check-complexity introuvable dans .pre-commit-config.yaml")
+files_key = re.search(r"^\s*files:\s*(\S+)\s*$", hook.group(1), re.M)
+if not files_key:
+    sys.exit("le hook check-complexity n'a plus de clé `files:` — il tournerait sur tout")
+trigger = re.compile(files_key.group(1))
+scope = re.search(
+    r"^SCOPE=\((.*?)^\)",
+    pathlib.Path("scripts/check-complexity.sh").read_text(encoding="utf-8"),
+    re.M | re.S,
+)
+if not scope:
+    sys.exit("SCOPE introuvable dans scripts/check-complexity.sh")
+modules = [p for p in scope.group(1).split() if p.endswith(".py")]
+if not modules:
+    sys.exit("SCOPE ne nomme aucun module Python — la comparaison serait vide")
+for module in modules:
+    if not trigger.search(module):
+        problems.append(f"le hook check-complexity ne se déclenche plus sur {module}")
+
+print(" | ".join(problems))
+print("PROBE_OK")
+PYEOF
+then
+  if [[ -z "$PROBE_OUT" ]]; then
+    pass "doc, point d'entrée et déclencheur du gate de complexité alignés"
+  else
+    fail "désalignement : $PROBE_OUT"
+  fi
 fi
 
 printf '\n'

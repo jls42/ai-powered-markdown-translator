@@ -50,3 +50,12 @@ jobs:
           # résoudre ensemble est le seul test fidèle, un conflit ne se voyant
           # pas si on les prend séparément.
           python -m pip install --dry-run --quiet -r requirements.txt -r requirements-dev.txt
+
+      - name: Résoudre les bornes publiques du paquet
+        run: |
+          # `requirements.txt` est un LOCK ; `[project.dependencies]` est le
+          # contrat PUBLIC, et ce sont deux jeux de contraintes différents.
+          # Sans ce step, les bornes basses publiées ne seraient vérifiées par
+          # personne : elles ne servent qu'aux utilisateurs, jamais au dépôt,
+          # qui installe toujours son lock.
+          python -m pip install --dry-run --quiet .
