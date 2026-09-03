@@ -2,7 +2,7 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
-- **1.11.0** Publication sur PyPI : `pip install ai-powered-markdown-translator` puis la commande `aipmt`, sans cloner le dépôt (2026-08-31) :
+- **1.11.0** Publication sur PyPI : `pip install ai-powered-markdown-translator` puis la commande `aipmt`, sans cloner le dépôt (2026-09-03) :
 
   - **Le script mono-fichier devient un paquet installable.** `translate.py` passe de la racine à `src/aipmt/translate.py`, avec un point d'entrée console `aipmt` et l'équivalent `python -m aipmt`. Le dépôt cloné reste nécessaire pour contribuer — tests, 28 traductions et outillage qualité y vivent — mais plus pour utiliser.
 
@@ -29,7 +29,7 @@
 
   - **Bornes basses, aucun plafond.** `requirements.txt` reste le lock testé, `[project.dependencies]` devient le contrat public : publier les versions exactes du lock provoquerait des conflits chez tout utilisateur ayant d'autres paquets. Pas de plafond `<N+1` non plus — il entrerait en contradiction frontale avec `check-deps-fresh.sh`, qui fait échouer le gate de release sur tout retard de majeure. Le jeu de planchers résout, et la contre-épreuve `openai==1.0.0` sort en `ResolutionImpossible`, ce qui prouve que le contrôle discrimine au lieu de tout accepter. Une garde interdit par ailleurs à la version de `pyproject.toml` de diverger de celle du CHANGELOG : PyPI n'autorise pas la réutilisation d'un numéro.
 
-  - **Vérifié de bout en bout dans un venv neuf** : wheel de 69 768 octets ne contenant que `aipmt/*.py`, le dist-info et la licence ; `aipmt --help` rc=0 avec 22 flags ; `python -m aipmt` affichant « usage: aipmt » et non « usage: \_\_main\_\_.py » ; installation `pipx` fonctionnelle ; et surtout **une traduction réelle fr→en depuis un répertoire utilisateur quelconque**, gras, liste, code inline, lien et URL préservés, bloc de code non traduit. Les 318 tests passent avec une liste d'identifiants identique à l'octet près avant/après migration — c'est cela qui prouve qu'aucun test n'a été neutralisé, pas le « OK ».
+  - **Vérifié de bout en bout dans un venv neuf** : wheel d'environ 70 Ko ne contenant que `aipmt/*.py`, le dist-info et la licence ; `aipmt --help` rc=0 avec 22 flags ; `python -m aipmt` affichant « usage: aipmt » et non « usage: \_\_main\_\_.py » ; installation `pipx` fonctionnelle ; et surtout **une traduction réelle fr→en depuis un répertoire utilisateur quelconque**, gras, liste, code inline, lien et URL préservés, bloc de code non traduit. Les 318 tests antérieurs à la migration passent avec une liste d'identifiants identique à l'octet près avant/après — c'est cela qui prouve qu'aucun test n'a été neutralisé, pas le « OK » ; douze s'y ajoutent pour la configuration en trois couches, soit 330.
 
 - **1.10.0** Provider `--use_codex` (quota d'abonnement ChatGPT), mise à jour des SDK et des modèles, fix des citations news multi-paragraphes (2026-08-29) :
 
