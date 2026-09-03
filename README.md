@@ -26,13 +26,13 @@
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-Traducteur de fichiers Markdown utilisant **OpenAI**, **Mistral AI**, **Claude (Anthropic)** et **Google Gemini**.
+Traducteur de fichiers Markdown utilisant **OpenAI**, **Mistral AI**, **Claude (Anthropic)**, **Google Gemini** et **Grok (xAI)** — par API, ou sur le quota d'un abonnement ChatGPT (Codex) ou Grok, sans facturation à l'usage.
 
 Ce script Python traduit des fichiers Markdown d'une langue source vers une langue cible tout en préservant le formatage, les blocs de code et les métadonnées front matter.
 
 ## Caractéristiques Principales
 
-- **Multi-Provider**: Support de 4 APIs (OpenAI, Mistral, Claude, Gemini) + le CLI Codex sur abonnement ChatGPT
+- **Multi-Provider**: 5 API (OpenAI, Mistral, Claude, Gemini, Grok) + 2 CLI sur abonnement, sans facturation à l'usage — Codex (ChatGPT) et Grok
 - **Modèles 2026**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
 - **Mode Économique**: Option `--eco` pour utiliser des modèles plus rapides et moins coûteux
 - **Fichier Unique**: Option `--file` pour traduire un seul fichier
