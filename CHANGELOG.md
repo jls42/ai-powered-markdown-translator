@@ -2,6 +2,11 @@
 
 🌍 [Français](CHANGELOG.md) | [English](CHANGELOG-en.md) | [Español](CHANGELOG-es.md) | [中文](CHANGELOG-zh.md) | [Deutsch](CHANGELOG-de.md) | [日本語](CHANGELOG-ja.md) | [한국어](CHANGELOG-ko.md) | [العربية](CHANGELOG-ar.md) | [हिन्दी](CHANGELOG-hi.md) | [Italiano](CHANGELOG-it.md) | [Nederlands](CHANGELOG-nl.md) | [Polski](CHANGELOG-pl.md) | [Português](CHANGELOG-pt.md) | [Română](CHANGELOG-ro.md) | [Svenska](CHANGELOG-sv.md)
 
+- **1.11.1** Correctif de documentation : le README annonce enfin les sept chemins de provider (2026-09-03) :
+
+  - **La page PyPI de 1.11.0 disait « 4 APIs + le CLI Codex ».** Le code en expose sept — OpenAI, Mistral, Claude, Gemini et Grok par API ; Codex (ChatGPT) et Grok sur abonnement, sans facturation à l'usage. Les deux modes Grok manquaient dans l'accroche et la puce _Multi-Provider_, et les 14 traductions répétaient l'erreur. Comme la description longue d'un paquet est figée par version, corriger la vitrine exigeait un numéro : c'est l'unique raison d'être de celui-ci. **Aucun changement de code.**
+  - `CLAUDE.md` est aligné sur ce que la publication a introduit : compteurs du gate (16, 17 en `--full`), les onze workflows actifs, les deux compteurs Sonar/Codacy invisibles dans `gh pr checks` (hotspots, API Codacy), le déplacement d'un `# nosemgrep` par `ruff-format`, les environnements GitHub exigés par l'échange OIDC, et le fait qu'un _pending publisher_ ne réserve pas le nom.
+
 - **1.11.0** Publication sur PyPI : `pip install ai-powered-markdown-translator` puis la commande `aipmt`, sans cloner le dépôt (2026-09-03) :
 
   - **Le script mono-fichier devient un paquet installable.** `translate.py` passe de la racine à `src/aipmt/translate.py`, avec un point d'entrée console `aipmt` et l'équivalent `python -m aipmt`. Le dépôt cloné reste nécessaire pour contribuer — tests, 28 traductions et outillage qualité y vivent — mais plus pour utiliser.
