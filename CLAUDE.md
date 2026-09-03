@@ -12,15 +12,17 @@ créé après plusieurs « c'est prêt » démentis ensuite par une vérificatio
 succès, provider non testé de bout en bout).
 
 ```bash
-./scripts/check-release-ready.sh          # 14 vérifications, ~45 s
-./scripts/check-release-ready.sh --full   # + hooks pre-push (mypy, SAST, audit), ~3 min
+./scripts/check-release-ready.sh          # 16 vérifications, ~45 s
+./scripts/check-release-ready.sh --full   # 17 : + hooks pre-push (mypy, SAST, audit), ~3 min
 ```
 
 Ce qu'il vérifie : tests `tests/` et `scripts/tests/`, hooks pre-commit (et
 pre-push en `--full`), **chaque flag argparse présent dans le README**, **chaque
 `os.getenv` documenté**, les 28 traductions (présence, structure, URLs,
-placeholders, couverture des flags), la version du CHANGELOG et son extraction
-par `release.sh`, et l'absence de secret dans les fichiers suivis.
+placeholders, couverture des flags), la version du CHANGELOG, son extraction
+par `release.sh` et son égalité avec celle de `pyproject.toml`, l'absence de
+secret dans les fichiers suivis, et une 7ᵉ section qui confronte la doc au point
+d'entrée console et le déclencheur du hook Lizard à son scope réel (cf. § Lizard).
 
 Points de méthode qui ont coûté cher et que le script encode :
 
@@ -46,7 +48,7 @@ reprendre la tâche jusqu'à ce que le script passe au vert.
 - **Recherche web**: Utiliser l'agent `web-research-specialist:web-research-specialist` pour les recherches de documentation (évite de polluer le contexte principal)
 - **Après chaque `git push`** (sur une PR, jamais main) : surveiller automatiquement les checks GitHub jusqu'à résolution.
   1. Attendre ~30-60s que SonarCloud / CodeQL terminent leur scan initial.
-  2. `gh pr checks <num>` pour lire l'état (workflows actifs : `Analyze (python)`, `CodeQL`, `SonarQube`).
+  2. `gh pr checks <num>` pour lire l'état (workflows actifs : `Analyze (python)` et `Analyze (actions)` (CodeQL), `SonarQube`, `SonarCloud Code Analysis`, `Python 3.10` / `3.11` / `3.12` (tests.yml), `Résolution des dépendances` (deps-check.yml), `Codacy Static Code Analysis`, `CodeFactor`).
   3. Si tous `pass` → **toujours** requêter l'API Sonar des issues ouvertes en complément (cf. piège ci-dessous), puis signaler à l'utilisateur et stop.
   4. Si un check est `pending` → re-check dans 60-90s (utiliser `ScheduleWakeup` pour ne pas bloquer le main thread, ou `gh run watch <run-id>` pour follow live).
   5. Si un check est `fail` :
@@ -64,8 +66,15 @@ reprendre la tâche jusqu'à ce que le script passe au vert.
          | python3 -c "import json,sys; d=json.load(sys.stdin); print('total:', d.get('total', 0)); [print(f\"  [{i['severity']}] {i['type']} {i['rule']} {i['component'].split(':')[-1]}:{i.get('line','?')} - {i['message']}\") for i in d.get('issues', [])]"
        ```
        Délai d'indexation Sonar : ~60-90s après le push (ré-exécuter si `total` reflète encore l'ancien commit).
+     - **Les hotspots de sécurité Sonar sont un compteur DISTINCT des issues** : `api/issues/search` ne les inclut pas. Interroger aussi
+       `https://sonarcloud.io/api/hotspots/search?projectKey=jls42_ai-powered-markdown-translator&pullRequest=<num>` (clé `hotspots`).
+     - **Codacy** est un check de PR dont le détail n'est lisible que par API (la page exige une session) :
+       `https://app.codacy.com/api/v3/analysis/organizations/gh/jls42/repositories/ai-powered-markdown-translator/pull-requests/<num>/issues`.
+       Ignorer les entrées `deltaType: Fixed` (anciennes occurrences résolues). Codacy attribue un finding aux LIGNES DU DIFF : toucher une
+       ligne ancienne — même un commentaire — fait remonter un problème préexistant, ce qui est une bonne chose.
      - Le gate Lizard local couvre `src/` et `scripts/`, et son scope est désormais fail-closed : un chemin absent fait échouer le script au lieu d'être ignoré en silence (`lizard` sort en 0 en annonçant « 0 file analyzed »).
      - **`ruff-format` peut fusionner deux f-strings adjacents sur une seule ligne**, ce qui crée une concaténation implicite que Sonar S5799 (`Merge these implicitly concatenated strings; or did you forget a comma?`) flag comme Code Smell Major. Préférer une seule f-string au lieu de deux f-strings sur des lignes séparées si le contenu peut tenir sous la limite de longueur.
+     - **`ruff-format` peut déplacer un marqueur `# nosemgrep` hors de portée.** Un marqueur ne vaut que pour sa ligne ou celle qui la précède, et les deux règles `dangerous-subprocess-use*` s'ancrent sur des lignes différentes (l'appel pour `-audit`, l'argument pour l'autre). Si l'argument dépasse 100 colonnes, le formateur éclate la liste et emporte le commentaire sur la ligne de FERMETURE, où il ne couvre plus rien — le correctif est défait sans signal. Parade mesurée : sortir l'argv dans une variable courte pour que la ligne ne puisse plus être scindée (cf. `tests/test_orchestration.py`). Le SAST local exclut `*test*` ; Codacy, lui, scanne les tests.
      - detect-secrets régénère parfois `.secrets.baseline` en pre-commit ; bien `git add` la baseline AVANT le commit suivant (sinon le pre-commit hook re-mute la baseline en boucle).
      - Hooks pre-push lents (~30s mypy + 5s SAST + 10s pip-audit + tests) : si on enchaîne plusieurs petits commits, préférer batcher en local et un seul `git push` à la fin.
 
@@ -185,6 +194,18 @@ hook. La 7ᵉ section de `check-release-ready.sh` confronte les deux.
 
 Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python src/aipmt/translate.py`.
 
+### Deux gardes CI ajoutées pour la publication
+
+- **Plancher de couverture** (`sonarcloud.yml`) : `coverage run --source=module_absent`
+  n'échoue PAS — avertissement sur stderr, rc 0 pour unittest comme pour
+  `coverage xml`, rapport quand même poussé à Sonar. Mesuré : 1453 → 141
+  statements sur un simple renommage, projet « sain » parce que plus analysé. Deux
+  planchers à 1000 : le total, et le plus gros fichier mesuré — ce second attrape
+  la sortie du module principal sans coder son chemin en dur.
+- **Matrice `tests.yml`** (3.10 / 3.11 / 3.12) : `requires-python = ">=3.10"` est une
+  promesse publique, et ce poste n'a que 3.12. La matrice installe le PAQUET (donc
+  les bornes publiques) et non le lock, avec `fail-fast: false`.
+
 ### Gestion du baseline detect-secrets
 
 ```bash
@@ -224,7 +245,7 @@ Quand l'utilisateur demande "release", "tag", "publie cette version" :
 ./release.sh --auto
 ```
 
-Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env`) → push branche → PR via `gh` (si auth OK).
+Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
 
 **Pas de tag à ce stade.** Le tag est créé en phase 2 pour qu'il pointe sur le commit de merge dans `main` (pas sur la branche feature).
 
@@ -272,6 +293,14 @@ workflow    = publish.yml
 environment = pypi          # et un second publisher avec `testpypi`
 ```
 
+Les deux **environnements GitHub** `pypi` et `testpypi` doivent exister côté dépôt
+(Settings → Environments, ou `gh api -X PUT repos/jls42/ai-powered-markdown-translator/environments/<nom>`) :
+la revendication OIDC porte le nom d'environnement, et PyPI la compare à celui
+déclaré. Un _pending publisher_ ne réserve pas le nom : jusqu'au premier
+téléversement, n'importe qui peut le prendre — ne pas laisser traîner.
+`workflow_dispatch` n'est possible que si `publish.yml` existe sur `main` : le
+tir TestPyPI se fait donc APRÈS le merge, jamais depuis la branche.
+
 Trois gardes, dans cet ordre, parce que **PyPI n'autorise jamais la
 réutilisation d'un numéro de version** :
 
@@ -299,6 +328,11 @@ les deux depuis l'arbre source.
 ./regen_translations.sh --force   # réécrit les 28 traductions
 ./regen_translations.sh           # skip celles qui existent déjà
 ```
+
+Le script lance 10 jobs en parallèle par défaut (4 pour Codex, 2 pour Grok). En
+relance manuelle d'un sous-ensemble — boucle directe sur `aipmt` — **5 en
+parallèle sont acceptés sur OpenAI**, demande explicite du propriétaire : 2 fait
+traîner un jeu de 14 CHANGELOG sur un quart d'heure.
 
 ## Project Overview
 
