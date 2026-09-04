@@ -26,13 +26,13 @@
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-Traducteur de fichiers Markdown utilisant **OpenAI**, **Mistral AI**, **Claude (Anthropic)**, **Google Gemini** et **Grok (xAI)** — par API, ou sur le quota d'un abonnement ChatGPT (Codex) ou Grok, sans facturation à l'usage.
+Traducteur de fichiers Markdown utilisant **OpenAI**, **Mistral AI**, **Claude (Anthropic)**, **Google Gemini** et **Grok (xAI)** — par API, sur le quota d'un abonnement ChatGPT (Codex) ou Grok sans facturation à l'usage, ou via **OpenCode**, l'agent open source, vers le fournisseur de votre choix : modèle local (Ollama), gratuit, abonnement (GitHub Copilot…) ou clé.
 
 Ce script Python traduit des fichiers Markdown d'une langue source vers une langue cible tout en préservant le formatage, les blocs de code et les métadonnées front matter.
 
 ## Caractéristiques Principales
 
-- **Multi-Provider**: 5 API (OpenAI, Mistral, Claude, Gemini, Grok) + 2 CLI sur abonnement, sans facturation à l'usage — Codex (ChatGPT) et Grok
+- **Multi-Provider**: 5 API (OpenAI, Mistral, Claude, Gemini, Grok) + 2 CLI sur abonnement, sans facturation à l'usage — Codex (ChatGPT) et Grok — + OpenCode (open source, MIT) vers n'importe quel fournisseur configuré dans OpenCode, y compris un modèle local
 - **Modèles 2026**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
 - **Mode Économique**: Option `--eco` pour utiliser des modèles plus rapides et moins coûteux
 - **Fichier Unique**: Option `--file` pour traduire un seul fichier
@@ -133,9 +133,11 @@ Si aucune clé n'est trouvée, la commande n'affiche pas de trace d'appel : elle
 Studio). Variables optionnelles : `XAI_BASE_URL` (endpoint xAI, défaut
 `https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (secondes par appel Anthropic, défaut
 900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
-et `GROK_TRANSLATE_SANDBOX` (voir la section Grok CLI). Côté
-`regen_translations.sh` : `REGEN_PROVIDER`, `REGEN_MODEL` et
-`REGEN_JOB_TIMEOUT` (plafond par job, défaut 600 s).
+`GROK_TRANSLATE_SANDBOX` (voir la section Grok CLI) et `OPENCODE_BIN` /
+`OPENCODE_TIMEOUT` (voir la section OpenCode). Côté
+`regen_translations.sh` : `REGEN_PROVIDER` (défaut `codex`, sur abonnement),
+`REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation obligatoire pour une API
+facturée) et `REGEN_JOB_TIMEOUT` (plafond par job, défaut 600 s, 1 800 s sur Codex).
 
 ## Utilisation
 
@@ -168,6 +170,9 @@ aipmt --use_grok --source_dir 'content/fr' --target_dir 'content/pt' --target_la
 
 # Avec Grok sur le quota de l'abonnement Grok (nécessite `grok login`)
 aipmt --use_grok_cli --eco --file 'README.md' --target_dir . --target_lang 'pl'
+
+# Avec OpenCode (open source), vers le fournisseur de votre choix — ici un modèle local Ollama
+aipmt --use_opencode --model ollama/qwen2.5:7b --file 'README.md' --target_dir . --target_lang 'nl'
 ```
 
 ### Traduire sur son abonnement ChatGPT (`--use_codex`)
@@ -249,14 +254,161 @@ Autres variables : `GROK_BIN` (chemin du binaire), `GROK_TIMEOUT` (défaut 900 s
 Pour la régénération des 28 traductions :
 
 ```bash
-REGEN_PROVIDER=codex ./regen_translations.sh --force
+# Défaut : Codex sur l'abonnement ChatGPT, modèle qualité gpt-5.6-sol, 0 € à l'usage
+./regen_translations.sh --force
 
-# Sur un modèle précis plutôt que le défaut --eco du provider
-REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+# Le modèle éco de Codex, si le volume l'impose
+REGEN_MODEL=gpt-5.6-luna ./regen_translations.sh --force
 
 # Sur le quota de l'abonnement Grok
 REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
+
+# Une API facturée (openai, gemini, grok) est REFUSÉE sans cette dérogation nommée
+REGEN_PROVIDER=openai REGEN_ALLOW_PAID_API=1 ./regen_translations.sh --force
+
+# Via OpenCode, vers le modèle de son choix (REGEN_MODEL obligatoire, 2 jobs en parallèle)
+REGEN_PROVIDER=opencode REGEN_MODEL=ollama/qwen2.5:7b ./regen_translations.sh --force
 ```
+
+### Traduire avec OpenCode, vers le fournisseur de son choix (`--use_opencode`)
+
+[OpenCode](https://opencode.ai) est un agent de code **open source (MIT)** en
+terminal. Il n'est pas un fournisseur de modèles mais un **routeur** vers ceux
+que vous avez configurés dans OpenCode lui-même : une clé API, un abonnement
+(GitHub Copilot, ChatGPT, SuperGrok), la passerelle OpenCode Zen — qui sert des
+modèles gratuits **sans compte** — ou un modèle **local** (Ollama, LM Studio,
+llama.cpp). Ce provider pilote `opencode run` en mode non-interactif et confine
+l'appel à un seul aller-retour, sans aucun outil.
+
+```bash
+curl -fsSL https://opencode.ai/install | bash   # ou : npm install -g opencode-ai
+opencode models                                 # les modèles disponibles, au format provider/modèle
+opencode auth login                             # facultatif : brancher un fournisseur ou un abonnement
+```
+
+`--model` est **obligatoire**, au format `provider/modèle`. OpenCode n'est pas
+un fournisseur, et aucun défaut n'est choisi à votre place : son propre repli
+serait un modèle gratuit dont les échanges peuvent servir à l'entraînement.
+
+```bash
+# Gratuit, sans compte ni clé (passerelle Zen ; données utilisables pour l'entraînement)
+aipmt --use_opencode --model opencode/mimo-v2.5-free --file README.md --target_dir . --target_lang en
+
+# Local, hors ligne, sans aucune clé (Ollama déclaré dans ~/.config/opencode/opencode.json)
+aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . --target_lang de
+
+# Sur un abonnement déjà payé (après `opencode auth login`)
+aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir . --target_lang ja
+```
+
+**Confinement — ce que fait le script à chaque appel :**
+
+- Une configuration inline (`OPENCODE_CONFIG_CONTENT`), prioritaire sur la
+  vôtre, définit un agent `aipmt` dont **tous les outils sont refusés**
+  (`permission: { "*": "deny" }`) : le modèle ne peut ni lire, ni écrire, ni
+  lancer de commande — mesuré, il ne le tente même pas. Le partage de session
+  est désactivé, `--pure` écarte les plugins externes, jamais `--auto`.
+- L'appel tourne dans un **répertoire jetable et vide**, avec les interrupteurs
+  `OPENCODE_DISABLE_PROJECT_CONFIG` et `OPENCODE_DISABLE_CLAUDE_CODE` : sans
+  eux, OpenCode injecte dans chaque prompt l'`AGENTS.md` du répertoire courant
+  et votre `~/.claude/CLAUDE.md` — mesuré, une consigne « finir chaque réponse
+  par BANANA » posée dans un `AGENTS.md` était appliquée à la traduction. Les
+  règles globales de `~/.config/opencode/AGENTS.md` restent en revanche
+  appliquées : OpenCode ne permet pas de les écarter.
+- Le contrat de sortie exige tout à la fois : code retour 0, aucun événement
+  `error`, aucun appel d'outil, un dernier pas terminé en `stop`, un texte non
+  vide, et l'agent effectivement chargé — un `--agent` inconnu ne fait pas
+  échouer OpenCode, il **retombe en silence** sur l'agent de codage, outils
+  actifs. Un `exit 0` ne prouve rien ici non plus.
+- **Aucune clé d'aipmt n'est transmise** au sous-processus (même filtrage
+  qu'avec Codex et Grok), à une exception nominative près : `OPENCODE_API_KEY`,
+  la clé d'OpenCode lui-même (Zen, Go). Les fournisseurs se configurent dans
+  OpenCode (`opencode auth login`, `opencode.json`), pas dans le `.env` d'aipmt.
+
+**À savoir :**
+
+- **Les modèles gratuits de Zen sont des modèles « stealth » ou contributeurs**,
+  changeants, aux limites non documentées, et leurs échanges peuvent servir à
+  l'entraînement : parfaits pour une documentation publique, à éviter pour un
+  contenu privé. Mesuré : `opencode/mimo-v2.5-free` traduit ce README en une
+  passe ; `opencode/big-pickle` est plus lent et deux requêtes simultanées y sont
+  restées sans réponse.
+- **Un modèle local doit offrir au moins 16 k de contexte** — les segments font
+  jusqu'à 16 000 caractères — alors qu'Ollama en configure souvent 4 096 par
+  défaut. Avec Ollama : un `Modelfile` avec `PARAMETER num_ctx 32768`, puis
+  `ollama create`. La qualité suit le modèle : un 7B a inversé une liste et
+  abîmé une clôture de bloc de code sur un fichier d'essai là où un modèle de
+  la passerelle a tout préservé.
+- `--eco` est sans effet (le modèle est celui de `--model`) ;
+  `--reasoning_effort` est transmis tel quel comme `--variant` d'OpenCode, à ne
+  demander que si le modèle le connaît.
+- Les sessions sont journalisées par OpenCode dans sa base
+  (`~/.local/share/opencode/`), comme toute session OpenCode.
+- Variables d'environnement : `OPENCODE_BIN` (chemin explicite du binaire,
+  sinon le `PATH` puis `~/.opencode/bin/opencode`) et `OPENCODE_TIMEOUT`
+  (secondes par segment, défaut `600`). `OPENCODE_CONFIG` est honoré si vous
+  l'exportez.
+
+**Exemple mesuré : un modèle local via Ollama** (RTX 3060 12 Go, 62 Go de RAM, Ollama 0.33.3)
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh   # Ollama ≥ 0.30 pour gemma4 ; conserve les modèles déjà téléchargés
+ollama pull gemma4:12b                          # 7,6 Go, Apache 2.0, 140+ langues
+ollama pull qwen3.5:9b                          # 6,6 Go, Apache 2.0, 201 langues
+
+# Sous 24 Go de VRAM, Ollama plafonne le contexte à 4 096 tokens, et son API OpenAI-compatible
+# ne permet pas de le régler par requête : on le fixe dans un Modelfile.
+printf 'FROM gemma4:12b\nPARAMETER num_ctx 32768\n' > gemma4-12b-32k.Modelfile
+ollama create gemma4-12b-32k -f gemma4-12b-32k.Modelfile
+```
+
+Puis le fournisseur dans `~/.config/opencode/opencode.json` :
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": { "baseURL": "http://127.0.0.1:11434/v1" },
+      "models": {
+        "gemma4-12b-32k": {
+          "name": "Gemma 4 12B (32k, sans réflexion)",
+          "limit": { "context": 32768, "output": 8192 },
+          "options": { "reasoningEffort": "none" }
+        }
+      }
+    }
+  }
+}
+```
+
+`reasoningEffort: "none"` n'est pas un détail : Ollama active la réflexion par
+défaut sur Gemma 4 et Qwen 3.5, et un Modelfile ne peut pas la couper. Mesuré à
+travers OpenCode : sans l'option, « Le chat dort sur le tapis » coûte 919 tokens
+de raisonnement et 68 s ; avec, 9 tokens.
+
+```bash
+aipmt --use_opencode --model ollama/gemma4-12b-32k --news --keep_filename \
+  --add_translation_note --file article.mdx --target_dir out/ --target_lang en
+```
+
+Résultats sur un article de blog réel de 589 lignes (140 liens, 21 sections,
+3 citations anglaises protégées par le mode `--news`), même commande, trois
+modèles :
+
+| Modèle                                   | Durée       | Structure                                                  | Écarts                                                                                    |
+| ---------------------------------------- | ----------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `opencode/mimo-v2.5-free` (Zen, gratuit) | 4 min 26 s  | identique à la source                                      | aucun                                                                                     |
+| `ollama/gemma4-12b-32k` (local)          | 10 min 10 s | liens, URL, tableaux, tags, gras et code inline identiques | une ligne de citation inventée (🇺🇸 + paraphrase), une attribution dupliquée               |
+| `ollama/qwen3.5-9b-32k` (local)          | 8 min 18 s  | liens, URL, tableaux et tags identiques                    | une ligne de citation inventée, quelques gras et codes inline ajoutés, un segment repassé |
+
+Pendant la traduction locale : GPU à 98 % et 170 W, 10 Go de VRAM occupés
+(modèle et cache de 32 k tokens, rien déchargé en RAM), 7,5 Go de RAM pour le
+serveur Ollama. Un modèle de 9 à 12 milliards de paramètres respecte la
+structure mais s'accorde une liberté par article, là où le modèle de passerelle
+n'en a pris aucune : à relire avant publication, ou à réserver aux brouillons.
 
 ### Mode économique
 
@@ -268,31 +420,32 @@ aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 ### Options
 
-| Option                   | Description                                                              |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `--file`                 | Fichier Markdown unique à traduire                                       |
-| `--source_dir`           | Répertoire source contenant les fichiers Markdown                        |
-| `--target_dir`           | Répertoire de sortie pour les fichiers traduits                          |
-| `--source_lang`          | Langue source (défaut: `fr`)                                             |
-| `--target_lang`          | Langue cible (défaut: `en`)                                              |
-| `--model`                | Modèle spécifique à utiliser                                             |
-| `--eco`                  | Utiliser les modèles économiques                                         |
-| `--use_mistral`          | Utiliser l'API Mistral AI                                                |
-| `--use_claude`           | Utiliser l'API Claude                                                    |
-| `--use_gemini`           | Utiliser l'API Gemini                                                    |
-| `--use_codex`            | Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT               |
-| `--use_grok`             | Utiliser l'API xAI (Grok) — nécessite `XAI_API_KEY`                      |
-| `--use_grok_cli`         | Utiliser le CLI Grok sur le quota de l'abonnement Grok                   |
-| `--force`                | Forcer la re-traduction                                                  |
-| `--keep_filename`        | Conserver le nom de fichier original                                     |
-| `--news`                 | Mode actualités : protège les citations EN, gère les drapeaux par langue |
-| `--add_translation_note` | Ajouter une note de traduction                                           |
-| `--note_position`        | Position de la note : `top`, `bottom` (défaut), ou `both`                |
-| `--note_format`          | Format de la note : `legacy` (défaut, paragraphe gras) ou `marker`       |
-| `--include_model`        | Inclure le nom du modèle dans le fichier de sortie                       |
-| `--reasoning_effort`     | Effort de raisonnement GPT-5.x : `none`/`low`/`medium`/`high`/`xhigh`    |
+| Option                   | Description                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `--file`                 | Fichier Markdown unique à traduire                                                                            |
+| `--source_dir`           | Répertoire source contenant les fichiers Markdown                                                             |
+| `--target_dir`           | Répertoire de sortie pour les fichiers traduits                                                               |
+| `--source_lang`          | Langue source (défaut: `fr`)                                                                                  |
+| `--target_lang`          | Langue cible (défaut: `en`)                                                                                   |
+| `--model`                | Modèle spécifique à utiliser                                                                                  |
+| `--eco`                  | Utiliser les modèles économiques                                                                              |
+| `--use_mistral`          | Utiliser l'API Mistral AI                                                                                     |
+| `--use_claude`           | Utiliser l'API Claude                                                                                         |
+| `--use_gemini`           | Utiliser l'API Gemini                                                                                         |
+| `--use_codex`            | Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT                                                    |
+| `--use_grok`             | Utiliser l'API xAI (Grok) — nécessite `XAI_API_KEY`                                                           |
+| `--use_grok_cli`         | Utiliser le CLI Grok sur le quota de l'abonnement Grok                                                        |
+| `--use_opencode`         | Utiliser OpenCode (open source) vers le fournisseur configuré dans OpenCode ; exige `--model provider/modèle` |
+| `--force`                | Forcer la re-traduction                                                                                       |
+| `--keep_filename`        | Conserver le nom de fichier original                                                                          |
+| `--news`                 | Mode actualités : protège les citations EN, gère les drapeaux par langue                                      |
+| `--add_translation_note` | Ajouter une note de traduction                                                                                |
+| `--note_position`        | Position de la note : `top`, `bottom` (défaut), ou `both`                                                     |
+| `--note_format`          | Format de la note : `legacy` (défaut, paragraphe gras) ou `marker`                                            |
+| `--include_model`        | Inclure le nom du modèle dans le fichier de sortie                                                            |
+| `--reasoning_effort`     | Effort de raisonnement GPT-5.x : `none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-> **Les six flags de provider sont mutuellement exclusifs.** En combiner deux
+> **Les sept flags de provider sont mutuellement exclusifs.** En combiner deux
 > était auparavant accepté en silence et résolvait vers le premier testé : une
 > traduction demandée sur quota d'abonnement (`--use_codex`, `--use_grok_cli`)
 > pouvait ainsi partir en facturation à l'usage sans aucun avertissement.
@@ -328,15 +481,16 @@ aipmt --file article.mdx --target_lang en \
 
 ### Modèles par défaut (2026)
 
-| Provider | Qualité (défaut)       | Économique (`--eco`)    |
-| -------- | ---------------------- | ----------------------- |
-| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
-| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
-| Mistral  | `mistral-large-latest` | `mistral-small-latest`  |
-| Gemini   | `gemini-3.7-flash`     | `gemini-3.1-flash-lite` |
-| Codex    | `gpt-5.6-sol`          | `gpt-5.6-luna`          |
-| Grok API | `grok-4.6`             | `grok-4.3`              |
-| Grok CLI | `grok-4.6`             | `grok-4.5`              |
+| Provider | Qualité (défaut)                      | Économique (`--eco`)      |
+| -------- | ------------------------------------- | ------------------------- |
+| OpenAI   | `gpt-5.6-terra`                       | `gpt-5.6-luna`            |
+| Claude   | `claude-sonnet-5`                     | `claude-haiku-4-5`        |
+| Mistral  | `mistral-large-latest`                | `mistral-small-latest`    |
+| Gemini   | `gemini-3.7-flash`                    | `gemini-3.1-flash-lite`   |
+| Codex    | `gpt-5.6-sol`                         | `gpt-5.6-luna`            |
+| Grok API | `grok-4.6`                            | `grok-4.3`                |
+| Grok CLI | `grok-4.6`                            | `grok-4.5`                |
+| OpenCode | `--model provider/modèle` obligatoire | idem — `--eco` sans effet |
 
 > **Recommandation traductions long-form** : `--use_gemini` (défaut = `gemini-3.7-flash`) préserve fidèlement la structure markdown sur les scripts non-latins (PL, JA, ZH, AR, HI), y compris en mode `--news` où la fidélité des placeholders compte. Mesuré sur ce README traduit en japonais : structure identique à `gemini-3.1-pro-preview` (21 listes, 18 blocs de code, 13 liens HTML, 13 images, toutes les URLs préservées) pour ~6x moins de latence. OpenAI reste le défaut pour la rétrocompatibilité.
 

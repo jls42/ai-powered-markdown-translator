@@ -113,7 +113,7 @@ section "3. Documentation synchronisée avec le code"
 # personne ne le voie : une assertion sur ensemble vide est toujours vraie.
 if probe "flags documentés" <<'PYEOF'
 import re, sys
-EXPECTED_FLAGS = 21
+EXPECTED_FLAGS = 22
 code = open("src/aipmt/translate.py", encoding="utf-8").read()
 readme = open("README.md", encoding="utf-8").read()
 flags = set(re.findall(r'\.add_argument\(\s*"(--[a-z_]+)"', code))

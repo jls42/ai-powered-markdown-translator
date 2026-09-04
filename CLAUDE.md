@@ -42,6 +42,34 @@ Si une vérification échoue, le travail continue — on ne rend pas la main sur
 « presque ». Pour enchaîner les corrections sans supervision, `/loop` permet de
 reprendre la tâche jusqu'à ce que le script passe au vert.
 
+## Traductions de ce dépôt : JAMAIS par une API facturée
+
+**Décision du propriétaire, non négociable, formulée le 2026-09-04 :** les 28
+traductions (README, CHANGELOG) se font sur **l'abonnement ChatGPT via Codex**,
+avec **`gpt-5.6-sol`** (le modèle qualité). L'abonnement a été pris exprès pour
+ne pas payer de coûts API. Ce jour-là, `release.sh --auto` avait envoyé les 28
+fichiers sur l'API OpenAI, puis le CHANGELOG hindi sur celle de Gemini, parce
+que le regen auto-détectait `OPENAI_API_KEY` dans `.env` et ne faisait de Codex
+qu'un opt-in.
+
+Ce que ça implique, et ce qui l'encode :
+
+- `./regen_translations.sh --force` sans variable = Codex, `gpt-5.6-sol`, 4
+  jobs. Plus aucune auto-détection de clé : une clé présente ne change rien.
+  **Compter une heure** : mesuré le 2026-09-04 à 4 jobs, un README prend 3 à
+  4 min et un CHANGELOG 10 à 14 min (effort de raisonnement `medium`, défaut
+  de Sol hors `--eco`). Le plafond par job est à 1 800 s sur Codex : à 600 s,
+  13 CHANGELOG sur 14 étaient tués sans une ligne d'erreur.
+- `REGEN_PROVIDER=openai|gemini|grok` est **refusé** (exit 1, message qui cite
+  cette règle) tant que `REGEN_ALLOW_PAID_API=1` n'est pas posé en plus. Ne
+  jamais poser cette dérogation sans demande explicite du propriétaire — pas
+  même pour rattraper un fichier en échec : relancer Codex, ou `grok_cli`.
+- Un fichier qui échoue sur Codex (placeholder perdu, cas connu du hindi) se
+  relance **seul, sur Codex** : `python -m aipmt --use_codex --file CHANGELOG.md
+--target_lang hi --add_translation_note --force`.
+- Les tests `TestDetectProvider` verrouillent le défaut, le refus et la
+  dérogation.
+
 ## Claude Code Workflow
 
 - **Commits**: Utiliser le skill `/helping-with-commits` pour tous les commits
@@ -245,7 +273,7 @@ Quand l'utilisateur demande "release", "tag", "publie cette version" :
 ./release.sh --auto
 ```
 
-Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
+Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`, Codex + `gpt-5.6-sol`, cf. règle en tête) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
 
 **Pas de tag à ce stade.** Le tag est créé en phase 2 pour qu'il pointe sur le commit de merge dans `main` (pas sur la branche feature).
 
@@ -325,18 +353,19 @@ les deux depuis l'arbre source.
 #### Régénération seule (sans release)
 
 ```bash
-./regen_translations.sh --force   # réécrit les 28 traductions
+./regen_translations.sh --force   # réécrit les 28 traductions — Codex, gpt-5.6-sol, 0 € à l'usage
 ./regen_translations.sh           # skip celles qui existent déjà
 ```
 
-Le script lance 10 jobs en parallèle par défaut (4 pour Codex, 2 pour Grok). En
+Le script lance 4 jobs en parallèle sur Codex (défaut), 2 pour Grok et OpenCode,
+10 seulement sur une API facturée en dérogation. En
 relance manuelle d'un sous-ensemble — boucle directe sur `aipmt` — **5 en
 parallèle sont acceptés sur OpenAI**, demande explicite du propriétaire : 2 fait
 traîner un jeu de 14 CHANGELOG sur un quart d'heure.
 
 ## Project Overview
 
-AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex) and Grok subscription CLIs, with no per-use billing — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
+AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex) and Grok subscription CLIs, with no per-use billing — or OpenCode, the open-source agent, routed to whatever provider the user configured in OpenCode (local model, free gateway, subscription or key) — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
 
 ## Commands
 
@@ -441,11 +470,15 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 
 Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
-`GROK_TRANSLATE_SANDBOX`, `REGEN_PROVIDER`, `REGEN_MODEL`,
-`REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen),
+`GROK_TRANSLATE_SANDBOX`, `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
+`REGEN_PROVIDER`, `REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation, cf. règle en tête),
+`REGEN_JOB_TIMEOUT` (plafond par job du regen : 600 s, 1 800 s sur Codex),
 `XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
 
 ## Recommended Usage
+
+**Pour les traductions de CE dépôt, voir la règle en tête : Codex + `gpt-5.6-sol`,
+jamais l'API.** Ce qui suit vaut pour un usage général de l'outil sur une clé API.
 
 For batch translations (README, CHANGELOG, blog articles), use `--eco` mode:
 
@@ -463,8 +496,8 @@ pas facturée à l'usage.
 
 ```bash
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
-REGEN_PROVIDER=codex ./regen_translations.sh --force   # opt-in explicite
-REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+./regen_translations.sh --force                         # Codex est le défaut : gpt-5.6-sol
+REGEN_MODEL=gpt-5.6-luna ./regen_translations.sh --force   # éco, si le propriétaire le demande
 ```
 
 Coût réel mesuré : régénérer les 28 traductions (70 turns) avec `gpt-5.6-sol` a
@@ -533,6 +566,111 @@ end_turn` là où OpenAI émet `stop`.
 - **Quota non mesurable** : pool hebdomadaire partagé avec Chat, Imagine et
   Voice, aucune commande ne l'expose. D'où `max_jobs=2` au regen.
 
+### Provider OpenCode (`--use_opencode`) — routeur open source, `--model` obligatoire
+
+```bash
+aipmt --use_opencode --model opencode/mimo-v2.5-free --file README.md --target_dir . --target_lang en
+aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . --target_lang de
+REGEN_PROVIDER=opencode REGEN_MODEL=ollama/qwen2.5:7b ./regen_translations.sh --force
+```
+
+Huitième chemin. OpenCode (MIT) n'est pas un fournisseur mais un routeur vers
+ceux que l'utilisateur a configurés dans OpenCode lui-même : clé, abonnement
+(GitHub Copilot, ChatGPT, SuperGrok — Claude Pro/Max est interdit par
+Anthropic depuis la 1.3.0), passerelle Zen (modèles gratuits SANS compte) ou
+modèle local (Ollama, LM Studio, llama.cpp). Tout ce qui suit a été **mesuré
+sur opencode 1.18.27**, pas déduit de la doc :
+
+- **`--model provider/modèle` est obligatoire**, `--eco` sans effet. Sans
+  `--model`, OpenCode retombe sur `opencode/big-pickle`, modèle gratuit
+  « stealth » dont les échanges peuvent servir à l'entraînement : ce choix ne
+  se fait pas à la place de l'utilisateur. Le « / » du modèle est remplacé
+  avant toute interpolation dans un nom de fichier (`_model_filename_label`),
+  et la garde anti-traversée contrôle la valeur INTERPOLÉE, plus la valeur
+  brute — `..` seul reste refusé.
+- **Un `--agent` inconnu ne fait pas échouer `opencode run`** : avertissement
+  sur stderr et repli silencieux sur l'agent de codage, outils actifs. Le
+  contrat de sortie vérifie donc l'absence de ce message, en plus de : rc 0,
+  aucun événement `error`, aucun `tool_use`, dernier `step_finish` en `stop`,
+  texte non vide.
+- **Le JSON d'erreur est opaque** (« Unexpected server error », `ref`) : la
+  cause réelle (`ProviderModelNotFoundError`, `ProviderAuthError`…) n'est que
+  dans les logs `--print-logs`, d'où `--print-logs --log-level ERROR` et la
+  lecture du champ `error="…"` de stderr.
+- **Confinement par config inline** (`OPENCODE_CONFIG_CONTENT`, dernière
+  dans l'ordre de fusion) : agent `aipmt` avec `permission: {"*": "deny"}` —
+  aucun outil n'est même proposé au modèle —, `share: disabled`, pas de
+  `--auto`, `--pure`. Répertoire de travail jetable et vide.
+- **Contexte injecté à l'insu de l'appelant** : sans
+  `OPENCODE_DISABLE_CLAUDE_CODE`, `~/.claude/CLAUDE.md` entre dans chaque
+  prompt (515 tokens d'entrée au lieu de 186) ; sans
+  `OPENCODE_DISABLE_PROJECT_CONFIG`, l'`AGENTS.md` du cwd aussi (une consigne
+  « finir par BANANA » y a été suivie). Le `~/.config/opencode/AGENTS.md`
+  global reste injecté, aucun interrupteur ne l'écarte : documenté au lieu
+  d'être contourné par un `XDG_CONFIG_HOME` détourné, qui masquerait aussi les
+  fournisseurs de l'utilisateur.
+- **`--title` évite un appel LLM** : sans lui, OpenCode génère un titre de
+  session par un tour supplémentaire sur le `small_model`.
+- **stdin est lu jusqu'à EOF** et concaténé après l'argument : le segment
+  part par stdin, jamais par argv, et `communicate()` ferme toujours.
+- **Secrets** : même filtrage par motif que Codex/Grok, à une exception
+  nominative près, `OPENCODE_API_KEY` (clé d'OpenCode lui-même, Zen/Go).
+- **Modèles gratuits Zen** : `mimo-v2.5-free` traduit ce README en une passe
+  (49 s, structure identique) ; `big-pickle` met 40 s pour 200 mots et deux
+  requêtes simultanées y restent sans réponse 5 minutes ; `nemotron-3.5-lightning-free`
+  n'a rien répondu en 3 minutes. D'où `max_jobs=2` au regen.
+- **Modèle local** : Ollama configure souvent 4 096 tokens de contexte, les
+  segments font jusqu'à 16 000 caractères → `PARAMETER num_ctx 32768` dans un
+  Modelfile. Un 7B (qwen2.5) a abîmé une clôture de bloc de code sur un
+  fichier d'essai, là où le modèle de la passerelle a tout préservé.
+- **Pas de refus en CI** : contrairement aux CLI d'abonnement, une clé API ou
+  un modèle auto-hébergé sur un runner sont des usages légitimes.
+- OpenCode écrit `~/.config/opencode/` (config vide, `node_modules` de son
+  runtime de plugins) et journalise chaque session dans sa base SQLite
+  `~/.local/share/opencode/opencode.db`.
+
+**Poste local (installé et mesuré le 2026-09-04)** — RTX 3060 12 Go, 62 Go de RAM :
+
+- Ollama 0.33.3, mis à jour par le script officiel (`curl -fsSL
+https://ollama.com/install.sh | sh`, sudo sans mot de passe sur ce poste).
+  Le script réécrit l'unité systemd mais pas le drop-in
+  `/etc/systemd/system/ollama.service.d/override.conf`, qui place le magasin
+  sur `OLLAMA_MODELS=/mnt/msi/ollama` (NVMe de 916 Go). Il ne touche pas aux
+  modèles téléchargés.
+- Modèles : `gemma4:12b` (7,6 Go, Apache 2.0, 140+ langues) et `qwen3.5:9b`
+  (6,6 Go, Apache 2.0, 201 langues), plus leurs variantes `gemma4-12b-32k` et
+  `qwen3.5-9b-32k` créées depuis `~/ollama/*.Modelfile` : sous 24 Go de VRAM,
+  Ollama plafonne le contexte à 4 096 par défaut, et l'API OpenAI-compatible
+  n'a aucun moyen de le régler par requête — d'où `PARAMETER num_ctx 32768`.
+- `~/.config/opencode/opencode.jsonc` déclare le fournisseur `ollama`
+  (`@ai-sdk/openai-compatible`, `http://127.0.0.1:11434/v1`) avec, sur chaque
+  modèle, `options.reasoningEffort: "none"`. Indispensable et mesuré : Ollama
+  active la réflexion par défaut sur Qwen 3.5 et Gemma 4, un Modelfile ne
+  peut pas la couper ; sans l'option, « Le chat dort sur le tapis » coûte 919
+  tokens de raisonnement et 68 s, avec elle 9 tokens.
+- Écartés après recherche : GLM 5.3 Flash et tous les Kimi n'existent sur
+  Ollama qu'en `:cloud` (320 B et ~1 T de paramètres) ; Qwen 3.6/3.8 font 18 à
+  23 Go ; `translategemma` est limité à 2 K tokens d'entrée.
+
+**Matrice des modèles testés sur un article réel du blog** (589 lignes, 140
+liens, 3 citations EN protégées, mode `--news`, cible `en`, même commande) — le
+barème du propriétaire est « aussi bien que gpt-5.6-luna / gpt-5.4-mini », et
+les modèles qui échouent sont supprimés du poste :
+
+| Modèle                                   | Poids  | Répartition           | Durée         | Résultat                                                                                                                                             | Verdict                                |
+| ---------------------------------------- | ------ | --------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `opencode/mimo-v2.5-free` (Zen, hébergé) | —      | —                     | 4 min 26 s    | structure identique, 0 écart                                                                                                                         | référence                              |
+| `ollama/gemma4-12b-32k`                  | 7,6 Go | 100 % GPU, 10 Go VRAM | 10 min 10 s   | liens/URL/tableaux/gras/code identiques ; 1 ligne de citation inventée (🇺🇸 + paraphrase), 1 attribution dupliquée                                    | insuffisant, le plus proche — conservé |
+| `ollama/qwen3.5-9b-32k`                  | 6,6 Go | 100 % GPU             | 8 min 18 s    | idem citation inventée + gras/code ajoutés, 1 segment repassé                                                                                        | échec — supprimé                       |
+| `ollama/qwen3.6-35b-a3b-32k`             | 22 Go  | 65 % CPU / 35 % GPU   | échec à 3 min | segment 1 : placeholder perdu, puis à la reprise un JSON `{"error": true, "message": "Translation contract violation…"}` à la place de la traduction | échec — supprimé                       |
+| `ollama/gpt-oss-20b-32k`                 | 13 Go  | 37 % CPU / 63 % GPU   | (en cours)    | `reasoning_effort: none` accepté mais réflexion toujours active (473 caractères) ; `low` la réduit à 39                                              | à compléter                            |
+
+Constat commun aux 9-12B : la consigne du mode news « supprimer la ligne 🇫🇷
+sous chaque citation pour une cible anglaise » est lue deux fois sur trois. Deux
+leviers côté aipmt, non implémentés : retirer en post-traitement toute ligne
+`> drapeau _…_` sous une citation protégée, et réduire la taille des segments
+pour les petits modèles (16 000 caractères aujourd'hui).
+
 ## Key Constants
 
 - `EXCLUDE_PATTERNS`: Paths containing these strings are skipped (`traductions_`, `venv`, `PRIVACY.md`)
@@ -540,15 +678,16 @@ end_turn` là où OpenAI émet `stop`.
 
 ### Default Models (2026)
 
-| Provider | Quality (default)      | Economic (`--eco`)      |
-| -------- | ---------------------- | ----------------------- |
-| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
-| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
-| Mistral  | `mistral-large-latest` | `mistral-small-latest`  |
-| Gemini   | `gemini-3.7-flash`     | `gemini-3.1-flash-lite` |
-| Codex    | `gpt-5.6-sol`          | `gpt-5.6-luna`          |
-| Grok API | `grok-4.6`             | `grok-4.3`              |
-| Grok CLI | `grok-4.6`             | `grok-4.5`              |
+| Provider | Quality (default)                     | Economic (`--eco`)      |
+| -------- | ------------------------------------- | ----------------------- |
+| OpenAI   | `gpt-5.6-terra`                       | `gpt-5.6-luna`          |
+| Claude   | `claude-sonnet-5`                     | `claude-haiku-4-5`      |
+| Mistral  | `mistral-large-latest`                | `mistral-small-latest`  |
+| Gemini   | `gemini-3.7-flash`                    | `gemini-3.1-flash-lite` |
+| Codex    | `gpt-5.6-sol`                         | `gpt-5.6-luna`          |
+| Grok API | `grok-4.6`                            | `grok-4.3`              |
+| Grok CLI | `grok-4.6`                            | `grok-4.5`              |
+| OpenCode | `--model provider/modèle` obligatoire | idem                    |
 
 ### Model lifecycle — dates to watch (audited 2026-08-29)
 
