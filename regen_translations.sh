@@ -210,9 +210,15 @@ main() {
   failed_log=$(mktemp)
   trap 'if [[ -n "${failed_log:-}" ]]; then rm -f "$failed_log"; fi' EXIT
 
-  # Timeout par job : si un appel API hang, le job sort en 124 et est consigné
-  # comme échec plutôt que de figer toute la release indéfiniment.
-  local job_timeout="${REGEN_JOB_TIMEOUT:-600}"
+  # Timeout par job : si un appel hang, le job sort en 124 et est consigné
+  # comme échec plutôt que de figer toute la release indéfiniment. Sur Codex
+  # le plafond est de 1800 s : mesuré le 2026-09-04 avec gpt-5.6-sol et 4 jobs,
+  # un README prend 180-245 s et CHANGELOG-en 548 s ; les 13 autres CHANGELOG,
+  # tués à 600 s, ont fait échouer le regen sans une ligne d'erreur — `timeout`
+  # abat python avant tout message. REGEN_JOB_TIMEOUT reste souverain.
+  local default_timeout=600
+  [[ "$provider_flags" == *--use_codex* ]] && default_timeout=1800
+  local job_timeout="${REGEN_JOB_TIMEOUT:-$default_timeout}"
 
   run_one() {
     local file="$1" lang="$2"

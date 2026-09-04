@@ -137,7 +137,7 @@ Studio). Variables optionnelles : `XAI_BASE_URL` (endpoint xAI, défaut
 `OPENCODE_TIMEOUT` (voir la section OpenCode). Côté
 `regen_translations.sh` : `REGEN_PROVIDER` (défaut `codex`, sur abonnement),
 `REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation obligatoire pour une API
-facturée) et `REGEN_JOB_TIMEOUT` (plafond par job, défaut 600 s).
+facturée) et `REGEN_JOB_TIMEOUT` (plafond par job, défaut 600 s, 1 800 s sur Codex).
 
 ## Utilisation
 
@@ -348,6 +348,67 @@ aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir 
   sinon le `PATH` puis `~/.opencode/bin/opencode`) et `OPENCODE_TIMEOUT`
   (secondes par segment, défaut `600`). `OPENCODE_CONFIG` est honoré si vous
   l'exportez.
+
+**Exemple mesuré : un modèle local via Ollama** (RTX 3060 12 Go, 62 Go de RAM, Ollama 0.33.3)
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh   # Ollama ≥ 0.30 pour gemma4 ; conserve les modèles déjà téléchargés
+ollama pull gemma4:12b                          # 7,6 Go, Apache 2.0, 140+ langues
+ollama pull qwen3.5:9b                          # 6,6 Go, Apache 2.0, 201 langues
+
+# Sous 24 Go de VRAM, Ollama plafonne le contexte à 4 096 tokens, et son API OpenAI-compatible
+# ne permet pas de le régler par requête : on le fixe dans un Modelfile.
+printf 'FROM gemma4:12b\nPARAMETER num_ctx 32768\n' > gemma4-12b-32k.Modelfile
+ollama create gemma4-12b-32k -f gemma4-12b-32k.Modelfile
+```
+
+Puis le fournisseur dans `~/.config/opencode/opencode.json` :
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": { "baseURL": "http://127.0.0.1:11434/v1" },
+      "models": {
+        "gemma4-12b-32k": {
+          "name": "Gemma 4 12B (32k, sans réflexion)",
+          "limit": { "context": 32768, "output": 8192 },
+          "options": { "reasoningEffort": "none" }
+        }
+      }
+    }
+  }
+}
+```
+
+`reasoningEffort: "none"` n'est pas un détail : Ollama active la réflexion par
+défaut sur Gemma 4 et Qwen 3.5, et un Modelfile ne peut pas la couper. Mesuré à
+travers OpenCode : sans l'option, « Le chat dort sur le tapis » coûte 919 tokens
+de raisonnement et 68 s ; avec, 9 tokens.
+
+```bash
+aipmt --use_opencode --model ollama/gemma4-12b-32k --news --keep_filename \
+  --add_translation_note --file article.mdx --target_dir out/ --target_lang en
+```
+
+Résultats sur un article de blog réel de 589 lignes (140 liens, 21 sections,
+3 citations anglaises protégées par le mode `--news`), même commande, trois
+modèles :
+
+| Modèle                                   | Durée       | Structure                                                  | Écarts                                                                                    |
+| ---------------------------------------- | ----------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `opencode/mimo-v2.5-free` (Zen, gratuit) | 4 min 26 s  | identique à la source                                      | aucun                                                                                     |
+| `ollama/gemma4-12b-32k` (local)          | 10 min 10 s | liens, URL, tableaux, tags, gras et code inline identiques | une ligne de citation inventée (🇺🇸 + paraphrase), une attribution dupliquée               |
+| `ollama/qwen3.5-9b-32k` (local)          | 8 min 18 s  | liens, URL, tableaux et tags identiques                    | une ligne de citation inventée, quelques gras et codes inline ajoutés, un segment repassé |
+
+Pendant la traduction locale : GPU à 98 % et 170 W, 10 Go de VRAM occupés
+(modèle et cache de 32 k tokens, rien déchargé en RAM), 7,5 Go de RAM pour le
+serveur Ollama. Un modèle de 9 à 12 milliards de paramètres respecte la
+structure mais s'accorde une liberté par article, là où le modèle de passerelle
+n'en a pris aucune : à relire avant publication, ou à réserver aux brouillons.
 
 ### Mode économique
 

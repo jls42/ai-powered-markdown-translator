@@ -56,6 +56,10 @@ Ce que ça implique, et ce qui l'encode :
 
 - `./regen_translations.sh --force` sans variable = Codex, `gpt-5.6-sol`, 4
   jobs. Plus aucune auto-détection de clé : une clé présente ne change rien.
+  **Compter une heure** : mesuré le 2026-09-04 à 4 jobs, un README prend 3 à
+  4 min et un CHANGELOG 10 à 14 min (effort de raisonnement `medium`, défaut
+  de Sol hors `--eco`). Le plafond par job est à 1 800 s sur Codex : à 600 s,
+  13 CHANGELOG sur 14 étaient tués sans une ligne d'erreur.
 - `REGEN_PROVIDER=openai|gemini|grok` est **refusé** (exit 1, message qui cite
   cette règle) tant que `REGEN_ALLOW_PAID_API=1` n'est pas posé en plus. Ne
   jamais poser cette dérogation sans demande explicite du propriétaire — pas
@@ -468,7 +472,7 @@ Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
 `GROK_TRANSLATE_SANDBOX`, `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
 `REGEN_PROVIDER`, `REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation, cf. règle en tête),
-`REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen),
+`REGEN_JOB_TIMEOUT` (plafond par job du regen : 600 s, 1 800 s sur Codex),
 `XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
 
 ## Recommended Usage
@@ -624,6 +628,48 @@ sur opencode 1.18.27**, pas déduit de la doc :
 - OpenCode écrit `~/.config/opencode/` (config vide, `node_modules` de son
   runtime de plugins) et journalise chaque session dans sa base SQLite
   `~/.local/share/opencode/opencode.db`.
+
+**Poste local (installé et mesuré le 2026-09-04)** — RTX 3060 12 Go, 62 Go de RAM :
+
+- Ollama 0.33.3, mis à jour par le script officiel (`curl -fsSL
+https://ollama.com/install.sh | sh`, sudo sans mot de passe sur ce poste).
+  Le script réécrit l'unité systemd mais pas le drop-in
+  `/etc/systemd/system/ollama.service.d/override.conf`, qui place le magasin
+  sur `OLLAMA_MODELS=/mnt/msi/ollama` (NVMe de 916 Go). Il ne touche pas aux
+  modèles téléchargés.
+- Modèles : `gemma4:12b` (7,6 Go, Apache 2.0, 140+ langues) et `qwen3.5:9b`
+  (6,6 Go, Apache 2.0, 201 langues), plus leurs variantes `gemma4-12b-32k` et
+  `qwen3.5-9b-32k` créées depuis `~/ollama/*.Modelfile` : sous 24 Go de VRAM,
+  Ollama plafonne le contexte à 4 096 par défaut, et l'API OpenAI-compatible
+  n'a aucun moyen de le régler par requête — d'où `PARAMETER num_ctx 32768`.
+- `~/.config/opencode/opencode.jsonc` déclare le fournisseur `ollama`
+  (`@ai-sdk/openai-compatible`, `http://127.0.0.1:11434/v1`) avec, sur chaque
+  modèle, `options.reasoningEffort: "none"`. Indispensable et mesuré : Ollama
+  active la réflexion par défaut sur Qwen 3.5 et Gemma 4, un Modelfile ne
+  peut pas la couper ; sans l'option, « Le chat dort sur le tapis » coûte 919
+  tokens de raisonnement et 68 s, avec elle 9 tokens.
+- Écartés après recherche : GLM 5.3 Flash et tous les Kimi n'existent sur
+  Ollama qu'en `:cloud` (320 B et ~1 T de paramètres) ; Qwen 3.6/3.8 font 18 à
+  23 Go ; `translategemma` est limité à 2 K tokens d'entrée.
+
+**Matrice des modèles testés sur un article réel du blog** (589 lignes, 140
+liens, 3 citations EN protégées, mode `--news`, cible `en`, même commande) — le
+barème du propriétaire est « aussi bien que gpt-5.6-luna / gpt-5.4-mini », et
+les modèles qui échouent sont supprimés du poste :
+
+| Modèle                                   | Poids  | Répartition           | Durée         | Résultat                                                                                                                                             | Verdict                                |
+| ---------------------------------------- | ------ | --------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `opencode/mimo-v2.5-free` (Zen, hébergé) | —      | —                     | 4 min 26 s    | structure identique, 0 écart                                                                                                                         | référence                              |
+| `ollama/gemma4-12b-32k`                  | 7,6 Go | 100 % GPU, 10 Go VRAM | 10 min 10 s   | liens/URL/tableaux/gras/code identiques ; 1 ligne de citation inventée (🇺🇸 + paraphrase), 1 attribution dupliquée                                    | insuffisant, le plus proche — conservé |
+| `ollama/qwen3.5-9b-32k`                  | 6,6 Go | 100 % GPU             | 8 min 18 s    | idem citation inventée + gras/code ajoutés, 1 segment repassé                                                                                        | échec — supprimé                       |
+| `ollama/qwen3.6-35b-a3b-32k`             | 22 Go  | 65 % CPU / 35 % GPU   | échec à 3 min | segment 1 : placeholder perdu, puis à la reprise un JSON `{"error": true, "message": "Translation contract violation…"}` à la place de la traduction | échec — supprimé                       |
+| `ollama/gpt-oss-20b-32k`                 | 13 Go  | 37 % CPU / 63 % GPU   | (en cours)    | `reasoning_effort: none` accepté mais réflexion toujours active (473 caractères) ; `low` la réduit à 39                                              | à compléter                            |
+
+Constat commun aux 9-12B : la consigne du mode news « supprimer la ligne 🇫🇷
+sous chaque citation pour une cible anglaise » est lue deux fois sur trois. Deux
+leviers côté aipmt, non implémentés : retirer en post-traitement toute ligne
+`> drapeau _…_` sous une citation protégée, et réduire la taille des segments
+pour les petits modèles (16 000 caractères aujourd'hui).
 
 ## Key Constants
 
