@@ -329,14 +329,15 @@ les deux depuis l'arbre source.
 ./regen_translations.sh           # skip celles qui existent déjà
 ```
 
-Le script lance 10 jobs en parallèle par défaut (4 pour Codex, 2 pour Grok). En
+Le script lance 10 jobs en parallèle par défaut (4 pour Codex, 2 pour Grok et
+OpenCode). En
 relance manuelle d'un sous-ensemble — boucle directe sur `aipmt` — **5 en
 parallèle sont acceptés sur OpenAI**, demande explicite du propriétaire : 2 fait
 traîner un jeu de 14 CHANGELOG sur un quart d'heure.
 
 ## Project Overview
 
-AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex) and Grok subscription CLIs, with no per-use billing — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
+AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex) and Grok subscription CLIs, with no per-use billing — or OpenCode, the open-source agent, routed to whatever provider the user configured in OpenCode (local model, free gateway, subscription or key) — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
 
 ## Commands
 
@@ -441,7 +442,8 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 
 Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
-`GROK_TRANSLATE_SANDBOX`, `REGEN_PROVIDER`, `REGEN_MODEL`,
+`GROK_TRANSLATE_SANDBOX`, `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
+`REGEN_PROVIDER`, `REGEN_MODEL`,
 `REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen),
 `XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
 
@@ -533,6 +535,69 @@ end_turn` là où OpenAI émet `stop`.
 - **Quota non mesurable** : pool hebdomadaire partagé avec Chat, Imagine et
   Voice, aucune commande ne l'expose. D'où `max_jobs=2` au regen.
 
+### Provider OpenCode (`--use_opencode`) — routeur open source, `--model` obligatoire
+
+```bash
+aipmt --use_opencode --model opencode/mimo-v2.5-free --file README.md --target_dir . --target_lang en
+aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . --target_lang de
+REGEN_PROVIDER=opencode REGEN_MODEL=ollama/qwen2.5:7b ./regen_translations.sh --force
+```
+
+Huitième chemin. OpenCode (MIT) n'est pas un fournisseur mais un routeur vers
+ceux que l'utilisateur a configurés dans OpenCode lui-même : clé, abonnement
+(GitHub Copilot, ChatGPT, SuperGrok — Claude Pro/Max est interdit par
+Anthropic depuis la 1.3.0), passerelle Zen (modèles gratuits SANS compte) ou
+modèle local (Ollama, LM Studio, llama.cpp). Tout ce qui suit a été **mesuré
+sur opencode 1.18.27**, pas déduit de la doc :
+
+- **`--model provider/modèle` est obligatoire**, `--eco` sans effet. Sans
+  `--model`, OpenCode retombe sur `opencode/big-pickle`, modèle gratuit
+  « stealth » dont les échanges peuvent servir à l'entraînement : ce choix ne
+  se fait pas à la place de l'utilisateur. Le « / » du modèle est remplacé
+  avant toute interpolation dans un nom de fichier (`_model_filename_label`),
+  et la garde anti-traversée contrôle la valeur INTERPOLÉE, plus la valeur
+  brute — `..` seul reste refusé.
+- **Un `--agent` inconnu ne fait pas échouer `opencode run`** : avertissement
+  sur stderr et repli silencieux sur l'agent de codage, outils actifs. Le
+  contrat de sortie vérifie donc l'absence de ce message, en plus de : rc 0,
+  aucun événement `error`, aucun `tool_use`, dernier `step_finish` en `stop`,
+  texte non vide.
+- **Le JSON d'erreur est opaque** (« Unexpected server error », `ref`) : la
+  cause réelle (`ProviderModelNotFoundError`, `ProviderAuthError`…) n'est que
+  dans les logs `--print-logs`, d'où `--print-logs --log-level ERROR` et la
+  lecture du champ `error="…"` de stderr.
+- **Confinement par config inline** (`OPENCODE_CONFIG_CONTENT`, dernière
+  dans l'ordre de fusion) : agent `aipmt` avec `permission: {"*": "deny"}` —
+  aucun outil n'est même proposé au modèle —, `share: disabled`, pas de
+  `--auto`, `--pure`. Répertoire de travail jetable et vide.
+- **Contexte injecté à l'insu de l'appelant** : sans
+  `OPENCODE_DISABLE_CLAUDE_CODE`, `~/.claude/CLAUDE.md` entre dans chaque
+  prompt (515 tokens d'entrée au lieu de 186) ; sans
+  `OPENCODE_DISABLE_PROJECT_CONFIG`, l'`AGENTS.md` du cwd aussi (une consigne
+  « finir par BANANA » y a été suivie). Le `~/.config/opencode/AGENTS.md`
+  global reste injecté, aucun interrupteur ne l'écarte : documenté au lieu
+  d'être contourné par un `XDG_CONFIG_HOME` détourné, qui masquerait aussi les
+  fournisseurs de l'utilisateur.
+- **`--title` évite un appel LLM** : sans lui, OpenCode génère un titre de
+  session par un tour supplémentaire sur le `small_model`.
+- **stdin est lu jusqu'à EOF** et concaténé après l'argument : le segment
+  part par stdin, jamais par argv, et `communicate()` ferme toujours.
+- **Secrets** : même filtrage par motif que Codex/Grok, à une exception
+  nominative près, `OPENCODE_API_KEY` (clé d'OpenCode lui-même, Zen/Go).
+- **Modèles gratuits Zen** : `mimo-v2.5-free` traduit ce README en une passe
+  (49 s, structure identique) ; `big-pickle` met 40 s pour 200 mots et deux
+  requêtes simultanées y restent sans réponse 5 minutes ; `nemotron-3.5-lightning-free`
+  n'a rien répondu en 3 minutes. D'où `max_jobs=2` au regen.
+- **Modèle local** : Ollama configure souvent 4 096 tokens de contexte, les
+  segments font jusqu'à 16 000 caractères → `PARAMETER num_ctx 32768` dans un
+  Modelfile. Un 7B (qwen2.5) a abîmé une clôture de bloc de code sur un
+  fichier d'essai, là où le modèle de la passerelle a tout préservé.
+- **Pas de refus en CI** : contrairement aux CLI d'abonnement, une clé API ou
+  un modèle auto-hébergé sur un runner sont des usages légitimes.
+- OpenCode écrit `~/.config/opencode/` (config vide, `node_modules` de son
+  runtime de plugins) et journalise chaque session dans sa base SQLite
+  `~/.local/share/opencode/opencode.db`.
+
 ## Key Constants
 
 - `EXCLUDE_PATTERNS`: Paths containing these strings are skipped (`traductions_`, `venv`, `PRIVACY.md`)
@@ -540,15 +605,16 @@ end_turn` là où OpenAI émet `stop`.
 
 ### Default Models (2026)
 
-| Provider | Quality (default)      | Economic (`--eco`)      |
-| -------- | ---------------------- | ----------------------- |
-| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
-| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
-| Mistral  | `mistral-large-latest` | `mistral-small-latest`  |
-| Gemini   | `gemini-3.7-flash`     | `gemini-3.1-flash-lite` |
-| Codex    | `gpt-5.6-sol`          | `gpt-5.6-luna`          |
-| Grok API | `grok-4.6`             | `grok-4.3`              |
-| Grok CLI | `grok-4.6`             | `grok-4.5`              |
+| Provider | Quality (default)                     | Economic (`--eco`)      |
+| -------- | ------------------------------------- | ----------------------- |
+| OpenAI   | `gpt-5.6-terra`                       | `gpt-5.6-luna`          |
+| Claude   | `claude-sonnet-5`                     | `claude-haiku-4-5`      |
+| Mistral  | `mistral-large-latest`                | `mistral-small-latest`  |
+| Gemini   | `gemini-3.7-flash`                    | `gemini-3.1-flash-lite` |
+| Codex    | `gpt-5.6-sol`                         | `gpt-5.6-luna`          |
+| Grok API | `grok-4.6`                            | `grok-4.3`              |
+| Grok CLI | `grok-4.6`                            | `grok-4.5`              |
+| OpenCode | `--model provider/modèle` obligatoire | idem                    |
 
 ### Model lifecycle — dates to watch (audited 2026-08-29)
 
