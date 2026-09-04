@@ -404,8 +404,9 @@ class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
         name = translate._resolve_single_output_filename(args)
         self.assertEqual(name, "doc-en-..-..-evil.md")
         self.assertNotIn(os.sep, name)
+        dotdot = self._args(model="..")
         with self.assertRaises(ValueError) as ctx:
-            translate._reject_path_separators_in_components(self._args(model=".."))
+            translate._reject_path_separators_in_components(dotdot)
         self.assertIn("model", str(ctx.exception))
 
     def test_bare_dotdot_is_refused(self):
