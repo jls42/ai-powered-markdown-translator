@@ -55,6 +55,8 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
             ["--use_codex", "--use_claude"],
             ["--use_grok", "--use_grok_cli"],
             ["--use_gemini", "--use_grok"],
+            ["--use_opencode", "--use_codex"],
+            ["--use_opencode", "--use_mistral"],
         ):
             with self.subTest(pair=pair), self.assertRaises(SystemExit):
                 parser.parse_args(pair)
@@ -68,6 +70,7 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
             "--use_grok",
             "--use_grok_cli",
             "--use_codex",
+            "--use_opencode",
         ):
             with self.subTest(flag=flag):
                 args = parser.parse_args([flag])
@@ -329,6 +332,16 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
             env = translate._grok_env()
         self.assertEqual(self._leaked(env), [])
 
+    def test_opencode_subprocess_receives_no_secret_but_its_own_key(self):
+        """OPENCODE_API_KEY est la clé d'OpenCode LUI-MÊME (passerelle Zen,
+        abonnement Go) : l'équivalent de son auth.json, adressée par son nom.
+        C'est la seule exception, et elle est nominative."""
+        with patch.dict(os.environ, {**self.SECRETS, "OPENCODE_API_KEY": _MARQUEUR}, clear=False):
+            env = translate._opencode_env("prompt")
+        self.assertEqual(self._leaked(env), [])
+        self.assertEqual(env.get("OPENCODE_API_KEY"), _MARQUEUR)
+        self.assertEqual(translate.OPENCODE_KEPT_ENV_VARS, ("OPENCODE_API_KEY",))
+
     def test_variables_needed_by_the_cli_survive(self):
         """Un filtrage trop large casserait les deux CLI.
 
@@ -339,6 +352,7 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
             for env in (
                 translate._codex_env(translate._CodexClient(binary="/bin/true")),
                 translate._grok_env(),
+                translate._opencode_env("prompt"),
             ):
                 self.assertEqual(env.get("PATH"), "/usr/bin")
                 self.assertEqual(env.get("HOME"), "/home/u")
@@ -380,10 +394,18 @@ class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
             translate._reject_path_separators_in_components(args)
         self.assertIn("target_lang", str(ctx.exception))
 
-    def test_path_separator_in_model_is_refused(self):
-        args = self._args(model="../../evil")
+    def test_path_separator_in_model_is_neutralized_not_refused(self):
+        """`provider/modèle` est la forme légitime d'OpenCode : le « / » n'est
+        plus refusé mais remplacé AVANT interpolation, si bien qu'une tentative
+        de traversée reste un simple nom de fichier sous la cible. Le contrôle
+        porte sur la valeur interpolée ; `..` seul y reste refusé."""
+        args = self._args(model="../../evil", include_model=True, target_lang="en")
+        translate._reject_path_separators_in_components(args)
+        name = translate._resolve_single_output_filename(args)
+        self.assertEqual(name, "doc-en-..-..-evil.md")
+        self.assertNotIn(os.sep, name)
         with self.assertRaises(ValueError) as ctx:
-            translate._reject_path_separators_in_components(args)
+            translate._reject_path_separators_in_components(self._args(model=".."))
         self.assertIn("model", str(ctx.exception))
 
     def test_bare_dotdot_is_refused(self):

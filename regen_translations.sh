@@ -13,8 +13,9 @@ set -euo pipefail
 #   - sinon GOOGLE/GEMINI_API_KEY valide   → Gemini Flash (--use_gemini --eco)
 #   - sinon                                → abort (aucune clé exploitable)
 #
-# REGEN_PROVIDER force le choix : gemini | openai | codex | grok | grok_cli.
-# REGEN_MODEL force un modèle par-dessus le défaut du provider.
+# REGEN_PROVIDER force le choix : gemini | openai | codex | grok | grok_cli | opencode.
+# REGEN_MODEL force un modèle par-dessus le défaut du provider (obligatoire
+# avec opencode, au format provider/modèle).
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -79,6 +80,18 @@ detect_provider() {
       echo "[regen] REGEN_PROVIDER=grok → --use_grok --eco (API xAI, facturé à l'usage)" >&2
       return
       ;;
+    opencode)
+      # Routeur open source vers le fournisseur configuré dans OpenCode (local,
+      # gratuit, abonnement ou clé). Aucun défaut n'est choisi à la place de
+      # l'utilisateur, ni ici ni dans le module : REGEN_MODEL est obligatoire.
+      if [[ -z "${REGEN_MODEL:-}" ]]; then
+        echo "[regen] ERROR: REGEN_PROVIDER=opencode exige REGEN_MODEL=provider/modèle (ex. ollama/qwen2.5:7b, opencode/mimo-v2.5-free)" >&2
+        exit 1
+      fi
+      echo "--use_opencode"
+      echo "[regen] REGEN_PROVIDER=opencode → --use_opencode --model ${REGEN_MODEL} (routeur OpenCode)" >&2
+      return
+      ;;
     codex)
       # Jamais auto-détecté : consomme le quota de l'abonnement ChatGPT, ce qui
       # doit rester un choix explicite. Opt-in uniquement.
@@ -90,7 +103,7 @@ detect_provider() {
       # Pas d'override → tomber dans l'auto-détection ci-dessous
       ;;
     *)
-      echo "[regen] WARNING: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: gemini|openai|codex|grok|grok_cli), auto-détection" >&2
+      echo "[regen] WARNING: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: gemini|openai|codex|grok|grok_cli|opencode), auto-détection" >&2
       ;;
   esac
 
@@ -158,6 +171,21 @@ main() {
       exit 1
     fi
     echo "[regen] ATTENTION : le quota Grok est partagé avec Chat/Imagine/Voice et n'est pas mesurable."
+    max_jobs=2
+  fi
+  if [[ "$provider_flags" == *--use_opencode* ]]; then
+    # Le binaire est cherché comme dans le module : OPENCODE_BIN, le PATH, puis
+    # l'emplacement de l'installeur officiel. Pas de contrôle d'auth : il n'y a
+    # rien d'unique à contrôler (Ollama ne demande rien, Zen sert des modèles
+    # gratuits sans compte), un fournisseur absent échoue au premier segment.
+    local opencode_bin="${OPENCODE_BIN:-$(command -v opencode || echo "$HOME/.opencode/bin/opencode")}"
+    if [[ ! -x "$opencode_bin" ]]; then
+      echo "[regen] ERROR: binaire OpenCode introuvable ($opencode_bin) — l'installer ou définir OPENCODE_BIN" >&2
+      exit 1
+    fi
+    # Backend inconnu d'ici : un GPU local sérialise de toute façon, et deux
+    # requêtes simultanées sur un modèle gratuit Zen ont été mesurées bloquées
+    # sans réponse pendant 5 minutes là où chacune seule répond en 40 s.
     max_jobs=2
   fi
   if [[ "$provider_flags" == *--use_codex* ]]; then
