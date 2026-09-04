@@ -135,8 +135,9 @@ Studio). Variables optionnelles : `XAI_BASE_URL` (endpoint xAI, défaut
 900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
 `GROK_TRANSLATE_SANDBOX` (voir la section Grok CLI) et `OPENCODE_BIN` /
 `OPENCODE_TIMEOUT` (voir la section OpenCode). Côté
-`regen_translations.sh` : `REGEN_PROVIDER`, `REGEN_MODEL` et
-`REGEN_JOB_TIMEOUT` (plafond par job, défaut 600 s).
+`regen_translations.sh` : `REGEN_PROVIDER` (défaut `codex`, sur abonnement),
+`REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation obligatoire pour une API
+facturée) et `REGEN_JOB_TIMEOUT` (plafond par job, défaut 600 s).
 
 ## Utilisation
 
@@ -253,13 +254,17 @@ Autres variables : `GROK_BIN` (chemin du binaire), `GROK_TIMEOUT` (défaut 900 s
 Pour la régénération des 28 traductions :
 
 ```bash
-REGEN_PROVIDER=codex ./regen_translations.sh --force
+# Défaut : Codex sur l'abonnement ChatGPT, modèle qualité gpt-5.6-sol, 0 € à l'usage
+./regen_translations.sh --force
 
-# Sur un modèle précis plutôt que le défaut --eco du provider
-REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+# Le modèle éco de Codex, si le volume l'impose
+REGEN_MODEL=gpt-5.6-luna ./regen_translations.sh --force
 
 # Sur le quota de l'abonnement Grok
 REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
+
+# Une API facturée (openai, gemini, grok) est REFUSÉE sans cette dérogation nommée
+REGEN_PROVIDER=openai REGEN_ALLOW_PAID_API=1 ./regen_translations.sh --force
 
 # Via OpenCode, vers le modèle de son choix (REGEN_MODEL obligatoire, 2 jobs en parallèle)
 REGEN_PROVIDER=opencode REGEN_MODEL=ollama/qwen2.5:7b ./regen_translations.sh --force
