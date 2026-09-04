@@ -42,6 +42,30 @@ Si une vérification échoue, le travail continue — on ne rend pas la main sur
 « presque ». Pour enchaîner les corrections sans supervision, `/loop` permet de
 reprendre la tâche jusqu'à ce que le script passe au vert.
 
+## Traductions de ce dépôt : JAMAIS par une API facturée
+
+**Décision du propriétaire, non négociable, formulée le 2026-09-04 :** les 28
+traductions (README, CHANGELOG) se font sur **l'abonnement ChatGPT via Codex**,
+avec **`gpt-5.6-sol`** (le modèle qualité). L'abonnement a été pris exprès pour
+ne pas payer de coûts API. Ce jour-là, `release.sh --auto` avait envoyé les 28
+fichiers sur l'API OpenAI, puis le CHANGELOG hindi sur celle de Gemini, parce
+que le regen auto-détectait `OPENAI_API_KEY` dans `.env` et ne faisait de Codex
+qu'un opt-in.
+
+Ce que ça implique, et ce qui l'encode :
+
+- `./regen_translations.sh --force` sans variable = Codex, `gpt-5.6-sol`, 4
+  jobs. Plus aucune auto-détection de clé : une clé présente ne change rien.
+- `REGEN_PROVIDER=openai|gemini|grok` est **refusé** (exit 1, message qui cite
+  cette règle) tant que `REGEN_ALLOW_PAID_API=1` n'est pas posé en plus. Ne
+  jamais poser cette dérogation sans demande explicite du propriétaire — pas
+  même pour rattraper un fichier en échec : relancer Codex, ou `grok_cli`.
+- Un fichier qui échoue sur Codex (placeholder perdu, cas connu du hindi) se
+  relance **seul, sur Codex** : `python -m aipmt --use_codex --file CHANGELOG.md
+--target_lang hi --add_translation_note --force`.
+- Les tests `TestDetectProvider` verrouillent le défaut, le refus et la
+  dérogation.
+
 ## Claude Code Workflow
 
 - **Commits**: Utiliser le skill `/helping-with-commits` pour tous les commits
@@ -245,7 +269,7 @@ Quand l'utilisateur demande "release", "tag", "publie cette version" :
 ./release.sh --auto
 ```
 
-Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
+Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`, Codex + `gpt-5.6-sol`, cf. règle en tête) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
 
 **Pas de tag à ce stade.** Le tag est créé en phase 2 pour qu'il pointe sur le commit de merge dans `main` (pas sur la branche feature).
 
@@ -325,12 +349,12 @@ les deux depuis l'arbre source.
 #### Régénération seule (sans release)
 
 ```bash
-./regen_translations.sh --force   # réécrit les 28 traductions
+./regen_translations.sh --force   # réécrit les 28 traductions — Codex, gpt-5.6-sol, 0 € à l'usage
 ./regen_translations.sh           # skip celles qui existent déjà
 ```
 
-Le script lance 10 jobs en parallèle par défaut (4 pour Codex, 2 pour Grok et
-OpenCode). En
+Le script lance 4 jobs en parallèle sur Codex (défaut), 2 pour Grok et OpenCode,
+10 seulement sur une API facturée en dérogation. En
 relance manuelle d'un sous-ensemble — boucle directe sur `aipmt` — **5 en
 parallèle sont acceptés sur OpenAI**, demande explicite du propriétaire : 2 fait
 traîner un jeu de 14 CHANGELOG sur un quart d'heure.
@@ -443,11 +467,14 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
 `GROK_TRANSLATE_SANDBOX`, `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
-`REGEN_PROVIDER`, `REGEN_MODEL`,
+`REGEN_PROVIDER`, `REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation, cf. règle en tête),
 `REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen),
 `XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
 
 ## Recommended Usage
+
+**Pour les traductions de CE dépôt, voir la règle en tête : Codex + `gpt-5.6-sol`,
+jamais l'API.** Ce qui suit vaut pour un usage général de l'outil sur une clé API.
 
 For batch translations (README, CHANGELOG, blog articles), use `--eco` mode:
 
@@ -465,8 +492,8 @@ pas facturée à l'usage.
 
 ```bash
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
-REGEN_PROVIDER=codex ./regen_translations.sh --force   # opt-in explicite
-REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+./regen_translations.sh --force                         # Codex est le défaut : gpt-5.6-sol
+REGEN_MODEL=gpt-5.6-luna ./regen_translations.sh --force   # éco, si le propriétaire le demande
 ```
 
 Coût réel mesuré : régénérer les 28 traductions (70 turns) avec `gpt-5.6-sol` a

@@ -6,7 +6,7 @@ Couvre :
 - Whitelist finish_reason / stop_reason
 - Segmentation heading-aware (priorité H2/H3)
 - Propagation jusqu'à sys.exit(1) côté CLI (single-file et directory)
-- detect_provider() bash : auto-fallback OpenAI quand GOOGLE_API_KEY absent/placeholder
+- detect_provider() bash : Codex par défaut, API facturée refusée sans dérogation nommée
 
 Lancement : python -m unittest discover tests/ -v
 """
@@ -918,9 +918,10 @@ REGEN_SCRIPT = os.path.abspath(
 class TestDetectProvider(unittest.TestCase):
     """Teste detect_provider() de regen_translations.sh.
 
-    Comportement : OpenAI par défaut. Fallback Gemini Flash si
-    OPENAI_API_KEY absent/placeholder mais GOOGLE_API_KEY valide. Override
-    explicite via REGEN_PROVIDER=openai|gemini.
+    Règle du propriétaire : les traductions de ce dépôt ne passent JAMAIS par
+    une API facturée. Codex (abonnement ChatGPT, gpt-5.6-sol) est le défaut,
+    sans aucune auto-détection de clé ; `openai`, `gemini` et `grok` exigent
+    `REGEN_ALLOW_PAID_API=1` en plus de `REGEN_PROVIDER`.
     """
 
     def _run_detect(self, env_content=None, exported_env=None):
@@ -937,8 +938,15 @@ class TestDetectProvider(unittest.TestCase):
             wrapper = f'source "{REGEN_SCRIPT}"; detect_provider'
 
             env = os.environ.copy()
-            # Baseline propre : retirer toutes les clés API du shell parent
-            for var in ("OPENAI_API_KEY", "GOOGLE_API_KEY", "GEMINI_API_KEY", "REGEN_PROVIDER"):
+            # Baseline propre : retirer clés et réglages du shell parent
+            for var in (
+                "OPENAI_API_KEY",
+                "GOOGLE_API_KEY",
+                "GEMINI_API_KEY",
+                "REGEN_PROVIDER",
+                "REGEN_MODEL",
+                "REGEN_ALLOW_PAID_API",
+            ):
                 env.pop(var, None)
             if exported_env:
                 env.update(exported_env)
@@ -953,86 +961,88 @@ class TestDetectProvider(unittest.TestCase):
             return result.stdout.strip(), result.stderr.strip(), result.returncode
 
     # Note: aucune des chaînes ci-dessous n'est une vraie clé. detect_provider()
-    # ne valide pas le format, seulement non-vide ET != placeholders connus.
+    # ne lit plus les clés du tout ; elles sont là pour prouver qu'elles ne
+    # changent rien.
     _FAKE_OPENAI_KEY = "fixture-fake-openai-key-do-not-use-aaaaaaaaaaaaaaaa"
     _FAKE_GEMINI_KEY = "fixture-fake-gemini-key-do-not-use-bbbbbbbbbbbbbbbb"
 
-    def test_no_env_file_no_keys_aborts(self):
-        """Pas de .env, pas de clés exportées → exit 1 + ERROR sur stderr.
-
-        Fail-closed plutôt qu'émettre `--eco` avec une clé placeholder : sinon
-        les jobs en aval tomberaient en 401 silencieux et release.sh validerait
-        '28 fichiers présents' contre des traductions stales.
-        """
+    def test_default_is_codex_subscription_without_any_key(self):
+        """Pas de .env, rien d'exporté → Codex, sans --eco : gpt-5.6-sol."""
         stdout, stderr, rc = self._run_detect(env_content=None)
-        self.assertEqual(rc, 1)
-        self.assertEqual(stdout, "")
-        self.assertIn("ERROR", stderr)
-
-    def test_openai_key_picks_openai(self):
-        """OPENAI_API_KEY valide dans .env → --eco (OpenAI par défaut)."""
-        stdout, stderr, rc = self._run_detect(
-            env_content=f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n"
-        )
         self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--eco")
-        # On asserte le PROVIDER, pas le nom du modèle : celui-ci change à
-        # chaque renouvellement du catalogue, et un test qui le fige devient
-        # un rappel de mise à jour plutôt qu'une garantie de comportement.
-        self.assertIn("OpenAI", stderr)
-        self.assertIn("--eco", stderr)
+        self.assertEqual(stdout, "--use_codex")
+        self.assertIn("Codex", stderr)
+        self.assertIn("gpt-5.6-sol", stderr)
 
-    def test_both_keys_prefers_openai(self):
-        """OPENAI et GOOGLE valides → OpenAI par défaut (priorité OpenAI)."""
+    def test_empty_regen_provider_is_the_default(self):
+        stdout, _stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": ""})
+        self.assertEqual((rc, stdout), (0, "--use_codex"))
+
+    def test_api_keys_in_env_never_switch_to_a_paid_api(self):
+        """C'est le cœur de la règle : une clé qui traîne dans .env ne doit
+        plus jamais faire partir les traductions sur une API payante."""
         stdout, stderr, rc = self._run_detect(
             env_content=(
                 f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\nGOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n"
             )
         )
         self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--eco")
-        self.assertIn("OpenAI", stderr)
+        self.assertEqual(stdout, "--use_codex")
+        self.assertNotIn("--eco", stdout)
+        self.assertNotIn("OpenAI", stderr)
 
-    def test_only_gemini_falls_back_to_gemini(self):
-        """OPENAI absent mais GOOGLE valide → fallback Gemini Flash."""
-        stdout, stderr, rc = self._run_detect(
-            env_content=f"GOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n"
-        )
-        self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--use_gemini --eco")
-        self.assertIn("fallback Gemini", stderr)
+    def test_paid_api_is_refused_without_explicit_opt_in(self):
+        for provider in ("openai", "gemini", "grok"):
+            with self.subTest(provider=provider):
+                stdout, stderr, rc = self._run_detect(
+                    env_content=f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n",
+                    exported_env={"REGEN_PROVIDER": provider},
+                )
+                self.assertEqual(rc, 1)
+                self.assertEqual(stdout, "")
+                self.assertIn("FACTURÉE", stderr)
+                self.assertIn("REGEN_ALLOW_PAID_API=1", stderr)
 
-    def test_both_placeholders_aborts(self):
-        """Les deux clés en placeholder → exit 1 + ERROR (aucun flag bidon émis)."""
-        stdout, stderr, rc = self._run_detect(
-            env_content=(
-                "OPENAI_API_KEY=votre-cle-api-openai-par-defaut\n"
-                "GOOGLE_API_KEY=votre-cle-api-gemini-par-defaut\n"
-            )
-        )
-        self.assertEqual(rc, 1)
-        self.assertEqual(stdout, "")
-        self.assertIn("ERROR", stderr)
+    def test_paid_api_with_named_opt_in_emits_flags_and_warns(self):
+        expected = {"openai": "--eco", "gemini": "--use_gemini --eco", "grok": "--use_grok --eco"}
+        for provider, flags in expected.items():
+            with self.subTest(provider=provider):
+                stdout, stderr, rc = self._run_detect(
+                    exported_env={"REGEN_PROVIDER": provider, "REGEN_ALLOW_PAID_API": "1"}
+                )
+                self.assertEqual(rc, 0)
+                self.assertEqual(stdout, flags)
+                self.assertIn("FACTURÉ", stderr)
 
-    def test_regen_provider_override_openai(self):
-        """REGEN_PROVIDER=openai force OpenAI même si seul Gemini est valide."""
-        stdout, stderr, rc = self._run_detect(
-            env_content=f"GOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n",
-            exported_env={"REGEN_PROVIDER": "openai"},
+    def test_opt_in_value_must_be_exactly_one(self):
+        stdout, _stderr, rc = self._run_detect(
+            exported_env={"REGEN_PROVIDER": "openai", "REGEN_ALLOW_PAID_API": "yes"}
         )
-        self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--eco")
-        self.assertIn("REGEN_PROVIDER=openai", stderr)
+        self.assertEqual((rc, stdout), (1, ""))
 
-    def test_regen_provider_override_gemini(self):
-        """REGEN_PROVIDER=gemini force Gemini même si OpenAI est dispo."""
+    def test_grok_cli_subscription(self):
+        stdout, stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": "grok_cli"})
+        self.assertEqual((rc, stdout), (0, "--use_grok_cli --eco"))
+        self.assertIn("abonnement Grok", stderr)
+
+    def test_opencode_requires_a_model(self):
+        stdout, stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": "opencode"})
+        self.assertEqual((rc, stdout), (1, ""))
+        self.assertIn("REGEN_MODEL", stderr)
+
+    def test_opencode_with_model(self):
         stdout, stderr, rc = self._run_detect(
-            env_content=f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n",
-            exported_env={"REGEN_PROVIDER": "gemini"},
+            exported_env={"REGEN_PROVIDER": "opencode", "REGEN_MODEL": "ollama/qwen2.5:7b"}
         )
-        self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--use_gemini --eco")
-        self.assertIn("REGEN_PROVIDER=gemini", stderr)
+        self.assertEqual((rc, stdout), (0, "--use_opencode"))
+        self.assertIn("ollama/qwen2.5:7b", stderr)
+
+    def test_unknown_provider_aborts_instead_of_guessing(self):
+        """L'ancienne version avertissait puis retombait sur l'auto-détection,
+        donc sur l'API OpenAI : une faute de frappe coûtait de l'argent."""
+        stdout, stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": "opnai"})
+        self.assertEqual((rc, stdout), (1, ""))
+        self.assertIn("inconnu", stderr)
 
 
 class TestNewsPipelinePerProvider(unittest.TestCase):

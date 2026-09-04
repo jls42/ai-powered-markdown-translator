@@ -1,21 +1,26 @@
 #!/bin/bash
 set -euo pipefail
 # Regenerate README and CHANGELOG translations in parallel.
-# Concurrence : 10 jobs par défaut, 4 pour Codex, 2 pour Grok CLI (quotas
-# d'abonnement, cf. main()).
+# Concurrence : 4 jobs pour Codex (défaut), 2 pour Grok CLI et OpenCode, 10 sur
+# une API facturée en dérogation (cf. main()).
 #
 # Usage:
 #   ./regen_translations.sh           # skip si fichier existe
 #   ./regen_translations.sh --force   # réécrit les fichiers existants
 #
-# Provider auto-détecté via detect_provider, dans cet ordre :
-#   - OPENAI_API_KEY valide (env ou .env)  → OpenAI --eco (gpt-5.6-luna)
-#   - sinon GOOGLE/GEMINI_API_KEY valide   → Gemini Flash (--use_gemini --eco)
-#   - sinon                                → abort (aucune clé exploitable)
+# RÈGLE DU PROPRIÉTAIRE — les traductions de CE dépôt ne passent JAMAIS par
+# une API facturée à l'usage. L'abonnement ChatGPT (Codex) existe pour ça :
+#   - défaut                     → Codex, gpt-5.6-sol (modèle qualité), 0 € à l'usage
+#   - REGEN_PROVIDER=grok_cli    → quota de l'abonnement Grok
+#   - REGEN_PROVIDER=opencode    → routeur OpenCode, REGEN_MODEL=provider/modèle obligatoire
+#   - REGEN_PROVIDER=openai|gemini|grok → API FACTURÉE : refusée sans
+#     REGEN_ALLOW_PAID_API=1, dérogation nommée pour que la règle morde au
+#     moment de la décision.
+# Il n'y a plus d'auto-détection de clé : une OPENAI_API_KEY présente dans
+# .env a suffi, une fois, à envoyer 28 traductions sur l'API payante.
 #
-# REGEN_PROVIDER force le choix : gemini | openai | codex | grok | grok_cli | opencode.
-# REGEN_MODEL force un modèle par-dessus le défaut du provider (obligatoire
-# avec opencode, au format provider/modèle).
+# REGEN_MODEL force un modèle par-dessus le défaut du provider (ex.
+# REGEN_MODEL=gpt-5.6-luna pour l'éco de Codex).
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -49,35 +54,22 @@ load_env() {
 detect_provider() {
   load_env
 
-  # Placeholders exacts définis dans le module (DEFAULT_*_API_KEY)
-  local openai_placeholder="votre-cle-api-openai-par-defaut"
-  local gemini_placeholder="votre-cle-api-gemini-par-defaut"
-  local openai_key="${OPENAI_API_KEY:-}"
-  # Accepte GOOGLE_API_KEY (SDK historique) ET GEMINI_API_KEY (convention AI Studio),
-  # cohérent avec _init_gemini_client() dans le module.
-  local gemini_key="${GOOGLE_API_KEY:-${GEMINI_API_KEY:-}}"
-
-  # Override explicite via REGEN_PROVIDER=gemini ou REGEN_PROVIDER=openai
-  case "${REGEN_PROVIDER:-}" in
-    gemini)
-      echo "--use_gemini --eco"
-      echo "[regen] REGEN_PROVIDER=gemini → --use_gemini --eco (Gemini Flash)" >&2
-      return
-      ;;
-    openai)
-      echo "--eco"
-      echo "[regen] REGEN_PROVIDER=openai → --eco (OpenAI, modèle éco courant)" >&2
+  # Décision du propriétaire, à ne pas rediscuter : les traductions de CE
+  # dépôt ne passent JAMAIS par une API facturée à l'usage. L'abonnement
+  # ChatGPT (Codex) existe précisément pour ça, et gpt-5.6-sol — le modèle
+  # qualité, défaut de --use_codex sans --eco — est celui demandé pour ce
+  # travail. Aucune auto-détection de clé : le 2026-09-04, une OPENAI_API_KEY
+  # présente dans .env a suffi à envoyer les 28 traductions sur l'API payante.
+  case "${REGEN_PROVIDER:-codex}" in
+    codex)
+      echo "--use_codex"
+      echo "[regen] Codex → --use_codex (abonnement ChatGPT, gpt-5.6-sol par défaut, aucune facturation à l'usage)" >&2
       return
       ;;
     grok_cli)
-      # Quota d'abonnement Grok. Jamais auto-détecté, comme codex.
+      # Quota d'abonnement Grok, sans facturation à l'usage.
       echo "--use_grok_cli --eco"
       echo "[regen] REGEN_PROVIDER=grok_cli → --use_grok_cli --eco (quota abonnement Grok)" >&2
-      return
-      ;;
-    grok)
-      echo "--use_grok --eco"
-      echo "[regen] REGEN_PROVIDER=grok → --use_grok --eco (API xAI, facturé à l'usage)" >&2
       return
       ;;
     opencode)
@@ -92,36 +84,26 @@ detect_provider() {
       echo "[regen] REGEN_PROVIDER=opencode → --use_opencode --model ${REGEN_MODEL} (routeur OpenCode)" >&2
       return
       ;;
-    codex)
-      # Jamais auto-détecté : consomme le quota de l'abonnement ChatGPT, ce qui
-      # doit rester un choix explicite. Opt-in uniquement.
-      echo "--use_codex --eco"
-      echo "[regen] REGEN_PROVIDER=codex → --use_codex --eco (quota abonnement ChatGPT)" >&2
+    openai | gemini | grok)
+      # API facturée à l'usage : refusée sauf dérogation explicite et nommée.
+      if [[ "${REGEN_ALLOW_PAID_API:-}" != "1" ]]; then
+        echo "[regen] ERROR: REGEN_PROVIDER=${REGEN_PROVIDER} est une API FACTURÉE à l'usage." >&2
+        echo "[regen] ERROR: les traductions de ce dépôt passent par l'abonnement Codex (défaut), jamais par une API payante — décision du propriétaire." >&2
+        echo "[regen] ERROR: pour passer outre sciemment : REGEN_ALLOW_PAID_API=1" >&2
+        exit 1
+      fi
+      local flags="--eco"
+      [[ "$REGEN_PROVIDER" == "gemini" ]] && flags="--use_gemini --eco"
+      [[ "$REGEN_PROVIDER" == "grok" ]] && flags="--use_grok --eco"
+      echo "$flags"
+      echo "[regen] WARNING: REGEN_PROVIDER=${REGEN_PROVIDER} avec REGEN_ALLOW_PAID_API=1 → ${flags} — FACTURÉ À L'USAGE" >&2
       return
       ;;
-    "")
-      # Pas d'override → tomber dans l'auto-détection ci-dessous
-      ;;
     *)
-      echo "[regen] WARNING: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: gemini|openai|codex|grok|grok_cli|opencode), auto-détection" >&2
+      echo "[regen] ERROR: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: codex|grok_cli|opencode, ou openai|gemini|grok avec REGEN_ALLOW_PAID_API=1)" >&2
+      exit 1
       ;;
   esac
-
-  # Auto-détection : OpenAI par défaut, fallback Gemini si OPENAI absent.
-  # IMPORTANT : si aucune clé valide, on échoue ici (exit 1) plutôt que d'émettre
-  # un flag bidon — sinon les jobs en aval tomberaient en 401 silencieusement et
-  # release.sh validerait "28 fichiers présents" contre des traductions stales.
-  if [[ -n "$openai_key" ]] && [[ "$openai_key" != "$openai_placeholder" ]]; then
-    echo "--eco"
-    echo "[regen] OpenAI détecté (OPENAI_API_KEY) → --eco (par défaut)" >&2
-  elif [[ -n "$gemini_key" ]] && [[ "$gemini_key" != "$gemini_placeholder" ]] && [[ "$gemini_key" != "your-google-api-key" ]]; then
-    echo "--use_gemini --eco"
-    echo "[regen] WARNING: OPENAI_API_KEY absent → fallback Gemini Flash --use_gemini --eco" >&2
-  else
-    echo "[regen] ERROR: aucune clé API valide (OPENAI_API_KEY, GOOGLE_API_KEY, GEMINI_API_KEY) dans .env/env" >&2
-    echo "[regen] ERROR: abort — définir au moins une clé valide avant de relancer" >&2
-    exit 1
-  fi
 }
 
 main() {
@@ -156,6 +138,8 @@ main() {
     echo "[regen] REGEN_MODEL=${REGEN_MODEL} → override du modèle par défaut" >&2
   fi
 
+  # 10 n'a plus de sens que sur une API facturée en dérogation ; Codex est
+  # le défaut et se borne à 4 ci-dessous.
   local max_jobs=10
   if [[ "$provider_flags" == *--use_grok_cli* ]]; then
     # Le quota Grok est un pool hebdomadaire PARTAGÉ avec Chat, Imagine et
