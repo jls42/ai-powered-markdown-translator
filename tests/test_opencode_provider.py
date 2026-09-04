@@ -120,6 +120,9 @@ class _FakePopen:
     def communicate(self, **kwargs):
         self.communicate_kwargs = kwargs
         if self._timeout:
+            # TimeoutExpired est une classe d'exception levée par un faux
+            # Popen, pas un lancement de process.
+            # nosemgrep
             raise subprocess.TimeoutExpired(cmd=self.argv, timeout=kwargs.get("timeout"))
         return self._stdout, self._stderr
 
@@ -299,13 +302,14 @@ class TestOpencodeCall(unittest.TestCase):
 
     def test_timeout_kills_process_group_and_names_the_variable(self):
         fake = _FakePopen(timeout=True)
+        client, args = _client(timeout=7), _args()
         with (
             patch.object(subprocess, "Popen", fake),
             patch.object(os, "getpgid", return_value=4242),
             patch.object(os, "killpg") as killpg,
             self.assertRaisesRegex(RuntimeError, "OPENCODE_TIMEOUT"),
         ):
-            translate._call_opencode(_client(timeout=7), _args(), "P", "S")
+            translate._call_opencode(client, args, "P", "S")
         killpg.assert_called()
         self.assertEqual(translate._CLI_TIMEOUT_ENV_VARS["OpenCode"], "OPENCODE_TIMEOUT")
 
@@ -348,6 +352,7 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
         self.assertEqual(text, "Translated body")
 
     def test_non_rate_limit_error_is_not_retried(self):
+        client, args = _client(), _args()
         popen = self._sequence(
             _FakePopen(stdout=_jsonl(_OPAQUE_ERROR), returncode=1, stderr=_LOG_CAUSE)
         )
@@ -356,7 +361,7 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
             patch.object(translate.time, "sleep") as sleep,
             self.assertRaises(translate._OpencodeCallError),
         ):
-            translate._call_opencode(_client(), _args(), "P", "S")
+            translate._call_opencode(client, args, "P", "S")
         sleep.assert_not_called()
 
     def test_shared_backoff_covers_the_three_clis(self):
@@ -376,15 +381,17 @@ class TestOpencodeInit(unittest.TestCase):
         )
 
     def test_model_is_required_and_the_message_says_how_to_list_them(self):
+        args = _args(model=None)
         with self.assertRaisesRegex(ValueError, "exige --model") as cm:
-            translate._init_opencode_client(_args(model=None))
+            translate._init_opencode_client(args)
         self.assertIn("opencode models", str(cm.exception))
         self.assertIn("ollama/", str(cm.exception))
 
     def test_model_must_be_provider_slash_model(self):
         for bad in ("gpt-5", "/x", "a/", "-x/y", "a b/c"):
+            args = _args(model=bad)
             with self.subTest(model=bad), self.assertRaisesRegex(ValueError, "invalide"):
-                translate._init_opencode_client(_args(model=bad))
+                translate._init_opencode_client(args)
 
     def test_model_with_nested_slash_and_colon_is_accepted(self):
         with (
@@ -531,11 +538,12 @@ class TestProviderWiring(unittest.TestCase):
         call.assert_called_once_with("client", unittest.mock.ANY, "P", "S")
 
     def test_dispatch_empty_content_guard_names_opencode(self):
+        args = _args()
         with (
             patch.object(translate, "_call_opencode", return_value="   "),
             self.assertRaisesRegex(RuntimeError, "OpenCode returned empty content"),
         ):
-            translate._dispatch_provider_call("client", _args(), "P", "S", "opencode", False)
+            translate._dispatch_provider_call("client", args, "P", "S", "opencode", False)
 
     def test_select_provider_client_routes_to_init(self):
         args = Namespace(
@@ -598,12 +606,12 @@ class TestModelFilenameLabel(unittest.TestCase):
             Namespace(model="ollama/qwen2.5:7b", **base)
         )
         for bad in ("..", "."):
+            args = Namespace(model=bad, **base)
             with self.subTest(model=bad), self.assertRaisesRegex(ValueError, "--model"):
-                translate._reject_path_separators_in_components(Namespace(model=bad, **base))
+                translate._reject_path_separators_in_components(args)
+        evasion = Namespace(model="ollama/x", target_lang="../../tmp/EVASION", source_lang="fr")
         with self.assertRaisesRegex(ValueError, "--target_lang"):
-            translate._reject_path_separators_in_components(
-                Namespace(model="ollama/x", target_lang="../../tmp/EVASION", source_lang="fr")
-            )
+            translate._reject_path_separators_in_components(evasion)
 
     def test_traversal_through_model_stays_inside_target_dir(self):
         """Contre-épreuve de la seconde couche : même sans la garde amont, le

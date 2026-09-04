@@ -1435,6 +1435,12 @@ def _codex_is_rate_limited(error):
     return kind.get("type") == "rate_limit_exceeded"
 
 
+def _stderr_tail(stderr, lines=3):
+    """Dernières lignes de stderr, jointes, pour un message d'erreur qui dit
+    quelque chose — commun aux trois CLI."""
+    return " | ".join((stderr or "").strip().splitlines()[-lines:]) or "(stderr vide)"
+
+
 def _codex_describe_error(error, returncode, stderr):
     """Message d'erreur exploitable : on cite le modèle et le détail serveur,
     parce que la cause la plus fréquente est un slug de modèle refusé pour un
@@ -1443,9 +1449,7 @@ def _codex_describe_error(error, returncode, stderr):
         detail = error.get("error", error)
         detail = detail.get("message", detail) if isinstance(detail, dict) else detail
         return f"Codex CLI a échoué : {detail}"
-    tail = (stderr or "").strip().splitlines()
-    tail = tail[-3:] if tail else ["(stderr vide)"]
-    return f"Codex CLI a quitté avec le code {returncode} : " + " | ".join(tail)
+    return f"Codex CLI a quitté avec le code {returncode} : {_stderr_tail(stderr)}"
 
 
 def _codex_read_output(output_file, args):
@@ -1671,8 +1675,7 @@ def _grok_attempt(client, args, prompt, segment):
             argv, None, client.timeout, _grok_env(), "Grok", args.model
         )
         if returncode != 0:
-            tail = (stderr or "").strip().splitlines()[-3:] or ["(stderr vide)"]
-            message = " | ".join(tail)
+            message = _stderr_tail(stderr)
             raise _GrokCallError(
                 f"Grok CLI a quitté avec le code {returncode} : {message}",
                 rate_limited=any(m in message.lower() for m in _GROK_RATE_LIMIT_MARKERS),
@@ -1841,7 +1844,7 @@ def _opencode_raise_reported_error(error, cause, model):
 
 
 def _opencode_raise_exit_code(returncode, cause, stderr, model):
-    tail = cause or " | ".join((stderr or "").strip().splitlines()[-3:] or ["(stderr vide)"])
+    tail = cause or _stderr_tail(stderr)
     raise _OpencodeCallError(
         f"OpenCode a quitté avec le code {returncode} (model={model}) : {tail}",
         rate_limited=_opencode_is_rate_limited(tail),
@@ -3754,7 +3757,7 @@ def _opencode_preflight(binary):
         )
     except (OSError, subprocess.SubprocessError) as e:
         raise ValueError(f"Impossible d'exécuter '{binary} --version' : {e}") from e
-    if result.returncode != 0 or not re.search(r"\d+\.\d+", result.stdout or ""):
+    if result.returncode != 0 or not re.search(r"\d\.\d", result.stdout or ""):
         raise ValueError(
             f"'{binary} --version' a échoué (code {result.returncode}) : "
             f"{(result.stderr or result.stdout or '').strip()[:200]}"
