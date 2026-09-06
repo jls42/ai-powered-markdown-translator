@@ -84,7 +84,7 @@ detect_provider() {
       echo "[regen] REGEN_PROVIDER=opencode → --use_opencode --model ${REGEN_MODEL} (routeur OpenCode)" >&2
       return
       ;;
-    openai | gemini | grok)
+    openai | gemini | grok | openrouter)
       # API facturée à l'usage : refusée sauf dérogation explicite et nommée.
       if [[ "${REGEN_ALLOW_PAID_API:-}" != "1" ]]; then
         echo "[regen] ERROR: REGEN_PROVIDER=${REGEN_PROVIDER} est une API FACTURÉE à l'usage." >&2
@@ -95,12 +95,20 @@ detect_provider() {
       local flags="--eco"
       [[ "$REGEN_PROVIDER" == "gemini" ]] && flags="--use_gemini --eco"
       [[ "$REGEN_PROVIDER" == "grok" ]] && flags="--use_grok --eco"
+      if [[ "$REGEN_PROVIDER" == "openrouter" ]]; then
+        # Routeur : aucun modèle par défaut, ni ici ni dans le module.
+        if [[ -z "${REGEN_MODEL:-}" ]]; then
+          echo "[regen] ERROR: REGEN_PROVIDER=openrouter exige REGEN_MODEL=fournisseur/modèle (ex. z-ai/glm-5.2)" >&2
+          exit 1
+        fi
+        flags="--use_openrouter"
+      fi
       echo "$flags"
       echo "[regen] WARNING: REGEN_PROVIDER=${REGEN_PROVIDER} avec REGEN_ALLOW_PAID_API=1 → ${flags} — FACTURÉ À L'USAGE" >&2
       return
       ;;
     *)
-      echo "[regen] ERROR: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: codex|grok_cli|opencode, ou openai|gemini|grok avec REGEN_ALLOW_PAID_API=1)" >&2
+      echo "[regen] ERROR: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: codex|grok_cli|opencode, ou openai|gemini|grok|openrouter avec REGEN_ALLOW_PAID_API=1)" >&2
       exit 1
       ;;
   esac

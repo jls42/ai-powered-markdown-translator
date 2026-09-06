@@ -1044,6 +1044,31 @@ class TestDetectProvider(unittest.TestCase):
         self.assertEqual((rc, stdout), (1, ""))
         self.assertIn("inconnu", stderr)
 
+    def test_openrouter_is_a_paid_api(self):
+        """OpenRouter facture à l'usage : même règle que les autres API, la
+        dérogation doit être nommée."""
+        stdout, stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": "openrouter"})
+        self.assertEqual((rc, stdout), (1, ""))
+        self.assertIn("FACTURÉE", stderr)
+
+    def test_openrouter_requires_a_model_even_with_the_waiver(self):
+        stdout, stderr, rc = self._run_detect(
+            exported_env={"REGEN_PROVIDER": "openrouter", "REGEN_ALLOW_PAID_API": "1"}
+        )
+        self.assertEqual((rc, stdout), (1, ""))
+        self.assertIn("REGEN_MODEL", stderr)
+
+    def test_openrouter_with_waiver_and_model(self):
+        stdout, stderr, rc = self._run_detect(
+            exported_env={
+                "REGEN_PROVIDER": "openrouter",
+                "REGEN_ALLOW_PAID_API": "1",
+                "REGEN_MODEL": "z-ai/glm-5.2",
+            }
+        )
+        self.assertEqual((rc, stdout), (0, "--use_openrouter"))
+        self.assertIn("FACTURÉ À L'USAGE", stderr)
+
 
 class TestNewsPipelinePerProvider(unittest.TestCase):
     """Exerce translate_markdown_file end-to-end en mode --news pour
