@@ -218,15 +218,17 @@ class TestContratDeSortie(unittest.TestCase):
         client.client.chat.completions.create.return_value = SimpleNamespace(
             choices=None, error={"message": "upstream down", "code": 502}
         )
+        args = _args()
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_openrouter(client, _args(), "p", "s")
+            translate._call_openrouter(client, args, "p", "s")
         self.assertIn("upstream down", str(ctx.exception))
 
     def test_aucun_choix(self):
         client = _client()
         client.client.chat.completions.create.return_value = SimpleNamespace(choices=[])
+        args = _args()
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_openrouter(client, _args(), "p", "s")
+            translate._call_openrouter(client, args, "p", "s")
         self.assertIn("aucun choix", str(ctx.exception))
 
     def test_page_blanche_distinguee_de_la_troncature(self):
@@ -236,8 +238,9 @@ class TestContratDeSortie(unittest.TestCase):
         client.client.chat.completions.create.return_value = SimpleNamespace(
             choices=[_choice("", finish="length")]
         )
+        args = _args()
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_openrouter(client, _args(), "p", "s")
+            translate._call_openrouter(client, args, "p", "s")
         message = str(ctx.exception)
         self.assertIn("raisonnement", message)
         self.assertNotIn("tronquée", message)
@@ -247,8 +250,9 @@ class TestContratDeSortie(unittest.TestCase):
         client.client.chat.completions.create.return_value = SimpleNamespace(
             choices=[_choice("début de trad", finish="length")]
         )
+        args = _args()
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_openrouter(client, _args(), "p", "s")
+            translate._call_openrouter(client, args, "p", "s")
         self.assertIn("tronquée", str(ctx.exception))
 
     def test_hebergeur_interrompt_la_generation(self):
@@ -259,8 +263,9 @@ class TestContratDeSortie(unittest.TestCase):
         client.client.chat.completions.create.return_value = SimpleNamespace(
             choices=[_choice("", finish="error")]
         )
+        args = _args()
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_openrouter(client, _args(), "p", "s")
+            translate._call_openrouter(client, args, "p", "s")
         self.assertIn("hébergeur", str(ctx.exception))
         self.assertIn("pas côté", str(ctx.exception))
 
@@ -269,8 +274,9 @@ class TestContratDeSortie(unittest.TestCase):
         client.client.chat.completions.create.return_value = SimpleNamespace(
             choices=[_choice("x", finish="content_filter", native="blocked")]
         )
+        args = _args()
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_openrouter(client, _args(), "p", "s")
+            translate._call_openrouter(client, args, "p", "s")
         self.assertIn("content_filter", str(ctx.exception))
         self.assertIn("blocked", str(ctx.exception))
 
@@ -279,8 +285,9 @@ class TestContratDeSortie(unittest.TestCase):
         client.client.chat.completions.create.return_value = SimpleNamespace(
             choices=[_choice(None)]
         )
+        args = _args()
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_openrouter(client, _args(), "p", "s")
+            translate._call_openrouter(client, args, "p", "s")
         self.assertIn("empty content", str(ctx.exception))
 
     def test_max_tokens_transmis(self):
@@ -372,23 +379,23 @@ class TestPreflight(unittest.TestCase):
     def test_init_refuse_si_aucun_hebergeur_sain(self):
         catalogue = {"data": [{"id": "z-ai/glm-5.2", "context_length": 100}]}
         endpoints = {"data": {"endpoints": [_endpoint("sail-research/fp8", 2048)]}}
+        args = _args()
+        urlopen = self._urlopen({"/endpoints": endpoints, "models": catalogue})
         with (
             patch.dict(os.environ, {"OPENROUTER_API_KEY": _MARQUEUR}),
-            patch(
-                "urllib.request.urlopen",
-                self._urlopen({"/endpoints": endpoints, "models": catalogue}),
-            ),
+            patch("urllib.request.urlopen", urlopen),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._init_openrouter_client(_args())
+            translate._init_openrouter_client(args)
         self.assertIn("troncature", str(ctx.exception))
 
     def test_init_sans_cle(self):
+        args = _args()
         with (
             patch.dict(os.environ, {"OPENROUTER_API_KEY": ""}),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._init_openrouter_client(_args())
+            translate._init_openrouter_client(args)
         self.assertIn("OPENROUTER_API_KEY", str(ctx.exception))
 
 

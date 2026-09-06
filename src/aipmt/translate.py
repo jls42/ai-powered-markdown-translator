@@ -1244,10 +1244,14 @@ def _openrouter_http_get(base_url, path):
     if not base.startswith("https://"):
         raise ValueError(f"OPENROUTER_BASE_URL doit commencer par https:// (reçu {base!r})")
     url = f"{base.rstrip('/')}/{path.lstrip('/')}"
+    # Le marqueur est SUR la ligne de l'appel : bandit ne le lit pas une ligne
+    # plus haut, contrairement à semgrep. Le délai est sorti en variable courte
+    # pour que ruff-format ne puisse pas scinder la ligne et emporter le
+    # marqueur ailleurs — le même piège avait déjà défait un `# nosemgrep`.
+    delai = OPENROUTER_PREFLIGHT_TIMEOUT
     try:
-        # nosec B310 — schéma https vérifié juste au-dessus, jamais file:// ni ftp://
-        with urllib.request.urlopen(url, timeout=OPENROUTER_PREFLIGHT_TIMEOUT) as response:
-            return json.loads(response.read().decode("utf-8"))
+        with urllib.request.urlopen(url, timeout=delai) as reponse:  # nosec B310 — https vérifié
+            return json.loads(reponse.read().decode("utf-8"))
     except (OSError, ValueError) as e:
         raise ValueError(f"Préflight OpenRouter injoignable ({url}) : {e}") from e
 
