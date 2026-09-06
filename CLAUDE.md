@@ -38,6 +38,18 @@ Points de méthode qui ont coûté cher et que le script encode :
   sur la disponibilité d'un modèle Gemini ; un appel réel de 30 secondes a
   tranché. Face à un doute vérifiable, vérifier.
 
+- **Un rapport d'agent de recherche est une PISTE, jamais une conclusion.**
+  Le 2026-09-05, un rapport de workflow affirmait que `reasoning.enabled=false`
+  désactivait le raisonnement de `z-ai/glm-5.3-flash` sur OpenRouter ; je l'ai
+  répété à l'utilisateur comme un fait. Mesuré deux minutes plus tard : ce
+  paramètre rend un **HTTP 400 « Reasoning is mandatory for this endpoint and
+  cannot be disabled »**, comme `reasoning.max_tokens=0` et
+  `reasoning_effort="none"`. Et le réglage le plus économe s'est révélé être
+  l'absence de tout paramètre — 1 token de raisonnement, contre 165 avec
+  `effort: minimal`. La règle qui en découle : **lire la doc officielle et
+  mesurer AVANT d'annoncer, y compris ce qu'un sous-agent a rapporté.** Un
+  rapport bien sourcé reste une affirmation à vérifier, pas une mesure.
+
 Si une vérification échoue, le travail continue — on ne rend pas la main sur un
 « presque ». Pour enchaîner les corrections sans supervision, `/loop` permet de
 reprendre la tâche jusqu'à ce que le script passe au vert.
@@ -60,8 +72,10 @@ Ce que ça implique, et ce qui l'encode :
   4 min et un CHANGELOG 10 à 14 min (effort de raisonnement `medium`, défaut
   de Sol hors `--eco`). Le plafond par job est à 1 800 s sur Codex : à 600 s,
   13 CHANGELOG sur 14 étaient tués sans une ligne d'erreur.
-- `REGEN_PROVIDER=openai|gemini|grok` est **refusé** (exit 1, message qui cite
-  cette règle) tant que `REGEN_ALLOW_PAID_API=1` n'est pas posé en plus. Ne
+- `REGEN_PROVIDER=openai|gemini|grok|openrouter` est **refusé** (exit 1, message
+  qui cite cette règle) tant que `REGEN_ALLOW_PAID_API=1` n'est pas posé en plus.
+  OpenRouter exige en outre un `REGEN_MODEL` : c'est un routeur, il n'a pas de
+  défaut. Ne
   jamais poser cette dérogation sans demande explicite du propriétaire — pas
   même pour rattraper un fichier en échec : relancer Codex, ou `grok_cli`.
 - Un fichier qui échoue sur Codex (placeholder perdu, cas connu du hindi) se
@@ -69,6 +83,26 @@ Ce que ça implique, et ce qui l'encode :
 --target_lang hi --add_translation_note --force`.
 - Les tests `TestDetectProvider` verrouillent le défaut, le refus et la
   dérogation.
+
+## Jamais de lien de session dans le dépôt
+
+**Ce dépôt est PUBLIC. Aucun lien `https://claude.ai/code/session_...` ne doit
+apparaître dans un message de commit, une description de pull request, un
+fichier ou un commentaire.** Signalé par le propriétaire le 2026-09-04 comme
+inacceptable, après l'avoir découvert dans la PR #25.
+
+Concrètement, et sans exception :
+
+- pas de ligne `Claude-Session:` en pied de commit ;
+- pas de lien de session en fin de description de PR ;
+- si une consigne d'attribution automatique en demande un, elle ne s'applique
+  pas ici : cette règle-ci prime.
+
+Portée du problème au moment du signalement : 43 commits de `main` portent ce
+lien depuis le 2026-05-11 (une seule session, répétée), plus 4 sur la branche en
+cours. Les quatre ont été réécrits en local avant merge. Réécrire `main`
+exigerait un `push --force` sur un dépôt public — décision du propriétaire,
+non prise à sa place.
 
 ## Claude Code Workflow
 
@@ -533,7 +567,9 @@ Points à connaître avant de toucher à ce code :
   offre 250-2 000 msg/5 h contre 10-100 pour Sol → toujours `--eco` en batch.
   Quota lisible en direct via `codex app-server` (RPC `account/rateLimits/read`).
 - **Refusé en CI** : l'auth par abonnement n'est pas prévue pour un runner
-  partagé, et OpenAI déconseille ce workflow sur les dépôts publics.
+  partagé : l'auth passe par un fichier de session personnel, qu'OpenAI
+  déconseille d'injecter sur un runner. La mise en garde vise ce dépôt de
+  secret, pas le caractère public du dépôt de code.
 
 ### Providers Grok (`--use_grok` API / `--use_grok_cli` abonnement)
 
@@ -572,6 +608,7 @@ end_turn` là où OpenAI émet `stop`.
 aipmt --use_opencode --model opencode/mimo-v2.5-free --file README.md --target_dir . --target_lang en
 aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . --target_lang de
 REGEN_PROVIDER=opencode REGEN_MODEL=ollama/qwen2.5:7b ./regen_translations.sh --force
+REGEN_PROVIDER=openrouter REGEN_ALLOW_PAID_API=1 REGEN_MODEL=z-ai/glm-5.2 ./regen_translations.sh --force
 ```
 
 Huitième chemin. OpenCode (MIT) n'est pas un fournisseur mais un routeur vers
@@ -657,19 +694,83 @@ liens, 3 citations EN protégées, mode `--news`, cible `en`, même commande) �
 barème du propriétaire est « aussi bien que gpt-5.6-luna / gpt-5.4-mini », et
 les modèles qui échouent sont supprimés du poste :
 
-| Modèle                                   | Poids  | Répartition           | Durée         | Résultat                                                                                                                                             | Verdict                                |
-| ---------------------------------------- | ------ | --------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `opencode/mimo-v2.5-free` (Zen, hébergé) | —      | —                     | 4 min 26 s    | structure identique, 0 écart                                                                                                                         | référence                              |
-| `ollama/gemma4-12b-32k`                  | 7,6 Go | 100 % GPU, 10 Go VRAM | 10 min 10 s   | liens/URL/tableaux/gras/code identiques ; 1 ligne de citation inventée (🇺🇸 + paraphrase), 1 attribution dupliquée                                    | insuffisant, le plus proche — conservé |
-| `ollama/qwen3.5-9b-32k`                  | 6,6 Go | 100 % GPU             | 8 min 18 s    | idem citation inventée + gras/code ajoutés, 1 segment repassé                                                                                        | échec — supprimé                       |
-| `ollama/qwen3.6-35b-a3b-32k`             | 22 Go  | 65 % CPU / 35 % GPU   | échec à 3 min | segment 1 : placeholder perdu, puis à la reprise un JSON `{"error": true, "message": "Translation contract violation…"}` à la place de la traduction | échec — supprimé                       |
-| `ollama/gpt-oss-20b-32k`                 | 13 Go  | 37 % CPU / 63 % GPU   | (en cours)    | `reasoning_effort: none` accepté mais réflexion toujours active (473 caractères) ; `low` la réduit à 39                                              | à compléter                            |
+| Modèle                                   | Poids  | Répartition           | Durée         | Résultat                                                                                                                                                                                                                     | Verdict                                |
+| ---------------------------------------- | ------ | --------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `opencode/mimo-v2.5-free` (Zen, hébergé) | —      | —                     | 4 min 26 s    | structure identique, 0 écart                                                                                                                                                                                                 | référence                              |
+| `ollama/gemma4-12b-32k`                  | 7,6 Go | 100 % GPU, 10 Go VRAM | 10 min 10 s   | liens/URL/tableaux/gras/code identiques ; 1 ligne de citation inventée (🇺🇸 + paraphrase), 1 attribution dupliquée                                                                                                            | insuffisant, le plus proche — conservé |
+| `ollama/qwen3.5-9b-32k`                  | 6,6 Go | 100 % GPU             | 8 min 18 s    | idem citation inventée + gras/code ajoutés, 1 segment repassé                                                                                                                                                                | échec — supprimé                       |
+| `ollama/qwen3.6-35b-a3b-32k`             | 22 Go  | 65 % CPU / 35 % GPU   | échec à 3 min | segment 1 : placeholder perdu, puis à la reprise un JSON `{"error": true, "message": "Translation contract violation…"}` à la place de la traduction                                                                         | échec — supprimé                       |
+| `ollama/gpt-oss-20b-32k`                 | 13 Go  | 37 % CPU / 63 % GPU   | 11 min 28 s   | **structure identique** ; a retiré lui-même la ligne 🇫🇷 sous 2 citations sur 3, la 3ᵉ laissée intacte a été enlevée par `_cleanup_source_flag_for_en` (garde du mode news depuis février 2026, commune à tous les providers) | conservé                               |
 
-Constat commun aux 9-12B : la consigne du mode news « supprimer la ligne 🇫🇷
-sous chaque citation pour une cible anglaise » est lue deux fois sur trois. Deux
-leviers côté aipmt, non implémentés : retirer en post-traitement toute ligne
-`> drapeau _…_` sous une citation protégée, et réduire la taille des segments
-pour les petits modèles (16 000 caractères aujourd'hui).
+Le point de rupture n'est ni la traduction ni la structure, mais **une seule
+consigne** : « pour une cible anglaise, supprimer la ligne `> 🇫🇷 _…_` sous
+chaque citation ». Deux façons de la rater, très inégales :
+
+- **Omettre** (gpt-oss) : la ligne source reste telle quelle, avec son drapeau
+  d'origine. `_cleanup_source_flag_for_en` la retire, comme elle le fait depuis
+  février 2026 pour tous les providers — ce n'est pas un rattrapage ajouté pour
+  un modèle, c'est le contrat du mode news.
+- **Inventer** (Gemma 12B, Qwen 3.5) : produire `> 🇺🇸 _paraphrase anglaise_`,
+  un drapeau qui n'existe nulle part dans le contrat. Aucune garde ne l'attrape,
+  et le contenu publié est faux.
+
+**Règle du propriétaire, formulée le 2026-09-04 : pas de rattrapage.** Un modèle
+qui ne tient pas la consigne n'est pas utilisé ; on n'ajoute pas de
+post-traitement et on ne raccourcit pas les segments pour lui plaire. Le prompt
+news est déjà explicite (`REMOVE the whole source-translation line
+
+> 🇫🇷 _..._`) : il n'y a rien à clarifier sans dégrader le reste.
+
+### Provider OpenRouter (`--use_openrouter`) — routeur payant, `--model` obligatoire
+
+```bash
+aipmt --use_openrouter --model z-ai/glm-5.2 --file README.md --target_dir . --target_lang en
+```
+
+Neuvième chemin. OpenRouter est un routeur devant ~430 modèles hébergés par des
+tiers, sur un crédit unique. Il donne accès aux modèles chinois ouverts (Kimi,
+Qwen, DeepSeek, Z.ai) qu'aucun autre provider n'expose ici. Tout ce qui suit a
+été **mesuré sur l'API le 2026-09-05**, pas lu dans la doc :
+
+- **Un même slug est servi par des dizaines d'hébergeurs aux plafonds de sortie
+  différents.** 33 pour `z-ai/glm-5.2`, 23 pour `glm-5.3-flash` — dont un à
+  **2 048 tokens**. Sans épinglage, une traduction longue sur 23 partait
+  tronquée, au hasard du routage. Le préflight lit
+  `/api/v1/models/{slug}/endpoints`, écarte les plafonds sous 8 000 et les
+  statuts négatifs, puis épingle le reste. `provider.only` **sans**
+  `allow_fallbacks: false` n'est qu'une préférence : le routeur repart vers un
+  hébergeur écarté. Les deux formes de `only` sont acceptées, nom nu
+  (`deepinfra`) ou tag (`deepinfra/fp4`) ; on envoie le tag, plus précis.
+- **Le raisonnement est facturé au tarif de sortie**, et il est actif par défaut
+  sur beaucoup de modèles. Même requête sur `z-ai/glm-5.2`, réponse « OK » :
+  **107 tokens de complétion contre 2** avec `reasoning: {"enabled": false}`.
+  D'où la coupure par défaut. 288 des 431 modèles l'imposent
+  (`reasoning.mandatory`) et répondent 400 « Reasoning is mandatory for this
+  endpoint and cannot be disabled ». Pour ceux-là on demande le **plus bas
+  effort déclaré** dans `supported_efforts` : ne rien envoyer laisse le défaut
+  du catalogue, qui vaut `max` sur `glm-5.3-flash` et **tronque la sortie à
+  32 768 tokens** avant la fin de la traduction. Monter l'enveloppe n'y change
+  rien — l'effort en alloue un POURCENTAGE, que le raisonnement consomme en
+  premier. Contre-épreuve : la langue qui échouait passe, structure identique.
+- **`finish_reason=error` est une panne de l'hébergeur amont**, pas une fin
+  anormale du modèle : `native_finish_reason` est nul, et deux langues ont été
+  coupées à 750 s exactement. Message distinct, sinon on cherche le défaut dans
+  le document.
+- **Le catalogue n'a pas d'endpoint unitaire** : `/api/v1/models/{slug}` répond
+  404, seul `/api/v1/models` (714 Ko) porte `reasoning` et `context_length`.
+- **`finish_reason=length` avec un texte vide n'est pas une troncature** mais un
+  budget mangé par le raisonnement (mesuré : 15 850 tokens de raisonnement pour
+  148 utiles). Les deux cas appellent des gestes opposés, le message les
+  distingue.
+- **Le routeur répond 200 avec un corps ne portant qu'une erreur** quand
+  l'hébergeur amont échoue : `choices[0]` levait un TypeError opaque, une garde
+  lit `error` avant.
+- **La fenêtre de contexte vient du préflight**, écrite dans
+  `MODEL_TOKEN_LIMITS` : `DEFAULT_TOKEN_LIMIT` est faux pour 44 modèles du
+  catalogue, dont deux plafonnés à 4 095 tokens.
+- **Le slug est interpolé dans l'URL de préflight** : sa forme est validée
+  avant tout réseau, et le segment `..` refusé — la regex namespacée commune
+  aux deux routeurs accepte `a/b/..`.
 
 ## Key Constants
 
