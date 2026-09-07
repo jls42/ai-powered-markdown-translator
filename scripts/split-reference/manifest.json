@@ -98,6 +98,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/anthropic.py",
       "why": "docstring du module providers/anthropic, né du découpage"
+    },
+    {
+      "hash": "49562e89926034fffa30081ceb2030576acc8e4ff3241a9aebc04843cb22adad",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/gemini.py",
+      "why": "docstring du module providers/gemini, né du découpage"
     }
   ],
   "removed": [],

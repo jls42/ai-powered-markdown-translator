@@ -24,7 +24,7 @@ from langdetect import LangDetectException
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import guards, naming, news, placeholders, translate
-from aipmt.providers import anthropic, mistral, openai
+from aipmt.providers import anthropic, gemini, mistral, openai
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -498,7 +498,7 @@ class TestProviderClientInit(unittest.TestCase):
     def test_init_gemini_missing_key_raises(self):
         args = _base_args()
         with patch.dict(os.environ, {}, clear=True), self.assertRaisesRegex(ValueError, "Gemini"):
-            translate._init_gemini_client(args)
+            gemini._init_gemini_client(args)
 
     def test_init_gemini_accepts_GEMINI_API_KEY(self):
         """Le SDK accepte aussi GEMINI_API_KEY (convention AI Studio)."""
@@ -506,11 +506,11 @@ class TestProviderClientInit(unittest.TestCase):
         args = _base_args(model=None, eco=True)
         with (
             patch.dict(os.environ, gemini_env, clear=True),
-            patch("aipmt.translate.genai") as mock_genai,
+            patch("aipmt.providers.gemini.genai") as mock_genai,
         ):
-            translate._init_gemini_client(args)
+            gemini._init_gemini_client(args)
             mock_genai.Client.assert_called_once_with(api_key=gemini_env["GEMINI_API_KEY"])
-        self.assertEqual(args.model, translate.ECO_MODEL_GEMINI)
+        self.assertEqual(args.model, gemini.ECO_MODEL_GEMINI)
 
     def test_init_openai_missing_key_raises(self):
         args = _base_args()
@@ -560,7 +560,7 @@ class TestSelectProviderClient(unittest.TestCase):
         args = _base_args(use_gemini=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_GEMINI_ENV, clear=True),
-            patch("aipmt.translate.genai") as mock_genai,
+            patch("aipmt.providers.gemini.genai") as mock_genai,
         ):
             translate._select_provider_client(args)
             mock_genai.Client.assert_called_once()

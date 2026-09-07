@@ -22,12 +22,14 @@ from argparse import Namespace
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+from google.genai import errors as genai_errors
+
 # Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import markdown, news, translate
-from aipmt.providers import anthropic, openai
+from aipmt.providers import anthropic, gemini, openai
 
 
 def _args(**overrides):
@@ -442,7 +444,7 @@ class TestGeminiThinkingFallback(unittest.TestCase):
         def generate_content(model, contents, config):
             calls.append(getattr(config, "thinking_config", None))
             if len(calls) <= n_levels:
-                raise translate.genai_errors.ClientError(
+                raise genai_errors.ClientError(
                     400, {"error": {"message": "Thinking level MINIMAL is not supported"}}
                 )
             return SimpleNamespace(
@@ -458,23 +460,23 @@ class TestGeminiThinkingFallback(unittest.TestCase):
         # aller-retour 400 par segment en production. C'est un état global :
         # sans cette remise à zéro, un test qui a déjà fait accepter `low` sur
         # gemini-3.7-flash ferait sauter la cascade au test suivant.
-        translate._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
+        gemini._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
 
     def test_first_level_accepted_stops_cascade(self):
         client, calls = self._client_refusing(0)
-        out = translate._call_gemini(client, _args(model="gemini-3.1-flash-lite"), "P", "SEG")
+        out = gemini._call_gemini(client, _args(model="gemini-3.1-flash-lite"), "P", "SEG")
         self.assertEqual(out, "Translated")
         self.assertEqual(len(calls), 1)
 
     def test_falls_back_to_next_level(self):
         client, calls = self._client_refusing(1)
-        out = translate._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
+        out = gemini._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
         self.assertEqual(out, "Translated")
         self.assertEqual(len(calls), 2)
 
     def test_last_level_sends_no_thinking_config(self):
         client, calls = self._client_refusing(2)
-        out = translate._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
+        out = gemini._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
         self.assertEqual(out, "Translated")
         self.assertEqual(len(calls), 3)
         self.assertIsNone(calls[-1], "le dernier essai ne doit porter aucun thinking_config")
@@ -483,7 +485,7 @@ class TestGeminiThinkingFallback(unittest.TestCase):
         client, _ = self._client_refusing(99)
         args = _args(model="gemini-3.7-flash")
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_gemini(client, args, "P", "SEG")
+            gemini._call_gemini(client, args, "P", "SEG")
         self.assertIn("refusé tous les niveaux", str(ctx.exception))
 
     def test_unrelated_client_error_is_not_retried(self):
@@ -493,15 +495,13 @@ class TestGeminiThinkingFallback(unittest.TestCase):
 
         def generate_content(model, contents, config):
             calls.append(config)
-            raise translate.genai_errors.ClientError(
-                429, {"error": {"message": "Resource exhausted"}}
-            )
+            raise genai_errors.ClientError(429, {"error": {"message": "Resource exhausted"}})
 
         client = MagicMock()
         client.models.generate_content = generate_content
         args = _args(model="gemini-3.7-flash")
-        with self.assertRaises(translate.genai_errors.ClientError):
-            translate._call_gemini(client, args, "P", "SEG")
+        with self.assertRaises(genai_errors.ClientError):
+            gemini._call_gemini(client, args, "P", "SEG")
         self.assertEqual(len(calls), 1)
 
     def test_system_instruction_carries_the_prompt(self):
@@ -516,7 +516,7 @@ class TestGeminiThinkingFallback(unittest.TestCase):
             )
 
         client.models.generate_content = generate_content
-        translate._call_gemini(client, _args(model="gemini-3.7-flash"), "PROMPT", "SEGMENT")
+        gemini._call_gemini(client, _args(model="gemini-3.7-flash"), "PROMPT", "SEGMENT")
         self.assertEqual(captured["config"].system_instruction, "PROMPT")
         self.assertEqual(captured["contents"], "SEGMENT")
 

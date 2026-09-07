@@ -24,7 +24,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import guards, markdown, news, notes, placeholders, prompts, translate
-from aipmt.providers import anthropic, mistral, openai
+from aipmt.providers import anthropic, gemini, mistral, openai
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -765,7 +765,7 @@ class TestMultiProviderStopReasons(unittest.TestCase):
         client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"Gemini abnormal finish_reason"):
-            translate._call_gemini(client, args, "prompt", "segment")
+            gemini._call_gemini(client, args, "prompt", "segment")
 
 
 class TestStructuralLineLanguageBar(unittest.TestCase):
@@ -1650,7 +1650,7 @@ class TestGeminiEdgeCases(unittest.TestCase):
         client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"no candidates.*prompt_feedback"):
-            translate._call_gemini(client, args, "prompt", "segment")
+            gemini._call_gemini(client, args, "prompt", "segment")
 
     def test_gemini_blocked_response_raises(self):
         gen_model = MagicMock()
@@ -1659,7 +1659,7 @@ class TestGeminiEdgeCases(unittest.TestCase):
         client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"Gemini response has no text|blocked"):
-            translate._call_gemini(client, args, "prompt", "segment")
+            gemini._call_gemini(client, args, "prompt", "segment")
 
 
 class TestOpenAINoneContent(unittest.TestCase):

@@ -26,10 +26,12 @@ from types import SimpleNamespace
 from typing import ClassVar
 from unittest.mock import MagicMock, patch
 
+from google.genai import errors as genai_errors
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, news, translate
-from aipmt.providers import base
+from aipmt.providers import base, gemini
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -240,10 +242,10 @@ class TestGeminiThinkingLevelIsMemoized(unittest.TestCase):
     """
 
     def setUp(self):
-        translate._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
+        gemini._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
 
     def tearDown(self):
-        translate._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
+        gemini._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
 
     def _client_refusing_first(self, calls):
         def generate_content(model, contents, config):
@@ -253,7 +255,7 @@ class TestGeminiThinkingLevelIsMemoized(unittest.TestCase):
             level = str(getattr(raw, "value", raw)).lower() if raw is not None else None
             calls.append(level)
             if level == "minimal":
-                raise translate.genai_errors.ClientError(
+                raise genai_errors.ClientError(
                     400, {"error": {"message": "Thinking level MINIMAL is not supported"}}
                 )
             return SimpleNamespace(
@@ -269,10 +271,10 @@ class TestGeminiThinkingLevelIsMemoized(unittest.TestCase):
         client = self._client_refusing_first(calls)
         args = Namespace(model="gemini-3.7-flash", target_lang="en", source_lang="fr")
 
-        translate._call_gemini(client, args, "P", "SEGMENT 1")
+        gemini._call_gemini(client, args, "P", "SEGMENT 1")
         self.assertEqual(calls, ["minimal", "low"], "le 1er segment descend la cascade")
 
-        translate._call_gemini(client, args, "P", "SEGMENT 2")
+        gemini._call_gemini(client, args, "P", "SEGMENT 2")
         self.assertEqual(
             calls,
             ["minimal", "low", "low"],
