@@ -28,7 +28,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import news, translate
+from aipmt import naming, news, translate
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -391,7 +391,7 @@ class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
     def test_path_separator_in_target_lang_is_refused(self):
         args = self._args(target_lang="../../../tmp/evasion")
         with self.assertRaises(ValueError) as ctx:
-            translate._reject_path_separators_in_components(args)
+            naming._reject_path_separators_in_components(args)
         self.assertIn("target_lang", str(ctx.exception))
 
     def test_path_separator_in_model_is_neutralized_not_refused(self):
@@ -400,29 +400,29 @@ class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
         de traversée reste un simple nom de fichier sous la cible. Le contrôle
         porte sur la valeur interpolée ; `..` seul y reste refusé."""
         args = self._args(model="../../evil", include_model=True, target_lang="en")
-        translate._reject_path_separators_in_components(args)
-        name = translate._resolve_single_output_filename(args)
+        naming._reject_path_separators_in_components(args)
+        name = naming._resolve_single_output_filename(args)
         self.assertEqual(name, "doc-en-..-..-evil.md")
         self.assertNotIn(os.sep, name)
         dotdot = self._args(model="..")
         with self.assertRaises(ValueError) as ctx:
-            translate._reject_path_separators_in_components(dotdot)
+            naming._reject_path_separators_in_components(dotdot)
         self.assertIn("model", str(ctx.exception))
 
     def test_bare_dotdot_is_refused(self):
         args = self._args(target_lang="..")
         with self.assertRaises(ValueError):
-            translate._reject_path_separators_in_components(args)
+            naming._reject_path_separators_in_components(args)
 
     def test_ordinary_values_pass(self):
-        translate._reject_path_separators_in_components(self._args())
-        translate._reject_path_separators_in_components(self._args(target_lang="zh-Hant"))
+        naming._reject_path_separators_in_components(self._args())
+        naming._reject_path_separators_in_components(self._args(target_lang="zh-Hant"))
 
     def test_perimeter_guard_accepts_paths_inside(self):
         with tempfile.TemporaryDirectory() as base:
             inside = os.path.join(base, "sub", "doc-en.md")
             self.assertEqual(
-                translate._ensure_within_directory(base, inside),
+                naming._ensure_within_directory(base, inside),
                 os.path.realpath(inside),
             )
 
@@ -435,7 +435,7 @@ class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
         with tempfile.TemporaryDirectory() as base:
             outside = os.path.join(base, "..", "EVADE.md")
             with self.assertRaises(ValueError) as ctx:
-                translate._ensure_within_directory(base, outside)
+                naming._ensure_within_directory(base, outside)
         self.assertIn("sort du répertoire cible", str(ctx.exception))
 
 

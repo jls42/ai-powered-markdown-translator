@@ -23,7 +23,7 @@ from langdetect import LangDetectException
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, news, placeholders, translate
+from aipmt import guards, naming, news, placeholders, translate
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -108,21 +108,19 @@ class TestResolveOutputFilename(unittest.TestCase):
 
     def test_keep_filename(self):
         args = _base_args(keep_filename=True)
-        self.assertEqual(
-            translate._resolve_output_filename("README.md", "README", args), "README.md"
-        )
+        self.assertEqual(naming._resolve_output_filename("README.md", "README", args), "README.md")
 
     def test_include_model(self):
         args = _base_args(include_model=True, model="gpt-5.4-mini", target_lang="es")
         self.assertEqual(
-            translate._resolve_output_filename("README.md", "README", args),
+            naming._resolve_output_filename("README.md", "README", args),
             "README-es-gpt-5.4-mini.md",
         )
 
     def test_default_target_lang_suffix(self):
         args = _base_args(target_lang="de")
         self.assertEqual(
-            translate._resolve_output_filename("README.md", "README", args),
+            naming._resolve_output_filename("README.md", "README", args),
             "README-de.md",
         )
 
@@ -130,7 +128,7 @@ class TestResolveOutputFilename(unittest.TestCase):
 class TestResolveSingleOutputFilename(unittest.TestCase):
     def test_keep_filename(self):
         args = _base_args(keep_filename=True, file="/source/foo/article.mdx")
-        self.assertEqual(translate._resolve_single_output_filename(args), "article.mdx")
+        self.assertEqual(naming._resolve_single_output_filename(args), "article.mdx")
 
     def test_include_model(self):
         args = _base_args(
@@ -139,23 +137,21 @@ class TestResolveSingleOutputFilename(unittest.TestCase):
             target_lang="ja",
             model="gpt-5.4-mini",
         )
-        self.assertEqual(
-            translate._resolve_single_output_filename(args), "article-ja-gpt-5.4-mini.md"
-        )
+        self.assertEqual(naming._resolve_single_output_filename(args), "article-ja-gpt-5.4-mini.md")
 
     def test_default(self):
         args = _base_args(file="/source/foo/article.md", target_lang="pt")
-        self.assertEqual(translate._resolve_single_output_filename(args), "article-pt.md")
+        self.assertEqual(naming._resolve_single_output_filename(args), "article-pt.md")
 
 
 class TestExcludePatterns(unittest.TestCase):
     def test_is_excluded_match(self):
-        self.assertTrue(translate.is_excluded("/source/traductions_en/foo.md"))
-        self.assertTrue(translate.is_excluded("/source/foo/PRIVACY.md"))
-        self.assertTrue(translate.is_excluded("/source/venv/lib/foo.md"))
+        self.assertTrue(naming.is_excluded("/source/traductions_en/foo.md"))
+        self.assertTrue(naming.is_excluded("/source/foo/PRIVACY.md"))
+        self.assertTrue(naming.is_excluded("/source/venv/lib/foo.md"))
 
     def test_is_excluded_no_match(self):
-        self.assertFalse(translate.is_excluded("/source/content/posts/foo.md"))
+        self.assertFalse(naming.is_excluded("/source/content/posts/foo.md"))
 
     def test_is_translatable_markdown_md(self):
         self.assertTrue(translate._is_translatable_markdown("article.md"))
@@ -173,28 +169,28 @@ class TestExcludePatterns(unittest.TestCase):
 class TestShouldSkipWalkDir(unittest.TestCase):
     def test_skip_excluded_root(self):
         self.assertTrue(
-            translate._should_skip_walk_dir(
+            naming._should_skip_walk_dir(
                 "/source/foo/venv/lib", "/source/out", "out", "/source/foo"
             )
         )
 
     def test_skip_root_inside_output_dir(self):
         self.assertTrue(
-            translate._should_skip_walk_dir("/source/out/sub", "/source/out", "out", "/source/in")
+            naming._should_skip_walk_dir("/source/out/sub", "/source/out", "out", "/source/in")
         )
 
     def test_skip_subdir_named_like_output(self):
         """Un sous-répertoire direct d'input qui a le même nom que le dossier
         de sortie doit être skippé pour éviter de lire les traductions."""
         self.assertTrue(
-            translate._should_skip_walk_dir(
+            naming._should_skip_walk_dir(
                 "/source/in/out", "/source/elsewhere/out", "out", "/source/in"
             )
         )
 
     def test_dont_skip_unrelated_dir(self):
         self.assertFalse(
-            translate._should_skip_walk_dir("/source/in/posts", "/source/out", "out", "/source/in")
+            naming._should_skip_walk_dir("/source/in/posts", "/source/out", "out", "/source/in")
         )
 
 
@@ -204,15 +200,13 @@ class TestExistingTranslationExists(unittest.TestCase):
             existing = os.path.join(tmpdir, "README.md")
             open(existing, "w").close()
             args = _base_args(keep_filename=True, target_lang="en")
-            self.assertTrue(
-                translate._existing_translation_exists(existing, tmpdir, "README", args)
-            )
+            self.assertTrue(naming._existing_translation_exists(existing, tmpdir, "README", args))
 
     def test_keep_filename_no_match(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             args = _base_args(keep_filename=True, target_lang="en")
             self.assertFalse(
-                translate._existing_translation_exists(
+                naming._existing_translation_exists(
                     os.path.join(tmpdir, "missing.md"), tmpdir, "missing", args
                 )
             )
@@ -223,7 +217,7 @@ class TestExistingTranslationExists(unittest.TestCase):
             open(existing, "w").close()
             args = _base_args(keep_filename=False, target_lang="en")
             self.assertTrue(
-                translate._existing_translation_exists(
+                naming._existing_translation_exists(
                     os.path.join(tmpdir, "README-en.md"), tmpdir, "README", args
                 )
             )
@@ -232,7 +226,7 @@ class TestExistingTranslationExists(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             args = _base_args(keep_filename=False, target_lang="ja")
             self.assertFalse(
-                translate._existing_translation_exists(
+                naming._existing_translation_exists(
                     os.path.join(tmpdir, "README-ja.md"), tmpdir, "README", args
                 )
             )
@@ -272,7 +266,7 @@ class TestWriteOutputFile(unittest.TestCase):
             dst = os.path.join(tmpdir, "existing.md")
             with open(dst, "w") as f:
                 f.write("ancien contenu")
-            status = translate._write_output_file(
+            status = naming._write_output_file(
                 dst, "nouveau", force=False, relative_output_path="rel/existing.md"
             )
             self.assertEqual(status, "skipped")
@@ -284,7 +278,7 @@ class TestWriteOutputFile(unittest.TestCase):
             dst = os.path.join(tmpdir, "existing.md")
             with open(dst, "w") as f:
                 f.write("ancien contenu")
-            status = translate._write_output_file(
+            status = naming._write_output_file(
                 dst, "nouveau", force=True, relative_output_path="rel/existing.md"
             )
             self.assertEqual(status, "success")
@@ -441,18 +435,18 @@ class TestValidateInputPaths(unittest.TestCase):
     def test_file_does_not_exist_raises(self):
         args = _base_args(file="/source/__inexistant_xyz_42.md", target_dir="/dest")
         with self.assertRaisesRegex(ValueError, "fichier spécifié n'existe pas"):
-            translate._validate_input_paths(args)
+            naming._validate_input_paths(args)
 
     def test_source_dir_does_not_exist_raises(self):
         args = _base_args(file=None, source_dir="/source/__inexistant_xyz_42", target_dir="/dest")
         with self.assertRaisesRegex(ValueError, "répertoire source"):
-            translate._validate_input_paths(args)
+            naming._validate_input_paths(args)
 
     def test_creates_target_dir_if_missing(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             target = os.path.join(tmpdir, "new_target")
             args = _base_args(file=None, source_dir=tmpdir, target_dir=target)
-            translate._validate_input_paths(args)
+            naming._validate_input_paths(args)
             self.assertTrue(os.path.isdir(target))
 
 

@@ -56,6 +56,13 @@
       "kind": "Expr",
       "file": "src/aipmt/notes.py",
       "why": "docstring du module notes, né du découpage"
+    },
+    {
+      "hash": "13a8f5f1f68036bbf0492f6efa641da1e240cb256c6c56390b83674c63ea0d30",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/naming.py",
+      "why": "docstring du module naming, né du découpage"
     }
   ],
   "removed": [],

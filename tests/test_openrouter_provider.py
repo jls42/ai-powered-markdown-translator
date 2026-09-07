@@ -31,7 +31,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import segmentation, translate
+from aipmt import naming, segmentation, translate
 
 _MARQUEUR = "jeton-de-test"
 
@@ -426,7 +426,7 @@ class TestIntegrationCLI(unittest.TestCase):
 
     def test_nom_de_fichier_sans_separateur(self):
         """`--include_model` avec un slug ne doit pas fabriquer de sous-chemin."""
-        self.assertEqual(translate._model_filename_label("z-ai/glm-5.2"), "z-ai-glm-5.2")
+        self.assertEqual(naming._model_filename_label("z-ai/glm-5.2"), "z-ai-glm-5.2")
 
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
+from aipmt import naming, translate
 
 # Valeur passée par référence : un littéral en face d'une clé *_API_KEY fait
 # crier les scanners de secrets, alors qu'il ne s'agit que d'un jeton de test.
@@ -578,9 +578,9 @@ class TestModelFilenameLabel(unittest.TestCase):
     sous-répertoire, et `ollama/qwen2.5:7b` est illégal sous Windows."""
 
     def test_label_replaces_separators(self):
-        self.assertEqual(translate._model_filename_label("ollama/qwen2.5:7b"), "ollama-qwen2.5-7b")
-        self.assertEqual(translate._model_filename_label("gpt-5.4-mini"), "gpt-5.4-mini")
-        self.assertEqual(translate._model_filename_label(None), "")
+        self.assertEqual(naming._model_filename_label("ollama/qwen2.5:7b"), "ollama-qwen2.5-7b")
+        self.assertEqual(naming._model_filename_label("gpt-5.4-mini"), "gpt-5.4-mini")
+        self.assertEqual(naming._model_filename_label(None), "")
 
     def test_single_file_naming(self):
         args = Namespace(
@@ -591,7 +591,7 @@ class TestModelFilenameLabel(unittest.TestCase):
             model="lmstudio/google/gemma-3n-e4b",
         )
         self.assertEqual(
-            translate._resolve_single_output_filename(args),
+            naming._resolve_single_output_filename(args),
             "article-en-lmstudio-google-gemma-3n-e4b.md",
         )
 
@@ -600,21 +600,19 @@ class TestModelFilenameLabel(unittest.TestCase):
             keep_filename=False, include_model=True, target_lang="de", model="ollama/qwen2.5:7b"
         )
         self.assertEqual(
-            translate._resolve_output_filename("doc.md", "doc", args), "doc-de-ollama-qwen2.5-7b.md"
+            naming._resolve_output_filename("doc.md", "doc", args), "doc-de-ollama-qwen2.5-7b.md"
         )
 
     def test_component_guard_accepts_provider_model_but_still_rejects_traversal(self):
         base = {"target_lang": "en", "source_lang": "fr"}
-        translate._reject_path_separators_in_components(
-            Namespace(model="ollama/qwen2.5:7b", **base)
-        )
+        naming._reject_path_separators_in_components(Namespace(model="ollama/qwen2.5:7b", **base))
         for bad in ("..", "."):
             args = Namespace(model=bad, **base)
             with self.subTest(model=bad), self.assertRaisesRegex(ValueError, "--model"):
-                translate._reject_path_separators_in_components(args)
+                naming._reject_path_separators_in_components(args)
         evasion = Namespace(model="ollama/x", target_lang="../../tmp/EVASION", source_lang="fr")
         with self.assertRaisesRegex(ValueError, "--target_lang"):
-            translate._reject_path_separators_in_components(evasion)
+            naming._reject_path_separators_in_components(evasion)
 
     def test_traversal_through_model_stays_inside_target_dir(self):
         """Contre-épreuve de la seconde couche : même sans la garde amont, le
@@ -626,10 +624,10 @@ class TestModelFilenameLabel(unittest.TestCase):
             target_lang="en",
             model="../../../tmp/EVASION",
         )
-        name = translate._resolve_single_output_filename(args)
+        name = naming._resolve_single_output_filename(args)
         self.assertEqual(name, "doc-en-..-..-..-tmp-EVASION.md")
         self.assertEqual(
-            translate._ensure_within_directory("/out", os.path.join("/out", name)),
+            naming._ensure_within_directory("/out", os.path.join("/out", name)),
             os.path.join("/out", name),
         )
 
