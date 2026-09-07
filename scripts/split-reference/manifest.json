@@ -84,6 +84,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/openai.py",
       "why": "docstring du module providers/openai, né du découpage"
+    },
+    {
+      "hash": "de7aee17cbf71edd5c4a640a02270d275f41594038d0c537b04ed1eb87292a0f",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/mistral.py",
+      "why": "docstring du module providers/mistral, né du découpage"
     }
   ],
   "removed": [],

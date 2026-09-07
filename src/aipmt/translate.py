@@ -15,7 +15,6 @@ import anthropic
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types as genai_types
-from mistralai.client import Mistral
 from openai import OpenAI
 
 from .config import _missing_key_message
@@ -70,6 +69,7 @@ from .providers.base import (
     _stderr_tail,
     _strip_secret_env,
 )
+from .providers.mistral import _call_mistral, _init_mistral_client
 from .providers.openai import (
     _build_openai_messages,
     _call_openai,
@@ -78,13 +78,11 @@ from .providers.openai import (
 )
 from .segmentation import DEFAULT_TOKEN_LIMIT, MODEL_TOKEN_LIMITS, segment_text
 
-DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"  # pragma: allowlist secret
 DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"  # pragma: allowlist secret
 DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"  # pragma: allowlist secret
 DEFAULT_XAI_API_KEY = "votre-cle-api-xai-par-defaut"  # pragma: allowlist secret
 DEFAULT_OPENROUTER_API_KEY = "votre-cle-api-openrouter-par-defaut"  # pragma: allowlist secret
 
-DEFAULT_MODEL_MISTRAL = "mistral-large-latest"
 DEFAULT_MODEL_CLAUDE = "claude-sonnet-5"
 DEFAULT_MODEL_GEMINI = "gemini-3.7-flash"
 # Volontairement écrit en toutes lettres ici, dans DEFAULT_MODEL_GROK_CLI et
@@ -98,7 +96,6 @@ DEFAULT_MODEL_GEMINI = "gemini-3.7-flash"
 DEFAULT_MODEL_GROK = "grok-4.6"  # NOSONAR python:S1192
 DEFAULT_MODEL_CODEX = "gpt-5.6-sol"
 
-ECO_MODEL_MISTRAL = "mistral-small-latest"
 ECO_MODEL_CLAUDE = "claude-haiku-4-5"
 ECO_MODEL_GEMINI = "gemini-3.1-flash-lite"
 # Luna = modèle "fast, high-volume" du plan ChatGPT : 250-2000 messages/5h sur
@@ -288,20 +285,6 @@ DEFAULT_SOURCE_LANG = "fr"
 DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
-
-
-def _call_mistral(client, args, prompt, segment):
-    messages = [{"role": "user", "content": prompt + "\n\n" + segment}]
-    response = client.chat.complete(model=args.model, messages=messages)
-    finish = _reason_name(response.choices[0].finish_reason)
-    if finish not in ("stop", "STOP", None):
-        raise RuntimeError(f"Mistral abnormal finish_reason={finish!r} (model={args.model})")
-    # Même garde que sur le chemin OpenAI : un `content` à None produisait un
-    # AttributeError opaque sur `.strip()` au lieu d'un message exploitable.
-    content = response.choices[0].message.content
-    if content is None:
-        raise RuntimeError(f"Mistral returned no content (model={args.model})")
-    return content.strip()
 
 
 # 32768 : marge sur l'expansion cross-script (FR→JA/ZH/KO/AR/HI peuvent
@@ -1923,14 +1906,6 @@ def _build_arg_parser():
     _add_note_args(parser)
     _add_news_args(parser)
     return parser
-
-
-def _init_mistral_client(args):
-    args.model = args.model or (ECO_MODEL_MISTRAL if args.eco else DEFAULT_MODEL_MISTRAL)
-    api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
-    if not api_key or api_key == DEFAULT_MISTRAL_API_KEY:
-        raise ValueError(_missing_key_message("Mistral", ["MISTRAL_API_KEY"]))
-    return Mistral(api_key=api_key)
 
 
 def _init_claude_client(args):

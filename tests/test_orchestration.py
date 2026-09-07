@@ -24,7 +24,7 @@ from langdetect import LangDetectException
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import guards, naming, news, placeholders, translate
-from aipmt.providers import openai
+from aipmt.providers import mistral, openai
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -457,25 +457,26 @@ class TestProviderClientInit(unittest.TestCase):
     def test_init_mistral_missing_key_raises(self):
         args = _base_args()
         with patch.dict(os.environ, {}, clear=True), self.assertRaisesRegex(ValueError, "Mistral"):
-            translate._init_mistral_client(args)
+            mistral._init_mistral_client(args)
 
     def test_init_mistral_happy_path(self):
         args = _base_args()
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
-            patch("aipmt.translate.Mistral") as mock_cls,
+            patch("aipmt.providers.mistral.Mistral") as mock_cls,
         ):
-            client = translate._init_mistral_client(args)
+            client = mistral._init_mistral_client(args)
             mock_cls.assert_called_once_with(api_key=_FAKE_MISTRAL_ENV["MISTRAL_API_KEY"])
             self.assertIs(client, mock_cls.return_value)
         # eco override applique aussi le modèle économique
         args2 = _base_args(eco=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
-            patch("aipmt.translate.Mistral"),
+            patch("aipmt.providers.mistral.Mistral") as fake_mistral,
         ):
-            translate._init_mistral_client(args2)
-        self.assertEqual(args2.model, translate.ECO_MODEL_MISTRAL)
+            mistral._init_mistral_client(args2)
+        self.assertEqual(args2.model, mistral.ECO_MODEL_MISTRAL)
+        fake_mistral.assert_called_once()
 
     def test_init_claude_missing_key_raises(self):
         args = _base_args()
@@ -541,7 +542,7 @@ class TestSelectProviderClient(unittest.TestCase):
         args = _base_args(use_mistral=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
-            patch("aipmt.translate.Mistral") as mock_cls,
+            patch("aipmt.providers.mistral.Mistral") as mock_cls,
         ):
             translate._select_provider_client(args)
             mock_cls.assert_called_once()
@@ -813,7 +814,7 @@ class TestMainCleansUpMistralClient(unittest.TestCase):
             patch(
                 "aipmt.translate.translate_directory", return_value={"failed": [], "skipped": []}
             ),
-            patch("aipmt.translate.Mistral"),
+            patch("aipmt.providers.mistral.Mistral") as fake_mistral,
             patch("os.path.isdir", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
@@ -830,6 +831,9 @@ class TestMainCleansUpMistralClient(unittest.TestCase):
         ):
             # Ne doit pas lever : la branche `del client` exécute proprement.
             translate.main()
+        # main() revient sans lever même quand rien n'est patché (mesuré) :
+        # seul l'appel du double prouve que la branche Mistral a été prise.
+        fake_mistral.assert_called_once()
 
 
 class TestModuleEntrypoint(unittest.TestCase):

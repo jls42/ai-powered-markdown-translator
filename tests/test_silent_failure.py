@@ -24,7 +24,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import guards, markdown, news, notes, placeholders, prompts, translate
-from aipmt.providers import openai
+from aipmt.providers import mistral, openai
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -753,7 +753,7 @@ class TestMultiProviderStopReasons(unittest.TestCase):
         )
         args = _base_args(model="mistral-small-latest")
         with self.assertRaisesRegex(RuntimeError, r"Mistral abnormal finish_reason"):
-            translate._call_mistral(client, args, "prompt", "segment")
+            mistral._call_mistral(client, args, "prompt", "segment")
 
     def test_gemini_abnormal_finish_reason_raises(self):
         gen_model = MagicMock()
