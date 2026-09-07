@@ -23,7 +23,7 @@ from langdetect import LangDetectException
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, translate
+from aipmt import guards, placeholders, translate
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -592,16 +592,16 @@ class TestNewsRulesEnglish(unittest.TestCase):
 
 class TestNormalizeCollapsedMarkdown(unittest.TestCase):
     def test_separator_collapse_is_split(self):
-        out = translate._normalize_collapsed_markdown("--- ## Titre\n")
+        out = placeholders._normalize_collapsed_markdown("--- ## Titre\n")
         self.assertEqual(out, "---\n\n## Titre\n")
 
     def test_link_collapse_with_heading_is_split(self):
-        out = translate._normalize_collapsed_markdown("[texte](https://x.com) ## Titre\n")
+        out = placeholders._normalize_collapsed_markdown("[texte](https://x.com) ## Titre\n")
         self.assertEqual(out, "[texte](https://x.com)\n\n## Titre\n")
 
     def test_no_collapse_passes_through(self):
         text = "## Titre\n\nParagraphe normal.\n"
-        self.assertEqual(translate._normalize_collapsed_markdown(text), text)
+        self.assertEqual(placeholders._normalize_collapsed_markdown(text), text)
 
 
 class TestCleanupSourceFlag(unittest.TestCase):
@@ -666,12 +666,12 @@ class TestNormalizeCollapsedRaisesOnPersistence(unittest.TestCase):
         # par le check final → on attend RuntimeError.
         text = "---\t## Titre\n"
         with self.assertRaisesRegex(RuntimeError, "séparateur markdown collé"):
-            translate._normalize_collapsed_markdown(text)
+            placeholders._normalize_collapsed_markdown(text)
 
     def test_link_with_tab_still_raises(self):
         text = "[t](https://x.com)\t## Titre\n"
         with self.assertRaisesRegex(RuntimeError, "lien markdown collé"):
-            translate._normalize_collapsed_markdown(text)
+            placeholders._normalize_collapsed_markdown(text)
 
 
 class TestOpenAIO1Series(unittest.TestCase):

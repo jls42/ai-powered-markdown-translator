@@ -28,6 +28,13 @@
       "kind": "Expr",
       "file": "src/aipmt/guards.py",
       "why": "docstring du module guards, né du découpage"
+    },
+    {
+      "hash": "8b9dadd7b887c215052197d2b53e42e9141fd59e8175522625b59e0b4169f50e",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/placeholders.py",
+      "why": "docstring du module placeholders, né du découpage"
     }
   ],
   "removed": [],

@@ -23,7 +23,7 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, markdown, translate
+from aipmt import guards, markdown, placeholders, translate
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -510,7 +510,7 @@ class TestCodePlaceholders(unittest.TestCase):
     def test_fenced_block_no_lang(self):
         """Fence sans info string ``` → doit être protégée."""
         content = "Texte\n\n```\ncode brut\n```\n\nSuite."
-        protected, blocks, _ph = translate._protect_code_blocks(content)
+        protected, blocks, _ph = placeholders._protect_code_blocks(content)
         self.assertEqual(len(blocks), 1)
         self.assertIn("#CODEBLOCK0#", protected)
         self.assertNotIn("code brut", protected)
@@ -518,14 +518,14 @@ class TestCodePlaceholders(unittest.TestCase):
     def test_fenced_block_hyphenated_lang(self):
         """Fence avec lang hyphené ```python-repl → doit être protégée."""
         content = "```python-repl\n>>> 1+1\n```"
-        protected, blocks, _ph = translate._protect_code_blocks(content)
+        protected, blocks, _ph = placeholders._protect_code_blocks(content)
         self.assertEqual(len(blocks), 1)
         self.assertIn("#CODEBLOCK0#", protected)
 
     def test_fenced_orphan_does_not_match(self):
         """Une fence ouverte sans fermeture ne doit pas être consommée greedy."""
         content = "Texte\n```\npas de fermeture"
-        protected, blocks, _ = translate._protect_code_blocks(content)
+        protected, blocks, _ = placeholders._protect_code_blocks(content)
         self.assertEqual(blocks, [])
         self.assertEqual(protected, content)
 
@@ -537,16 +537,16 @@ class TestCodePlaceholders(unittest.TestCase):
             "Avec `inline_code` au milieu.\n\n"
             "```\nautre bloc\n```\n"
         )
-        c1, blocks, b_ph = translate._protect_code_blocks(content)
-        c2, inlines, i_ph = translate._protect_inline_code(c1)
+        c1, blocks, b_ph = placeholders._protect_code_blocks(content)
+        c2, inlines, i_ph = placeholders._protect_inline_code(c1)
         # Simule un LLM qui ne touche pas au texte (round-trip pur).
-        restored = translate._restore_code(c2, inlines, i_ph, blocks, b_ph)
+        restored = placeholders._restore_code(c2, inlines, i_ph, blocks, b_ph)
         self.assertEqual(restored, content)
 
     def test_double_backtick_inline_not_swallowed(self):
         """Backticks doubles ``foo`` ne doivent pas être pris pour inline-code single-tick."""
         content = "Voir ``literal`backtick`` dans la doc."
-        _, inlines, _ = translate._protect_inline_code(content)
+        _, inlines, _ = placeholders._protect_inline_code(content)
         # Le pattern actuel (?<!`)`...`(?!`) exclut les doubles → 0 match attendu.
         self.assertEqual(inlines, [])
 
@@ -554,26 +554,26 @@ class TestCodePlaceholders(unittest.TestCase):
         """Un #CODEBLOCK0# qui n'a pas été restauré (mismatch d'index) doit lever."""
         text = "Translated text with leftover #CODEBLOCK7# that was never restored."
         with self.assertRaisesRegex(RuntimeError, r"non restauré|leftover|Placeholder"):
-            translate._validate_no_code_placeholder_leftover(text)
+            placeholders._validate_no_code_placeholder_leftover(text)
 
     def test_placeholder_eaten_by_llm_raises(self):
         """Un placeholder #CODEBLOCK0# émis mais absent de la sortie du LLM doit lever."""
         text = "LLM output that lost the placeholder."
         with self.assertRaisesRegex(RuntimeError, r"manquant|Placeholder"):
-            translate._validate_code_placeholders_present(text, ["#CODEBLOCK0#"], [])
+            placeholders._validate_code_placeholders_present(text, ["#CODEBLOCK0#"], [])
 
 
 class TestHeadingAnchors(unittest.TestCase):
     def test_github_slug_preserves_devanagari_marks(self):
         """Les matras Devanagari doivent survivre dans les slugs heading-derived."""
-        self.assertEqual(translate._github_slug("विषय-सूची"), "विषय-सूची")
-        self.assertEqual(translate._github_slug("इंस्टॉलेशन"), "इंस्टॉलेशन")
-        self.assertEqual(translate._github_slug("TC (तकनीकी समिति)"), "tc-तकनीकी-समिति")
+        self.assertEqual(placeholders._github_slug("विषय-सूची"), "विषय-सूची")
+        self.assertEqual(placeholders._github_slug("इंस्टॉलेशन"), "इंस्टॉलेशन")
+        self.assertEqual(placeholders._github_slug("TC (तकनीकी समिति)"), "tc-तकनीकी-समिति")
 
     def test_heading_anchor_restore_uses_devanagari_slug_with_marks(self):
         source_slugs = ["tc-technical-committee"]
-        target_slugs = [translate._github_slug("TC (तकनीकी समिति)")]
-        out = translate._restore_anchors(
+        target_slugs = [placeholders._github_slug("TC (तकनीकी समिति)")]
+        out = placeholders._restore_anchors(
             "[TC (तकनीकी समिति)]#ANCHOR0#",
             ["(#tc-technical-committee)"],
             ["#ANCHOR0#"],
