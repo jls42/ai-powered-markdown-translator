@@ -63,6 +63,20 @@
       "kind": "Expr",
       "file": "src/aipmt/naming.py",
       "why": "docstring du module naming, né du découpage"
+    },
+    {
+      "hash": "25f6320de5b19871624d864d678f84cb5b267267ab7913f4cefff6f7f84edac4",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/base.py",
+      "why": "docstring du module providers/base, né du découpage"
+    },
+    {
+      "hash": "3ccdbb17aa82af17794e37a390712b9a5dba4bc95056afc173e6a5715f0cc33a",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/__init__.py",
+      "why": "docstring du sous-paquet providers, né du découpage"
     }
   ],
   "removed": [],

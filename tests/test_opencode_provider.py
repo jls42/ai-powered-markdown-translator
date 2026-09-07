@@ -35,6 +35,7 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, translate
+from aipmt.providers import base
 
 # Valeur passée par référence : un littéral en face d'une clé *_API_KEY fait
 # crier les scanners de secrets, alors qu'il ne s'agit que d'un jeton de test.
@@ -313,7 +314,7 @@ class TestOpencodeCall(unittest.TestCase):
         ):
             translate._call_opencode(client, args, "P", "S")
         killpg.assert_called()
-        self.assertEqual(translate._CLI_TIMEOUT_ENV_VARS["OpenCode"], "OPENCODE_TIMEOUT")
+        self.assertEqual(base._CLI_TIMEOUT_ENV_VARS["OpenCode"], "OPENCODE_TIMEOUT")
 
 
 class TestOpencodeRateLimitBackoff(unittest.TestCase):
@@ -370,9 +371,9 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
     def test_shared_backoff_covers_the_three_clis(self):
         """Le back-off est commun : les erreurs Codex et Grok doivent rester
         des `_CliCallError`, sinon la boucle partagée ne les verrait plus."""
-        self.assertTrue(issubclass(translate._CodexCallError, translate._CliCallError))
-        self.assertTrue(issubclass(translate._GrokCallError, translate._CliCallError))
-        self.assertTrue(issubclass(translate._OpencodeCallError, translate._CliCallError))
+        self.assertTrue(issubclass(translate._CodexCallError, base._CliCallError))
+        self.assertTrue(issubclass(translate._GrokCallError, base._CliCallError))
+        self.assertTrue(issubclass(translate._OpencodeCallError, base._CliCallError))
 
 
 class TestOpencodeInit(unittest.TestCase):

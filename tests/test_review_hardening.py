@@ -29,6 +29,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, news, translate
+from aipmt.providers import base
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -215,7 +216,7 @@ class TestCiRejectionNamesTheRightProvider(unittest.TestCase):
             patch.dict(os.environ, {"CI": "1"}, clear=False),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._codex_reject_ci_environment(flag="--use_grok_cli")
+            base._codex_reject_ci_environment(flag="--use_grok_cli")
         message = str(ctx.exception)
         self.assertIn("XAI_API_KEY", message)
         self.assertNotIn("OPENAI_API_KEY", message)
@@ -225,7 +226,7 @@ class TestCiRejectionNamesTheRightProvider(unittest.TestCase):
             patch.dict(os.environ, {"CI": "1"}, clear=False),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._codex_reject_ci_environment(flag="--use_codex")
+            base._codex_reject_ci_environment(flag="--use_codex")
         self.assertIn("OPENAI_API_KEY", str(ctx.exception))
 
 
