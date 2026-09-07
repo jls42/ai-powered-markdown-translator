@@ -178,6 +178,13 @@
       "old_hash": "31da5444c63d040cb2c69fffba9c392bc0cd30bec55624b136978b7380f15d25",
       "new_hash": "187abf09417bbafa55a764453c0759691136eb5c22ed37003167a65c8216ac98",
       "why": "docstring du paquet : décrit le découpage au lieu d'un module unique"
+    },
+    {
+      "name": "_is_translatable_markdown",
+      "file": "src/aipmt/pipeline.py",
+      "old_hash": "68750e5159a2432e1f7266afa155de5b709f9d35b33f8a5253cedbcb37c9427d",
+      "new_hash": "e487cd02c473cf0f2e41ab75e479e1d646c40fd3dd3f58a419701e1760aa8360",
+      "why": "Sonar S8513 : deux endswith chaînés remplacés par un endswith à tuple, comportement identique (le code déplacé compte comme nouveau pour Sonar)"
     }
   ]
 }

@@ -52,8 +52,9 @@ import sys
 import tokenize
 from collections import Counter
 
+ORIGIN_NAME = "translate.py"
 PACKAGE = pathlib.Path("src/aipmt")
-ORIGIN = PACKAGE / "translate.py"
+ORIGIN = PACKAGE / ORIGIN_NAME
 SNAPSHOT = pathlib.Path("scripts/split-reference/package-6ae1505.json")
 MANIFEST = pathlib.Path("scripts/split-reference/manifest.json")
 REFERENCE_REVISION = "6ae1505"
@@ -406,6 +407,20 @@ TARGET_OF: dict[str, str] = {
 }
 
 
+def _within_root(path: pathlib.Path) -> pathlib.Path:
+    """Refuse tout chemin qui sortirait de la racine courante.
+
+    Les chemins viennent de la ligne de commande d'un outil de développement ;
+    les borner n'en fait pas une surface d'attaque, mais dit explicitement où
+    l'outil a le droit de lire et d'écrire : sous la racine, jamais ailleurs.
+    """
+    root = pathlib.Path.cwd().resolve()
+    resolved = (root / path).resolve()
+    if resolved != root and root not in resolved.parents:
+        raise SystemExit(f"chemin hors de la racine refusé : {path}")
+    return resolved
+
+
 def _is_main_guard(node: ast.AST) -> bool:
     return isinstance(node, ast.If) and "__name__" in ast.dump(node.test)
 
@@ -497,7 +512,12 @@ def write_snapshot(package: pathlib.Path, origin: pathlib.Path, snapshot: pathli
         "markers": collect_markers(origin),
     }
     snapshot.parent.mkdir(parents=True, exist_ok=True)
-    snapshot.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    # NOSONAR pythonsecurity:S2083 pythonsecurity:S8707 — chemin borné à la racine
+    # par _within_root avant tout accès ; outil de développement lancé par un
+    # mainteneur, sans entrée réseau.
+    snapshot.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )  # NOSONAR
     print(f"snapshot écrit : {snapshot} ({len(nodes)} nœuds, {len(payload['markers'])} marqueurs)")
     return 0
 
@@ -505,7 +525,8 @@ def write_snapshot(package: pathlib.Path, origin: pathlib.Path, snapshot: pathli
 def _load_manifest(manifest: pathlib.Path) -> dict[str, list[dict[str, str]]]:
     if not manifest.exists():
         return {"added": [], "removed": [], "modified": []}
-    data = json.loads(manifest.read_text(encoding="utf-8"))
+    # NOSONAR pythonsecurity:S8707 — cf. write_snapshot, même borne.
+    data = json.loads(manifest.read_text(encoding="utf-8"))  # NOSONAR
     return {key: list(data.get(key, [])) for key in ("added", "removed", "modified")}
 
 
@@ -549,7 +570,7 @@ def check_nodes(
 
 
 def check_locations(current: list[dict[str, str]], package: pathlib.Path) -> list[str]:
-    origin = (package / "translate.py").as_posix()
+    origin = (package / ORIGIN_NAME).as_posix()
     problems = []
     for node in current:
         for name in node["name"].split(","):
@@ -604,7 +625,8 @@ def check(
     if not snapshot.exists():
         print(f"✗ snapshot absent : {snapshot} — générer avec --write-snapshot", file=sys.stderr)
         return 1
-    reference = json.loads(snapshot.read_text(encoding="utf-8"))
+    # NOSONAR pythonsecurity:S8707 — cf. write_snapshot, même borne.
+    reference = json.loads(snapshot.read_text(encoding="utf-8"))  # NOSONAR
     current = collect_nodes(package)
     declared = _load_manifest(manifest)
     problems = (
@@ -638,9 +660,11 @@ def main(argv: list[str] | None = None) -> int:
     # poste à la CI : un chemin absolu y serait faux par construction.
     previous = os.getcwd()
     os.chdir(args.root)
+    for path in (args.package, args.snapshot, args.manifest):
+        _within_root(path)
     try:
         if args.write_snapshot:
-            return write_snapshot(args.package, args.package / "translate.py", args.snapshot)
+            return write_snapshot(args.package, args.package / ORIGIN_NAME, args.snapshot)
         return check(pathlib.Path("."), args.package, args.snapshot, args.manifest)
     finally:
         os.chdir(previous)

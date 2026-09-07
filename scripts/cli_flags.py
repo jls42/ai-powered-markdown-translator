@@ -25,7 +25,7 @@ def _parser_builders() -> list:
     importlib.import_module("aipmt")
     return [
         module
-        for name, module in list(sys.modules.items())
+        for name, module in sys.modules.items()
         if (name == "aipmt" or name.startswith("aipmt."))
         and callable(getattr(module, "_build_arg_parser", None))
     ]

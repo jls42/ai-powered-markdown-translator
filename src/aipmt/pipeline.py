@@ -437,7 +437,7 @@ def _process_one_markdown_file(file, root, ctx):
 
 
 def _is_translatable_markdown(file):
-    return (file.endswith(".md") or file.endswith(".mdx")) and not is_excluded(file)
+    return file.endswith((".md", ".mdx")) and not is_excluded(file)
 
 
 def translate_directory(input_dir, output_dir, config):

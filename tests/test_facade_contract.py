@@ -139,7 +139,7 @@ class FacadeExposesExactlyTheHistoricalPublicNames(unittest.TestCase):
 
     def test_all_lists_only_the_supported_api(self):
         self.assertEqual(set(facade.__all__), SUPPORTED)
-        self.assertTrue(set().union(*ALIASES.values()) >= SUPPORTED)
+        self.assertLessEqual(SUPPORTED, set().union(*ALIASES.values()))
 
     def test_no_private_sdk_or_stdlib_reexport(self):
         for name in (
