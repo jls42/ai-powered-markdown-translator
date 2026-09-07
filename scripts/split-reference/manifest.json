@@ -126,6 +126,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/opencode.py",
       "why": "docstring du module providers/opencode, né du découpage"
+    },
+    {
+      "hash": "947f24db86e0f4a68ca93277744d7e3c1ecf5cb0e01289fbbb8f0e4aa03aac83",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "docstring du module providers/openrouter, né du découpage"
     }
   ],
   "removed": [],
