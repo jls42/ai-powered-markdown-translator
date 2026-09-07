@@ -154,8 +154,30 @@
       "kind": "Expr",
       "file": "src/aipmt/cli.py",
       "why": "docstring du module cli, né du découpage"
+    },
+    {
+      "hash": "142d824313a9392f93cf6f30f1b3b6cab2f09e43297d350b240e05fbf58bd320",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/translate.py",
+      "why": "docstring de la façade de compatibilité"
+    },
+    {
+      "hash": "817cc02a01e757409c904f50bf890a33bfb69d3fd4017efc2cd7fa23d1ce79ca",
+      "name": "__all__",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py",
+      "why": "__all__ de la façade : les neuf noms supportés"
     }
   ],
   "removed": [],
-  "modified": []
+  "modified": [
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/__init__.py",
+      "old_hash": "07f233eae769add5273a49c58c593c01b231349a765eb6b79afa78f52cd66f2c",
+      "new_hash": "0d23c524f9735acb585c5ecd600f4e489300f0a1f7368e57768b5dc122b496b2",
+      "why": "docstring du paquet : décrit le découpage au lieu d'un module unique"
+    }
+  ]
 }

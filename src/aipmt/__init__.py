@@ -1,7 +1,15 @@
 """AI-Powered Markdown Translator — traduit du Markdown en préservant la mise en forme.
 
-Toute la logique vit dans `aipmt.translate`, qui reste un module unique. Ce
-paquet n'expose que le point d'entrée cité par `[project.scripts]`.
+Le paquet est découpé par responsabilité : `config` (clés et `.env`),
+`markdown` (lexique partagé), `segmentation`, `guards` (gardes de sortie),
+`placeholders`, `news` (mode `--news`), `prompts`, `notes`, `naming`,
+`pipeline` (traduction d'un texte, d'un fichier, d'un répertoire), `cli`
+(ligne de commande) et le sous-paquet `providers/` (un module par chemin
+d'appel, `base` en socle, `registry` pour la résolution et le dispatch).
+`translate` est une façade de compatibilité : les noms que le module unique
+d'origine exposait y restent accessibles, par identité.
+
+Ce paquet n'expose que le point d'entrée cité par `[project.scripts]`.
 
 Le nom `aipmt` n'est pas une coquetterie d'acronyme : publier ce module en
 top-level `translate` l'aurait mis en collision avec le paquet PyPI `translate`
