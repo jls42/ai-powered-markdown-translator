@@ -31,8 +31,8 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import naming, segmentation, translate
-from aipmt.providers import openrouter
+from aipmt import naming, segmentation
+from aipmt.providers import openrouter, registry
 
 _MARQUEUR = "jeton-de-test"
 
@@ -404,28 +404,28 @@ class TestPreflight(unittest.TestCase):
 
 class TestIntegrationCLI(unittest.TestCase):
     def test_dispatch(self):
-        with patch.object(translate, "_call_openrouter", return_value="traduit") as appel:
-            texte = translate._dispatch_provider_call(
+        with patch.object(registry, "_call_openrouter", return_value="traduit") as appel:
+            texte = registry._dispatch_provider_call(
                 _client(), _args(), "p", "s", "openrouter", False
             )
         self.assertEqual(texte, "traduit")
         appel.assert_called_once()
 
     def test_resolve_provider(self):
-        self.assertEqual(translate._resolve_provider(_args()), "openrouter")
+        self.assertEqual(registry._resolve_provider(_args()), "openrouter")
 
     def test_flag_exclusif(self):
         """Deux flags provider simultanés partaient jusqu'ici en facturation
         silencieuse : argparse doit refuser la combinaison."""
         parser = argparse.ArgumentParser()
-        translate._add_provider_args(parser)
+        registry._add_provider_args(parser)
         self.assertTrue(parser.parse_args(["--use_openrouter"]).use_openrouter)
         for autre in ("--use_codex", "--use_mistral", "--use_grok", "--use_opencode"):
             with patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit):
                 parser.parse_args(["--use_openrouter", autre])
 
     def test_libelle_du_provider(self):
-        self.assertEqual(translate._PROVIDER_LABELS["openrouter"], "OpenRouter")
+        self.assertEqual(registry._PROVIDER_LABELS["openrouter"], "OpenRouter")
 
     def test_nom_de_fichier_sans_separateur(self):
         """`--include_model` avec un slug ne doit pas fabriquer de sous-chemin."""

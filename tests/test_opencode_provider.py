@@ -34,8 +34,8 @@ from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import naming, translate
-from aipmt.providers import base, codex, grok, opencode
+from aipmt import naming
+from aipmt.providers import base, codex, grok, opencode, registry
 
 # Valeur passée par référence : un littéral en face d'une clé *_API_KEY fait
 # crier les scanners de secrets, alors qu'il ne s'agit que d'un jeton de test.
@@ -530,24 +530,24 @@ class TestOpencodeBinaryResolution(unittest.TestCase):
 
 class TestProviderWiring(unittest.TestCase):
     def test_resolve_provider_from_args(self):
-        self.assertEqual(translate._resolve_provider(Namespace(use_opencode=True)), "opencode")
+        self.assertEqual(registry._resolve_provider(Namespace(use_opencode=True)), "opencode")
 
     def test_label(self):
-        self.assertEqual(translate._PROVIDER_LABELS["opencode"], "OpenCode")
+        self.assertEqual(registry._PROVIDER_LABELS["opencode"], "OpenCode")
 
     def test_dispatch_routes_to_opencode(self):
-        with patch.object(translate, "_call_opencode", return_value="ok") as call:
-            text = translate._dispatch_provider_call("client", _args(), "P", "S", "opencode", False)
+        with patch.object(registry, "_call_opencode", return_value="ok") as call:
+            text = registry._dispatch_provider_call("client", _args(), "P", "S", "opencode", False)
         self.assertEqual(text, "ok")
         call.assert_called_once_with("client", unittest.mock.ANY, "P", "S")
 
     def test_dispatch_empty_content_guard_names_opencode(self):
         args = _args()
         with (
-            patch.object(translate, "_call_opencode", return_value="   "),
+            patch.object(registry, "_call_opencode", return_value="   "),
             self.assertRaisesRegex(RuntimeError, "OpenCode returned empty content"),
         ):
-            translate._dispatch_provider_call("client", args, "P", "S", "opencode", False)
+            registry._dispatch_provider_call("client", args, "P", "S", "opencode", False)
 
     def test_select_provider_client_routes_to_init(self):
         args = Namespace(
@@ -559,15 +559,15 @@ class TestProviderWiring(unittest.TestCase):
             use_grok=False,
             use_opencode=True,
         )
-        with patch.object(translate, "_init_opencode_client", return_value="client") as init:
-            self.assertEqual(translate._select_provider_client(args), "client")
+        with patch.object(registry, "_init_opencode_client", return_value="client") as init:
+            self.assertEqual(registry._select_provider_client(args), "client")
         init.assert_called_once_with(args)
 
     def test_flag_is_in_the_exclusive_group(self):
         import argparse
 
         parser = argparse.ArgumentParser()
-        translate._add_provider_args(parser)
+        registry._add_provider_args(parser)
         self.assertTrue(parser.parse_args(["--use_opencode"]).use_opencode)
         for other in ("--use_codex", "--use_mistral", "--use_grok_cli"):
             with self.subTest(other=other), self.assertRaises(SystemExit):

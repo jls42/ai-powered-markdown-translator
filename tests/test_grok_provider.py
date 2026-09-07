@@ -26,8 +26,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
-from aipmt.providers import grok, openai
+from aipmt.providers import grok, openai, registry
 
 
 def _args(**overrides):
@@ -335,17 +334,17 @@ class TestGrokApiMode(unittest.TestCase):
         self.assertEqual(out, "Translated")
 
     def test_api_mode_routes_through_openai_call(self):
-        with patch("aipmt.translate._call_openai", return_value="ok") as call:
-            out = translate._dispatch_provider_call(
+        with patch("aipmt.providers.registry._call_openai", return_value="ok") as call:
+            out = registry._dispatch_provider_call(
                 MagicMock(), _args(), "PROMPT", "SEG", "grok", False
             )
         self.assertEqual(out, "ok")
         call.assert_called_once()
 
     def test_provider_resolution(self):
-        self.assertEqual(translate._resolve_provider(_args(use_grok=True)), "grok")
-        self.assertEqual(translate._resolve_provider(_args(use_grok_cli=True)), "grok_cli")
-        self.assertEqual(translate._resolve_provider(_args()), "openai")
+        self.assertEqual(registry._resolve_provider(_args(use_grok=True)), "grok")
+        self.assertEqual(registry._resolve_provider(_args(use_grok_cli=True)), "grok_cli")
+        self.assertEqual(registry._resolve_provider(_args()), "openai")
 
 
 if __name__ == "__main__":

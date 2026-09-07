@@ -133,6 +133,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/openrouter.py",
       "why": "docstring du module providers/openrouter, né du découpage"
+    },
+    {
+      "hash": "a40c74ccf5195927733a9d6ba8484af3ca2808e83cc5a1471bea2c4107e2bc74",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "docstring du module providers/registry, né du découpage"
     }
   ],
   "removed": [],

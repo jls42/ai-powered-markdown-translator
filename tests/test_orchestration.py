@@ -24,7 +24,7 @@ from langdetect import LangDetectException
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import guards, naming, news, placeholders, translate
-from aipmt.providers import anthropic, gemini, mistral, openai
+from aipmt.providers import anthropic, gemini, mistral, openai, registry
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -544,7 +544,7 @@ class TestSelectProviderClient(unittest.TestCase):
             patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
             patch("aipmt.providers.mistral.Mistral") as mock_cls,
         ):
-            translate._select_provider_client(args)
+            registry._select_provider_client(args)
             mock_cls.assert_called_once()
 
     def test_claude_branch(self):
@@ -553,7 +553,7 @@ class TestSelectProviderClient(unittest.TestCase):
             patch.dict(os.environ, _FAKE_CLAUDE_ENV, clear=True),
             patch("aipmt.providers.anthropic.anthropic") as mock_anthropic,
         ):
-            translate._select_provider_client(args)
+            registry._select_provider_client(args)
             mock_anthropic.Anthropic.assert_called_once()
 
     def test_gemini_branch(self):
@@ -562,7 +562,7 @@ class TestSelectProviderClient(unittest.TestCase):
             patch.dict(os.environ, _FAKE_GEMINI_ENV, clear=True),
             patch("aipmt.providers.gemini.genai") as mock_genai,
         ):
-            translate._select_provider_client(args)
+            registry._select_provider_client(args)
             mock_genai.Client.assert_called_once()
 
     def test_openai_default_branch(self):
@@ -571,7 +571,7 @@ class TestSelectProviderClient(unittest.TestCase):
             patch.dict(os.environ, _FAKE_OPENAI_ENV, clear=True),
             patch("aipmt.providers.openai.OpenAI") as mock_cls,
         ):
-            translate._select_provider_client(args)
+            registry._select_provider_client(args)
             mock_cls.assert_called_once()
 
 

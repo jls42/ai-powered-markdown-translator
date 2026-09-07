@@ -28,8 +28,8 @@ from google.genai import errors as genai_errors
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import markdown, news, translate
-from aipmt.providers import anthropic, codex, gemini, openai
+from aipmt import markdown, news
+from aipmt.providers import anthropic, codex, gemini, openai, registry
 
 
 def _args(**overrides):
@@ -318,25 +318,27 @@ class TestProviderResolution(unittest.TestCase):
         """Plusieurs tests existants appellent translate(..., use_mistral=True)
         avec un Namespace dépourvu d'attributs use_* : la résolution doit rester
         tolérante."""
-        self.assertEqual(translate._resolve_provider(_args(), use_mistral=True), "mistral")
-        self.assertEqual(translate._resolve_provider(_args(), use_claude=True), "claude")
-        self.assertEqual(translate._resolve_provider(_args(), use_gemini=True), "gemini")
+        self.assertEqual(registry._resolve_provider(_args(), use_mistral=True), "mistral")
+        self.assertEqual(registry._resolve_provider(_args(), use_claude=True), "claude")
+        self.assertEqual(registry._resolve_provider(_args(), use_gemini=True), "gemini")
 
     def test_args_without_use_codex_defaults_to_openai(self):
-        self.assertEqual(translate._resolve_provider(_args()), "openai")
+        self.assertEqual(registry._resolve_provider(_args()), "openai")
 
     def test_use_codex_from_args(self):
-        self.assertEqual(translate._resolve_provider(_args(use_codex=True)), "codex")
+        self.assertEqual(registry._resolve_provider(_args(use_codex=True)), "codex")
 
     def test_select_provider_client_tolerates_missing_use_codex(self):
         args = _args(model=None, use_mistral=False, use_claude=False, use_gemini=False)
-        with patch("aipmt.translate._init_openai_client", return_value="openai-client") as init:
-            self.assertEqual(translate._select_provider_client(args), "openai-client")
+        with patch(
+            "aipmt.providers.registry._init_openai_client", return_value="openai-client"
+        ) as init:
+            self.assertEqual(registry._select_provider_client(args), "openai-client")
         init.assert_called_once()
 
     def test_dispatch_routes_to_codex(self):
-        with patch("aipmt.translate._call_codex", return_value="translated") as call:
-            out = translate._dispatch_provider_call(
+        with patch("aipmt.providers.registry._call_codex", return_value="translated") as call:
+            out = registry._dispatch_provider_call(
                 _client(), _args(), "PROMPT", "SEG", "codex", False
             )
         self.assertEqual(out, "translated")
@@ -346,10 +348,10 @@ class TestProviderResolution(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate._call_codex", return_value="   "),
+            patch("aipmt.providers.registry._call_codex", return_value="   "),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._dispatch_provider_call(client, args, "PROMPT", "SEG", "codex", False)
+            registry._dispatch_provider_call(client, args, "PROMPT", "SEG", "codex", False)
         self.assertIn("Codex CLI returned empty content", str(ctx.exception))
 
 

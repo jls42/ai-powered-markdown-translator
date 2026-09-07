@@ -30,8 +30,8 @@ from google.genai import errors as genai_errors
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import naming, news, translate
-from aipmt.providers import base, codex, gemini, grok, opencode
+from aipmt import naming, news
+from aipmt.providers import base, codex, gemini, grok, opencode, registry
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -48,7 +48,7 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
         import argparse
 
         parser = argparse.ArgumentParser()
-        translate._add_provider_args(parser)
+        registry._add_provider_args(parser)
         return parser
 
     def test_two_provider_flags_are_refused(self):
@@ -81,7 +81,7 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
 
     def test_no_provider_flag_defaults_to_openai(self):
         args = self._parser().parse_args([])
-        self.assertEqual(translate._resolve_provider(args), "openai")
+        self.assertEqual(registry._resolve_provider(args), "openai")
 
 
 class TestGrokStopReasonIsMandatory(unittest.TestCase):
