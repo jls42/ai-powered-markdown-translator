@@ -26,7 +26,7 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import markdown, translate
+from aipmt import markdown, news, translate
 
 
 def _args(**overrides):
@@ -542,7 +542,7 @@ class TestNewsMultiParagraphQuotes(unittest.TestCase):
     )
 
     def _protect(self, content):
-        return translate._protect_news_quotes(content, Namespace(news=True))
+        return news._protect_news_quotes(content, Namespace(news=True))
 
     def test_single_paragraph_unchanged(self):
         _, quotes, urls = self._protect(self.SINGLE)
@@ -565,7 +565,7 @@ class TestNewsMultiParagraphQuotes(unittest.TestCase):
 
     def test_round_trip_restores_every_paragraph(self):
         protected, quotes, _ = self._protect(self.MULTI)
-        restored = translate._restore_news_quotes(protected, quotes)
+        restored = news._restore_news_quotes(protected, quotes)
         self.assertIn("> GLM-5.3 is now open-weight.", restored)
         self.assertIn("> Our most capable model is now available to download.", restored)
 

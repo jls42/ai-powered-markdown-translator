@@ -28,7 +28,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
+from aipmt import news, translate
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -162,7 +162,7 @@ class TestNewsCitationRegexIsLinear(unittest.TestCase):
 
     def _elapsed(self, text):
         start = time.perf_counter()
-        translate._NEWS_CITATION_REGEX.search(text)
+        news._NEWS_CITATION_REGEX.search(text)
         return time.perf_counter() - start
 
     def test_indented_quote_lines_stay_linear(self):
@@ -187,7 +187,7 @@ class TestNewsCitationRegexIsLinear(unittest.TestCase):
             "> 🇫🇷 _La traduction._\n"
             "> — [@source](https://x.com/source/1)"
         )
-        match = translate._NEWS_CITATION_REGEX.search(text)
+        match = news._NEWS_CITATION_REGEX.search(text)
         self.assertIsNotNone(match)
         body = match.group(1)
         self.assertIn("Premier paragraphe EN.", body)
@@ -196,7 +196,7 @@ class TestNewsCitationRegexIsLinear(unittest.TestCase):
 
     def test_attribution_line_is_never_absorbed_into_body(self):
         text = "> EN quote.\n>\n> 🇫🇷 _Trad._\n> — [@a](https://x.com/a/1)"
-        match = translate._NEWS_CITATION_REGEX.search(text)
+        match = news._NEWS_CITATION_REGEX.search(text)
         self.assertIsNotNone(match)
         self.assertNotIn("—", match.group(1))
         self.assertEqual(match.group(3), "> — [@a](https://x.com/a/1)")

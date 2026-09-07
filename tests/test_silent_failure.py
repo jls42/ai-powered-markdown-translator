@@ -23,7 +23,7 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, markdown, placeholders, translate
+from aipmt import guards, markdown, news, placeholders, translate
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -594,27 +594,27 @@ class TestNewsPlaceholderValidator(unittest.TestCase):
         """LLM remplace <NEWSQUOTE id="0"/> par <新闻引用 id="0"/> → doit lever."""
         bad = '<新闻引用 id="0"/>\n>\n> 🇨🇳 _十年磨一剑_\n'
         with self.assertRaisesRegex(RuntimeError, r"Placeholder.*manquant"):
-            translate._validate_news_placeholders_intact(bad, n_quotes=1)
+            news._validate_news_placeholders_intact(bad, n_quotes=1)
 
     def test_korean_localized_tag_rejected(self):
         bad = '<뉴스인용 id="0"/>\n>\n> 🇰🇷 _10년간의 작업._\n'
         with self.assertRaisesRegex(RuntimeError, r"Placeholder.*manquant"):
-            translate._validate_news_placeholders_intact(bad, n_quotes=1)
+            news._validate_news_placeholders_intact(bad, n_quotes=1)
 
     def test_japanese_deleted_placeholder_rejected(self):
         """Sortie JA sans aucun tag XML (LLM a remplacé par la quote traduite)."""
         bad = "> 🇯🇵 _十年の月日を経て._\n> — [@GoogleAI X上で](https://x.com/google)\n"
         with self.assertRaisesRegex(RuntimeError, r"Placeholder.*manquant"):
-            translate._validate_news_placeholders_intact(bad, n_quotes=1)
+            news._validate_news_placeholders_intact(bad, n_quotes=1)
 
     def test_arabic_correct_tag_passes(self):
         """Tag NEWSQUOTE correct dans une sortie AR doit passer."""
         good = '<NEWSQUOTE id="0"/>\n>\n> 🇸🇦 _عقد من العمل._\n'
-        translate._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
+        news._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
 
     def test_hindi_correct_tag_passes(self):
         good = '<NEWSQUOTE id="0"/>\n>\n> 🇮🇳 _एक दशक का काम._\n'
-        translate._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
+        news._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
 
 
 class TestLangDetectLayer2(unittest.TestCase):
@@ -1246,16 +1246,16 @@ class TestRestoreNewsQuotesCount(unittest.TestCase):
             '<NEWSQUOTE id="0"/>\n>\n> 🇵🇱 _trad._\n\n<NEWSQUOTE id="0"/>\n>\n> Doublon parasite.\n'
         )
         with self.assertRaisesRegex(RuntimeError, r"restauré 2 fois"):
-            translate._restore_news_quotes(translated, ["> Quote source EN."])
+            news._restore_news_quotes(translated, ["> Quote source EN."])
 
     def test_zero_placeholder_raises(self):
         translated = "Sortie qui a perdu le placeholder.\n"
         with self.assertRaisesRegex(RuntimeError, r"restauré 0 fois"):
-            translate._restore_news_quotes(translated, ["> Quote source EN."])
+            news._restore_news_quotes(translated, ["> Quote source EN."])
 
     def test_exactly_one_placeholder_passes(self):
         translated = '<NEWSQUOTE id="0"/>\n>\n> 🇵🇱 _trad._\n'
-        out = translate._restore_news_quotes(translated, ["> Quote source EN."])
+        out = news._restore_news_quotes(translated, ["> Quote source EN."])
         self.assertIn("> Quote source EN.", out)
         self.assertNotIn("<NEWSQUOTE", out)
 
@@ -1272,7 +1272,7 @@ class TestValidateNewsPost(unittest.TestCase):
         translated = "Sortie sans la citation source.\n"
         args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"citation EN brute non restaurée"):
-            translate._validate_news_post(
+            news._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=[],
@@ -1283,7 +1283,7 @@ class TestValidateNewsPost(unittest.TestCase):
         translated = "> A decade in the making.\n> 🇵🇱 _trad_\n"
         args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"URL d'attribution.*manquante"):
-            translate._validate_news_post(
+            news._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=["https://x.com/google"],
@@ -1294,7 +1294,7 @@ class TestValidateNewsPost(unittest.TestCase):
         translated = '> A decade in the making.\n> 🇵🇱 _trad_\n<NEWSQUOTE id="1"/>\n'
         args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
-            translate._validate_news_post(
+            news._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=[],
@@ -1305,7 +1305,7 @@ class TestValidateNewsPost(unittest.TestCase):
         translated = "> A decade in the making.\n> 🇵🇱 _trad_\n#NEWSQUOTE1#\n"
         args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
-            translate._validate_news_post(
+            news._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=[],
@@ -1517,14 +1517,14 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Une décennie en gestation._\n"
             "> — [@GoogleAI](https://x.com/g)\n"
         )
-        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        protected, quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertIn('<NEWSQUOTE id="0"/>', protected)
         self.assertEqual(quotes, ["> A decade in the making."])
         self.assertEqual(urls, ["https://x.com/g"])
 
     def test_extract_without_attribution(self):
         content = "## Section\n\n> A short EN quote.\n>\n> 🇫🇷 _Une courte citation EN._\n"
-        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        protected, quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertIn('<NEWSQUOTE id="0"/>', protected)
         self.assertEqual(quotes, ["> A short EN quote."])
         self.assertEqual(urls, [])
@@ -1543,7 +1543,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Citation traduite multi-ligne._\n"
             "> — [@source](https://x.com/source)\n"
         )
-        protected, quotes, _urls = translate._protect_news_quotes(content, self._args())
+        protected, quotes, _urls = news._protect_news_quotes(content, self._args())
         self.assertEqual(len(quotes), 1)
         # Les 3 lignes EN doivent être capturées intégralement dans le quote
         self.assertIn("First line of the EN quote.", quotes[0])
@@ -1567,7 +1567,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Citation B._\n"
             "> — [@b](https://x.com/b)\n"
         )
-        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        protected, quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertEqual(len(quotes), 2)
         self.assertIn('<NEWSQUOTE id="0"/>', protected)
         self.assertIn('<NEWSQUOTE id="1"/>', protected)
@@ -1576,7 +1576,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
     def test_news_disabled_passthrough(self):
         content = "> Looks like a quote\n>\n> 🇫🇷 _trad_\n"
         args = _base_args(news=False)
-        protected, quotes, urls = translate._protect_news_quotes(content, args)
+        protected, quotes, urls = news._protect_news_quotes(content, args)
         self.assertEqual(protected, content)
         self.assertEqual(quotes, [])
         self.assertEqual(urls, [])
@@ -1598,7 +1598,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Une citation en FR._\n"
             "> — Vasek Mlejnsky, CEO E2B (relayé par [@genspark_ai sur X](https://x.com/genspark_ai/status/2052602512360808652))\n"
         )
-        _protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        _protected, quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertEqual(quotes, ["> A quote in EN."])
         # Extraction propre : juste l'URL, sans préfixe FR ni `)` tronqué.
         self.assertEqual(urls, ["https://x.com/genspark_ai/status/2052602512360808652"])
@@ -1614,7 +1614,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Citation._\n"
             "> — via [@source officielle](https://example.com/post/42)\n"
         )
-        _protected, _quotes, urls = translate._protect_news_quotes(content, self._args())
+        _protected, _quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertEqual(urls, ["https://example.com/post/42"])
 
 

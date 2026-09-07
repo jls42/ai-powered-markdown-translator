@@ -23,7 +23,7 @@ from langdetect import LangDetectException
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, placeholders, translate
+from aipmt import guards, news, placeholders, translate
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -584,7 +584,7 @@ class TestNewsRulesEnglish(unittest.TestCase):
 
     def test_news_addendum_en_uses_english_rules(self):
         args = _base_args(news=True, target_lang="en")
-        addendum = translate._build_news_addendum(args)
+        addendum = news._build_news_addendum(args)
         self.assertIn("placeholder_rule", addendum)
         # La variante EN ne doit pas mentionner de drapeau cible
         self.assertNotIn("Translate to fr", addendum)
@@ -608,7 +608,7 @@ class TestCleanupSourceFlag(unittest.TestCase):
     def test_no_news_passthrough(self):
         args = _base_args(news=False, source_lang="fr", target_lang="en")
         text = "> 🇫🇷 _trad_\n"
-        self.assertEqual(translate._cleanup_source_flag(text, args), text)
+        self.assertEqual(news._cleanup_source_flag(text, args), text)
 
     def test_target_en_removes_orphan_source_flag_line(self):
         """Quand cible=en, le bloc `> 🇫🇷 _trad_` orphelin doit être supprimé."""
@@ -616,7 +616,7 @@ class TestCleanupSourceFlag(unittest.TestCase):
         translated = (
             "> Some EN quote.\n>\n> 🇫🇷 _Citation traduite._\n> — [@source](https://x.com/s)\n"
         )
-        out = translate._cleanup_source_flag(translated, args)
+        out = news._cleanup_source_flag(translated, args)
         self.assertNotIn("🇫🇷", out)
         self.assertIn("> Some EN quote.", out)
 
@@ -625,36 +625,36 @@ class TestCleanupSourceFlag(unittest.TestCase):
         remplacé par le drapeau cible."""
         args = _base_args(news=True, source_lang="fr", target_lang="es")
         translated = "> 🇫🇷 _Texto traducido._\n"
-        out = translate._cleanup_source_flag(translated, args)
+        out = news._cleanup_source_flag(translated, args)
         self.assertIn("🇪🇸", out)
         self.assertNotIn("🇫🇷", out)
 
     def test_no_flag_in_content_passthrough(self):
         args = _base_args(news=True, source_lang="fr", target_lang="es")
         text = "> Aucun drapeau ici.\n"
-        self.assertEqual(translate._cleanup_source_flag(text, args), text)
+        self.assertEqual(news._cleanup_source_flag(text, args), text)
 
 
 class TestValidateNewsPostFlags(unittest.TestCase):
     def test_en_target_with_other_flag_raises(self):
         with self.assertRaisesRegex(RuntimeError, "Drapeau .* trouvé"):
-            translate._validate_news_flags_for_en("contenu avec 🇪🇸 drapeau")
+            news._validate_news_flags_for_en("contenu avec 🇪🇸 drapeau")
 
     def test_other_target_wrong_flag_count_raises(self):
         args = _base_args(target_lang="es", source_lang="fr")
         # Aucune occurrence du drapeau cible alors qu'on attendait 1.
         with self.assertRaisesRegex(RuntimeError, "Drapeau .* trouvé 0 fois"):
-            translate._validate_news_flags_for_other("contenu sans drapeau", args, 1)
+            news._validate_news_flags_for_other("contenu sans drapeau", args, 1)
 
     def test_other_target_residual_source_flag_raises(self):
         args = _base_args(target_lang="es", source_lang="fr")
         # Bon compte de drapeaux cibles, mais drapeau source résiduel.
         with self.assertRaisesRegex(RuntimeError, "Drapeau source .* encore présent"):
-            translate._validate_news_flags_for_other("🇪🇸 drapeau cible et 🇫🇷 source", args, 1)
+            news._validate_news_flags_for_other("🇪🇸 drapeau cible et 🇫🇷 source", args, 1)
 
     def test_other_target_correct_state_passes(self):
         args = _base_args(target_lang="es", source_lang="fr")
-        translate._validate_news_flags_for_other("Texte avec 🇪🇸 ok", args, 1)
+        news._validate_news_flags_for_other("Texte avec 🇪🇸 ok", args, 1)
 
 
 class TestNormalizeCollapsedRaisesOnPersistence(unittest.TestCase):

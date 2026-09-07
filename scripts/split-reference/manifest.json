@@ -35,6 +35,13 @@
       "kind": "Expr",
       "file": "src/aipmt/placeholders.py",
       "why": "docstring du module placeholders, né du découpage"
+    },
+    {
+      "hash": "a9311f1d4145f7cb4b42964831e895f04f4a2ba3fab459b5409c1e4e026e0534",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/news.py",
+      "why": "docstring du module news, né du découpage"
     }
   ],
   "removed": [],
