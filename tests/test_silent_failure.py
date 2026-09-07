@@ -23,7 +23,7 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
+from aipmt import markdown, translate
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -776,11 +776,11 @@ class TestStructuralLineLanguageBar(unittest.TestCase):
     def test_language_bar_with_globe_emoji_is_structural(self):
         """README.md / CHANGELOG.md commencent par une ligne `🌍 [Français](...)`."""
         line = "🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md)"
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_language_bar_without_emoji_is_structural(self):
         line = "[français](readme.md) | [english](readme-en.md) | [中文](readme-zh.md)"
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_long_real_language_bar_is_structural(self):
         """La barre complète à 14 langues du README/CHANGELOG actuel."""
@@ -788,7 +788,7 @@ class TestStructuralLineLanguageBar(unittest.TestCase):
             "🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | "
             "[中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md)"
         )
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_blog_prose_with_two_links_is_NOT_structural(self):
         """La phrase `Voici les [docs](a.md) | [tutorial](b.md) à consulter.` du blog
@@ -796,16 +796,16 @@ class TestStructuralLineLanguageBar(unittest.TestCase):
         empêche le faux positif quand il y a du texte après le dernier lien.
         """
         line = "Voici les [docs](a.md) | [tutorial](b.md) à consulter."
-        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_single_link_is_NOT_structural(self):
         line = "Voir la [doc](docs.md) pour plus d'info."
-        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_comma_separated_links_is_NOT_structural(self):
         """Séparateur autre que `|` → pas une barre de langues."""
         line = "Voir aussi : [a](a.md), [b](b.md)"
-        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNone(markdown._STRUCTURAL_LINE.match(line))
 
 
 class TestStructuralLineHTML(unittest.TestCase):
@@ -816,15 +816,15 @@ class TestStructuralLineHTML(unittest.TestCase):
 
     def test_html_open_tag_alone_is_structural(self):
         for line in ('<p align="center">', "<p>", "<div class='hero'>", "<section>"):
-            self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line), line)
+            self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line), line)
 
     def test_html_close_tag_alone_is_structural(self):
         for line in ("</p>", "</div>", "</section>"):
-            self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line), line)
+            self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line), line)
 
     def test_html_self_closing_tag_alone_is_structural(self):
         for line in ("<br>", "<br/>", "<br />", "<hr>", '<img src="x.png" alt="y" />'):
-            self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line), line)
+            self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line), line)
 
     def test_html_nav_bar_with_flags_is_structural(self):
         """Le bandeau language switcher EurekAI."""
@@ -833,16 +833,16 @@ class TestStructuralLineHTML(unittest.TestCase):
             '<a href="README-es.md">🇪🇸 Español</a> · '
             '<a href="README-pt.md">🇧🇷 Português</a><br>'
         )
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_html_nav_bar_pipe_separator_is_structural(self):
         line = '<a href="a.md">A</a> | <a href="b.md">B</a> | <a href="c.md">C</a>'
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_html_paragraph_with_strong_text_is_NOT_structural(self):
         """Une vraie phrase avec balises inline doit rester traduite (pas skip)."""
         line = "<strong>Transforme votre contenu en expérience interactive.</strong>"
-        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNone(markdown._STRUCTURAL_LINE.match(line))
 
 
 class TestLooksLikeProperNounList(unittest.TestCase):

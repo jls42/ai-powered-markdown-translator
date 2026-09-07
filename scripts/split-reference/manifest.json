@@ -7,6 +7,13 @@
       "kind": "Expr",
       "file": "src/aipmt/config.py",
       "why": "docstring du module config, né du découpage"
+    },
+    {
+      "hash": "59e5e04e7d9d18e80a326b0a4e7a4491bed3be0904064fee741f5223bc08cc50",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/markdown.py",
+      "why": "docstring du module markdown, né du découpage"
     }
   ],
   "removed": [],
