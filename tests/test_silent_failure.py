@@ -23,7 +23,7 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, markdown, news, placeholders, translate
+from aipmt import guards, markdown, news, placeholders, prompts, translate
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -299,7 +299,7 @@ class TestSilentFailure(unittest.TestCase):
     def test_markdown_contract_applies_to_non_news_translations(self):
         """Le contrat complétude/prose doit aussi couvrir les README non-news."""
         args = _base_args(news=False)
-        system_prompt = translate._build_system_instructions(args, is_translation_note=False)
+        system_prompt = prompts._build_system_instructions(args, is_translation_note=False)
 
         self.assertIn("<markdown_translation_contract>", system_prompt)
         self.assertIn("Translate ALL prose into the target language", system_prompt)
@@ -309,7 +309,7 @@ class TestSilentFailure(unittest.TestCase):
     def test_news_prompt_combines_markdown_contract_and_news_checks(self):
         """Le mode --news garde le contrat markdown général + checks spécifiques news."""
         args = _base_args(news=True, target_lang="pl")
-        system_prompt = translate._build_system_instructions(args, is_translation_note=False)
+        system_prompt = prompts._build_system_instructions(args, is_translation_note=False)
 
         self.assertIn("<markdown_translation_contract>", system_prompt)
         self.assertIn("Translate ALL prose into the target language", system_prompt)

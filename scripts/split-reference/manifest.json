@@ -42,6 +42,13 @@
       "kind": "Expr",
       "file": "src/aipmt/news.py",
       "why": "docstring du module news, né du découpage"
+    },
+    {
+      "hash": "67bc3a875a549e9ae6eeb5476cb6a1910c43f43148b7a090eb85494225d9e123",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/prompts.py",
+      "why": "docstring du module prompts, né du découpage"
     }
   ],
   "removed": [],
