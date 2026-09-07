@@ -91,7 +91,7 @@ class _FakePopen:
 class TestGrokCliCall(unittest.TestCase):
     def test_nominal_returns_text(self):
         fake = _FakePopen()
-        with patch("aipmt.translate.subprocess.Popen", fake):
+        with patch("subprocess.Popen", fake):
             out = translate._call_grok_cli(_client(), _args(), "PROMPT", "SEGMENT")
         self.assertEqual(out, "Translated body")
         self.assertTrue(fake.kwargs["start_new_session"])
@@ -100,7 +100,7 @@ class TestGrokCliCall(unittest.TestCase):
         """Un segment de 16 000 caractères en argv serait visible dans `ps` et
         flirterait avec ARG_MAX ; le CLI ne lit pas stdin."""
         fake = _FakePopen()
-        with patch("aipmt.translate.subprocess.Popen", fake):
+        with patch("subprocess.Popen", fake):
             translate._call_grok_cli(_client(), _args(), "PROMPT", "SECRET-SEGMENT")
         self.assertIn("--prompt-file", fake.argv)
         self.assertNotIn("SECRET-SEGMENT", " ".join(fake.argv))
@@ -110,7 +110,7 @@ class TestGrokCliCall(unittest.TestCase):
         fake = _FakePopen()
         client = _client()
         args = _args()
-        with patch("aipmt.translate.subprocess.Popen", fake):
+        with patch("subprocess.Popen", fake):
             translate._call_grok_cli(client, args, "PROMPT", "SEG")
         argv = fake.argv
         denied = [argv[i + 1] for i, a in enumerate(argv) if a == "--deny"]
@@ -142,13 +142,13 @@ class TestGrokCliCall(unittest.TestCase):
         """Un profil intégré qui ne peut pas s'appliquer démarre NON confiné en
         silence : on ne le demande donc jamais implicitement."""
         fake = _FakePopen()
-        with patch("aipmt.translate.subprocess.Popen", fake):
+        with patch("subprocess.Popen", fake):
             translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
         self.assertNotIn("--sandbox", fake.argv)
 
     def test_sandbox_flag_present_when_opted_in(self):
         fake = _FakePopen()
-        with patch("aipmt.translate.subprocess.Popen", fake):
+        with patch("subprocess.Popen", fake):
             translate._call_grok_cli(_client(sandbox_profile="read-only"), _args(), "P", "S")
         self.assertEqual(fake.argv[fake.argv.index("--sandbox") + 1], "read-only")
 
@@ -157,7 +157,7 @@ class TestGrokCliCall(unittest.TestCase):
         env = {"XAI_API_KEY": "xai-leak", "GROK_SANDBOX": "read-only", "PATH": "/usr/bin"}
         with (
             patch.dict(os.environ, env, clear=False),
-            patch("aipmt.translate.subprocess.Popen", fake),
+            patch("subprocess.Popen", fake),
         ):
             translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
         child = fake.kwargs["env"]
@@ -172,7 +172,7 @@ class TestGrokCliCall(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", _FakePopen(stdout=payload, returncode=0)),
+            patch("subprocess.Popen", _FakePopen(stdout=payload, returncode=0)),
             self.assertRaises(RuntimeError) as ctx,
         ):
             translate._call_grok_cli(client, args, "PROMPT", "SEG")
@@ -183,7 +183,7 @@ class TestGrokCliCall(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", _FakePopen(stdout=payload)),
+            patch("subprocess.Popen", _FakePopen(stdout=payload)),
             self.assertRaises(RuntimeError) as ctx,
         ):
             translate._call_grok_cli(client, args, "PROMPT", "SEG")
@@ -194,7 +194,7 @@ class TestGrokCliCall(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", _FakePopen(stdout=payload)),
+            patch("subprocess.Popen", _FakePopen(stdout=payload)),
             self.assertRaises(RuntimeError) as ctx,
         ):
             translate._call_grok_cli(client, args, "PROMPT", "SEG")
@@ -204,7 +204,7 @@ class TestGrokCliCall(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", _FakePopen(stdout="oops not json")),
+            patch("subprocess.Popen", _FakePopen(stdout="oops not json")),
             self.assertRaises(RuntimeError) as ctx,
         ):
             translate._call_grok_cli(client, args, "PROMPT", "SEG")
@@ -218,7 +218,7 @@ class TestGrokCliCall(unittest.TestCase):
                 "stopReason": "end_turn",
             }
         )
-        with patch("aipmt.translate.subprocess.Popen", _FakePopen(stdout=payload)):
+        with patch("subprocess.Popen", _FakePopen(stdout=payload)):
             out = translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
         self.assertEqual(out, "# Titre")
 
@@ -226,9 +226,9 @@ class TestGrokCliCall(unittest.TestCase):
         client = _client(timeout=42)
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", _FakePopen(timeout=True)),
-            patch("aipmt.translate.os.getpgid", return_value=4242),
-            patch("aipmt.translate.os.killpg") as killpg,
+            patch("subprocess.Popen", _FakePopen(timeout=True)),
+            patch("os.getpgid", return_value=4242),
+            patch("os.killpg") as killpg,
             self.assertRaises(RuntimeError) as ctx,
         ):
             translate._call_grok_cli(client, args, "PROMPT", "SEG")
@@ -245,8 +245,8 @@ class TestGrokCliCall(unittest.TestCase):
             return _FakePopen(stdout=stdout)(argv, **kwargs)
 
         with (
-            patch("aipmt.translate.subprocess.Popen", factory),
-            patch("aipmt.translate.time.sleep") as sleep,
+            patch("subprocess.Popen", factory),
+            patch("time.sleep") as sleep,
         ):
             out = translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
         self.assertEqual(out, "Translated body")
@@ -259,7 +259,7 @@ class TestGrokCliInit(unittest.TestCase):
         """`grok models` sort en 0 même déconnecté : le code retour ne suffit pas."""
         result = MagicMock(returncode=0, stdout="You are not authenticated.\n", stderr="")
         with (
-            patch("aipmt.translate.subprocess.run", return_value=result),
+            patch("subprocess.run", return_value=result),
             self.assertRaises(ValueError) as ctx,
         ):
             translate._grok_preflight("/usr/bin/grok")
@@ -267,7 +267,7 @@ class TestGrokCliInit(unittest.TestCase):
 
     def test_preflight_accepts_authenticated(self):
         result = MagicMock(returncode=0, stdout="You are logged in with grok.com.", stderr="")
-        with patch("aipmt.translate.subprocess.run", return_value=result):
+        with patch("subprocess.run", return_value=result):
             translate._grok_preflight("/usr/bin/grok")
 
     def test_preflight_rejects_missing_binary(self):
@@ -278,8 +278,8 @@ class TestGrokCliInit(unittest.TestCase):
     def test_binary_falls_back_to_grok_home(self):
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("aipmt.translate.shutil.which", return_value=None),
-            patch("aipmt.translate.os.path.isfile", return_value=True),
+            patch("shutil.which", return_value=None),
+            patch("os.path.isfile", return_value=True),
         ):
             self.assertTrue(translate._resolve_grok_binary().endswith("/.grok/bin/grok"))
 

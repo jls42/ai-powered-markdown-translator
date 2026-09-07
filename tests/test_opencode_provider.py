@@ -23,8 +23,10 @@ from __future__ import annotations
 import io
 import json
 import os
+import shutil
 import subprocess  # nosec B404 — la suite simule le CLI, elle n'en lance aucun
 import sys
+import time
 import unittest
 from argparse import Namespace
 from types import SimpleNamespace
@@ -333,7 +335,7 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
         popen = self._sequence(_FakePopen(stdout=_jsonl(error), returncode=1), _FakePopen())
         with (
             patch.object(subprocess, "Popen", popen),
-            patch.object(translate.time, "sleep") as sleep,
+            patch.object(time, "sleep") as sleep,
             patch("sys.stderr", new_callable=io.StringIO),
         ):
             text = translate._call_opencode(_client(backoff_seconds=1.0), _args(), "P", "S")
@@ -345,11 +347,12 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
         popen = self._sequence(_FakePopen(stdout="", returncode=1, stderr=stderr), _FakePopen())
         with (
             patch.object(subprocess, "Popen", popen),
-            patch.object(translate.time, "sleep"),
+            patch.object(time, "sleep") as sleep,
             patch("sys.stderr", new_callable=io.StringIO),
         ):
             text = translate._call_opencode(_client(), _args(), "P", "S")
         self.assertEqual(text, "Translated body")
+        sleep.assert_called_once()
 
     def test_non_rate_limit_error_is_not_retried(self):
         client, args = _client(), _args()
@@ -358,7 +361,7 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
         )
         with (
             patch.object(subprocess, "Popen", popen),
-            patch.object(translate.time, "sleep") as sleep,
+            patch.object(time, "sleep") as sleep,
             self.assertRaises(translate._OpencodeCallError),
         ):
             translate._call_opencode(client, args, "P", "S")
@@ -491,15 +494,15 @@ class TestOpencodeBinaryResolution(unittest.TestCase):
     def test_explicit_opencode_bin_wins(self):
         with (
             patch.dict(os.environ, {"OPENCODE_BIN": "/custom/oc"}, clear=False),
-            patch.object(translate.shutil, "which", return_value=None),
-            patch.object(translate.os.path, "isfile", return_value=True),
+            patch.object(shutil, "which", return_value=None),
+            patch.object(os.path, "isfile", return_value=True),
         ):
             self.assertEqual(translate._resolve_opencode_binary(), "/custom/oc")
 
     def test_path_used_when_no_explicit_bin(self):
         with (
             patch.dict(os.environ, {}, clear=False),
-            patch.object(translate.shutil, "which", return_value="/usr/local/bin/opencode"),
+            patch.object(shutil, "which", return_value="/usr/local/bin/opencode"),
         ):
             os.environ.pop("OPENCODE_BIN", None)
             self.assertEqual(translate._resolve_opencode_binary(), "/usr/local/bin/opencode")
@@ -508,8 +511,8 @@ class TestOpencodeBinaryResolution(unittest.TestCase):
         home = os.path.join(os.path.expanduser("~"), ".opencode", "bin", "opencode")
         with (
             patch.dict(os.environ, {}, clear=False),
-            patch.object(translate.shutil, "which", return_value=None),
-            patch.object(translate.os.path, "isfile", side_effect=lambda p: p == home),
+            patch.object(shutil, "which", return_value=None),
+            patch.object(os.path, "isfile", side_effect=lambda p: p == home),
         ):
             os.environ.pop("OPENCODE_BIN", None)
             self.assertEqual(translate._resolve_opencode_binary(), home)
@@ -517,8 +520,8 @@ class TestOpencodeBinaryResolution(unittest.TestCase):
     def test_returns_none_when_nothing_available(self):
         with (
             patch.dict(os.environ, {}, clear=False),
-            patch.object(translate.shutil, "which", return_value=None),
-            patch.object(translate.os.path, "isfile", return_value=False),
+            patch.object(shutil, "which", return_value=None),
+            patch.object(os.path, "isfile", return_value=False),
         ):
             os.environ.pop("OPENCODE_BIN", None)
             self.assertIsNone(translate._resolve_opencode_binary())
