@@ -140,6 +140,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/registry.py",
       "why": "docstring du module providers/registry, né du découpage"
+    },
+    {
+      "hash": "aa2cbe51071e4cb721405ee72e01efddf1d082b9fd22e6ced6347e2e2267be09",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/pipeline.py",
+      "why": "docstring du module pipeline, né du découpage"
     }
   ],
   "removed": [],

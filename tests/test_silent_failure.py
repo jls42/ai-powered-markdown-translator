@@ -23,10 +23,11 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, markdown, news, notes, placeholders, prompts, translate
+from aipmt import guards, markdown, news, notes, pipeline, placeholders, prompts, translate
+from aipmt.pipeline import translate as translate_fn
+from aipmt.pipeline import translate_markdown_file
 from aipmt.providers import anthropic, gemini, mistral, openai
-from aipmt.translate import segment_text, translate_markdown_file
-from aipmt.translate import translate as translate_fn
+from aipmt.segmentation import segment_text
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "fixtures", "long_fr_excerpt.txt")
 
@@ -108,7 +109,7 @@ def _run_markdown_file_translation(
             news=news,
         )
 
-        config = translate._TranslationConfig(
+        config = pipeline._TranslationConfig(
             client=mock_client,
             args=args,
             add_translation_note=add_translation_note,
@@ -183,7 +184,7 @@ class TestSilentFailure(unittest.TestCase):
             mock_client.chat.completions.create.side_effect = responses
 
             args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
-            config = translate._TranslationConfig(client=mock_client, args=args)
+            config = pipeline._TranslationConfig(client=mock_client, args=args)
             status = translate_markdown_file(src, dst, config)
             self.assertEqual(status, "failure")
             self.assertFalse(
@@ -1125,7 +1126,7 @@ locale: 'pl'
                     "gemini": "gemini-3-flash-preview",
                 }[provider],
             )
-            config = translate._TranslationConfig(
+            config = pipeline._TranslationConfig(
                 client=mock_client_factory(),
                 args=args,
                 use_mistral=(provider == "mistral"),
@@ -1222,7 +1223,7 @@ locale: 'pl'
                 news=True,
                 model="claude-haiku-4-5-20251001",
             )
-            config = translate._TranslationConfig(
+            config = pipeline._TranslationConfig(
                 client=client,
                 args=args,
                 use_mistral=False,

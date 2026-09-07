@@ -23,7 +23,7 @@ from langdetect import LangDetectException
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, naming, news, placeholders, translate
+from aipmt import guards, naming, news, pipeline, placeholders, translate
 from aipmt.providers import anthropic, gemini, mistral, openai, registry
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
@@ -155,16 +155,16 @@ class TestExcludePatterns(unittest.TestCase):
         self.assertFalse(naming.is_excluded("/source/content/posts/foo.md"))
 
     def test_is_translatable_markdown_md(self):
-        self.assertTrue(translate._is_translatable_markdown("article.md"))
+        self.assertTrue(pipeline._is_translatable_markdown("article.md"))
 
     def test_is_translatable_markdown_mdx(self):
-        self.assertTrue(translate._is_translatable_markdown("article.mdx"))
+        self.assertTrue(pipeline._is_translatable_markdown("article.mdx"))
 
     def test_is_translatable_markdown_skips_excluded(self):
-        self.assertFalse(translate._is_translatable_markdown("PRIVACY.md"))
+        self.assertFalse(pipeline._is_translatable_markdown("PRIVACY.md"))
 
     def test_is_translatable_markdown_rejects_other(self):
-        self.assertFalse(translate._is_translatable_markdown("README.txt"))
+        self.assertFalse(pipeline._is_translatable_markdown("README.txt"))
 
 
 class TestShouldSkipWalkDir(unittest.TestCase):
@@ -236,19 +236,19 @@ class TestExistingTranslationExists(unittest.TestCase):
 class TestRecordTranslationStatus(unittest.TestCase):
     def test_success_does_not_track(self):
         failed, skipped = [], []
-        translate._record_translation_status("success", "f.md", "/abs/f.md", failed, skipped)
+        pipeline._record_translation_status("success", "f.md", "/abs/f.md", failed, skipped)
         self.assertEqual(failed, [])
         self.assertEqual(skipped, [])
 
     def test_skipped_appends_to_skipped(self):
         failed, skipped = [], []
-        translate._record_translation_status("skipped", "f.md", "/abs/f.md", failed, skipped)
+        pipeline._record_translation_status("skipped", "f.md", "/abs/f.md", failed, skipped)
         self.assertEqual(failed, [])
         self.assertEqual(skipped, ["/abs/f.md"])
 
     def test_failure_appends_to_failed(self):
         failed, skipped = [], []
-        translate._record_translation_status("failure", "f.md", "/abs/f.md", failed, skipped)
+        pipeline._record_translation_status("failure", "f.md", "/abs/f.md", failed, skipped)
         self.assertEqual(failed, ["/abs/f.md"])
         self.assertEqual(skipped, [])
 
@@ -256,7 +256,7 @@ class TestRecordTranslationStatus(unittest.TestCase):
         """Default-fail : tout statut hors {success, skipped, failure} doit être
         traité comme un échec (régression future)."""
         failed, skipped = [], []
-        translate._record_translation_status("???", "f.md", "/abs/f.md", failed, skipped)
+        pipeline._record_translation_status("???", "f.md", "/abs/f.md", failed, skipped)
         self.assertEqual(failed, ["/abs/f.md"])
         self.assertEqual(skipped, [])
 
@@ -293,8 +293,8 @@ class TestEmptyAndIOErrorPaths(unittest.TestCase):
             src = os.path.join(tmpdir, "empty.md")
             open(src, "w").close()
             args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
-            config = translate._TranslationConfig(client=MagicMock(), args=args)
-            status = translate.translate_markdown_file(
+            config = pipeline._TranslationConfig(client=MagicMock(), args=args)
+            status = pipeline.translate_markdown_file(
                 src,
                 os.path.join(tmpdir, "empty-en.md"),
                 config,
@@ -317,8 +317,8 @@ class TestEmptyAndIOErrorPaths(unittest.TestCase):
                 return real_open(path, *a, **kw)
 
             with patch("builtins.open", side_effect=selective_open):
-                config = translate._TranslationConfig(client=MagicMock(), args=args)
-                status = translate.translate_markdown_file(
+                config = pipeline._TranslationConfig(client=MagicMock(), args=args)
+                status = pipeline.translate_markdown_file(
                     src,
                     os.path.join(tmpdir, "exists-en.md"),
                     config,
@@ -345,15 +345,15 @@ class TestProcessOneMarkdownFileSkip(unittest.TestCase):
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
             failed, skipped = [], []
             mock_client = MagicMock()
-            config = translate._TranslationConfig(client=mock_client, args=args, force=False)
-            ctx = translate._DirectoryWalkContext(
+            config = pipeline._TranslationConfig(client=mock_client, args=args, force=False)
+            ctx = pipeline._DirectoryWalkContext(
                 input_dir=input_dir,
                 output_dir=output_dir,
                 config=config,
                 failed_files=failed,
                 skipped_files=skipped,
             )
-            translate._process_one_markdown_file("article.md", input_dir, ctx)
+            pipeline._process_one_markdown_file("article.md", input_dir, ctx)
             self.assertEqual(skipped, [src])
             self.assertEqual(failed, [])
             mock_client.chat.completions.create.assert_not_called()
@@ -374,15 +374,15 @@ class TestProcessOneMarkdownFileSkip(unittest.TestCase):
             failed, skipped = [], []
             mock_client = MagicMock()
             mock_client.chat.completions.create.return_value = _make_openai_response("Hello.")
-            config = translate._TranslationConfig(client=mock_client, args=args, force=True)
-            ctx = translate._DirectoryWalkContext(
+            config = pipeline._TranslationConfig(client=mock_client, args=args, force=True)
+            ctx = pipeline._DirectoryWalkContext(
                 input_dir=input_dir,
                 output_dir=output_dir,
                 config=config,
                 failed_files=failed,
                 skipped_files=skipped,
             )
-            translate._process_one_markdown_file("article.md", input_dir, ctx)
+            pipeline._process_one_markdown_file("article.md", input_dir, ctx)
             self.assertEqual(failed, [])
             self.assertEqual(skipped, [])
             with open(os.path.join(output_dir, "article-en.md")) as f:
@@ -406,8 +406,8 @@ class TestTranslateDirectory(unittest.TestCase):
             mock_client = MagicMock()
             mock_client.chat.completions.create.return_value = _make_openai_response("Hello.")
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
-            config = translate._TranslationConfig(client=mock_client, args=args)
-            result = translate.translate_directory(input_dir, output_dir, config)
+            config = pipeline._TranslationConfig(client=mock_client, args=args)
+            result = pipeline.translate_directory(input_dir, output_dir, config)
             self.assertEqual(result["failed"], [])
             self.assertTrue(os.path.exists(os.path.join(output_dir, "a-en.md")))
             # Sans --keep_filename, l'extension de sortie est forcée à .md
@@ -424,8 +424,8 @@ class TestTranslateDirectory(unittest.TestCase):
 
             mock_client = MagicMock()
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
-            config = translate._TranslationConfig(client=mock_client, args=args)
-            translate.translate_directory(input_dir, output_dir, config)
+            config = pipeline._TranslationConfig(client=mock_client, args=args)
+            pipeline.translate_directory(input_dir, output_dir, config)
             self.assertFalse(
                 os.path.exists(os.path.join(output_dir, "traductions_old", "skip-en.md"))
             )
