@@ -23,7 +23,7 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import markdown, translate
+from aipmt import guards, markdown, translate
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -641,7 +641,7 @@ class TestLangDetectLayer2(unittest.TestCase):
         )
         args = _base_args()
         with self.assertRaisesRegex(RuntimeError, r"Output language mismatch"):
-            translate._validate_translation_output(
+            guards._validate_translation_output(
                 source_segment, paraphrased_fr_output, args, is_translation_note=False
             )
 
@@ -664,7 +664,7 @@ class TestGenericBlockquoteValidation(unittest.TestCase):
         args = _base_args(source_lang="en", target_lang="es", news=False)
 
         with self.assertRaisesRegex(RuntimeError, r"untranslated source excerpt"):
-            translate._validate_translation_output(
+            guards._validate_translation_output(
                 source_segment, source_segment, args, is_translation_note=False
             )
 
@@ -676,7 +676,7 @@ class TestGenericBlockquoteValidation(unittest.TestCase):
             "> — [@GoogleAI sur X](https://x.com/GoogleAI/status/1)"
         )
 
-        windows = translate._extract_source_windows(source_segment, ignore_blockquotes=True)
+        windows = guards._extract_source_windows(source_segment, ignore_blockquotes=True)
 
         self.assertEqual(windows, [])
 
@@ -701,8 +701,8 @@ class TestHindiTechnicalReadmeValidation(unittest.TestCase):
         )
         args = _base_args(source_lang="en", target_lang="hi", news=False)
 
-        with patch("aipmt.translate.detect_langs", return_value=[MagicMock(lang="en", prob=0.86)]):
-            translate._validate_translation_output(
+        with patch("aipmt.guards.detect_langs", return_value=[MagicMock(lang="en", prob=0.86)]):
+            guards._validate_translation_output(
                 source_segment, translated, args, is_translation_note=False
             )
 
@@ -719,12 +719,12 @@ class TestHindiTechnicalReadmeValidation(unittest.TestCase):
 
         with (
             patch(
-                "aipmt.translate.detect_langs",
+                "aipmt.guards.detect_langs",
                 return_value=[MagicMock(lang="en", prob=0.95), MagicMock(lang="hi", prob=0.05)],
             ),
             self.assertRaisesRegex(RuntimeError, r"Output language mismatch"),
         ):
-            translate._validate_translation_output(
+            guards._validate_translation_output(
                 source_segment, translated, args, is_translation_note=False
             )
 
@@ -856,32 +856,32 @@ class TestLooksLikeProperNounList(unittest.TestCase):
             "* opencode, Roo, Amp, Goose, Kiro CLI, Augment, Aider Desk, "
             "Continue, Kilo, Junie (JetBrains), Trae"
         )
-        self.assertTrue(translate._looks_like_proper_noun_list(window))
+        self.assertTrue(guards._looks_like_proper_noun_list(window))
 
     def test_normal_french_prose_is_not_proper_noun_dominated(self):
         window = (
             "Le projet utilise une approche moderne pour la traduction "
             "automatique des documents techniques."
         )
-        self.assertFalse(translate._looks_like_proper_noun_list(window))
+        self.assertFalse(guards._looks_like_proper_noun_list(window))
 
     def test_normal_english_prose_with_acronyms_is_not_proper_noun_dominated(self):
         window = (
             "The API uses HTTP for communication and JSON for data exchange "
             "between the client and the server."
         )
-        self.assertFalse(translate._looks_like_proper_noun_list(window))
+        self.assertFalse(guards._looks_like_proper_noun_list(window))
 
     def test_short_window_under_5_words_is_not_filtered(self):
         # Sécurité : ne pas skip à tort des fenêtres trop courtes.
         window = "Mistral AI Service"
-        self.assertFalse(translate._looks_like_proper_noun_list(window))
+        self.assertFalse(guards._looks_like_proper_noun_list(window))
 
     def test_title_case_long_heading_is_not_filtered_at_70pct(self):
         # Title case 6 mots, mais "for" est lowercase → 5/6 = 83% — skip.
         # Avec des "and"/"the" intercalés, on tombe sous 70%.
         window = "Setup and the configuration of advanced features in production environments"
-        self.assertFalse(translate._looks_like_proper_noun_list(window))
+        self.assertFalse(guards._looks_like_proper_noun_list(window))
 
 
 class TestExtractSourceWindowsStripsHTML(unittest.TestCase):
@@ -896,7 +896,7 @@ class TestExtractSourceWindowsStripsHTML(unittest.TestCase):
             "caracteres apres avoir retire les balises HTML inline du texte "
             "source.</strong>"
         )
-        windows = translate._extract_source_windows(prose)
+        windows = guards._extract_source_windows(prose)
         self.assertEqual(len(windows), 1)
         self.assertNotIn("<strong>", windows[0])
         self.assertNotIn("</strong>", windows[0])
@@ -906,7 +906,7 @@ class TestExtractSourceWindowsStripsHTML(unittest.TestCase):
         # Un paragraphe composé uniquement de balises HTML + URLs courtes
         # doit produire un cleaned trop court (<120 chars) → 0 fenêtre.
         prose = '<a href="README-en.md">English</a> · <a href="README-es.md">Español</a>'
-        windows = translate._extract_source_windows(prose)
+        windows = guards._extract_source_windows(prose)
         self.assertEqual(windows, [])
 
 

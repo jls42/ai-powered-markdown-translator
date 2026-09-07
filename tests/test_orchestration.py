@@ -17,11 +17,13 @@ import unittest
 from argparse import Namespace
 from unittest.mock import MagicMock, patch
 
+from langdetect import LangDetectException
+
 # Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
+from aipmt import guards, translate
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -70,20 +72,20 @@ class TestValidateTranslationOutputShortCircuits(unittest.TestCase):
         segment = "Texte identique source = cible."
         args = _base_args(source_lang="fr", target_lang="fr")
         # Pas d'exception attendue même si translated == segment.
-        translate._validate_translation_output(segment, segment, args, False)
+        guards._validate_translation_output(segment, segment, args, False)
 
     def test_empty_translation_skips_validation(self):
         """Une sortie vide après strip() est traitée plus haut (empty-content
         guard) ; ici on garantit que _validate_translation_output ne lève pas
         sur un blanc."""
         args = _base_args()
-        translate._validate_translation_output("Source", "   \n  ", args, False)
+        guards._validate_translation_output("Source", "   \n  ", args, False)
 
     def test_translation_note_skips_validation(self):
         """is_translation_note=True : la note est forcément courte et peut
         ressembler au segment source — on ne valide pas."""
         args = _base_args()
-        translate._validate_translation_output("Source", "Source", args, True)
+        guards._validate_translation_output("Source", "Source", args, True)
 
     def test_langdetect_exception_does_not_raise(self):
         """Une LangDetectException sur la sortie doit écrire un warning sur
@@ -92,10 +94,13 @@ class TestValidateTranslationOutputShortCircuits(unittest.TestCase):
         # Sortie >= 100 chars pour atteindre la couche langdetect.
         translated = "1234567890" * 12  # 120 chars de chiffres → langdetect lève
         with patch(
-            "aipmt.translate.detect_langs",
-            side_effect=translate.LangDetectException(0, "no features"),
-        ):
-            translate._validate_translation_output("Source longue.", translated, args, False)
+            "aipmt.guards.detect_langs",
+            side_effect=LangDetectException(0, "no features"),
+        ) as fake_detect:
+            guards._validate_translation_output("Source longue.", translated, args, False)
+        # Sans cette assertion, un patch qui ne mord plus laisserait le test
+        # vert : le vrai langdetect lève déjà sur cette sortie.
+        fake_detect.assert_called_once()
 
 
 class TestResolveOutputFilename(unittest.TestCase):

@@ -21,6 +21,13 @@
       "kind": "Expr",
       "file": "src/aipmt/segmentation.py",
       "why": "docstring du module segmentation, né du découpage"
+    },
+    {
+      "hash": "c58f2375b6ff265c386818bcd90fa1c42bb2fed865313fb3b18b60c77b32a44e",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/guards.py",
+      "why": "docstring du module guards, né du découpage"
     }
   ],
   "removed": [],
