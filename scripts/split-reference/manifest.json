@@ -147,6 +147,13 @@
       "kind": "Expr",
       "file": "src/aipmt/pipeline.py",
       "why": "docstring du module pipeline, né du découpage"
+    },
+    {
+      "hash": "34cc53df58a28a0d5943cf16f4ca24943450d49ce8c6b15479ff845bf8f19682",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/cli.py",
+      "why": "docstring du module cli, né du découpage"
     }
   ],
   "removed": [],

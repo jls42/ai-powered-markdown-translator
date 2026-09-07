@@ -5,7 +5,7 @@ disponible quand le répertoire des scripts n'est pas dans le PATH, situation
 courante sur une installation utilisateur.
 """
 
-from .translate import main
+from .cli import main
 
 if __name__ == "__main__":
     main()

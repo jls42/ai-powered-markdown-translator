@@ -29,8 +29,8 @@ from unittest.mock import patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
+from aipmt import cli
 from aipmt import config as aipmt_config
-from aipmt import translate
 from aipmt.providers import anthropic, gemini, grok, mistral, openai
 
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
@@ -217,7 +217,7 @@ class TestMissingKeyIsNotATraceback(unittest.TestCase):
         traduction deviendrait un message rassurant — le mode de défaillance
         que ce dépôt traque. Seule la phase de configuration est enveloppée.
         """
-        body = inspect.getsource(translate.main)
+        body = inspect.getsource(cli.main)
         self.assertIn("except ValueError", body)
         self.assertNotIn("except Exception", body)
         self.assertNotIn("except:", body)

@@ -17,6 +17,6 @@ un simple `pip install translate`.
 # niveau module. Tout import d'un sous-module exécute ce fichier d'abord, ce
 # qui fait de cette ligne la garantie d'ordre — pas une convention.
 from . import config  # noqa: F401
-from .translate import main
+from .cli import main
 
 __all__ = ["main"]

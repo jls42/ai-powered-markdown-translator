@@ -23,7 +23,7 @@ from langdetect import LangDetectException
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, naming, news, pipeline, placeholders, translate
+from aipmt import cli, guards, naming, news, pipeline, placeholders
 from aipmt.providers import anthropic, gemini, mistral, openai, registry
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
@@ -741,37 +741,42 @@ class TestRunSingleAndDirectory(unittest.TestCase):
 
     def test_run_single_file_failure_listed(self):
         args = _base_args(file="/source/foo.md", target_dir="/dest")
-        with patch("aipmt.translate.translate_markdown_file", return_value="failure"):
-            failed = translate._run_single_file(args, MagicMock())
+        with patch("aipmt.cli.translate_markdown_file", return_value="failure") as fake_tmf:
+            failed = cli._run_single_file(args, MagicMock())
         self.assertEqual(failed, ["/source/foo.md"])
+        # Mesuré : sans patch, le vrai translate_markdown_file rend « failure » sur
+        # un chemin inexistant — la valeur attendue. Seul l'appel du double prouve.
+        fake_tmf.assert_called_once()
 
     def test_run_single_file_success_empty(self):
         args = _base_args(file="/source/foo.md", target_dir="/dest")
-        with patch("aipmt.translate.translate_markdown_file", return_value="success"):
-            failed = translate._run_single_file(args, MagicMock())
+        with patch("aipmt.cli.translate_markdown_file", return_value="success"):
+            failed = cli._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
 
     def test_run_single_file_skipped_empty(self):
         args = _base_args(file="/source/foo.md", target_dir="/dest")
-        with patch("aipmt.translate.translate_markdown_file", return_value="skipped"):
-            failed = translate._run_single_file(args, MagicMock())
+        with patch("aipmt.cli.translate_markdown_file", return_value="skipped"):
+            failed = cli._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
 
     def test_run_directory_dict_with_failed(self):
         args = _base_args(source_dir="/source/src", target_dir="/source/dst")
         with patch(
-            "aipmt.translate.translate_directory",
+            "aipmt.cli.translate_directory",
             return_value={"failed": ["a.md"], "skipped": []},
-        ):
-            self.assertEqual(translate._run_directory(args, MagicMock()), ["a.md"])
+        ) as fake_td:
+            self.assertEqual(cli._run_directory(args, MagicMock()), ["a.md"])
+        fake_td.assert_called_once()
 
     def test_run_directory_default_fail_on_malformed(self):
         """Default-fail : si translate_directory renvoie une dict mal formée
         (sans clé 'failed'), on traite comme un échec."""
         args = _base_args(source_dir="/source/src", target_dir="/source/dst")
-        with patch("aipmt.translate.translate_directory", return_value={"oops": []}):
-            failed = translate._run_directory(args, MagicMock())
+        with patch("aipmt.cli.translate_directory", return_value={"oops": []}) as fake_td:
+            failed = cli._run_directory(args, MagicMock())
         self.assertTrue(failed)
+        fake_td.assert_called_once()
 
 
 class TestMainModelWarning(unittest.TestCase):
@@ -780,7 +785,7 @@ class TestMainModelWarning(unittest.TestCase):
     def test_unknown_model_prints_warning(self):
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV),
-            patch("aipmt.translate.translate_markdown_file", return_value="success"),
+            patch("aipmt.cli.translate_markdown_file", return_value="success"),
             patch("aipmt.providers.openai.OpenAI") as fake_openai,
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
@@ -798,7 +803,7 @@ class TestMainModelWarning(unittest.TestCase):
             ),
             patch("builtins.print") as mock_print,
         ):
-            translate.main()
+            cli.main()
         fake_openai.assert_called_once()
         printed = " ".join(str(c) for c in mock_print.call_args_list)
         self.assertIn("modele-inconnu-xyz", printed)
@@ -811,9 +816,7 @@ class TestMainCleansUpMistralClient(unittest.TestCase):
     def test_mistral_branch_executes_del(self):
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV),
-            patch(
-                "aipmt.translate.translate_directory", return_value={"failed": [], "skipped": []}
-            ),
+            patch("aipmt.cli.translate_directory", return_value={"failed": [], "skipped": []}),
             patch("aipmt.providers.mistral.Mistral") as fake_mistral,
             patch("os.path.isdir", return_value=True),
             patch("os.path.exists", return_value=True),
@@ -830,7 +833,7 @@ class TestMainCleansUpMistralClient(unittest.TestCase):
             ),
         ):
             # Ne doit pas lever : la branche `del client` exécute proprement.
-            translate.main()
+            cli.main()
         # main() revient sans lever même quand rien n'est patché (mesuré) :
         # seul l'appel du double prouve que la branche Mistral a été prise.
         fake_mistral.assert_called_once()

@@ -23,7 +23,7 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, markdown, news, notes, pipeline, placeholders, prompts, translate
+from aipmt import cli, guards, markdown, news, notes, pipeline, placeholders, prompts
 from aipmt.pipeline import translate as translate_fn
 from aipmt.pipeline import translate_markdown_file
 from aipmt.providers import anthropic, gemini, mistral, openai
@@ -227,16 +227,18 @@ class TestSilentFailure(unittest.TestCase):
         """main() avec --file doit sys.exit(1) quand translate_markdown_file retourne 'failure'."""
         with (
             patch.dict(os.environ, _fake_openai_env()),
-            patch("aipmt.translate.translate_markdown_file", return_value="failure"),
+            patch("aipmt.cli.translate_markdown_file", return_value="failure") as fake_tmf,
             patch("aipmt.providers.openai.OpenAI") as fake_openai,
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
             patch("sys.argv", ["aipmt", "--file", "/source/fake.md", "--target_dir", "/dest"]),
         ):
             with self.assertRaises(SystemExit) as cm:
-                translate.main()
+                cli.main()
             self.assertEqual(cm.exception.code, 1)
             fake_openai.assert_called_once()
+            # Sans patch, le vrai translate_markdown_file rend déjà « failure » ici.
+            fake_tmf.assert_called_once()
 
     def test_main_exits_nonzero_on_failure_directory(self):
         """main() avec --source_dir doit sys.exit(1) quand translate_directory rapporte
@@ -244,7 +246,7 @@ class TestSilentFailure(unittest.TestCase):
         with (
             patch.dict(os.environ, _fake_openai_env()),
             patch(
-                "aipmt.translate.translate_directory",
+                "aipmt.cli.translate_directory",
                 return_value={"failed": ["a.md"], "skipped": []},
             ),
             patch("aipmt.providers.openai.OpenAI") as fake_openai,
@@ -262,7 +264,7 @@ class TestSilentFailure(unittest.TestCase):
             ),
         ):
             with self.assertRaises(SystemExit) as cm:
-                translate.main()
+                cli.main()
             self.assertEqual(cm.exception.code, 1)
             fake_openai.assert_called_once()
 
@@ -1359,7 +1361,7 @@ class TestMainExitsOnRealSilentFailure(unittest.TestCase):
                 ),
             ):
                 with self.assertRaises(SystemExit) as cm:
-                    translate.main()
+                    cli.main()
                 self.assertEqual(cm.exception.code, 1)
 
             dst = os.path.join(tmpdir, "input-en.md")
