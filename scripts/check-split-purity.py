@@ -511,13 +511,14 @@ def write_snapshot(package: pathlib.Path, origin: pathlib.Path, snapshot: pathli
         "nodes": nodes,
         "markers": collect_markers(origin),
     }
-    snapshot.parent.mkdir(parents=True, exist_ok=True)
     # NOSONAR pythonsecurity:S2083 pythonsecurity:S8707 — chemin borné à la racine
     # par _within_root avant tout accès ; outil de développement lancé par un
-    # mainteneur, sans entrée réseau.
-    snapshot.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
-    )  # NOSONAR
+    # mainteneur, sans entrée réseau. Le texte est sorti dans une variable pour
+    # que l'appel tienne sur une ligne : ruff-format éclatait l'appel et
+    # emportait le marqueur sur la ligne de fermeture, hors de portée.
+    snapshot.parent.mkdir(parents=True, exist_ok=True)  # NOSONAR
+    payload_text = json.dumps(payload, ensure_ascii=False, indent=1) + "\n"
+    snapshot.write_text(payload_text, encoding="utf-8")  # NOSONAR
     print(f"snapshot écrit : {snapshot} ({len(nodes)} nœuds, {len(payload['markers'])} marqueurs)")
     return 0
 
@@ -658,8 +659,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     # Chemins relatifs à la racine, pour que le snapshot soit portable d'un
     # poste à la CI : un chemin absolu y serait faux par construction.
+    if not args.root.is_dir():
+        raise SystemExit(f"racine introuvable : {args.root}")
     previous = os.getcwd()
-    os.chdir(args.root)
+    # NOSONAR pythonsecurity:S8707 — la racine est un répertoire existant choisi
+    # par le mainteneur qui lance l'outil ; tout autre chemin est borné à cette
+    # racine par _within_root juste après.
+    os.chdir(args.root)  # NOSONAR
     for path in (args.package, args.snapshot, args.manifest):
         _within_root(path)
     try:
