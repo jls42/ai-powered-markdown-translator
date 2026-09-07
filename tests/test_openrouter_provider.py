@@ -31,7 +31,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
+from aipmt import segmentation, translate
 
 _MARQUEUR = "jeton-de-test"
 
@@ -353,7 +353,7 @@ class TestPreflight(unittest.TestCase):
         }  # `supported_efforts` absent : le repli doit donner un tuple vide, pas None
         endpoints = {"data": {"endpoints": [_endpoint("deepinfra/fp4", 131072)]}}
         args = _args()
-        limits_avant = dict(translate.MODEL_TOKEN_LIMITS)
+        limits_avant = dict(segmentation.MODEL_TOKEN_LIMITS)
         try:
             with (
                 patch.dict(os.environ, {"OPENROUTER_API_KEY": _MARQUEUR}),
@@ -364,7 +364,7 @@ class TestPreflight(unittest.TestCase):
                 patch("aipmt.translate.OpenAI") as fake_openai,
             ):
                 client = translate._init_openrouter_client(args)
-            self.assertEqual(translate.MODEL_TOKEN_LIMITS["z-ai/glm-5.2"], 1048576)
+            self.assertEqual(segmentation.MODEL_TOKEN_LIMITS["z-ai/glm-5.2"], 1048576)
             self.assertEqual(client.providers, ("deepinfra/fp4",))
             self.assertEqual(client.supported_efforts, ())
             self.assertEqual(client.max_tokens, 32768)
@@ -373,8 +373,8 @@ class TestPreflight(unittest.TestCase):
                 fake_openai.call_args.kwargs["base_url"], translate.OPENROUTER_BASE_URL
             )
         finally:
-            translate.MODEL_TOKEN_LIMITS.clear()
-            translate.MODEL_TOKEN_LIMITS.update(limits_avant)
+            segmentation.MODEL_TOKEN_LIMITS.clear()
+            segmentation.MODEL_TOKEN_LIMITS.update(limits_avant)
 
     def test_init_refuse_si_aucun_hebergeur_sain(self):
         catalogue = {"data": [{"id": "z-ai/glm-5.2", "context_length": 100}]}

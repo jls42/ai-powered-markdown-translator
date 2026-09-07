@@ -14,6 +14,13 @@
       "kind": "Expr",
       "file": "src/aipmt/markdown.py",
       "why": "docstring du module markdown, né du découpage"
+    },
+    {
+      "hash": "89ff2c4221eb9ea872808ea73091962e715ca32775250153c70958be7cedb88f",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/segmentation.py",
+      "why": "docstring du module segmentation, né du découpage"
     }
   ],
   "removed": [],
