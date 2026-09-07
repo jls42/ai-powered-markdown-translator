@@ -11,7 +11,6 @@ import traceback
 import urllib.request
 from dataclasses import dataclass, field
 
-import anthropic
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types as genai_types
@@ -59,6 +58,7 @@ from .placeholders import (
     _validate_segment_placeholders,
 )
 from .prompts import _build_system_instructions
+from .providers.anthropic import _call_claude, _init_claude_client
 from .providers.base import (
     _NAMESPACED_MODEL_REGEX,
     _CliCallError,
@@ -78,12 +78,10 @@ from .providers.openai import (
 )
 from .segmentation import DEFAULT_TOKEN_LIMIT, MODEL_TOKEN_LIMITS, segment_text
 
-DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"  # pragma: allowlist secret
 DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"  # pragma: allowlist secret
 DEFAULT_XAI_API_KEY = "votre-cle-api-xai-par-defaut"  # pragma: allowlist secret
 DEFAULT_OPENROUTER_API_KEY = "votre-cle-api-openrouter-par-defaut"  # pragma: allowlist secret
 
-DEFAULT_MODEL_CLAUDE = "claude-sonnet-5"
 DEFAULT_MODEL_GEMINI = "gemini-3.7-flash"
 # Volontairement écrit en toutes lettres ici, dans DEFAULT_MODEL_GROK_CLI et
 # dans MODEL_TOKEN_LIMITS, plutôt que factorisé (SonarCloud python:S1192).
@@ -96,7 +94,6 @@ DEFAULT_MODEL_GEMINI = "gemini-3.7-flash"
 DEFAULT_MODEL_GROK = "grok-4.6"  # NOSONAR python:S1192
 DEFAULT_MODEL_CODEX = "gpt-5.6-sol"
 
-ECO_MODEL_CLAUDE = "claude-haiku-4-5"
 ECO_MODEL_GEMINI = "gemini-3.1-flash-lite"
 # Luna = modèle "fast, high-volume" du plan ChatGPT : 250-2000 messages/5h sur
 # Plus contre 10-100 pour Sol. C'est le seul choix raisonnable pour du batch.
@@ -285,66 +282,6 @@ DEFAULT_SOURCE_LANG = "fr"
 DEFAULT_TARGET_LANG = "en"
 DEFAULT_SOURCE_DIR = "content/posts"
 DEFAULT_TARGET_DIR = "traductions_en"
-
-
-# 32768 : marge sur l'expansion cross-script (FR→JA/ZH/KO/AR/HI peuvent
-# dépasser 16k tokens en sortie pour des segments source de 16k chars).
-CLAUDE_MAX_TOKENS = 32768
-# Plafond d'attente d'un appel Claude non-streamé. Doit rester SUPÉRIEUR
-# à la durée d'un segment, mais l'utilisateur doit savoir qu'en regen le
-# job est tué avant : REGEN_JOB_TIMEOUT vaut 600 s contre 900 s ici, donc
-# c'est `timeout` qui tranche en premier (sortie 124, échec consigné).
-CLAUDE_TIMEOUT = float(os.getenv("CLAUDE_TIMEOUT", "900"))
-
-# Types de blocs Anthropic qui ne portent pas de texte traduit. `thinking` et
-# `redacted_thinking` apparaissent sur les modèles à raisonnement adaptatif.
-_CLAUDE_NON_TEXT_BLOCK_TYPES = frozenset(
-    {"thinking", "redacted_thinking", "tool_use", "tool_result"}
-)
-
-
-def _call_claude(client, args, prompt, segment):
-    messages = [{"role": "user", "content": prompt + "\n\n" + segment}]
-    # thinking désactivé explicitement : à partir de Sonnet 5, le raisonnement
-    # adaptatif est actif par défaut. Il double les tokens de sortie facturés
-    # et la latence sans rien apporter à une traduction.
-    #
-    # `timeout` explicite : depuis les SDK récents, un appel non-streamé dont
-    # le `max_tokens` laisse présager plus de 10 minutes est refusé côté client
-    # par un ValueError ("Streaming is required..."). Fournir un timeout revient
-    # à assumer l'attente, et évite de passer au streaming pour un appel dont on
-    # n'exploite que la réponse complète.
-    response = client.messages.create(
-        model=args.model,
-        max_tokens=CLAUDE_MAX_TOKENS,
-        thinking={"type": "disabled"},
-        timeout=CLAUDE_TIMEOUT,
-        messages=messages,
-    )
-    stop = _reason_name(response.stop_reason)
-    if stop not in ("end_turn", "stop_sequence", None):
-        raise RuntimeError(f"Claude abnormal stop_reason={stop!r} (model={args.model})")
-    # Écarte les blocs non textuels : les modèles à raisonnement (Sonnet 5 et
-    # au-delà, où la thinking adaptive est active par défaut) intercalent un
-    # bloc `thinking` avant le bloc `text`. Un ThinkingBlock expose `.thinking`
-    # et non `.text` — sans ce filtre, la traduction casserait sur un
-    # AttributeError opaque au premier segment. On exclut par liste négative
-    # plutôt que de n'accepter que `type == "text"` : un bloc au type absent ou
-    # inconnu mais porteur de texte reste exploitable.
-    text_blocks = [
-        block
-        for block in response.content
-        if getattr(block, "type", None) not in _CLAUDE_NON_TEXT_BLOCK_TYPES
-    ]
-    if not text_blocks:
-        types = [getattr(block, "type", "?") for block in response.content]
-        raise RuntimeError(
-            f"Claude n'a renvoyé aucun bloc de texte (model={args.model}, blocs={types})"
-        )
-    # Préserve la structure markdown entre blocs : pas de .strip() sur chaque
-    # bloc (qui mangerait des newlines structurants), join avec "\n\n" entre
-    # blocs distincts, et un seul .strip() global sur la sortie finale.
-    return "\n\n".join(block.text for block in text_blocks).strip()
 
 
 def _gemini_config(prompt, thinking_level):
@@ -1906,14 +1843,6 @@ def _build_arg_parser():
     _add_note_args(parser)
     _add_news_args(parser)
     return parser
-
-
-def _init_claude_client(args):
-    args.model = args.model or (ECO_MODEL_CLAUDE if args.eco else DEFAULT_MODEL_CLAUDE)
-    api_key = os.getenv("ANTHROPIC_API_KEY", DEFAULT_ANTHROPIC_API_KEY)
-    if not api_key or api_key == DEFAULT_ANTHROPIC_API_KEY:
-        raise ValueError(_missing_key_message("Claude", ["ANTHROPIC_API_KEY"]))
-    return anthropic.Anthropic(api_key=api_key)
 
 
 def _init_gemini_client(args):

@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from aipmt import config as aipmt_config
 from aipmt import translate
-from aipmt.providers import mistral, openai
+from aipmt.providers import anthropic, mistral, openai
 
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 
@@ -143,7 +143,7 @@ class TestMissingKeyMessageIsActionable(unittest.TestCase):
         Args = type("Args", (), {"model": None, "eco": True})
         initialisers = (
             openai._init_openai_client,
-            translate._init_claude_client,
+            anthropic._init_claude_client,
             mistral._init_mistral_client,
             translate._init_gemini_client,
             translate._init_grok_client,

@@ -24,7 +24,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import guards, markdown, news, notes, placeholders, prompts, translate
-from aipmt.providers import mistral, openai
+from aipmt.providers import anthropic, mistral, openai
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -744,7 +744,7 @@ class TestMultiProviderStopReasons(unittest.TestCase):
         )
         args = _base_args(model="claude-haiku-4-5-20251001")
         with self.assertRaisesRegex(RuntimeError, r"Claude abnormal stop_reason"):
-            translate._call_claude(client, args, "prompt", "segment")
+            anthropic._call_claude(client, args, "prompt", "segment")
 
     def test_mistral_abnormal_finish_reason_raises(self):
         client = MagicMock()

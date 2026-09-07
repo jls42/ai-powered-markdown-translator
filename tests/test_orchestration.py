@@ -24,7 +24,7 @@ from langdetect import LangDetectException
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import guards, naming, news, placeholders, translate
-from aipmt.providers import mistral, openai
+from aipmt.providers import anthropic, mistral, openai
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -481,19 +481,19 @@ class TestProviderClientInit(unittest.TestCase):
     def test_init_claude_missing_key_raises(self):
         args = _base_args()
         with patch.dict(os.environ, {}, clear=True), self.assertRaisesRegex(ValueError, "Claude"):
-            translate._init_claude_client(args)
+            anthropic._init_claude_client(args)
 
     def test_init_claude_happy_path(self):
         args = _base_args(model=None)
         with (
             patch.dict(os.environ, _FAKE_CLAUDE_ENV, clear=True),
-            patch("aipmt.translate.anthropic") as mock_anthropic,
+            patch("aipmt.providers.anthropic.anthropic") as mock_anthropic,
         ):
-            translate._init_claude_client(args)
+            anthropic._init_claude_client(args)
             mock_anthropic.Anthropic.assert_called_once_with(
                 api_key=_FAKE_CLAUDE_ENV["ANTHROPIC_API_KEY"]
             )
-        self.assertEqual(args.model, translate.DEFAULT_MODEL_CLAUDE)
+        self.assertEqual(args.model, anthropic.DEFAULT_MODEL_CLAUDE)
 
     def test_init_gemini_missing_key_raises(self):
         args = _base_args()
@@ -551,7 +551,7 @@ class TestSelectProviderClient(unittest.TestCase):
         args = _base_args(use_claude=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_CLAUDE_ENV, clear=True),
-            patch("aipmt.translate.anthropic") as mock_anthropic,
+            patch("aipmt.providers.anthropic.anthropic") as mock_anthropic,
         ):
             translate._select_provider_client(args)
             mock_anthropic.Anthropic.assert_called_once()

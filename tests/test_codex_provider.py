@@ -27,7 +27,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import markdown, news, translate
-from aipmt.providers import openai
+from aipmt.providers import anthropic, openai
 
 
 def _args(**overrides):
@@ -406,7 +406,7 @@ class TestClaudeBlockFiltering(unittest.TestCase):
         )
         client = MagicMock()
         client.messages.create.return_value = response
-        out = translate._call_claude(client, _args(model="claude-sonnet-5"), "PROMPT", "SEG")
+        out = anthropic._call_claude(client, _args(model="claude-sonnet-5"), "PROMPT", "SEG")
         self.assertEqual(out, "Translated body")
 
     def test_multiple_text_blocks_keep_structure(self):
@@ -416,7 +416,7 @@ class TestClaudeBlockFiltering(unittest.TestCase):
         )
         client = MagicMock()
         client.messages.create.return_value = response
-        out = translate._call_claude(client, _args(model="claude-sonnet-4-6"), "PROMPT", "SEG")
+        out = anthropic._call_claude(client, _args(model="claude-sonnet-4-6"), "PROMPT", "SEG")
         self.assertEqual(out, "# Title\n\nBody")
 
     def test_no_text_block_raises_explicitly(self):
@@ -425,7 +425,7 @@ class TestClaudeBlockFiltering(unittest.TestCase):
         client.messages.create.return_value = response
         args = _args(model="claude-sonnet-5")
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_claude(client, args, "PROMPT", "SEG")
+            anthropic._call_claude(client, args, "PROMPT", "SEG")
         self.assertIn("aucun bloc de texte", str(ctx.exception))
 
 

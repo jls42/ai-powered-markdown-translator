@@ -91,6 +91,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/mistral.py",
       "why": "docstring du module providers/mistral, né du découpage"
+    },
+    {
+      "hash": "21e4d9e28c3c81dd78bc5018dda7ed896b00d5d1e84f00ba7d586353cc7b2a06",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/anthropic.py",
+      "why": "docstring du module providers/anthropic, né du découpage"
     }
   ],
   "removed": [],
