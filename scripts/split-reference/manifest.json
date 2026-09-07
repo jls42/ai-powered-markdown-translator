@@ -119,6 +119,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/grok.py",
       "why": "docstring du module providers/grok, né du découpage"
+    },
+    {
+      "hash": "49bccef6e0a8af084d77b5c72dc1eeb0de1df5b0ea0486884d574a02c52b78ff",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/opencode.py",
+      "why": "docstring du module providers/opencode, né du découpage"
     }
   ],
   "removed": [],

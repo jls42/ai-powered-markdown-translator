@@ -35,7 +35,7 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, translate
-from aipmt.providers import base, codex, grok
+from aipmt.providers import base, codex, grok, opencode
 
 # Valeur passée par référence : un littéral en face d'une clé *_API_KEY fait
 # crier les scanners de secrets, alors qu'il ne s'agit que d'un jeton de test.
@@ -58,7 +58,7 @@ def _args(**overrides):
 def _client(**overrides):
     defaults = {"binary": "opencode", "timeout": 600}
     defaults.update(overrides)
-    return translate._OpencodeClient(**defaults)
+    return opencode._OpencodeClient(**defaults)
 
 
 def _jsonl(*events):
@@ -136,7 +136,7 @@ class _FakePopen:
 class TestOpencodeCall(unittest.TestCase):
     def _run(self, fake, client=None, args=None, prompt="PROMPT SYSTÈME"):
         with patch.object(subprocess, "Popen", fake):
-            return translate._call_opencode(client or _client(), args or _args(), prompt, "Segment")
+            return opencode._call_opencode(client or _client(), args or _args(), prompt, "Segment")
 
     def test_nominal_returns_text_and_closes_stdin(self):
         fake = _FakePopen()
@@ -153,10 +153,10 @@ class TestOpencodeCall(unittest.TestCase):
         self.assertEqual(argv[:2], ["opencode", "run"])
         for flag, value in (
             ("--format", "json"),
-            ("--agent", translate.OPENCODE_AGENT_NAME),
+            ("--agent", opencode.OPENCODE_AGENT_NAME),
             ("--model", "ollama/qwen2.5:7b"),
             ("--log-level", "ERROR"),
-            ("--title", translate.OPENCODE_SESSION_TITLE),
+            ("--title", opencode.OPENCODE_SESSION_TITLE),
         ):
             self.assertEqual(argv[argv.index(flag) + 1], value, flag)
         self.assertIn("--pure", argv)
@@ -182,7 +182,7 @@ class TestOpencodeCall(unittest.TestCase):
         self.assertEqual(config["permission"], {"*": "deny"})
         self.assertEqual(config["share"], "disabled")
         self.assertFalse(config["autoupdate"])
-        agent = config["agent"][translate.OPENCODE_AGENT_NAME]
+        agent = config["agent"][opencode.OPENCODE_AGENT_NAME]
         self.assertEqual(agent["permission"], {"*": "deny"})
         self.assertEqual(agent["mode"], "primary")
         self.assertTrue(agent["prompt"].startswith("Traduis vers l'anglais."))
@@ -191,10 +191,10 @@ class TestOpencodeCall(unittest.TestCase):
     def test_env_carries_kill_switches(self):
         fake = _FakePopen()
         self._run(fake)
-        for name, value in translate.OPENCODE_ENV_KILL_SWITCHES.items():
+        for name, value in opencode.OPENCODE_ENV_KILL_SWITCHES.items():
             self.assertEqual(fake.kwargs["env"].get(name), value, name)
-        self.assertIn("OPENCODE_DISABLE_CLAUDE_CODE", translate.OPENCODE_ENV_KILL_SWITCHES)
-        self.assertIn("OPENCODE_DISABLE_PROJECT_CONFIG", translate.OPENCODE_ENV_KILL_SWITCHES)
+        self.assertIn("OPENCODE_DISABLE_CLAUDE_CODE", opencode.OPENCODE_ENV_KILL_SWITCHES)
+        self.assertIn("OPENCODE_DISABLE_PROJECT_CONFIG", opencode.OPENCODE_ENV_KILL_SWITCHES)
 
     def test_env_strips_api_keys_but_keeps_opencode_own_key(self):
         secrets = {
@@ -206,7 +206,7 @@ class TestOpencodeCall(unittest.TestCase):
             "OPENCODE_API_KEY": _MARQUEUR,
         }
         with patch.dict(os.environ, secrets, clear=False):
-            env = translate._opencode_env("PROMPT")
+            env = opencode._opencode_env("PROMPT")
         leaked = sorted(name for name in secrets if name in env)
         self.assertEqual(leaked, ["OPENCODE_API_KEY"])
         self.assertEqual(env["OPENCODE_API_KEY"], _MARQUEUR)
@@ -214,7 +214,7 @@ class TestOpencodeCall(unittest.TestCase):
     def test_opaque_error_event_is_completed_by_the_log_cause(self):
         fake = _FakePopen(stdout=_jsonl(_OPAQUE_ERROR), returncode=1, stderr=_LOG_CAUSE)
         with self.assertRaisesRegex(
-            translate._OpencodeCallError, "ProviderModelNotFoundError"
+            opencode._OpencodeCallError, "ProviderModelNotFoundError"
         ) as cm:
             self._run(fake)
         self.assertIn("Model not found: foo/bar", str(cm.exception))
@@ -223,13 +223,13 @@ class TestOpencodeCall(unittest.TestCase):
 
     def test_error_event_raises_even_with_exit_zero(self):
         fake = _FakePopen(stdout=_jsonl(_OPAQUE_ERROR, _text_event("partial")), returncode=0)
-        with self.assertRaisesRegex(translate._OpencodeCallError, "OpenCode a échoué"):
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "OpenCode a échoué"):
             self._run(fake)
 
     def test_agent_fallback_warning_refuses_the_answer(self):
         stderr = '\x1b[93m! \x1b[0m agent "aipmt" not found. Falling back to default agent\n'
         fake = _FakePopen(stderr=stderr)
-        with self.assertRaisesRegex(translate._OpencodeCallError, "n'a pas chargé l'agent"):
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "n'a pas chargé l'agent"):
             self._run(fake)
 
     def test_tool_use_refuses_the_answer(self):
@@ -244,39 +244,39 @@ class TestOpencodeCall(unittest.TestCase):
             },
         }
         fake = _FakePopen(stdout=_jsonl(_START, tool, _text_event("t"), _finish_event()))
-        with self.assertRaisesRegex(translate._OpencodeCallError, "appelé un outil .*bash"):
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "appelé un outil .*bash"):
             self._run(fake)
 
     def test_missing_step_finish_refuses_the_answer(self):
         fake = _FakePopen(stdout=_jsonl(_START, _text_event("t")))
-        with self.assertRaisesRegex(translate._OpencodeCallError, "aucun step_finish"):
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "aucun step_finish"):
             self._run(fake)
 
     def test_truncated_reason_refuses_the_answer(self):
         fake = _FakePopen(stdout=_jsonl(_START, _text_event("t"), _finish_event("length")))
-        with self.assertRaisesRegex(translate._OpencodeCallError, "reason anormal='length'"):
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "reason anormal='length'"):
             self._run(fake)
 
     def test_empty_text_refuses_the_answer(self):
         fake = _FakePopen(stdout=_jsonl(_START, _text_event("  \n"), _finish_event()))
-        with self.assertRaisesRegex(translate._OpencodeCallError, "aucun texte"):
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "aucun texte"):
             self._run(fake)
 
     def test_no_text_event_at_all_refuses_the_answer(self):
         fake = _FakePopen(stdout=_jsonl(_START, _finish_event()))
-        with self.assertRaisesRegex(translate._OpencodeCallError, "aucun texte"):
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "aucun texte"):
             self._run(fake)
 
     def test_nonzero_returncode_reports_the_log_cause(self):
         fake = _FakePopen(stdout="", returncode=1, stderr=_LOG_CAUSE)
         with self.assertRaisesRegex(
-            translate._OpencodeCallError, "code 1.*ProviderModelNotFoundError"
+            opencode._OpencodeCallError, "code 1.*ProviderModelNotFoundError"
         ):
             self._run(fake)
 
     def test_nonzero_returncode_without_logs_reports_stderr_tail(self):
         fake = _FakePopen(stdout="", returncode=3, stderr="ligne 1\nligne 2\nligne 3\nderniere")
-        with self.assertRaisesRegex(translate._OpencodeCallError, "code 3.*derniere"):
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "code 3.*derniere"):
             self._run(fake)
 
     def test_text_parts_are_joined_in_order_and_deduplicated(self):
@@ -312,7 +312,7 @@ class TestOpencodeCall(unittest.TestCase):
             patch.object(os, "killpg") as killpg,
             self.assertRaisesRegex(RuntimeError, "OPENCODE_TIMEOUT"),
         ):
-            translate._call_opencode(client, args, "P", "S")
+            opencode._call_opencode(client, args, "P", "S")
         killpg.assert_called()
         self.assertEqual(base._CLI_TIMEOUT_ENV_VARS["OpenCode"], "OPENCODE_TIMEOUT")
 
@@ -339,7 +339,7 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
             patch.object(time, "sleep") as sleep,
             patch("sys.stderr", new_callable=io.StringIO),
         ):
-            text = translate._call_opencode(_client(backoff_seconds=1.0), _args(), "P", "S")
+            text = opencode._call_opencode(_client(backoff_seconds=1.0), _args(), "P", "S")
         self.assertEqual(text, "Translated body")
         sleep.assert_called_once()
 
@@ -351,7 +351,7 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
             patch.object(time, "sleep") as sleep,
             patch("sys.stderr", new_callable=io.StringIO),
         ):
-            text = translate._call_opencode(_client(), _args(), "P", "S")
+            text = opencode._call_opencode(_client(), _args(), "P", "S")
         self.assertEqual(text, "Translated body")
         sleep.assert_called_once()
 
@@ -363,9 +363,9 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
         with (
             patch.object(subprocess, "Popen", popen),
             patch.object(time, "sleep") as sleep,
-            self.assertRaises(translate._OpencodeCallError),
+            self.assertRaises(opencode._OpencodeCallError),
         ):
-            translate._call_opencode(client, args, "P", "S")
+            opencode._call_opencode(client, args, "P", "S")
         sleep.assert_not_called()
 
     def test_shared_backoff_covers_the_three_clis(self):
@@ -373,7 +373,7 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
         des `_CliCallError`, sinon la boucle partagée ne les verrait plus."""
         self.assertTrue(issubclass(codex._CodexCallError, base._CliCallError))
         self.assertTrue(issubclass(grok._GrokCallError, base._CliCallError))
-        self.assertTrue(issubclass(translate._OpencodeCallError, base._CliCallError))
+        self.assertTrue(issubclass(opencode._OpencodeCallError, base._CliCallError))
 
 
 class TestOpencodeInit(unittest.TestCase):
@@ -387,7 +387,7 @@ class TestOpencodeInit(unittest.TestCase):
     def test_model_is_required_and_the_message_says_how_to_list_them(self):
         args = _args(model=None)
         with self.assertRaisesRegex(ValueError, "exige --model") as cm:
-            translate._init_opencode_client(args)
+            opencode._init_opencode_client(args)
         self.assertIn("opencode models", str(cm.exception))
         self.assertIn("ollama/", str(cm.exception))
 
@@ -395,11 +395,11 @@ class TestOpencodeInit(unittest.TestCase):
         for bad in ("gpt-5", "/x", "a/", "-x/y", "a b/c"):
             args = _args(model=bad)
             with self.subTest(model=bad), self.assertRaisesRegex(ValueError, "invalide"):
-                translate._init_opencode_client(args)
+                opencode._init_opencode_client(args)
 
     def test_model_with_nested_slash_and_colon_is_accepted(self):
         with (
-            patch.object(translate, "_resolve_opencode_binary", return_value="/bin/oc"),
+            patch.object(opencode, "_resolve_opencode_binary", return_value="/bin/oc"),
             self._preflight_ok(),
         ):
             for good in (
@@ -408,52 +408,52 @@ class TestOpencodeInit(unittest.TestCase):
                 "opencode/big-pickle",
             ):
                 with self.subTest(model=good):
-                    translate._init_opencode_client(_args(model=good))
+                    opencode._init_opencode_client(_args(model=good))
 
     def test_eco_warns_that_it_has_no_effect(self):
         with (
-            patch.object(translate, "_resolve_opencode_binary", return_value="/bin/oc"),
+            patch.object(opencode, "_resolve_opencode_binary", return_value="/bin/oc"),
             self._preflight_ok(),
             patch("sys.stderr", new_callable=io.StringIO) as err,
         ):
-            translate._init_opencode_client(_args(eco=True))
+            opencode._init_opencode_client(_args(eco=True))
         self.assertIn("--eco est sans effet", err.getvalue())
 
     def test_variant_follows_explicit_reasoning_effort_only(self):
         with (
-            patch.object(translate, "_resolve_opencode_binary", return_value="/bin/oc"),
+            patch.object(opencode, "_resolve_opencode_binary", return_value="/bin/oc"),
             self._preflight_ok(),
         ):
-            self.assertEqual(translate._init_opencode_client(_args()).variant, "")
+            self.assertEqual(opencode._init_opencode_client(_args()).variant, "")
             self.assertEqual(
-                translate._init_opencode_client(_args(reasoning_effort="none")).variant, ""
+                opencode._init_opencode_client(_args(reasoning_effort="none")).variant, ""
             )
             self.assertEqual(
-                translate._init_opencode_client(_args(reasoning_effort="high")).variant, "high"
+                opencode._init_opencode_client(_args(reasoning_effort="high")).variant, "high"
             )
 
     def test_init_uses_resolved_binary_and_timeout(self):
         with (
-            patch.object(translate, "_resolve_opencode_binary", return_value="/opt/oc"),
+            patch.object(opencode, "_resolve_opencode_binary", return_value="/opt/oc"),
             self._preflight_ok(),
         ):
-            client = translate._init_opencode_client(_args())
+            client = opencode._init_opencode_client(_args())
         self.assertEqual(client.binary, "/opt/oc")
-        self.assertEqual(client.timeout, translate.OPENCODE_TIMEOUT)
+        self.assertEqual(client.timeout, opencode.OPENCODE_TIMEOUT)
 
     def test_not_refused_in_ci(self):
         """Contrairement aux CLI d'abonnement, OpenCode a des usages légitimes
         sur un runner (clé API, modèle local auto-hébergé)."""
         with (
             patch.dict(os.environ, {"CI": "1", "GITHUB_ACTIONS": "true"}, clear=False),
-            patch.object(translate, "_resolve_opencode_binary", return_value="/bin/oc"),
+            patch.object(opencode, "_resolve_opencode_binary", return_value="/bin/oc"),
             self._preflight_ok(),
         ):
-            translate._init_opencode_client(_args())
+            opencode._init_opencode_client(_args())
 
     def test_preflight_rejects_missing_binary_and_names_install_paths(self):
         with self.assertRaisesRegex(ValueError, "introuvable") as cm:
-            translate._opencode_preflight(None)
+            opencode._opencode_preflight(None)
         for hint in ("opencode.ai/install", "npm install -g opencode-ai", "OPENCODE_BIN"):
             self.assertIn(hint, str(cm.exception))
 
@@ -463,7 +463,7 @@ class TestOpencodeInit(unittest.TestCase):
             patch.object(subprocess, "run", return_value=failing),
             self.assertRaisesRegex(ValueError, "a échoué .*boom"),
         ):
-            translate._opencode_preflight("/bin/oc")
+            opencode._opencode_preflight("/bin/oc")
 
     def test_preflight_rejects_binary_without_version(self):
         odd = SimpleNamespace(returncode=0, stdout="usage: something", stderr="")
@@ -471,21 +471,21 @@ class TestOpencodeInit(unittest.TestCase):
             patch.object(subprocess, "run", return_value=odd),
             self.assertRaisesRegex(ValueError, "a échoué"),
         ):
-            translate._opencode_preflight("/bin/oc")
+            opencode._opencode_preflight("/bin/oc")
 
     def test_preflight_reports_unexecutable_binary(self):
         with (
             patch.object(subprocess, "run", side_effect=OSError("EACCES")),
             self.assertRaisesRegex(ValueError, "Impossible d'exécuter"),
         ):
-            translate._opencode_preflight("/bin/oc")
+            opencode._opencode_preflight("/bin/oc")
 
     def test_preflight_environment_carries_no_secret(self):
         with (
             patch.dict(os.environ, {"OPENAI_API_KEY": _MARQUEUR}, clear=False),
             self._preflight_ok() as run,
         ):
-            translate._opencode_preflight("/bin/oc")
+            opencode._opencode_preflight("/bin/oc")
         env = run.call_args.kwargs["env"]
         self.assertNotIn("OPENAI_API_KEY", env)
         self.assertEqual(run.call_args.args[0], ["/bin/oc", "--version"])
@@ -498,7 +498,7 @@ class TestOpencodeBinaryResolution(unittest.TestCase):
             patch.object(shutil, "which", return_value=None),
             patch.object(os.path, "isfile", return_value=True),
         ):
-            self.assertEqual(translate._resolve_opencode_binary(), "/custom/oc")
+            self.assertEqual(opencode._resolve_opencode_binary(), "/custom/oc")
 
     def test_path_used_when_no_explicit_bin(self):
         with (
@@ -506,7 +506,7 @@ class TestOpencodeBinaryResolution(unittest.TestCase):
             patch.object(shutil, "which", return_value="/usr/local/bin/opencode"),
         ):
             os.environ.pop("OPENCODE_BIN", None)
-            self.assertEqual(translate._resolve_opencode_binary(), "/usr/local/bin/opencode")
+            self.assertEqual(opencode._resolve_opencode_binary(), "/usr/local/bin/opencode")
 
     def test_falls_back_to_installer_location(self):
         home = os.path.join(os.path.expanduser("~"), ".opencode", "bin", "opencode")
@@ -516,7 +516,7 @@ class TestOpencodeBinaryResolution(unittest.TestCase):
             patch.object(os.path, "isfile", side_effect=lambda p: p == home),
         ):
             os.environ.pop("OPENCODE_BIN", None)
-            self.assertEqual(translate._resolve_opencode_binary(), home)
+            self.assertEqual(opencode._resolve_opencode_binary(), home)
 
     def test_returns_none_when_nothing_available(self):
         with (
@@ -525,7 +525,7 @@ class TestOpencodeBinaryResolution(unittest.TestCase):
             patch.object(os.path, "isfile", return_value=False),
         ):
             os.environ.pop("OPENCODE_BIN", None)
-            self.assertIsNone(translate._resolve_opencode_binary())
+            self.assertIsNone(opencode._resolve_opencode_binary())
 
 
 class TestProviderWiring(unittest.TestCase):

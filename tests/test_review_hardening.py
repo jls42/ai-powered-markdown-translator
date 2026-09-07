@@ -31,7 +31,7 @@ from google.genai import errors as genai_errors
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, news, translate
-from aipmt.providers import base, codex, gemini, grok
+from aipmt.providers import base, codex, gemini, grok, opencode
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -340,10 +340,10 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
         abonnement Go) : l'équivalent de son auth.json, adressée par son nom.
         C'est la seule exception, et elle est nominative."""
         with patch.dict(os.environ, {**self.SECRETS, "OPENCODE_API_KEY": _MARQUEUR}, clear=False):
-            env = translate._opencode_env("prompt")
+            env = opencode._opencode_env("prompt")
         self.assertEqual(self._leaked(env), [])
         self.assertEqual(env.get("OPENCODE_API_KEY"), _MARQUEUR)
-        self.assertEqual(translate.OPENCODE_KEPT_ENV_VARS, ("OPENCODE_API_KEY",))
+        self.assertEqual(opencode.OPENCODE_KEPT_ENV_VARS, ("OPENCODE_API_KEY",))
 
     def test_variables_needed_by_the_cli_survive(self):
         """Un filtrage trop large casserait les deux CLI.
@@ -355,7 +355,7 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
             for env in (
                 codex._codex_env(codex._CodexClient(binary="/bin/true")),
                 grok._grok_env(),
-                translate._opencode_env("prompt"),
+                opencode._opencode_env("prompt"),
             ):
                 self.assertEqual(env.get("PATH"), "/usr/bin")
                 self.assertEqual(env.get("HOME"), "/home/u")
