@@ -105,6 +105,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/gemini.py",
       "why": "docstring du module providers/gemini, né du découpage"
+    },
+    {
+      "hash": "706ab468afe53298f4ef88925d72eaaa95260cdb07d343756ab1bed786a26832",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/codex.py",
+      "why": "docstring du module providers/codex, né du découpage"
     }
   ],
   "removed": [],

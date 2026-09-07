@@ -31,7 +31,7 @@ from google.genai import errors as genai_errors
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, news, translate
-from aipmt.providers import base, gemini
+from aipmt.providers import base, codex, gemini
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -327,7 +327,7 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
 
     def test_codex_subprocess_receives_no_secret(self):
         with patch.dict(os.environ, self.SECRETS, clear=False):
-            env = translate._codex_env(translate._CodexClient(binary="/bin/true"))
+            env = codex._codex_env(codex._CodexClient(binary="/bin/true"))
         self.assertEqual(self._leaked(env), [])
 
     def test_grok_subprocess_receives_no_secret(self):
@@ -353,7 +353,7 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
         """
         with patch.dict(os.environ, {"PATH": "/usr/bin", "HOME": "/home/u"}, clear=False):
             for env in (
-                translate._codex_env(translate._CodexClient(binary="/bin/true")),
+                codex._codex_env(codex._CodexClient(binary="/bin/true")),
                 translate._grok_env(),
                 translate._opencode_env("prompt"),
             ):

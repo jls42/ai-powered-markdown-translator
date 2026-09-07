@@ -35,7 +35,7 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, translate
-from aipmt.providers import base
+from aipmt.providers import base, codex
 
 # Valeur passée par référence : un littéral en face d'une clé *_API_KEY fait
 # crier les scanners de secrets, alors qu'il ne s'agit que d'un jeton de test.
@@ -371,7 +371,7 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
     def test_shared_backoff_covers_the_three_clis(self):
         """Le back-off est commun : les erreurs Codex et Grok doivent rester
         des `_CliCallError`, sinon la boucle partagée ne les verrait plus."""
-        self.assertTrue(issubclass(translate._CodexCallError, base._CliCallError))
+        self.assertTrue(issubclass(codex._CodexCallError, base._CliCallError))
         self.assertTrue(issubclass(translate._GrokCallError, base._CliCallError))
         self.assertTrue(issubclass(translate._OpencodeCallError, base._CliCallError))
 
