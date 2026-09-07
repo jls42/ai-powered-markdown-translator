@@ -1,6 +1,14 @@
 {
   "_comment": "Manifeste CUMULATIF des écarts déclarés par rapport au snapshot de référence (package-6ae1505.json). Lu par scripts/check-split-purity.py. added : nœuds de premier niveau ajoutés (docstrings de module, __all__…) ; removed : nœuds retirés ; modified : nœuds dont le corps a changé (old_hash → new_hash). Chaque entrée dit pourquoi.",
-  "added": [],
+  "added": [
+    {
+      "hash": "c83fcf7fec0288c99da175e4029624bab424e187f1d9e286498ed142cd0a1898",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/config.py",
+      "why": "docstring du module config, né du découpage"
+    }
+  ],
   "removed": [],
   "modified": []
 }

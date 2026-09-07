@@ -29,6 +29,7 @@ from unittest.mock import patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
+from aipmt import config as aipmt_config
 from aipmt import translate
 
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
@@ -39,7 +40,7 @@ class TestUserConfigPathFollowsOsConvention(unittest.TestCase):
 
     def test_absolute_xdg_config_home_is_honoured(self) -> None:
         with patch.dict(os.environ, {"XDG_CONFIG_HOME": "/opt/conf"}, clear=False):
-            self.assertEqual(translate._user_config_path(), "/opt/conf/aipmt/.env")
+            self.assertEqual(aipmt_config._user_config_path(), "/opt/conf/aipmt/.env")
 
     def test_relative_xdg_config_home_is_ignored(self) -> None:
         """La spécification XDG impose un chemin absolu et dit d'ignorer sinon.
@@ -49,7 +50,7 @@ class TestUserConfigPathFollowsOsConvention(unittest.TestCase):
         défaut que cette couche existe pour supprimer.
         """
         with patch.dict(os.environ, {"XDG_CONFIG_HOME": "relatif/conf"}, clear=False):
-            path = translate._user_config_path()
+            path = aipmt_config._user_config_path()
         self.assertTrue(os.path.isabs(path), f"{path!r} devrait être absolu")
         self.assertNotIn("relatif", path)
         self.assertTrue(path.endswith(os.path.join(".config", "aipmt", ".env")))
@@ -57,7 +58,7 @@ class TestUserConfigPathFollowsOsConvention(unittest.TestCase):
     def test_falls_back_to_dot_config_when_unset(self) -> None:
         env = {k: v for k, v in os.environ.items() if k != "XDG_CONFIG_HOME"}
         with patch.dict(os.environ, env, clear=True):
-            path = translate._user_config_path()
+            path = aipmt_config._user_config_path()
         self.assertTrue(path.endswith(os.path.join(".config", "aipmt", ".env")))
 
     def test_windows_uses_appdata(self) -> None:
@@ -65,7 +66,7 @@ class TestUserConfigPathFollowsOsConvention(unittest.TestCase):
             patch.object(os, "name", "nt"),
             patch.dict(os.environ, {"APPDATA": r"C:\Users\x\AppData\Roaming"}, clear=False),
         ):
-            path = translate._user_config_path()
+            path = aipmt_config._user_config_path()
         self.assertIn("AppData", path)
         self.assertTrue(path.endswith(os.path.join("aipmt", ".env")))
 
@@ -100,7 +101,7 @@ class TestThreeLayerPriority(unittest.TestCase):
                 with patch.dict(os.environ, overrides, clear=False):
                     if env_value is None:
                         os.environ.pop(self.VAR, None)
-                    translate._load_configuration()
+                    aipmt_config._load_configuration()
                     return os.environ.get(self.VAR)
             finally:
                 os.chdir(previous)
@@ -131,10 +132,10 @@ class TestMissingKeyMessageIsActionable(unittest.TestCase):
     """Le message doit MONTRER les emplacements, pas seulement les nommer."""
 
     def test_message_names_the_three_locations(self) -> None:
-        message = translate._missing_key_message("OpenAI", ["OPENAI_API_KEY"])
+        message = aipmt_config._missing_key_message("OpenAI", ["OPENAI_API_KEY"])
         self.assertIn("OPENAI_API_KEY", message)
         self.assertIn(os.path.join(os.getcwd(), ".env"), message)
-        self.assertIn(translate._user_config_path(), message)
+        self.assertIn(aipmt_config._user_config_path(), message)
 
     def test_every_provider_message_shows_the_user_config_path(self) -> None:
         """Aucun provider ne doit garder l'ancien message tronqué."""
@@ -170,7 +171,7 @@ class TestMissingKeyMessageIsActionable(unittest.TestCase):
             ):
                 with self.assertRaises(ValueError) as raised:
                     initialiser(provider_args)
-                self.assertIn(translate._user_config_path(), str(raised.exception))
+                self.assertIn(aipmt_config._user_config_path(), str(raised.exception))
 
 
 class TestMissingKeyIsNotATraceback(unittest.TestCase):

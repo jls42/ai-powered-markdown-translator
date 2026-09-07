@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import argparse
 import datetime
 import glob
@@ -18,7 +16,6 @@ import urllib.request
 from dataclasses import dataclass, field
 
 import anthropic
-from dotenv import find_dotenv, load_dotenv
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types as genai_types
@@ -26,59 +23,11 @@ from langdetect import DetectorFactory, LangDetectException, detect_langs
 from mistralai.client import Mistral
 from openai import BadRequestError, OpenAI
 
+from .config import _missing_key_message
+
 # Détection de langue déterministe (évite les variations entre runs sur des textes courts)
 DetectorFactory.seed = 0
 
-
-def _user_config_path():
-    """Fichier de configuration utilisateur, à l'emplacement conventionnel de l'OS.
-
-    C'est la couche « installé une fois, marche partout » : sans elle, une CLI
-    installée n'a que la variable d'environnement et le `.env` du répertoire
-    courant — donc rien de persistant hors d'un projet donné.
-
-    `find_dotenv` remonte certes jusqu'à la racine du système et trouverait un
-    `~/.env` quand on travaille sous son répertoire personnel — mais pas quand
-    on travaille ailleurs. Cette couverture accidentelle dépend de l'endroit
-    d'où l'on lance la commande ; celle-ci n'en dépend pas.
-    """
-    if os.name == "nt":
-        base = os.getenv("APPDATA") or os.path.join(os.path.expanduser("~"), "AppData", "Roaming")
-    else:
-        # La spécification XDG impose un chemin ABSOLU et demande d'ignorer la
-        # variable sinon. Sans ce contrôle, un `XDG_CONFIG_HOME` relatif ferait
-        # dépendre l'emplacement de la configuration du répertoire courant —
-        # exactement le défaut qu'on corrige ici.
-        base = os.getenv("XDG_CONFIG_HOME") or ""
-        if not os.path.isabs(base):
-            base = os.path.join(os.path.expanduser("~"), ".config")
-    return os.path.join(base, "aipmt", ".env")
-
-
-def _load_configuration():
-    """Charge les clés selon TROIS couches, de la plus prioritaire à la moindre.
-
-    1. variables d'environnement déjà définies — CI, conteneurs, override ponctuel
-    2. `.env` du projet, cherché depuis le répertoire courant puis les parents
-    3. `_user_config_path()`, la configuration utilisateur persistante
-
-    La priorité n'est pas codée : elle découle de `override=False`, valeur par
-    défaut de `load_dotenv`, qui ne remplace jamais une variable déjà définie.
-    Chaque couche ne fait donc que combler ce que la précédente a laissé vide.
-
-    `usecwd=True` est indispensable à la couche 2 : sans lui, `find_dotenv`
-    remonte depuis le fichier APPELANT — donc depuis site-packages une fois
-    l'outil installé — et ignore en silence le `.env` du répertoire de travail.
-    Mesuré sur un point d'entrée console réel : `find_dotenv()` renvoie `''` là
-    où `find_dotenv(usecwd=True)` trouve le fichier. Depuis le dépôt cloné, les
-    deux formes donnent le même résultat, ce qui explique que le défaut soit
-    resté invisible tant que l'outil n'était pas installable.
-    """
-    load_dotenv(find_dotenv(usecwd=True))
-    load_dotenv(_user_config_path())
-
-
-_load_configuration()
 
 EXCLUDE_PATTERNS = ["traductions_", "venv", "PRIVACY.md"]
 
@@ -3726,26 +3675,6 @@ def _validate_input_paths(args):
         os.makedirs(args.target_dir)  # NOSONAR
 
 
-def _missing_key_message(provider, variables, hint=""):
-    """Message d'absence de clé qui dit OÙ mettre la clé, chemin exact compris.
-
-    Le message précédent — « Définir X dans l'environnement ou .env » — était
-    exact et inexploitable : quelqu'un qui vient d'installer l'outil n'a ni
-    l'un ni l'autre, et rien ne lui disait où créer le second ni qu'une
-    configuration utilisateur existait. Une erreur de configuration doit
-    montrer l'emplacement, pas le nommer.
-    """
-    names = " ou ".join(variables)
-    return (
-        f"Clé API {provider} non spécifiée.{hint}\n"
-        f"Définir {names} à l'un de ces trois endroits, du plus prioritaire au moindre :\n"
-        f"  1. variable d'environnement  →  export {variables[0]}=votre-cle\n"
-        f"  2. .env du projet            →  {os.path.join(os.getcwd(), '.env')}\n"
-        f"  3. configuration utilisateur →  {_user_config_path()}\n"
-        f"     (vaut pour toutes vos sessions ; créer le répertoire si besoin)"
-    )
-
-
 def _init_mistral_client(args):
     args.model = args.model or (ECO_MODEL_MISTRAL if args.eco else DEFAULT_MODEL_MISTRAL)
     api_key = os.getenv("MISTRAL_API_KEY", DEFAULT_MISTRAL_API_KEY)
@@ -4247,7 +4176,3 @@ def main():
             file=sys.stderr,
         )
         sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()

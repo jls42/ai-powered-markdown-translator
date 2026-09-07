@@ -832,8 +832,9 @@ class TestMainCleansUpMistralClient(unittest.TestCase):
 
 
 class TestModuleEntrypoint(unittest.TestCase):
-    """Couvre `if __name__ == '__main__': main()` (ligne ~1459) en exécutant
-    le script avec une invocation rapide qui sort en erreur (validation paths)."""
+    """Exécute `python -m aipmt` en sous-processus, avec une invocation rapide
+    qui sort en erreur (validation des chemins) : le point d'entrée installable
+    est la seule forme d'exécution supportée depuis le découpage du module."""
 
     def test_module_entrypoint_invokes_main(self):
         import subprocess  # nosec B404 — test exécute la CLI aipmt

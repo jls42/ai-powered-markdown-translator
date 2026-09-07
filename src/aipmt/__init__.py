@@ -12,6 +12,11 @@ requirements found ». Une casse silencieuse qu'un utilisateur déclencherait pa
 un simple `pip install translate`.
 """
 
+# `config` en PREMIER, et explicitement : il charge les trois couches de
+# configuration à l'import, et les modules providers lisent `os.getenv` au
+# niveau module. Tout import d'un sous-module exécute ce fichier d'abord, ce
+# qui fait de cette ligne la garantie d'ordre — pas une convention.
+from . import config  # noqa: F401
 from .translate import main
 
 __all__ = ["main"]
