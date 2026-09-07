@@ -199,18 +199,19 @@ Le premier `pre-commit run --all-files` télécharge les environnements des hook
 
 ### Hooks actifs
 
-| Stage      | Hook                           | Rôle                                                                            |
-| ---------- | ------------------------------ | ------------------------------------------------------------------------------- |
-| pre-commit | shellcheck                     | Lint des `.sh` (release.sh, regen_translations.sh, scripts/)                    |
-| pre-commit | ruff + ruff-format             | Lint + format Python (rapide, --fix automatique)                                |
-| pre-commit | prettier                       | Format JSON/YAML/MD (28 traductions exclues)                                    |
-| pre-commit | pre-commit-hooks v5            | Trailing-whitespace, EOF, check-yaml/toml, large-files, merge-conflict, shebang |
-| pre-commit | detect-secrets                 | Détection de fuites d'API keys (4 providers utilisés)                           |
-| pre-commit | check-complexity (Lizard)      | CCN <= 12, scope `src/` + `scripts/`, existence des chemins vérifiée            |
-| pre-push   | mypy (lax)                     | Type-checking des fonctions déjà annotées (durcissement progressif)             |
-| pre-push   | check-security-sast (Opengrep) | SAST sur src/ + scripts/ (graceful skip si binaire absent)                      |
-| pre-push   | check-pip-audit                | Audit deps (mode reporting initial, durcir après bump)                          |
-| pre-push   | unittest                       | Tests `tests/` + `scripts/tests/`                                               |
+| Stage      | Hook                            | Rôle                                                                             |
+| ---------- | ------------------------------- | -------------------------------------------------------------------------------- |
+| pre-commit | shellcheck                      | Lint des `.sh` (release.sh, regen_translations.sh, scripts/)                     |
+| pre-commit | ruff + ruff-format              | Lint + format Python (rapide, --fix automatique)                                 |
+| pre-commit | prettier                        | Format JSON/YAML/MD (28 traductions exclues)                                     |
+| pre-commit | pre-commit-hooks v5             | Trailing-whitespace, EOF, check-yaml/toml, large-files, merge-conflict, shebang  |
+| pre-commit | detect-secrets                  | Détection de fuites d'API keys (4 providers utilisés)                            |
+| pre-commit | check-complexity (Lizard)       | CCN <= 12, scope `src/` + `scripts/`, existence des chemins et plancher vérifiés |
+| pre-commit | check-split-purity (temporaire) | Le découpage de `translate.py` reste un déplacement pur, cf. § ci-dessous        |
+| pre-push   | mypy (lax)                      | Type-checking des fonctions déjà annotées (durcissement progressif)              |
+| pre-push   | check-security-sast (Opengrep)  | SAST sur src/ + scripts/ (graceful skip si binaire absent)                       |
+| pre-push   | check-pip-audit                 | Audit deps (mode reporting initial, durcir après bump)                           |
+| pre-push   | unittest                        | Tests `tests/` + `scripts/tests/`                                                |
 
 ### Lancer manuellement
 
@@ -234,27 +235,28 @@ mypy est en mode **Lax** au démarrage (`disallow_untyped_defs = false`, `check_
 Trajectoire :
 
 1. **Phase 1 (actuel)** : mypy lax, 0 effort initial. Filet de sécurité quand on ajoute des annotations.
-2. **Phase 2** : annoter les fonctions critiques de `src/aipmt/translate.py` (`segment_text`, `translate`, `translate_markdown_file`). Bumper `check_untyped_defs = true`.
+2. **Phase 2** : annoter les fonctions critiques (`segment_text` dans `aipmt.segmentation`, `translate` et `translate_markdown_file` dans `aipmt.pipeline`). Bumper `check_untyped_defs = true`.
 3. **Phase 3** : `disallow_untyped_defs = true` (mypy strict). Tout le code annoté.
 
 ### Lizard CCN — scope et fail-closed
 
-Le seuil est 12 (futur 8). `src/aipmt/translate.py` est **dans** le scope depuis que
-le refactor des providers l'a fait repasser dessous : 158 fonctions, CCN moyen
-3,3, zéro dépassement. L'exclusion documentée ici auparavant ne correspondait
-plus au script depuis ce refactor.
+Le seuil est 12 (futur 8). Tout le paquet `src/aipmt/` est **dans** le scope :
+192 fonctions au découpage de la 1.13.0, CCN moyen 3,5, zéro dépassement.
 
-Le scope vit dans un tableau `SCOPE` en tête de `scripts/check-complexity.sh`,
-dont **chaque entrée est vérifiée existante avant l'analyse**. Sans cette garde,
-un simple déplacement de fichier désarmait le gate en silence : `lizard` ignore
-un chemin absent, sort en 0 et n'écrit rien. Mesuré sur une copie migrée — de
-158 fonctions / 2247 nloc à 3 fonctions / 34 nloc, sortie de zéro octet.
+Le scope vit dans un tableau `SCOPE` en tête de `scripts/check-complexity.sh`
+— des RÉPERTOIRES (`src/`, `scripts/`), pas des fichiers, et un **plancher de
+185 fonctions** lu par l'API Python de Lizard. Deux gardes, parce que chacune
+seule a un angle mort : `lizard` ignore un chemin absent, sort en 0 et n'écrit
+rien (mesuré sur une copie migrée — de 158 fonctions / 2247 nloc à 3 fonctions
+/ 34 nloc, sortie de zéro octet) ; et l'existence d'un répertoire ne prouve pas
+qu'il contient quelque chose. Le plancher se lit par l'API parce que
+`--warnings_only` n'imprime AUCUNE ligne de synthèse quand tout est vert.
 
 Le hook `files:` de `.pre-commit-config.yaml` doit suivre le même chemin : une
 regex qui ne matche plus ne fait pas échouer pre-commit, elle fait **sauter** le
 hook. La 7ᵉ section de `check-release-ready.sh` confronte les deux.
 
-Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python src/aipmt/translate.py`.
+Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python src/`.
 
 ### Deux gardes CI ajoutées pour la publication
 
@@ -446,21 +448,59 @@ pip install -r requirements.txt
 
 ## Architecture
 
-**Installable package, single-module logic**: le paquet est `src/aipmt/`, et toute
-la logique tient dans `src/aipmt/translate.py`. `__init__.py` n'expose que `main`
-(cité par `[project.scripts] aipmt`), `__main__.py` permet `python -m aipmt`.
+**Paquet installable, découpé par responsabilité** : le paquet est `src/aipmt/`.
+`__init__.py` importe `config` EN PREMIER (il charge `.env` à l'import, avant
+que les providers lisent `os.getenv` au niveau module) puis expose `main` (cité
+par `[project.scripts] aipmt`) ; `__main__.py` permet `python -m aipmt`.
+L'exécution directe du fichier (`python src/aipmt/translate.py`) n'existe plus
+depuis le découpage : les imports sont relatifs.
 
 Le nom d'import est `aipmt` et **jamais** `translate` : le paquet PyPI `translate`
 (v3.8.1, actif) installe un répertoire homonyme qui masquerait le module — le
 point d'entrée casse alors sur `AttributeError` et `pip check` ne voit rien.
 
-Contenu de `src/aipmt/translate.py` :
+Modules (chaque flèche de dépendance va vers un module plus bas, jamais l'inverse) :
 
-- **API clients**: OpenAI, Mistral, Claude (Anthropic), and Gemini are initialized based on CLI flags
-- **Text segmentation**: `segment_text()` splits long documents at natural breakpoints (sentences, paragraphs, headers) respecting model token limits defined in `MODEL_TOKEN_LIMITS`
-- **Code preservation**: Regex extracts fenced code blocks AND inline code (`` `...` ``) before translation, replaces with placeholders, restores after
-- **News mode**: `--news` protects English quotes with `<NEWSQUOTE id="N"/>` XML self-closing tags, validates placeholder integrity before restoration, manages flag emojis per target language. (La forme legacy `#NEWSQUOTE\d+#` n'est plus émise mais reste détectée comme résidu.)
-- **Directory traversal**: `translate_directory()` walks source directory, skips patterns in `EXCLUDE_PATTERNS`, checks for existing translations
+| Module                  | Rôle                                                                                                           |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `config.py`             | Trois couches de clés (env, `.env`, `~/.config/aipmt/.env`), `_missing_key_message`                            |
+| `markdown.py`           | Lexique partagé : regex de lignes structurelles, liens, balises, placeholders ; plages d'écritures             |
+| `segmentation.py`       | `segment_text()`, `MODEL_TOKEN_LIMITS` (objet unique, OpenRouter y écrit la fenêtre lue au préflight)          |
+| `guards.py`             | Gardes de sortie : langue détectée, extrait source verbatim, ratio, écriture cible ; graine langdetect         |
+| `placeholders.py`       | Protection/restauration des blocs de code, code inline, URL, ancres, labels — et leurs validations             |
+| `news.py`               | Mode `--news` : `<NEWSQUOTE id="N"/>`, drapeaux par langue, règles du prompt et validations                    |
+| `prompts.py`            | Instructions système : contrat Markdown, placeholders, ancres, addenda news et écritures non latines           |
+| `notes.py`              | Note de traduction (constructeurs purs)                                                                        |
+| `naming.py`             | `EXCLUDE_PATTERNS`, nom de sortie, traduction déjà présente, garde anti-traversée, écriture                    |
+| `pipeline.py`           | `translate()`, `translate_markdown_file()`, `translate_directory()`, `_append_translation_note()`              |
+| `cli.py`                | argparse hors providers, validation des chemins, `main()`                                                      |
+| `providers/base.py`     | Socle des CLI : sous-processus, secrets, back-off, erreurs, refus en CI                                        |
+| `providers/<nom>.py`    | Un module par provider : `openai`, `mistral`, `anthropic`, `gemini`, `codex`, `grok`, `opencode`, `openrouter` |
+| `providers/registry.py` | `_resolve_provider`, `_PROVIDER_LABELS`, `_dispatch_provider_call`, `_select_provider_client`, flags           |
+| `translate.py`          | FAÇADE de compatibilité : les 64 noms publics de l'ancien module unique, par identité ; `__all__` à 9          |
+
+Deux règles qui découlent du découpage, verrouillées par `tests/test_facade_contract.py` :
+
+- **Un patch de test vise le module qui CONSULTE le nom, jamais la façade.**
+  `patch("aipmt.translate.translate_markdown_file")` réussissait sans rien
+  intercepter (le nom consommé est celui de `aipmt.cli`) — et deux tests
+  restaient verts sans leur patch. Détection par AST dans `tests/` et
+  `scripts/tests/`, quotes simples et appels multilignes compris.
+- **La façade ne ré-exporte ni nom privé, ni SDK, ni module stdlib.** Un patch
+  posé au mauvais endroit lève `AttributeError` au lieu de ne plus mordre.
+
+**Vérificateur de pureté (temporaire, retiré par la PR qui suit le découpage)** :
+`scripts/check-split-purity.py`, hook pre-commit `check-split-purity` et étape
+de `tests.yml`. Il compare le multiensemble des nœuds AST de premier niveau du
+paquet à un snapshot versionné (`scripts/split-reference/package-6ae1505.json`,
+304 nœuds au 2026-09-07) plus un manifeste cumulatif d'écarts déclarés
+(`manifest.json` : docstrings de module, `__all__`…) ; il vérifie l'emplacement
+de chaque symbole, la survie verbatim des marqueurs `# nosec` / `# nosemgrep` /
+`NOSONAR`, et refuse tout `.py` non suivi sous `src/aipmt/`, `tests/` ou
+`scripts/tests/` (pre-commit ne voit que l'index : un module créé sans `git add`
+passait tous les hooks). Le snapshot est dans le dépôt parce que la CI fait un
+checkout superficiel. Neuf tests négatifs (`scripts/tests/test_check_split_purity.py`)
+prouvent qu'il mord.
 
 **Output naming**:
 
