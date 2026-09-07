@@ -1,0 +1,6 @@
+{
+  "_comment": "Manifeste CUMULATIF des écarts déclarés par rapport au snapshot de référence (package-6ae1505.json). Lu par scripts/check-split-purity.py. added : nœuds de premier niveau ajoutés (docstrings de module, __all__…) ; removed : nœuds retirés ; modified : nœuds dont le corps a changé (old_hash → new_hash). Chaque entrée dit pourquoi.",
+  "added": [],
+  "removed": [],
+  "modified": []
+}

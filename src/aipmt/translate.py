@@ -101,12 +101,12 @@ LANG_FLAGS = {
     "fr": "🇫🇷",
 }
 
-DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"
-DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"
-DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"
-DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"
-DEFAULT_XAI_API_KEY = "votre-cle-api-xai-par-defaut"
-DEFAULT_OPENROUTER_API_KEY = "votre-cle-api-openrouter-par-defaut"
+DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"  # pragma: allowlist secret
+DEFAULT_MISTRAL_API_KEY = "votre-cle-api-mistral-par-defaut"  # pragma: allowlist secret
+DEFAULT_ANTHROPIC_API_KEY = "votre-cle-api-anthropic-par-defaut"  # pragma: allowlist secret
+DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"  # pragma: allowlist secret
+DEFAULT_XAI_API_KEY = "votre-cle-api-xai-par-defaut"  # pragma: allowlist secret
+DEFAULT_OPENROUTER_API_KEY = "votre-cle-api-openrouter-par-defaut"  # pragma: allowlist secret
 
 DEFAULT_MODEL_OPENAI = "gpt-5.6-terra"
 DEFAULT_MODEL_MISTRAL = "mistral-large-latest"

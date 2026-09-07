@@ -278,13 +278,14 @@ git ls-files --cached -z | xargs -0 detect-secrets scan \
   --exclude-files 'tests/fixtures/.*' \
   --exclude-files 'venv/.*' \
   --exclude-files '\.secrets\.baseline' \
+  --exclude-files 'scripts/split-reference/.*' \
   > .secrets.baseline
 
 # Auditer manuellement les findings (interactif)
 detect-secrets audit .secrets.baseline
 ```
 
-Findings actuels (tous faux positifs attendus) : 4 placeholders `votre-cle-api-*-par-defaut` dans `src/aipmt/translate.py` (OpenAI/Anthropic/Mistral/Google), 1 exemple dans README.md, 1 fixture dans tests/test_silent_failure.py. À auditer ponctuellement pour passer `is_secret: false`.
+Findings actuels (tous faux positifs attendus) : 1 exemple dans README.md, 1 fixture dans tests/test*codex_provider.py, 1 dans tests/test_grok_provider.py. Les 6 placeholders `votre-cle-api-*-par-defaut`(une constante`DEFAULT\*\*\_API_KEY`par provider à clé) ne sont plus dans la baseline : ils portent`# pragma: allowlist secret`sur leur ligne, parce que la baseline est indexée par FICHIER et qu'un placeholder déplacé dans un autre module y redevenait un « nouveau secret ». Le marqueur voyage avec la ligne. À auditer ponctuellement pour passer`is_secret: false`.
 
 ### Pré-requis lors du clone sur une autre machine
 

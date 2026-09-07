@@ -349,10 +349,12 @@ fi
 
 # Add ciblé (jamais -A) : fichier par fichier, pas de répertoire (évite __pycache__/, .pyc, etc.)
 run git add CHANGELOG.md CLAUDE.md README.md requirements.txt .gitignore
-# Le paquet, fichier par fichier : __init__.py et __main__.py sont neufs et
-# ne sont couverts par aucune autre règle. Omis, ils seraient absents du
-# commit de release ET invisibles aux hooks, qui ne scannent que l'index.
-run git add src/aipmt/__init__.py src/aipmt/__main__.py src/aipmt/translate.py
+# Le paquet : tous ses modules SUIVIS, énumérés par git — jamais le
+# répertoire, qui ramasserait __pycache__/. Une liste nominative de trois
+# fichiers ne connaissait que le module unique : chaque module né du découpage
+# aurait été absent du commit de release, sans un mot.
+mapfile -t PACKAGE_FILES < <(git ls-files 'src/aipmt/*.py')
+run git add "${PACKAGE_FILES[@]}"
 run git add tests/test_silent_failure.py tests/fixtures/long_fr_excerpt.txt
 run git add regen_translations.sh release.sh
 
@@ -386,6 +388,16 @@ LEFT_OUT=$(git diff --name-only 2>/dev/null | tr '\n' ' ')
 if [[ -n "${LEFT_OUT// /}" ]]; then
   warn "Modifiés mais NON stagés (hors de la liste nominative) : $LEFT_OUT"
   warn "Les ajouter à la main s'ils font partie de la release, ou compléter cette liste."
+fi
+# Sous src/, le silence n'est plus toléré : un module modifié mais non stagé,
+# ou créé mais jamais `git add`, sortirait de la release un paquet qui ne
+# s'importe pas. `git diff` ne voit jamais un fichier non suivi ; d'où la
+# seconde commande.
+SRC_LEFT_OUT=$( (git diff --name-only -- src; git ls-files --others --exclude-standard -- src) 2>/dev/null | tr '\n' ' ')
+if [[ -n "${SRC_LEFT_OUT// /}" ]]; then
+  err "Sous src/, modifié ou non suivi et absent de l'index : $SRC_LEFT_OUT"
+  err "Le paquet publié ne correspondrait pas à l'arbre de travail. git add, puis relancer."
+  exit 1
 fi
 
 RELEASE_NOTES=$(extract_release_notes "$VERSION")

@@ -105,18 +105,20 @@ else
 fi
 
 section "3. Documentation synchronisée avec le code"
-# `\.add_argument\(` et non `parser\.add_argument\(` : les flags provider
-# passent par un add_mutually_exclusive_group, donc par un objet `*_group`.
-# Avec l'ancien ancrage, six flags — dont --use_codex et --use_grok_cli —
-# sortaient du périmètre en silence et la vérification restait verte.
-# EXPECTED_FLAGS interdit qu'un refactor d'argparse vide l'ensemble sans que
-# personne ne le voie : une assertion sur ensemble vide est toujours vraie.
+# Les flags sont lus sur le PARSER CONSTRUIT (scripts/cli_flags.py), et non
+# par regex sur un fichier nommé. Historique des deux angles morts de la regex :
+# ancrée sur `parser.add_argument(`, elle manquait les six flags provider
+# déclarés sur un groupe exclusif et restait verte ; ancrée sur
+# `src/aipmt/translate.py`, elle aurait cessé de voir tout flag dès qu'argparse
+# quittait ce fichier. EXPECTED_FLAGS interdit qu'un refactor vide l'ensemble
+# sans que personne ne le voie : une assertion sur ensemble vide est toujours
+# vraie.
 if probe "flags documentés" <<'PYEOF'
-import re, sys
+import sys
+from scripts.cli_flags import cli_flags
 EXPECTED_FLAGS = 22
-code = open("src/aipmt/translate.py", encoding="utf-8").read()
 readme = open("README.md", encoding="utf-8").read()
-flags = set(re.findall(r'\.add_argument\(\s*"(--[a-z_]+)"', code))
+flags = cli_flags()
 if len(flags) < EXPECTED_FLAGS:
     sys.exit(f"{len(flags)} flags détectés, {EXPECTED_FLAGS} attendus — la regex "
              "de détection ne suit plus argparse, la vérification serait vide")
@@ -135,17 +137,21 @@ fi
 # lisait que les littéraux, donc GROK_TRANSLATE_SANDBOX — passé via la
 # constante GROK_SANDBOX_ENV_VAR — échappait au filet alors que CLAUDE.md
 # annonce « chaque os.getenv documenté ».
+# Le code est lu sur TOUT le paquet, avec un plancher chiffré : pointer la
+# sonde sur un seul module après un découpage la laisserait verte avec deux
+# variables au lieu de vingt-deux — un garde anti-vide ne suffit pas.
 if probe "variables d'environnement" <<'PYEOF'
-import re, sys
-code = open("src/aipmt/translate.py", encoding="utf-8").read()
+import pathlib, re, sys
+EXPECTED_ENV = 22
+code = "".join(p.read_text(encoding="utf-8") for p in sorted(pathlib.Path("src/aipmt").rglob("*.py")))
 docs = open("README.md", encoding="utf-8").read() + open("CLAUDE.md", encoding="utf-8").read()
 env = set(re.findall(r'os\.getenv\(\s*"([A-Z_]+)"', code))
 for const in re.findall(r'os\.getenv\(\s*([A-Z_]+)\s*[,)]', code):
     m = re.search(rf'^{const}\s*=\s*"([A-Z_]+)"', code, re.M)
     if m:
         env.add(m.group(1))
-if not env:
-    sys.exit("aucune variable détectée — la regex ne suit plus le code")
+if len(env) < EXPECTED_ENV:
+    sys.exit(f"{len(env)} variables détectées, {EXPECTED_ENV} attendues — la sonde ne lit plus tout le paquet")
 print(" ".join(sorted(v for v in env if v not in docs)))
 print("PROBE_OK")
 PYEOF
@@ -206,10 +212,11 @@ fi
 # Fraîcheur par CONTENU et non par date : prettier réécrit la source sans en
 # changer le sens, ce qui rendrait toute comparaison de timestamps trompeuse.
 if probe "fraîcheur des traductions" <<'PYEOF'
-import re, sys
+import sys
+from scripts.cli_flags import cli_flags
 readme = open("README.md", encoding="utf-8").read()
 # Repères : chaque flag documenté doit se retrouver dans les traductions.
-keys = [f"`{f}`" for f in re.findall(r'\.add_argument\(\s*"(--[a-z_]+)"', open("src/aipmt/translate.py", encoding="utf-8").read())]
+keys = [f"`{f}`" for f in sorted(cli_flags())]
 keys = [k for k in keys if k in readme]
 # Sans ce garde-fou, une regex qui cesse de matcher vide `keys` et rend
 # l'assertion « aucun repère absent » vraie pour les 14 langues — vert en
@@ -370,10 +377,24 @@ scope = re.search(
 )
 if not scope:
     sys.exit("SCOPE introuvable dans scripts/check-complexity.sh")
-modules = [p for p in scope.group(1).split() if p.endswith(".py")]
-if not modules:
-    sys.exit("SCOPE ne nomme aucun module Python — la comparaison serait vide")
-for module in modules:
+# Chaque entrée de SCOPE est développée en fichiers (un répertoire vaut tous
+# ses .py), puis on exige que CHAQUE module du paquet soit couvert par SCOPE et
+# déclenche le hook. Le contrôle porte sur le paquet, pas sur un nom de
+# fichier : un module ajouté hors périmètre ou une regex qui ne matche plus
+# sont tous deux rouges, et un ensemble vide est refusé.
+covered = set()
+for entry in scope.group(1).split():
+    entry_path = pathlib.Path(entry)
+    if entry_path.is_dir():
+        covered.update(p.as_posix() for p in entry_path.rglob("*.py"))
+    elif entry_path.suffix == ".py":
+        covered.add(entry_path.as_posix())
+package = sorted(p.as_posix() for p in pathlib.Path("src/aipmt").rglob("*.py"))
+if len(package) < 3:
+    sys.exit(f"{len(package)} module(s) sous src/aipmt — la comparaison serait vide")
+for module in package:
+    if module not in covered:
+        problems.append(f"{module} est hors du SCOPE Lizard")
     if not trigger.search(module):
         problems.append(f"le hook check-complexity ne se déclenche plus sur {module}")
 

@@ -1,0 +1,1852 @@
+{
+  "reference": "6ae1505",
+  "package": "src/aipmt",
+  "nodes": [
+    {
+      "hash": "07f233eae769add5273a49c58c593c01b231349a765eb6b79afa78f52cd66f2c",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/__init__.py"
+    },
+    {
+      "hash": "ef4f118a58fb741cc76e4e9f3508a73b86e631c7cfb2007ed3b5a9cdb1703877",
+      "name": "__all__",
+      "kind": "Assign",
+      "file": "src/aipmt/__init__.py"
+    },
+    {
+      "hash": "a1ff367f3882d13b032cd016dc2dbca3ce3f05fc326f290e09bc1fd44717889a",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/__main__.py"
+    },
+    {
+      "hash": "d6e16414770715342d19e09e89256cb8541b8faaf306ff7bfe5e36b4e7f61d27",
+      "name": "DetectorFactory.seed",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "d6eb8f9c6bff1cf32e97f54f655fcada4ea31e9a4d2a2fbe804e8a48975724da",
+      "name": "_user_config_path",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "fd74497ee31e16f21344a2db3de8a912e1e130002f2df2824350e1884ba07a50",
+      "name": "_load_configuration",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0083834b28b2f2f0863b3e229a3380d1eca5dc61dd9dd234af007e7b3b207459",
+      "name": "<_load_configuration()>",
+      "kind": "Expr",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c2fb12d87c4a75ed66d7774a796afc07b1de1900df8e638dd9e9b18445a4558e",
+      "name": "EXCLUDE_PATTERNS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e55baf46c68f021c603f53ef5d651ea679b7ff8828ed891fe5a7f2d8f4550242",
+      "name": "LANG_FLAGS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ce6e2f348bcbbdc72c978da2e67df06fd2e79ec85e996fbda32d51bc030240d8",
+      "name": "DEFAULT_OPENAI_API_KEY",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "166aa8d03bbf0ffa1bc71236e8d2b586861c76e4275b928d3964df3a06e2852e",
+      "name": "DEFAULT_MISTRAL_API_KEY",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "74f9543a6721b488007ef6767793270c82f31caae28e17ceff193381fbe0a676",
+      "name": "DEFAULT_ANTHROPIC_API_KEY",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0c28e404baa33d06b3be4af6f414cd7e7555b961a2cf398f583811fda6b6d2f7",
+      "name": "DEFAULT_GEMINI_API_KEY",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b1b03f2bc5a901e672644f51ccefb15c2e4cc0b8936fea2fe5693d9caeb9e039",
+      "name": "DEFAULT_XAI_API_KEY",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "8a563399f7a8da28af053d06f4bc17498fc4b882b333d5a1e20ff0a034a6a963",
+      "name": "DEFAULT_OPENROUTER_API_KEY",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "cb5594dc7cf2f0b21153801857bce63944f2b9a167bd6bc3265f91cad8c211af",
+      "name": "DEFAULT_MODEL_OPENAI",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "811f67731386ca911fd25eb909a8a942ac025c1ccf7dadb50ec8dfa50f8156e2",
+      "name": "DEFAULT_MODEL_MISTRAL",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "6ddcf68a3d63c8edc0279315514a85c9ac45de8186e467e3fa761a4748ae4f60",
+      "name": "DEFAULT_MODEL_CLAUDE",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "791f195d8e8f28565dbfa951301625d237208c5c2f2b2a4ab964d0167e1544d9",
+      "name": "DEFAULT_MODEL_GEMINI",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "3ec4e84f578ea8226460bd630418baa9473fb8139d6b40fbc3da29c933ae5912",
+      "name": "DEFAULT_MODEL_GROK",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c2c4a60c9e52b23a119c3001e3e3197251d3cda30bffc4d51bafa2b04cdff8e1",
+      "name": "DEFAULT_MODEL_CODEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "75f97fa6d802bba3c8717232c94d40cfc4994a4abf8db589539d15940ae7a25d",
+      "name": "ECO_MODEL_OPENAI",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "261ad4cf09f3b6de3b8fa4e7d011e6bd785a6c31622a82f06900a23f97e90cdc",
+      "name": "ECO_MODEL_MISTRAL",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "f120beda36a72e80f56c7acd6f51d2e6b7a9b56154b8b17fa1f3fa8dccef099d",
+      "name": "ECO_MODEL_CLAUDE",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "dfb70874bf0ac98e3dce43155918f6544563fe0565c4e5fb00c5b4e311b7a5cc",
+      "name": "ECO_MODEL_GEMINI",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "75d9d1e8713ce812ba073e113c47ffb0e7fb36ebbd1ce59755f98a2cb9f42ad7",
+      "name": "ECO_MODEL_GROK",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e9b1f434b61864abf1d5f258cdeeb6e72c0e119414578aa86d701143df179b21",
+      "name": "DEFAULT_MODEL_GROK_CLI",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9f17642eb765a341ee23ab5f9fde49cd5832430d5bc5b24e293a04d495b711c3",
+      "name": "ECO_MODEL_GROK_CLI",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "5385b326338b26acd075567d18d4013ffb912865c2805e6f8822e4842af33104",
+      "name": "ECO_MODEL_CODEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "5c265a2da01141929b3daa84aa618aec3cc9e4e8e45f7a5e5d084703e21e2fff",
+      "name": "XAI_BASE_URL",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2fdd4dafc989795a0ad5aaab26649a84f9eed5e8b9073942350be4ce7060aeaf",
+      "name": "OPENROUTER_BASE_URL",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "62886440b9b5f45d54dfb21f4c48234baa67b1d0d905aff027928911038876cd",
+      "name": "OPENROUTER_TIMEOUT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4d8b25cfa97edc594a8b293f9c47f52a28901aa18aef214a39af5cf1d1564598",
+      "name": "OPENROUTER_PREFLIGHT_TIMEOUT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "77d0d09214217441d459545b712ec264a9273d490b3e8f6ddbe03c6ae258c46e",
+      "name": "OPENROUTER_MIN_COMPLETION_TOKENS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c74c06e57f87eb14a7d0bb3d09dd63b42a777be73cb3c5bb85a85d66c2530e8d",
+      "name": "OPENROUTER_MAX_TOKENS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e41bf986a940d483e324ad97169463d8a00078c2987c62cbdd040be9303afcbf",
+      "name": "OPENROUTER_EFFORTS_CROISSANTS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "994474e493e96310b60d66b02f73486154a90f12946d13bf17ca2fdbf3d3f1b6",
+      "name": "GROK_TIMEOUT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e48794a402968c4155a5169d4d25768b87866e8c522244c37108a09812e8cdfb",
+      "name": "GROK_PROMPT_FILENAME",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "132253b0d783128db60351c740a9d5b0e978be7263b5bd10661edee5001bc0eb",
+      "name": "GROK_DENY_RULES",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "25c85bd0c03e0503217d124379b0a9288618f62b3352c95266100499474e1b18",
+      "name": "GROK_MAX_TURNS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9c8c825d1fa7d4a2e869f46661bf24ba76f5454288d5f887f60af1b69ec494f1",
+      "name": "GROK_STRIPPED_ENV_VARS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "bea3fe519791c036e55a8d31dee119af89b1d388833b812cf3a9a5dbc80c62ab",
+      "name": "GROK_ENV_KILL_SWITCHES",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "efd4a57ed96464e2dad1d5eef9edb4aa7d7ebe348151e0a9622a71378d91b5bf",
+      "name": "GROK_SANDBOX_ENV_VAR",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0ac70f2619f3301faa4a3fbcc24783fd5a4d44c021c18c3fcc6b394e6d66c6ef",
+      "name": "GROK_AGENT_CONTRACT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "069d56a09ebaf7ecab9ab312ec21347047f8149f9e9a313d022e5e779175028a",
+      "name": "CODEX_TIMEOUT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "3bb4ab6e3f02a84de1315765cb53f723efd45dd84fe03f15b1b90bdfd322f259",
+      "name": "CODEX_TERM_GRACE",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "d4a840866f878048b7ed3b4138c6bd7aba0675b4c3e70a79c543df9605701e5b",
+      "name": "CODEX_MODEL_PREFIXES",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "542917763269ed3a2d39b8af16991edb6f19ac2b63b541692759d59c7c1363cd",
+      "name": "CODEX_STRIPPED_ENV_VARS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "d3ad27091cfd71a74b084e56642b2bfe7d2ddebcb3d435373c951c9b4a595712",
+      "name": "CODEX_AGENT_CONTRACT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "06c06ec87ca9d94e195913e04176a765024e7ff5f463141f5e466cb84efcf562",
+      "name": "OPENCODE_TIMEOUT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c91a5241a0c18ad72b28e08ac93065c32f77558a5abbe60ef9dd3062f59848c7",
+      "name": "OPENCODE_AGENT_NAME",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "1ade5f5b2371d662aeb7e202bfb5d29513d5e499d048e498585790fb0271e820",
+      "name": "OPENCODE_SESSION_TITLE",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0f6577e7eeb78e4e74ba5bd5232620da8cf9a58d44e1d04c868fe05421d54fb6",
+      "name": "OPENCODE_ENV_KILL_SWITCHES",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "f06ec3595908d7ebe17832fb66d36dfed099b8a5a60b603919c35f554846416c",
+      "name": "OPENCODE_KEPT_ENV_VARS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "8fdffc1414877e35bab6115b207c9d79ed02e177d753a5249a18ad050c978305",
+      "name": "_NAMESPACED_MODEL_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "871d3c1f45cab308f789e99aff7dcc61ec53e6a7a08f422ec1e7b5da24cf7550",
+      "name": "_OPENCODE_RATE_LIMIT_MARKERS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "f4843861d247622cc4a95bc9af6aef65df946d823119ad5503f5eecc4dd7a028",
+      "name": "_OPENCODE_LOG_ERROR_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b1b6d9ae48dffc8e292fd688c260f37e67abdc49f0c5dad72579bf0760cd7df0",
+      "name": "_OPENCODE_AGENT_FALLBACK_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a8521ad10131884426448fc34ef9cd521efb60489b3f4d916c06a0d7e250111f",
+      "name": "OPENCODE_AGENT_CONTRACT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "49ef41dd6eb5ac00c60ea9f75549689369ff3cd0d682420ef135564baf8075cd",
+      "name": "DEFAULT_TOKEN_LIMIT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "5a2c78a672bb53506f3bd7c09496e2ee3250bd7928ecf47e246ec8ed2516c496",
+      "name": "DEFAULT_SOURCE_LANG",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "017eb915a71edbe7e02b5c8a52e2b8dfe2c9674239490742ddb68f608a4124f2",
+      "name": "DEFAULT_TARGET_LANG",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "1a588a7c665f78a25241b856c54094440bff980494382c7dadb818390b5f77d0",
+      "name": "DEFAULT_SOURCE_DIR",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "fa3845a1e29d3945ef0f4614855ddec2bb55853b1c2ddc5e8c60671f871b2494",
+      "name": "DEFAULT_TARGET_DIR",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0a68354910cfaaa156426bbf4acf7f497840cdd96637ebb26d0ab234e9a6a176",
+      "name": "MODEL_TOKEN_LIMITS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e00ccb6f09e8d2530429008ac0dc7be270c0f998efe9f7e49bd02c269f6b4d88",
+      "name": "news_quote_placeholder",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "206d030132842e0af4e3003ada822ba1725171d42c7958c35c2188e0120f97c1",
+      "name": "news_quote_placeholder_regex",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2ef4300437f74a770db5fa939303097471374a0f7c3347217eb89162cef95a8b",
+      "name": "_STRUCTURAL_LINE",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a4702c8ebb9ee5168eb04997c2b5ceeadf5f52f89825d1654610296d22481028",
+      "name": "_INLINE_MD_PREFIX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "f4d359d90133fc8119bd6efed50e918489b9965323d307151b634af46430fa48",
+      "name": "_EMPTY_BLOCKQUOTE_LINE",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "cfa7bd390f4fb45bd59b717f0e59278062b5db976838b5680708195494448fe6",
+      "name": "_BLOCKQUOTE_PREFIX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "45aa9a2d3f6bb56e0fe73e9801bd3487c50fd016582124d8be83cdb87e15a583",
+      "name": "_URL_OR_PLACEHOLDER",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a6490b511d255e9d4a5cdbf39a6ab85d2f8ca263b98abd8f8b097ba41c9c33fe",
+      "name": "_NEWSQUOTE_PLACEHOLDER_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "baadba33205a4b06362d04a0280e33f9c263e75f0ca7d742472bc4ace30e24af",
+      "name": "_MARKDOWN_LINK",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "157d1864ced256859b156c7270076d9a6d2c0fe2202374f311f7b3c31a0696c4",
+      "name": "_HTML_TAG_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "fa2ff2000d77d317a17be8128a6fc49de33d61e88c2a692fbdfe4694bcd8e961",
+      "name": "_LANG_SCRIPT_RANGES",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "20ddddcfa3366a852ae41e374ad70c275b1571b3ce64dbd4d2cb604cd7a51758",
+      "name": "_LANG_SCRIPT_NAMES",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ef3500c762b5241d1ac4b44685110acf72dfd6ecffafc66870702f5b49d267aa",
+      "name": "_find_last_h2_h3_match",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "252b79b73263673f3d83b1369772ab75bb06609a9d3fbe0500a8651f267ccdd8",
+      "name": "_find_segment_breakpoint",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "49f041775a46aa7824ae09bda9b58851a5a4e11e0ebb9d8608bd45cd3cece85c",
+      "name": "segment_text",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "6b813f27b19914f0b97bbc177615bb3c9ed1ef102fa709cb25af89589168144f",
+      "name": "_reason_name",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "5b6015d0621c2cbfb86e95456ab8646ca51d73082c4ba0efa58c235e8ae3995c",
+      "name": "_looks_like_proper_noun_list",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "7ba06d84f71ed35cf10105735552010bdbdcbfea1a964f13074bc7fb71161e44",
+      "name": "_clean_for_language_detection",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "103d051522bad5b5a5158c0ca3375dddb2e2e1d9af54c6eb3b9ef72b913a1ff0",
+      "name": "_count_chars_in_ranges",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "eeb39ec3996083d29d6971b83647fa5aced8c10d0986e8fa6d25633a46e1633e",
+      "name": "_has_target_script_signal",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "32d563ff59f820521233c64906fec1516af68404072d719245ba56f92fbe3876",
+      "name": "_line_is_droppable",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "11ce0ccc1a5ff69ae22ec9b95dc73a62afb4ed847c911f732f03b46db43d0693",
+      "name": "_clean_paragraph_for_window",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4b2eec2bca47d5b02dc8fca841221dd330dadb567cfaf095bd0dca16efbc2ff5",
+      "name": "_windows_from_clean_text",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2f0b4aeff8883fc8f766e6755557b310048d163bf354558e6ce1e402068901f3",
+      "name": "_extract_source_windows",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "7a191e1b725f8d5f7835981a1fa5e888e67302e5800767cee4c3490e2ce1b2d1",
+      "name": "_check_output_short_ratio",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4bfed4c1191cc0b6aaab9f914f82f28c5817319d2be35d3694a01e9213eff22c",
+      "name": "_check_passthrough_excerpt",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4462403b321f5017c2e2025b278b158e30ff9aade56bf800adf285c11fb91e1a",
+      "name": "_check_output_language",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "adc10146a978420a2545794e35d45920f7b99ecad3369b506a4ea2299e85b993",
+      "name": "_validate_translation_output",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4f4f7e97d050ec7815bd7fda49207621f68d7b44810899c013e517b022ddbb3a",
+      "name": "_O1_SERIES",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4850f0e7f27ca261a127b81d6fce0e87e4e09abecfa3e58cf773cdb57fd14fbb",
+      "name": "_build_translation_note_prompt",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "427a44e58edfe60d78d703fdecc88d3a50eae8795808630424f17b6630d3164e",
+      "name": "_build_base_markdown_prompt",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c78912436eda7d8d8de7bee571d9b75c059f1f78e9474679485dcd26c0ed8a6f",
+      "name": "_build_news_rules_en",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9fb2bf65c734a87585503bc34cd0b38509dc0de3f1a42275f9249580e801b206",
+      "name": "_build_news_placeholder_rule",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "8e0f4d0e7a045b9047a872acb247a4a6a0e1e081714d320db22dd6815cb557f4",
+      "name": "_build_news_flag_rule",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "29ea8393caffe9bb520c695e89e2cadb4967c6810e5c939ba90349dc0f673b07",
+      "name": "_NEWS_RULES_EXAMPLES",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "1c4d58e45102b76d17061005d905e8fc291def38e833c56117439c4546c80ab9",
+      "name": "_build_news_result_format",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "1091a94ce4385db74c57eb495667da651ffcc1727b71cf74e59b6fc6c37ea3c9",
+      "name": "_build_news_rules_other",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "1bf5a49996c473fd98ef73ce8c97ce618d3355db33f70172b4d5f9e30e0b3138",
+      "name": "_MARKDOWN_TRANSLATION_CONTRACT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b0111080b2afa83c93eebeda3eff5c852ebfd026aa88d0a8e757ae399908bb65",
+      "name": "_NEWS_FINAL_CHECKS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a55ef105104e231521258251bd0071d1bef941874dde6e38a3c3dcfe3f7cec14",
+      "name": "_PLACEHOLDER_PRESERVATION_CONTRACT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "df4d4dfb907aa722c2e5048dfef0dcc0f931f1dbdc2bda51e4584db30154dbaa",
+      "name": "_HEADING_ANCHOR_CONSISTENCY_CONTRACT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "89e235801fb0649dfc86820b2ddabe76d72495f7c497def1d4979de056cc2cfc",
+      "name": "_build_news_addendum",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "72338ba53a3805317df296d4c3f6dc44b0133c9303eb5a04dcc189be9dc99336",
+      "name": "_build_non_latin_script_addendum",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "22e8852522a541ad688fa5143c38db8d27a4f7fc693d65174c4d36105dd6bbb5",
+      "name": "_build_system_instructions",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0f13241a4abf80a3690f31a6e025342527a69fcf383b597095616232b170f5a3",
+      "name": "_call_mistral",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "29ac7155b473399e4ac460987cebd87eb262cbc21077895ec380fa8ef3cd87fb",
+      "name": "CLAUDE_MAX_TOKENS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ae92c0609f80f72923af59836cafa04538ba79a349094e26f5c4fa5bbe6e3106",
+      "name": "CLAUDE_TIMEOUT",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "31e1364657ddcce393e4f23baead9bf4d8cd5b3170746f3cbf2cf8f9c4280b1a",
+      "name": "_CLAUDE_NON_TEXT_BLOCK_TYPES",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2826122d8e95f68baa5256c53697b1eaf26514a7332bd2e9e479ef455e0e1cb5",
+      "name": "_call_claude",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "d6354cdbd94f7adddc4696be8ac260fe9b3b82c589bb6a845b375f03fc57cf15",
+      "name": "_gemini_config",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2a0754e8c4cb48327995f584de7cb56073d69fff8ec050b4dcd378915a15f73b",
+      "name": "_GEMINI_THINKING_LEVELS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b262a3a0d5f1ce68f76148563ecc1f9db19c251bdc511e04d4ad873f003e5d1f",
+      "name": "_GEMINI_ACCEPTED_THINKING_LEVEL",
+      "kind": "AnnAssign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "6fdc4019e94fb24f3bda26c3a8ea499814485f562a41ed99d4f0d8442afbf3ba",
+      "name": "_gemini_generate_with_fallback",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9977d890f6eed3e66cb9584ccdff6e63d279140fff4c35143abd4236265d3601",
+      "name": "_call_gemini",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "eef0330f59c76fe3f1f14a9accf0f5bb371969dbb4357fd57f010a7b893d919e",
+      "name": "_resolve_reasoning_effort",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b9891850349cc0e6b22e9cac782057e19d3b22ff6c9f40dd3f42719c3e84e676",
+      "name": "_build_openai_messages",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "7a2d65339b81cf48df7c624e5b45c14b34fc5ce7bb392942495ecd775b1ab257",
+      "name": "_openai_extra_kwargs",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "1c079e70d750dc3afb7c815db08798c5ad9dac31a9fd6e2d5ecca7dd3de7a635",
+      "name": "_openai_create_with_fallback",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "baf18ab7725bed5bc58dc81650e2342997abd2252995a30c800028f83d9760fe",
+      "name": "_call_openai",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "1485f8221545a2642aab78c6982264afbd5f7e375383bcb6430eedeb5f19af3f",
+      "name": "_openrouter_http_get",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "f129e250d6914e713b2e4186cab39ae33f424041c0618f3149cb54d4996df27d",
+      "name": "_openrouter_catalog_entry",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4ad3850cdb9191fd9eacbb46f0b74f0eafcb01f2470562bdb05bb2406418c8d1",
+      "name": "_openrouter_endpoints",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "f4eecc4b0b125ab2e7631ef5df2bdbe2b0e63561d5fbc0a84205ee751e9d75c4",
+      "name": "_openrouter_pin",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "cd634fb34d69e3cb1ff0df5c28a50eeb8eef1822caff31b4b39bfd528cf48de5",
+      "name": "_OpenRouterClient",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "925ec68abc988184f6916c357beecc73e9ffcf023817f93a674cf922b2d628fa",
+      "name": "_openrouter_reasoning",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "8d4b9761606ae5e876113c11c07e9ef2f830bb65eca15d80900c32daae8af88d",
+      "name": "_openrouter_lowest_effort",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "32bc392a31035dfd55fb5538b3ec034270692010404b924bdcd4bfa33bc56bdd",
+      "name": "_openrouter_reasoning_label",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c8c1d7626199c6c2270d3d551dd9e45c7af9f14a901cc6a23ad52a205cad16e0",
+      "name": "_openrouter_extra_body",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "01303401b293ab294c2c09779c4ba99ee22745af1413c5fdfea80e32e043c92c",
+      "name": "_openrouter_first_choice",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9891d7fb0d5ce5dc4eba9021eb9e4a3c3a3fc95c902bb5168bca5be639b453b5",
+      "name": "_openrouter_check_finish",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "6892ae496367b333999ed3f98c50ea52d8aadc7a740da607f2a38a3a1f594d84",
+      "name": "_call_openrouter",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "39f0ed7a34bb950c31faee7e07a7065114ccbefcdd52edd7354b3fca968d9b56",
+      "name": "_CodexClient",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2595ea81b38e821184d67795ddbd6b2ac4efa4fd4033b9f6b3ff4f30a6cb3f28",
+      "name": "_SECRET_ENV_NAME_PATTERNS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "bdd5fd4e266d023ca42199e7333252c79caed7be0d2b3058f4affa083255aae9",
+      "name": "_strip_secret_env",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "3f82b1df80dcf85c461707c94c3718126f18231c16f302ffa03d0a3179cc18de",
+      "name": "_codex_env_base",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0252338e4bc35b407df75099e8f8d1e5e9ea5175efb42bbd4115004f3b1c838c",
+      "name": "_codex_env",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e85be0639910e8974ecd54a3b470835bb9111b9aa388693685a09ed376229371",
+      "name": "_codex_argv",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "3abd1edfd808cef49d8587cb8eb9806cde77588a763849019ba898c769591d6b",
+      "name": "_codex_kill_group",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0ee1b6359a42a5bde46c26384d9a472ba8edf2a5509cb13dcc36b50e0ae4757d",
+      "name": "_CLI_TIMEOUT_ENV_VARS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "10be5bb5c8e50fbf2a791a17c55ff9fd1e313228e91828a9a108ecb59deda28f",
+      "name": "_codex_run_process",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "70c01571640cbf185c663657b8463817e45aa1f187d8772b11a2c7796822ff7a",
+      "name": "_codex_run",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2fa1a83db4ba3d907eacc58994944d0f518623640d6126fc86e4c959928c454a",
+      "name": "_codex_unwrap_error",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "83451b9eb4326cefc6a915477e0ad1760d27d3e9d096f379164d8d34fac621a0",
+      "name": "_codex_error_from_events",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e7808eed5571e209b8b52a54f785a9e2641a889d81b7a208baaf90c698630cdd",
+      "name": "_codex_is_rate_limited",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a63e2bbfd7651f7f245210235acc9f0ea35925c1b3f0d16cd07fb65a868e552d",
+      "name": "_stderr_tail",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4ba426089f92660c3bd4a3d87b5d86b0ac35576afe6ece171afdf3c2479a86c6",
+      "name": "_codex_describe_error",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "fbb551ba5260a043018cb6022e877baba9cb3b848c101f41db2b7c68fff55b1e",
+      "name": "_codex_read_output",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b600947e9ef207fb26d90b986df8e1f59b35c1c936db3cf662e4925ee85229f4",
+      "name": "_codex_attempt",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "fd0742d82e6ed8941c70c75dd81bf012a08de0c013adba883367aebd0ff88630",
+      "name": "_CliCallError",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "94a192eff8bcb6eb0107b621b02b1e430169e2243101494d234c502dff178ca2",
+      "name": "_CodexCallError",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "7add71574f73f199795ef0c6bac0b0fb55aacd039e3475d7f6451d42e0b6f05a",
+      "name": "_retry_on_rate_limit",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ebce5b869ce8620eb2f0ff6dbff92e3bfb47f9b48ac4effc58abe25186b95ef8",
+      "name": "_call_codex",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0b6507b279f2005ffe0514d438e230dc7568ad395facfcf679992974974c6bf1",
+      "name": "_GrokCliClient",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "6d84679a290be25dd8758ea5acd71cdc96a6495d4fd326a899d43139d288a335",
+      "name": "_grok_env",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a65053e5d6883ad5bdd73c651976f93cf61cf3e2e34adc7e60d9c7475c21e3dc",
+      "name": "_grok_write_prompt",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4574ebe6e203604583ce68074e340b57d1240828d6a0d00a2cba0dc48ea11e76",
+      "name": "_grok_argv",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "fded117fbc725f2255360025dbef7d00c5ab439326e282e3b82dcb186b965882",
+      "name": "_grok_parse_payload",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ade2254ef4b8cd8cdb64f82b266744cb73a2ce13117e22978575dd1bc5fe9d25",
+      "name": "_GROK_RATE_LIMIT_MARKERS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "5568f9def6d6994dfbaa5b71549da37026d46e4e25130b013ff430a77f2c45e9",
+      "name": "_grok_check_payload",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "3b52a25e601ebf56a57a3800beb8f9b189495d63c8f3788f689061059c30e23b",
+      "name": "_grok_extract_text",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "d0e58630f99238ffc4a407a3d3c5c67163a35bfb61c71b4791390b5ca5f9c579",
+      "name": "_GrokCallError",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2f9db1cf5bd80b076aba990c9a1fe23240ab20d14c033dac94ef20a06e94f582",
+      "name": "_grok_attempt",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "d0750af50367fa15a8bb63d8dcb5d12c1b105224b161c3c92b962d508d933edb",
+      "name": "_call_grok_cli",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c5a8e674cb1b8157e2fe4174dca774d04220e2372311c63420d14d522fbd08b9",
+      "name": "_OpencodeClient",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "f07b80569171d00e7a8c140377eb04656398fd4270a4dde9e1125484fbc3bfdd",
+      "name": "_OpencodeCallError",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a12ca686eb40445d3b4b6b93096fb4baf8a49fb6ecb5b1df4b612d59b6226dba",
+      "name": "_opencode_env_base",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a0c890da4b59765fa62f9f3e7090ab38bc57d9c03b5ba53d185ddbd6887ce460",
+      "name": "_opencode_config_content",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "333a69df857093892e235a2c64680f435f25fa6bb757323846791147d210656f",
+      "name": "_opencode_env",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "218dbba968a43c7a737e7a31a609a33d9ff560f08ba38dee8a3773eee95fbcdc",
+      "name": "_opencode_argv",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e5312b60b899520156f8ae0395adcd79d161a1d045f324af6195b488c07f3511",
+      "name": "_opencode_events",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "33ae75a917394e09e757c15513a3f85996a932ab15854faae2b3525b5c6c2dbf",
+      "name": "_opencode_stderr_cause",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "679d53d2d8a3801be63310428148c54499e148b4cccaba9e59c0bcce4f347186",
+      "name": "_opencode_error_data",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "99cd6d4ecda5e79d61435b1c6479cd2c9a9da769496c52318583373efe4c505c",
+      "name": "_opencode_is_rate_limited",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "bc1545d950f764195ba6812c530c0217984a9ddaaa565078fa83085117cfa049",
+      "name": "_opencode_raise_reported_error",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "758d19d9dfcac9988524bc91ded4c5a64ad6f18626b8757dfcf57dc9c0576617",
+      "name": "_opencode_raise_exit_code",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ef0c72a7641de43d6be941615e6bf4e92f616986a2106f1d2050b9801d8d89d2",
+      "name": "_opencode_check_completion",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "3ee40225ecf1a8924751f266fc7b5dceb33cd56db662e946540e58275f048bf7",
+      "name": "_opencode_raise_on_failure",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2dc0656ff8a167204db3af1d6b8a02dd2b7e4345a97cf118003774f7a2cea4db",
+      "name": "_opencode_text_parts",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "1a286d07656df4f27835e2708b34a089a4df2503d4b6654d8909ef22caae2ad7",
+      "name": "_opencode_extract_text",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "437723f96183c9c61cb9b7312a40e184b408fedf5a38bcab43d71a1a7110300f",
+      "name": "_opencode_attempt",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a8face70851e70cbea41cff379e1b9e9ef1dd966049e645e861dc76187d93716",
+      "name": "_call_opencode",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "6e8f5893055abbaffa66e0bf4bc6e05ec9c016108377da5a7b8d8365514ceda6",
+      "name": "_resolve_provider",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "3100292852ba9b21e755c3ac11f5124f53abb13f487d6f284fc2f2dbbec8d89f",
+      "name": "_PROVIDER_LABELS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "8181743e746755b0500bc895f4d82b6b8e5319e0cb0c9caeac9120e9a9ea2ed8",
+      "name": "_dispatch_provider_call",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "93b077064221a85f25e16eecf7ed9264f581b2330ebb797d4caf5cbb665f3186",
+      "name": "_SEGMENT_PLACEHOLDER_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9e83c6a7d183bc189efac27ad9b446b9fe5b0dd87e3862a4f4e38ee1bf466f0c",
+      "name": "_validate_segment_placeholders",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0b62ed9cb14a4ded8f20638540d44f40a498975dfe7d2523fb32ccc2a653be4c",
+      "name": "_LLMCallSpec",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9e95280e936f3ef893cafe222491fc7e18810981f9e1cc677f1658d1a742a4eb",
+      "name": "_translate_segment_with_retry",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "325f1e7d533b0b24160c8eea82960644b8be138d146494f3d81dd28a2b10b8ff",
+      "name": "translate",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0887fd89ae5731fe0509042aa01fd4ffd0ce792f0c83d5a455f74597f50817c3",
+      "name": "_FENCED_CODE_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "42a8afc528534254f9570120df5d757a16ca0761b0c87db40ea9214b9da9c433",
+      "name": "_INLINE_CODE_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4d3cd88503ed572f3249281603d290719e186891e2e4017175b5626bada8be0c",
+      "name": "_NEWS_CITATION_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "dc62ac269af4b15ba7ab45fa4a497a305d8a38634134e38c75cf187f430dbb67",
+      "name": "_RESIDUAL_NEWS_PLACEHOLDER_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "edbab297ebf8cfce46f0cf9f46ebe12e7d37d6033c5cc61a0f1af887ebf178e9",
+      "name": "_protect_code_blocks",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e5fbcf405110d83d1fde6b926bc14b0444406d81d7bbbf20d116d243d5b99f6e",
+      "name": "_protect_inline_code",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ade8eb246226e16a5e567a54f59e6fe972733601e5f114918a183194c616fabb",
+      "name": "_URL_PROTECTION_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "5792c2d1d2c8c6e793b703fa1cf57b66c90dcaaa3de0feff0bd05e8452934ab9",
+      "name": "_protect_urls",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "6b1c5fb1f5cb2055a67e6c74630fac2701c67eefd216dac00e9e403cab079f05",
+      "name": "_restore_urls",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "5bbccdb4aab848d22f94837d295d6fc41447ed1ee8d02d01b213d81961c85c32",
+      "name": "_ANCHOR_NAME_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "75031831c80c49565382c5ac3085804fa39a373bc40d2238a8d51d6a37d587be",
+      "name": "_ANCHOR_LINK_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a8ce300b50812ac968f6e74a15630295744c64657f65c2783630c20e69d2f3fc",
+      "name": "_HTML_HREF_ANCHOR_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "30007baf30bb77541ac477318b9b0846b82237026e218fe88fc25aedb522f1ff",
+      "name": "_HEADING_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "540c1b2b49c72c1c7e2c6601678dc064e9455386fefc02828a731ed81c58699b",
+      "name": "_github_slug",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "298c2ad5a17681d630e59ea684c34d6d88f0b2cf3fdd24d44ee99f7f640d568d",
+      "name": "_extract_heading_slugs",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "1bcf777acb909e394f6e9e87849c278ebfa41a17e1b0a53118294b1e6b630c91",
+      "name": "_classify_anchor_target",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "bff9fe4ab0f63d4bedbce4fd26fd07a40c4593ae9717b93bcb2719373c92fe4a",
+      "name": "_collect_md_anchor_links",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e0015bfefa12f21285a5260707e7d7178ac377e95f23a21fc02c386c06ca2e1e",
+      "name": "_collect_html_href_anchors",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "efab3fa7ec29721f17fffc041d09cc4ce9acda30c054616c6d845bc417f84f9f",
+      "name": "_protect_anchors",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "f180574d12ed3bfa60fc0f0f2a27b6b4e20e846d76b8838c0c3fa878906fea91",
+      "name": "_restore_anchors",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "76a4fa71559d2c7492b489b3689fb1e7c5e76a4b9b5de357cdff0b705a758909",
+      "name": "_build_heading_slug_map",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "beb88ba422942a7e9542d2b99dd949116e78a11fb4162ec96ed831ff2ac225dd",
+      "name": "_REF_DEFINITION_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ae655732b73ef83a0ce94d44b57c047196d2fd2f491a97fae2f29ea5128f2460",
+      "name": "_protect_ref_labels",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "49424fa4cd86231291a6c5486990afe076722973264e3dfe1242f0c1528fc144",
+      "name": "_restore_ref_labels",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "63599afce579a926915e790d73ed43a2d0cb8b3cf73d510a304f42dce0a57673",
+      "name": "_protect_news_quotes",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9d446ff43a1477dfc3791b2aca9c4cfd46273efc22ec2b5deef5b171bb1d44d6",
+      "name": "_restore_code",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b2f60390d9cf419945abdfedf3c8c07e518720c23298389074a85e09db49a981",
+      "name": "_validate_news_placeholders_intact",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "dd1a692e6eaad91ea14ee48ad05ee768bec62cd0b299268eb7ced3c25472d7d3",
+      "name": "_CODE_PLACEHOLDER_LEFTOVER_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "8f7e8785703b32d3cbb01d8dd1115580eb9d0fa7bafd74e14ff238b6565e8792",
+      "name": "_check_placeholders_present",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9ce9558370155cb408d3f97a7ac3731a777ec0c10f7bdb764b1c28286b697f38",
+      "name": "_validate_code_placeholders_present",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "91391e024832779e514d9f90c92b2653ad5eca4809c783d064dcd7f09de3dfbe",
+      "name": "_validate_ref_label_placeholders_present",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0a25ccb3d2e017acebb06183f1ca62b2c114870fbf3d73ae4a321b894fa45576",
+      "name": "_validate_no_code_placeholder_leftover",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "03460b15518048b9f0a1d2606315547ffeeb0d48a554880599430c8a1ceead84",
+      "name": "_restore_news_quotes",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "cad551ffe241314ceef6f95374b56b82abda8581106c9464ffa6311e97bd808f",
+      "name": "_normalize_collapsed_markdown",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "68c55841f9a6454c5f4f34840e8dea3902cdb6f4716bf9709d56f73ba39d8cd8",
+      "name": "_cleanup_source_flag_for_en",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a05c6e501de3bf3ef5968c1f891d00fc83670ba9237dd552ba5921fcc35897dc",
+      "name": "_cleanup_source_flag_swap",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "aca1f8aaf578376ce942022e5709fa1aa007d7c6e87e3a08303f1e1c3063065d",
+      "name": "_cleanup_source_flag",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b058aef844af2b523f68dd953ddca149f2e9064ac89153b5947c34e7101a62f8",
+      "name": "_validate_news_flags_for_en",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c38e4c91f67ca883e95529e06969585369d473a0e5dd47f236624054c80c14cc",
+      "name": "_validate_news_flags_for_other",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "55da3c3f51329c2da063726703f9a123c9a73c62680de347432b782b89797fd9",
+      "name": "_validate_news_post",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "39dbe55fe784b23a4274c15295e44abd6022f2d1b2f674a1f1b4188b6e756ff8",
+      "name": "_VIEW_PROJECT_LABELS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "7788d0fd4d8f7e4b4977eb9a405057c684925e550c02e665d516d27959dd04ad",
+      "name": "_translation_note_invariants",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "27957ff1672b47f8087f9bae085a3169ebebef705dd4a17d79a811cf99020086",
+      "name": "_build_translation_note_phrase",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "44582ca8855fb17e868aaffa177d8923d985a6a2aab069b85d4db25afadb3006",
+      "name": "_assemble_translation_note_paragraphs",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "fba5ef3fce2aacd37698acf91df6fd77c337345fc315b727260c73c1b9afb283",
+      "name": "_build_translation_note_source",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "27a4ced5689500c20b4425b3749ce123467591572651d529e4a919b59cb84912",
+      "name": "_sanitize_model",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "8597829d076b58cf816c1661966167ef71b9739c89054d08aaf51d09665bfed8",
+      "name": "_quote_lines",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "28711f39453219d026f137d3a2ed6126b290210cf2e4c3e35e834e3d3713a5ed",
+      "name": "_split_frontmatter",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e6a2174ca995eaac3efa8c263519c49a4bec53af0608888a7c692fd1fce852ac",
+      "name": "_build_translation_note_block",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "d1fb1e8b067f91dd51e079b55ad159f6fc2441cd9037fbd80a8afa7b0f912d12",
+      "name": "_compose_with_notes",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "2c8d6cb6d8dd1ab974e95063f3a41eff2c85f550552c2cec45dce55eb4dd5cbd",
+      "name": "_append_translation_note",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "33ba89eeeceb513a7af8080877d7a479a762d482f1ff2b09fef4173235b89221",
+      "name": "_resolve_relative_paths",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "37b1f70b2b6567470b9a3327f470d0dae64c31bdde7459921db16192598103af",
+      "name": "_write_output_file",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "fee4cd196d34c130ac2d1c52d10d6b9a479e7df737598fc62715ae8f0e094ad2",
+      "name": "_PipelineState",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "956e9d7ffdacf9ce792fe18903ad6ef550c55049f39f22520b414bef301ffc83",
+      "name": "_protect_pipeline_inputs",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e54526c03a20c591f60ca952a23f7d3d5c1ad9bbf90a81d8036c3d797571b49b",
+      "name": "_restore_pipeline_outputs",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b54f381e9398015b890813d366dc96956490a50dec956e362c7f6b5cb8f1cdd2",
+      "name": "_TranslationConfig",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ce24ed5d6bf1a60d067e9d5b5ecddfee27b44b4b0f132a024791f606429f5655",
+      "name": "_translate_pipeline",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a82392d2cbfee7a6820666d914ed06b8081824b20de3a2dae34467fea8833b77",
+      "name": "_read_translatable_source",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b04ed4298a6858e2410aa3cbba26d6c6b3bb05e10f922408fb76e76eeed9b849",
+      "name": "_translate_one_file",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "d91d43a082792948a36d2b400b6b0e3e24a6ad699e6963536a935289aabe5046",
+      "name": "translate_markdown_file",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "899de88c96de87005cfd87916e4959d5ce82cd4d62fce9731cebc3335083f0a2",
+      "name": "is_excluded",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4cc352acf414a193a5ae7e206850bc9de72fc5c4d54850a4a8eb0674e97e347e",
+      "name": "_should_skip_walk_dir",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "63340bac17b4bc89fd51ba54b0015392b89960395074dbe8f4cdc6c9d9e94ef9",
+      "name": "_model_filename_label",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "361796937baed6242a5d4140aadf9bd2ca7dc2f2f59dc4c35c6c7bfb56a48532",
+      "name": "_resolve_output_filename",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "02a29fe693a8667dc62cf3ee9abb42eae866f3d6ab37092779da4a5c951d18f2",
+      "name": "_existing_translation_exists",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e129742037fcd1ebf54532970dc880825ea3af34e5b66a85c1fb65647b4dace4",
+      "name": "_record_translation_status",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "3ad332ed7694c9068ccf178863b1e8abc931e7a6c815a3785c854a7b4fa05cde",
+      "name": "_DirectoryWalkContext",
+      "kind": "ClassDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b921770a525929b892b0285f96499af5590c464bf534b32939f02ece12feefa3",
+      "name": "_process_one_markdown_file",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "e7a6a1b501c8536c7858e648fd41d1f007bd154817649d2a214f499e71e89db8",
+      "name": "_is_translatable_markdown",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "5bcf135165abce704f687020788addb4bbb7b53ae4dd097b4918156e60710179",
+      "name": "translate_directory",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c1337ec5eea7537ffd8d710683eec72df422948f89cdd7e42a291be911c3f05a",
+      "name": "_add_io_args",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b8a7af8675ba5ff1d1b437fcd004f53404efdede566f390c9c73e0dc5a15d217",
+      "name": "_add_lang_args",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "6c4df6208b6330c6fcd81c3dbcfce04d4c32154adfd5760efb94850e98a5cf13",
+      "name": "_add_provider_args",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "25e1903d59b42f494882bd589b19ad487af29aec3ec6868b827501a50efb88af",
+      "name": "_add_output_naming_args",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "62b0679d70115a0d898998b3c7d12b03201ada005190896360f5215c18dd26a4",
+      "name": "_add_note_args",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b3b958184f52ccf034e8787acae515650212c8f52c96cfedbf729008fcfe62e6",
+      "name": "_add_news_args",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9bf0c967e11951094403ac03c2a2f3cf200fa92050f70118a1e0f41953ac688d",
+      "name": "_build_arg_parser",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "b0e2e90d545174daed561a00c23534a875bf9a100051335f76648fac9a817136",
+      "name": "_FILENAME_COMPONENT_FLAGS",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "6c894e30fd17379659ecf8473bb01643eadac0c7263f597f6a80f60242c0ffeb",
+      "name": "_looks_like_path_component",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "691aff9124d4f6b0b09acdc336e065e2c9b968886604e64c01e63840baa28764",
+      "name": "_reject_path_separators_in_components",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a422fa8829ffc979ed72c72341ffddf0d8ddb4f784ac95bff61c1fa77e9fed8c",
+      "name": "_ensure_within_directory",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "9d571ebbe4207008b75310d9af5eff7b723cbdeaefc8b643a0b6d38f94dae7b7",
+      "name": "_validate_input_paths",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "beff3dc6ac6f38ee0f37d4cfaa67296963afe067ddc0f225915f2b8b3244db0d",
+      "name": "_missing_key_message",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "38975cbc9f01125c3d7a026d8744c40b80f45231cc05b941b03c26ec593cc815",
+      "name": "_init_mistral_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "42685ce8f4770df4e00fbdd0d1a54799028bf289da6366aa27aa46e71e9bce49",
+      "name": "_init_claude_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "d8ed5ad8d4611fcbaa92207a427b38d057a817f1706a11c6a493b63d76f5929d",
+      "name": "_init_gemini_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0616c0f8fdcf336afaa8ec4723f94052a12e19f108ef17aa594a1a4e30bafea1",
+      "name": "_init_openai_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "0449229da96a7547847939e616b80a75fb113b263b8fcab1d434714c1f34e143",
+      "name": "_resolve_grok_binary",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "60a5d9a99a3632349c19a545459d1ecd0cb04e10bd1d7f0df3d86e86477f1e5d",
+      "name": "_grok_preflight",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4ec016a465713049f2d219978d6ebf7fc2b5c07a837cd6960706beb4215fe058",
+      "name": "_grok_sandbox_profile",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "68ecba5bba673932e5090b746f5946af2fde5c43e6892434b4fdcab1d262112c",
+      "name": "_init_grok_cli_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "410b1413d66c048cc38e8a1e0a1db7cc4587f1b6e3eebf1f785f729555a82c57",
+      "name": "_init_grok_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "3219d645db89140567866da46395560570350629cadc57f7561dcb0be9ceb0a4",
+      "name": "_CLI_PROVIDER_CI_FALLBACK",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "197a7e2f20193373e7f20b3819ad618e2c6ff25c81b00ca4e42282b0e9ecbbcd",
+      "name": "_codex_reject_ci_environment",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "18e07b1812ea943e64bec157e236889da1c8a323d168c3aec1f4e6e84fa70c0a",
+      "name": "_resolve_codex_binary",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "7dc267e663c2d912d79a7045c5bd7f7268257615ccd2ab3bc778f8687fa8f546",
+      "name": "_codex_preflight",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "f1e0428b7ac7519e65c1949fb531904652f5302e6ede0609cc453b4bf9028334",
+      "name": "_codex_warn_unexpected_model",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "4e15f85929bfb28809f94107605c5c9ee5e50e709545fb0e631cc9930c6b08a6",
+      "name": "_init_codex_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "088aacd135dff8225f156381a11e72943b0f59c497f24bb1717c01f0e9527efa",
+      "name": "_resolve_opencode_binary",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "cd6b874a8ee97d883a3d8d3163f99fa917a70562d1e43c25136681292037701b",
+      "name": "_opencode_preflight",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "904d2d9893691032ee1e510b34056b13bc2ddeda9fbb8ae224bd5152f3817bff",
+      "name": "_init_opencode_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "abd9c69df9c1d71ee6d6a4edb8f1eaa32bbeaaf491ee29594e2f65faef621010",
+      "name": "_openrouter_validate_model",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "ced6ab8452e3bb068ca624174715912803ad158ce972faeea69eac3610c0728b",
+      "name": "_init_openrouter_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "c270586f9932bb6735bc5c5920ea84f7311cd855605ae4b409eec13d52042684",
+      "name": "_select_provider_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "df8d9119129ecb6e4e3774873c5dc0ea76b4aeee2855406063aa1de25f9348ee",
+      "name": "_resolve_single_output_filename",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "19c704ad28e5fddc9a4f04a543fd6d5ea8690660d8d7163c2108cb8c3b461073",
+      "name": "_build_translation_config",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "67e3c79ef1e4ba20b443aab69ffe5e182b0ddc3250b1f4ed991fcb38bcec934c",
+      "name": "_run_single_file",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "a7719607ffe25efd1421a92d35ec5e659b80f3107a39620a393ae83c36bcedcb",
+      "name": "_run_directory",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    },
+    {
+      "hash": "63c7f7cbe72343eba594dae2ff771b179fafeecf80eb12f5a1129d10f51ec328",
+      "name": "main",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/translate.py"
+    }
+  ],
+  "markers": [
+    "DEFAULT_MODEL_GROK = \"grok-4.6\"  # NOSONAR python:S1192",
+    "ECO_MODEL_OPENAI = \"gpt-5.6-luna\"  # NOSONAR python:S1192 — cf. DEFAULT_MODEL_GROK",
+    "# marqueur ailleurs — le même piège avait déjà défait un `# nosemgrep`.",
+    "with urllib.request.urlopen(url, timeout=delai) as reponse:  # nosec B310 — https vérifié",
+    "# nosemgrep",
+    "with subprocess.Popen(  # nosec B603",
+    "argv,  # nosemgrep — la finding est ancrée sur l'argument, pas sur l'appel",
+    "_HEADING_REGEX = re.compile(r\"^(#{1,6})[ \\t]+([^\\n]+)$\", re.MULTILINE)  # NOSONAR S5852",
+    "# NOSONAR pythonsecurity:S8707 — chemin borné en amont par",
+    "with open(clean_output_path, \"w\", encoding=\"utf-8\") as f:  # NOSONAR",
+    "# NOSONAR pythonsecurity:S8707 — lecture d'un chemin nommé par l'utilisateur,",
+    "with open(file_path, encoding=\"utf-8\") as f:  # NOSONAR pythonsecurity:S8707",
+    "# NOSONAR pythonsecurity:S8707 — création de la RACINE que l'utilisateur",
+    "os.makedirs(output_dir)  # NOSONAR",
+    "# NOSONAR pythonsecurity:S8707 — cf. ci-dessus.",
+    "os.makedirs(args.target_dir)  # NOSONAR",
+    "result = subprocess.run(  # nosec B603",
+    "[binary, \"models\"],  # nosemgrep",
+    "[binary, \"login\", \"status\"],  # nosemgrep",
+    "[binary, \"--version\"],  # nosemgrep"
+  ]
+}
