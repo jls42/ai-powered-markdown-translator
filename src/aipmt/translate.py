@@ -23,8 +23,9 @@ disparu avec lui. Le `__module__` des fonctions ré-exportées est celui de leur
 module de définition.
 """
 
-# --- API supportée --------------------------------------------------------
-# --- Alias de compatibilité (non documentés, conservés) -------------------
+# Alias redondants (`import Y as Y`) : la forme que ruff et mypy reconnaissent
+# comme ré-export voulu. L'API supportée est celle de `__all__`, en bas ; tout
+# le reste est un alias de compatibilité, non documenté et conservé.
 from .cli import DEFAULT_SOURCE_DIR as DEFAULT_SOURCE_DIR
 from .cli import DEFAULT_SOURCE_LANG as DEFAULT_SOURCE_LANG
 from .cli import DEFAULT_TARGET_DIR as DEFAULT_TARGET_DIR
