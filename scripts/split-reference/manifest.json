@@ -77,6 +77,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/__init__.py",
       "why": "docstring du sous-paquet providers, né du découpage"
+    },
+    {
+      "hash": "b2da5b93af23ca66d3761bff574a29b2d527595856a80423ea3d5f796a190629",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/openai.py",
+      "why": "docstring du module providers/openai, né du découpage"
     }
   ],
   "removed": [],

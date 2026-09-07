@@ -24,6 +24,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import guards, markdown, news, notes, placeholders, prompts, translate
+from aipmt.providers import openai
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -226,7 +227,7 @@ class TestSilentFailure(unittest.TestCase):
         with (
             patch.dict(os.environ, _fake_openai_env()),
             patch("aipmt.translate.translate_markdown_file", return_value="failure"),
-            patch("aipmt.translate.OpenAI"),
+            patch("aipmt.providers.openai.OpenAI") as fake_openai,
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
             patch("sys.argv", ["aipmt", "--file", "/source/fake.md", "--target_dir", "/dest"]),
@@ -234,6 +235,7 @@ class TestSilentFailure(unittest.TestCase):
             with self.assertRaises(SystemExit) as cm:
                 translate.main()
             self.assertEqual(cm.exception.code, 1)
+            fake_openai.assert_called_once()
 
     def test_main_exits_nonzero_on_failure_directory(self):
         """main() avec --source_dir doit sys.exit(1) quand translate_directory rapporte
@@ -244,7 +246,7 @@ class TestSilentFailure(unittest.TestCase):
                 "aipmt.translate.translate_directory",
                 return_value={"failed": ["a.md"], "skipped": []},
             ),
-            patch("aipmt.translate.OpenAI"),
+            patch("aipmt.providers.openai.OpenAI") as fake_openai,
             patch("os.path.isdir", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
@@ -261,6 +263,7 @@ class TestSilentFailure(unittest.TestCase):
             with self.assertRaises(SystemExit) as cm:
                 translate.main()
             self.assertEqual(cm.exception.code, 1)
+            fake_openai.assert_called_once()
 
     def test_openai_reasoning_effort_is_configurable(self):
         """translate() doit transmettre l'effort demandé aux modèles GPT-5.x."""
@@ -1348,7 +1351,7 @@ class TestMainExitsOnRealSilentFailure(unittest.TestCase):
 
             with (
                 patch.dict(os.environ, _fake_openai_env()),
-                patch("aipmt.translate.OpenAI", return_value=mock_instance),
+                patch("aipmt.providers.openai.OpenAI", return_value=mock_instance),
                 patch(
                     "sys.argv",
                     ["aipmt", "--file", src_path, "--target_dir", tmpdir],
@@ -1671,7 +1674,7 @@ class TestOpenAINoneContent(unittest.TestCase):
         mock_client.chat.completions.create.return_value = response
         args = _base_args()
         with self.assertRaisesRegex(RuntimeError, r"message\.content=None.*refusal"):
-            translate._call_openai(mock_client, args, "prompt", "segment", False)
+            openai._call_openai(mock_client, args, "prompt", "segment", False)
 
 
 class TestComposeWithNotesBottomTolerantToMalformedFM(unittest.TestCase):

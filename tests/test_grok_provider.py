@@ -27,6 +27,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import translate
+from aipmt.providers import openai
 
 
 def _args(**overrides):
@@ -325,7 +326,7 @@ class TestGrokApiMode(unittest.TestCase):
         response.choices[0].message.content = "Translated"
         client = MagicMock()
         client.chat.completions.create.return_value = response
-        out = translate._call_openai(client, _args(), "PROMPT", "SEG", False)
+        out = openai._call_openai(client, _args(), "PROMPT", "SEG", False)
         self.assertEqual(out, "Translated")
 
     def test_api_mode_routes_through_openai_call(self):

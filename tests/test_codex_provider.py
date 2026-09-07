@@ -27,6 +27,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import markdown, news, translate
+from aipmt.providers import openai
 
 
 def _args(**overrides):
@@ -353,26 +354,26 @@ class TestReasoningEffortResolution(unittest.TestCase):
 
     def test_eco_defaults_to_none(self):
         self.assertEqual(
-            translate._resolve_reasoning_effort(Namespace(eco=True, reasoning_effort=None)),
+            openai._resolve_reasoning_effort(Namespace(eco=True, reasoning_effort=None)),
             "none",
         )
 
     def test_non_eco_defaults_to_medium(self):
         self.assertEqual(
-            translate._resolve_reasoning_effort(Namespace(eco=False, reasoning_effort=None)),
+            openai._resolve_reasoning_effort(Namespace(eco=False, reasoning_effort=None)),
             "medium",
         )
 
     def test_explicit_value_wins_over_eco(self):
         self.assertEqual(
-            translate._resolve_reasoning_effort(Namespace(eco=True, reasoning_effort="high")),
+            openai._resolve_reasoning_effort(Namespace(eco=True, reasoning_effort="high")),
             "high",
         )
 
     def test_codex_eco_default_is_low_not_none(self):
         """`none` n'est pas une valeur connue de model_reasoning_effort côté CLI."""
         self.assertEqual(
-            translate._resolve_reasoning_effort(
+            openai._resolve_reasoning_effort(
                 Namespace(eco=True, reasoning_effort=None), eco_default="low"
             ),
             "low",
@@ -380,11 +381,11 @@ class TestReasoningEffortResolution(unittest.TestCase):
 
     def test_openai_extra_kwargs_applies_eco_default(self):
         args = Namespace(model="gpt-5.4-mini", eco=True, reasoning_effort=None)
-        self.assertEqual(translate._openai_extra_kwargs(args, False), {"reasoning_effort": "none"})
+        self.assertEqual(openai._openai_extra_kwargs(args, False), {"reasoning_effort": "none"})
 
     def test_translation_note_never_pays_for_reasoning(self):
         args = Namespace(model="gpt-5.4-mini", eco=False, reasoning_effort=None)
-        self.assertEqual(translate._openai_extra_kwargs(args, True), {})
+        self.assertEqual(openai._openai_extra_kwargs(args, True), {})
 
 
 class TestClaudeBlockFiltering(unittest.TestCase):

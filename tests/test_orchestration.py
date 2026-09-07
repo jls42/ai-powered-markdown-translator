@@ -24,6 +24,7 @@ from langdetect import LangDetectException
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import guards, naming, news, placeholders, translate
+from aipmt.providers import openai
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -513,24 +514,24 @@ class TestProviderClientInit(unittest.TestCase):
     def test_init_openai_missing_key_raises(self):
         args = _base_args()
         with patch.dict(os.environ, {}, clear=True), self.assertRaisesRegex(ValueError, "OpenAI"):
-            translate._init_openai_client(args)
+            openai._init_openai_client(args)
 
     def test_init_openai_placeholder_key_raises(self):
         """Le placeholder de défaut doit être traité comme une clé absente."""
         args = _base_args()
-        env = {"OPENAI_API_KEY": translate.DEFAULT_OPENAI_API_KEY}
+        env = {"OPENAI_API_KEY": openai.DEFAULT_OPENAI_API_KEY}
         with patch.dict(os.environ, env, clear=True), self.assertRaisesRegex(ValueError, "OpenAI"):
-            translate._init_openai_client(args)
+            openai._init_openai_client(args)
 
     def test_init_openai_happy_path(self):
         args = _base_args(model=None)
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV, clear=True),
-            patch("aipmt.translate.OpenAI") as mock_cls,
+            patch("aipmt.providers.openai.OpenAI") as mock_cls,
         ):
-            translate._init_openai_client(args)
+            openai._init_openai_client(args)
             mock_cls.assert_called_once_with(api_key=_FAKE_OPENAI_ENV["OPENAI_API_KEY"])
-        self.assertEqual(args.model, translate.DEFAULT_MODEL_OPENAI)
+        self.assertEqual(args.model, openai.DEFAULT_MODEL_OPENAI)
 
 
 class TestSelectProviderClient(unittest.TestCase):
@@ -567,7 +568,7 @@ class TestSelectProviderClient(unittest.TestCase):
         args = _base_args(model=None)
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV, clear=True),
-            patch("aipmt.translate.OpenAI") as mock_cls,
+            patch("aipmt.providers.openai.OpenAI") as mock_cls,
         ):
             translate._select_provider_client(args)
             mock_cls.assert_called_once()
@@ -674,7 +675,7 @@ class TestOpenAIO1Series(unittest.TestCase):
 
     def test_o1_single_user_message(self):
         args = _base_args(model="o1-mini")
-        msgs = translate._build_openai_messages(args, "PROMPT", "SEGMENT")
+        msgs = openai._build_openai_messages(args, "PROMPT", "SEGMENT")
         self.assertEqual(len(msgs), 1)
         self.assertEqual(msgs[0]["role"], "user")
         self.assertIn("PROMPT", msgs[0]["content"])
@@ -682,7 +683,7 @@ class TestOpenAIO1Series(unittest.TestCase):
 
     def test_non_o1_uses_system_user_split(self):
         args = _base_args(model="gpt-5.4-mini")
-        msgs = translate._build_openai_messages(args, "PROMPT", "SEGMENT")
+        msgs = openai._build_openai_messages(args, "PROMPT", "SEGMENT")
         self.assertEqual(len(msgs), 2)
         self.assertEqual(msgs[0]["role"], "system")
         self.assertEqual(msgs[1]["role"], "user")
@@ -700,7 +701,7 @@ class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
             ok_response,
         ]
         args = _base_args(model="gpt-5.4-mini")
-        out = translate._openai_create_with_fallback(
+        out = openai._openai_create_with_fallback(
             client, args, [{"role": "user", "content": "x"}], {"reasoning_effort": "medium"}
         )
         self.assertIs(out, ok_response)
@@ -711,7 +712,7 @@ class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
         client.chat.completions.create.side_effect = TypeError("unrelated")
         args = _base_args(model="gpt-5.4-mini")
         with self.assertRaises(TypeError):
-            translate._openai_create_with_fallback(
+            openai._openai_create_with_fallback(
                 client, args, [{"role": "user", "content": "x"}], {"reasoning_effort": "medium"}
             )
 
@@ -727,7 +728,7 @@ class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
         )
         client.chat.completions.create.side_effect = [bad_request, ok_response]
         args = _base_args(model="gpt-5.4-mini")
-        out = translate._openai_create_with_fallback(
+        out = openai._openai_create_with_fallback(
             client, args, [{"role": "user", "content": "x"}], {"reasoning_effort": "medium"}
         )
         self.assertIs(out, ok_response)
@@ -779,7 +780,7 @@ class TestMainModelWarning(unittest.TestCase):
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV),
             patch("aipmt.translate.translate_markdown_file", return_value="success"),
-            patch("aipmt.translate.OpenAI"),
+            patch("aipmt.providers.openai.OpenAI") as fake_openai,
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
@@ -797,6 +798,7 @@ class TestMainModelWarning(unittest.TestCase):
             patch("builtins.print") as mock_print,
         ):
             translate.main()
+        fake_openai.assert_called_once()
         printed = " ".join(str(c) for c in mock_print.call_args_list)
         self.assertIn("modele-inconnu-xyz", printed)
 
