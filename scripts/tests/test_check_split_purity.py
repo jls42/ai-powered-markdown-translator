@@ -23,7 +23,8 @@ import importlib.util
 _SPEC = importlib.util.spec_from_file_location(
     "check_split_purity", ROOT / "scripts" / "check-split-purity.py"
 )
-assert _SPEC is not None and _SPEC.loader is not None
+if _SPEC is None or _SPEC.loader is None:
+    raise ImportError("scripts/check-split-purity.py introuvable ou sans chargeur")
 purity = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(purity)
 

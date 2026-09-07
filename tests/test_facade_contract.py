@@ -193,31 +193,42 @@ class NoTestPatchesTheFacade(unittest.TestCase):
     """Un patch se pose sur le module qui consulte le nom. Jamais sur la façade."""
 
     @staticmethod
-    def _patch_targets(path):
+    def _is_patch_call(func):
+        """`patch(...)`, `mock.patch(...)`, `patch.object(...)` — pas `patch.dict`."""
+        if isinstance(func, ast.Name):
+            return func.id == "patch"
+        if not isinstance(func, ast.Attribute):
+            return False
+        if func.attr == "patch":
+            return True
+        return func.attr == "object" and getattr(func.value, "id", "") == "patch"
+
+    @staticmethod
+    def _facade_target(target):
+        """La cible si elle désigne la façade, sinon None."""
+        if isinstance(target, ast.Constant):
+            value = target.value
+            if isinstance(value, str) and (
+                value == "aipmt.translate" or value.startswith("aipmt.translate.")
+            ):
+                return value
+            return None
+        root = target
+        while isinstance(root, ast.Attribute):
+            root = root.value
+        if isinstance(root, ast.Name) and root.id == "translate":
+            return ast.unparse(target)
+        return None
+
+    @classmethod
+    def _patch_targets(cls, path):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
-            if not isinstance(node, ast.Call) or not node.args:
+            if not isinstance(node, ast.Call) or not node.args or not cls._is_patch_call(node.func):
                 continue
-            func = node.func
-            is_patch = (isinstance(func, ast.Name) and func.id == "patch") or (
-                isinstance(func, ast.Attribute)
-                and (
-                    func.attr == "patch"
-                    or (func.attr == "object" and getattr(func.value, "id", "") == "patch")
-                )
-            )
-            if not is_patch:
-                continue
-            target = node.args[0]
-            if isinstance(target, ast.Constant) and isinstance(target.value, str):
-                if target.value == "aipmt.translate" or target.value.startswith("aipmt.translate."):
-                    yield node.lineno, target.value
-            else:
-                root = target
-                while isinstance(root, ast.Attribute):
-                    root = root.value
-                if isinstance(root, ast.Name) and root.id == "translate":
-                    yield node.lineno, ast.unparse(target)
+            target = cls._facade_target(node.args[0])
+            if target is not None:
+                yield node.lineno, target
 
     def test_no_patch_targets_the_facade(self):
         offenders = []

@@ -19,23 +19,20 @@ import importlib
 import sys
 
 
-def cli_flags() -> set[str]:
-    """Options longues (`--…`) déclarées par le parser, l'aide intégrée exclue."""
+def _parser_builders() -> list:
+    """Les modules du paquet qui portent `_build_arg_parser`, après `import aipmt`."""
     sys.path.insert(0, "src")
     importlib.import_module("aipmt")
-    builders = [
+    return [
         module
         for name, module in list(sys.modules.items())
         if (name == "aipmt" or name.startswith("aipmt."))
         and callable(getattr(module, "_build_arg_parser", None))
     ]
-    if len(builders) != 1:
-        found = sorted(module.__name__ for module in builders)
-        raise RuntimeError(
-            f"{len(builders)} module(s) du paquet portent _build_arg_parser ({found}) — "
-            "la sonde ne sait pas quel parser lire"
-        )
-    parser = builders[0]._build_arg_parser()
+
+
+def _long_options(parser: argparse.ArgumentParser) -> set[str]:
+    """Options `--…` du parser, l'aide intégrée exclue."""
     return {
         option
         for action in parser._actions
@@ -43,6 +40,18 @@ def cli_flags() -> set[str]:
         for option in action.option_strings
         if option.startswith("--")
     }
+
+
+def cli_flags() -> set[str]:
+    """Options longues (`--…`) déclarées par le parser, l'aide intégrée exclue."""
+    builders = _parser_builders()
+    if len(builders) != 1:
+        found = sorted(module.__name__ for module in builders)
+        raise RuntimeError(
+            f"{len(builders)} module(s) du paquet portent _build_arg_parser ({found}) — "
+            "la sonde ne sait pas quel parser lire"
+        )
+    return _long_options(builders[0]._build_arg_parser())
 
 
 if __name__ == "__main__":
