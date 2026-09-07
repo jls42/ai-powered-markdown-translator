@@ -2,168 +2,168 @@
   "_comment": "Manifeste CUMULATIF des écarts déclarés par rapport au snapshot de référence (package-6ae1505.json). Lu par scripts/check-split-purity.py. added : nœuds de premier niveau ajoutés (docstrings de module, __all__…) ; removed : nœuds retirés ; modified : nœuds dont le corps a changé (old_hash → new_hash). Chaque entrée dit pourquoi.",
   "added": [
     {
-      "hash": "c83fcf7fec0288c99da175e4029624bab424e187f1d9e286498ed142cd0a1898",
+      "hash": "fac53b21a025fbfa1bafdbb53db0c4f021a40abb67c8a8d6614c384a4ffb1649",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/config.py",
       "why": "docstring du module config, né du découpage"
     },
     {
-      "hash": "59e5e04e7d9d18e80a326b0a4e7a4491bed3be0904064fee741f5223bc08cc50",
+      "hash": "1b9b902744144b708816c4c111d63703546cafd83e49db4d1e7432f2cafcbbcc",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/markdown.py",
       "why": "docstring du module markdown, né du découpage"
     },
     {
-      "hash": "89ff2c4221eb9ea872808ea73091962e715ca32775250153c70958be7cedb88f",
+      "hash": "f1cc7e2a02fb87c122d3f096f5c5092091873034553d0ce043541476ae971fc6",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/segmentation.py",
       "why": "docstring du module segmentation, né du découpage"
     },
     {
-      "hash": "c58f2375b6ff265c386818bcd90fa1c42bb2fed865313fb3b18b60c77b32a44e",
+      "hash": "2bc893f0672315e347bda4c69193075a3f7b999eab39fa3c38d1a76d1a0767af",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/guards.py",
       "why": "docstring du module guards, né du découpage"
     },
     {
-      "hash": "8b9dadd7b887c215052197d2b53e42e9141fd59e8175522625b59e0b4169f50e",
+      "hash": "58a6340fc0465cf3df0af07a2a3cb84fbe7cdaa9fc4fcb8e543dd67eaea24680",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/placeholders.py",
       "why": "docstring du module placeholders, né du découpage"
     },
     {
-      "hash": "a9311f1d4145f7cb4b42964831e895f04f4a2ba3fab459b5409c1e4e026e0534",
+      "hash": "6726cb9fe7c5006fd044c67c306564c3b58c04d22c0abc0fde220c72f269f786",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/news.py",
       "why": "docstring du module news, né du découpage"
     },
     {
-      "hash": "67bc3a875a549e9ae6eeb5476cb6a1910c43f43148b7a090eb85494225d9e123",
+      "hash": "95d6f8b304294a8385640a1ecf13e4ad2e26db024f8662a1fd77a866cf6958a4",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/prompts.py",
       "why": "docstring du module prompts, né du découpage"
     },
     {
-      "hash": "f24fb118690733d55fb4dab936edb0cdcf1c4b14d81198cceb11a51e365318a7",
+      "hash": "593288646a347004fb0b17c0b31dc9d1d80bbff850c6e2110c54080517a7451c",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/notes.py",
       "why": "docstring du module notes, né du découpage"
     },
     {
-      "hash": "13a8f5f1f68036bbf0492f6efa641da1e240cb256c6c56390b83674c63ea0d30",
+      "hash": "cd7c55ef65011fdb9913fc16aa540c853b63f19cff6cbb8a6da5d768834011f5",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/naming.py",
       "why": "docstring du module naming, né du découpage"
     },
     {
-      "hash": "25f6320de5b19871624d864d678f84cb5b267267ab7913f4cefff6f7f84edac4",
+      "hash": "a4b7a0d091531f43e8c03a25dc40077befa806f72fd0438270dd77df1056fb4f",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/base.py",
       "why": "docstring du module providers/base, né du découpage"
     },
     {
-      "hash": "3ccdbb17aa82af17794e37a390712b9a5dba4bc95056afc173e6a5715f0cc33a",
+      "hash": "ff3bf1da8b4120cc895c3df20c7d9703a67490ee842bc59ea032a7cdda5c5b3c",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/__init__.py",
       "why": "docstring du sous-paquet providers, né du découpage"
     },
     {
-      "hash": "b2da5b93af23ca66d3761bff574a29b2d527595856a80423ea3d5f796a190629",
+      "hash": "0faa1be6b47b9462a0e7d37db9c9f84971b41e4815b7191cfe5486afc8892a9b",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/openai.py",
       "why": "docstring du module providers/openai, né du découpage"
     },
     {
-      "hash": "de7aee17cbf71edd5c4a640a02270d275f41594038d0c537b04ed1eb87292a0f",
+      "hash": "7b7320c512b1177cad0b8794bd3ab38df573a6a0528c0b6628214c4d386ffb7a",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/mistral.py",
       "why": "docstring du module providers/mistral, né du découpage"
     },
     {
-      "hash": "21e4d9e28c3c81dd78bc5018dda7ed896b00d5d1e84f00ba7d586353cc7b2a06",
+      "hash": "6ab2ce726f699864a417431c6715fd56a762bd9977a04c01eda880c8eff621ed",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/anthropic.py",
       "why": "docstring du module providers/anthropic, né du découpage"
     },
     {
-      "hash": "49562e89926034fffa30081ceb2030576acc8e4ff3241a9aebc04843cb22adad",
+      "hash": "bd5504bd7bab634dce8865c5c47f81df564b2339a9d5c608eec7fc857d0bac77",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/gemini.py",
       "why": "docstring du module providers/gemini, né du découpage"
     },
     {
-      "hash": "706ab468afe53298f4ef88925d72eaaa95260cdb07d343756ab1bed786a26832",
+      "hash": "b07ecc0c212b33a3fd647b9a2ed5db0fa4f5b83d233243acb48645db071332f1",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/codex.py",
       "why": "docstring du module providers/codex, né du découpage"
     },
     {
-      "hash": "0bb191332690914547c9821920fadda9d9f57f01eb88d415067e3d9ed5cf5bde",
+      "hash": "a6b46bd4448e5d367c1450c792b08ae38a192572e0c798614b40dc4da8ed7a39",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/grok.py",
       "why": "docstring du module providers/grok, né du découpage"
     },
     {
-      "hash": "49bccef6e0a8af084d77b5c72dc1eeb0de1df5b0ea0486884d574a02c52b78ff",
+      "hash": "23b76a2ce0d2b4d9234899912ab8843ebb8c87ce0a5bb8cff9195a3dcc5145d7",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/opencode.py",
       "why": "docstring du module providers/opencode, né du découpage"
     },
     {
-      "hash": "947f24db86e0f4a68ca93277744d7e3c1ecf5cb0e01289fbbb8f0e4aa03aac83",
+      "hash": "75381da99b05755c06d48f0fa08f613a6e878f4dde9f2ec20fbba24d9f25913f",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/openrouter.py",
       "why": "docstring du module providers/openrouter, né du découpage"
     },
     {
-      "hash": "a40c74ccf5195927733a9d6ba8484af3ca2808e83cc5a1471bea2c4107e2bc74",
+      "hash": "76975be5f55734e71698038b2bc89e673f73952440873c76baa3dfd732c2ecc5",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/providers/registry.py",
       "why": "docstring du module providers/registry, né du découpage"
     },
     {
-      "hash": "aa2cbe51071e4cb721405ee72e01efddf1d082b9fd22e6ced6347e2e2267be09",
+      "hash": "5df261ad88aef97908e432353feb14fe9668dc8d879b847245a3742aea633abc",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/pipeline.py",
       "why": "docstring du module pipeline, né du découpage"
     },
     {
-      "hash": "34cc53df58a28a0d5943cf16f4ca24943450d49ce8c6b15479ff845bf8f19682",
+      "hash": "6cee25e646da77b151612df6056825d698dd047d5fa900b696579677fc331ef5",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/cli.py",
       "why": "docstring du module cli, né du découpage"
     },
     {
-      "hash": "142d824313a9392f93cf6f30f1b3b6cab2f09e43297d350b240e05fbf58bd320",
+      "hash": "42a672c46f26f0100cb9b717660a884eb096fd11431a5223ad0bcd32fc1e601a",
       "name": "<docstring>",
       "kind": "Expr",
       "file": "src/aipmt/translate.py",
       "why": "docstring de la façade de compatibilité"
     },
     {
-      "hash": "817cc02a01e757409c904f50bf890a33bfb69d3fd4017efc2cd7fa23d1ce79ca",
+      "hash": "6799ebcedbf3ed0c952932506f0dbac9286efa18fc6888714a09a53e6b748d5b",
       "name": "__all__",
       "kind": "Assign",
       "file": "src/aipmt/translate.py",
@@ -175,8 +175,8 @@
     {
       "name": "<docstring>",
       "file": "src/aipmt/__init__.py",
-      "old_hash": "07f233eae769add5273a49c58c593c01b231349a765eb6b79afa78f52cd66f2c",
-      "new_hash": "0d23c524f9735acb585c5ecd600f4e489300f0a1f7368e57768b5dc122b496b2",
+      "old_hash": "31da5444c63d040cb2c69fffba9c392bc0cd30bec55624b136978b7380f15d25",
+      "new_hash": "187abf09417bbafa55a764453c0759691136eb5c22ed37003167a65c8216ac98",
       "why": "docstring du paquet : décrit le découpage au lieu d'un module unique"
     }
   ]

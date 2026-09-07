@@ -10,7 +10,8 @@ Ce qu'il vérifie, et pourquoi chaque point existe :
 
 1. **Multiensemble des nœuds de premier niveau.** Chaque fonction, classe,
    constante et expression de premier niveau (docstrings comprises, imports
-   exclus) est hachée sur son `ast.dump()`. L'ensemble courant, réuni sur
+   exclus) est hachée sur son texte normalisé — commentaires retirés, blancs
+   ignorés ; pas `ast.dump()`, qui change d'une version de Python à l'autre. L'ensemble courant, réuni sur
    tous les modules de `src/aipmt/`, doit valoir le snapshot de référence plus
    le manifeste cumulatif (ajouts, retraits, modifications déclarés), ni plus
    ni moins. Un symbole déplacé mais laissé en place compte deux fois et
@@ -42,11 +43,13 @@ from __future__ import annotations
 import argparse
 import ast
 import hashlib
+import io
 import json
 import os
 import pathlib
 import subprocess  # nosec B404 — interroge git pour les fichiers non suivis, argv littéral
 import sys
+import tokenize
 from collections import Counter
 
 PACKAGE = pathlib.Path("src/aipmt")
@@ -419,15 +422,49 @@ def _node_name(node: ast.AST) -> str:
     return "<" + ast.unparse(node).splitlines()[0][:60] + ">"
 
 
+def _strip_comments(source: str) -> list[str]:
+    """Lignes du source sans leurs commentaires, via les positions de `tokenize`.
+
+    Les commentaires sont vérifiés à part (marqueurs de sécurité) ; ici on hache
+    le CODE. Retirer les commentaires par leurs positions de jeton, et non par
+    regex, laisse intact un `#` à l'intérieur d'une chaîne.
+    """
+    lines = source.splitlines()
+    comments: dict[int, int] = {}
+    tokens = tokenize.generate_tokens(io.StringIO(source).readline)
+    for token in tokens:
+        if token.type == tokenize.COMMENT:
+            comments[token.start[0] - 1] = token.start[1]
+    return [line[: comments[i]] if i in comments else line for i, line in enumerate(lines)]
+
+
+def _node_digest(node: ast.stmt, lines: list[str]) -> str:
+    """Haché du texte normalisé du nœud : commentaires retirés, blancs de fin et
+    lignes vides ignorés. Le texte, et non `ast.dump()`, parce que ce dernier
+    change d'une version de Python à l'autre — mesuré en CI : les f-strings de
+    3.12 ne se représentent pas comme celles de 3.10 et 3.11, et 44 nœuds
+    identiques passaient pour perdus. Le texte d'un même code est le même
+    partout."""
+    start = node.lineno
+    decorators = getattr(node, "decorator_list", None)
+    if decorators:
+        start = min(start, min(d.lineno for d in decorators))
+    segment = [line.rstrip() for line in lines[start - 1 : node.end_lineno]]
+    text = "\n".join(line for line in segment if line.strip())
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def collect_nodes(package: pathlib.Path) -> list[dict[str, str]]:
     """Nœuds de premier niveau de tous les modules, imports et garde `__main__` exclus."""
     nodes = []
     for path in sorted(package.rglob("*.py")):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(path))
+        lines = _strip_comments(source)
         for node in tree.body:
             if isinstance(node, ast.Import | ast.ImportFrom) or _is_main_guard(node):
                 continue
-            digest = hashlib.sha256(ast.dump(node).encode("utf-8")).hexdigest()
+            digest = _node_digest(node, lines)
             nodes.append(
                 {
                     "hash": digest,

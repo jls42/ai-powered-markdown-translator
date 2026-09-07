@@ -103,7 +103,15 @@ jobs:
           tracked = subprocess.run(
               ["git", "ls-files", "src/aipmt/*.py"], capture_output=True, text=True, check=True
           ).stdout.split()
-          silent = [f for f in tracked if not f.endswith("__main__.py") and executed.get(f, 0) == 0]
+          # Un module sans instruction (docstring seule, ex. providers/__init__.py)
+          # n'a rien à exécuter : seul un module qui a des lignes et zéro exécutée
+          # est « jamais mesuré ». Mesuré en CI : le premier plancher échouait sur
+          # un __init__ réduit à sa docstring.
+          silent = [
+              f for f in tracked
+              if not f.endswith("__main__.py")
+              and (f not in per_file or (per_file[f] > 0 and executed.get(f, 0) == 0))
+          ]
 
           if total < FLOOR:
               sys.exit(f"✗ {total} statements seulement (plancher {FLOOR}) : le rapport est amputé.")
