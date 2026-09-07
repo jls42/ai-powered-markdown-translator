@@ -112,6 +112,13 @@
       "kind": "Expr",
       "file": "src/aipmt/providers/codex.py",
       "why": "docstring du module providers/codex, né du découpage"
+    },
+    {
+      "hash": "0bb191332690914547c9821920fadda9d9f57f01eb88d415067e3d9ed5cf5bde",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/grok.py",
+      "why": "docstring du module providers/grok, né du découpage"
     }
   ],
   "removed": [],

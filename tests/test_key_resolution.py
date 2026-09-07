@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from aipmt import config as aipmt_config
 from aipmt import translate
-from aipmt.providers import anthropic, gemini, mistral, openai
+from aipmt.providers import anthropic, gemini, grok, mistral, openai
 
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 
@@ -146,7 +146,7 @@ class TestMissingKeyMessageIsActionable(unittest.TestCase):
             anthropic._init_claude_client,
             mistral._init_mistral_client,
             gemini._init_gemini_client,
-            translate._init_grok_client,
+            grok._init_grok_client,
         )
         # Liste EXPLICITE plutôt que dérivée de `os.environ` : la seconde
         # dépendrait de ce que la machine a chargé, donc le test ne prouverait

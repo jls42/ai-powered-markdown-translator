@@ -31,7 +31,7 @@ from google.genai import errors as genai_errors
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, news, translate
-from aipmt.providers import base, codex, gemini
+from aipmt.providers import base, codex, gemini, grok
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -98,23 +98,23 @@ class TestGrokStopReasonIsMandatory(unittest.TestCase):
 
     def test_missing_stop_reason_is_refused(self):
         args = self._args()
-        with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload({"text": "trad"}, args)
+        with self.assertRaises(grok._GrokCallError) as ctx:
+            grok._grok_check_payload({"text": "trad"}, args)
         self.assertIn("stopReason", str(ctx.exception))
 
     def test_renamed_stop_reason_field_is_refused(self):
         payload = {"type": "result", "text": "trad", "stop_reason": "max_turn_requests"}
         args = self._args()
-        with self.assertRaises(translate._GrokCallError):
-            translate._grok_check_payload(payload, args)
+        with self.assertRaises(grok._GrokCallError):
+            grok._grok_check_payload(payload, args)
 
     def test_null_stop_reason_is_refused(self):
         args = self._args()
-        with self.assertRaises(translate._GrokCallError):
-            translate._grok_check_payload({"text": "t", "stopReason": None}, args)
+        with self.assertRaises(grok._GrokCallError):
+            grok._grok_check_payload({"text": "t", "stopReason": None}, args)
 
     def test_end_turn_still_accepted(self):
-        translate._grok_check_payload({"text": "t", "stopReason": "end_turn"}, self._args())
+        grok._grok_check_payload({"text": "t", "stopReason": "end_turn"}, self._args())
 
     def test_turn_budget_exhaustion_is_not_a_rate_limit(self):
         """`max_turn_requests` = budget de tours épuisé, pas un rate limit.
@@ -123,8 +123,8 @@ class TestGrokStopReasonIsMandatory(unittest.TestCase):
         rejouer à l'identique une erreur déterministe (`--max-turns` inchangé).
         """
         args = self._args()
-        with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload({"text": "t", "stopReason": "max_turn_requests"}, args)
+        with self.assertRaises(grok._GrokCallError) as ctx:
+            grok._grok_check_payload({"text": "t", "stopReason": "max_turn_requests"}, args)
         self.assertFalse(ctx.exception.rate_limited)
 
     def test_quota_marker_is_not_treated_as_rate_limit(self):
@@ -135,15 +135,15 @@ class TestGrokStopReasonIsMandatory(unittest.TestCase):
         """
         payload = {"type": "error", "message": "quota exhausted, upgrade your plan"}
         args = self._args()
-        with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload(payload, args)
+        with self.assertRaises(grok._GrokCallError) as ctx:
+            grok._grok_check_payload(payload, args)
         self.assertFalse(ctx.exception.rate_limited)
 
     def test_real_rate_limit_is_still_retryable(self):
         payload = {"type": "error", "message": "429 Too Many Requests — rate limit reached"}
         args = self._args()
-        with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload(payload, args)
+        with self.assertRaises(grok._GrokCallError) as ctx:
+            grok._grok_check_payload(payload, args)
         self.assertTrue(ctx.exception.rate_limited)
 
 
@@ -332,7 +332,7 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
 
     def test_grok_subprocess_receives_no_secret(self):
         with patch.dict(os.environ, self.SECRETS, clear=False):
-            env = translate._grok_env()
+            env = grok._grok_env()
         self.assertEqual(self._leaked(env), [])
 
     def test_opencode_subprocess_receives_no_secret_but_its_own_key(self):
@@ -354,7 +354,7 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
         with patch.dict(os.environ, {"PATH": "/usr/bin", "HOME": "/home/u"}, clear=False):
             for env in (
                 codex._codex_env(codex._CodexClient(binary="/bin/true")),
-                translate._grok_env(),
+                grok._grok_env(),
                 translate._opencode_env("prompt"),
             ):
                 self.assertEqual(env.get("PATH"), "/usr/bin")

@@ -27,7 +27,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import translate
-from aipmt.providers import openai
+from aipmt.providers import grok, openai
 
 
 def _args(**overrides):
@@ -46,7 +46,7 @@ def _args(**overrides):
 def _client(**overrides):
     defaults = {"binary": "grok", "timeout": 900}
     defaults.update(overrides)
-    return translate._GrokCliClient(**defaults)
+    return grok._GrokCliClient(**defaults)
 
 
 _OK_PAYLOAD = json.dumps(
@@ -93,7 +93,7 @@ class TestGrokCliCall(unittest.TestCase):
     def test_nominal_returns_text(self):
         fake = _FakePopen()
         with patch("subprocess.Popen", fake):
-            out = translate._call_grok_cli(_client(), _args(), "PROMPT", "SEGMENT")
+            out = grok._call_grok_cli(_client(), _args(), "PROMPT", "SEGMENT")
         self.assertEqual(out, "Translated body")
         self.assertTrue(fake.kwargs["start_new_session"])
 
@@ -102,7 +102,7 @@ class TestGrokCliCall(unittest.TestCase):
         flirterait avec ARG_MAX ; le CLI ne lit pas stdin."""
         fake = _FakePopen()
         with patch("subprocess.Popen", fake):
-            translate._call_grok_cli(_client(), _args(), "PROMPT", "SECRET-SEGMENT")
+            grok._call_grok_cli(_client(), _args(), "PROMPT", "SECRET-SEGMENT")
         self.assertIn("--prompt-file", fake.argv)
         self.assertNotIn("SECRET-SEGMENT", " ".join(fake.argv))
 
@@ -112,7 +112,7 @@ class TestGrokCliCall(unittest.TestCase):
         client = _client()
         args = _args()
         with patch("subprocess.Popen", fake):
-            translate._call_grok_cli(client, args, "PROMPT", "SEG")
+            grok._call_grok_cli(client, args, "PROMPT", "SEG")
         argv = fake.argv
         denied = [argv[i + 1] for i, a in enumerate(argv) if a == "--deny"]
         self.assertIn("*", denied)
@@ -131,7 +131,7 @@ class TestGrokCliCall(unittest.TestCase):
         un poste où le sandbox OS ne s'applique déjà pas. Ce test empêche un
         retour à la forme non validée.
         """
-        named = [r for r in translate.GROK_DENY_RULES if r != "*"]
+        named = [r for r in grok.GROK_DENY_RULES if r != "*"]
         self.assertTrue(named, "les règles nommées ne doivent pas disparaître")
         for rule in named:
             self.assertTrue(
@@ -144,13 +144,13 @@ class TestGrokCliCall(unittest.TestCase):
         silence : on ne le demande donc jamais implicitement."""
         fake = _FakePopen()
         with patch("subprocess.Popen", fake):
-            translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
+            grok._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
         self.assertNotIn("--sandbox", fake.argv)
 
     def test_sandbox_flag_present_when_opted_in(self):
         fake = _FakePopen()
         with patch("subprocess.Popen", fake):
-            translate._call_grok_cli(_client(sandbox_profile="read-only"), _args(), "P", "S")
+            grok._call_grok_cli(_client(sandbox_profile="read-only"), _args(), "P", "S")
         self.assertEqual(fake.argv[fake.argv.index("--sandbox") + 1], "read-only")
 
     def test_env_strips_api_keys_and_inherited_sandbox(self):
@@ -160,7 +160,7 @@ class TestGrokCliCall(unittest.TestCase):
             patch.dict(os.environ, env, clear=False),
             patch("subprocess.Popen", fake),
         ):
-            translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
+            grok._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
         child = fake.kwargs["env"]
         self.assertNotIn("XAI_API_KEY", child)
         self.assertNotIn("GROK_SANDBOX", child)
@@ -176,7 +176,7 @@ class TestGrokCliCall(unittest.TestCase):
             patch("subprocess.Popen", _FakePopen(stdout=payload, returncode=0)),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(client, args, "PROMPT", "SEG")
+            grok._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("Not signed in", str(ctx.exception))
 
     def test_abnormal_stop_reason_raises(self):
@@ -187,7 +187,7 @@ class TestGrokCliCall(unittest.TestCase):
             patch("subprocess.Popen", _FakePopen(stdout=payload)),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(client, args, "PROMPT", "SEG")
+            grok._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("stopReason anormal", str(ctx.exception))
 
     def test_empty_text_raises(self):
@@ -198,7 +198,7 @@ class TestGrokCliCall(unittest.TestCase):
             patch("subprocess.Popen", _FakePopen(stdout=payload)),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(client, args, "PROMPT", "SEG")
+            grok._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("aucun texte", str(ctx.exception))
 
     def test_non_json_stdout_raises(self):
@@ -208,7 +208,7 @@ class TestGrokCliCall(unittest.TestCase):
             patch("subprocess.Popen", _FakePopen(stdout="oops not json")),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(client, args, "PROMPT", "SEG")
+            grok._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("illisible", str(ctx.exception))
 
     def test_structured_output_takes_precedence(self):
@@ -220,7 +220,7 @@ class TestGrokCliCall(unittest.TestCase):
             }
         )
         with patch("subprocess.Popen", _FakePopen(stdout=payload)):
-            out = translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
+            out = grok._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
         self.assertEqual(out, "# Titre")
 
     def test_timeout_kills_process_group(self):
@@ -232,7 +232,7 @@ class TestGrokCliCall(unittest.TestCase):
             patch("os.killpg") as killpg,
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_grok_cli(client, args, "PROMPT", "SEG")
+            grok._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("Grok CLI timeout après 42s", str(ctx.exception))
         killpg.assert_called_once()
 
@@ -249,7 +249,7 @@ class TestGrokCliCall(unittest.TestCase):
             patch("subprocess.Popen", factory),
             patch("time.sleep") as sleep,
         ):
-            out = translate._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
+            out = grok._call_grok_cli(_client(), _args(), "PROMPT", "SEG")
         self.assertEqual(out, "Translated body")
         self.assertEqual(len(attempts), 2)
         sleep.assert_called_once()
@@ -263,17 +263,17 @@ class TestGrokCliInit(unittest.TestCase):
             patch("subprocess.run", return_value=result),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._grok_preflight("/usr/bin/grok")
+            grok._grok_preflight("/usr/bin/grok")
         self.assertIn("grok login", str(ctx.exception))
 
     def test_preflight_accepts_authenticated(self):
         result = MagicMock(returncode=0, stdout="You are logged in with grok.com.", stderr="")
         with patch("subprocess.run", return_value=result):
-            translate._grok_preflight("/usr/bin/grok")
+            grok._grok_preflight("/usr/bin/grok")
 
     def test_preflight_rejects_missing_binary(self):
         with self.assertRaises(ValueError) as ctx:
-            translate._grok_preflight(None)
+            grok._grok_preflight(None)
         self.assertIn("introuvable", str(ctx.exception))
 
     def test_binary_falls_back_to_grok_home(self):
@@ -282,7 +282,7 @@ class TestGrokCliInit(unittest.TestCase):
             patch("shutil.which", return_value=None),
             patch("os.path.isfile", return_value=True),
         ):
-            self.assertTrue(translate._resolve_grok_binary().endswith("/.grok/bin/grok"))
+            self.assertTrue(grok._resolve_grok_binary().endswith("/.grok/bin/grok"))
 
     def test_refuses_ci_environment(self):
         args = _args(model=None)
@@ -290,34 +290,39 @@ class TestGrokCliInit(unittest.TestCase):
             patch.dict(os.environ, {"CI": "true"}, clear=False),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._init_grok_cli_client(args)
+            grok._init_grok_cli_client(args)
         self.assertIn("--use_grok_cli", str(ctx.exception))
 
     def test_eco_uses_model_available_on_subscription(self):
         """`grok models` n'expose que 4.6 et 4.5 : grok-4.3 n'est pas disponible."""
         with (
-            patch("aipmt.translate._grok_preflight"),
-            patch("aipmt.translate._resolve_grok_binary", return_value="/usr/bin/grok"),
+            patch("aipmt.providers.grok._grok_preflight") as fake_preflight,
+            patch("aipmt.providers.grok._resolve_grok_binary", return_value="/usr/bin/grok"),
             patch.dict(os.environ, {"CI": "", "GITHUB_ACTIONS": ""}, clear=False),
         ):
             args = _args(model=None, eco=True)
-            translate._init_grok_cli_client(args)
-        self.assertEqual(args.model, translate.ECO_MODEL_GROK_CLI)
+            grok._init_grok_cli_client(args)
+        self.assertEqual(args.model, grok.ECO_MODEL_GROK_CLI)
         self.assertEqual(args.model, "grok-4.5")
+        # Un patch mort exécuterait un vrai `grok models` : l'appel du double est exigé.
+        fake_preflight.assert_called_once()
 
 
 class TestGrokApiMode(unittest.TestCase):
     def test_requires_api_key(self):
         args = _args(model=None)
         with patch.dict(os.environ, {}, clear=True), self.assertRaises(ValueError) as ctx:
-            translate._init_grok_client(args)
+            grok._init_grok_client(args)
         self.assertIn("XAI_API_KEY", str(ctx.exception))
 
     def test_uses_xai_base_url(self):
         env = {"XAI_API_KEY": "xai-fixture-key"}  # pragma: allowlist secret
-        with patch.dict(os.environ, env, clear=True), patch("aipmt.translate.OpenAI") as client:
-            translate._init_grok_client(_args(model=None))
-        self.assertEqual(client.call_args.kwargs["base_url"], translate.XAI_BASE_URL)
+        with (
+            patch.dict(os.environ, env, clear=True),
+            patch("aipmt.providers.grok.OpenAI") as client,
+        ):
+            grok._init_grok_client(_args(model=None))
+        self.assertEqual(client.call_args.kwargs["base_url"], grok.XAI_BASE_URL)
 
     def test_end_turn_finish_reason_accepted(self):
         """xAI émet `end_turn` là où OpenAI émet `stop`."""
