@@ -23,7 +23,7 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import guards, markdown, news, placeholders, prompts, translate
+from aipmt import guards, markdown, news, notes, placeholders, prompts, translate
 from aipmt.translate import segment_text, translate_markdown_file
 from aipmt.translate import translate as translate_fn
 
@@ -1684,7 +1684,7 @@ class TestComposeWithNotesBottomTolerantToMalformedFM(unittest.TestCase):
         args = _base_args()
         args.note_position = "bottom"
         args.note_format = "legacy"
-        out = translate._compose_with_notes(content, args, "Note traduite", "legacy")
+        out = notes._compose_with_notes(content, args, "Note traduite", "legacy")
         self.assertIn("**Note traduite**", out)
         self.assertTrue(out.endswith("\n"))
 
@@ -1694,7 +1694,7 @@ class TestComposeWithNotesBottomTolerantToMalformedFM(unittest.TestCase):
         args.note_position = "top"
         args.note_format = "legacy"
         with self.assertRaisesRegex(RuntimeError, r"malformed frontmatter"):
-            translate._compose_with_notes(content, args, "Note traduite", "legacy")
+            notes._compose_with_notes(content, args, "Note traduite", "legacy")
 
 
 if __name__ == "__main__":

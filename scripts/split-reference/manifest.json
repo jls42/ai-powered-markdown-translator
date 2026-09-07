@@ -49,6 +49,13 @@
       "kind": "Expr",
       "file": "src/aipmt/prompts.py",
       "why": "docstring du module prompts, né du découpage"
+    },
+    {
+      "hash": "f24fb118690733d55fb4dab936edb0cdcf1c4b14d81198cceb11a51e365318a7",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/notes.py",
+      "why": "docstring du module notes, né du découpage"
     }
   ],
   "removed": [],

@@ -21,16 +21,15 @@ from unittest.mock import MagicMock
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import translate
-from aipmt.translate import (
-    _append_translation_note,
+from aipmt.notes import (
     _build_translation_note_block,
     _build_translation_note_source,
     _compose_with_notes,
     _quote_lines,
     _sanitize_model,
     _split_frontmatter,
-    translate_markdown_file,
 )
+from aipmt.translate import _append_translation_note, translate_markdown_file
 
 
 def _args(**overrides):
