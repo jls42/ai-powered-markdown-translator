@@ -222,38 +222,64 @@ def _openrouter_extra_body(client, args):
     return body
 
 
+def _openrouter_error_detail(error):
+    """Rendu lisible d'un objet d'erreur du routeur, où qu'il soit porté.
+
+    Trois sites lisaient la même forme de trois façons — dont une qui déversait
+    le dict entier, `metadata` et corps amont compris. Le message s'il en porte
+    un et qu'il n'est pas vide, l'objet sinon : un `{"message": ""}` doit rester
+    diagnosticable."""
+    if isinstance(error, dict):
+        return error.get("message") or error
+    return error
+
+
 def _openrouter_first_choice(response, args):
     """Premier choix de la réponse, ou une erreur qui nomme la vraie cause.
 
     OpenRouter répond 200 avec un corps qui ne porte qu'une erreur quand
     l'hébergeur amont échoue. Sans cette garde, `choices[0]` levait un
-    TypeError opaque qui masquait le message du routeur. Le type documenté
-    `NonStreamingChoice` porte aussi un `error` optionnel, à côté d'un contenu
-    partiel et indépendant de `finish_reason` : lui aussi refuse la réponse."""
+    TypeError opaque qui masquait le message du routeur."""
     error = getattr(response, "error", None) or (
         response.get("error") if isinstance(response, dict) else None
     )
     if error:
-        raise RuntimeError(f"OpenRouter a répondu une erreur (model={args.model}) : {error}")
+        raise RuntimeError(
+            f"OpenRouter a répondu une erreur (model={args.model}) : "
+            f"{_openrouter_error_detail(error)}"
+        )
     choices = getattr(response, "choices", None)
     if not choices:
         raise RuntimeError(
             f"OpenRouter n'a renvoyé aucun choix (model={args.model}) — "
             "réponse sans contenu ni erreur exploitable"
         )
-    choice = choices[0]
-    choice_error = getattr(choice, "error", None)
-    if choice_error:
-        detail = (
-            choice_error.get("message", choice_error)
-            if isinstance(choice_error, dict)
-            else choice_error
-        )
-        raise RuntimeError(
-            f"OpenRouter : l'hébergeur a échoué en cours de génération (model={args.model}) : "
-            f"{detail} — le contenu partiel qui l'accompagne est refusé."
-        )
-    return choice
+    return choices[0]
+
+
+def _openrouter_upstream_failure(error, native, args, content):
+    """Panne de l'hébergeur amont : un seul message pour ses deux signaux.
+
+    Le routeur la NORMALISE en `finish_reason=error` (mesuré sur
+    z-ai/glm-5.3-flash : deux segments coupés à 750 s exactement, `native` à
+    None) et le type documenté `NonStreamingChoice` porte en plus un `error`
+    optionnel, à côté d'un contenu partiel. Les deux arrivent ensemble ou
+    séparément ; un seul message les couvre, avec le détail de l'amont ET le
+    geste qui convient — sans lui, on cherche un défaut dans le document ou
+    dans le découpage, alors que la panne est ailleurs.
+
+    Refus systématique, y compris sur `finish_reason=stop` : une réponse qu'un
+    hébergeur déclare en erreur n'est pas une traduction, et ce dépôt refuse
+    plutôt que de deviner ce qui a survécu."""
+    detail = "" if error is None else f" : {_openrouter_error_detail(error)}"
+    # Ne parler de contenu perdu que s'il y en avait : sur un choix en échec,
+    # le SDK laisse `message` à None et rien n'a été produit.
+    perdu = " Le contenu partiel qui l'accompagne est refusé." if content else ""
+    raise RuntimeError(
+        f"OpenRouter : l'hébergeur a interrompu la génération (model={args.model}, "
+        f"natif={native!r}){detail}. Panne côté fournisseur, pas côté document : "
+        f"réessayer, ou restreindre les hébergeurs retenus.{perdu}"
+    )
 
 
 def _openrouter_check_finish(choice, client, args, content):
@@ -266,6 +292,9 @@ def _openrouter_check_finish(choice, client, args, content):
     l'utilisateur réduire une taille de segment qui n'est pas en cause."""
     finish = _reason_name(choice.finish_reason)
     native = _reason_name(getattr(choice, "native_finish_reason", None))
+    # `is not None` et non la vérité de l'objet : un `error` présent mais vide
+    # (`{}`, `""`) laissait passer le contenu partiel qu'il accompagne.
+    choice_error = getattr(choice, "error", None)
     # La raison normalisée est `string | null` dans le type documenté de la
     # réponse non streamée (api-reference/overview), sans condition, et le SDK
     # d'OpenRouter lui-même la tolère nulle. Quand elle manque, la raison brute
@@ -284,16 +313,8 @@ def _openrouter_check_finish(choice, client, args, content):
             f"OpenRouter : sortie tronquée à {client.max_tokens} tokens "
             f"(model={args.model}, finish_reason=length)"
         )
-    # `error` est la valeur que le routeur NORMALISE quand l'hébergeur amont
-    # échoue en cours de génération. Mesuré sur z-ai/glm-5.3-flash : deux
-    # segments coupés à 750 s exactement, `native_finish_reason` à None. Le dire
-    # évite de chercher un défaut dans le document ou dans le découpage.
-    if reason == "error":
-        raise RuntimeError(
-            f"OpenRouter : l'hébergeur a interrompu la génération (model={args.model}, "
-            f"finish_reason=error, natif={native!r}). Panne côté fournisseur, pas côté "
-            "document : réessayer, ou restreindre les hébergeurs retenus."
-        )
+    if reason == "error" or choice_error is not None:
+        _openrouter_upstream_failure(choice_error, native, args, content)
     # `end_turn` est la forme émise par certains hébergeurs là où OpenAI émet
     # `stop` ; `native_finish_reason` porte la valeur non normalisée de l'amont.
     if reason not in ("stop", "STOP", "end_turn", None):

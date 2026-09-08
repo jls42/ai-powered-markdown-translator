@@ -245,6 +245,20 @@
       "kind": "FunctionDef",
       "file": "src/aipmt/providers/opencode.py",
       "why": "revue : part: null compte comme vide"
+    },
+    {
+      "hash": "e2ecf5810a810ba2cd108c5ac0dc1d272586dc7b052b1881bde5bd75c9a77877",
+      "name": "_openrouter_error_detail",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue max : un seul rendu des objets d'erreur du routeur"
+    },
+    {
+      "hash": "06854ab621e9b3355343f92110b2e943709e93638f051a9e2feacc196a4e9716",
+      "name": "_openrouter_upstream_failure",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue max : un seul message pour la panne amont, détail + conseil"
     }
   ],
   "removed": [],
@@ -486,6 +500,20 @@
       "old_hash": "fb1302f739955381a3180572fe5bef7b3c9fe327d2ea2b1a28dc58ac2d26db51",
       "new_hash": "0dd39f1395154ebc52df6e42b51304d8f196e6909c173c88dd11aeceb52466f9",
       "why": "revue (Codex) : l'erreur portée par le choix lui-même (NonStreamingChoice.error) refuse le contenu partiel"
+    },
+    {
+      "name": "_openrouter_first_choice",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "0dd39f1395154ebc52df6e42b51304d8f196e6909c173c88dd11aeceb52466f9",
+      "new_hash": "6fb82f48b20acd1d18ea6ad51c9b52701e465327236e458e869c4f30f9eb5b4c",
+      "why": "revue max : l'erreur du choix rejoint le contrat de sortie ; rendu de l'erreur factorisé"
+    },
+    {
+      "name": "_openrouter_check_finish",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "926914eb12244ab93e267323a74a11d86c9acc7cdae201ab7b1ffa2216e66b49",
+      "new_hash": "ed6dfd3a752982e4adb8424d22daec08a39fc1d3d25619457f5f330d410d56c7",
+      "why": "revue max : panne amont regroupée (finish_reason=error et/ou error du choix), objet présent mais vide refusé"
     }
   ]
 }

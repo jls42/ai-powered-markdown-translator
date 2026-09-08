@@ -31,6 +31,9 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
+from openai._models import construct_type
+from openai.types.chat import ChatCompletion
+
 from aipmt import naming, segmentation
 from aipmt.providers import openai as openai_provider
 from aipmt.providers import openrouter, registry
@@ -50,11 +53,15 @@ def _args(**kw):
     return Namespace(**base)
 
 
-def _choice(content="Bonjour", finish="stop", native=None):
+def _choice(content="Bonjour", finish="stop", native=None, **extra):
+    """Un choix de réponse ; `error=` pose l'erreur que `NonStreamingChoice`
+    autorise à côté du contenu, `message=None` le choix sans message du tout."""
+    message = SimpleNamespace(content=content) if content is not None else None
     return SimpleNamespace(
-        message=SimpleNamespace(content=content),
+        message=message,
         finish_reason=finish,
         native_finish_reason=native,
+        **extra,
     )
 
 
@@ -269,28 +276,88 @@ class TestContratDeSortie(unittest.TestCase):
             openrouter._call_openrouter(client, args, "p", "s")
         self.assertIn("upstream down", str(ctx.exception))
 
+    def _refus(self, **kw):
+        """Appelle le provider sur un choix donné et rend le message d'erreur."""
+        client = _client()
+        client.client.chat.completions.create.return_value = SimpleNamespace(
+            choices=[_choice(**kw)]
+        )
+        args = _args()
+        with self.assertRaises(RuntimeError) as ctx:
+            openrouter._call_openrouter(client, args, "p", "s")
+        return str(ctx.exception)
+
     def test_erreur_dans_le_choix_refuse_le_contenu_partiel(self):
         """Type documenté `NonStreamingChoice.error` : l'erreur amont peut être
         portée par le choix, à côté d'un contenu partiel, que `finish_reason`
-        soit `error` ou nul. Mesuré avec le SDK verrouillé : le champ survit
-        dans les attributs supplémentaires du choix."""
-        for finish in ("error", None):
+        soit `error`, `stop` ou nul."""
+        for finish in ("error", None, "stop"):
             with self.subTest(finish=finish):
-                client = _client()
-                choix = SimpleNamespace(
-                    message=SimpleNamespace(content="partial translation"),
-                    finish_reason=finish,
-                    native_finish_reason=None,
+                message = self._refus(
+                    content="partial translation",
+                    finish=finish,
                     error={"code": 502, "message": "Provider disconnected mid-stream"},
                 )
-                client.client.chat.completions.create.return_value = SimpleNamespace(
-                    choices=[choix]
-                )
-                args = _args()
-                with self.assertRaises(RuntimeError) as ctx:
-                    openrouter._call_openrouter(client, args, "p", "s")
-                self.assertIn("disconnected mid-stream", str(ctx.exception))
-                self.assertIn("partiel", str(ctx.exception))
+                self.assertIn("disconnected mid-stream", message)
+                self.assertIn("partiel", message)
+                # Le conseil du cas `finish_reason=error` ne doit pas disparaître
+                # parce que l'erreur est aussi portée par le choix.
+                self.assertIn("restreindre les hébergeurs", message)
+
+    def test_erreur_presente_mais_vide_refuse_aussi(self):
+        """`if choice_error:` laissait passer le contenu partiel sur un objet
+        présent mais faux — mesuré sur `{}`, `""`, `0` et `False`."""
+        for vide in ({}, "", 0, False, []):
+            with self.subTest(erreur=repr(vide)):
+                message = self._refus(content="partial", finish=None, error=vide)
+                self.assertIn("interrompu la génération", message)
+
+    def test_le_detail_reste_diagnosticable_si_le_message_est_vide(self):
+        """`.get("message", error)` rendait une chaîne vide ou `None` : le
+        message d'erreur ne nommait plus aucune cause."""
+        for erreur in ({"message": ""}, {"message": None}, {"code": 502}):
+            with self.subTest(erreur=erreur):
+                message = self._refus(content="partial", finish=None, error=erreur)
+                self.assertIn("502" if "code" in erreur else "message", message)
+                self.assertNotIn(" : . ", message)
+
+    def test_aucun_contenu_perdu_nest_annonce_quand_il_ny_en_a_pas(self):
+        """Sur un choix en échec, le SDK laisse `message` à None : annoncer un
+        contenu partiel refusé enverrait chercher une troncature inexistante."""
+        message = self._refus(content=None, finish="error", error={"message": "boom"})
+        self.assertIn("boom", message)
+        self.assertNotIn("partiel", message)
+
+    def test_le_champ_error_survit_au_sdk_verrouille(self):
+        """La garde ne tient que parce que le modèle du SDK accepte les champs
+        supplémentaires : `error` n'appartient pas au schéma d'OpenAI, il vient
+        d'OpenRouter. Une version qui les rejetterait rendrait la garde muette
+        sans faire rougir un seul test à base de doublures — d'où cette
+        construction par le SDK lui-même."""
+        raw = {
+            "id": "gen-1",
+            "object": "chat.completion",
+            "created": 0,
+            "model": "z-ai/glm-5.2",
+            "choices": [
+                {
+                    "index": 0,
+                    "finish_reason": None,
+                    "native_finish_reason": None,
+                    "message": {"role": "assistant", "content": "partial"},
+                    "error": {"code": 502, "message": "Provider disconnected mid-stream"},
+                }
+            ],
+        }
+        response = construct_type(value=raw, type_=ChatCompletion)
+        choice = response.choices[0]
+        self.assertEqual(getattr(choice, "error", None), raw["choices"][0]["error"])
+        client = _client()
+        client.client.chat.completions.create.return_value = response
+        args = _args()
+        with self.assertRaises(RuntimeError) as ctx:
+            openrouter._call_openrouter(client, args, "p", "s")
+        self.assertIn("disconnected mid-stream", str(ctx.exception))
 
     def test_aucun_choix(self):
         client = _client()
