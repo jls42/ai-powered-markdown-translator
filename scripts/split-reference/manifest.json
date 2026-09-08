@@ -479,6 +479,13 @@
       "old_hash": "7c902fac701f5d0823b26b5fbd973a5b81c715a03815b118821933fc18a15f94",
       "new_hash": "5930d68494dc1a7b3f8c25e8a0117983d7e81226aa2001e8bf8381e0e7242eef",
       "why": "revue : un corps 200 portant une erreur se lisait « slug inconnu » ; l'erreur du routeur est nommée"
+    },
+    {
+      "name": "_openrouter_first_choice",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "fb1302f739955381a3180572fe5bef7b3c9fe327d2ea2b1a28dc58ac2d26db51",
+      "new_hash": "0dd39f1395154ebc52df6e42b51304d8f196e6909c173c88dd11aeceb52466f9",
+      "why": "revue (Codex) : l'erreur portée par le choix lui-même (NonStreamingChoice.error) refuse le contenu partiel"
     }
   ]
 }

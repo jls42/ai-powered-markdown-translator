@@ -227,7 +227,9 @@ def _openrouter_first_choice(response, args):
 
     OpenRouter répond 200 avec un corps qui ne porte qu'une erreur quand
     l'hébergeur amont échoue. Sans cette garde, `choices[0]` levait un
-    TypeError opaque qui masquait le message du routeur."""
+    TypeError opaque qui masquait le message du routeur. Le type documenté
+    `NonStreamingChoice` porte aussi un `error` optionnel, à côté d'un contenu
+    partiel et indépendant de `finish_reason` : lui aussi refuse la réponse."""
     error = getattr(response, "error", None) or (
         response.get("error") if isinstance(response, dict) else None
     )
@@ -239,7 +241,19 @@ def _openrouter_first_choice(response, args):
             f"OpenRouter n'a renvoyé aucun choix (model={args.model}) — "
             "réponse sans contenu ni erreur exploitable"
         )
-    return choices[0]
+    choice = choices[0]
+    choice_error = getattr(choice, "error", None)
+    if choice_error:
+        detail = (
+            choice_error.get("message", choice_error)
+            if isinstance(choice_error, dict)
+            else choice_error
+        )
+        raise RuntimeError(
+            f"OpenRouter : l'hébergeur a échoué en cours de génération (model={args.model}) : "
+            f"{detail} — le contenu partiel qui l'accompagne est refusé."
+        )
+    return choice
 
 
 def _openrouter_check_finish(choice, client, args, content):

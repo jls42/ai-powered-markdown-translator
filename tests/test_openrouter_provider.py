@@ -269,6 +269,29 @@ class TestContratDeSortie(unittest.TestCase):
             openrouter._call_openrouter(client, args, "p", "s")
         self.assertIn("upstream down", str(ctx.exception))
 
+    def test_erreur_dans_le_choix_refuse_le_contenu_partiel(self):
+        """Type documenté `NonStreamingChoice.error` : l'erreur amont peut être
+        portée par le choix, à côté d'un contenu partiel, que `finish_reason`
+        soit `error` ou nul. Mesuré avec le SDK verrouillé : le champ survit
+        dans les attributs supplémentaires du choix."""
+        for finish in ("error", None):
+            with self.subTest(finish=finish):
+                client = _client()
+                choix = SimpleNamespace(
+                    message=SimpleNamespace(content="partial translation"),
+                    finish_reason=finish,
+                    native_finish_reason=None,
+                    error={"code": 502, "message": "Provider disconnected mid-stream"},
+                )
+                client.client.chat.completions.create.return_value = SimpleNamespace(
+                    choices=[choix]
+                )
+                args = _args()
+                with self.assertRaises(RuntimeError) as ctx:
+                    openrouter._call_openrouter(client, args, "p", "s")
+                self.assertIn("disconnected mid-stream", str(ctx.exception))
+                self.assertIn("partiel", str(ctx.exception))
+
     def test_aucun_choix(self):
         client = _client()
         client.client.chat.completions.create.return_value = SimpleNamespace(choices=[])
