@@ -636,31 +636,34 @@ class TestPreflightDeBoutEnBout(unittest.TestCase):
         self.assertIn("--reasoning_effort=none ignoré", err.getvalue())
 
     def test_slug_invalide_refuse_avant_tout_reseau(self):
+        args = _args(model="z-ai/glm/..")
         with (
             patch.dict(os.environ, {"OPENROUTER_API_KEY": _MARQUEUR}),
             patch("urllib.request.urlopen", side_effect=AssertionError("réseau interdit")),
             self.assertRaises(ValueError) as ctx,
         ):
-            openrouter._init_openrouter_client(_args(model="z-ai/glm/.."))
+            openrouter._init_openrouter_client(args)
         self.assertIn("invalide", str(ctx.exception))
 
     def test_cle_absente_refusee_avant_tout_reseau(self):
+        args = _args()
         with (
             patch.dict(os.environ, {"OPENROUTER_API_KEY": ""}),
             patch("urllib.request.urlopen", side_effect=AssertionError("réseau interdit")),
             self.assertRaises(ValueError) as ctx,
         ):
-            openrouter._init_openrouter_client(_args())
+            openrouter._init_openrouter_client(args)
         self.assertIn("OPENROUTER_API_KEY", str(ctx.exception))
 
     def test_catalogue_injoignable_refuse_sans_construire_de_client(self):
+        args = _args()
         with (
             patch.dict(os.environ, {"OPENROUTER_API_KEY": _MARQUEUR}),
             patch("urllib.request.urlopen", side_effect=OSError("DNS")),
             patch("aipmt.providers.openrouter.OpenAI") as fake_openai,
             self.assertRaises(ValueError) as ctx,
         ):
-            openrouter._init_openrouter_client(_args())
+            openrouter._init_openrouter_client(args)
         self.assertIn("injoignable", str(ctx.exception))
         fake_openai.assert_not_called()
         self.assertEqual(segmentation.MODEL_TOKEN_LIMITS, self._limits)

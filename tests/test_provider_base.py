@@ -38,6 +38,16 @@ def _alive(pid):
     return True
 
 
+def _survivors(pids, seconds):
+    """Les pids encore vivants après `seconds` au plus."""
+    deadline = time.monotonic() + seconds
+    alive = [pid for pid in pids if _alive(pid)]
+    while alive and time.monotonic() < deadline:
+        time.sleep(0.05)
+        alive = [pid for pid in pids if _alive(pid)]
+    return alive
+
+
 def _ignore(*_):
     """Gestionnaire neutre : si le SIGTERM du test arrivait hors de la fenêtre
     surveillée, il ne doit pas tuer le lanceur de tests."""
@@ -54,13 +64,14 @@ class TestSigtermDuringWait(unittest.TestCase):
             # groupe peut les arrêter — c'est précisément ce qu'on veut prouver.
             argv = ["sh", "-c", f'trap "" TERM; sleep 30 & echo $$ $! > {pidfile}; wait']
             timer = threading.Timer(0.8, os.kill, args=(os.getpid(), signal.SIGTERM))
+            env = os.environ.copy()
             try:
                 timer.start()
                 with (
                     patch.object(base, "CODEX_TERM_GRACE", 0.5),
                     self.assertRaises(SystemExit) as ctx,
                 ):
-                    base._codex_run_process(argv, "", 30, os.environ.copy(), "Codex", "m")
+                    base._codex_run_process(argv, "", 30, env, "Codex", "m")
                 # Le gestionnaire précédent est restauré dès la sortie du pilote.
                 self.assertIs(signal.getsignal(signal.SIGTERM), _ignore)
             finally:
@@ -69,10 +80,7 @@ class TestSigtermDuringWait(unittest.TestCase):
             self.assertEqual(ctx.exception.code, 128 + signal.SIGTERM)
             pids = [int(x) for x in pathlib.Path(pidfile).read_text(encoding="utf-8").split()]
         self.assertEqual(len(pids), 2)
-        deadline = time.monotonic() + 5
-        while time.monotonic() < deadline and any(_alive(pid) for pid in pids):
-            time.sleep(0.05)
-        self.assertEqual([pid for pid in pids if _alive(pid)], [], "agent encore vivant")
+        self.assertEqual(_survivors(pids, 5), [], "agent encore vivant")
 
     def test_no_handler_is_installed_outside_the_main_thread(self):
         before = signal.getsignal(signal.SIGTERM)

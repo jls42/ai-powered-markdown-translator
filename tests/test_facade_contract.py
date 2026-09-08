@@ -213,22 +213,42 @@ class NoTestPatchesTheFacade(unittest.TestCase):
         `import aipmt.translate as x` et `from aipmt import translate as x`."""
         names = {"translate"}
         for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                names |= {a.asname for a in node.names if a.name == cls.FACADE and a.asname}
-            elif isinstance(node, ast.ImportFrom) and node.module == "aipmt" and not node.level:
-                names |= {a.asname or a.name for a in node.names if a.name == "translate"}
+            names |= cls._aliases_bound_by(node)
         return names
+
+    @classmethod
+    def _aliases_bound_by(cls, node):
+        if isinstance(node, ast.Import):
+            return cls._aliases_from_import(node)
+        if isinstance(node, ast.ImportFrom):
+            return cls._aliases_from_import_from(node)
+        return set()
+
+    @classmethod
+    def _aliases_from_import(cls, node):
+        return {a.asname for a in node.names if a.name == cls.FACADE and a.asname}
+
+    @staticmethod
+    def _aliases_from_import_from(node):
+        if node.module != "aipmt" or node.level:
+            return set()
+        return {a.asname or a.name for a in node.names if a.name == "translate"}
 
     @classmethod
     def _facade_target(cls, target, aliases):
         """La cible si elle désigne la façade, sinon None."""
         if isinstance(target, ast.Constant):
-            value = target.value
-            if isinstance(value, str) and (
-                value == cls.FACADE or value.startswith(cls.FACADE + ".")
-            ):
-                return value
-            return None
+            return cls._facade_string(target.value)
+        return cls._facade_attribute(target, aliases)
+
+    @classmethod
+    def _facade_string(cls, value):
+        if isinstance(value, str) and (value == cls.FACADE or value.startswith(cls.FACADE + ".")):
+            return value
+        return None
+
+    @classmethod
+    def _facade_attribute(cls, target, aliases):
         dotted = ast.unparse(target)
         if dotted == cls.FACADE or dotted.startswith(cls.FACADE + "."):
             return dotted
@@ -239,6 +259,13 @@ class NoTestPatchesTheFacade(unittest.TestCase):
             return dotted
         return None
 
+    @staticmethod
+    def _first_target(call):
+        """Premier argument positionnel, sinon le mot-clé `target=`."""
+        if call.args:
+            return call.args[0]
+        return next((k.value for k in call.keywords if k.arg == "target"), None)
+
     @classmethod
     def _patch_targets(cls, path):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -246,12 +273,8 @@ class NoTestPatchesTheFacade(unittest.TestCase):
         for node in ast.walk(tree):
             if not isinstance(node, ast.Call) or not cls._is_patch_call(node.func):
                 continue
-            candidate = node.args[0] if node.args else None
-            if candidate is None:
-                candidate = next((k.value for k in node.keywords if k.arg == "target"), None)
-            if candidate is None:
-                continue
-            target = cls._facade_target(candidate, aliases)
+            candidate = cls._first_target(node)
+            target = None if candidate is None else cls._facade_target(candidate, aliases)
             if target is not None:
                 yield node.lineno, target
 

@@ -650,15 +650,17 @@ class TestOpencodeStreamHardening(unittest.TestCase):
 
     def test_part_null_on_step_finish_gives_the_contract_error(self):
         stdout = _jsonl(_START, _text_event("t"), {"type": "step_finish", "part": None})
+        fake = _FakePopen(stdout=stdout)
         with self.assertRaisesRegex(opencode._OpencodeCallError, "reason anormal=None"):
-            self._run(_FakePopen(stdout=stdout))
+            self._run(fake)
 
     def test_part_null_on_tool_use_gives_the_contract_error(self):
         stdout = _jsonl(
             _START, {"type": "tool_use", "part": None}, _text_event("t"), _finish_event()
         )
+        fake = _FakePopen(stdout=stdout)
         with self.assertRaisesRegex(opencode._OpencodeCallError, "appelé un outil"):
-            self._run(_FakePopen(stdout=stdout))
+            self._run(fake)
 
     def test_unreadable_event_line_refuses_a_partial_answer(self):
         stdout = (
@@ -666,18 +668,21 @@ class TestOpencodeStreamHardening(unittest.TestCase):
             + '{"type": "text", "part": {"text": "seconde moi\n'
             + _jsonl(_finish_event())
         )
+        fake = _FakePopen(stdout=stdout)
         with self.assertRaisesRegex(opencode._OpencodeCallError, "illisible"):
-            self._run(_FakePopen(stdout=stdout))
+            self._run(fake)
 
     def test_cli_failure_cause_wins_over_a_corrupted_stream(self):
         stdout = '{"type": "text", "part": {\n' + _jsonl(_OPAQUE_ERROR)
+        fake = _FakePopen(stdout=stdout, returncode=1, stderr=_LOG_CAUSE)
         with self.assertRaisesRegex(opencode._OpencodeCallError, "ProviderModelNotFoundError"):
-            self._run(_FakePopen(stdout=stdout, returncode=1, stderr=_LOG_CAUSE))
+            self._run(fake)
 
     def test_the_last_step_finish_decides(self):
         stdout = _jsonl(_START, _text_event("t"), _finish_event("stop"), _finish_event("length"))
+        fake = _FakePopen(stdout=stdout)
         with self.assertRaisesRegex(opencode._OpencodeCallError, "reason anormal='length'"):
-            self._run(_FakePopen(stdout=stdout))
+            self._run(fake)
 
     def test_workdir_is_empty_at_call_time_and_removed_after(self):
         seen = {}
