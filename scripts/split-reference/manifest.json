@@ -168,6 +168,55 @@
       "kind": "Assign",
       "file": "src/aipmt/translate.py",
       "why": "__all__ de la façade : les neuf noms supportés"
+    },
+    {
+      "hash": "a5d5d348f7e84faf62d719be59740b412fc4ac6a855ec6946da5895f11be6805",
+      "name": "_resolve_provider_from_args",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "scission de _resolve_provider pour Codacy"
+    },
+    {
+      "hash": "9e7fe2fc071c0176baeca71569a8738533ae236632d0a3ae98ffc0b1da63dd8d",
+      "name": "_call_provider",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "scission de _dispatch_provider_call pour Codacy"
+    },
+    {
+      "hash": "0a01c5c308f283a674b88febdc7bbec693c8f59cb069a12e4b47cfc83f6bcf8a",
+      "name": "_PROVIDER_FLAGS",
+      "kind": "Assign",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "table des huit flags exclusifs, née de la scission de _add_provider_args pour Codacy"
+    },
+    {
+      "hash": "0f82341d5fc1897c77bd34350f038a80ea488c5b056006b21b715c45e9356778",
+      "name": "_select_later_provider_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "scission de _select_provider_client pour Codacy"
+    },
+    {
+      "hash": "c53d7defe2343b9c738f2a2418266dd36bbd2ab32428fc3ea6652950160f8873",
+      "name": "_openrouter_endpoint_usable",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "scission de _openrouter_pin pour Codacy"
+    },
+    {
+      "hash": "c23b85f78c07adcf49c5edd1a9fc0a476539db5070379c01894ddda705242e7d",
+      "name": "_openrouter_api_key",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "scission de _init_openrouter_client pour Codacy"
+    },
+    {
+      "hash": "1357b9bda8df5dafc36d8792937fd2048f9cf4dcc906e403012eca7848b74122",
+      "name": "_openrouter_reasoning_constraints",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "scission de _init_openrouter_client pour Codacy"
     }
   ],
   "removed": [],
@@ -185,6 +234,55 @@
       "old_hash": "68750e5159a2432e1f7266afa155de5b709f9d35b33f8a5253cedbcb37c9427d",
       "new_hash": "e487cd02c473cf0f2e41ab75e479e1d646c40fd3dd3f58a419701e1760aa8360",
       "why": "Sonar S8513 : deux endswith chaînés remplacés par un endswith à tuple, comportement identique (le code déplacé compte comme nouveau pour Sonar)"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "76975be5f55734e71698038b2bc89e673f73952440873c76baa3dfd732c2ecc5",
+      "new_hash": "57aad80ad91ff688082c3dc480d4ba60c75afb27841e78a251fa1946786207b3",
+      "why": "docstring du module : ses fonctions ne sont plus « déplacées telles quelles », elles sont scindées pour Codacy sans changer l'ordre d'évaluation"
+    },
+    {
+      "name": "_resolve_provider",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "7c32bcb9e5c7cf70ee19ac804d2dd28c2822217b8237a99479f17fa712e279f4",
+      "new_hash": "d22f0fbfeaa233db40d48032208d2f1bf775b005eda9f09ae9a7b4c1fa5aaef8",
+      "why": "Codacy CCN 9 > 8 : la chaîne des flags du Namespace devient _resolve_provider_from_args, même ordre d'évaluation"
+    },
+    {
+      "name": "_dispatch_provider_call",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "7c86f4626307e81d5bf6f38fd19f3dd218d3374f4058864e7349fa963ef67274",
+      "new_hash": "5649c81b64820a6f5b3f1e7b5fa0b7c57035a773ed85bc51ec909f998576c24e",
+      "why": "Codacy CCN 9 > 8 : la chaîne d'appels devient _call_provider, la garde de contenu vide reste ici"
+    },
+    {
+      "name": "_add_provider_args",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "11a676712465b230625e28ea09098d03cc90015408737dcc92e0964d4a320964",
+      "new_hash": "49c1fa01a50f59b657ae4d635ff6e4ea22019e1690f99d6aabbe653b47e2bf7f",
+      "why": "Codacy 80 lignes > 50 : les huit flags exclusifs viennent de la table _PROVIDER_FLAGS ; parser identique, sha256 de --help inchangé"
+    },
+    {
+      "name": "_select_provider_client",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "76aab0abe3fce22bdce81f3c488c87f07eb69abd81094c53550e2cfae7dad774",
+      "new_hash": "21b6eb9e0c046a286a238022b3745788b85dc6442ac3968e7b3d26bba8d07157",
+      "why": "Codacy CCN 9 > 8 : la suite de la chaîne devient _select_later_provider_client, même ordre d'évaluation"
+    },
+    {
+      "name": "_openrouter_pin",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "d04025aa9fe96010e9bb24af1f72026327e6a4cc3da0ee1c170711092b693019",
+      "new_hash": "1b04062baedfe4aec3b1431bc6162d55b845610da2564b6c776d4cf71a45eef0",
+      "why": "Codacy CCN 9 > 8 : le prédicat de filtre devient _openrouter_endpoint_usable"
+    },
+    {
+      "name": "_init_openrouter_client",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "a6a33c12aeb9abc5bc982f56b2e81c0d85306e08b3032152e6fa099ef0416a3c",
+      "new_hash": "0d307aff8b5d05ae36745586ce6122dcf67c2e4b13e6c63c8a92fc0ae410a679",
+      "why": "Codacy CCN 10 > 8 : lecture de la clé et contraintes de raisonnement extraites (_openrouter_api_key, _openrouter_reasoning_constraints)"
     }
   ]
 }

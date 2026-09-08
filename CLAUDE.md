@@ -241,7 +241,8 @@ Trajectoire :
 ### Lizard CCN — scope et fail-closed
 
 Le seuil est 12 (futur 8). Tout le paquet `src/aipmt/` est **dans** le scope :
-192 fonctions au découpage de la 1.13.0, CCN moyen 3,5, zéro dépassement.
+198 fonctions au découpage de la 1.13.0 (192 déplacées, puis six scindées pour
+tenir sous la limite 8 de Codacy), CCN moyen 3,4, zéro dépassement.
 
 Le scope vit dans un tableau `SCOPE` en tête de `scripts/check-complexity.sh`
 — des RÉPERTOIRES (`src/`, `scripts/`), pas des fichiers, et un **plancher de
@@ -494,7 +495,8 @@ Deux règles qui découlent du découpage, verrouillées par `tests/test_facade_
 de `tests.yml`. Il compare le multiensemble des nœuds AST de premier niveau du
 paquet à un snapshot versionné (`scripts/split-reference/package-6ae1505.json`,
 304 nœuds au 2026-09-07) plus un manifeste cumulatif d'écarts déclarés
-(`manifest.json` : docstrings de module, `__all__`…) ; il vérifie l'emplacement
+(`manifest.json` : docstrings de module, `__all__`, scissions demandées par
+Codacy…) ; il vérifie l'emplacement
 de chaque symbole, la survie verbatim des marqueurs `# nosec` / `# nosemgrep` /
 `NOSONAR`, et refuse tout `.py` non suivi sous `src/aipmt/`, `tests/` ou
 `scripts/tests/` (pre-commit ne voit que l'index : un module créé sans `git add`

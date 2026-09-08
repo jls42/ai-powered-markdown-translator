@@ -111,6 +111,14 @@ def _openrouter_endpoints(base_url, model):
     return (payload.get("data") or {}).get("endpoints") or []
 
 
+def _openrouter_endpoint_usable(endpoint):
+    """Les deux filtres de `_openrouter_pin` : statut sain, plafond de sortie
+    déclaré et au-dessus du plancher."""
+    return (endpoint.get("status") or 0) >= 0 and (
+        endpoint.get("max_completion_tokens") or 0
+    ) >= OPENROUTER_MIN_COMPLETION_TOKENS
+
+
 def _openrouter_pin(endpoints):
     """Hébergeurs retenus, et plafond de sortie commun à ceux-là.
 
@@ -120,12 +128,7 @@ def _openrouter_pin(endpoints):
     traduction longue en silence — c'est le défaut que le préflight existe pour
     empêcher. Un plafond non déclaré (`None`) est un inconnu, donc écarté :
     l'objet de cette fonction est justement de ne rien laisser au hasard."""
-    usable = [
-        e
-        for e in endpoints
-        if (e.get("status") or 0) >= 0
-        and (e.get("max_completion_tokens") or 0) >= OPENROUTER_MIN_COMPLETION_TOKENS
-    ]
+    usable = [e for e in endpoints if _openrouter_endpoint_usable(e)]
     tags = tuple(e["tag"] for e in usable if e.get("tag"))
     ceiling = min((e["max_completion_tokens"] for e in usable), default=0)
     return tags, ceiling
@@ -307,11 +310,8 @@ def _openrouter_validate_model(model):
         )
 
 
-def _init_openrouter_client(args):
-    """Provider OpenRouter. L'appel est compatible OpenAI ; ce qui distingue ce
-    provider tient dans le préflight, dont le résultat est affiché parce qu'il
-    engage la dépense et la fidélité de la sortie."""
-    _openrouter_validate_model(args.model)
+def _openrouter_api_key():
+    """Clé lue dans l'environnement ; le placeholder par défaut vaut absence."""
     api_key = os.getenv("OPENROUTER_API_KEY", DEFAULT_OPENROUTER_API_KEY)
     if not api_key or api_key == DEFAULT_OPENROUTER_API_KEY:
         raise ValueError(
@@ -321,6 +321,22 @@ def _init_openrouter_client(args):
                 hint=" Clé à obtenir sur openrouter.ai/keys.",
             )
         )
+    return api_key
+
+
+def _openrouter_reasoning_constraints(entry):
+    """Ce que le catalogue impose au modèle : raisonnement obligatoire ou non,
+    et les efforts qu'il déclare accepter (tuple vide s'il n'en liste aucun)."""
+    reasoning = entry.get("reasoning") or {}
+    return bool(reasoning.get("mandatory")), tuple(reasoning.get("supported_efforts") or ())
+
+
+def _init_openrouter_client(args):
+    """Provider OpenRouter. L'appel est compatible OpenAI ; ce qui distingue ce
+    provider tient dans le préflight, dont le résultat est affiché parce qu'il
+    engage la dépense et la fidélité de la sortie."""
+    _openrouter_validate_model(args.model)
+    api_key = _openrouter_api_key()
     if args.eco:
         print(
             "⚠ --eco est sans effet avec --use_openrouter : le modèle est celui de --model.",
@@ -342,14 +358,13 @@ def _init_openrouter_client(args):
     # modèles — dont deux plafonnés à 4 095 tokens.
     context_length = int(entry.get("context_length") or DEFAULT_TOKEN_LIMIT)
     MODEL_TOKEN_LIMITS[args.model] = context_length
-    reasoning = entry.get("reasoning") or {}
-    mandatory = bool(reasoning.get("mandatory"))
+    mandatory, supported_efforts = _openrouter_reasoning_constraints(entry)
     client = _OpenRouterClient(
         client=OpenAI(api_key=api_key, base_url=base_url, timeout=OPENROUTER_TIMEOUT),
         providers=providers,
         max_tokens=min(OPENROUTER_MAX_TOKENS, ceiling),
         reasoning_mandatory=mandatory,
-        supported_efforts=tuple(reasoning.get("supported_efforts") or ()),
+        supported_efforts=supported_efforts,
     )
     if mandatory and getattr(args, "reasoning_effort", None) == "none":
         print(

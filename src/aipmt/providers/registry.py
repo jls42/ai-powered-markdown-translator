@@ -2,10 +2,11 @@
 
 Un provider est identifié par une clé (`codex`, `grok_cli`…) résolue depuis les
 flags ; à chaque clé correspondent un libellé, un constructeur de client et un
-appel de traduction. Les cinq fonctions de ce module sont déplacées telles
-quelles depuis le module principal : leurs chaînes if/elif restent le contrat
-observable (précédence, libellés, ordre de l'aide) jusqu'à ce qu'un registre
-déclaratif les remplace, dans un changement nommé comme tel.
+appel de traduction. Les fonctions de ce module viennent du module principal,
+scindées depuis pour tenir sous la complexité que Codacy tolère, sans changer
+l'ordre d'évaluation : leurs chaînes if/elif restent le contrat observable
+(précédence, libellés, ordre de l'aide) jusqu'à ce qu'un registre déclaratif
+les remplace, dans un changement nommé comme tel.
 """
 
 from .anthropic import _call_claude, _init_claude_client
@@ -28,6 +29,12 @@ def _resolve_provider(args, use_mistral=False, use_claude=False, use_gemini=Fals
         return "claude"
     if use_gemini:
         return "gemini"
+    return _resolve_provider_from_args(args)
+
+
+def _resolve_provider_from_args(args):
+    """Provider désigné par les flags `use_*` du Namespace, `openai` à défaut.
+    Lus par `getattr` : un Namespace construit à la main peut ne pas les porter."""
     if getattr(args, "use_codex", False):
         return "codex"
     if getattr(args, "use_grok_cli", False):
@@ -56,24 +63,28 @@ _PROVIDER_LABELS = {
 }
 
 
-def _dispatch_provider_call(client, args, prompt, segment, provider, is_translation_note):
+def _call_provider(client, args, prompt, segment, provider, is_translation_note):
+    """L'appel de traduction de `provider`, sans garde sur ce qu'il retourne."""
     if provider == "mistral":
-        text = _call_mistral(client, args, prompt, segment)
-    elif provider == "claude":
-        text = _call_claude(client, args, prompt, segment)
-    elif provider == "gemini":
-        text = _call_gemini(client, args, prompt, segment)
-    elif provider == "codex":
-        text = _call_codex(client, args, prompt, segment)
-    elif provider == "grok_cli":
-        text = _call_grok_cli(client, args, prompt, segment)
-    elif provider == "opencode":
-        text = _call_opencode(client, args, prompt, segment)
-    elif provider == "openrouter":
-        text = _call_openrouter(client, args, prompt, segment)
-    else:
-        # `grok` (API xAI) inclus : endpoint compatible OpenAI, donc même appel.
-        text = _call_openai(client, args, prompt, segment, is_translation_note)
+        return _call_mistral(client, args, prompt, segment)
+    if provider == "claude":
+        return _call_claude(client, args, prompt, segment)
+    if provider == "gemini":
+        return _call_gemini(client, args, prompt, segment)
+    if provider == "codex":
+        return _call_codex(client, args, prompt, segment)
+    if provider == "grok_cli":
+        return _call_grok_cli(client, args, prompt, segment)
+    if provider == "opencode":
+        return _call_opencode(client, args, prompt, segment)
+    if provider == "openrouter":
+        return _call_openrouter(client, args, prompt, segment)
+    # `grok` (API xAI) inclus : endpoint compatible OpenAI, donc même appel.
+    return _call_openai(client, args, prompt, segment, is_translation_note)
+
+
+def _dispatch_provider_call(client, args, prompt, segment, provider, is_translation_note):
+    text = _call_provider(client, args, prompt, segment, provider, is_translation_note)
     # Empty-content guard : un provider qui retourne "" avec finish_reason="stop"
     # produirait sinon un fichier vide marqué success.
     if not text.strip():
@@ -81,6 +92,39 @@ def _dispatch_provider_call(client, args, prompt, segment, provider, is_translat
             f"{_PROVIDER_LABELS[provider]} returned empty content (model={args.model})"
         )
     return text
+
+
+# Les huit flags du groupe exclusif, dans l'ordre de l'aide — qui n'est pas
+# l'ordre de précédence de `_resolve_provider`, sans conséquence tant que le
+# groupe interdit d'en lever deux. Tous sont des `store_true` : seuls le nom
+# et le texte d'aide changent, d'où une table plutôt que huit appels.
+_PROVIDER_FLAGS = (
+    ("use_mistral", "Utiliser l'API Mistral AI pour la traduction"),
+    ("use_claude", "Utiliser l'API Claude d'Anthropic pour la traduction"),
+    ("use_gemini", "Utiliser l'API Gemini de Google pour la traduction"),
+    ("use_grok", "Utiliser l'API xAI (Grok) — nécessite XAI_API_KEY, facturé à l'usage"),
+    (
+        "use_grok_cli",
+        "Utiliser le CLI Grok sur le quota de l'abonnement Grok "
+        "(nécessite `grok login` ; confinement plus faible que --use_codex)",
+    ),
+    (
+        "use_codex",
+        "Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT "
+        "(aucune facturation à l'usage ; nécessite `codex login`)",
+    ),
+    (
+        "use_opencode",
+        "Utiliser OpenCode (agent open source) vers le fournisseur configuré "
+        "dans OpenCode — modèle local, gratuit, abonnement ou clé ; exige "
+        "--model provider/modèle",
+    ),
+    (
+        "use_openrouter",
+        "Utiliser OpenRouter (routeur vers ~430 modèles) — nécessite "
+        "OPENROUTER_API_KEY, facturé à l'usage ; exige --model fournisseur/modèle",
+    ),
+)
 
 
 def _add_provider_args(parser):
@@ -103,57 +147,8 @@ def _add_provider_args(parser):
     # d'abonnement — exactement ce que --use_codex existe pour empêcher, et
     # sans le moindre avertissement. argparse refuse désormais la combinaison.
     provider_group = parser.add_mutually_exclusive_group()
-    provider_group.add_argument(
-        "--use_mistral", action="store_true", help="Utiliser l'API Mistral AI pour la traduction"
-    )
-    provider_group.add_argument(
-        "--use_claude",
-        action="store_true",
-        help="Utiliser l'API Claude d'Anthropic pour la traduction",
-    )
-    provider_group.add_argument(
-        "--use_gemini",
-        action="store_true",
-        help="Utiliser l'API Gemini de Google pour la traduction",
-    )
-    provider_group.add_argument(
-        "--use_grok",
-        action="store_true",
-        help="Utiliser l'API xAI (Grok) — nécessite XAI_API_KEY, facturé à l'usage",
-    )
-    provider_group.add_argument(
-        "--use_grok_cli",
-        action="store_true",
-        help=(
-            "Utiliser le CLI Grok sur le quota de l'abonnement Grok "
-            "(nécessite `grok login` ; confinement plus faible que --use_codex)"
-        ),
-    )
-    provider_group.add_argument(
-        "--use_codex",
-        action="store_true",
-        help=(
-            "Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT "
-            "(aucune facturation à l'usage ; nécessite `codex login`)"
-        ),
-    )
-    provider_group.add_argument(
-        "--use_opencode",
-        action="store_true",
-        help=(
-            "Utiliser OpenCode (agent open source) vers le fournisseur configuré "
-            "dans OpenCode — modèle local, gratuit, abonnement ou clé ; exige "
-            "--model provider/modèle"
-        ),
-    )
-    provider_group.add_argument(
-        "--use_openrouter",
-        action="store_true",
-        help=(
-            "Utiliser OpenRouter (routeur vers ~430 modèles) — nécessite "
-            "OPENROUTER_API_KEY, facturé à l'usage ; exige --model fournisseur/modèle"
-        ),
-    )
+    for flag, help_text in _PROVIDER_FLAGS:
+        provider_group.add_argument(f"--{flag}", action="store_true", help=help_text)
     parser.add_argument(
         "--eco",
         action="store_true",
@@ -180,6 +175,13 @@ def _select_provider_client(args):
         return _init_claude_client(args)
     if args.use_gemini:
         return _init_gemini_client(args)
+    return _select_later_provider_client(args)
+
+
+def _select_later_provider_client(args):
+    """Suite de `_select_provider_client` : les providers ajoutés après le trio
+    initial, dont un Namespace construit à la main (tests) peut ne pas porter le
+    flag — d'où `getattr` —, puis OpenAI à défaut."""
     if getattr(args, "use_codex", False):
         return _init_codex_client(args)
     if getattr(args, "use_grok_cli", False):

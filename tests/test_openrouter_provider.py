@@ -131,6 +131,48 @@ class TestPin(unittest.TestCase):
         self.assertEqual((tags, ceiling), ((), 0))
 
 
+class TestHelpersDuPreflight(unittest.TestCase):
+    """Les trois helpers nés de la scission de `_openrouter_pin` et
+    `_init_openrouter_client` pour Codacy, testés seuls en plus des tests de
+    bout en bout : le filtre d'hébergeur, les contraintes de raisonnement lues
+    au catalogue, la clé."""
+
+    def test_endpoint_usable(self):
+        usable = openrouter._openrouter_endpoint_usable
+        self.assertTrue(usable(_endpoint("a/fp8", 131072)))
+        self.assertFalse(usable(_endpoint("a/fp8", 131072, status=-1)))
+        self.assertFalse(usable(_endpoint("a/fp8", None)))
+        self.assertFalse(usable(_endpoint("a/fp8", 2048)))
+        # Statut absent = sain ; le plancher lui-même est accepté.
+        self.assertTrue(
+            usable({"max_completion_tokens": openrouter.OPENROUTER_MIN_COMPLETION_TOKENS})
+        )
+
+    def test_reasoning_constraints(self):
+        constraints = openrouter._openrouter_reasoning_constraints
+        self.assertEqual(constraints({}), (False, ()))
+        self.assertEqual(constraints({"reasoning": None}), (False, ()))
+        self.assertEqual(
+            constraints({"reasoning": {"mandatory": True, "supported_efforts": ["low", "high"]}}),
+            (True, ("low", "high")),
+        )
+
+    def test_api_key(self):
+        with patch.dict(os.environ, {"OPENROUTER_API_KEY": _MARQUEUR}):
+            self.assertEqual(openrouter._openrouter_api_key(), _MARQUEUR)
+        with patch.dict(os.environ):
+            os.environ.pop("OPENROUTER_API_KEY", None)
+            with self.assertRaises(ValueError) as ctx:
+                openrouter._openrouter_api_key()
+            self.assertIn("OPENROUTER_API_KEY", str(ctx.exception))
+        for valeur in ("", openrouter.DEFAULT_OPENROUTER_API_KEY):
+            with (
+                patch.dict(os.environ, {"OPENROUTER_API_KEY": valeur}),
+                self.assertRaises(ValueError),
+            ):
+                openrouter._openrouter_api_key()
+
+
 class TestExtraBody(unittest.TestCase):
     def test_allow_fallbacks_toujours_faux(self):
         """Sans lui, `only` n'est qu'une préférence et le routeur repart vers un
