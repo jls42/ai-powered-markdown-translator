@@ -13,7 +13,7 @@ set -euo pipefail
 #   - défaut                     → Codex, gpt-5.6-sol (modèle qualité), 0 € à l'usage
 #   - REGEN_PROVIDER=grok_cli    → quota de l'abonnement Grok
 #   - REGEN_PROVIDER=opencode    → routeur OpenCode, REGEN_MODEL=provider/modèle obligatoire
-#   - REGEN_PROVIDER=openai|gemini|grok → API FACTURÉE : refusée sans
+#   - REGEN_PROVIDER=openai|gemini|grok|openrouter → API FACTURÉE : refusée sans
 #     REGEN_ALLOW_PAID_API=1, dérogation nommée pour que la règle morde au
 #     moment de la décision.
 # Il n'y a plus d'auto-détection de clé : une OPENAI_API_KEY présente dans

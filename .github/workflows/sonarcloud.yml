@@ -63,9 +63,10 @@ jobs:
       # « CoverageWarning: Module ... was never imported » sur stderr, unittest
       # sort en 0, et `coverage xml` produit quand même un rapport — amputé.
       # Rien dans le step ci-dessus ne transforme cet avertissement en échec.
-      # Un simple renommage de fichier ferait donc passer le rapport de 1648 à
-      # 39 statements, et le projet apparaîtrait sain parce qu'il ne serait
-      # presque plus analysé. Mesuré : le paquet pèse 1609 des 1648 statements.
+      # Un simple renommage de fichier ferait donc passer le rapport de 2214 à
+      # 440 statements, et le projet apparaîtrait sain parce qu'il ne serait
+      # presque plus analysé. Mesuré le 2026-09-08 : le paquet pèse 1774 des
+      # 2214 statements.
       #
       # Trois planchers, parce qu'un seul avait un angle mort :
       #   - le total attrape un effondrement global ;

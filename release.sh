@@ -181,7 +181,7 @@ if [[ "$MODE" == "tag-only" ]]; then
 
   log "Checkout main + pull..."
   run git checkout main
-  run git pull origin main
+  run git pull --ff-only origin main
 
   CHANGELOG_VERSION=$(extract_changelog_version)
   [[ -z "$VERSION" ]] && VERSION="$CHANGELOG_VERSION"

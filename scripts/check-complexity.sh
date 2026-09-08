@@ -10,7 +10,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 # shellcheck source=scripts/_venv_python.sh
 source scripts/_venv_python.sh
 
-# Le paquet entier est DANS le scope (192 fonctions, CCN moyen 3,5, **zéro
+# Le paquet entier est DANS le scope (203 fonctions, CCN moyen 3,4, **zéro
 # dépassement à 12**) : le gate protège le code le plus exposé du dépôt contre
 # une régression de complexité, au lieu de la découvrir via SonarCloud après le
 # push. Des RÉPERTOIRES, pas des fichiers : un découpage du module principal ne
@@ -40,8 +40,8 @@ done
 # répertoire ne prouve pas qu'il contient quelque chose : `[[ -e src/ ]]` est
 # vrai sur un répertoire vide, et lizard sort alors en 0 sans rien dire. Lu par
 # l'API Python parce que `--warnings_only` n'imprime AUCUNE ligne de synthèse
-# quand tout est vert (mesuré : zéro octet), donc rien à parser. 195 fonctions
-# mesurées le 2026-09-07 (192 dans src/aipmt, 3 dans scripts/).
+# quand tout est vert (mesuré : zéro octet), donc rien à parser. 225 fonctions
+# mesurées le 2026-09-08 (203 dans src/aipmt, 22 dans scripts/ hors tests).
 "$PY" - "${SCOPE[@]}" <<'PYEOF' || exit 1
 import sys
 

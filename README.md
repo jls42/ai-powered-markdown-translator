@@ -361,8 +361,8 @@ aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir 
   (`~/.local/share/opencode/`), comme toute session OpenCode.
 - Variables d'environnement : `OPENCODE_BIN` (chemin explicite du binaire,
   sinon le `PATH` puis `~/.opencode/bin/opencode`) et `OPENCODE_TIMEOUT`
-  (secondes par segment, défaut `600`). `OPENCODE_CONFIG` est honoré si vous
-  l'exportez.
+  (secondes par segment, défaut `600`). `OPENCODE_CONFIG`, s'il est
+  exporté, n'est pas lu par `aipmt` : il passe tel quel à OpenCode, qui l'honore.
 
 **Exemple mesuré : un modèle local via Ollama** (RTX 3060 12 Go, 62 Go de RAM, Ollama 0.33.3)
 
@@ -525,7 +525,7 @@ aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--include_model`        | Inclure le nom du modèle dans le fichier de sortie                                                            |
 | `--reasoning_effort`     | Effort de raisonnement GPT-5.x : `none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-> **Les sept flags de provider sont mutuellement exclusifs.** En combiner deux
+> **Les huit flags de provider sont mutuellement exclusifs.** En combiner deux
 > était auparavant accepté en silence et résolvait vers le premier testé : une
 > traduction demandée sur quota d'abonnement (`--use_codex`, `--use_grok_cli`)
 > pouvait ainsi partir en facturation à l'usage sans aucun avertissement.

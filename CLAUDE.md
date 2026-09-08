@@ -205,7 +205,7 @@ Le premier `pre-commit run --all-files` télécharge les environnements des hook
 | pre-commit | ruff + ruff-format              | Lint + format Python (rapide, --fix automatique)                                 |
 | pre-commit | prettier                        | Format JSON/YAML/MD (28 traductions exclues)                                     |
 | pre-commit | pre-commit-hooks v5             | Trailing-whitespace, EOF, check-yaml/toml, large-files, merge-conflict, shebang  |
-| pre-commit | detect-secrets                  | Détection de fuites d'API keys (4 providers utilisés)                            |
+| pre-commit | detect-secrets                  | Détection de fuites d'API keys (6 providers à clé)                               |
 | pre-commit | check-complexity (Lizard)       | CCN <= 12, scope `src/` + `scripts/`, existence des chemins et plancher vérifiés |
 | pre-commit | check-split-purity (temporaire) | Le découpage de `translate.py` reste un déplacement pur, cf. § ci-dessous        |
 | pre-push   | mypy (lax)                      | Type-checking des fonctions déjà annotées (durcissement progressif)              |
@@ -241,8 +241,9 @@ Trajectoire :
 ### Lizard CCN — scope et fail-closed
 
 Le seuil est 12 (futur 8). Tout le paquet `src/aipmt/` est **dans** le scope :
-198 fonctions au découpage de la 1.13.0 (192 déplacées, puis six scindées pour
-tenir sous la limite 8 de Codacy), CCN moyen 3,4, zéro dépassement.
+203 fonctions au découpage de la 1.13.0 (192 déplacées, six scindées pour tenir
+sous la limite 8 de Codacy, cinq helpers nés de la revue), CCN moyen 3,4, zéro
+dépassement.
 
 Le scope vit dans un tableau `SCOPE` en tête de `scripts/check-complexity.sh`
 — des RÉPERTOIRES (`src/`, `scripts/`), pas des fichiers, et un **plancher de
@@ -264,9 +265,10 @@ Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python src/`.
 - **Plancher de couverture** (`sonarcloud.yml`) : `coverage run --source=module_absent`
   n'échoue PAS — avertissement sur stderr, rc 0 pour unittest comme pour
   `coverage xml`, rapport quand même poussé à Sonar. Mesuré : 1453 → 141
-  statements sur un simple renommage, projet « sain » parce que plus analysé. Deux
-  planchers à 1000 : le total, et le plus gros fichier mesuré — ce second attrape
-  la sortie du module principal sans coder son chemin en dur.
+  statements sur un simple renommage, projet « sain » parce que plus analysé. Trois
+  planchers : le total ≥ 1000, la somme sous `src/aipmt/` ≥ 1550, et aucun module
+  suivi du paquet à zéro exécution — un module sorti du `--source` disparaît du
+  rapport, un module renommé n'y est plus mesuré.
 - **Matrice `tests.yml`** (3.10 / 3.11 / 3.12) : `requires-python = ">=3.10"` est une
   promesse publique, et ce poste n'a que 3.12. La matrice installe le PAQUET (donc
   les bornes publiques) et non le lock, avec `fail-fast: false`.
@@ -288,7 +290,7 @@ git ls-files --cached -z | xargs -0 detect-secrets scan \
 detect-secrets audit .secrets.baseline
 ```
 
-Findings actuels (tous faux positifs attendus) : 1 exemple dans README.md, 1 fixture dans tests/test*codex_provider.py, 1 dans tests/test_grok_provider.py. Les 6 placeholders `votre-cle-api-*-par-defaut`(une constante`DEFAULT\*\*\_API_KEY`par provider à clé) ne sont plus dans la baseline : ils portent`# pragma: allowlist secret`sur leur ligne, parce que la baseline est indexée par FICHIER et qu'un placeholder déplacé dans un autre module y redevenait un « nouveau secret ». Le marqueur voyage avec la ligne. À auditer ponctuellement pour passer`is_secret: false`.
+Findings actuels (tous faux positifs attendus) : 1 exemple dans README.md, 1 fixture dans `tests/test_codex_provider.py`, 1 dans `tests/test_grok_provider.py`. Les 6 placeholders `votre-cle-api-*-par-defaut` (une constante `DEFAULT_*_API_KEY` par provider à clé) ne sont plus dans la baseline : ils portent `# pragma: allowlist secret` sur leur ligne, parce que la baseline est indexée par FICHIER et qu'un placeholder déplacé dans un autre module y redevenait un « nouveau secret ». Le marqueur voyage avec la ligne. À auditer ponctuellement pour passer `is_secret: false`.
 
 ### Pré-requis lors du clone sur une autre machine
 
@@ -460,24 +462,25 @@ Le nom d'import est `aipmt` et **jamais** `translate` : le paquet PyPI `translat
 (v3.8.1, actif) installe un répertoire homonyme qui masquerait le module — le
 point d'entrée casse alors sur `AttributeError` et `pip check` ne voit rien.
 
-Modules (chaque flèche de dépendance va vers un module plus bas, jamais l'inverse) :
+Modules, dans l'ordre topologique des imports : chaque flèche de dépendance va vers
+un module plus HAUT dans le tableau, jamais l'inverse.
 
 | Module                  | Rôle                                                                                                           |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `config.py`             | Trois couches de clés (env, `.env`, `~/.config/aipmt/.env`), `_missing_key_message`                            |
 | `markdown.py`           | Lexique partagé : regex de lignes structurelles, liens, balises, placeholders ; plages d'écritures             |
 | `segmentation.py`       | `segment_text()`, `MODEL_TOKEN_LIMITS` (objet unique, OpenRouter y écrit la fenêtre lue au préflight)          |
+| `naming.py`             | `EXCLUDE_PATTERNS`, nom de sortie, traduction déjà présente, garde anti-traversée, écriture                    |
+| `notes.py`              | Note de traduction (constructeurs purs)                                                                        |
 | `guards.py`             | Gardes de sortie : langue détectée, extrait source verbatim, ratio, écriture cible ; graine langdetect         |
 | `placeholders.py`       | Protection/restauration des blocs de code, code inline, URL, ancres, labels — et leurs validations             |
 | `news.py`               | Mode `--news` : `<NEWSQUOTE id="N"/>`, drapeaux par langue, règles du prompt et validations                    |
 | `prompts.py`            | Instructions système : contrat Markdown, placeholders, ancres, addenda news et écritures non latines           |
-| `notes.py`              | Note de traduction (constructeurs purs)                                                                        |
-| `naming.py`             | `EXCLUDE_PATTERNS`, nom de sortie, traduction déjà présente, garde anti-traversée, écriture                    |
-| `pipeline.py`           | `translate()`, `translate_markdown_file()`, `translate_directory()`, `_append_translation_note()`              |
-| `cli.py`                | argparse hors providers, validation des chemins, `main()`                                                      |
 | `providers/base.py`     | Socle des CLI : sous-processus, secrets, back-off, erreurs, refus en CI                                        |
 | `providers/<nom>.py`    | Un module par provider : `openai`, `mistral`, `anthropic`, `gemini`, `codex`, `grok`, `opencode`, `openrouter` |
 | `providers/registry.py` | `_resolve_provider`, `_PROVIDER_LABELS`, `_dispatch_provider_call`, `_select_provider_client`, flags           |
+| `pipeline.py`           | `translate()`, `translate_markdown_file()`, `translate_directory()`, `_append_translation_note()`              |
+| `cli.py`                | argparse hors providers, validation des chemins, `main()`                                                      |
 | `translate.py`          | FAÇADE de compatibilité : les 64 noms publics de l'ancien module unique, par identité ; `__all__` à 9          |
 
 Deux règles qui découlent du découpage, verrouillées par `tests/test_facade_contract.py` :
@@ -501,8 +504,8 @@ de chaque symbole, la survie verbatim des marqueurs `# nosec` / `# nosemgrep` /
 `NOSONAR`, et refuse tout `.py` non suivi sous `src/aipmt/`, `tests/` ou
 `scripts/tests/` (pre-commit ne voit que l'index : un module créé sans `git add`
 passait tous les hooks). Le snapshot est dans le dépôt parce que la CI fait un
-checkout superficiel. Neuf tests négatifs (`scripts/tests/test_check_split_purity.py`)
-prouvent qu'il mord.
+checkout superficiel. Neuf tests (`scripts/tests/test_check_split_purity.py`), dont sept
+refus, prouvent qu'il mord.
 
 **Output naming**:
 
@@ -544,10 +547,13 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 - `GOOGLE_API_KEY` (for Gemini)
 - `XAI_API_KEY` (for Grok via the xAI API)
 - `GEMINI_API_KEY` accepted as an alternative to `GOOGLE_API_KEY`
+- `OPENROUTER_API_KEY` (for OpenRouter, `--use_openrouter`)
 
 Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
 `GROK_TRANSLATE_SANDBOX`, `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
+`OPENROUTER_BASE_URL` (https exigé), `OPENROUTER_TIMEOUT` (défaut 900 s),
+`OPENROUTER_PREFLIGHT_TIMEOUT` (défaut 30 s),
 `REGEN_PROVIDER`, `REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation, cf. règle en tête),
 `REGEN_JOB_TIMEOUT` (plafond par job du regen : 600 s, 1 800 s sur Codex),
 `XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
@@ -717,11 +723,12 @@ https://ollama.com/install.sh | sh`, sudo sans mot de passe sur ce poste).
   `/etc/systemd/system/ollama.service.d/override.conf`, qui place le magasin
   sur `OLLAMA_MODELS=/mnt/msi/ollama` (NVMe de 916 Go). Il ne touche pas aux
   modèles téléchargés.
-- Modèles : `gemma4:12b` (7,6 Go, Apache 2.0, 140+ langues) et `qwen3.5:9b`
-  (6,6 Go, Apache 2.0, 201 langues), plus leurs variantes `gemma4-12b-32k` et
-  `qwen3.5-9b-32k` créées depuis `~/ollama/*.Modelfile` : sous 24 Go de VRAM,
-  Ollama plafonne le contexte à 4 096 par défaut, et l'API OpenAI-compatible
-  n'a aucun moyen de le régler par requête — d'où `PARAMETER num_ctx 32768`.
+- Modèles : `gemma4:12b` (7,6 Go, Apache 2.0, 140+ langues) et `gpt-oss:20b`
+  (13 Go, Apache 2.0), plus leurs variantes `gemma4-12b-32k` et `gpt-oss-20b-32k`
+  créées depuis `~/ollama/*.Modelfile` : sous 24 Go de VRAM, Ollama plafonne le
+  contexte à 4 096 par défaut, et l'API OpenAI-compatible n'a aucun moyen de le
+  régler par requête — d'où `PARAMETER num_ctx 32768`. `qwen3.5:9b` a été
+  supprimé après le tableau ci-dessous.
 - `~/.config/opencode/opencode.jsonc` déclare le fournisseur `ollama`
   (`@ai-sdk/openai-compatible`, `http://127.0.0.1:11434/v1`) avec, sur chaque
   modèle, `options.reasoningEffort: "none"`. Indispensable et mesuré : Ollama
