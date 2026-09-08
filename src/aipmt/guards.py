@@ -1,8 +1,9 @@
 """Gardes de sortie : une traduction qui ressemble à la source est un échec.
 
 Détection de langue déterministe, extraits source repris verbatim, ratio de
-longueur anormal, écriture cible absente sur un alphabet non latin. Chaque
-garde lève `RuntimeError` ; le pipeline décide alors d'un second essai. Le
+longueur anormal, écriture cible absente sur un alphabet non latin. Trois
+gardes lèvent `RuntimeError`, et le pipeline décide alors d'un second essai ;
+le signal d'écriture cible, lui, court-circuite la détection de langue. La
 graine de `langdetect` est fixée ici, à l'import, parce que ce module est le
 seul à l'appeler.
 """

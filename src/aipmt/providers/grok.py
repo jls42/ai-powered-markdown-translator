@@ -40,8 +40,6 @@ DEFAULT_XAI_API_KEY = "votre-cle-api-xai-par-defaut"  # pragma: allowlist secret
 DEFAULT_MODEL_GROK = "grok-4.6"  # NOSONAR python:S1192
 
 
-# Luna = modèle "fast, high-volume" du plan ChatGPT : 250-2000 messages/5h sur
-# Plus contre 10-100 pour Sol. C'est le seul choix raisonnable pour du batch.
 # xAI n'a aucun palier mini/flash/lite : l'« éco » est une génération
 # antérieure, pas une variante allégée. `grok-4.3` (1M ctx, $1.25/$2.50) reste
 # nettement plus cher que l'éco des autres providers — mistral-small-latest est

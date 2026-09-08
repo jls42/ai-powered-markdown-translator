@@ -1,19 +1,22 @@
 """Socle commun des providers : sous-processus, secrets, back-off, erreurs.
 
-Les trois CLI d'abonnement (Codex, Grok, OpenCode) partagent le même pilote de
-sous-processus — groupe de processus propre, `SIGTERM` puis `SIGKILL` au
-timeout, stdin toujours fermé — le même filtrage des variables d'environnement
+Les trois CLI agentiques (Codex et Grok sur abonnement, OpenCode en routeur)
+partagent le même pilote de sous-processus — groupe de processus propre,
+`SIGTERM` puis `SIGKILL` au timeout ou quand ce processus reçoit lui-même
+`SIGTERM`, stdin toujours fermé — le même filtrage des variables d'environnement
 secrètes, la même relance sur limitation de débit et la même hiérarchie
 d'erreurs. Les noms `_codex_*` sont historiques : ces fonctions sont nées avec
 le provider Codex, puis ont été partagées ; elles gardent leur nom ici pour
 que ce découpage reste un déplacement pur.
 """
 
+import contextlib
 import os
 import re
 import signal
 import subprocess  # nosec B404 — pilote les CLI Codex, Grok et OpenCode, cf. _codex_run_process
 import sys
+import threading
 import time
 
 # Délai laissé au CLI pour propager SIGTERM à son petit-fils avant le SIGKILL.
@@ -38,12 +41,13 @@ def _reason_name(reason):
 # Les deny-lists nommées ne protégeaient que l'invariant de FACTURATION (Codex
 # sans OPENAI_API_KEY, Grok sans XAI_API_KEY). Mesuré : sept autres secrets
 # entraient quand même dans le sous-processus — les clés Anthropic, Mistral,
-# Google, Gemini, plus celle de l'autre CLI. Or ces deux CLI sont des agents :
+# Google, Gemini, plus celle de l'autre CLI. Or ces CLI sont des agents :
 # Codex tourne en `--sandbox read-only`, mais le sandbox de Grok est
 # inapplicable sur beaucoup de postes Linux et la protection y repose sur les
-# seules règles `--deny`. Aucun des deux n'a besoin de la clé d'un autre
-# fournisseur — l'authentification vit dans ~/.codex et ~/.grok, jamais dans
-# l'environnement.
+# seules règles `--deny` ; OpenCode n'a que les permissions refusées de sa
+# config inline. Aucun n'a besoin de la clé d'un autre fournisseur : Codex et
+# Grok s'authentifient sur disque (~/.codex, ~/.grok), et OpenCode ne conserve
+# que la sienne, `OPENCODE_API_KEY`, par `keep`.
 #
 # Le filtrage est par motif et non par liste nominative, pour couvrir les
 # variables qu'un utilisateur ajoute dans son `.env` sans que ce code le sache.
@@ -53,8 +57,9 @@ _SECRET_ENV_NAME_PATTERNS = ("API_KEY", "_TOKEN", "SECRET", "PASSWORD", "CREDENT
 def _strip_secret_env(env, keep=()):
     """Retire de `env` toute variable dont le nom évoque un secret.
 
-    `keep` permet de conserver explicitement une variable nécessaire au CLI ;
-    aucune ne l'est aujourd'hui, l'auth des deux providers étant sur disque.
+    `keep` conserve explicitement une variable nécessaire au CLI : Codex et
+    Grok n'en ont aucune, leur auth étant sur disque ; OpenCode garde
+    `OPENCODE_API_KEY`, la clé de sa propre passerelle.
     """
     for name in [k for k in env if k not in keep]:
         if any(pattern in name.upper() for pattern in _SECRET_ENV_NAME_PATTERNS):
@@ -63,9 +68,12 @@ def _strip_secret_env(env, keep=()):
 
 
 def _codex_kill_group(proc):
-    """Tue tout le groupe de process. Le `codex` installé par npm est un shim
-    Node qui `spawn` le vrai binaire Rust : celui-ci est un petit-fils et
-    survit à un kill du fils direct, où il continuerait à consommer du quota."""
+    """Tue tout le groupe de process : SIGTERM, délai de grâce, puis SIGKILL
+    quoi qu'il arrive. Le `codex` installé par npm est un shim Node qui `spawn`
+    le vrai binaire Rust : ce petit-fils survit à la mort du fils direct — et
+    le shim, lui, meurt proprement sur SIGTERM. Conditionner le SIGKILL à la
+    survie du fils laissait donc l'agent réel continuer à consommer du quota
+    (mesuré : petit-fils vivant après un `_codex_kill_group` rendu en 0 s)."""
     # ProcessLookupError est une sous-classe d'OSError : la capture est écrite
     # `except OSError` partout, sans la mentionner séparément.
     try:
@@ -75,20 +83,45 @@ def _codex_kill_group(proc):
     try:
         os.killpg(pgid, signal.SIGTERM)
         proc.wait(timeout=CODEX_TERM_GRACE)
-    except subprocess.TimeoutExpired:
-        # Le SIGKILL a son propre try : une exception levée DEPUIS une clause
-        # except n'est pas rattrapée par les clauses sœurs. Si le groupe meurt
-        # entre l'expiration du délai de grâce et cet appel, le
-        # ProcessLookupError remontait tel quel — l'appelant recevait une trace
-        # opaque au lieu du RuntimeError « timeout après Ns » qui nomme la
-        # cause et la variable d'environnement à augmenter.
-        try:
-            os.killpg(pgid, signal.SIGKILL)
-            proc.wait()
-        except OSError:
-            pass
+    except (subprocess.TimeoutExpired, OSError):
+        pass
+    # Le SIGKILL a son propre try : une exception levée DEPUIS une clause
+    # except n'est pas rattrapée par les clauses sœurs, et un groupe déjà mort
+    # répond ProcessLookupError — l'appelant doit recevoir le RuntimeError
+    # « timeout après Ns » qui nomme la cause, pas une trace opaque.
+    try:
+        os.killpg(pgid, signal.SIGKILL)
+        proc.wait()
     except OSError:
         pass
+
+
+@contextlib.contextmanager
+def _kill_group_on_sigterm(holder):
+    """Pendant l'attente d'un CLI, un SIGTERM reçu par CE processus tue d'abord
+    le groupe de l'agent, puis termine avec le code conventionnel 143.
+
+    Mesuré : le `timeout` de `regen_translations.sh` signale Python, qui meurt
+    sans exécuter aucune clause `except` ; l'agent, placé dans sa propre
+    session par `start_new_session`, survivait et consommait son quota jusqu'au
+    bout. `holder["proc"]` est renseigné par l'appelant dès que le processus
+    existe. Le gestionnaire n'est posé que depuis le thread principal, seul
+    autorisé à en installer un."""
+    if threading.current_thread() is not threading.main_thread():
+        yield
+        return
+
+    def _on_sigterm(signum, _frame):
+        proc = holder.get("proc")
+        if proc is not None:
+            _codex_kill_group(proc)
+        raise SystemExit(128 + signum)
+
+    previous = signal.signal(signal.SIGTERM, _on_sigterm)
+    try:
+        yield
+    finally:
+        signal.signal(signal.SIGTERM, previous)
 
 
 # Variable à augmenter, citée dans le message de timeout de chaque CLI.
@@ -104,47 +137,53 @@ def _codex_run_process(argv, stdin_data, timeout, env, label, model):
     (returncode, stdout, stderr). Socle commun aux providers Codex, Grok et
     OpenCode.
 
-    Le groupe de process n'est pas une précaution de principe : ces deux CLI
-    sont des agents, qui lancent leurs propres sous-process. Codex ajoute un
+    Le groupe de process n'est pas une précaution de principe : ces CLI sont
+    des agents, qui lancent leurs propres sous-process. Codex ajoute un
     niveau — installé par npm, `codex` est un shim Node qui `spawn` le binaire
     Rust, petit-fils du process Python qui survivrait au kill du fils direct en
     continuant à consommer du quota (vérifié : shebang `#!/usr/bin/env node`).
     Le binaire Grok est en revanche un ELF natif, sans shim, et le binaire
     Codex installé par pip aussi — la raison « shim » ne vaut donc pas partout,
     contrairement à ce qu'affirmait une version antérieure de ce commentaire ;
-    la raison « agent qui spawn » vaut pour les deux.
+    la raison « agent qui spawn » vaut pour tous.
 
     `communicate(input=...)` ferme toujours stdin — obligatoire pour Codex, qui
     lit stdin même quand le prompt est passé en argument et attendrait sinon
     indéfiniment sans jamais appeler le modèle."""
     timeout_var = _CLI_TIMEOUT_ENV_VARS.get(label, "CODEX_TIMEOUT")
-    # argv est une LISTE (jamais shell=True) construite par _codex_argv/_grok_argv :
-    # binaire résolu et validé par le préflight, flags littéraux, et `args.model`
-    # placé en valeur juste après `-m` — une valeur commençant par `--` y est donc
-    # consommée comme valeur du flag, pas réinterprétée en drapeau. Le contenu du
-    # document ne transite JAMAIS par argv : il part par stdin (Codex) ou par
-    # fichier (Grok, --prompt-file). Le marqueur nosemgrep doit rester sur la
-    # ligne immédiatement précédente : plus haut, il n'est pas pris en compte.
-    # nosemgrep
-    with subprocess.Popen(  # nosec B603
-        argv,  # nosemgrep — la finding est ancrée sur l'argument, pas sur l'appel
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        encoding="utf-8",
-        env=env,
-        start_new_session=True,
-    ) as proc:
-        try:
-            stdout, stderr = proc.communicate(input=stdin_data, timeout=timeout)
-        except subprocess.TimeoutExpired:
-            _codex_kill_group(proc)
-            raise RuntimeError(
-                f"{label} CLI timeout après {timeout}s (model={model}). "
-                f"Augmenter {timeout_var} si les segments sont longs."
-            ) from None
-        return proc.returncode, stdout, stderr
+    holder = {}
+    # Les deux `with` restent imbriqués (SIM117) : la ligne du Popen porte des
+    # marqueurs nosec/nosemgrep que le vérificateur de pureté exige verbatim.
+    with _kill_group_on_sigterm(holder):  # noqa: SIM117
+        # argv est une LISTE (jamais shell=True) construite par _codex_argv,
+        # _grok_argv ou _opencode_argv : binaire résolu et validé par le préflight,
+        # flags littéraux, et `args.model` placé en valeur juste après son flag —
+        # une valeur commençant par `--` y est donc consommée comme valeur, pas
+        # réinterprétée en drapeau. Le contenu du document ne transite JAMAIS par
+        # argv : il part par stdin (Codex, OpenCode) ou par fichier (Grok,
+        # --prompt-file). Le marqueur nosemgrep doit rester sur la ligne
+        # immédiatement précédente : plus haut, il n'est pas pris en compte.
+        # nosemgrep
+        with subprocess.Popen(  # nosec B603
+            argv,  # nosemgrep — la finding est ancrée sur l'argument, pas sur l'appel
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            env=env,
+            start_new_session=True,
+        ) as proc:
+            holder["proc"] = proc
+            try:
+                stdout, stderr = proc.communicate(input=stdin_data, timeout=timeout)
+            except subprocess.TimeoutExpired:
+                _codex_kill_group(proc)
+                raise RuntimeError(
+                    f"{label} CLI timeout après {timeout}s (model={model}). "
+                    f"Augmenter {timeout_var} si les segments sont longs."
+                ) from None
+            return proc.returncode, stdout, stderr
 
 
 def _stderr_tail(stderr, lines=3):

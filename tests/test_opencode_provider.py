@@ -161,7 +161,11 @@ class TestOpencodeCall(unittest.TestCase):
             self.assertEqual(argv[argv.index(flag) + 1], value, flag)
         self.assertIn("--pure", argv)
         self.assertIn("--print-logs", argv)
-        self.assertTrue(argv[argv.index("--dir") + 1].startswith(os.path.join("", "")))
+        workdir = argv[argv.index("--dir") + 1]
+        self.assertTrue(os.path.isabs(workdir))
+        self.assertNotEqual(workdir, os.getcwd())
+        self.assertTrue(os.path.basename(workdir).startswith("translate-opencode-"))
+        self.assertFalse(os.path.exists(workdir))  # jetable : disparu après l'appel
         for forbidden in ("--auto", "--share", "--continue"):
             self.assertNotIn(forbidden, argv)
         self.assertNotIn("Segment", " ".join(argv))
@@ -631,6 +635,78 @@ class TestModelFilenameLabel(unittest.TestCase):
             naming._ensure_within_directory("/out", os.path.join("/out", name)),
             os.path.join("/out", name),
         )
+
+
+class TestOpencodeStreamHardening(unittest.TestCase):
+    """Constats de la revue : `part: null` répondait AttributeError, une ligne
+    d'événement illisible était ignorée (texte partiel accepté), seul le premier
+    `step_finish` était exercé, le workdir jetable n'était pas prouvé vide, et
+    le filtrage des secrets n'était prouvé que sur `_opencode_env`, jamais sur
+    l'`env=` remis à Popen."""
+
+    def _run(self, fake, args=None):
+        with patch.object(subprocess, "Popen", fake):
+            return opencode._call_opencode(_client(), args or _args(), "PROMPT SYSTÈME", "Segment")
+
+    def test_part_null_on_step_finish_gives_the_contract_error(self):
+        stdout = _jsonl(_START, _text_event("t"), {"type": "step_finish", "part": None})
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "reason anormal=None"):
+            self._run(_FakePopen(stdout=stdout))
+
+    def test_part_null_on_tool_use_gives_the_contract_error(self):
+        stdout = _jsonl(
+            _START, {"type": "tool_use", "part": None}, _text_event("t"), _finish_event()
+        )
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "appelé un outil"):
+            self._run(_FakePopen(stdout=stdout))
+
+    def test_unreadable_event_line_refuses_a_partial_answer(self):
+        stdout = (
+            _jsonl(_START, _text_event("Première moitié"))
+            + '{"type": "text", "part": {"text": "seconde moi\n'
+            + _jsonl(_finish_event())
+        )
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "illisible"):
+            self._run(_FakePopen(stdout=stdout))
+
+    def test_cli_failure_cause_wins_over_a_corrupted_stream(self):
+        stdout = '{"type": "text", "part": {\n' + _jsonl(_OPAQUE_ERROR)
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "ProviderModelNotFoundError"):
+            self._run(_FakePopen(stdout=stdout, returncode=1, stderr=_LOG_CAUSE))
+
+    def test_the_last_step_finish_decides(self):
+        stdout = _jsonl(_START, _text_event("t"), _finish_event("stop"), _finish_event("length"))
+        with self.assertRaisesRegex(opencode._OpencodeCallError, "reason anormal='length'"):
+            self._run(_FakePopen(stdout=stdout))
+
+    def test_workdir_is_empty_at_call_time_and_removed_after(self):
+        seen = {}
+
+        class Snoop(_FakePopen):
+            def __call__(self, argv, **kwargs):
+                workdir = argv[argv.index("--dir") + 1]
+                seen["listing"] = os.listdir(workdir)
+                seen["dir"] = workdir
+                return super().__call__(argv, **kwargs)
+
+        self.assertEqual(self._run(Snoop()), "Translated body")
+        self.assertEqual(seen["listing"], [])
+        self.assertFalse(os.path.exists(seen["dir"]))
+
+    def test_popen_env_carries_no_secret_but_opencode_own_key(self):
+        secrets = {
+            "OPENAI_API_KEY": _MARQUEUR,
+            "ANTHROPIC_API_KEY": _MARQUEUR,
+            "XAI_API_KEY": _MARQUEUR,
+            "HF_TOKEN": _MARQUEUR,
+            "OPENCODE_API_KEY": _MARQUEUR,
+        }
+        fake = _FakePopen()
+        with patch.dict(os.environ, secrets, clear=False):
+            self._run(fake)
+        env = fake.kwargs["env"]
+        self.assertEqual(sorted(name for name in secrets if name in env), ["OPENCODE_API_KEY"])
+        self.assertEqual(env["OPENCODE_API_KEY"], _MARQUEUR)
 
 
 if __name__ == "__main__":

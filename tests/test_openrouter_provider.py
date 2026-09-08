@@ -32,6 +32,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, segmentation
+from aipmt.providers import openai as openai_provider
 from aipmt.providers import openrouter, registry
 
 _MARQUEUR = "jeton-de-test"
@@ -346,24 +347,30 @@ class TestContratDeSortie(unittest.TestCase):
         )
 
 
+def _fake_urlopen(payloads):
+    """`urlopen` simulé : la réponse est choisie par fragment d'URL."""
+
+    def reponse(payload):
+        body = json.dumps(payload).encode("utf-8")
+        return MagicMock(
+            __enter__=MagicMock(return_value=SimpleNamespace(read=lambda: body)),
+            __exit__=MagicMock(return_value=False),
+        )
+
+    def fake(url, timeout=None):
+        for fragment, payload in payloads.items():
+            if fragment in url:
+                return reponse(payload)
+        raise AssertionError(f"URL inattendue : {url}")
+
+    return fake
+
+
 class TestPreflight(unittest.TestCase):
     """Le préflight est fail-closed : pas de catalogue, pas de traduction."""
 
     def _urlopen(self, payloads):
-        def reponse(payload):
-            body = json.dumps(payload).encode("utf-8")
-            return MagicMock(
-                __enter__=MagicMock(return_value=SimpleNamespace(read=lambda: body)),
-                __exit__=MagicMock(return_value=False),
-            )
-
-        def fake(url, timeout=None):
-            for fragment, payload in payloads.items():
-                if fragment in url:
-                    return reponse(payload)
-            raise AssertionError(f"URL inattendue : {url}")
-
-        return fake
+        return _fake_urlopen(payloads)
 
     def test_slug_absent_du_catalogue(self):
         with (
@@ -472,6 +479,225 @@ class TestIntegrationCLI(unittest.TestCase):
     def test_nom_de_fichier_sans_separateur(self):
         """`--include_model` avec un slug ne doit pas fabriquer de sous-chemin."""
         self.assertEqual(naming._model_filename_label("z-ai/glm-5.2"), "z-ai-glm-5.2")
+
+
+class TestRequeteReelle(unittest.TestCase):
+    """Ce que reçoit le SDK, pas ce que produisent les helpers : retirer
+    `extra_body=` de l'appel laissait 42 tests verts (mesuré par mutation)."""
+
+    def _create_kwargs(self, client, args):
+        client.client.chat.completions.create.return_value = SimpleNamespace(
+            choices=[_choice("Hello")]
+        )
+        self.assertEqual(openrouter._call_openrouter(client, args, "p", "s"), "Hello")
+        return client.client.chat.completions.create.call_args.kwargs
+
+    def test_epinglage_et_raisonnement_coupe_partent_dans_la_requete(self):
+        client = _client(providers=("deepinfra/fp4", "novita/fp8"), max_tokens=16000)
+        args = _args()
+        kwargs = self._create_kwargs(client, args)
+        self.assertEqual(kwargs["model"], "z-ai/glm-5.2")
+        self.assertEqual(kwargs["max_tokens"], 16000)
+        self.assertEqual(kwargs["messages"], openai_provider._build_openai_messages(args, "p", "s"))
+        self.assertEqual(
+            kwargs["extra_body"],
+            {
+                "provider": {"only": ["deepinfra/fp4", "novita/fp8"], "allow_fallbacks": False},
+                "reasoning": {"enabled": False},
+            },
+        )
+
+    def test_effort_le_plus_bas_part_dans_la_requete_quand_le_modele_impose(self):
+        kwargs = self._create_kwargs(
+            _client(mandatory=True, efforts=("high", "low", "max")), _args()
+        )
+        self.assertEqual(kwargs["extra_body"]["reasoning"], {"effort": "low"})
+        self.assertFalse(kwargs["extra_body"]["provider"]["allow_fallbacks"])
+
+    def test_effort_explicite_part_dans_la_requete(self):
+        kwargs = self._create_kwargs(_client(), _args(reasoning_effort="high"))
+        self.assertEqual(kwargs["extra_body"]["reasoning"], {"effort": "high"})
+
+
+class TestRaisonDeFinAbsente(unittest.TestCase):
+    """`finish_reason` est `string | null` dans le type documenté de la réponse
+    non streamée, sans condition : nul, la raison brute de l'amont fait foi ;
+    absentes toutes deux, le contenu est accepté — le contenu vide, lui, est
+    refusé par le dispatch."""
+
+    def _call(self, finish, native, content="Hello"):
+        client = _client()
+        client.client.chat.completions.create.return_value = SimpleNamespace(
+            choices=[_choice(content, finish=finish, native=native)]
+        )
+        return openrouter._call_openrouter(client, _args(), "p", "s")
+
+    def test_nul_avec_natif_stop_accepte(self):
+        self.assertEqual(self._call(None, "stop"), "Hello")
+
+    def test_nul_avec_natif_end_turn_accepte(self):
+        self.assertEqual(self._call(None, "end_turn"), "Hello")
+
+    def test_nul_sans_natif_accepte(self):
+        self.assertEqual(self._call(None, None), "Hello")
+
+    def test_nul_avec_natif_max_tokens_est_une_troncature(self):
+        with self.assertRaises(RuntimeError) as ctx:
+            self._call(None, "max_tokens", content="début")
+        self.assertIn("tronquée", str(ctx.exception))
+
+    def test_nul_avec_natif_error_est_une_panne_amont(self):
+        with self.assertRaises(RuntimeError) as ctx:
+            self._call(None, "error")
+        self.assertIn("hébergeur", str(ctx.exception))
+
+    def test_nul_avec_natif_inconnu_refuse(self):
+        with self.assertRaises(RuntimeError) as ctx:
+            self._call(None, "content_filter")
+        self.assertIn("anormal", str(ctx.exception))
+
+
+_CATALOGUE = {
+    "data": [{"id": "z-ai/glm-5.2", "context_length": 1048576, "reasoning": {"mandatory": False}}]
+}
+_ENDPOINTS = {"data": {"endpoints": [_endpoint("deepinfra/fp4", 131072)]}}
+
+
+class TestPreflightDeBoutEnBout(unittest.TestCase):
+    """L'initialisation exercée comme le CLI l'exerce, avec des valeurs qui
+    DISCRIMINENT : un plafond sous 32 768, un modèle qui impose le raisonnement,
+    une clé et un timeout précis. Mesuré par mutation avant ces tests : un
+    plafond ignoré, un `mandatory` en dur ou un slug validé après les GET
+    laissaient 42 tests verts."""
+
+    def setUp(self):
+        self._limits = dict(segmentation.MODEL_TOKEN_LIMITS)
+        self.addCleanup(self._restore)
+
+    def _restore(self):
+        segmentation.MODEL_TOKEN_LIMITS.clear()
+        segmentation.MODEL_TOKEN_LIMITS.update(self._limits)
+
+    def _init(self, catalogue=_CATALOGUE, endpoints=_ENDPOINTS, args=None):
+        with (
+            patch.dict(os.environ, {"OPENROUTER_API_KEY": _MARQUEUR}),
+            patch(
+                "urllib.request.urlopen",
+                _fake_urlopen({"/endpoints": endpoints, "models": catalogue}),
+            ),
+            patch("aipmt.providers.openrouter.OpenAI") as fake_openai,
+        ):
+            client = openrouter._init_openrouter_client(args or _args())
+        return client, fake_openai
+
+    def test_cle_url_et_timeout_transmis_au_client(self):
+        with patch.dict(os.environ, {"OPENROUTER_BASE_URL": "https://relais.example/api/v1"}):
+            _, fake_openai = self._init()
+        kwargs = fake_openai.call_args.kwargs
+        self.assertEqual(kwargs["api_key"], _MARQUEUR)
+        self.assertEqual(kwargs["base_url"], "https://relais.example/api/v1")
+        self.assertEqual(kwargs["timeout"], openrouter.OPENROUTER_TIMEOUT)
+
+    def test_plafond_inferieur_et_efforts_lus_au_catalogue(self):
+        catalogue = {
+            "data": [
+                {
+                    "id": "z-ai/glm-5.2",
+                    "context_length": 65536,
+                    "reasoning": {"mandatory": True, "supported_efforts": ["low", "max"]},
+                }
+            ]
+        }
+        endpoints = {
+            "data": {
+                "endpoints": [_endpoint("deepinfra/fp4", 16000), _endpoint("novita/fp8", 40000)]
+            }
+        }
+        client, _ = self._init(catalogue, endpoints)
+        self.assertEqual(client.max_tokens, 16000)
+        self.assertEqual(client.providers, ("deepinfra/fp4", "novita/fp8"))
+        self.assertTrue(client.reasoning_mandatory)
+        self.assertEqual(client.supported_efforts, ("low", "max"))
+        self.assertEqual(segmentation.MODEL_TOKEN_LIMITS["z-ai/glm-5.2"], 65536)
+
+    def test_effort_none_ignore_sur_modele_imposant_est_annonce(self):
+        catalogue = {
+            "data": [
+                {
+                    "id": "z-ai/glm-5.2",
+                    "context_length": 65536,
+                    "reasoning": {"mandatory": True, "supported_efforts": ["low"]},
+                }
+            ]
+        }
+        with patch("sys.stderr", io.StringIO()) as err:
+            client, _ = self._init(catalogue, args=_args(reasoning_effort="none"))
+        self.assertTrue(client.reasoning_mandatory)
+        self.assertIn("--reasoning_effort=none ignoré", err.getvalue())
+
+    def test_slug_invalide_refuse_avant_tout_reseau(self):
+        with (
+            patch.dict(os.environ, {"OPENROUTER_API_KEY": _MARQUEUR}),
+            patch("urllib.request.urlopen", side_effect=AssertionError("réseau interdit")),
+            self.assertRaises(ValueError) as ctx,
+        ):
+            openrouter._init_openrouter_client(_args(model="z-ai/glm/.."))
+        self.assertIn("invalide", str(ctx.exception))
+
+    def test_cle_absente_refusee_avant_tout_reseau(self):
+        with (
+            patch.dict(os.environ, {"OPENROUTER_API_KEY": ""}),
+            patch("urllib.request.urlopen", side_effect=AssertionError("réseau interdit")),
+            self.assertRaises(ValueError) as ctx,
+        ):
+            openrouter._init_openrouter_client(_args())
+        self.assertIn("OPENROUTER_API_KEY", str(ctx.exception))
+
+    def test_catalogue_injoignable_refuse_sans_construire_de_client(self):
+        with (
+            patch.dict(os.environ, {"OPENROUTER_API_KEY": _MARQUEUR}),
+            patch("urllib.request.urlopen", side_effect=OSError("DNS")),
+            patch("aipmt.providers.openrouter.OpenAI") as fake_openai,
+            self.assertRaises(ValueError) as ctx,
+        ):
+            openrouter._init_openrouter_client(_args())
+        self.assertIn("injoignable", str(ctx.exception))
+        fake_openai.assert_not_called()
+        self.assertEqual(segmentation.MODEL_TOKEN_LIMITS, self._limits)
+
+    def test_catalogue_en_erreur_nomme_l_erreur_pas_le_slug(self):
+        catalogue = {"error": {"message": "upstream 503", "code": 503}}
+        with self.assertRaises(ValueError) as ctx:
+            self._init(catalogue)
+        self.assertIn("upstream 503", str(ctx.exception))
+        self.assertNotIn("inconnu", str(ctx.exception))
+
+    def test_fiche_sans_context_length_refusee(self):
+        catalogue = {"data": [{"id": "z-ai/glm-5.2", "reasoning": {"mandatory": False}}]}
+        with self.assertRaises(ValueError) as ctx:
+            self._init(catalogue)
+        self.assertIn("context_length", str(ctx.exception))
+        self.assertEqual(segmentation.MODEL_TOKEN_LIMITS, self._limits)
+
+    def test_context_length_illisible_refuse(self):
+        catalogue = {"data": [{"id": "z-ai/glm-5.2", "context_length": "1M"}]}
+        with self.assertRaises(ValueError) as ctx:
+            self._init(catalogue)
+        self.assertIn("illisible", str(ctx.exception))
+        self.assertIn("1M", str(ctx.exception))
+
+    def test_helper_context_length(self):
+        lire = openrouter._openrouter_context_length
+        self.assertEqual(lire({"context_length": 4095}, "m"), 4095)
+        self.assertEqual(lire({"context_length": "32768"}, "m"), 32768)
+        for entry in (
+            {},
+            {"context_length": None},
+            {"context_length": 0},
+            {"context_length": "1M"},
+        ):
+            with self.subTest(entry=entry), self.assertRaises(ValueError):
+                lire(entry, "m")
 
 
 if __name__ == "__main__":

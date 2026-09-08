@@ -217,6 +217,34 @@
       "kind": "FunctionDef",
       "file": "src/aipmt/providers/openrouter.py",
       "why": "scission de _init_openrouter_client pour Codacy"
+    },
+    {
+      "hash": "dac795baaec9fd5ab5ad55cbfb6c9c5e0f7fccc04eae5b7146cca80d4b240a44",
+      "name": "_kill_group_on_sigterm",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/base.py",
+      "why": "revue : gestionnaire SIGTERM qui tue le groupe de l'agent avant de terminer"
+    },
+    {
+      "hash": "f55f161c81c3faa281cded5c4c20545ab71e477eb329bd00f5d7f66c0d438484",
+      "name": "_opencode_reject_corrupted_stream",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/opencode.py",
+      "why": "revue : refus d'un flux JSONL corrompu"
+    },
+    {
+      "hash": "195e8bd0e584550a7e6751f7116a084cb7f25e1b1c42cf91c897a421c6591a9e",
+      "name": "_openrouter_context_length",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue : fenêtre de contexte refusée si absente ou illisible"
+    },
+    {
+      "hash": "fb322f546d9948bd8c7ec0b1ff0a03236800a04a8871270e400c9901f45e3775",
+      "name": "_opencode_parts",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/opencode.py",
+      "why": "revue : part: null compte comme vide"
     }
   ],
   "removed": [],
@@ -283,6 +311,174 @@
       "old_hash": "a6a33c12aeb9abc5bc982f56b2e81c0d85306e08b3032152e6fa099ef0416a3c",
       "new_hash": "0d307aff8b5d05ae36745586ce6122dcf67c2e4b13e6c63c8a92fc0ae410a679",
       "why": "Codacy CCN 10 > 8 : lecture de la clé et contraintes de raisonnement extraites (_openrouter_api_key, _openrouter_reasoning_constraints)"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/guards.py",
+      "old_hash": "2bc893f0672315e347bda4c69193075a3f7b999eab39fa3c38d1a76d1a0767af",
+      "new_hash": "80ce8e5c2a542c50acfbb3cdce666377c4114db7158219b06986cb1bc49bd9e9",
+      "why": "revue : trois gardes lèvent, le signal d'écriture court-circuite ; « La graine »"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/markdown.py",
+      "old_hash": "1b9b902744144b708816c4c111d63703546cafd83e49db4d1e7432f2cafcbbcc",
+      "new_hash": "a3402920c6e2af407bd293228ae8fc51789a6caad3c863d0fadc7a9463c950af",
+      "why": "revue : la segmentation n'importe pas ce module, les instructions système si"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/naming.py",
+      "old_hash": "cd7c55ef65011fdb9913fc16aa540c853b63f19cff6cbb8a6da5d768834011f5",
+      "new_hash": "64130507a8cbcf90e1a0de5f5697b9c92501bcaccff44549673ce174e9e47bb7",
+      "why": "revue : deux couches de garde, pas « la seule »"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/news.py",
+      "old_hash": "6726cb9fe7c5006fd044c67c306564c3b58c04d22c0abc0fde220c72f269f786",
+      "new_hash": "adfae4f6e8c5442c032ebdcc5467ff8f347fcc1de4df1a205ec30274ad5cd032",
+      "why": "revue : le prompt demande le retrait/la permutation, le module n'est qu'un repli"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/notes.py",
+      "old_hash": "593288646a347004fb0b17c0b31dc9d1d80bbff850c6e2110c54080517a7451c",
+      "new_hash": "0c075a05e0c1eae8e31d4c07a06e53254835f2e3c0042777abd2ee3c6c6330f0",
+      "why": "revue :  rend « purs » inexact"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/pipeline.py",
+      "old_hash": "5df261ad88aef97908e432353feb14fe9668dc8d879b847245a3742aea633abc",
+      "new_hash": "2e33cf72388b005ffa291448bc7112621fb33c68b483cd92489f6739c5f0e1a8",
+      "why": "revue : la borne d'écriture est chez les appelants, pas dans translate_markdown_file"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/anthropic.py",
+      "old_hash": "6ab2ce726f699864a417431c6715fd56a762bd9977a04c01eda880c8eff621ed",
+      "new_hash": "0a415fd1abfb3b85e9b86c47708c91febce1c346022ee34efc1de7a28a42579c",
+      "why": "revue : c'est le timeout explicite qui évite le refus du SDK (921 s pour 32 768 tokens), pas un calibrage"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "a4b7a0d091531f43e8c03a25dc40077befa806f72fd0438270dd77df1056fb4f",
+      "new_hash": "f64b408c1c1b831cc31033f06beef2376a72d1b5e4f6253a59aec3be437d301f",
+      "why": "revue : OpenCode n'est pas un CLI d'abonnement ; SIGTERM reçu tue aussi le groupe"
+    },
+    {
+      "name": "_strip_secret_env",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "d9a493be6e3b2edb03c0ed01b1b42e6c66bcde1d0531da59999573491bdde6f1",
+      "new_hash": "b1028c12c917bb0fcc0c910d138bf540ae6788e08b1f54b1a04836f7cff743d5",
+      "why": "revue : OpenCode conserve OPENCODE_API_KEY par keep, la docstring disait « aucune »"
+    },
+    {
+      "name": "_codex_kill_group",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "b7e4bc08cbc7988b12661979c512e8282b30bb4ff327dd84f907b3421e998599",
+      "new_hash": "98193d4ce2f37cce3ba5d41886cc0b6e20307a3988cb70c84c58729d7ae7328f",
+      "why": "revue (code déplacé) : SIGKILL du groupe systématique après le délai de grâce — un fils qui meurt proprement sur SIGTERM laissait vivre le petit-fils"
+    },
+    {
+      "name": "_codex_run_process",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "8bc77cd10e2b6eb7ad81772c5ef11168d1cc95816bc768ddd4bfe3a8de7835ff",
+      "new_hash": "55645db8c0408bc9afcbf9946d25aa20fe2a34fb696c580eb9919a99447ba3cb",
+      "why": "revue : SIGTERM reçu pendant l'attente tue le groupe de l'agent (le timeout du regen laissait l'agent survivre) ; argv/stdin d'OpenCode nommés"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/gemini.py",
+      "old_hash": "bd5504bd7bab634dce8865c5c47f81df564b2339a9d5c608eec7fc857d0bac77",
+      "new_hash": "d753cb1f830102f8537caa8b3b40ce1b91a40db6629390f049b68e6208f8b167",
+      "why": "revue : le niveau ACCEPTÉ est mémorisé, pas la cascade après un refus"
+    },
+    {
+      "name": "_opencode_events",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "031bf923bceb1faae30ac125dd28bc124189af27e9b613149f77d38dff82c528",
+      "new_hash": "160f6eb209f32a527d6599f527fb8150d1911a984dd2c5b64d757dda834cd218",
+      "why": "revue : compte les lignes d'événement illisibles au lieu de les ignorer"
+    },
+    {
+      "name": "_opencode_check_completion",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "9d116a69f8b2f1a13d8156b54d389be155e56a35b99809e631ff42a6f8991576",
+      "new_hash": "1bdd64a31dba244f51a6dc4493aac92a3a3c5838bfbf162cdd4c7ea922f5be87",
+      "why": "revue : part: null donnait AttributeError au lieu de l'erreur de contrat"
+    },
+    {
+      "name": "_opencode_attempt",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "8d749a6f996a83971c17c8bc240319b438f180bafeb8ed448bd1b2e91e1ac648",
+      "new_hash": "a89cef75b689b05de1e70cc51245e17ad38cb223034fc37e73f83f54737c774b",
+      "why": "revue : refuse un flux d'événements corrompu après les contrôles de sortie"
+    },
+    {
+      "name": "_OpenRouterClient",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "a42352f4b062da7a360f75b4ecf838e459e8654822f57fdfe9c737b6c9f06668",
+      "new_hash": "19054ed0cc67e9f0cc79d46fd149f4dc324dc3d7b14d66b63838b5d29252a7b7",
+      "why": "revue : quatre champs de contrainte, pas trois"
+    },
+    {
+      "name": "_openrouter_reasoning",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "204979dba49fe64606623bc45d3f6f5ccf0506d184500db6ec5123a75fe6de0c",
+      "new_hash": "b5d75a656f845b6b7fa7c42068bfe884d8c8db71b0c144774a6b183781d49192",
+      "why": "revue : la docstring disait l'inverse du code (plus bas effort envoyé quand le modèle impose)"
+    },
+    {
+      "name": "_init_openrouter_client",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "0d307aff8b5d05ae36745586ce6122dcf67c2e4b13e6c63c8a92fc0ae410a679",
+      "new_hash": "64422faa929223e3f54c65e1a0569b353408fb807c4f7960f4eb8dfb0a2eef7e",
+      "why": "revue : fiche sans context_length refusée au lieu d'un défaut inscrit comme mesure"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "57aad80ad91ff688082c3dc480d4ba60c75afb27841e78a251fa1946786207b3",
+      "new_hash": "4d3897470509e6c55ba8a3ed233e6c51a42243accee3475f59a0924567318c49",
+      "why": "revue : chaînes de if, plus d'elif"
+    },
+    {
+      "name": "_add_provider_args",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "49c1fa01a50f59b657ae4d635ff6e4ea22019e1690f99d6aabbe653b47e2bf7f",
+      "new_hash": "4e467ed0dd4db0c3ed861939f3a5050585957533879b5ce4c338f57419095f8e",
+      "why": "revue : l'aide de --reasoning_effort nomme les quatre providers qui le consomment"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/segmentation.py",
+      "old_hash": "f1cc7e2a02fb87c122d3f096f5c5092091873034553d0ce043541476ae971fc6",
+      "new_hash": "b2c0b25b4f7abcd6d56828361595da6d95d33e9d274683500f63a9257830fd21",
+      "why": "revue : segmentation en caractères ; MODEL_TOKEN_LIMITS est lu par le pipeline"
+    },
+    {
+      "name": "_openrouter_check_finish",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "0d29edc41566adbcf536fad6f809019561a119afd03ad6f0bac66242e1c28b6e",
+      "new_hash": "926914eb12244ab93e267323a74a11d86c9acc7cdae201ab7b1ffa2216e66b49",
+      "why": "revue : finish_reason nul (type documenté string | null) → la raison brute de l'amont fait foi, max_tokens vaut length"
+    },
+    {
+      "name": "_opencode_check_completion",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "1bdd64a31dba244f51a6dc4493aac92a3a3c5838bfbf162cdd4c7ea922f5be87",
+      "new_hash": "cbce6a9f12d04f1d7c3f0fc36261869ae518728cc762e71a1e5575c862dc0538",
+      "why": "revue : les part passent par _opencode_parts (CCN 11 → 6)"
+    },
+    {
+      "name": "_openrouter_http_get",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "7c902fac701f5d0823b26b5fbd973a5b81c715a03815b118821933fc18a15f94",
+      "new_hash": "5930d68494dc1a7b3f8c25e8a0117983d7e81226aa2001e8bf8381e0e7242eef",
+      "why": "revue : un corps 200 portant une erreur se lisait « slug inconnu » ; l'erreur du routeur est nommée"
     }
   ]
 }

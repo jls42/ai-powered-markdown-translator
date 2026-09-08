@@ -1,6 +1,6 @@
 """Note de traduction ajoutée en fin de document (`--add_translation_note`).
 
-Constructeurs purs : la phrase descriptive, les paragraphes invariants (titre
+Constructeurs sans I/O ni appel au modèle : la phrase descriptive, les paragraphes invariants (titre
 du dépôt, lien), la découpe du front matter et la composition finale. La
 traduction de la phrase elle-même passe par le pipeline, qui appelle ce module,
 jamais l'inverse.

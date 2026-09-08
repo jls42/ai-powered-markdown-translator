@@ -707,10 +707,16 @@ class TestHindiTechnicalReadmeValidation(unittest.TestCase):
         )
         args = _base_args(source_lang="en", target_lang="hi", news=False)
 
-        with patch("aipmt.guards.detect_langs", return_value=[MagicMock(lang="en", prob=0.86)]):
+        with patch(
+            "aipmt.guards.detect_langs", return_value=[MagicMock(lang="en", prob=0.86)]
+        ) as fake_detect:
             guards._validate_translation_output(
                 source_segment, translated, args, is_translation_note=False
             )
+        # Le signal d'écriture cible (devanagari) court-circuite la détection :
+        # c'est lui qui fait passer ce test, pas le mock — mesuré, le test restait
+        # vert sans le patch.
+        fake_detect.assert_not_called()
 
     def test_hindi_header_only_still_fails_language_mismatch(self):
         source_segment = (
@@ -727,12 +733,14 @@ class TestHindiTechnicalReadmeValidation(unittest.TestCase):
             patch(
                 "aipmt.guards.detect_langs",
                 return_value=[MagicMock(lang="en", prob=0.95), MagicMock(lang="hi", prob=0.05)],
-            ),
+            ) as fake_detect,
             self.assertRaisesRegex(RuntimeError, r"Output language mismatch"),
         ):
             guards._validate_translation_output(
                 source_segment, translated, args, is_translation_note=False
             )
+        # Un en-tête hindi ne suffit pas : la détection est bien consultée.
+        fake_detect.assert_called_once()
 
 
 class TestMultiProviderStopReasons(unittest.TestCase):
@@ -926,7 +934,8 @@ class TestDetectProvider(unittest.TestCase):
 
     Règle du propriétaire : les traductions de ce dépôt ne passent JAMAIS par
     une API facturée. Codex (abonnement ChatGPT, gpt-5.6-sol) est le défaut,
-    sans aucune auto-détection de clé ; `openai`, `gemini` et `grok` exigent
+    sans aucune auto-détection de clé ; `openai`, `gemini`, `grok` et `openrouter`
+    exigent
     `REGEN_ALLOW_PAID_API=1` en plus de `REGEN_PROVIDER`.
     """
 

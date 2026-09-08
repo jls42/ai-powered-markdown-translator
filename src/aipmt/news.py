@@ -2,8 +2,10 @@
 
 Les citations sont remplacées par `<NEWSQUOTE id="N"/>` avant traduction, et
 la ligne de traduction source (`> 🇫🇷 _…_`) est gérée selon la langue cible :
-retirée pour l'anglais, permutée sinon. Les règles injectées dans le prompt
-vivent ici aussi, à côté des validations qui les vérifient.
+le prompt demande de la retirer pour l'anglais et d'en permuter les drapeaux
+sinon, et un nettoyage de repli applique ici la même règle quand le modèle l'a
+ignorée. Les règles injectées dans le prompt vivent ici aussi, à côté des
+validations qui les vérifient.
 """
 
 import re
@@ -197,9 +199,6 @@ _NEWS_CITATION_REGEX = re.compile(
 
 
 _RESIDUAL_NEWS_PLACEHOLDER_REGEX = re.compile(r'<NEWSQUOTE\s+id=["\']\d+["\']\s*/>|#NEWSQUOTE\d+#')
-
-
-# fmt: on
 
 
 def _protect_news_quotes(content, args):

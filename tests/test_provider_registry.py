@@ -22,8 +22,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from aipmt.providers import registry
 
-# Ordre d'évaluation, du plus prioritaire au moins : les trois premiers sont
-# des attributs obligatoires du Namespace, les suivants sont lus par getattr.
+# Ordre d'évaluation, du plus prioritaire au moins. Pour `_select_provider_client`
+# les trois premiers sont des attributs obligatoires du Namespace et les suivants
+# sont lus par getattr ; `_resolve_provider` reçoit les trois premiers en
+# paramètres nommés et ne lit le Namespace que pour les suivants.
 CHAIN = (
     ("use_mistral", "mistral"),
     ("use_claude", "claude"),

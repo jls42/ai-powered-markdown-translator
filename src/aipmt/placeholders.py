@@ -118,6 +118,7 @@ _HTML_HREF_ANCHOR_REGEX = re.compile(r'href=(["\'])#([^"\'#?]+)\1')
 # `.strip()` côté Python pour trimmer les espaces finaux capturés.
 # fmt: off
 _HEADING_REGEX = re.compile(r"^(#{1,6})[ \t]+([^\n]+)$", re.MULTILINE)  # NOSONAR S5852
+# fmt: on
 
 
 def _github_slug(heading_text):

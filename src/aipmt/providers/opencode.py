@@ -190,8 +190,13 @@ def _opencode_argv(client, args, workdir):
 
 
 def _opencode_events(stdout):
-    """Événements JSONL de stdout ; les lignes non-JSON sont ignorées."""
-    events = []
+    """Événements JSONL de stdout, et nombre de lignes d'événement illisibles.
+
+    Les lignes qui ne commencent pas par `{` (bannières) sont ignorées. Une
+    ligne qui commence par `{` et ne se décode pas est comptée : c'est une
+    corruption du flux, refusée APRÈS les contrôles de sortie, qui portent un
+    meilleur diagnostic quand le CLI a lui-même échoué."""
+    events, unreadable = [], 0
     for line in (stdout or "").splitlines():
         line = line.strip()
         if not line.startswith("{"):
@@ -199,10 +204,21 @@ def _opencode_events(stdout):
         try:
             event = json.loads(line)
         except ValueError:
+            unreadable += 1
             continue
         if isinstance(event, dict):
             events.append(event)
-    return events
+    return events, unreadable
+
+
+def _opencode_reject_corrupted_stream(unreadable, model):
+    """Un texte partiel suivi d'un `step_finish` sain passerait pour une
+    traduction complète : une seule ligne d'événement illisible refuse le tout."""
+    if unreadable:
+        raise _OpencodeCallError(
+            f"OpenCode : {unreadable} ligne(s) d'événement illisible(s) sur stdout "
+            f"(model={model}) — flux corrompu, réponse refusée."
+        )
 
 
 def _opencode_stderr_cause(stderr):
@@ -256,17 +272,23 @@ def _opencode_raise_exit_code(returncode, cause, stderr, model):
     )
 
 
+def _opencode_parts(events, kind):
+    """Les `part` des événements de type `kind` ; `part: null` compte comme vide,
+    pour que le contrat de sortie réponde par SON erreur et non un AttributeError."""
+    return [event.get("part") or {} for event in events if event.get("type") == kind]
+
+
 def _opencode_check_completion(events, model):
     """Un `tool_use` prouve que le confinement n'a pas pris ; un dernier pas
     qui ne finit pas en `stop` (`length`, `error`…) est une réponse tronquée ;
     aucun `step_finish` du tout, un tour qui ne s'est pas terminé."""
-    tools = [e.get("part", {}).get("tool") for e in events if e.get("type") == "tool_use"]
+    tools = [part.get("tool") for part in _opencode_parts(events, "tool_use")]
     if tools:
         raise _OpencodeCallError(
             f"OpenCode a appelé un outil ({', '.join(str(t) for t in tools)}) alors que "
             f"tous sont refusés (model={model}) — confinement non appliqué, réponse refusée."
         )
-    reasons = [e.get("part", {}).get("reason") for e in events if e.get("type") == "step_finish"]
+    reasons = [part.get("reason") for part in _opencode_parts(events, "step_finish")]
     if not reasons:
         raise _OpencodeCallError(
             f"OpenCode n'a émis aucun step_finish (model={model}) — contrat de sortie "
@@ -331,8 +353,9 @@ def _opencode_attempt(client, args, prompt, segment):
         returncode, stdout, stderr = _codex_run_process(
             argv, segment, client.timeout, _opencode_env(prompt), "OpenCode", args.model
         )
-        events = _opencode_events(stdout)
+        events, unreadable = _opencode_events(stdout)
         _opencode_raise_on_failure(returncode, events, stderr, args.model)
+        _opencode_reject_corrupted_stream(unreadable, args.model)
         return _opencode_extract_text(events, args.model)
 
 

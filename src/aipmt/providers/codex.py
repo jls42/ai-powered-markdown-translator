@@ -27,6 +27,8 @@ from .openai import _resolve_reasoning_effort
 DEFAULT_MODEL_CODEX = "gpt-5.6-sol"
 
 
+# Luna = modèle "fast, high-volume" du plan ChatGPT : 250-2000 messages/5h sur
+# Plus contre 10-100 pour Sol. C'est le seul choix raisonnable pour du batch.
 ECO_MODEL_CODEX = "gpt-5.6-luna"
 
 

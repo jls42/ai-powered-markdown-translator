@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import subprocess  # nosec B404 — la suite simule les CLI, elle n'en lance aucun
 import sys
 import types
@@ -218,8 +219,12 @@ class TestCodexCall(unittest.TestCase):
         ):
             codex._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("timeout après 42s", str(ctx.exception))
-        killpg.assert_called_once()
-        self.assertEqual(killpg.call_args[0][0], 4242)
+        # SIGTERM, délai de grâce, puis SIGKILL quoi qu'il arrive : le shim meurt
+        # proprement sur SIGTERM, son petit-fils Rust pas forcément.
+        self.assertEqual(
+            [c.args for c in killpg.call_args_list],
+            [(4242, signal.SIGTERM), (4242, signal.SIGKILL)],
+        )
 
 
 class TestCodexRateLimitBackoff(unittest.TestCase):

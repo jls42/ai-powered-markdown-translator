@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import subprocess  # nosec B404 — la suite simule les CLI, elle n'en lance aucun
 import sys
 import unittest
@@ -233,7 +234,10 @@ class TestGrokCliCall(unittest.TestCase):
         ):
             grok._call_grok_cli(client, args, "PROMPT", "SEG")
         self.assertIn("Grok CLI timeout après 42s", str(ctx.exception))
-        killpg.assert_called_once()
+        self.assertEqual(
+            [c.args for c in killpg.call_args_list],
+            [(4242, signal.SIGTERM), (4242, signal.SIGKILL)],
+        )
 
     def test_rate_limit_is_retried(self):
         payload = json.dumps({"type": "error", "message": "rate limit exceeded"})

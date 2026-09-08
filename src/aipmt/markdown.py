@@ -1,11 +1,11 @@
 """Lexique Markdown partagé : expressions régulières et tables d'écritures.
 
 Ce module n'a aucune dépendance interne et n'en aura jamais : c'est le socle
-que la segmentation, les gardes de sortie, la protection des placeholders et
-le mode `--news` consultent tous. Il porte aussi les plages Unicode des
-écritures non latines et la forme des placeholders de citation (`news_quote_
-placeholder`), parce que plusieurs modules doivent reconnaître exactement le
-même motif.
+que les gardes de sortie, la protection des placeholders, le mode `--news` et
+les instructions système consultent tous. Il porte aussi les plages Unicode
+des écritures non latines et la forme des placeholders de citation
+(`news_quote_placeholder`), parce que plusieurs modules doivent reconnaître
+exactement le même motif.
 """
 
 import re

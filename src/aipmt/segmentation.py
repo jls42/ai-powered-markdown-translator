@@ -1,8 +1,9 @@
 """Segmentation d'un document en morceaux traduisibles.
 
 `segment_text` coupe aux frontières naturelles (paragraphes, titres, phrases)
-sous la fenêtre de tokens du modèle. `MODEL_TOKEN_LIMITS` vit ici parce que
-c'est la segmentation qui le consomme ; le provider OpenRouter y ÉCRIT la
+sous une taille maximale en caractères, que le pipeline dérive de la fenêtre
+du modèle. `MODEL_TOKEN_LIMITS` vit ici parce que la fenêtre d'un modèle est
+une donnée de segmentation ; le provider OpenRouter y ÉCRIT la
 fenêtre lue au préflight, d'où l'importance que tous les modules partagent le
 même objet dictionnaire, jamais une copie.
 """

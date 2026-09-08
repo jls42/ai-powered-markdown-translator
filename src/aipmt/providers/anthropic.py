@@ -1,8 +1,9 @@
 """Provider Claude (API Anthropic).
 
 Le SDK refuse côté client un appel non streamé dont `max_tokens` laisse
-présager plus de dix minutes : `CLAUDE_MAX_TOKENS` et `CLAUDE_TIMEOUT` sont
-calibrés pour rester sous cette limite, mesurée par un appel réel.
+présager plus de dix minutes — sa formule donne 921 s pour les 32 768 tokens
+de `CLAUDE_MAX_TOKENS`. C'est le `timeout` explicite passé à l'appel qui l'en
+dispense, pas un calibrage du plafond ; mesuré par un appel réel.
 """
 
 import os
@@ -26,10 +27,9 @@ ECO_MODEL_CLAUDE = "claude-haiku-4-5"
 CLAUDE_MAX_TOKENS = 32768
 
 
-# Plafond d'attente d'un appel Claude non-streamé. Doit rester SUPÉRIEUR
-# à la durée d'un segment, mais l'utilisateur doit savoir qu'en regen le
-# job est tué avant : REGEN_JOB_TIMEOUT vaut 600 s contre 900 s ici, donc
-# c'est `timeout` qui tranche en premier (sortie 124, échec consigné).
+# Plafond d'attente d'un appel Claude non-streamé. Doit rester SUPÉRIEUR à la
+# durée d'un segment. (Le regen du dépôt n'a aucun chemin Claude : son
+# REGEN_JOB_TIMEOUT ne s'applique pas ici.)
 CLAUDE_TIMEOUT = float(os.getenv("CLAUDE_TIMEOUT", "900"))
 
 

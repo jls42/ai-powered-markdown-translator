@@ -29,6 +29,7 @@ import os
 import pathlib
 import subprocess  # nosec B404 — relance l'interpréteur pour observer l'import du paquet
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
@@ -192,41 +193,65 @@ class ConfigurationIsLoadedAtPackageImport(unittest.TestCase):
 class NoTestPatchesTheFacade(unittest.TestCase):
     """Un patch se pose sur le module qui consulte le nom. Jamais sur la façade."""
 
-    @staticmethod
-    def _is_patch_call(func):
-        """`patch(...)`, `mock.patch(...)`, `patch.object(...)` — pas `patch.dict`."""
+    FACADE = "aipmt.translate"
+
+    @classmethod
+    def _is_patch_call(cls, func):
+        """`patch(...)`, `mock.patch(...)`, `patch.object(...)`, `patch.multiple(...)`
+        et leurs formes préfixées — pas `patch.dict`, qui touche un objet partagé."""
         if isinstance(func, ast.Name):
             return func.id == "patch"
         if not isinstance(func, ast.Attribute):
             return False
         if func.attr == "patch":
             return True
-        return func.attr == "object" and getattr(func.value, "id", "") == "patch"
+        return func.attr in ("object", "multiple") and cls._is_patch_call(func.value)
 
-    @staticmethod
-    def _facade_target(target):
+    @classmethod
+    def _facade_aliases(cls, tree):
+        """Les noms locaux liés à la façade : `translate` par défaut, plus
+        `import aipmt.translate as x` et `from aipmt import translate as x`."""
+        names = {"translate"}
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names |= {a.asname for a in node.names if a.name == cls.FACADE and a.asname}
+            elif isinstance(node, ast.ImportFrom) and node.module == "aipmt" and not node.level:
+                names |= {a.asname or a.name for a in node.names if a.name == "translate"}
+        return names
+
+    @classmethod
+    def _facade_target(cls, target, aliases):
         """La cible si elle désigne la façade, sinon None."""
         if isinstance(target, ast.Constant):
             value = target.value
             if isinstance(value, str) and (
-                value == "aipmt.translate" or value.startswith("aipmt.translate.")
+                value == cls.FACADE or value.startswith(cls.FACADE + ".")
             ):
                 return value
             return None
+        dotted = ast.unparse(target)
+        if dotted == cls.FACADE or dotted.startswith(cls.FACADE + "."):
+            return dotted
         root = target
         while isinstance(root, ast.Attribute):
             root = root.value
-        if isinstance(root, ast.Name) and root.id == "translate":
-            return ast.unparse(target)
+        if isinstance(root, ast.Name) and root.id in aliases:
+            return dotted
         return None
 
     @classmethod
     def _patch_targets(cls, path):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        aliases = cls._facade_aliases(tree)
         for node in ast.walk(tree):
-            if not isinstance(node, ast.Call) or not node.args or not cls._is_patch_call(node.func):
+            if not isinstance(node, ast.Call) or not cls._is_patch_call(node.func):
                 continue
-            target = cls._facade_target(node.args[0])
+            candidate = node.args[0] if node.args else None
+            if candidate is None:
+                candidate = next((k.value for k in node.keywords if k.arg == "target"), None)
+            if candidate is None:
+                continue
+            target = cls._facade_target(candidate, aliases)
             if target is not None:
                 yield node.lineno, target
 
@@ -241,24 +266,47 @@ class NoTestPatchesTheFacade(unittest.TestCase):
         self.assertEqual(offenders, [])
 
     def test_the_detector_sees_every_form(self):
+        """Mesuré avant durcissement : sur cinq formes, seule la chaîne
+        `patch('aipmt.translate.x')` était vue ; `mock.patch.object`, un alias
+        d'import, `target=` et `patch.multiple` passaient."""
         sample = (
             "from unittest import mock\n"
             "from unittest.mock import patch\n"
             "from aipmt import translate\n"
+            "from aipmt import translate as t\n"
+            "import aipmt.translate as facade\n"
+            "import aipmt.translate\n"
             "patch('aipmt.translate.x')\n"
             'patch(\n    "aipmt.translate.y",\n)\n'
             "patch.object(translate, 'z')\n"
             "mock.patch('aipmt.translate.w')\n"
+            "mock.patch.object(translate, 'v')\n"
+            "patch.object(facade, 'u')\n"
+            "patch.object(t, 's')\n"
+            "patch.object(aipmt.translate, 'p')\n"
+            "patch(target='aipmt.translate.r')\n"
+            "patch.multiple(translate, q=1)\n"
             "patch.dict(translate.MODEL_TOKEN_LIMITS, {})\n"  # autorisé : objet partagé
+            "patch('aipmt.cli.translate_markdown_file')\n"  # autorisé : le consommateur
         )
-        tmp = pathlib.Path(self.id().replace(".", "_") + ".py")
-        tmp.write_text(sample, encoding="utf-8")
-        try:
-            found = [target for _, target in self._patch_targets(tmp)]
-        finally:
-            tmp.unlink()
+        with tempfile.TemporaryDirectory() as tmp:
+            sample_path = pathlib.Path(tmp, "sonde.py")
+            sample_path.write_text(sample, encoding="utf-8")
+            found = [target for _, target in self._patch_targets(sample_path)]
         self.assertEqual(
-            found, ["aipmt.translate.x", "aipmt.translate.y", "translate", "aipmt.translate.w"]
+            found,
+            [
+                "aipmt.translate.x",
+                "aipmt.translate.y",
+                "translate",
+                "aipmt.translate.w",
+                "translate",
+                "facade",
+                "t",
+                "aipmt.translate",
+                "aipmt.translate.r",
+                "translate",
+            ],
         )
 
 

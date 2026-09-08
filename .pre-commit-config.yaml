@@ -83,8 +83,8 @@ repos:
         stages: [pre-commit]
         files: ^(src/.*|scripts/.*|tests/.*)\.py$
 
-      # Pureté du découpage de src/aipmt/translate.py : déplacement pur, AST
-      # identique, marqueurs conservés, aucun fichier non suivi. Temporaire :
+      # Pureté du découpage de src/aipmt/translate.py : déplacement pur, texte
+      # normalisé identique nœud par nœud, marqueurs conservés, aucun fichier non suivi. Temporaire :
       # retiré avec la PR qui suit le découpage. Le déclencheur couvre aussi
       # l'outil lui-même — une modification isolée du vérificateur doit le
       # relancer, sinon rien ne dit qu'il mord encore.

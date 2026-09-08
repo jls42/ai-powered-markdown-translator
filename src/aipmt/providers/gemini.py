@@ -1,8 +1,8 @@
 """Provider Gemini (API Google, SDK `google-genai`).
 
-Le niveau de réflexion accepté varie d'un modèle à l'autre ; la cascade est
-mémoïsée par modèle après le premier refus, pour ne pas payer un aller-retour
-par segment.
+Le niveau de réflexion accepté varie d'un modèle à l'autre ; le premier
+niveau accepté est mémorisé par modèle, pour ne pas repayer la cascade de
+refus à chaque segment.
 """
 
 import os

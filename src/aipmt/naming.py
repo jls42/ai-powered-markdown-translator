@@ -3,7 +3,8 @@
 `EXCLUDE_PATTERNS`, le nom de fichier cible (`{base}-{lang}.md`, avec ou sans
 modèle, ou conservé tel quel), la détection d'une traduction déjà présente, et
 la vérification qu'aucun chemin construit à partir des arguments ne sort du
-répertoire cible — la seule garde qui protège l'écriture.
+répertoire cible — deux couches : le refus des séparateurs dans les composants
+du nom, puis la borne du chemin résolu.
 """
 
 import glob

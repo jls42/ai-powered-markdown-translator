@@ -4,7 +4,7 @@ Un provider est identifié par une clé (`codex`, `grok_cli`…) résolue depuis
 flags ; à chaque clé correspondent un libellé, un constructeur de client et un
 appel de traduction. Les fonctions de ce module viennent du module principal,
 scindées depuis pour tenir sous la complexité que Codacy tolère, sans changer
-l'ordre d'évaluation : leurs chaînes if/elif restent le contrat observable
+l'ordre d'évaluation : leurs chaînes de `if` restent le contrat observable
 (précédence, libellés, ordre de l'aide) jusqu'à ce qu'un registre déclaratif
 les remplace, dans un changement nommé comme tel.
 """
@@ -159,11 +159,11 @@ def _add_provider_args(parser):
         choices=("none", "low", "medium", "high", "xhigh"),
         default=None,
         help=(
-            "Effort de raisonnement OpenAI GPT-5.x. Par défaut : 'none' avec "
-            "--eco (le raisonnement n'apporte rien à une traduction et double "
-            "les tokens de sortie), 'medium' sinon. Toutes les valeurs ne sont "
-            "pas acceptées par tous les modèles ; un refus déclenche un retry "
-            "sans le paramètre."
+            "Effort de raisonnement, transmis à OpenAI, Codex, OpenCode (--variant) "
+            "et OpenRouter. Par défaut : 'none' avec --eco (le raisonnement "
+            "n'apporte rien à une traduction et double les tokens de sortie), "
+            "'medium' sinon. Toutes les valeurs ne sont pas acceptées par tous les "
+            "modèles ; sur OpenAI, un refus déclenche un retry sans le paramètre."
         ),
     )
 

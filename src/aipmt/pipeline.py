@@ -4,7 +4,8 @@
 et valide chaque segment (placeholders, langue, passthrough) avec un second
 essai sur échec récupérable. `translate_markdown_file` enchaîne protection
 des fragments, traduction, restauration, validations du mode news, note de
-traduction et écriture bornée au répertoire cible ; `translate_directory`
+traduction et écriture au chemin reçu — borné par `_ensure_within_directory`
+chez ses appelants, `cli` et `translate_directory` ; `translate_directory`
 parcourt une arborescence en respectant `EXCLUDE_PATTERNS`. Toute garde lève :
 rien n'est rattrapé en silence, un fichier en échec est rapporté comme tel.
 """

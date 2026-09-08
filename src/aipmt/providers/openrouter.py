@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from openai import OpenAI
 
 from ..config import _missing_key_message
-from ..segmentation import DEFAULT_TOKEN_LIMIT, MODEL_TOKEN_LIMITS
+from ..segmentation import MODEL_TOKEN_LIMITS
 from .base import _NAMESPACED_MODEL_REGEX, _reason_name
 from .openai import _build_openai_messages
 
@@ -34,8 +34,8 @@ OPENROUTER_TIMEOUT = float(os.getenv("OPENROUTER_TIMEOUT", "900"))
 OPENROUTER_PREFLIGHT_TIMEOUT = float(os.getenv("OPENROUTER_PREFLIGHT_TIMEOUT", "30"))
 
 
-# Plancher de sortie exigé d'un hébergeur. 8 000 tokens couvrent largement un
-# segment de 16 000 tokens d'entrée traduit ; le seuil sert à écarter les
+# Plancher de sortie exigé d'un hébergeur. 8 000 tokens couvrent largement la
+# traduction d'un segment de 16 000 caractères ; le seuil sert à écarter les
 # hébergeurs à 2 048 qui tronqueraient sans le dire, pas à dimensionner.
 OPENROUTER_MIN_COMPLETION_TOKENS = 8000
 
@@ -66,8 +66,9 @@ OPENROUTER_EFFORTS_CROISSANTS = ("minimal", "low", "medium", "high", "xhigh", "m
 #    préflight, qui est fail-closed : pas de catalogue, pas de traduction.
 # 2. Le raisonnement est facturé au tarif de sortie. Même requête sur
 #    `z-ai/glm-5.2`, réponse « OK » : 107 tokens de complétion au défaut du
-#    modèle, 2 avec le raisonnement coupé. Un facteur 18 sur chaque segment de
-#    chaque fichier, pour une tâche à laquelle le raisonnement n'apporte rien.
+#    modèle, 2 avec le raisonnement coupé. Un facteur 50 sur cette requête, et
+#    autant sur chaque segment d'un fichier, pour une tâche à laquelle le
+#    raisonnement n'apporte rien.
 def _openrouter_http_get(base_url, path):
     """GET JSON sur l'API OpenRouter. Le catalogue est public : pas de clé ici,
     donc rien à fuiter si l'URL de base est détournée.
@@ -85,9 +86,19 @@ def _openrouter_http_get(base_url, path):
     delai = OPENROUTER_PREFLIGHT_TIMEOUT
     try:
         with urllib.request.urlopen(url, timeout=delai) as reponse:  # nosec B310 — https vérifié
-            return json.loads(reponse.read().decode("utf-8"))
+            payload = json.loads(reponse.read().decode("utf-8"))
     except (OSError, ValueError) as e:
         raise ValueError(f"Préflight OpenRouter injoignable ({url}) : {e}") from e
+    # Le routeur répond 200 avec un corps qui ne porte qu'une erreur quand
+    # l'amont échoue — mesuré sur les complétions, la même garde vaut ici :
+    # sans elle, un catalogue en panne se lisait « slug inconnu ».
+    error = payload.get("error") if isinstance(payload, dict) else None
+    if error:
+        message = error.get("message", error) if isinstance(error, dict) else error
+        raise ValueError(
+            f"Préflight OpenRouter : le routeur répond en erreur sur {path} : {message}"
+        )
+    return payload
 
 
 def _openrouter_catalog_entry(base_url, model):
@@ -138,10 +149,10 @@ def _openrouter_pin(endpoints):
 class _OpenRouterClient:
     """Client OpenRouter : le client OpenAI, plus ce que le préflight a mesuré.
 
-    Ces trois champs ne sont pas des préférences, ce sont des contraintes lues
+    Ces quatre champs ne sont pas des préférences, ce sont des contraintes lues
     sur le catalogue au démarrage — la liste d'hébergeurs dont aucun ne
-    tronque, le plafond de sortie qu'ils tiennent tous, et le fait que le
-    modèle impose ou non de raisonner."""
+    tronque, le plafond de sortie qu'ils tiennent tous, le fait que le modèle
+    impose ou non de raisonner, et les efforts qu'il déclare accepter."""
 
     client: object
     providers: tuple = ()
@@ -155,10 +166,12 @@ def _openrouter_reasoning(client, args):
 
     Par défaut le raisonnement est COUPÉ quand le modèle le permet : mesuré sur
     z-ai/glm-5.2, la même réponse coûte 2 tokens de complétion au lieu de 107.
-    Quand le modèle l'impose, on n'envoie rien plutôt que de deviner un effort —
-    l'effort alloue un pourcentage de `max_tokens` et le raisonnement se sert en
-    premier, si bien qu'une valeur choisie au hasard déplace le risque de page
-    blanche au lieu de le réduire."""
+    Quand le modèle l'impose, on demande le PLUS BAS effort qu'il déclare
+    accepter : laisser son défaut (`max` sur z-ai/glm-5.3-flash) saturait
+    l'enveloppe de sortie avant la fin de la traduction, l'effort en allouant
+    un pourcentage que le raisonnement consomme en premier. Sans effort connu
+    au catalogue, on n'envoie rien plutôt que d'en inventer un. Un
+    `--reasoning_effort` explicite part tel quel."""
     effort = getattr(args, "reasoning_effort", None)
     if effort not in (None, "none"):
         return {"effort": effort}
@@ -239,7 +252,14 @@ def _openrouter_check_finish(choice, client, args, content):
     l'utilisateur réduire une taille de segment qui n'est pas en cause."""
     finish = _reason_name(choice.finish_reason)
     native = _reason_name(getattr(choice, "native_finish_reason", None))
-    if finish == "length":
+    # La raison normalisée est `string | null` dans le type documenté de la
+    # réponse non streamée (api-reference/overview), sans condition, et le SDK
+    # d'OpenRouter lui-même la tolère nulle. Quand elle manque, la raison brute
+    # de l'amont fait foi (`max_tokens` chez Anthropic vaut `length`) ; leur
+    # absence à toutes deux est admise, refuser serait deviner — le contenu
+    # vide, lui, est déjà refusé par le dispatch.
+    reason = finish if finish is not None else native
+    if reason in ("length", "max_tokens", "MAX_TOKENS"):
         if not content:
             raise RuntimeError(
                 f"OpenRouter : budget de sortie ({client.max_tokens} tokens) consommé par le "
@@ -254,7 +274,7 @@ def _openrouter_check_finish(choice, client, args, content):
     # échoue en cours de génération. Mesuré sur z-ai/glm-5.3-flash : deux
     # segments coupés à 750 s exactement, `native_finish_reason` à None. Le dire
     # évite de chercher un défaut dans le document ou dans le découpage.
-    if finish == "error":
+    if reason == "error":
         raise RuntimeError(
             f"OpenRouter : l'hébergeur a interrompu la génération (model={args.model}, "
             f"finish_reason=error, natif={native!r}). Panne côté fournisseur, pas côté "
@@ -262,7 +282,7 @@ def _openrouter_check_finish(choice, client, args, content):
         )
     # `end_turn` est la forme émise par certains hébergeurs là où OpenAI émet
     # `stop` ; `native_finish_reason` porte la valeur non normalisée de l'amont.
-    if finish not in ("stop", "STOP", "end_turn", None):
+    if reason not in ("stop", "STOP", "end_turn", None):
         raise RuntimeError(
             f"OpenRouter finish_reason anormal={finish!r} (natif={native!r}, model={args.model})"
         )
@@ -331,6 +351,30 @@ def _openrouter_reasoning_constraints(entry):
     return bool(reasoning.get("mandatory")), tuple(reasoning.get("supported_efforts") or ())
 
 
+def _openrouter_context_length(entry, model):
+    """Fenêtre de contexte lue au catalogue, refusée si absente ou illisible.
+
+    Un défaut silencieux (`DEFAULT_TOKEN_LIMIT`) serait inscrit dans
+    `MODEL_TOKEN_LIMITS` comme une mesure, et éteindrait l'avertissement
+    « modèle non listé » de la CLI : le préflight existe pour ne rien laisser
+    au hasard, une fiche sans fenêtre est une fiche qu'on ne sait pas lire."""
+    raw = entry.get("context_length")
+    if raw is None:
+        raise ValueError(
+            f"Catalogue OpenRouter sans context_length pour {model!r} : fenêtre de contexte "
+            "inconnue, traduction refusée plutôt que segmentée au hasard."
+        )
+    try:
+        context_length = int(raw)
+    except (TypeError, ValueError) as e:
+        raise ValueError(
+            f"Catalogue OpenRouter : context_length illisible pour {model!r} ({raw!r})."
+        ) from e
+    if context_length <= 0:
+        raise ValueError(f"Catalogue OpenRouter : context_length nul pour {model!r} ({raw!r}).")
+    return context_length
+
+
 def _init_openrouter_client(args):
     """Provider OpenRouter. L'appel est compatible OpenAI ; ce qui distingue ce
     provider tient dans le préflight, dont le résultat est affiché parce qu'il
@@ -355,8 +399,9 @@ def _init_openrouter_client(args):
         )
     # Le catalogue connaît la vraie fenêtre : la renseigner évite que la
     # segmentation retombe sur DEFAULT_TOKEN_LIMIT, faux pour 44 des 431
-    # modèles — dont deux plafonnés à 4 095 tokens.
-    context_length = int(entry.get("context_length") or DEFAULT_TOKEN_LIMIT)
+    # modèles — dont deux plafonnés à 4 095 tokens. Une fiche sans fenêtre est
+    # refusée : un défaut inscrit ici passerait pour une mesure.
+    context_length = _openrouter_context_length(entry, args.model)
     MODEL_TOKEN_LIMITS[args.model] = context_length
     mandatory, supported_efforts = _openrouter_reasoning_constraints(entry)
     client = _OpenRouterClient(
