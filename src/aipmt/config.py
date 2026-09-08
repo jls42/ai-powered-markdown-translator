@@ -13,8 +13,20 @@ déjà chargé, comme lorsque tout vivait dans un seul module.
 """
 
 import os
+import sys
 
 from dotenv import find_dotenv, load_dotenv
+
+# Variables qui décident OÙ part une clé d'API. Le `.env` du projet est cherché
+# depuis le répertoire courant et ses parents : une arborescence non fiable —
+# un dépôt qu'on vient de cloner — peut donc en poser une, et la vraie clé,
+# venue de l'environnement ou de la configuration utilisateur, partirait
+# ensuite dans l'en-tête d'autorisation d'un serveur tiers. Ces variables-là ne
+# sont acceptées que des deux couches que l'utilisateur contrôle vraiment.
+#
+# `OPENAI_BASE_URL` est lue par le SDK lui-même, pas par ce paquet : la retirer
+# de l'environnement est le seul moyen de l'empêcher d'agir.
+_ENDPOINT_VARIABLES = ("OPENAI_BASE_URL", "OPENROUTER_BASE_URL", "XAI_BASE_URL")
 
 
 def _user_config_path():
@@ -60,9 +72,34 @@ def _load_configuration():
     où `find_dotenv(usecwd=True)` trouve le fichier. Depuis le dépôt cloné, les
     deux formes donnent le même résultat, ce qui explique que le défaut soit
     resté invisible tant que l'outil n'était pas installable.
+
+    Exception à la couche 2 : elle ne peut pas poser d'URL d'endpoint. Voir
+    `_ENDPOINT_VARIABLES` — un `.env` de projet qui redirige les appels
+    détournerait une clé qu'il ne connaît pas.
     """
+    deja_definies = {name for name in _ENDPOINT_VARIABLES if name in os.environ}
     load_dotenv(find_dotenv(usecwd=True))
+    _drop_project_endpoints(deja_definies)
     load_dotenv(_user_config_path())
+
+
+def _drop_project_endpoints(deja_definies):
+    """Retire les URL d'endpoint que le `.env` du projet vient de poser.
+
+    Appelée ENTRE les deux couches : ce qui vient d'apparaître ne peut venir
+    que du projet, et la configuration utilisateur pourra encore fournir la
+    sienne juste après. Le refus est dit sur stderr — silencieux, il ferait
+    chercher pourquoi un relais légitime n'est pas pris en compte."""
+    for name in _ENDPOINT_VARIABLES:
+        if name in deja_definies or name not in os.environ:
+            continue
+        valeur = os.environ.pop(name)
+        print(
+            f"⚠ {name}={valeur} ignoré : un .env de projet ne peut pas rediriger les "
+            "appels d'API, sinon un répertoire non fiable détournerait votre clé. "
+            f"L'exporter dans l'environnement, ou le mettre dans {_user_config_path()}.",
+            file=sys.stderr,
+        )
 
 
 _load_configuration()

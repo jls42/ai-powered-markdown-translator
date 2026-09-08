@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from openai import OpenAI
 
 from ..config import _missing_key_message
-from ..segmentation import MODEL_TOKEN_LIMITS
+from ..segmentation import DEFAULT_TOKEN_LIMIT, MODEL_TOKEN_LIMITS
 from .base import _NAMESPACED_MODEL_REGEX, _reason_name
 from .openai import _build_openai_messages
 
@@ -45,17 +45,28 @@ OPENROUTER_MIN_COMPLETION_TOKENS = 8000
 OPENROUTER_MAX_TOKENS = 32768
 
 
-# Part du contexte réservée à l'ENTRÉE. `context_length` couvre l'entrée ET la
-# complétion : demander tout le plafond de sortie ne laisse alors plus de place
-# au prompt ni au segment, et l'hébergeur refuse la requête. Six modèles du
-# catalogue sont dans ce cas (mesuré le 2026-09-09 : contexte 16 384 ou 32 768
-# face à un plafond de sortie de 14 745 ou 29 491).
+# Part du contexte réservée à l'ENTRÉE au moment du PRÉFLIGHT, quand le texte
+# n'est pas encore connu. `context_length` couvre l'entrée ET la complétion :
+# demander tout le plafond de sortie ne laisse alors plus de place au prompt ni
+# au segment, et l'hébergeur refuse la requête. Six modèles du catalogue sont
+# dans ce cas (mesuré le 2026-09-09 : contexte 16 384 ou 32 768 face à un
+# plafond de sortie de 14 745 ou 29 491).
 #
-# Le pipeline coupe les segments à 16 000 caractères et le prompt système pèse
-# jusqu'à 9 250 caractères (mode news, cible japonaise, mesuré) ; à trois
-# caractères par token — hypothèse prudente, un texte latin en compte plutôt
-# quatre — l'entrée réclame environ 8 400 tokens.
+# Ce nombre n'est qu'un seuil d'éligibilité — le budget réel est recalculé à
+# chaque appel sur le texte envoyé, cf. `_openrouter_call_budget`.
 OPENROUTER_INPUT_RESERVE = 8400
+
+
+# Octets par token dans le PIRE cas mesuré. Mesuré au tokenizer `o200k_base`
+# sur huit échantillons — français 5,12, anglais 5,23, arabe 5,17, hindi 7,90,
+# japonais 3,91, chinois 4,08, code et URL 2,68, emoji 2,39 : diviser le nombre
+# d'octets UTF-8 par deux majore donc l'entrée partout, avec de la marge.
+#
+# Compter en CARACTÈRES ne majore rien : 16 000 caractères valent 3 200 tokens
+# en français mais 12 300 en japonais et 17 500 en emoji. Une réserve fixe
+# calibrée sur du latin laissait donc passer le dépassement qu'elle devait
+# empêcher.
+OPENROUTER_BYTES_PER_TOKEN = 2
 
 
 # Efforts de raisonnement du moins au plus coûteux, tels que le catalogue les
@@ -164,12 +175,13 @@ class _OpenRouterClient:
 
     Ces quatre champs ne sont pas des préférences, ce sont des contraintes lues
     sur le catalogue au démarrage — la liste d'hébergeurs dont aucun ne
-    tronque, le plafond de sortie qu'ils tiennent tous une fois l'entrée
-    réservée dans le contexte, le fait que le modèle impose ou non de
-    raisonner, et les efforts qu'il déclare accepter."""
+    tronque, la fenêtre de contexte du modèle, le plafond de sortie que les
+    hébergeurs tiennent tous, le fait que le modèle impose ou non de raisonner,
+    et les efforts qu'il déclare accepter."""
 
     client: object
     providers: tuple = ()
+    context_length: int = DEFAULT_TOKEN_LIMIT
     max_tokens: int = OPENROUTER_MAX_TOKENS
     reasoning_mandatory: bool = False
     supported_efforts: tuple = ()
@@ -223,6 +235,35 @@ def _openrouter_reasoning_label(client, args):
         "" if demande and demande != "none" else " (imposé par le modèle, le plus bas accepté)"
     )
     return f"effort {reasoning['effort']!r}{origine}"
+
+
+def _openrouter_estimated_tokens(text):
+    """Majorant du nombre de tokens d'un texte, cf. `OPENROUTER_BYTES_PER_TOKEN`."""
+    return len((text or "").encode("utf-8")) // OPENROUTER_BYTES_PER_TOKEN + 1
+
+
+def _openrouter_call_budget(client, args, prompt, segment):
+    """Enveloppe de sortie de CET appel, l'entrée réelle étant décomptée.
+
+    Le plafond calculé au préflight suppose une entrée moyenne ; il ne borne
+    rien pour un segment japonais ou truffé d'emoji, où 16 000 caractères
+    pèsent jusqu'à 17 500 tokens. Ici le texte est connu : entrée estimée plus
+    sortie demandée tiennent dans la fenêtre, par construction.
+
+    Refus quand il ne reste pas de quoi rendre un texte de la taille de
+    l'entrée — une traduction fait grosso modo la longueur de sa source, et
+    partir quand même achèterait une troncature. L'estimation étant prudente,
+    le message le dit : le refus peut être sévère sur un contenu latin."""
+    entree = _openrouter_estimated_tokens(prompt) + _openrouter_estimated_tokens(segment)
+    budget = min(client.max_tokens, client.context_length - entree)
+    if budget < entree:
+        raise RuntimeError(
+            f"OpenRouter : fenêtre de {client.context_length} tokens trop courte pour ce "
+            f"segment (model={args.model}) — entrée estimée à {entree} tokens, il ne "
+            f"resterait que {max(budget, 0)} tokens de sortie pour une traduction de taille "
+            "comparable. Estimation prudente ; choisir un modèle à plus grande fenêtre."
+        )
+    return budget
 
 
 def _openrouter_extra_body(client, args):
@@ -342,7 +383,7 @@ def _call_openrouter(client, args, prompt, segment):
     response = client.client.chat.completions.create(
         model=args.model,
         messages=messages,
-        max_tokens=client.max_tokens,
+        max_tokens=_openrouter_call_budget(client, args, prompt, segment),
         extra_body=_openrouter_extra_body(client, args),
     )
     choice = _openrouter_first_choice(response, args)
@@ -473,6 +514,7 @@ def _init_openrouter_client(args):
     client = _OpenRouterClient(
         client=OpenAI(api_key=api_key, base_url=base_url, timeout=OPENROUTER_TIMEOUT),
         providers=providers,
+        context_length=context_length,
         max_tokens=_openrouter_output_budget(context_length, ceiling, args.model),
         reasoning_mandatory=mandatory,
         supported_efforts=supported_efforts,

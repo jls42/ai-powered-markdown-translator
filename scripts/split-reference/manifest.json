@@ -287,6 +287,41 @@
       "kind": "FunctionDef",
       "file": "src/aipmt/providers/openrouter.py",
       "why": "revue Codex : plafond de sortie borné par le contexte, refus avant facturation"
+    },
+    {
+      "hash": "a7823aa7cce0f5e3b7b4b658b5aed3cc7126c6a797ebcf72573a243590ae8d0d",
+      "name": "_ENDPOINT_VARIABLES",
+      "kind": "Assign",
+      "file": "src/aipmt/config.py",
+      "why": "revue Codex : variables qui décident où part une clé"
+    },
+    {
+      "hash": "52218b49638ee6c132f2681b1dd97ddbe4c088f24da36d9e2484729294c9c782",
+      "name": "_drop_project_endpoints",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/config.py",
+      "why": "revue Codex : refus des URL d'endpoint venues du projet"
+    },
+    {
+      "hash": "c876cb06fcdc434ce5c3de2848dce6b3c293eddaac29258de68e5be38516d667",
+      "name": "OPENROUTER_BYTES_PER_TOKEN",
+      "kind": "Assign",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : majorant mesuré des tokens par octet"
+    },
+    {
+      "hash": "6c884c67f6ed9bc4e3a80ef73e82137ca70162d40d2a22ebb94f8d4189f51151",
+      "name": "_openrouter_estimated_tokens",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : majorant du nombre de tokens d'un texte"
+    },
+    {
+      "hash": "7ac6b804617a8b297c7fa3b1141a64818e9aa121d39302dfe6fa761dad522921",
+      "name": "_openrouter_call_budget",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : enveloppe de sortie calculée sur le texte réel"
     }
   ],
   "removed": [],
@@ -577,6 +612,34 @@
       "old_hash": "64422faa929223e3f54c65e1a0569b353408fb807c4f7960f4eb8dfb0a2eef7e",
       "new_hash": "1b88dea93b43d29a500205b15ecb68294b1b228f0f4cc75f89486f911c8a83ca",
       "why": "revue Codex : entrée réservée dans le contexte, endpoint non canonique affiché"
+    },
+    {
+      "name": "_load_configuration",
+      "file": "src/aipmt/config.py",
+      "old_hash": "c522fa6e85655225fadcf4c4538a5d32c9049bec229d8eb3fb33da0e33e2527a",
+      "new_hash": "779d8fa75a05b02b12309f33eb170021c5310649daf6682bf65b4a5d2e3b9095",
+      "why": "revue Codex : les URL d'endpoint sont retirées entre la couche projet et la couche utilisateur"
+    },
+    {
+      "name": "_call_openrouter",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "e56e20d5484142d3aaa97f3451be268a0c36c1ab1445d9f4c61aeea21c367794",
+      "new_hash": "b1b70333b178ba192905c0adf6178489fd2c0f5037c39dd44cf1f06271edc586",
+      "why": "revue Codex : le plafond de sortie est calculé pour cet appel"
+    },
+    {
+      "name": "_init_openrouter_client",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "1b88dea93b43d29a500205b15ecb68294b1b228f0f4cc75f89486f911c8a83ca",
+      "new_hash": "c1ee601b0e0c563ca25a92cb2a6be6e957c067183812f736a760d1365c4eaae2",
+      "why": "revue Codex : le client porte la fenêtre de contexte"
+    },
+    {
+      "name": "_OpenRouterClient",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "3ef966d8e783c40c9f674213e5f61aa1a2037175bdf9560f0653fe84e1619ed2",
+      "new_hash": "a84c7d8f671257a0ff241325355152992d938aff16f4016f69a270a73c53f7e1",
+      "why": "revue Codex : le client porte la fenêtre de contexte, lue à chaque appel"
     }
   ]
 }

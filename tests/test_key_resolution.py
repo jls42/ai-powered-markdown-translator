@@ -17,6 +17,7 @@ Deux défauts en découlaient, tous deux mesurés avant correction :
 from __future__ import annotations
 
 import inspect
+import io
 import os
 import subprocess  # nosec B404 — exerce le point d'entrée réel, cf. TestMissingKeyIsNotATraceback
 import sys
@@ -127,6 +128,77 @@ class TestThreeLayerPriority(unittest.TestCase):
         """Contre-épreuve : sans elle, les trois tests ci-dessus passeraient
         aussi sur une implémentation qui inventerait une valeur."""
         self.assertIsNone(self._run_layers())
+
+
+class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
+    """Un `.env` de projet ne pose pas d'URL d'endpoint.
+
+    `find_dotenv(usecwd=True)` remonte depuis le répertoire courant : un dépôt
+    qu'on vient de cloner peut donc poser `OPENROUTER_BASE_URL` sans connaître
+    aucune clé, et la vraie clé — venue de l'environnement ou de la
+    configuration utilisateur — partirait ensuite dans l'en-tête
+    d'autorisation d'un serveur tiers. Les deux couches que l'utilisateur
+    contrôle vraiment gardent le droit de rediriger.
+    """
+
+    HOSTILE = "https://attaquant.example/v1"
+    LEGITIME = "https://relais-interne.example/v1"
+
+    def _run(self, variable, project=None, user=None, env=None):
+        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
+            if project is not None:
+                Path(projet, ".env").write_text(f"{variable}={project}\n", encoding="utf-8")
+            user_env = Path(config, "aipmt", ".env")
+            if user is not None:
+                user_env.parent.mkdir(parents=True)
+                user_env.write_text(f"{variable}={user}\n", encoding="utf-8")
+            overrides = {"XDG_CONFIG_HOME": config}
+            if env is not None:
+                overrides[variable] = env
+            previous = os.getcwd()
+            try:
+                os.chdir(projet)
+                with (
+                    patch.dict(os.environ, overrides, clear=False),
+                    patch("sys.stderr", io.StringIO()) as err,
+                ):
+                    if env is None:
+                        os.environ.pop(variable, None)
+                    aipmt_config._load_configuration()
+                    return os.environ.get(variable), err.getvalue()
+            finally:
+                os.chdir(previous)
+                os.environ.pop(variable, None)
+
+    def test_the_three_endpoint_variables_are_refused_from_the_project(self) -> None:
+        for variable in aipmt_config._ENDPOINT_VARIABLES:
+            with self.subTest(variable=variable):
+                valeur, avertissement = self._run(variable, project=self.HOSTILE)
+                self.assertIsNone(valeur)
+                self.assertIn(variable, avertissement)
+                self.assertIn("détournerait votre clé", avertissement)
+
+    def test_an_exported_variable_is_kept(self) -> None:
+        valeur, avertissement = self._run(
+            "OPENROUTER_BASE_URL", project=self.HOSTILE, env=self.LEGITIME
+        )
+        self.assertEqual(valeur, self.LEGITIME)
+        self.assertEqual(avertissement, "")
+
+    def test_the_user_configuration_may_still_redirect(self) -> None:
+        """La couche que l'utilisateur possède garde le droit : un relais
+        d'entreprise s'y déclare une fois pour toutes."""
+        valeur, _ = self._run("OPENROUTER_BASE_URL", user=self.LEGITIME)
+        self.assertEqual(valeur, self.LEGITIME)
+
+    def test_the_hostile_project_value_never_reaches_the_user_layer(self) -> None:
+        valeur, _ = self._run("OPENROUTER_BASE_URL", project=self.HOSTILE, user=self.LEGITIME)
+        self.assertEqual(valeur, self.LEGITIME)
+
+    def test_an_ordinary_variable_is_still_read_from_the_project(self) -> None:
+        """Contre-épreuve : le refus vise les URL, pas la couche entière."""
+        valeur, _ = self._run("AIPMT_TEST_ORDINARY", project="valeur-du-projet")
+        self.assertEqual(valeur, "valeur-du-projet")
 
 
 class TestMissingKeyMessageIsActionable(unittest.TestCase):
