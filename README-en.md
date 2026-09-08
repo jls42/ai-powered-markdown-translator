@@ -1,6 +1,6 @@
 # AI-Powered Markdown Translator
 
-🌍 [French](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [English](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Español](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [中文](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [Deutsch](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [日本語](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [한국어](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [العربية](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [हिन्दी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italiano](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Nederlands](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Português](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Română](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Svenska](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
+🌍 [French](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [English](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Spanish](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [Chinese](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [German](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [Japanese](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [Korean](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [Arabic](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [Hindi](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italian](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Dutch](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polish](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Portuguese](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Romanian](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Swedish](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
 
 <h4 align="center">📊 Code Quality</h4>
 
@@ -26,7 +26,7 @@
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-Markdown file translator using **OpenAI**, **Mistral AI**, **Claude (Anthropic)**, **Google Gemini**, and **Grok (xAI)**—via API, using a ChatGPT (Codex) or Grok subscription quota with no usage-based billing, or through **OpenCode**, the open-source agent, with the provider of your choice: local model (Ollama), free tier, subscription (GitHub Copilot…), or API key.
+Markdown file translator using **OpenAI**, **Mistral AI**, **Claude (Anthropic)**, **Google Gemini**, and **Grok (xAI)**—via API, through a ChatGPT (Codex) or Grok subscription quota with no usage-based billing, or through **OpenCode**, the open-source agent, with the provider of your choice: local model (Ollama), free, subscription-based (GitHub Copilot…), or API key.
 
 This Python script translates Markdown files from a source language into a target language while preserving formatting, code blocks, and front matter metadata.
 
@@ -38,7 +38,7 @@ This Python script translates Markdown files from a source language into a targe
 - **Single File**: `--file` option to translate a single file
 - **Smart Segmentation**: Handles long texts with per-model token limits
 - **Code Preservation**: Code blocks AND inline code (`` `...` ``) are preserved
-- **File Name**: `--keep_filename` option to retain the original name
+- **File Name**: `--keep_filename` option to keep the original name
 - **News Mode**: `--news` option to protect English quotations and handle flags in news articles
 - **.env Configuration**: Support for the `.env` file for API keys
 - **Translation Note**: Optionally adds a note at the end of the document
@@ -51,8 +51,8 @@ This Python script translates Markdown files from a source language into a targe
 pip install ai-powered-markdown-translator
 ```
 
-The `aipmt` command is then available everywhere. If Python's scripts
-directory is not in your `PATH`, `python -m aipmt` does exactly the same
+The `aipmt` command is then available everywhere. If Python's scripts directory
+is not in your `PATH`, `python -m aipmt` does exactly the same
 thing. Python 3.10 or newer.
 
 For an installation isolated from the rest of your packages:
@@ -64,7 +64,7 @@ pipx install ai-powered-markdown-translator
 ### To contribute to the project
 
 The cloned repository is still required for development: it contains the tests,
-the 28 translations, and all quality tooling.
+the 28 translations, and all the quality tooling.
 
 ```bash
 git clone https://github.com/jls42/ai-powered-markdown-translator.git
@@ -73,8 +73,8 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-`requirements.txt` is a **fully pinned lock file**, an exact snapshot of
-the tested environment. The constraints published in `pyproject.toml` are
+`requirements.txt` is a **fully pinned lock**, an exact snapshot of
+the tested environment. The published constraints in `pyproject.toml` are
 intentionally broader: they do not impose anything on your other packages.
 
 ### Quality tooling (optional but recommended)
@@ -92,13 +92,13 @@ Active hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/jso
 ## Configuration
 
 Keys are searched for in **three locations**, from highest to lowest priority.
-Each one only fills in what the previous one leaves empty.
+Each one only fills in values left empty by the previous one.
 
-|     | Where                                            | Purpose                                      |
-| --- | ------------------------------------------------ | -------------------------------------------- |
-| 1   | Environment variables                            | CI, containers, one-time overrides           |
-| 2   | `.env` in the current directory (or a parent) | a project-specific key                       |
-| 3   | `~/.config/aipmt/.env`                                   | **install once, works everywhere**           |
+|     | Where                                            | Purpose                             |
+| --- | --------------------------------------------- | ------------------------------------- |
+| 1   | Environment variables                     | CI, containers, one-time overrides |
+| 2   | `.env` in the current directory (or a parent) | a project-specific key            |
+| 3   | `~/.config/aipmt/.env`                        | **installed once, applies everywhere**   |
 
 The simplest option after a `pip install` is the third:
 
@@ -115,7 +115,7 @@ EOF
 chmod 600 ~/.config/aipmt/.env
 ```
 
-This file follows `XDG_CONFIG_HOME` when the variable points to an absolute path
+This file follows `XDG_CONFIG_HOME` when the variable specifies an absolute path
 (otherwise it is ignored, as required by the specification), and `%APPDATA%`
 on Windows.
 
@@ -139,8 +139,8 @@ Studio convention). Optional variables: `XAI_BASE_URL` (xAI endpoint, default
 `OPENROUTER_TIMEOUT` / `OPENROUTER_PREFLIGHT_TIMEOUT` (see the
 OpenRouter section). For
 `regen_translations.sh`: `REGEN_PROVIDER` (default `codex`, subscription-based),
-`REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (mandatory override for a
-billed API), and `REGEN_JOB_TIMEOUT` (per-job limit, default 600 s, 1,800 s on Codex).
+`REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (mandatory override for a billed API),
+and `REGEN_JOB_TIMEOUT` (per-job limit, default 600 s, 1,800 s on Codex).
 
 ## Usage
 
@@ -183,11 +183,11 @@ aipmt --use_opencode --model ollama/qwen2.5:7b --file 'README.md' --target_dir .
 
 ### Translate using your ChatGPT subscription (`--use_codex`)
 
-This provider does not use any API key: it runs the official Codex CLI in
-non-interactive mode, so translation is deducted from the quota of the
-already-paid ChatGPT subscription (Plus, Pro, Business…). This is the only path
-documented by OpenAI for this use—the `~/.codex/auth.json` tokens do not authenticate
-Platform API calls and are never read by this script.
+This provider does not use any API key: it drives the official Codex CLI in
+non-interactive mode, so translation usage is deducted from the quota of the
+already-paid ChatGPT subscription (Plus, Pro, Business…). This is the only method
+documented by OpenAI for this use case—the tokens from `~/.codex/auth.json` do not
+authenticate Platform API calls and are never read by this script.
 
 **Prerequisites:**
 
@@ -200,11 +200,11 @@ codex login                        # connexion avec le compte ChatGPT
 ```
 
 The binary is searched for in this order: the `CODEX_BIN` variable, the `PATH`,
-then the `openai-codex-cli-bin` Python package. The latter is intentionally
-not included in `requirements.txt`: it weighs ~250 MB, which would otherwise be imposed on all
+then the `openai-codex-cli-bin` Python package. The latter is deliberately
+not included in `requirements.txt`: it weighs ~250 MB, which would be imposed on all
 users for an optional provider.
 
-**Things to know:**
+**Important:**
 
 - **No API key is used.** `OPENAI_API_KEY` and `CODEX_API_KEY` are
   removed from the subprocess environment, ensuring that a key
@@ -213,11 +213,11 @@ users for an optional provider.
 - **One segment = one “local message”** in the plan's 5-hour window.
   Use `--eco` (model `gpt-5.6-luna`, 250–2,000 messages/5 h on Plus)
   rather than the quality model (`gpt-5.6-sol`, 10–100 messages/5 h).
-- **Slower** than an API call: expect ~45 s for a complete README, versus
+- **Slower** than an API call: expect ~45 s for a complete README, compared with
   a few seconds directly.
 - **Rejected in CI** (`CI` or `GITHUB_ACTIONS` defined): the subscription
-  authenticates through a personal session file, and putting it on a shared runner
-  amounts to placing a reusable identity there for anything running on it.
+  authenticates through a personal session file, and placing it on a shared runner
+  amounts to storing a reusable identity there for anything running on it.
   Use an API key for this path.
 - Environment variables: `CODEX_BIN` (explicit binary path) and
   `CODEX_TIMEOUT` (seconds per segment, default `600`).
@@ -225,35 +225,35 @@ users for an optional provider.
 ### Translate using your Grok subscription (`--use_grok_cli`)
 
 The same principle as `--use_codex`, using the official **Grok Build** CLI:
-translation is deducted from the Grok subscription (SuperGrok / X Premium+) instead
-of being billed per token.
+translation usage is deducted from the Grok subscription (SuperGrok / X Premium+)
+instead of being billed per token.
 
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
 grok login                                      # ou `grok login --device-code`
 ```
 
-**Confinement—read before use.** This provider is structurally **weaker**
+**Containment—read before use.** This provider is structurally **weaker**
 than `--use_codex`, and this is intentional:
 
 - Codex runs in `--sandbox read-only`, a boundary enforced by the system.
-- Grok's sandbox **cannot be applied** on many recent Linux systems:
-  AppArmor has blocked unprivileged user namespaces since Ubuntu
+- Grok's sandbox **cannot be applied** on many recent Linux
+  systems: AppArmor has blocked unprivileged user namespaces since Ubuntu
   24.04, and the container runtime socket denylist fails if
   `/run/podman` is in `0700`. Yet a **built-in** profile that cannot
   be applied starts **unconfined, silently**.
 - The script therefore requests no profile by default and **never falls back
-  silently**: it displays a warning. Confinement relies on the CLI's
-  `--deny` rules (including the catch-all `*`), the only layer measured as
-  _fail-closed_—an unknown rule prevents startup instead of
-  removing protection without saying so.
+  silently**: it displays a warning. Containment relies on the CLI's
+  `--deny` rules (including the catch-all `*`), the only measured
+  _fail-closed_ layer—an unknown rule prevents startup rather than
+  removing protection without notice.
 - To **require** the OS sandbox: `GROK_TRANSLATE_SANDBOX=read-only`.
   Startup will fail if the machine cannot honor it, which is the
   intended behavior.
 
 **Quota**: the Grok pool is **weekly and shared** with Chat, Imagine, and
-Voice, and no command can display it. Batch processing may therefore
-eat into your conversational usage without any notification—hence
+Voice, and no command can display it. Batch processing can therefore
+reduce your conversational usage without any notification—hence
 concurrency limited to 2 and a warning in `regen_translations.sh`.
 
 Other variables: `GROK_BIN` (binary path), `GROK_TIMEOUT` (default 900 s).
@@ -300,8 +300,8 @@ opencode models                                 # les modèles disponibles, au f
 opencode auth login                             # facultatif : brancher un fournisseur ou un abonnement
 ```
 
-`--model` is **required**, in the `provider/modèle` format. OpenCode is not
-a provider, and no default is chosen on your behalf: its own fallback
+`--model` is **required**, in `provider/modèle` format. OpenCode is not
+a provider, and no default is selected on your behalf: its own fallback
 would be a free model whose interactions may be used for training.
 
 ```bash
@@ -318,50 +318,50 @@ aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir 
 **Confinement—what the script does on every call:**
 
 - An inline configuration (`OPENCODE_CONFIG_CONTENT`), which takes precedence over
-  yours, defines a `aipmt` agent whose **every tool is denied**
+  yours, defines a `aipmt` agent whose **tools are all denied**
   (`permission: { "*": "deny" }`): the model cannot read, write, or
-  run commands—and measurements show that it does not even attempt to. Session sharing
+  run commands—and, when measured, it did not even try. Session sharing
   is disabled, `--pure` excludes external plugins, never `--auto`.
 - The call runs in a **disposable, empty directory**, with the
   `OPENCODE_DISABLE_PROJECT_CONFIG` and `OPENCODE_DISABLE_CLAUDE_CODE` switches: without
   them, OpenCode injects the current directory's `AGENTS.md`
-  and your `~/.claude/CLAUDE.md` into every prompt—measurements showed that an instruction to “end every response
-  with BANANA” placed in an `AGENTS.md` was applied to the translation. The
-  global `~/.config/opencode/AGENTS.md` rules, however, still
-  apply: OpenCode does not allow them to be excluded.
+  and your `~/.claude/CLAUDE.md` into every prompt—when measured, an instruction to “end every response
+  with BANANA” placed in a `AGENTS.md` was applied to the translation. The
+  global `~/.config/opencode/AGENTS.md` rules, however, remain
+  in effect: OpenCode does not allow them to be excluded.
 - The output contract requires all of the following: exit code 0, no
   `error` event, no tool call, a final step completed with `stop`, non-empty
-  text, and confirmation that the agent was actually loaded—an unknown `--agent` does not
-  cause OpenCode to fail; it **silently falls back** to the coding agent, with
-  tools enabled. An `exit 0` proves nothing here either.
+  text, and the agent actually loaded—an unknown `--agent` does not cause
+  OpenCode to fail; it **silently falls back** to the coding agent, with tools
+  enabled. A `exit 0` proves nothing here either.
 - **No aipmt key is passed** to the subprocess (the same filtering
   as with Codex and Grok), with one named exception: `OPENCODE_API_KEY`,
   OpenCode's own key (Zen, Go). Providers are configured in
   OpenCode (`opencode auth login`, `opencode.json`), not in aipmt's `.env`.
 
-**What you need to know:**
+**Good to know:**
 
 - **Zen's free models are “stealth” or contributor models**,
   subject to change, with undocumented limits, and their interactions may be used for
   training: ideal for public documentation, but best avoided for
   private content. Measured: `opencode/mimo-v2.5-free` translates this README in a
-  single pass; `opencode/big-pickle` is slower, and two simultaneous requests
+  single pass; `opencode/big-pickle` is slower, and two simultaneous requests to it
   remained unanswered.
-- **A local model must provide at least 16k of context**—segments contain
-  up to 16,000 characters—whereas Ollama often configures 4,096 by
+- **A local model must provide at least 16k context**—segments are
+  up to 16,000 characters long—while Ollama often configures 4,096 by
   default. With Ollama: a `Modelfile` with `PARAMETER num_ctx 32768`, then
-  `ollama create`. Quality depends on the model: a 7B model reversed a list and
-  damaged a code-block fence in a test file, whereas a
-  gateway model preserved everything.
-- `--eco` has no effect (the model is specified by `--model`);
-  `--reasoning_effort` is passed unchanged as OpenCode's `--variant` and should only be
-  requested if the model supports it.
+  `ollama create`. Quality depends on the model: a 7B reversed a list and
+  damaged a code-block fence in a test file, whereas a gateway
+  model preserved everything.
+- `--eco` has no effect (the model is the one in `--model`);
+  `--reasoning_effort` is passed through unchanged as OpenCode's `--variant` and should
+  only be requested if the model recognizes it.
 - Sessions are logged by OpenCode in its database
   (`~/.local/share/opencode/`), like any OpenCode session.
-- Environment variables: `OPENCODE_BIN` (explicit path to the binary;
-  otherwise `PATH`, then `~/.opencode/bin/opencode`) and `OPENCODE_TIMEOUT`
-  (seconds per segment, default `600`). `OPENCODE_CONFIG` is honored if you
-  export it.
+- Environment variables: `OPENCODE_BIN` (explicit binary path,
+  otherwise `PATH` then `~/.opencode/bin/opencode`) and `OPENCODE_TIMEOUT`
+  (seconds per segment, default `600`). If `OPENCODE_CONFIG` is
+  exported, it is not read by `aipmt`: it is passed through unchanged to OpenCode, which honors it.
 
 **Measured example: a local model via Ollama** (RTX 3060 12 GB, 62 GB RAM, Ollama 0.33.3)
 
@@ -399,7 +399,7 @@ Then the provider in `~/.config/opencode/opencode.json`:
 
 `reasoningEffort: "none"` is not a minor detail: Ollama enables reasoning by
 default on these models, and a Modelfile cannot disable it. Measured
-through OpenCode: without the option, “The cat is sleeping on the mat” costs 919 reasoning
+through OpenCode: without the option, “The cat sleeps on the rug” costs 919 reasoning
 tokens and 68 seconds; with it, 9 tokens.
 
 ```bash
@@ -408,33 +408,33 @@ aipmt --use_opencode --model ollama/gpt-oss-20b-32k --news --keep_filename \
 ```
 
 Results on a real 589-line blog post (140 links, 21 sections,
-3 English quotations protected by `--news` mode), using the same command with three
+3 English quotations protected by `--news` mode), same command, three
 models:
 
-| Model                                    | Duration      | Structure                                                  | Differences                                                                               |
-| ---------------------------------------- | ------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `opencode/mimo-v2.5-free` (Zen, free) | 4 min 26 s    | identical to the source                                    | none                                                                                      |
-| `ollama/gemma4-12b-32k` (local)          | 10 min 10 s   | links, URLs, tables, tags, bold text, and inline code identical | one fabricated quotation line (🇺🇸 + paraphrase), one duplicated attribution              |
-| `ollama/qwen3.5-9b-32k` (local)          | 8 min 18 s    | links, URLs, tables, and tags identical                    | one fabricated quotation line, some added bold text and inline code, one segment retried  |
+| Model                                    | Duration     | Structure                                                  | Deviations                                                                                |
+| ---------------------------------------- | ------------ | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `opencode/mimo-v2.5-free` (Zen, free) | 4 min 26 s  | identical to the source                                    | none                                                                                      |
+| `ollama/gemma4-12b-32k` (local)          | 10 min 10 s | identical links, URLs, tables, tags, bold, and inline code | one fabricated quotation line (🇺🇸 + paraphrase), one duplicated attribution              |
+| `ollama/qwen3.5-9b-32k` (local)          | 8 min 18 s  | identical links, URLs, tables, and tags                    | one fabricated quotation line, some added bold and inline code, one segment processed again |
 
 These two local models have since been **discarded**: one liberty per article
 is enough to disqualify a model for published translation. Five others were
-discarded for the same reasons or because they timed out (`gemma4:26b-a4b`,
+discarded for the same reasons or for timing out (`gemma4:26b-a4b`,
 `qwen3.6:35b-a3b`, `ministral-3:14b`, `mistral-small3.2`, `hy-mt2:7b`). Only
 `gpt-oss:20b` was retained—and even it leaves passages in French in
-a dense article; see the recommended models table.
+a dense article; see the recommended-models table.
 
 During local translation: GPU at 98% and 170 W, 10 GB of VRAM in use
-(model and 32k-token cache, with nothing offloaded to RAM), 7.5 GB of RAM for the
+(model and 32k-token cache, nothing offloaded to RAM), 7.5 GB of RAM for the
 Ollama server. A model with 9 to 12 billion parameters preserves the
 structure but takes one liberty per article, whereas the gateway model
-took none: review before publication, or reserve it for drafts.
+took none: proofread before publication, or reserve it for drafts.
 
 ### Translate via OpenRouter (`--use_openrouter`)
 
 OpenRouter is a **router** in front of more than 400 third-party-hosted models,
 billed by usage against a single credit balance. With one key, it provides access to models
-that none of the other providers expose, particularly open Chinese models.
+that none of the other providers expose, notably open Chinese models.
 
 ```bash
 # --model est OBLIGATOIRE : aucun défaut n'est choisi à votre place
@@ -442,27 +442,27 @@ aipmt --use_openrouter --model 'z-ai/glm-5.2' --file README.md \
   --target_dir . --source_lang fr --target_lang en
 ```
 
-Two routing characteristics shaped the implementation, and both can be
-measured:
+Two routing characteristics shaped the implementation, and both are
+measurable:
 
 - **The same model is served by dozens of hosts with different
   limits.** For `z-ai/glm-5.3-flash`, there are 23 hosts, including one capped at
-  2,048 output tokens: without safeguards, one long translation out of 23 was
-  truncated at random by the routing, without any signal whatsoever. A preflight reads
+  2,048 output tokens: without precautions, one long translation out of 23 would be
+  truncated, depending randomly on routing and without any signal. A preflight reads
   `/api/v1/models/{modèle}/endpoints`, excludes hosts with fewer than 8,000 output
-  tokens or a degraded status, then pins the others with
-  `allow_fallbacks: false`—without it, the router falls back to an
+  tokens or degraded status, then pins the others with
+  `allow_fallbacks: false`—without it, the router would fall back to an
   excluded host.
-- **Reasoning is billed at the output rate.** Same request on
+- **Reasoning is billed at the output-token rate.** Same request on
   `z-ai/glm-5.2`, response “OK”: 107 completion tokens with the model's default,
-  2 with reasoning disabled. It is therefore disabled by default on models
-  that allow it. Models that require it—`reasoning.mandatory`, 288 of the 431
-  models in the catalog—receive the **lowest effort they declare
-  they support**, rather than their default setting: for `z-ai/glm-5.3-flash`, this is
+  2 with reasoning disabled. It is therefore disabled by default for models
+  that allow it. Those that require it—`reasoning.mandatory`, 288 of the catalog's 431
+  models—receive the **lowest effort level they declare
+  they accept**, rather than their default setting: `z-ai/glm-5.3-flash` defaults to
   `max`, and it exhausted all 32,768 output tokens before the
-  translation was finished. Increasing the budget would not have changed anything, since the effort allocates
-  a percentage of it. `--reasoning_effort` still takes precedence, and `none` on a model
-  that requires reasoning is reported instead of being bypassed.
+  translation ended. Increasing the allowance would not have helped, since effort allocates a
+  percentage of it. `--reasoning_effort` still takes precedence, and `none` on a model
+  that requires reasoning is reported rather than bypassed.
 
 The preflight is **fail-closed** and displays what it selected:
 
@@ -472,17 +472,17 @@ The preflight is **fail-closed** and displays what it selected:
 ```
 
 A slug missing from the catalog, an unreachable catalog, or the absence of a host
-that can meet the limit stops the command before any charges are incurred.
+meeting the limit stops the command before any billing occurs.
 
 Other points:
 
 - The context window comes from the catalog, not a constant: segmentation
-  genuinely adapts to it, including for models with 4,095 tokens.
-- `--eco` has no effect (the model is specified by `--model`).
+  actually adapts to it, including for models with 4,095 tokens.
+- `--eco` has no effect (the model is the one in `--model`).
 - `finish_reason=length` with empty output is not truncation but a
-  budget consumed by reasoning; the message says so because the two
-  cases require opposite responses.
-- Environment variables: `OPENROUTER_API_KEY` (key, available at
+  budget consumed by reasoning; the message says so, because the two
+  cases require opposite actions.
+- Environment variables: `OPENROUTER_API_KEY` (key, at
   <https://openrouter.ai/keys>), `OPENROUTER_BASE_URL` (default
   `https://openrouter.ai/api/v1`, `https://` required), `OPENROUTER_TIMEOUT`
   (seconds per call, default `900`), and `OPENROUTER_PREFLIGHT_TIMEOUT`
@@ -490,7 +490,7 @@ Other points:
 
 ### Economy mode
 
-Uses faster and less expensive models (gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite):
+Uses faster, less expensive models (gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite):
 
 ```bash
 aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
@@ -510,35 +510,35 @@ aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_mistral`          | Use the Mistral AI API                                                                                        |
 | `--use_claude`           | Use the Claude API                                                                                            |
 | `--use_gemini`           | Use the Gemini API                                                                                            |
-| `--use_codex`            | Use the Codex CLI with the ChatGPT subscription quota                                                         |
+| `--use_codex`            | Use the Codex CLI against the ChatGPT subscription quota                                                      |
 | `--use_grok`             | Use the xAI API (Grok)—requires `XAI_API_KEY`                                                               |
-| `--use_openrouter`       | Use OpenRouter—requires `OPENROUTER_API_KEY` and `--model fournisseur/modèle`                                  |
-| `--use_grok_cli`         | Use the Grok CLI with the Grok subscription quota                                                             |
+| `--use_openrouter`       | Use OpenRouter—requires `OPENROUTER_API_KEY` and `--model fournisseur/modèle`                                                       |
+| `--use_grok_cli`         | Use the Grok CLI against the Grok subscription quota                                                          |
 | `--use_opencode`         | Use OpenCode (open source) with the provider configured in OpenCode; requires `--model provider/modèle`                 |
 | `--force`                | Force retranslation                                                                                           |
 | `--keep_filename`        | Preserve the original filename                                                                                |
-| `--news`                 | News mode: protects English quotations and handles flags by language                                          |
+| `--news`                 | News mode: protects EN quotations and handles flags by language                                               |
 | `--add_translation_note` | Add a translation note                                                                                        |
 | `--note_position`        | Note position: `top`, `bottom` (default), or `both`                                 |
-| `--note_format`          | Note format: `legacy` (default, bold paragraph) or `marker`                                      |
+| `--note_format`          | Note format: `legacy` (default, bold paragraph) or `marker`                                     |
 | `--include_model`        | Include the model name in the output file                                                                     |
-| `--reasoning_effort`     | GPT-5.x reasoning effort: `none`/`low`/`medium`/`high`/`xhigh`     |
+| `--reasoning_effort`     | GPT-5.x reasoning effort: `none`/`low`/`medium`/`high`/`xhigh`    |
 
-> **The seven provider flags are mutually exclusive.** Combining two
-> was previously silently accepted and resolved to the first one tested: a
+> **The eight provider flags are mutually exclusive.** Combining two
+> was previously accepted silently and resolved to the first one checked: a
 > translation requested against a subscription quota (`--use_codex`, `--use_grok_cli`)
-> could therefore be billed based on usage without any warning.
+> could therefore incur usage-based billing without any warning.
 > `argparse` now rejects the combination.
 
 ### Translation note: positions and formats
 
-With `--add_translation_note`, the translator can place the note at the top, at the bottom, or in both places, and render it either as plain text (backward-compatible) or in a `marker` format that a Markdown plugin can consume.
+With `--add_translation_note`, the translator can place the note at the top, at the bottom, or in both locations, and render it either as plain text (backward-compatible) or in a `marker` format consumable by a Markdown plugin.
 
 **Position** (`--note_position`):
 
 - `bottom` (default): note at the end of the file, as before.
 - `top`: note inserted **after the YAML front matter** (safe for Astro Content Collections, gray-matter, etc.).
-- `both`: note inserted at both the top AND the bottom (a single LLM call, with content reused for both placements).
+- `both`: note inserted at the top AND bottom (a single LLM call, with content reused for both placements).
 
 **Format** (`--note_format`):
 
@@ -560,7 +560,7 @@ aipmt --file article.mdx --target_lang en \
 
 ### Default models (2026)
 
-| Provider   | Quality (default)                        | Economy (`--eco`)  |
+| Provider   | Quality (default)                        | Economy (`--eco`) |
 | ---------- | ---------------------------------------- | ------------------------- |
 | OpenAI     | `gpt-5.6-terra`                          | `gpt-5.6-luna`            |
 | Claude     | `claude-sonnet-5`                        | `claude-haiku-4-5`        |
@@ -569,7 +569,7 @@ aipmt --file article.mdx --target_lang en \
 | Codex      | `gpt-5.6-sol`                            | `gpt-5.6-luna`            |
 | Grok API   | `grok-4.6`                               | `grok-4.3`                |
 | Grok CLI   | `grok-4.6`                               | `grok-4.5`                |
-| OpenCode   | `--model provider/modèle` required      | same—`--eco` has no effect |
+| OpenCode   | `--model provider/modèle` required       | same—`--eco` has no effect |
 | OpenRouter | `--model fournisseur/modèle` required | same—`--eco` has no effect |
 ## Which models hold up
 
@@ -581,115 +581,114 @@ ko, zh, ar, hi.
 
 Two columns, and they do not mean the same thing. **Written** counts the
 translations that complete successfully—the script's silent-failure safeguards
-allow the file through. **No discrepancies** counts those whose structure is
+allow the file through. **Exact match** counts those whose structure is
 identical to the source: same sections, same links, same URLs, same blocks and
 inline code, same tables, same blockquotes, same flags.
 
 ### Dense blog post, `--news` mode
 
 589 lines, 140 links, 21 sections, 3 protected English quotations. This is the
-most demanding of the three documents: `--news` mode adds flag and
-quotation constraints on top of the Markdown structure.
+most demanding of the three documents: `--news` mode adds flag and quotation
+constraints on top of the Markdown structure.
 
-| Model                             | Access             | Written | No discrepancies | Median/language |
-| --------------------------------- | ------------------ | ------- | ---------------- | --------------- |
-| `gemini-3.7-flash`                | Google API         | 14/14   | **14/14**        | 1 min 18 s      |
-| `gpt-5.6-sol` (`--use_codex`)     | ChatGPT subscription | 14/14   | **14/14**        | 11 min 28 s     |
-| `z-ai/glm-5.2`                    | OpenRouter         | 14/14   | **14/14**        | 5 min 37 s      |
-| `qwen/qwen3.8-flash`              | OpenRouter         | 14/14   | 13/14            | 26 min 23 s     |
-| `z-ai/glm-5.3-flash`              | OpenRouter         | 12/14   | 12/14            | 15 min 49 s     |
-| `qwen/qwen3.5-27b`                | OpenRouter         | 7/9     | 7/9              | 20 min 33 s     |
-| `claude-sonnet-5`                 | Anthropic API      | 14/14   | 11/14            | 6 min 31 s      |
-| `opencode/mimo-v2.5-free`         | OpenCode Zen       | 13/14   | 11/14            | 9 min 27 s      |
-| `qwen/qwen3.7-flash`              | OpenRouter         | 13/14   | 7/14             | 10 min 09 s     |
-| `ollama/gpt-oss-20b-32k`          | local              | 10/14   | 7/14             | 12 min 39 s     |
-| `mistral-large-latest`            | Mistral API       | 11/14   | 5/14             | 5 min 32 s      |
-| `deepseek/deepseek-v4-flash-0731` | OpenRouter         | 4/14    | 3/14             | 37 min 27 s     |
-| `grok-4.6` (`--use_grok_cli`)     | Grok subscription | 1/14    | 1/14             | 23 min 11 s     |
-| `moonshotai/kimi-k2.6`            | OpenRouter         | 1/4     | 1/4              | 23 min 00 s     |
+| Model                             | Access               | Written | Exact match | Median/language |
+| --------------------------------- | -------------------- | ------- | ----------- | --------------- |
+| `gemini-3.7-flash`                | Google API           | 14/14   | **14/14**   | 1 min 18 s      |
+| `gpt-5.6-sol` (`--use_codex`)     | ChatGPT subscription | 14/14   | **14/14**   | 11 min 28 s     |
+| `z-ai/glm-5.2`                    | OpenRouter           | 14/14   | **14/14**   | 5 min 37 s      |
+| `qwen/qwen3.8-flash`              | OpenRouter           | 14/14   | 13/14       | 26 min 23 s     |
+| `z-ai/glm-5.3-flash`              | OpenRouter           | 12/14   | 12/14       | 15 min 49 s     |
+| `qwen/qwen3.5-27b`                | OpenRouter           | 7/9     | 7/9         | 20 min 33 s     |
+| `claude-sonnet-5`                 | Anthropic API        | 14/14   | 11/14       | 6 min 31 s      |
+| `opencode/mimo-v2.5-free`         | OpenCode Zen         | 13/14   | 11/14       | 9 min 27 s      |
+| `qwen/qwen3.7-flash`              | OpenRouter           | 13/14   | 7/14        | 10 min 09 s     |
+| `ollama/gpt-oss-20b-32k`          | local                | 10/14   | 7/14        | 12 min 39 s     |
+| `mistral-large-latest`            | Mistral API          | 11/14   | 5/14        | 5 min 32 s      |
+| `deepseek/deepseek-v4-flash-0731` | OpenRouter           | 4/14    | 3/14        | 37 min 27 s     |
+| `grok-4.6` (`--use_grok_cli`)     | Grok subscription    | 1/14    | 1/14        | 23 min 11 s     |
+| `moonshotai/kimi-k2.6`            | OpenRouter           | 1/4     | 1/4         | 23 min 00 s     |
 
-Two batches were **interrupted due to insufficient credit**, as reflected in
-their denominators: `qwen3.5-27b` stopped after nine languages, and
-`kimi-k2.6` after four—the latter following a forty-minute timeout and two
-refusals, at nearly $0.33 per language.
+Two batches were **stopped due to insufficient credit**, as reflected in their
+denominators: `qwen3.5-27b` stopped at nine languages, and `kimi-k2.6` at
+four—the latter after a forty-minute timeout and two refusals, at nearly
+$0.33 per language.
 
-One methodological caveat regarding the OpenRouter rows: they were measured
-using the **router's default settings**, before `--use_openrouter` existed.
-`z-ai/glm-5.2` has since been measured again with the bundled provider,
-reasoning disabled, and produced exactly the same 14/14. `z-ai/glm-5.3-flash` failed
-twice because the router's default output budget was exhausted; the provider
-now requests the lowest reasoning effort these models accept, and the
-validation runs for the affected languages pass.
+One methodological caveat regarding the OpenRouter rows: they were measured with
+the router's **default settings**, before `--use_openrouter` existed.
+`z-ai/glm-5.2` has since been measured again with the bundled provider and reasoning
+disabled, producing exactly the same 14/14 result. `z-ai/glm-5.3-flash` failed twice
+because the router's default output budget was exhausted; the provider now requests
+the lowest reasoning effort these models accept, and retesting the affected
+languages succeeds.
 
 ### This project's README, standard Markdown
 
-508 lines, 219 inline code spans, 40 block fences, 45 table rows. There is no
-`--news` mode here: the difficulty comes from the code density.
+508 lines, 219 inline code spans, 40 block fences, 45 table lines. There is no
+`--news` mode here: the difficulty comes from the density of code.
 
-| Model                         | Written | No discrepancies | Median/language |
-| ----------------------------- | ------- | ---------------- | --------------- |
-| `z-ai/glm-5.2` (OpenRouter)   | 14/14   | 11/14            | 1 min 22 s      |
-| `gemini-3.7-flash`            | 14/14   | 13/14            | 21 s            |
-| `gpt-5.6-sol` (`--use_codex`) | 14/14   | 12/14            | 2 min 04 s      |
-| `opencode/mimo-v2.5-free`     | 9/14    | 7/14             | 3 min 25 s      |
-| `ollama/gpt-oss-20b-32k`      | 9/14    | 1/14             | 3 min 38 s      |
+| Model                         | Written | Exact match | Median/language |
+| ----------------------------- | ------- | ----------- | --------------- |
+| `z-ai/glm-5.2` (OpenRouter)   | 14/14   | 11/14       | 1 min 22 s      |
+| `gemini-3.7-flash`            | 14/14   | 13/14       | 21 s            |
+| `gpt-5.6-sol` (`--use_codex`) | 14/14   | 12/14       | 2 min 04 s      |
+| `opencode/mimo-v2.5-free`     | 9/14    | 7/14        | 3 min 25 s      |
+| `ollama/gpt-oss-20b-32k`      | 9/14    | 1/14        | 3 min 38 s      |
 
 ### Four READMEs from well-known projects
 
-FastAPI, Ollama, tldr-pages, and Vue.js, taken as-is from GitHub. These documents
+FastAPI, Ollama, tldr-pages, and Vue.js, taken directly from GitHub. These documents
 are **easier** than the previous two, as the table shows.
 
-| Model                     | Scope                      | Written | No discrepancies |
-| ------------------------- | -------------------------- | ------- | ---------------- |
-| `opencode/mimo-v2.5-free` | 4 projects × 14 languages   | 55/56   | 47/56            |
-| `grok-4.6` (subscription)   | 4 projects × ar, hi, ja, zh | 16/16   | 14/16            |
-| `ollama/gpt-oss-20b-32k`  | 4 projects × ar, hi, ja, zh | 15/16   | 9/16             |
+| Model                     | Scope                      | Written | Exact match |
+| ------------------------- | -------------------------- | ------- | ----------- |
+| `opencode/mimo-v2.5-free` | 4 projects × 14 languages     | 55/56   | 47/56       |
+| `grok-4.6` (subscription)   | 4 projects × ar, hi, ja, zh | 16/16   | 14/16       |
+| `ollama/gpt-oss-20b-32k`  | 4 projects × ar, hi, ja, zh | 15/16   | 9/16        |
 
 ### Key takeaways
 
 - **Three models never lost any information** across the two dense documents:
   `gemini-3.7-flash`, `gpt-5.6-sol` through the ChatGPT subscription, and
   `z-ai/glm-5.2` through OpenRouter. Their only discrepancies in standard mode
-  were a pair of `**` markers omitted in one or two languages—never a URL,
+  were a pair of `**` markers omitted in one or two languages, never a URL,
   code block, or quotation.
-- **The distinguishing factor is document density, not `--news` mode.**
-  Grok through a subscription fails 13 out of 14 times on the blog post but
-  succeeds on 14 out of 16 public READMEs: its failure is caused by losing track
-  in a long segment, as confirmed by a validation run—the isolated passage is
-  translated correctly.
+- **The differentiating factor is document density, not `--news` mode.**
+  Grok through a subscription fails 13 times out of 14 on the blog post and
+  succeeds on 14 public READMEs out of 16: its failure is caused by losing track
+  in a long segment, as confirmed by retesting—the isolated passage is translated
+  correctly.
 - **Non-Latin scripts are not the dividing line one might expect.** `gpt-oss`
-  leaves passages in French in Arabic, Japanese, Polish, **and Romanian**;
-  Mistral and MiMo lose inline code only with non-Latin scripts.
+  leaves passages in French in Arabic, Japanese, Polish, **and Romanian**; Mistral
+  and MiMo lose inline code only in non-Latin scripts.
 - **Disabling reasoning does not reduce quality.** `z-ai/glm-5.2` completes
-  fourteen languages without a single discrepancy under both conditions—
-  reasoning enabled by the router by default, then disabled by
+  fourteen languages without a single discrepancy under both conditions—with
+  reasoning enabled by the router's default, then disabled through
   `--use_openrouter`—while using eighteen times fewer billed output tokens. This
   measurement justifies the provider's default setting.
-- **A slow model is not necessarily a reliable model.** `deepseek-v4-flash-0731` takes
-  37 minutes per language for 4 successful translations out of 14,
-  `qwen3.8-flash` takes 26 minutes for an almost perfect result, and Gemini takes
-  1 minute 18 seconds for a flawless result.
+- **A slow model is not necessarily a reliable model.** `deepseek-v4-flash-0731` takes 37
+  minutes per language for 4 successful translations out of 14, `qwen3.8-flash`
+  takes 26 minutes for an almost perfect result, and Gemini takes 1 minute 18
+  seconds for a flawless result.
 
 ### What this table is not
 
-- **This is not a comprehensive ranking.** OpenRouter alone offers more than
-  four hundred models; around fifteen were measured here. A model's absence
-  says nothing about its quality, only that it was not tested.
+- **This is not an exhaustive ranking.** OpenRouter alone offers more than four
+  hundred models; around fifteen were measured here. A model's absence says
+  nothing about its quality, only that it was not tested.
 - **These measurements are dated**: September 4 and 5, 2026. Models change
   under the same name, hosting providers adjust quantization and limits, and
   new models are released every week.
-- **The durations do not constitute a ranking.** Concurrency ranged from 3 to 6
-  simultaneous translations depending on the test run, and a provider's
-  throughput varies throughout the day. They provide an order of magnitude,
-  not a comparison.
+- **The durations do not constitute a ranking.** Parallelism ranged from 3 to 6
+  simultaneous translations depending on the test run, and a provider's throughput
+  varies throughout the day. They provide an order of magnitude, not a comparison.
 - **A result depends as much on the document as on the model.** The same model
-  succeeds in fourteen languages for one article and nine for this README.
-  Your files are not ours.
-- **The right approach is still to measure on your own files**: translate one
-  of your documents into your target languages, then compare the structure—the
-  number of sections, links, distinct URLs, code blocks, inline code spans, and
-  table rows. That is exactly what the protocol above does, and it fits in a
-  single loop over `aipmt`.
+  succeeds in fourteen languages on one article and nine on this README. Your files
+  are not ours.
+- **The right approach is still to measure on your own files**: translate one of
+  your documents into your target languages, then compare the structure—the number
+  of sections, links, distinct URLs, code blocks, inline code spans, and table
+  lines. That is exactly what the protocol above does, and it fits into a single
+  loop over `aipmt`.
 
 ## Projects using this script
 
@@ -704,4 +703,4 @@ Email: contact@jls42.org
 
 GNU GENERAL PUBLIC LICENSE Version 3. See [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
 
-**Article translated from French to English with gpt-5.6-sol.**
+**Article translated from fr to en with gpt-5.6-sol.**

@@ -14,7 +14,7 @@
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Täckning"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Sårbarheter"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Buggar"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Kodproblem"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Kodlukter"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Duplicerade rader (%)"></a>
@@ -26,14 +26,14 @@
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-Översättare för Markdown-filer som använder **OpenAI**, **Mistral AI**, **Claude (Anthropic)**, **Google Gemini** och **Grok (xAI)** – via API, med kvoten från en ChatGPT- (Codex) eller Grok-prenumeration utan användningsbaserad debitering, eller via **OpenCode**, open source-agenten, med valfri leverantör: lokal modell (Ollama), kostnadsfri tjänst, prenumeration (GitHub Copilot…) eller nyckel.
+Översättare för Markdown-filer som använder **OpenAI**, **Mistral AI**, **Claude (Anthropic)**, **Google Gemini** och **Grok (xAI)** — via API, genom kvoten för en ChatGPT- (Codex) eller Grok-prenumeration utan användningsbaserad debitering, eller via **OpenCode**, agenten med öppen källkod, till valfri leverantör: lokal modell (Ollama), kostnadsfri tjänst, prenumeration (GitHub Copilot…) eller nyckel.
 
 Detta Python-skript översätter Markdown-filer från ett källspråk till ett målspråk samtidigt som formatering, kodblock och front matter-metadata bevaras.
 
 ## Huvudfunktioner
 
-- **Flera leverantörer**: 5 API:er (OpenAI, Mistral, Claude, Gemini, Grok) + 2 CLI:er via prenumeration, utan användningsbaserad debitering – Codex (ChatGPT) och Grok – + OpenCode (open source, MIT) med valfri leverantör som konfigurerats i OpenCode, inklusive en lokal modell
-- **2026 års modeller**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
+- **Flera leverantörer**: 5 API:er (OpenAI, Mistral, Claude, Gemini, Grok) + 2 CLI:er via prenumeration, utan användningsbaserad debitering — Codex (ChatGPT) och Grok — samt OpenCode (öppen källkod, MIT) till valfri leverantör som konfigurerats i OpenCode, inklusive en lokal modell
+- **2026-modeller**: GPT-5.6 Terra, Claude Sonnet 5, Gemini 3.7 Flash
 - **Ekonomiläge**: Alternativet `--eco` för att använda snabbare och billigare modeller
 - **Enskild fil**: Alternativet `--file` för att översätta en enda fil
 - **Intelligent segmentering**: Hantering av långa texter med tokensgränser per modell
@@ -41,7 +41,7 @@ Detta Python-skript översätter Markdown-filer från ett källspråk till ett m
 - **Filnamn**: Alternativet `--keep_filename` för att behålla det ursprungliga namnet
 - **Nyhetsläge**: Alternativet `--news` för att skydda engelska citat och hantera flaggor i nyhetsartiklar
 - **.env-konfiguration**: Stöd för filen `.env` för API-nycklar
-- **Översättningsnotering**: Valfri notering i slutet av dokumentet
+- **Översättningsnotering**: Möjlighet att lägga till en notering i slutet av dokumentet
 
 ## Installation
 
@@ -55,7 +55,7 @@ Kommandot `aipmt` är därefter tillgängligt överallt. Om katalogen för
 Python-skript inte finns i din `PATH` gör `python -m aipmt` exakt samma
 sak. Python 3.10 eller senare.
 
-För en installation som är isolerad från dina övriga paket:
+För en installation som är isolerad från resten av dina paket:
 
 ```bash
 pipx install ai-powered-markdown-translator
@@ -73,13 +73,13 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-`requirements.txt` är en **fullständigt låst lock-fil**, en exakt avbildning av
+`requirements.txt` är en **fullständigt låst lockfil**, en exakt avbildning av
 den testade miljön. Gränserna som publiceras i `pyproject.toml` är
-avsiktligt bredare: de ålägger inte dina andra paket några begränsningar.
+avsiktligt bredare: de påtvingar inte dina andra paket något.
 
-### Kvalitetsverktyg (valfritt men rekommenderas)
+### Kvalitetsverktyg (valfritt men rekommenderat)
 
-Projektet använder [`pre-commit`](https://pre-commit.com) för att förhindra commits av dåligt formaterad eller sårbar kod eller kod som innehåller en hemlighet. Installation:
+Projektet använder [`pre-commit`](https://pre-commit.com) för att förhindra att felaktigt formaterad eller sårbar kod, eller kod som innehåller en hemlighet, committas. Installation:
 
 ```bash
 pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
@@ -87,18 +87,18 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # hooks lourds avant chaque push
 ```
 
-Aktiva hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (komplexitet), detect-secrets (API-nycklar), mypy (progressiv typning), Opengrep (SAST), pip-audit (CVE-beroenden), unittest. Se avsnittet _Quality / pre-commit_ i `CLAUDE.md` för mer information.
+Aktiva hooks: ruff (lint+format), shellcheck (bash), prettier (markdown/yaml/json), Lizard (komplexitet), detect-secrets (API-nycklar), mypy (gradvis typning), Opengrep (SAST), pip-audit (CVE-beroenden), unittest. Se avsnittet _Quality / pre-commit_ i `CLAUDE.md` för mer information.
 
 ## Konfiguration
 
 Nycklar söks på **tre platser**, från högsta till lägsta prioritet.
-Varje plats fyller endast i det som den föregående lämnat tomt.
+Varje plats fyller endast i det som den föregående lämnar tomt.
 
-|     | Var                                           | För vad                               |
-| --- | --------------------------------------------- | ------------------------------------- |
-| 1   | Miljövariabler                                | CI, containrar, tillfälliga undantag  |
-| 2   | `.env` i den aktuella katalogen (eller en överordnad katalog) | en projektspecifik nyckel             |
-| 3   | `~/.config/aipmt/.env`                        | **installeras en gång, gäller överallt** |
+|     | Var                                            | För vad                                      |
+| --- | --------------------------------------------- | -------------------------------------------- |
+| 1   | Miljövariabler                                | CI, containrar, tillfälliga åsidosättningar  |
+| 2   | `.env` i den aktuella katalogen (eller en överordnad katalog) | en projektspecifik nyckel                    |
+| 3   | `~/.config/aipmt/.env`                        | **installeras en gång och gäller överallt**  |
 
 Det enklaste efter en `pip install` är det tredje alternativet:
 
@@ -121,7 +121,7 @@ i Windows.
 
 Det andra alternativet är fortfarande användbart när ett repositorium har en egen nyckel: en `.env` i dess rot
 har då företräde framför användarkonfigurationen utan att ändra den. En
-variabel som redan har definierats i miljön har företräde framför båda:
+variabel som redan definierats i miljön har företräde framför båda:
 
 ```bash
 export OPENAI_API_KEY='une-clé-le-temps-d-une-commande'
@@ -130,8 +130,8 @@ export OPENAI_API_KEY='une-clé-le-temps-d-une-commande'
 Om ingen nyckel hittas visar kommandot ingen anropsspårning: det
 listar de tre platserna med deras exakta sökvägar.
 
-`GEMINI_API_KEY` accepteras som alternativ till `GOOGLE_API_KEY` (AI
-Studio-konvention). Valfria variabler: `XAI_BASE_URL` (xAI-endpoint, standard
+`GEMINI_API_KEY` godtas som ett alternativ till `GOOGLE_API_KEY` (AI
+Studio-konventionen). Valfria variabler: `XAI_BASE_URL` (xAI-endpoint, standard
 `https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (sekunder per Anthropic-anrop, standard
 900), `CODEX_BIN` / `CODEX_TIMEOUT`, `GROK_BIN` / `GROK_HOME` / `GROK_TIMEOUT`,
 `GROK_TRANSLATE_SANDBOX` (se avsnittet om Grok CLI), `OPENCODE_BIN` /
@@ -139,8 +139,8 @@ Studio-konvention). Valfria variabler: `XAI_BASE_URL` (xAI-endpoint, standard
 `OPENROUTER_TIMEOUT` / `OPENROUTER_PREFLIGHT_TIMEOUT` (se avsnittet om
 OpenRouter). För
 `regen_translations.sh`: `REGEN_PROVIDER` (standard `codex`, via prenumeration),
-`REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (obligatoriskt undantag för ett
-debiterat API) och `REGEN_JOB_TIMEOUT` (tidsgräns per jobb, standard 600 s, 1 800 s med Codex).
+`REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (obligatoriskt åsidosättande för ett
+debiterat API) och `REGEN_JOB_TIMEOUT` (gräns per jobb, standard 600 s, 1 800 s med Codex).
 
 ## Användning
 
@@ -181,13 +181,13 @@ aipmt --use_openrouter --model 'z-ai/glm-5.2' --source_dir 'content/fr' --target
 aipmt --use_opencode --model ollama/qwen2.5:7b --file 'README.md' --target_dir . --target_lang 'nl'
 ```
 
-### Översätta via sin ChatGPT-prenumeration (`--use_codex`)
+### Översätta via din ChatGPT-prenumeration (`--use_codex`)
 
-Den här leverantören använder ingen API-nyckel: den styr Codex officiella CLI i
-icke-interaktivt läge, så översättningen räknas av från kvoten i den redan
-betalda ChatGPT-prenumerationen (Plus, Pro, Business…). Det är den enda metoden
-som OpenAI dokumenterar för detta ändamål – tokens från `~/.codex/auth.json` autentiserar
-inte anrop till API Platform och läses dessutom aldrig av detta skript.
+Den här leverantören använder ingen API-nyckel: den styr den officiella Codex CLI:n i
+icke-interaktivt läge, så översättningen räknas av från kvoten för den redan
+betalda ChatGPT-prenumerationen (Plus, Pro, Business…). Det är det enda sättet som
+OpenAI dokumenterar för denna användning — tokens från `~/.codex/auth.json` autentiserar inte
+anrop till Platform API och läses för övrigt aldrig av detta skript.
 
 **Förutsättningar:**
 
@@ -200,7 +200,7 @@ codex login                        # connexion avec le compte ChatGPT
 ```
 
 Binärfilen söks i följande ordning: variabeln `CODEX_BIN`, `PATH`,
-sedan Python-paketet `openai-codex-cli-bin`. Det sistnämnda ingår avsiktligt
+därefter Python-paketet `openai-codex-cli-bin`. Det sistnämnda ingår avsiktligt
 inte i `requirements.txt`: det är cirka 250 MB stort, vilket annars skulle påtvingas alla
 användare för en valfri leverantör.
 
@@ -208,23 +208,23 @@ användare för en valfri leverantör.
 
 - **Ingen API-nyckel används.** `OPENAI_API_KEY` och `CODEX_API_KEY`
   tas bort från underprocessens miljö, vilket garanterar att en nyckel
-  i `.env` aldrig gör att översättningen övergår till användningsbaserad
+  i `.env` aldrig får översättningen att övergå till användningsbaserad
   debitering.
-- **Ett segment = ett ”lokalt meddelande”** i abonnemangets femtimmarsfönster.
+- **Ett segment = ett ”lokalt meddelande”** inom abonnemangets femtimmarsfönster.
   Använd `--eco` (modellen `gpt-5.6-luna`, 250–2 000 meddelanden/5 h med Plus)
   i stället för kvalitetsmodellen (`gpt-5.6-sol`, 10–100 meddelanden/5 h).
-- **Långsammare** än ett API-anrop: räkna med cirka 45 s för en fullständig README, jämfört med
-  några sekunder vid ett direktanrop.
-- **Nekas i CI** (`CI` eller `GITHUB_ACTIONS` definierad): prenumerationen
-  autentiseras via en personlig sessionsfil, och att överföra den till en delad runner
-  innebär att en återanvändbar identitet placeras där och kan utnyttjas av allt som
-  körs på den. Använd en API-nyckel på den här vägen.
+- **Långsammare** än ett API-anrop: räkna med cirka 45 s för en fullständig README,
+  jämfört med några sekunder direkt.
+- **Nekas i CI** (om `CI` eller `GITHUB_ACTIONS` är definierad): prenumerationen
+  autentiseras med en personlig sessionsfil, och att flytta den till en delad runner
+  innebär att en återanvändbar identitet görs tillgänglig för allt som körs där.
+  Använd en API-nyckel för detta.
 - Miljövariabler: `CODEX_BIN` (uttrycklig sökväg till binärfilen) och
   `CODEX_TIMEOUT` (sekunder per segment, standard `600`).
 
-### Översätta via sin Grok-prenumeration (`--use_grok_cli`)
+### Översätta via din Grok-prenumeration (`--use_grok_cli`)
 
-Samma princip som `--use_codex`, med det officiella CLI-verktyget **Grok Build**:
+Samma princip som med `--use_codex`, fast med den officiella CLI:n **Grok Build**:
 översättningen räknas av från Grok-prenumerationen (SuperGrok / X Premium+) i stället
 för att debiteras per token.
 
@@ -233,28 +233,28 @@ curl -fsSL https://x.ai/cli/install.sh | bash   # le binaire `grok`
 grok login                                      # ou `grok login --device-code`
 ```
 
-**Isolering – läs före användning.** Den här leverantören är strukturellt **svagare**
-än `--use_codex`, och detta är avsiktligt:
+**Isolering — läs före användning.** Den här leverantören är strukturellt **svagare**
+än `--use_codex`, och det är ett medvetet val:
 
-- Codex körs i `--sandbox read-only`, en gräns som upprätthålls av systemet.
-- Groks sandbox **kan inte tillämpas** på många moderna Linux-datorer:
+- Codex körs i `--sandbox read-only`, en gräns som påtvingas av systemet.
+- Groks sandbox **kan inte användas** på många moderna Linux-datorer:
   AppArmor blockerar oprivilegierade user namespaces sedan Ubuntu
-  24.04, och deny-listan för sockets till containrarnas runtime misslyckas om
-  `/run/podman` finns i `0700`. En **inbyggd** profil som inte kan
-  tillämpas startar dock **oisolerad, utan varning**.
+  24.04, och deny-listan för containerruntimens sockets misslyckas om
+  `/run/podman` är i `0700`. En **inbyggd** profil som inte kan
+  tillämpas startar då **oisolerat och utan varning**.
 - Skriptet begär därför ingen profil som standard och **faller aldrig tillbaka
-  utan varning**: det visar en varning. Isoleringen bygger på CLI-verktygets
-  `--deny`-regler (inklusive catch-all-regeln `*`), det enda lager som uppmätts vara
-  _fail-closed_ – en okänd regel gör att starten nekas i stället för att
+  utan varning**: det visar en varning. Isoleringen bygger på CLI:ns
+  `--deny`-regler (inklusive catch-all-regeln `*`), det enda uppmätta
+  _fail-closed_-lagret — en okänd regel gör att starten nekas i stället för att
   skyddet tas bort utan att det meddelas.
 - För att **kräva** operativsystemets sandbox: `GROK_TRANSLATE_SANDBOX=read-only`.
-  Starten misslyckas om datorn inte kan upprätthålla den, vilket är det
+  Starten misslyckas om datorn inte kan uppfylla kravet, vilket är det
   avsedda beteendet.
 
-**Kvot**: Grok-poolen är **veckovis och delas** med Chat, Imagine och
-Voice, och inget kommando kan läsa av den. En batchkörning kan därför
-förbruka en del av din kvot för konversationer utan att något meddelar det – därav en
-samtidighetsgräns på 2 och en varning i `regen_translations.sh`.
+**Kvot**: Grok-poolen är **veckovis och delad** med Chat, Imagine och
+Voice, och inget kommando kan visa den. En batchbearbetning kan därför
+minska din tillgängliga konversationsanvändning utan någon indikation — därav
+en samtidighetsgräns på 2 och en varning i `regen_translations.sh`.
 
 Övriga variabler: `GROK_BIN` (sökväg till binärfilen), `GROK_TIMEOUT` (standard 900 s).
 
@@ -279,19 +279,19 @@ REGEN_PROVIDER=opencode REGEN_MODEL=ollama/qwen2.5:7b ./regen_translations.sh --
 # Via OpenRouter : API facturée, donc dérogation ET modèle obligatoires
 REGEN_PROVIDER=openrouter REGEN_ALLOW_PAID_API=1 REGEN_MODEL=z-ai/glm-5.2 ./regen_translations.sh --force
 ```
-### Översätta med OpenCode, till valfri leverantör (`--use_opencode`)
+### Översätt med OpenCode, till valfri leverantör (`--use_opencode`)
 
-[OpenCode](https://opencode.ai) är en **open source-agent (MIT)** för
-terminalen. Det är inte en modellleverantör utan en **router** till dem
-som du har konfigurerat i själva OpenCode: en API-nyckel, en prenumeration,
+[OpenCode](https://opencode.ai) är en **open source-agent (MIT)** för kod i
+terminalen. Den är inte en modellleverantör utan en **router** till de
+leverantörer som du har konfigurerat i själva OpenCode: en API-nyckel, en prenumeration,
 OpenCode Zen-gatewayen – som erbjuder kostnadsfria modeller **utan konto** – eller
 en **lokal** modell. Denna provider kör `opencode run` i icke-interaktivt läge och
-begränsar anropet till en enda tur och retur, utan några verktyg.
+begränsar anropet till en enda tur och retur, helt utan verktyg.
 
-Två av dessa vägar har mätts från början till slut här: **Zen-gatewayen** och
-lokal **Ollama**. De andra som OpenCode tillkännager (GitHub Copilot, LM Studio,
+Två av dessa alternativ har mätts från början till slut här: **Zen-gatewayen** och
+lokal **Ollama**. De andra som OpenCode uppger (GitHub Copilot, LM Studio,
 llama.cpp) bör fungera genom konstruktionen, eftersom providern endast kommunicerar
-med OpenCode – men de har inte testats, och denna README beskriver endast det
+med OpenCode – men de har inte testats, och denna README beskriver bara det
 som har verifierats.
 
 ```bash
@@ -302,7 +302,7 @@ opencode auth login                             # facultatif : brancher un fourn
 
 `--model` är **obligatorisk**, i formatet `provider/modèle`. OpenCode är inte
 en leverantör, och inget standardval görs åt dig: dess egen fallback
-skulle vara en kostnadsfri modell vars interaktioner kan användas för träning.
+skulle vara en kostnadsfri modell vars konversationer kan användas för träning.
 
 ```bash
 # Gratuit, sans compte ni clé (passerelle Zen ; données utilisables pour l'entraînement)
@@ -315,7 +315,7 @@ aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . -
 aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir . --target_lang ja
 ```
 
-**Isolering – detta gör skriptet vid varje anrop:**
+**Begränsning – det här gör skriptet vid varje anrop:**
 
 - En inline-konfiguration (`OPENCODE_CONFIG_CONTENT`), som har företräde framför
   din egen, definierar en agent `aipmt` där **alla verktyg nekas**
@@ -324,44 +324,44 @@ aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir 
   är inaktiverad, `--pure` utesluter externa plugins, aldrig `--auto`.
 - Anropet körs i en **tillfällig och tom katalog**, med växlarna
   `OPENCODE_DISABLE_PROJECT_CONFIG` och `OPENCODE_DISABLE_CLAUDE_CODE`: utan
-  dem injicerar OpenCode `AGENTS.md` från den aktuella katalogen
-  och din `~/.claude/CLAUDE.md` i varje prompt – enligt mätning tillämpades en instruktion
-  om att ”avsluta varje svar med BANANA”, placerad i en `AGENTS.md`, på översättningen. De
-  globala reglerna i `~/.config/opencode/AGENTS.md` tillämpas däremot fortfarande:
-  OpenCode tillåter inte att de utesluts.
+  dem injicerar OpenCode katalogens aktuella `AGENTS.md`
+  och din `~/.claude/CLAUDE.md` i varje prompt – enligt mätning följdes en instruktion
+  om att ”avsluta varje svar med BANANA” som lagts i en `AGENTS.md` vid
+  översättningen. De globala reglerna i `~/.config/opencode/AGENTS.md` tillämpas däremot
+  fortfarande: OpenCode tillåter inte att de kringgås.
 - Utdatakontraktet kräver allt detta samtidigt: returkod 0, ingen händelse
-  `error`, inget verktygsanrop, ett sista steg slutfört med `stop`, icke-tom
-  text och att agenten faktiskt har lästs in – en okänd `--agent` får inte
-  OpenCode att misslyckas, utan programmet **faller tyst tillbaka** till kodningsagenten, med
-  aktiva verktyg. En `exit 0` bevisar inte heller något här.
-- **Ingen aipmt-nyckel överförs** till underprocessen (samma filtrering
-  som med Codex och Grok), med ett uttryckligt undantag: `OPENCODE_API_KEY`,
+  `error`, inget verktygsanrop, ett sista steg som avslutats med `stop`, en
+  icke-tom text och att agenten faktiskt har laddats – en okänd `--agent`
+  får inte OpenCode att misslyckas, utan den **faller tyst tillbaka** till kodagenten,
+  med aktiva verktyg. Inte heller en `exit 0` bevisar något här.
+- **Ingen aipmt-nyckel skickas** till underprocessen (samma filtrering
+  som med Codex och Grok), med ett namngivet undantag: `OPENCODE_API_KEY`,
   OpenCodes egen nyckel (Zen, Go). Leverantörerna konfigureras i
   OpenCode (`opencode auth login`, `opencode.json`), inte i aipmts `.env`.
 
 **Bra att veta:**
 
-- **Zens kostnadsfria modeller är ”stealth”- eller bidragsgivarmodeller**,
-  föränderliga, med odokumenterade gränser, och deras interaktioner kan användas för
-  träning: perfekta för offentlig dokumentation, men bör undvikas för
+- **Zens kostnadsfria modeller är ”stealth”- eller community-modeller**,
+  föränderliga, med odokumenterade gränser, och deras konversationer kan användas
+  för träning: perfekta för offentlig dokumentation, men bör undvikas för
   privat innehåll. Uppmätt: `opencode/mimo-v2.5-free` översätter denna README i en
   omgång; `opencode/big-pickle` är långsammare och två samtidiga förfrågningar
   förblev obesvarade.
-- **En lokal modell måste erbjuda minst 16 k i kontext** – segmenten är
+- **En lokal modell måste erbjuda minst 16 k kontext** – segmenten är
   upp till 16 000 tecken – medan Ollama ofta konfigurerar 4 096 som
   standard. Med Ollama: en `Modelfile` med `PARAMETER num_ctx 32768`, sedan
   `ollama create`. Kvaliteten beror på modellen: en 7B-modell vände på en lista och
-  skadade avslutningen på ett kodblock i en testfil, medan en modell från
+  skadade en kodblocksavgränsare i en testfil, medan en modell från
   gatewayen bevarade allt.
 - `--eco` har ingen effekt (modellen är den i `--model`);
-  `--reasoning_effort` skickas oförändrad som OpenCodes `--variant` och bör endast
-  begäras om modellen känner till den.
+  `--reasoning_effort` skickas oförändrad som OpenCodes `--variant` och bör
+  endast begäras om modellen stöder den.
 - Sessionerna loggas av OpenCode i dess databas
   (`~/.local/share/opencode/`), precis som alla OpenCode-sessioner.
 - Miljövariabler: `OPENCODE_BIN` (explicit sökväg till binärfilen,
-  annars `PATH` och därefter `~/.opencode/bin/opencode`) och `OPENCODE_TIMEOUT`
-  (sekunder per segment, standard `600`). `OPENCODE_CONFIG` respekteras om du
-  exporterar den.
+  annars `PATH` och sedan `~/.opencode/bin/opencode`) och `OPENCODE_TIMEOUT`
+  (sekunder per segment, standard `600`). Om `OPENCODE_CONFIG` har
+  exporterats läses den inte av `aipmt`: den skickas oförändrad till OpenCode, som följer den.
 
 **Uppmätt exempel: en lokal modell via Ollama** (RTX 3060 12 GB, 62 GB RAM, Ollama 0.33.3)
 
@@ -397,44 +397,44 @@ Sedan leverantören i `~/.config/opencode/opencode.json`:
 }
 ```
 
-`reasoningEffort: "none"` är ingen detalj: Ollama aktiverar resonemang som
-standard för dessa modeller, och en Modelfile kan inte stänga av det. Uppmätt
-via OpenCode: utan alternativet kostar ”Katten sover på mattan” 919 tokens
-för resonemang och 68 s; med alternativet 9 tokens.
+`reasoningEffort: "none"` är inte en detalj: Ollama aktiverar reasoning som
+standard för dessa modeller, och en Modelfile kan inte stänga av den. Uppmätt
+via OpenCode: utan alternativet kostar ”Katten sover på mattan” 919 reasoning-tokens
+och 68 s; med alternativet 9 tokens.
 
 ```bash
 aipmt --use_opencode --model ollama/gpt-oss-20b-32k --news --keep_filename \
   --add_translation_note --file article.mdx --target_dir out/ --target_lang en
 ```
 
-Resultat för ett verkligt blogginlägg på 589 rader (140 länkar, 21 avsnitt,
+Resultat för en verklig bloggartikel med 589 rader (140 länkar, 21 avsnitt,
 3 engelska citat skyddade av läget `--news`), samma kommando, tre
 modeller:
 
-| Modell                                   | Tid          | Struktur                                                    | Avvikelser                                                                                      |
-| ---------------------------------------- | ------------ | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `opencode/mimo-v2.5-free` (Zen, kostnadsfri) | 4 min 26 s   | identisk med källan                                         | inga                                                                                            |
-| `ollama/gemma4-12b-32k` (lokal)          | 10 min 10 s  | identiska länkar, URL:er, tabeller, taggar, fetstil och inline-kod | en påhittad citatrad (🇺🇸 + parafras), en duplicerad attribuering                                 |
-| `ollama/qwen3.5-9b-32k` (lokal)          | 8 min 18 s   | identiska länkar, URL:er, tabeller och taggar               | en påhittad citatrad, viss tillagd fetstil och inline-kod, ett segment som kördes om             |
+| Modell                                   | Tid          | Struktur                                                   | Avvikelser                                                                                 |
+| ---------------------------------------- | ------------ | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `opencode/mimo-v2.5-free` (Zen, kostnadsfri) | 4 min 26 s   | identisk med källan                                        | inga                                                                                       |
+| `ollama/gemma4-12b-32k` (lokal)          | 10 min 10 s  | identiska länkar, URL:er, tabeller, taggar, fetstil och inline-kod | en påhittad citatrad (🇺🇸 + parafras), en duplicerad tillskrivning                           |
+| `ollama/qwen3.5-9b-32k` (lokal)          | 8 min 18 s   | identiska länkar, URL:er, tabeller och taggar              | en påhittad citatrad, viss tillagd fetstil och inline-kod, ett segment bearbetat på nytt    |
 
-Dessa två lokala modeller har sedan dess **uteslutits**: en enda frihet per artikel
+Dessa två lokala modeller har sedan dess **valts bort**: en enda frihet per artikel
 räcker för att diskvalificera en modell för publicerad översättning. Fem andra har
-uteslutits av samma skäl eller på grund av timeout (`gemma4:26b-a4b`,
+valts bort av samma skäl eller för att de överskred tidsgränsen (`gemma4:26b-a4b`,
 `qwen3.6:35b-a3b`, `ministral-3:14b`, `mistral-small3.2`, `hy-mt2:7b`). Endast
-`gpt-oss:20b` har behållits – och även den lämnar passager på franska i
-en innehållsrik artikel, se tabellen över rekommenderade modeller.
+`gpt-oss:20b` behölls – och även den lämnar avsnitt på franska i
+en innehållstät artikel, se tabellen över rekommenderade modeller.
 
-Under den lokala översättningen: GPU på 98 % och 170 W, 10 GB VRAM använt
-(modell och cache på 32 k tokens, inget avlastat till RAM), 7,5 GB RAM för
-Ollama-servern. En modell med 9 till 12 miljarder parametrar respekterar
-strukturen men tar sig en frihet per artikel, medan gatewaymodellen
-inte tog sig någon: korrekturläs före publicering eller använd den endast för utkast.
+Under den lokala översättningen: GPU på 98 % och 170 W, 10 GB upptaget VRAM
+(modell och cache för 32 k tokens, inget avlastat till RAM), 7,5 GB RAM för
+Ollama-servern. En modell med 9–12 miljarder parametrar följer
+strukturen men tar sig en frihet per artikel, medan gateway-modellen
+inte tog sig någon: korrekturläs före publicering eller använd endast för utkast.
 
-### Översätta via OpenRouter (`--use_openrouter`)
+### Översätt via OpenRouter (`--use_openrouter`)
 
-OpenRouter är en **router** framför fler än 400 modeller som drivs av tredje part,
-med användningsbaserad debitering från ett gemensamt saldo. Med en enda nyckel ger den åtkomst till modeller
-som ingen av de andra providers erbjuder, särskilt öppna kinesiska modeller.
+OpenRouter är en **router** framför fler än 400 modeller som driftas av tredje part,
+med användningsbaserad debitering från ett gemensamt saldo. Den ger med en enda nyckel åtkomst till modeller
+som ingen av de andra providerna erbjuder, särskilt öppna kinesiska modeller.
 
 ```bash
 # --model est OBLIGATOIRE : aucun défaut n'est choisi à votre place
@@ -442,27 +442,27 @@ aipmt --use_openrouter --model 'z-ai/glm-5.2' --file README.md \
   --target_dir . --source_lang fr --target_lang en
 ```
 
-Två egenskaper hos routingen har styrt implementationen, och båda är
+Två särskilda egenskaper hos routingen styrde implementationen, och båda är
 mätbara:
 
-- **Samma modell tillhandahålls av dussintals värdar med olika
-  gränser.** För `z-ai/glm-5.3-flash` finns 23 värdar, varav en är begränsad till
-  2 048 tokens i utdata: utan försiktighetsåtgärder blev en av 23 långa översättningar
-  trunkerad, slumpmässigt beroende på routingen och utan minsta varning. En preflight läser
-  `/api/v1/models/{modèle}/endpoints`, utesluter värdar med mindre än 8 000 tokens
-  i utdata eller degraderad status och fäster sedan de övriga med
-  `allow_fallbacks: false` – annars återgår routern till en
-  utesluten värd.
-- **Resonemang debiteras enligt utdatataxan.** Samma förfrågan till
-  `z-ai/glm-5.2`, svaret ”OK”: 107 slutförandetokens med modellens standardinställning,
-  2 med resonemang avstängt. Det är därför avstängt som standard för de modeller
-  som tillåter det. De som kräver det – `reasoning.mandatory`, 288 av katalogens 431
-  modeller – får den **lägsta nivå de uppger att de
-  accepterar**, inte sin standardinställning: för `z-ai/glm-5.3-flash` är den
-  `max`, och den förbrukade alla 32 768 utdatatokens innan
-  översättningen var klar. Att höja gränsen hade inte förändrat något, eftersom nivån tilldelar
-  en procentandel av den. `--reasoning_effort` har fortsatt företräde, och `none` för en modell
-  som kräver resonemang rapporteras i stället för att kringgås.
+- **Samma modell tillhandahålls av dussintals driftleverantörer med olika
+  gränser.** För `z-ai/glm-5.3-flash` finns 23 driftleverantörer, varav en är begränsad till
+  2 048 tokens i utdata: utan försiktighetsåtgärder blev en lång översättning i 1 fall av 23
+  trunkerad, slumpmässigt beroende på routing och utan någon som helst signal. En preflight läser
+  `/api/v1/models/{modèle}/endpoints`, utesluter driftleverantörer med mindre än 8 000 tokens
+  i utdata eller med försämrad status och låser sedan fast de övriga med
+  `allow_fallbacks: false` – annars går routern vidare till en
+  utesluten driftleverantör.
+- **Reasoning debiteras till utdatatakt.** Samma förfrågan till
+  `z-ai/glm-5.2`, svaret ”OK”: 107 completion-tokens med modellens standardinställning,
+  2 med reasoning avstängd. Den är därför avstängd som standard för de modeller
+  som tillåter det. De som kräver den – `reasoning.mandatory`, 288 av katalogens 431
+  modeller – får den **lägsta effort-nivå de uppger
+  att de accepterar**, inte sin standardinställning: för `z-ai/glm-5.3-flash` är den
+  `max`, och den förbrukade samtliga 32 768 utdatatokens innan
+  översättningen var klar. Att höja gränsen skulle inte ha ändrat något, eftersom effort
+  tilldelas en procentandel av den. `--reasoning_effort` har fortfarande företräde, och `none` för en modell
+  som kräver reasoning rapporteras i stället för att kringgås.
 
 Preflight-kontrollen är **fail-closed** och visar vad den har valt:
 
@@ -471,8 +471,8 @@ Preflight-kontrollen är **fail-closed** och visar vad den har valt:
   sortie plafonnée à 32768, raisonnement coupé
 ```
 
-En slug som saknas i katalogen, en katalog som inte kan nås eller avsaknad av en värd
-som klarar gränsen stoppar kommandot före all debitering.
+Ett slug som saknas i katalogen, en oåtkomlig katalog eller avsaknad av en driftleverantör
+som klarar gränsen stoppar kommandot innan någon debitering sker.
 
 Övriga punkter:
 
@@ -480,7 +480,7 @@ som klarar gränsen stoppar kommandot före all debitering.
   segmenteringen anpassas faktiskt efter det, även för modeller med 4 095 tokens.
 - `--eco` har ingen effekt (modellen är den i `--model`).
 - `finish_reason=length` med tom utdata är inte en trunkering utan en
-  budget som förbrukats av resonemang; meddelandet anger det, eftersom de två
+  budget som förbrukats av reasoning; meddelandet anger detta, eftersom de två
   fallen kräver motsatta åtgärder.
 - Miljövariabler: `OPENROUTER_API_KEY` (nyckel, på
   <https://openrouter.ai/keys>), `OPENROUTER_BASE_URL` (standard
@@ -499,7 +499,7 @@ aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 ### Alternativ
 
 | Alternativ                | Beskrivning                                                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `--file`                 | En enskild Markdown-fil att översätta                                                                         |
 | `--source_dir`           | Källkatalog som innehåller Markdown-filer                                                                     |
 | `--target_dir`           | Utdatakatalog för de översatta filerna                                                                        |
@@ -512,38 +512,38 @@ aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 | `--use_gemini`           | Använd Gemini API                                                                                             |
 | `--use_codex`            | Använd Codex CLI med ChatGPT-prenumerationens kvot                                                            |
 | `--use_grok`             | Använd xAI API (Grok) – kräver `XAI_API_KEY`                                                                  |
-| `--use_openrouter`       | Använd OpenRouter – kräver `OPENROUTER_API_KEY` och `--model fournisseur/modèle`                             |
+| `--use_openrouter`       | Använd OpenRouter – kräver `OPENROUTER_API_KEY` och `--model fournisseur/modèle`                              |
 | `--use_grok_cli`         | Använd Grok CLI med Grok-prenumerationens kvot                                                                |
-| `--use_opencode`         | Använd OpenCode (open source) med leverantören som konfigurerats i OpenCode; kräver `--model provider/modèle` |
-| `--force`                | Tvinga fram en ny översättning                                                                                |
+| `--use_opencode`         | Använd OpenCode (open source) till leverantören som konfigurerats i OpenCode; kräver `--model provider/modèle` |
+| `--force`                | Tvinga fram ny översättning                                                                                   |
 | `--keep_filename`        | Behåll det ursprungliga filnamnet                                                                             |
-| `--news`                 | Nyhetsläge: skyddar engelska citat och hanterar flaggor efter språk                                           |
-| `--add_translation_note` | Lägg till en översättningsnot                                                                                 |
-| `--note_position`        | Notens placering: `top`, `bottom` (standard) eller `both`                                                     |
-| `--note_format`          | Notens format: `legacy` (standard, stycke i fetstil) eller `marker`                                            |
+| `--news`                 | Nyhetsläge: skyddar engelska citat och hanterar flaggor per språk                                             |
+| `--add_translation_note` | Lägg till en översättningsnotis                                                                               |
+| `--note_position`        | Notisens position: `top`, `bottom` (standard) eller `both`                                                     |
+| `--note_format`          | Notisens format: `legacy` (standard, stycke i fetstil) eller `marker`                                            |
 | `--include_model`        | Inkludera modellnamnet i utdatafilen                                                                          |
-| `--reasoning_effort`     | Resonemangsnivå för GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`                                         |
+| `--reasoning_effort`     | Reasoning effort för GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-> **De sju provider-flaggorna är ömsesidigt uteslutande.** Att kombinera två
-> accepterades tidigare tyst och valde den första som testades: en
-> översättning som begärdes mot en prenumerationskvot (`--use_codex`, `--use_grok_cli`)
-> kunde därmed gå över till användningsbaserad debitering utan någon varning.
-> `argparse` nekar numera kombinationen.
+> **De åtta provider-flaggorna är ömsesidigt uteslutande.** Att kombinera två
+> accepterades tidigare utan meddelande och valde den första som testades: en
+> översättning som begärts med prenumerationskvot (`--use_codex`, `--use_grok_cli`)
+> kunde därför i stället användningsdebiteras helt utan varning.
+> `argparse` avvisar nu kombinationen.
 
-### Översättningsnot: placeringar och format
+### Översättningsnotis: positioner och format
 
-Med `--add_translation_note` kan översättaren placera noten högst upp, längst ned eller på båda ställena och återge den antingen som enkel text (bakåtkompatibelt) eller i ett `marker`-format som kan användas av ett Markdown-plugin.
+Med `--add_translation_note` kan translatorn placera notisen högst upp, längst ned eller på båda ställena och återge den antingen som enkel text (bakåtkompatibelt) eller i ett `marker`-format som kan användas av ett Markdown-plugin.
 
-**Placering** (`--note_position`):
+**Position** (`--note_position`):
 
-- `bottom` (standard): noten placeras sist i filen, som tidigare.
-- `top`: noten infogas **efter YAML-frontmatter** (säkert för Astro Content Collections, gray-matter osv.).
-- `both`: noten infogas både högst upp OCH längst ned (ett enda LLM-anrop, innehållet återanvänds för båda placeringarna).
+- `bottom` (standard): notis i slutet av filen, som tidigare.
+- `top`: notis infogad **efter YAML-frontmatter** (säkert för Astro Content Collections, gray-matter osv.).
+- `both`: notis infogad både högst upp OCH längst ned (ett enda LLM-anrop, innehållet återanvänds för båda placeringarna).
 
 **Format** (`--note_format`):
 
-- `legacy` (standard): stycke i fetstil `**...**` – beteendet är strikt identiskt med v1.8, byte för byte. Kompatibelt med Hugo, GitHub, GitLab och alla Markdown-renderare.
-- `marker`: osynlig Markdown-definition för länkreferens (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`), följd av ett blockquote i fetstil. Läsbart direkt på GitHub/GitLab och användbart under bygget av ett remark-plugin på Astro-sidan för att skapa en stiliserad banner (se bloggen jls42.org).
+- `legacy` (standard): stycke i fetstil `**...**` – beteende strikt identiskt med v1.8, byte-for-byte. Kompatibelt med Hugo, GitHub, GitLab och alla Markdown-renderers.
+- `marker`: osynlig Markdown link reference definition (`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`) följd av ett blockquote i fetstil. Kan läsas direkt på GitHub/GitLab och användas vid build av ett remark-plugin på Astro-sidan för att skapa en formgiven banner (se bloggen jls42.org).
 
 ```bash
 # Compatibilité legacy (rien ne change vs v1.8)
@@ -573,56 +573,56 @@ aipmt --file article.mdx --target_lang en \
 | OpenRouter | `--model fournisseur/modèle` obligatorisk | samma – `--eco` utan effekt |
 ## Vilka modeller håller måttet
 
-En modell som översätter ett stycke bra bevarar inte nödvändigtvis strukturen
+En modell som översätter ett stycke väl bevarar inte nödvändigtvis strukturen
 i ett helt dokument. Dessa mätningar kommer från **faktiskt genomförda
 översättningar**, med kommandot som visas ovan, på tre dokumentuppsättningar
 och fjorton målspråk: en, es, de, it, pt, nl, pl, sv, ro, ja, ko, zh, ar, hi.
 
 Två kolumner, och de säger inte samma sak. **Slutförda** räknar de
-översättningar som lyckas — scriptets skydd mot tysta fel släpper igenom filen.
+översättningar som lyckas — skriptets skydd mot tysta fel släpper igenom filen.
 **Utan avvikelse** räknar dem vars struktur är identisk med källan: samma
 avsnitt, samma länkar, samma URL:er, samma block och inline-kod, samma tabeller,
 samma citat, samma flaggor.
 
-### Innehållsrik bloggartikel, läget `--news`
+### Kompakt bloggartikel, läge `--news`
 
 589 rader, 140 länkar, 21 avsnitt, 3 skyddade engelska citat. Det är det mest
 krävande av de tre dokumenten: läget `--news` lägger till begränsningar
 för flaggor och citat utöver Markdown-strukturen.
 
-| Modell                            | Åtkomst             | Slutförda | Utan avvikelse | Median/språk |
-| --------------------------------- | ------------------- | --------- | -------------- | ------------ |
-| `gemini-3.7-flash`                | Google API          | 14/14     | **14/14**      | 1 min 18 s   |
-| `gpt-5.6-sol` (`--use_codex`)     | ChatGPT-abonnemang  | 14/14     | **14/14**      | 11 min 28 s  |
-| `z-ai/glm-5.2`                    | OpenRouter          | 14/14     | **14/14**      | 5 min 37 s   |
-| `qwen/qwen3.8-flash`              | OpenRouter          | 14/14     | 13/14          | 26 min 23 s  |
-| `z-ai/glm-5.3-flash`              | OpenRouter          | 12/14     | 12/14          | 15 min 49 s  |
-| `qwen/qwen3.5-27b`                | OpenRouter          | 7/9       | 7/9            | 20 min 33 s  |
-| `claude-sonnet-5`                 | Anthropic API       | 14/14     | 11/14          | 6 min 31 s   |
-| `opencode/mimo-v2.5-free`         | OpenCode Zen        | 13/14     | 11/14          | 9 min 27 s   |
-| `qwen/qwen3.7-flash`              | OpenRouter          | 13/14     | 714           | 10 min 09 s  |
-| `ollama/gpt-oss-20b-32k`          | lokalt              | 10/14     | 714           | 12 min 39 s  |
-| `mistral-large-latest`            | Mistral API         | 11/14     | 5/14           | 5 min 32 s   |
-| `deepseek/deepseek-v4-flash-0731` | OpenRouter          | 4/14      | 3/14           | 37 min 27 s  |
-| `grok-4.6` (`--use_grok_cli`)     | Grok-abonnemang     | 1/14      | 1/14           | 23 min 11 s  |
-| `moonshotai/kimi-k2.6`            | OpenRouter          | 1/4       | 1/4            | 23 min 00 s  |
+| Modell                            | Åtkomst              | Slutförda | Utan avvikelse | Median/språk |
+| --------------------------------- | -------------------- | --------- | -------------- | ------------ |
+| `gemini-3.7-flash`                | Google API           | 14/14     | **14/14**      | 1 min 18 s   |
+| `gpt-5.6-sol` (`--use_codex`)     | ChatGPT-abonnemang   | 14/14     | **14/14**      | 11 min 28 s  |
+| `z-ai/glm-5.2`                    | OpenRouter           | 14/14     | **14/14**      | 5 min 37 s   |
+| `qwen/qwen3.8-flash`              | OpenRouter           | 14/14     | 13/14          | 26 min 23 s  |
+| `z-ai/glm-5.3-flash`              | OpenRouter           | 12/14     | 12/14          | 15 min 49 s  |
+| `qwen/qwen3.5-27b`                | OpenRouter           | 7/9       | 7/9            | 20 min 33 s  |
+| `claude-sonnet-5`                 | Anthropic API        | 14/14     | 11/14          | 6 min 31 s   |
+| `opencode/mimo-v2.5-free`         | OpenCode Zen         | 13/14     | 11/14          | 9 min 27 s   |
+| `qwen/qwen3.7-flash`              | OpenRouter           | 13/14     | 7/14           | 10 min 09 s  |
+| `ollama/gpt-oss-20b-32k`          | lokalt               | 10/14     | 7/14           | 12 min 39 s  |
+| `mistral-large-latest`            | Mistral API          | 11/14     | 5/14           | 5 min 32 s   |
+| `deepseek/deepseek-v4-flash-0731` | OpenRouter           | 4/14      | 3/14           | 37 min 27 s  |
+| `grok-4.6` (`--use_grok_cli`)     | Grok-abonnemang      | 1/14      | 1/14           | 23 min 11 s  |
+| `moonshotai/kimi-k2.6`            | OpenRouter           | 1/4       | 1/4            | 23 min 00 s  |
 
 Två körningar **avbröts på grund av bristande saldo**, vilket framgår av deras
-nämnare: `qwen3.5-27b` stannade efter nio språk och `kimi-k2.6` efter fyra
-— den senare efter en timeout på fyrtio minuter och två avslag, till en kostnad
+nämnare: `qwen3.5-27b` stannade vid nio språk och `kimi-k2.6` vid fyra —
+den senare efter en timeout på fyrtio minuter och två avslag, till en kostnad
 på nästan 0,33 $ per språk.
 
-En metodanmärkning om OpenRouter-raderna: de mättes med routerns
+En metodologisk reservation gäller OpenRouter-raderna: de mättes med routerns
 **standardinställningar**, innan `--use_openrouter` fanns. `z-ai/glm-5.2` har
-sedan dess mätts på nytt med den medföljande providern, med reasoning avstängt,
+sedan dess mätts på nytt med den medföljande providern, med resonemang avstängt,
 och ger exakt samma 14/14. `z-ai/glm-5.3-flash` misslyckades två gånger eftersom
 routerns standardbudget för utdata tog slut; providern begär numera den lägsta
-reasoning-nivå som dessa modeller accepterar, och kontrolltestet på de berörda
+resonemangsnivå som dessa modeller accepterar, och omtestningen på de berörda
 språken lyckas.
 
 ### Projektets README, standard-Markdown
 
-508 rader, 219 inline-koder, 40 blockavgränsare, 45 tabellrader. Inget
+508 rader, 219 inline-koder, 40 blockavslutningar, 45 tabellrader. Inget
 `--news`-läge här: svårigheten beror på den höga kodtätheten.
 
 | Modell                        | Slutförda | Utan avvikelse | Median/språk |
@@ -630,67 +630,67 @@ språken lyckas.
 | `z-ai/glm-5.2` (OpenRouter)   | 14/14     | 11/14          | 1 min 22 s   |
 | `gemini-3.7-flash`            | 14/14     | 13/14          | 21 s         |
 | `gpt-5.6-sol` (`--use_codex`) | 14/14     | 12/14          | 2 min 04 s   |
-| `opencode/mimo-v2.5-free`     | 9/14      | 714           | 3 min 25 s   |
+| `opencode/mimo-v2.5-free`     | 9/14      | 7/14           | 3 min 25 s   |
 | `ollama/gpt-oss-20b-32k`      | 9/14      | 1/14           | 3 min 38 s   |
 
 ### Fyra README-filer från välkända projekt
 
-FastAPI, Ollama, tldr-pages och Vue.js, hämtade i befintligt skick från GitHub.
-Dessa dokument är **enklare** än de två föregående, vilket tabellen visar.
+FastAPI, Ollama, tldr-pages och Vue.js, hämtade oförändrade från GitHub. Dessa
+dokument är **enklare** än de två föregående, vilket tabellen visar.
 
 | Modell                    | Omfattning                 | Slutförda | Utan avvikelse |
 | ------------------------- | -------------------------- | --------- | -------------- |
-| `opencode/mimo-v2.5-free` | | 4 projekt × 14 språk       | 55/56     | 47/56          |
+| `opencode/mimo-v2.5-free` | 4 projekt × 14 språk       | 55/56     | 47/56          |
 | `grok-4.6` (abonnemang)   | 4 projekt × ar, hi, ja, zh | 16/16     | 14/16          |
 | `ollama/gpt-oss-20b-32k`  | 4 projekt × ar, hi, ja, zh | 15/16     | 9/16           |
 
-### Vad vi kan dra för slutsatser
+### Slutsatser
 
-- **Tre modeller har aldrig förlorat information** i de två innehållsrika
+- **Tre modeller har aldrig förlorat information** i de två kompakta
   dokumenten: `gemini-3.7-flash`, `gpt-5.6-sol` via ChatGPT-abonnemanget och
   `z-ai/glm-5.2` via OpenRouter. Deras enda avvikelser i standardläget är ett
-  par `**` som inte återges på ett eller två språk, aldrig en URL,
+  par `**` som inte återgavs på ett eller två språk, aldrig en URL,
   ett kodblock eller ett citat.
 - **Den avgörande faktorn är dokumentets täthet, inte läget `--news`.**
-  Grok via abonnemang misslyckas 13 gånger av 14 på bloggartikeln och lyckas
-  med 14 offentliga README-filer av 16: orsaken till misslyckandet är att den
-  tappar tråden i ett långt segment, vilket har verifierats med ett
-  kontrolltest — det isolerade avsnittet översätts korrekt.
-- **Icke-latinska skriftsystem är inte den förväntade skiljelinjen.**
-  `gpt-oss` lämnar kvar franska avsnitt på arabiska, japanska, polska
-  **och rum rumänska**; Mistral och MiMo tappar endast inline-kod i
-  icke-latinska skriftsystem.
-- **Att stänga av reasoning kostar inget i kvalitet.** `z-ai/glm-5.2` klarar
-  fjorton språk utan en enda avvikelse under båda förutsättningarna — reasoning
-  aktiverat enligt routerns standardinställning och sedan avstängt av
-  `--use_openrouter` — med arton gånger färre fakturerade utdatatokens. Det är
+  Grok via abonnemang misslyckas 13 gånger av 14 på bloggartikeln och klarar 14
+  offentliga README-filer av 16: orsaken till misslyckandet är att modellen
+  tappar tråden i ett långt segment, vilket bekräftades genom omtestning — det
+  isolerade stycket översätts korrekt.
+- **Icke-latinska skriftsystem utgör inte den förväntade skiljelinjen.**
+  `gpt-oss` lämnar kvar franska stycken på arabiska, japanska, polska
+  **och rumänska**; Mistral och MiMo tappar endast inline-koder för icke-latinska
+  skriftsystem.
+- **Att stänga av resonemang kostar ingenting i kvalitet.** `z-ai/glm-5.2`
+  klarar fjorton språk utan en enda avvikelse under båda förhållandena —
+  resonemang aktiverat enligt routerns standardinställning och sedan avstängt
+  genom `--use_openrouter` — med arton gånger färre debiterade utdatatokens. Det är
   denna mätning som motiverar providerns standardinställning.
 - **En långsam modell är inte en säker modell.** `deepseek-v4-flash-0731` tar 37 minuter
   per språk för 4 översättningar av 14, `qwen3.8-flash` tar 26 minuter för ett
   nästan perfekt resultat och Gemini tar 1 minut och 18 sekunder för ett
   felfritt resultat.
 
-### Vad den här tabellen inte är
+### Vad tabellen inte är
 
-- **Det är inte en uttömmande rangordning.** Enbart OpenRouter erbjuder fler än
-  fyrahundra modeller; ett femtontal har mätts här. Att en modell saknas säger
-  ingenting om dess kvalitet, bara att den inte har testats.
-- **Dessa mätningar har ett datum**: den 4 och 5 september 2026. Modeller ändras
-  under samma namn, leverantörerna justerar kvantiseringar och gränser och nya
-  modeller lanseras varje vecka.
-- **Tiderna rangordnar ingenting.** Parallelliteten varierade mellan 3 och 6
-  samtidiga översättningar beroende på körning, och en leverantörs
-  genomströmning varierar under dagen. De ger en storleksordning, inte en
-  jämförelse.
+- **Detta är inte en uttömmande rangordning.** Enbart OpenRouter erbjuder fler
+  än fyrahundra modeller; ett femtontal har mätts här. Att en modell saknas
+  säger ingenting om dess kvalitet, bara att den inte har testats.
+- **Dessa mätningar har ett datum**: 4 och 5 september 2026. Modeller förändras
+  under samma namn, driftleverantörer justerar kvantiseringar och gränser och
+  nya modeller lanseras varje vecka.
+- **Tiderna utgör ingen rangordning.** Parallelliteten varierade mellan 3 och 6
+  samtidiga översättningar beroende på körning, och en leverantörs kapacitet
+  varierar under dagen. De ger en storleksordning, inte en jämförelse.
 - **Ett resultat beror lika mycket på dokumentet som på modellen.** Samma modell
   klarar fjorton språk för en artikel och nio för denna README. Era filer är
   inte våra.
-- **Rätt tillvägagångssätt är fortfarande att mäta hos er**: översätt ett av
-  era dokument till era målspråk och jämför sedan strukturen — antalet avsnitt,
-  länkar, unika URL:er, kodblock, inline-koder och tabellrader. Det är exakt vad
-  protokollet ovan gör, och det ryms i en loop över `aipmt`.
+- **Det bästa tillvägagångssättet är fortfarande att mäta hos er själva**:
+  översätt ett av era dokument till era målspråk och jämför sedan strukturen —
+  antalet avsnitt, länkar, unika URL:er, kodblock, inline-koder och tabellrader.
+  Det är exakt vad protokollet ovan gör, och det ryms i en loop över
+  `aipmt`.
 
-## Projekt som använder detta script
+## Projekt som använder detta skript
 
 - **[jls42.org](https://jls42.org)** - Flerspråkig personlig blogg (15 språk)
 
