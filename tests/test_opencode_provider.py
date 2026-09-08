@@ -380,6 +380,30 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
         self.assertTrue(issubclass(opencode._OpencodeCallError, base._CliCallError))
 
 
+class TestOpencodeRateLimitDetection(unittest.TestCase):
+    """« 429 » cherché en sous-chaîne classait en limitation de débit des
+    erreurs ordinaires — mesuré sur `ref err_84290b`, `foo429bar`, `429TooMany`
+    — et le back-off attendait alors 90 s avant d'échouer quand même."""
+
+    def test_les_vraies_limitations_sont_reconnues(self):
+        for texte in ("Rate limit exceeded", "HTTP 429 Too Many Requests", "status 429: slow down"):
+            with self.subTest(texte=texte):
+                self.assertTrue(opencode._opencode_is_rate_limited(texte))
+
+    def test_le_statut_structure_prime(self):
+        self.assertTrue(opencode._opencode_is_rate_limited("rien", {"statusCode": 429}))
+
+    def test_un_429_noye_dans_un_identifiant_nen_est_pas_une(self):
+        for texte in (
+            "ProviderModelNotFoundError: ref err_84290b",
+            "model foo429bar missing",
+            "429TooMany",
+            "error code 1429",
+        ):
+            with self.subTest(texte=texte):
+                self.assertFalse(opencode._opencode_is_rate_limited(texte))
+
+
 class TestOpencodeInit(unittest.TestCase):
     def _preflight_ok(self):
         return patch.object(

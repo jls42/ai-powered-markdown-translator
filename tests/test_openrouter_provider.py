@@ -681,12 +681,23 @@ class TestPreflightDeBoutEnBout(unittest.TestCase):
         return client, fake_openai
 
     def test_cle_url_et_timeout_transmis_au_client(self):
-        with patch.dict(os.environ, {"OPENROUTER_BASE_URL": "https://relais.example/api/v1"}):
+        with (
+            patch.dict(os.environ, {"OPENROUTER_BASE_URL": "https://relais.example/api/v1"}),
+            patch("sys.stdout", io.StringIO()) as sortie,
+        ):
             _, fake_openai = self._init()
         kwargs = fake_openai.call_args.kwargs
         self.assertEqual(kwargs["api_key"], _MARQUEUR)
         self.assertEqual(kwargs["base_url"], "https://relais.example/api/v1")
         self.assertEqual(kwargs["timeout"], openrouter.OPENROUTER_TIMEOUT)
+        # Un endpoint détourné — un `.env` de projet suffit à en poser un —
+        # doit se voir : c'est la vraie clé qui partira dans l'en-tête.
+        self.assertIn("endpoint https://relais.example/api/v1", sortie.getvalue())
+
+    def test_l_endpoint_canonique_ne_pollue_pas_la_ligne_de_preflight(self):
+        with patch("sys.stdout", io.StringIO()) as sortie:
+            self._init()
+        self.assertNotIn("endpoint", sortie.getvalue())
 
     def test_plafond_inferieur_et_efforts_lus_au_catalogue(self):
         catalogue = {
@@ -724,6 +735,45 @@ class TestPreflightDeBoutEnBout(unittest.TestCase):
             client, _ = self._init(catalogue, args=_args(reasoning_effort="none"))
         self.assertTrue(client.reasoning_mandatory)
         self.assertIn("--reasoning_effort=none ignoré", err.getvalue())
+
+    def test_le_contexte_est_reserve_a_l_entree(self):
+        """`context_length` couvre l'entrée ET la complétion : demander tout le
+        plafond de sortie ne laissait plus de place au prompt ni au segment.
+        Mesuré sur le catalogue : six modèles sont dans ce cas."""
+        catalogue = {
+            "data": [
+                {"id": "z-ai/glm-5.2", "context_length": 32768, "reasoning": {"mandatory": False}}
+            ]
+        }
+        endpoints = {"data": {"endpoints": [_endpoint("deepinfra/fp4", 29491)]}}
+        client, _ = self._init(catalogue, endpoints)
+        self.assertEqual(client.max_tokens, 32768 - openrouter.OPENROUTER_INPUT_RESERVE)
+
+    def test_contexte_trop_court_refuse_avant_facturation(self):
+        """Un contexte de 16 384 tokens ne laisse pas 8 000 tokens de sortie une
+        fois l'entrée réservée : refuser ici évite de payer un refus amont."""
+        catalogue = {
+            "data": [
+                {"id": "z-ai/glm-5.2", "context_length": 16384, "reasoning": {"mandatory": False}}
+            ]
+        }
+        endpoints = {"data": {"endpoints": [_endpoint("deepinfra/fp4", 14745)]}}
+        with self.assertRaises(ValueError) as ctx:
+            self._init(catalogue, endpoints)
+        message = str(ctx.exception)
+        self.assertIn("Contexte trop court", message)
+        self.assertIn("16384", message)
+
+    def test_budget_de_sortie(self):
+        budget = openrouter._openrouter_output_budget
+        # Grande fenêtre : l'enveloppe demandée reste le plafond du projet.
+        self.assertEqual(budget(1048576, 131072, "m"), openrouter.OPENROUTER_MAX_TOKENS)
+        # Le plafond de l'hébergeur reste prioritaire s'il est plus bas.
+        self.assertEqual(budget(65536, 16000, "m"), 16000)
+        # Sinon c'est le contexte, moins la réserve d'entrée, qui tranche.
+        self.assertEqual(budget(32768, 29491, "m"), 32768 - openrouter.OPENROUTER_INPUT_RESERVE)
+        with self.assertRaises(ValueError):
+            budget(16384, 14745, "m")
 
     def test_slug_invalide_refuse_avant_tout_reseau(self):
         args = _args(model="z-ai/glm/..")

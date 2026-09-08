@@ -16,11 +16,13 @@ from __future__ import annotations
 import os
 import pathlib
 import signal
+import subprocess  # nosec B404 — types d'exception seulement, aucun lancement
 import sys
 import tempfile
 import threading
 import time
 import unittest
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
@@ -94,6 +96,37 @@ class TestSigtermDuringWait(unittest.TestCase):
         thread.start()
         thread.join()
         self.assertIs(seen["inside"], before)
+
+
+class TestPlatformWithoutProcessGroups(unittest.TestCase):
+    """`os.killpg` n'existe pas sur Windows et `start_new_session` y est ignoré :
+    sans garde, l'AttributeError traversait le `except TimeoutExpired` et le
+    `with Popen` attendait ensuite un processus que personne n'avait tué, alors
+    que le paquet se déclare « OS Independent »."""
+
+    @staticmethod
+    def _os_sans_groupes():
+        """Le module `os` tel que le voit `base` sur une plateforme sans
+        groupes de processus : `killpg` n'y existe pas."""
+        return SimpleNamespace()
+
+    def test_the_direct_child_is_still_killed(self):
+        proc = MagicMock(pid=4242)
+        # Le délai de grâce expire, puis `wait()` sans délai rend la main après
+        # le kill — un `wait()` sans timeout bloque, il n'expire jamais.
+        proc.wait.side_effect = [subprocess.TimeoutExpired(cmd="x", timeout=1), 0]
+        with patch.object(base, "os", self._os_sans_groupes()):
+            base._codex_kill_group(proc)
+        proc.terminate.assert_called_once()
+        proc.kill.assert_called_once()
+
+    def test_a_child_that_stops_on_terminate_is_not_killed(self):
+        proc = MagicMock(pid=4242)
+        proc.wait.return_value = 0
+        with patch.object(base, "os", self._os_sans_groupes()):
+            base._codex_kill_group(proc)
+        proc.terminate.assert_called_once()
+        proc.kill.assert_not_called()
 
 
 class TestKillGroup(unittest.TestCase):

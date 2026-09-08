@@ -67,6 +67,19 @@ def _strip_secret_env(env, keep=()):
     return env
 
 
+def _kill_process_only(proc):
+    """Repli sans groupe de processus : `terminate`, délai de grâce, `kill`."""
+    try:
+        proc.terminate()
+        proc.wait(timeout=CODEX_TERM_GRACE)
+    except (subprocess.TimeoutExpired, OSError):
+        try:
+            proc.kill()
+            proc.wait()
+        except OSError:
+            pass
+
+
 def _codex_kill_group(proc):
     """Tue tout le groupe de process : SIGTERM, délai de grâce, puis SIGKILL
     quoi qu'il arrive. Le `codex` installé par npm est un shim Node qui `spawn`
@@ -74,6 +87,15 @@ def _codex_kill_group(proc):
     le shim, lui, meurt proprement sur SIGTERM. Conditionner le SIGKILL à la
     survie du fils laissait donc l'agent réel continuer à consommer du quota
     (mesuré : petit-fils vivant après un `_codex_kill_group` rendu en 0 s)."""
+    # Sans groupes de processus POSIX (Windows), `os.killpg` n'existe même pas
+    # et `start_new_session` est ignoré par CPython : il n'y a pas de groupe à
+    # viser. Le fils direct reste tuable, et c'est tout ce qu'on peut promettre
+    # là-bas — sans cette garde, l'AttributeError traversait le `except
+    # TimeoutExpired`, et le `with Popen` attendait ensuite indéfiniment un
+    # processus que personne n'avait tué.
+    if not hasattr(os, "killpg"):
+        _kill_process_only(proc)
+        return
     # ProcessLookupError est une sous-classe d'OSError : la capture est écrite
     # `except OSError` partout, sans la mentionner séparément.
     try:

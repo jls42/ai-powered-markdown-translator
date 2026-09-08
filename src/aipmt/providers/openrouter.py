@@ -45,6 +45,19 @@ OPENROUTER_MIN_COMPLETION_TOKENS = 8000
 OPENROUTER_MAX_TOKENS = 32768
 
 
+# Part du contexte réservée à l'ENTRÉE. `context_length` couvre l'entrée ET la
+# complétion : demander tout le plafond de sortie ne laisse alors plus de place
+# au prompt ni au segment, et l'hébergeur refuse la requête. Six modèles du
+# catalogue sont dans ce cas (mesuré le 2026-09-09 : contexte 16 384 ou 32 768
+# face à un plafond de sortie de 14 745 ou 29 491).
+#
+# Le pipeline coupe les segments à 16 000 caractères et le prompt système pèse
+# jusqu'à 9 250 caractères (mode news, cible japonaise, mesuré) ; à trois
+# caractères par token — hypothèse prudente, un texte latin en compte plutôt
+# quatre — l'entrée réclame environ 8 400 tokens.
+OPENROUTER_INPUT_RESERVE = 8400
+
+
 # Efforts de raisonnement du moins au plus coûteux, tels que le catalogue les
 # nomme. L'ordre sert à choisir le PLUS BAS que le modèle accepte quand il
 # impose de raisonner : mesuré sur z-ai/glm-5.3-flash, dont le défaut est
@@ -151,8 +164,9 @@ class _OpenRouterClient:
 
     Ces quatre champs ne sont pas des préférences, ce sont des contraintes lues
     sur le catalogue au démarrage — la liste d'hébergeurs dont aucun ne
-    tronque, le plafond de sortie qu'ils tiennent tous, le fait que le modèle
-    impose ou non de raisonner, et les efforts qu'il déclare accepter."""
+    tronque, le plafond de sortie qu'ils tiennent tous une fois l'entrée
+    réservée dans le contexte, le fait que le modèle impose ou non de
+    raisonner, et les efforts qu'il déclare accepter."""
 
     client: object
     providers: tuple = ()
@@ -410,6 +424,23 @@ def _openrouter_context_length(entry, model):
     return context_length
 
 
+def _openrouter_output_budget(context_length, ceiling, model):
+    """Plafond de sortie à demander, une fois l'entrée réservée dans le contexte.
+
+    Refuse AVANT toute facturation quand il ne reste pas de quoi traduire :
+    laisser partir la requête ferait payer un refus de l'hébergeur, ou pire une
+    sortie tronquée, pour une enveloppe qu'on savait insuffisante ici."""
+    budget = min(OPENROUTER_MAX_TOKENS, ceiling, context_length - OPENROUTER_INPUT_RESERVE)
+    if budget < OPENROUTER_MIN_COMPLETION_TOKENS:
+        raise ValueError(
+            f"Contexte trop court pour {model!r} : {context_length} tokens dont "
+            f"~{OPENROUTER_INPUT_RESERVE} pour le prompt et le segment, il ne reste que "
+            f"{max(budget, 0)} tokens de sortie pour au moins "
+            f"{OPENROUTER_MIN_COMPLETION_TOKENS}. Choisir un modèle à plus grande fenêtre."
+        )
+    return budget
+
+
 def _init_openrouter_client(args):
     """Provider OpenRouter. L'appel est compatible OpenAI ; ce qui distingue ce
     provider tient dans le préflight, dont le résultat est affiché parce qu'il
@@ -442,7 +473,7 @@ def _init_openrouter_client(args):
     client = _OpenRouterClient(
         client=OpenAI(api_key=api_key, base_url=base_url, timeout=OPENROUTER_TIMEOUT),
         providers=providers,
-        max_tokens=min(OPENROUTER_MAX_TOKENS, ceiling),
+        max_tokens=_openrouter_output_budget(context_length, ceiling, args.model),
         reasoning_mandatory=mandatory,
         supported_efforts=supported_efforts,
     )
@@ -452,9 +483,16 @@ def _init_openrouter_client(args):
             "(reasoning.mandatory sur le catalogue OpenRouter)",
             file=sys.stderr,
         )
+    # L'endpoint n'est affiché que s'il n'est PAS le canonique. `.env` est
+    # cherché depuis le répertoire courant et ses parents : une arborescence
+    # non fiable peut donc en fournir un, et c'est la vraie clé — venue de la
+    # couche utilisateur — qui partirait ensuite dans l'en-tête d'autorisation.
+    # Le dire à l'écran ne remplace pas une frontière de confiance, mais rend
+    # le détournement visible plutôt que muet.
+    detourne = f", endpoint {base_url}" if base_url != OPENROUTER_BASE_URL else ""
     print(
         f"→ OpenRouter : {len(providers)} hébergeur(s) épinglé(s) sur {len(endpoints)}, "
         f"contexte {context_length} tokens, sortie plafonnée à {client.max_tokens}, "
-        f"raisonnement {_openrouter_reasoning_label(client, args)}"
+        f"raisonnement {_openrouter_reasoning_label(client, args)}{detourne}"
     )
     return client

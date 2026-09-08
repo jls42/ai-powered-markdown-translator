@@ -68,7 +68,12 @@ OPENCODE_ENV_KILL_SWITCHES = {
 OPENCODE_KEPT_ENV_VARS = ("OPENCODE_API_KEY",)
 
 
-_OPENCODE_RATE_LIMIT_MARKERS = ("rate limit", "rate_limit", "too many requests", "429")
+_OPENCODE_RATE_LIMIT_MARKERS = ("rate limit", "rate_limit", "too many requests")
+# `429` comme NOMBRE, jamais en sous-chaîne : mesuré, `in` classait en rate
+# limit les identifiants d'erreur ordinaires (`ref err_84290b`, `foo429bar`,
+# `429TooMany`), et le back-off attendait alors 30 puis 60 s avant d'échouer
+# quand même sur une erreur déterministe.
+_OPENCODE_HTTP_429_REGEX = re.compile(r"\b429\b")
 
 
 # Première ligne `error="…"` des logs `--print-logs` : c'est là, et non dans
@@ -251,7 +256,10 @@ def _opencode_is_rate_limited(text, data=None):
     nomme aussi bien un 429 récupérable qu'un épuisement définitif."""
     if data and data.get("statusCode") == 429:
         return True
-    return any(marker in (text or "").lower() for marker in _OPENCODE_RATE_LIMIT_MARKERS)
+    minuscules = (text or "").lower()
+    if any(marker in minuscules for marker in _OPENCODE_RATE_LIMIT_MARKERS):
+        return True
+    return bool(_OPENCODE_HTTP_429_REGEX.search(minuscules))
 
 
 def _opencode_raise_reported_error(error, cause, model):

@@ -259,6 +259,34 @@
       "kind": "FunctionDef",
       "file": "src/aipmt/providers/openrouter.py",
       "why": "revue max : un seul message pour la panne amont, détail + conseil"
+    },
+    {
+      "hash": "9036b9fc5c7ec4069ebc9ed4447318b929fdc6a49488f6c42cae78879ac32150",
+      "name": "_OPENCODE_HTTP_429_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/providers/opencode.py",
+      "why": "revue Codex : 429 borné par des frontières de mot"
+    },
+    {
+      "hash": "f5844b0e53347e9bb224a9b1681b4df93ec6f5e59695bb023d217ebc5d03c6f4",
+      "name": "_kill_process_only",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/base.py",
+      "why": "revue Codex : repli sans groupes de processus"
+    },
+    {
+      "hash": "4dda438b48e3efb4c5427b98dba1fb2d737abc4a3b93f7abc4ee76be91c5ad50",
+      "name": "OPENROUTER_INPUT_RESERVE",
+      "kind": "Assign",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : part du contexte réservée à l'entrée"
+    },
+    {
+      "hash": "827e59d8d7527dd0296826ce83793ff6baab562c402de35024c32f8d699c7032",
+      "name": "_openrouter_output_budget",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : plafond de sortie borné par le contexte, refus avant facturation"
     }
   ],
   "removed": [],
@@ -514,6 +542,41 @@
       "old_hash": "926914eb12244ab93e267323a74a11d86c9acc7cdae201ab7b1ffa2216e66b49",
       "new_hash": "ed6dfd3a752982e4adb8424d22daec08a39fc1d3d25619457f5f330d410d56c7",
       "why": "revue max : panne amont regroupée (finish_reason=error et/ou error du choix), objet présent mais vide refusé"
+    },
+    {
+      "name": "_opencode_is_rate_limited",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "02cf3ca86a115a276e4f4d0d0884bc6427173b4bd817b0937a02cc65496d682b",
+      "new_hash": "db71a202c75a766066e382cbc1046241ce78581e9f454033878e7a708d6dbdc3",
+      "why": "revue Codex : « 429 » cherché comme nombre, plus en sous-chaîne (err_84290b, foo429bar)"
+    },
+    {
+      "name": "_codex_kill_group",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "98193d4ce2f37cce3ba5d41886cc0b6e20307a3988cb70c84c58729d7ae7328f",
+      "new_hash": "ac70dc393ddf594523de12ace6aeaac04cb48e0947efdc5eefb2f86c524366ba",
+      "why": "revue Codex : repli sans groupes POSIX (Windows), l'AttributeError faisait attendre le Popen indéfiniment"
+    },
+    {
+      "name": "_OpenRouterClient",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "19054ed0cc67e9f0cc79d46fd149f4dc324dc3d7b14d66b63838b5d29252a7b7",
+      "new_hash": "3ef966d8e783c40c9f674213e5f61aa1a2037175bdf9560f0653fe84e1619ed2",
+      "why": "revue Codex : le plafond de sortie tient compte du contexte réservé à l'entrée"
+    },
+    {
+      "name": "_OPENCODE_RATE_LIMIT_MARKERS",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "05694ee7495cc1759b699a5a11a9b2965ee2cbe149d7fc2d4e61c960ab377579",
+      "new_hash": "8aa8e8c097f64421bd554402c402f2ad5fa413c8e7d3aad15e3db039a0d9bc92",
+      "why": "revue Codex : « 429 » sort du tuple, il devient une regex bornée"
+    },
+    {
+      "name": "_init_openrouter_client",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "64422faa929223e3f54c65e1a0569b353408fb807c4f7960f4eb8dfb0a2eef7e",
+      "new_hash": "1b88dea93b43d29a500205b15ecb68294b1b228f0f4cc75f89486f911c8a83ca",
+      "why": "revue Codex : entrée réservée dans le contexte, endpoint non canonique affiché"
     }
   ]
 }
