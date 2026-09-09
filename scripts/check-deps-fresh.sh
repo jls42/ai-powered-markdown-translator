@@ -40,7 +40,8 @@ DIRECT_DEPS="openai anthropic mistralai google-genai langdetect python-dotenv ce
 # CHANGELOG à la racine de leur dépôt ; pour les autres, la page des versions
 # de PyPI est le point d'entrée le plus stable.
 changelog_url() {
-  case "$1" in
+  local pkg="$1"
+  case "$pkg" in
     openai)         echo "https://github.com/openai/openai-python/blob/main/CHANGELOG.md" ;;
     anthropic)      echo "https://github.com/anthropics/anthropic-sdk-python/blob/main/CHANGELOG.md" ;;
     mistralai)      echo "https://github.com/mistralai/client-python/releases" ;;
@@ -48,8 +49,9 @@ changelog_url() {
     langdetect)     echo "https://pypi.org/project/langdetect/#history" ;;
     python-dotenv)  echo "https://github.com/theskumar/python-dotenv/blob/main/CHANGELOG.md" ;;
     certifi)        echo "https://github.com/certifi/python-certifi/releases" ;;
-    *)              echo "https://pypi.org/project/$1/#history" ;;
+    *)              echo "https://pypi.org/project/$pkg/#history" ;;
   esac
+  return 0
 }
 
 if [[ ! -f requirements.txt ]]; then
@@ -128,6 +130,7 @@ print_changelogs() {
     pkg="${entry%%(*}"
     printf '    %-14s %s\n' "$pkg" "$(changelog_url "$pkg")" >&2
   done
+  return 0
 }
 
 if [[ -n "$OUTDATED_MINOR" ]]; then
