@@ -11,6 +11,7 @@ Lancement : python -m unittest discover tests/ -v
 from __future__ import annotations
 
 import os
+import stat
 import sys
 import tempfile
 import unittest
@@ -285,6 +286,119 @@ class TestWriteOutputFile(unittest.TestCase):
             self.assertEqual(status, "success")
             with open(dst) as f:
                 self.assertEqual(f.read(), "nouveau")
+
+    def test_une_ecriture_interrompue_ne_laisse_pas_de_cible_partielle(self):
+        """Reproduit un disque plein en cours d'écriture. Avant l'écriture par
+        temporaire, la cible tronquée restait sur le disque et la relance
+        suivante la comptait pour une traduction faite (`skipped`)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dst = os.path.join(tmpdir, "sortie.md")
+            vrai_fdopen = os.fdopen
+
+            def fdopen_qui_lache(descripteur, *args, **kwargs):
+                fichier = vrai_fdopen(descripteur, *args, **kwargs)
+                fichier.write("---\ntit")
+                fichier.close()
+                raise OSError(28, "No space left on device")
+
+            with (
+                patch("aipmt.naming.os.fdopen", fdopen_qui_lache),
+                self.assertRaises(OSError),
+            ):
+                naming._write_output_file(
+                    dst, "contenu complet", force=True, relative_output_path="rel/sortie.md"
+                )
+            self.assertFalse(os.path.exists(dst), "la cible ne doit pas exister")
+            self.assertEqual(os.listdir(tmpdir), [], "le temporaire doit être nettoyé")
+
+    def test_le_temporaire_ne_passe_pas_pour_une_traduction_deja_presente(self):
+        """Le nom du temporaire doit rester hors du motif `*.md` que
+        `_existing_translation_exists` interroge, sinon un résidu de plantage
+        ferait sauter la traduction suivante."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with open(os.path.join(tmpdir, ".aipmt-abc123.tmp"), "w") as f:
+                f.write("résidu tronqué")
+            args = Namespace(target_lang="en", include_model=False, model="x", keep_filename=False)
+            self.assertFalse(
+                naming._existing_translation_exists(
+                    os.path.join(tmpdir, "doc-en.md"), tmpdir, "doc", args
+                )
+            )
+
+    def test_un_lien_symbolique_ne_detourne_pas_l_ecriture(self):
+        """Le temporaire est créé en O_CREAT|O_EXCL et sous un nom imprévisible.
+        Avec le nom fixe `cible.md.aipmt-tmp`, un lien planté à cette adresse
+        faisait écrire la traduction dans le fichier visé — hors du répertoire
+        de sortie — et la cible devenait elle-même un lien, en rendant
+        `success`."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            sortie = os.path.join(tmpdir, "sortie")
+            os.mkdir(sortie)
+            exterieur = os.path.join(tmpdir, "victime.txt")
+            with open(exterieur, "w") as f:
+                f.write("contenu précieux")
+            cible = os.path.join(sortie, "doc-en.md")
+            os.symlink(exterieur, cible + ".aipmt-tmp")
+
+            status = naming._write_output_file(
+                cible, "TRADUCTION", force=True, relative_output_path="doc-en.md"
+            )
+
+            self.assertEqual(status, "success")
+            with open(exterieur) as f:
+                self.assertEqual(f.read(), "contenu précieux", "fichier extérieur modifié")
+            self.assertFalse(os.path.islink(cible), "la cible est devenue un lien")
+            with open(cible) as f:
+                self.assertEqual(f.read(), "TRADUCTION")
+
+    def test_deux_ecritures_simultanees_ne_partagent_pas_leur_temporaire(self):
+        """Un nom de temporaire fixe était partagé : la seconde écriture
+        renommait pendant que la première écrivait encore dans le même inode,
+        et la cible annoncée `success` contenait un mélange des deux
+        (`BBBAAAAA` au lieu de `BBBBBBBB`, mesuré)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temporaires = []
+            vrai_mkstemp = tempfile.mkstemp
+
+            def mkstemp_espionne(*args, **kwargs):
+                descripteur, chemin = vrai_mkstemp(*args, **kwargs)
+                temporaires.append(chemin)
+                return descripteur, chemin
+
+            cible = os.path.join(tmpdir, "doc-en.md")
+            with patch("aipmt.naming.tempfile.mkstemp", mkstemp_espionne):
+                for contenu in ("premier", "second"):
+                    naming._write_output_file(
+                        cible, contenu, force=True, relative_output_path="doc-en.md"
+                    )
+
+            self.assertEqual(len(temporaires), 2)
+            self.assertNotEqual(temporaires[0], temporaires[1], "temporaire partagé")
+            with open(cible) as f:
+                self.assertEqual(f.read(), "second")
+
+    def test_les_droits_d_une_cible_existante_sont_conserves(self):
+        """`mkstemp` crée en 0600 : remplacer une cible lui donnait les droits du
+        NOUVEAU fichier. Une cible délibérément en 0600 passait à 0664, et une
+        cible en 0644 servie par un serveur web serait devenue illisible."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            for mode in (0o600, 0o644, 0o640):
+                cible = os.path.join(tmpdir, f"m{mode:o}-en.md")
+                with open(cible, "w") as f:
+                    f.write("ancien")
+                os.chmod(cible, mode)
+                naming._write_output_file(cible, "nouveau", force=True, relative_output_path="x.md")
+                self.assertEqual(stat.S_IMODE(os.stat(cible).st_mode), mode, f"mode {mode:o}")
+
+    def test_une_cible_neuve_recoit_les_droits_d_un_open_ordinaire(self):
+        """Sans cible préexistante, le fichier doit porter 0666 moins le umask —
+        ce que produisait `open(..., "w")` — et non le 0600 de `mkstemp`."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cible = os.path.join(tmpdir, "neuf-en.md")
+            naming._write_output_file(cible, "x", force=True, relative_output_path="x.md")
+            umask = os.umask(0)
+            os.umask(umask)
+            self.assertEqual(stat.S_IMODE(os.stat(cible).st_mode), 0o666 & ~umask)
 
 
 class TestEmptyAndIOErrorPaths(unittest.TestCase):

@@ -7,9 +7,12 @@ répertoire cible — deux couches : le refus des séparateurs dans les composan
 du nom, puis la borne du chemin résolu.
 """
 
+import contextlib
 import glob
 import os
 import re
+import stat
+import tempfile
 
 EXCLUDE_PATTERNS = ["traductions_", "venv", "PRIVACY.md"]
 
@@ -35,15 +38,78 @@ def _write_output_file(output_path, translated_content, force, relative_output_p
             f"Le fichier '{relative_output_path}' existe déjà, aucune traduction n'est effectuée."
         )
         return "skipped"
+    _write_then_rename(clean_output_path, translated_content)
+    return "success"
+
+
+def _write_then_rename(clean_output_path, translated_content):
+    """Écrit à côté de la cible, puis renomme — la cible n'existe jamais à moitié.
+
+    `open(cible, "w")` TRONQUE avant de remplir : une erreur en cours d'écriture
+    y laissait un fichier partiel. Reproduit sur un disque simulé plein : huit
+    octets écrits, statut `failure` rendu — puis la relance suivante trouvait ce
+    fichier, répondait `skipped` et le conservait.
+
+    Le temporaire vient de `mkstemp`, et les trois raisons sont mesurées :
+
+    - il est créé en `O_CREAT | O_EXCL`, donc il ne peut pas SUIVRE un lien
+      symbolique déjà en place. Avec un nom prévisible (`cible.md.aipmt-tmp`),
+      un lien planté à cette adresse par un tiers faisait écrire la traduction
+      dans le fichier visé, hors du répertoire de sortie, et la cible devenait
+      elle-même un lien — le tout en rendant `success` ;
+    - son nom est unique, donc deux exécutions simultanées sur la même cible ne
+      le partagent plus. Reproduit avec un nom fixe : la seconde écriture
+      renommait pendant que la première écrivait encore dans le même inode, et
+      la cible annoncée `success` contenait un mélange des deux ;
+    - il est dans le répertoire de la CIBLE, pas dans `/tmp` : `os.replace`
+      n'est atomique que sur un même système de fichiers.
+
+    Un remplacement ne doit pas non plus élargir les droits de la cible : voir
+    `_mode_du_fichier_ecrit`.
+    """
+    repertoire = os.path.dirname(clean_output_path) or "."
     # NOSONAR pythonsecurity:S8707 — chemin borné en amont par
     # _ensure_within_directory, dont les deux appelants consomment la valeur
     # de retour. Le moteur de contamination de Sonar ne reconnaît que ses
     # propres assainisseurs et ne peut pas suivre une fonction maison ; la
     # garde est vérifiée par tests, et l'évasion mesurée avant correctif
     # (--target_lang '../../tmp/X' → /tmp/X.md) est aujourd'hui refusée.
-    with open(clean_output_path, "w", encoding="utf-8") as f:  # NOSONAR
-        f.write(translated_content)
-    return "success"
+    descripteur, temporaire = tempfile.mkstemp(  # NOSONAR
+        dir=repertoire, prefix=".aipmt-", suffix=".tmp"
+    )
+    try:
+        with os.fdopen(descripteur, "w", encoding="utf-8") as f:
+            f.write(translated_content)
+        os.chmod(temporaire, _mode_du_fichier_ecrit(clean_output_path))
+        os.replace(temporaire, clean_output_path)
+    except BaseException:
+        # Le temporaire ne doit pas survivre à l'échec, y compris sur Ctrl-C :
+        # il porterait le même contenu tronqué, à un nom près.
+        with contextlib.suppress(OSError):
+            os.unlink(temporaire)
+        raise
+
+
+def _mode_du_fichier_ecrit(clean_output_path):
+    """Droits à poser sur le fichier écrit, avant de le mettre à la place de la cible.
+
+    Deux cas, et le premier est une régression mesurée : `mkstemp` crée en 0600,
+    et remplacer une cible existante lui donnait les droits du NOUVEAU fichier.
+    Une cible délibérément en 0600 passait à 0664, une cible en 0644 servie par
+    un serveur web serait devenue illisible. On reprend donc les droits de la
+    cible quand elle existe.
+
+    Sinon, ceux qu'un `open(..., "w")` aurait produits : 0666 moins le umask.
+    Le lire impose de le poser puis de le restaurer, faute d'accesseur en
+    lecture seule — sans risque ici, l'outil traduisant un fichier à la fois
+    dans un processus sans fil d'exécution concurrent.
+    """
+    try:
+        return stat.S_IMODE(os.stat(clean_output_path).st_mode)
+    except OSError:
+        umask = os.umask(0)
+        os.umask(umask)
+        return 0o666 & ~umask
 
 
 def is_excluded(path):

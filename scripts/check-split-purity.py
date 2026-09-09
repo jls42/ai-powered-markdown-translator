@@ -525,10 +525,10 @@ def write_snapshot(package: pathlib.Path, origin: pathlib.Path, snapshot: pathli
 
 def _load_manifest(manifest: pathlib.Path) -> dict[str, list[dict[str, str]]]:
     if not manifest.exists():
-        return {"added": [], "removed": [], "modified": []}
+        return {"added": [], "removed": [], "modified": [], "markers": []}
     # NOSONAR pythonsecurity:S8707 — cf. write_snapshot, même borne.
     data = json.loads(manifest.read_text(encoding="utf-8"))  # NOSONAR
-    return {key: list(data.get(key, [])) for key in ("added", "removed", "modified")}
+    return {key: list(data.get(key, [])) for key in ("added", "removed", "modified", "markers")}
 
 
 def _expected_counter(
@@ -586,19 +586,61 @@ def check_locations(current: list[dict[str, str]], package: pathlib.Path) -> lis
     return problems
 
 
-def check_markers(package: pathlib.Path, markers: list[str]) -> list[str]:
+def check_markers(
+    package: pathlib.Path, markers: list[str], declared: list[dict[str, str]] | None = None
+) -> list[str]:
+    """Chaque ligne porteuse d'un marqueur de la référence doit exister verbatim.
+
+    Un marqueur peut légitimement être RÉÉCRIT — la ligne suppressée change de
+    variable, la suppression reste la même. Le manifeste le déclare alors en
+    `markers` (`old` → `new`, plus un `why`) et l'ancienne ligne est tenue pour
+    satisfaite si la nouvelle est présente. Ce qui reste refusé, et c'est tout
+    l'objet du contrôle, c'est qu'un marqueur DISPARAISSE : une suppression
+    Sonar, Bandit ou Semgrep qui s'évapore rouvre en silence ce qu'elle taisait.
+
+    D'où la seconde condition, sans laquelle la première ne vaut rien : la ligne
+    de remplacement doit porter les MÊMES suppressions que celle d'origine.
+    Mesuré avant correctif — déclarer `value = 1  # NOSONAR` → `value = 1`
+    passait au vert, si bien qu'une déclaration suffisait à retirer un marqueur,
+    soit exactement ce que ce contrôle existe pour empêcher.
+    """
+    reecrits = {entry["old"]: entry["new"] for entry in declared or []}
+    present, problems = _lignes_et_imports_surveilles(package)
+    for marker in markers:
+        problems.extend(_probleme_de_marqueur(marker, present, reecrits))
+    return problems
+
+
+def _lignes_et_imports_surveilles(package: pathlib.Path) -> tuple[set[str], list[str]]:
+    """Toutes les lignes du paquet, et les `import subprocess` sans `# nosec B404`."""
     present: set[str] = set()
-    problems = []
+    problems: list[str] = []
     for path in sorted(package.rglob("*.py")):
         for line in path.read_text(encoding="utf-8").splitlines():
             stripped = line.strip()
             present.add(stripped)
             if stripped.startswith("import subprocess") and "# nosec B404" not in stripped:
                 problems.append(f"{path.as_posix()} : `import subprocess` sans `# nosec B404`")
-    for marker in markers:
-        if marker not in present:
-            problems.append(f"marqueur perdu : {marker}")
-    return problems
+    return present, problems
+
+
+def _probleme_de_marqueur(marker: str, present: set[str], reecrits: dict[str, str]) -> list[str]:
+    """Ce qui cloche avec un marqueur de la référence, ou rien s'il est honoré."""
+    if marker in present:
+        return []
+    remplacant = reecrits.get(marker)
+    if remplacant is None:
+        return [f"marqueur perdu : {marker}"]
+    if remplacant not in present:
+        return [f"marqueur déclaré réécrit mais absent : {marker} → {remplacant}"]
+    retirees = [
+        suppression
+        for suppression in MARKERS
+        if suppression in marker and suppression not in remplacant
+    ]
+    if retirees:
+        return [f"réécriture déclarée qui RETIRE {', '.join(retirees)} : {marker} → {remplacant}"]
+    return []
 
 
 def check_untracked(root: pathlib.Path) -> list[str]:
@@ -633,7 +675,7 @@ def check(
     problems = (
         check_nodes(current, reference["nodes"], declared)
         + check_locations(current, package)
-        + check_markers(package, reference["markers"])
+        + check_markers(package, reference["markers"], declared["markers"])
         + check_untracked(root)
     )
     if problems:

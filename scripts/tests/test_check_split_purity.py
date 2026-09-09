@@ -134,6 +134,63 @@ class PurityCheckerBites(unittest.TestCase):
         self._write_translate(MODULE.replace("  # nosec B000 — marqueur de démonstration", ""))
         self.assertEqual(self._run(), 1)
 
+    def test_marqueur_reecrit_vert_seulement_si_le_remplacant_existe(self):
+        """Un marqueur peut changer de ligne — la variable ouverte est renommée —
+        sans que la suppression disparaisse. Déclaré, c'est vert ; déclaré vers
+        une ligne qui n'existe pas, c'est rouge, sinon la déclaration
+        suffirait à faire taire le contrôle."""
+        ancien = "return os.getcwd()  # nosec B000 — marqueur de démonstration"
+        nouveau = "return os.getcwdb()  # nosec B000 — marqueur de démonstration"
+        self._write_translate(MODULE.replace(ancien, nouveau))
+        self.assertEqual(self._run(), 1)
+
+        reference = json.loads((self.root / self.snapshot).read_text(encoding="utf-8"))
+        ancien_hash = next(node["hash"] for node in reference["nodes"] if node["name"] == "alpha")
+        alpha = next(node for node in purity.collect_nodes(self.package) if node["name"] == "alpha")
+        base = {
+            "added": [],
+            "removed": [],
+            "modified": [
+                {**alpha, "old_hash": ancien_hash, "new_hash": alpha["hash"], "why": "test"}
+            ],
+        }
+        absent = dict(base, markers=[{"old": ancien, "new": "ligne inexistante", "why": "test"}])
+        (self.root / self.manifest).write_text(json.dumps(absent), encoding="utf-8")
+        _git(self.root, "add", "-A")
+        self.assertEqual(self._run(), 1)
+
+        correct = dict(base, markers=[{"old": ancien, "new": nouveau, "why": "test"}])
+        (self.root / self.manifest).write_text(json.dumps(correct), encoding="utf-8")
+        _git(self.root, "add", "-A")
+        self.assertEqual(self._run(), 0)
+
+    def test_une_reecriture_ne_peut_pas_retirer_la_suppression(self):
+        """Déclarer `… # nosec B000` → la même ligne SANS le marqueur passait au
+        vert : la déclaration suffisait alors à retirer une suppression, soit
+        exactement ce que ce contrôle existe pour empêcher."""
+        ancien = "return os.getcwd()  # nosec B000 — marqueur de démonstration"
+        sans_marqueur = "return os.getcwd()"
+        self._write_translate(MODULE.replace(ancien, sans_marqueur))
+
+        reference = json.loads((self.root / self.snapshot).read_text(encoding="utf-8"))
+        ancien_hash = next(node["hash"] for node in reference["nodes"] if node["name"] == "alpha")
+        alpha = next(node for node in purity.collect_nodes(self.package) if node["name"] == "alpha")
+        (self.root / self.manifest).write_text(
+            json.dumps(
+                {
+                    "added": [],
+                    "removed": [],
+                    "modified": [
+                        {**alpha, "old_hash": ancien_hash, "new_hash": alpha["hash"], "why": "test"}
+                    ],
+                    "markers": [{"old": ancien, "new": sans_marqueur, "why": "test"}],
+                }
+            ),
+            encoding="utf-8",
+        )
+        _git(self.root, "add", "-A")
+        self.assertEqual(self._run(), 1)
+
     def test_untracked_module_is_red(self):
         (self.package / "forgotten.py").write_text("", encoding="utf-8")
         self.assertEqual(self._run(), 1)
