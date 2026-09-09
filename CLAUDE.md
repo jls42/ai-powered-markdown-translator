@@ -64,6 +64,54 @@ fichiers sur l'API OpenAI, puis le CHANGELOG hindi sur celle de Gemini, parce
 que le regen auto-détectait `OPENAI_API_KEY` dans `.env` et ne faisait de Codex
 qu'un opt-in.
 
+### QUAND régénérer : une seule fois, juste avant le merge
+
+**La régénération se lance quand le README et le CHANGELOG sont FIGÉS, pas à
+chaque modification.** Mesuré le 2026-09-09 : huit campagnes lancées dans la
+même journée pour 53 fichiers réellement conservés, parce que chaque retour de
+revue changeait une phrase du CHANGELOG et que la régénération repartait
+aussitôt. Sept campagnes sur huit sont parties à la poubelle, et le quota de la
+fenêtre de cinq heures y est passé.
+
+L'ordre correct, sur une PR qui touche la documentation :
+
+1. le code, la revue et les correctifs, jusqu'à ce que plus aucun retour ne
+   soit en attente ;
+2. la dernière retouche du CHANGELOG et du README ;
+3. **alors seulement** `./regen_translations.sh --force` ;
+4. gate, commit des 28 traductions, push.
+
+Pendant les étapes 1 et 2, la quatrième section du gate est rouge sur les
+traductions divergentes : **c'est normal et il faut la laisser rouge**. Elle
+signale un travail à faire à la fin, pas une urgence à traiter tout de suite.
+
+**Une campagne couvre TOUTES les langues.** Quand le README ou le CHANGELOG
+change, les quatorze sont refaites : en sauter une laisserait des traductions
+sur deux versions différentes, et c'est justement ce que le compte 28/28 et le
+contrôle de fraîcheur par contenu existent pour empêcher.
+
+Ce qui se reprend, c'est une campagne INTERROMPUE, pas une sélection. Une
+langue coupée en cours de traduction se refait depuis le début — il n'y a pas
+de reprise partielle, l'outil traduit des fichiers entiers — puis les suivantes
+s'enchaînent. Concrètement, après un quota épuisé à mi-parcours, relancer
+nommément les langues qui n'ont pas abouti :
+
+```bash
+printf '%s\n' ja hi it ko nl pl pt ro sv zh | xargs -P 4 -I{} bash regen_one.sh {}
+```
+
+Celles déjà terminées portent le même contenu source : les refaire ne
+changerait rien qu'une dépense.
+
+**Le coût par campagne croît avec le CHANGELOG.** Il fait 83 000 caractères, se
+découpe en six segments, soit six tours Codex par langue et 84 tours pour les
+quatorze. La référence « 28 fichiers pour 70 tours, 1 point de la fenêtre »
+notée plus bas date d'un fichier bien plus court : le coût par fichier a plus
+que doublé depuis, et chaque release retraduit intégralement des entrées de
+versions publiées il y a des mois. Archiver l'historique dans un
+`CHANGELOG-archive.md` traduit une fois rendrait ce coût constant — décision du
+propriétaire, non prise à sa place.
+
 Ce que ça implique, et ce qui l'encode :
 
 - `./regen_translations.sh --force` sans variable = Codex, `gpt-5.6-sol`, 4

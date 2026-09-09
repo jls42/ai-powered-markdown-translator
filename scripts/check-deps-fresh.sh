@@ -19,6 +19,13 @@
 #     rendrait le gate rouge en permanence, donc ignoré — exactement le mode de
 #     défaillance qu'on cherche à éviter.
 #
+# Le retard s'accompagne des NOTES DE VERSION, parce qu'un numéro ne dit pas ce
+# qui change. Une mineure de SDK a déjà modifié des choses dont ce projet
+# dépend : la tolérance des modèles aux champs inconnus, sans laquelle le
+# `error` qu'OpenRouter ajoute à un choix disparaît en silence, ou la règle
+# côté client qui refuse un appel non streamé trop long. Lire l'entrée avant de
+# figer coûte deux minutes ; ne pas la lire a déjà coûté davantage.
+#
 # Usage : ./scripts/check-deps-fresh.sh
 
 set -uo pipefail
@@ -28,6 +35,24 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 # n'est pas importé mais embarque le magasin de CA qui valide TLS pour tous les
 # appels providers. Un retard y est un problème de sécurité, pas de confort.
 DIRECT_DEPS="openai anthropic mistralai google-genai langdetect python-dotenv certifi"
+
+# Où lire ce qui change, par paquet. Les SDK des providers tiennent un
+# CHANGELOG à la racine de leur dépôt ; pour les autres, la page des versions
+# de PyPI est le point d'entrée le plus stable.
+changelog_url() {
+  local pkg="$1"
+  case "$pkg" in
+    openai)         echo "https://github.com/openai/openai-python/blob/main/CHANGELOG.md" ;;
+    anthropic)      echo "https://github.com/anthropics/anthropic-sdk-python/blob/main/CHANGELOG.md" ;;
+    mistralai)      echo "https://github.com/mistralai/client-python/releases" ;;
+    google-genai)   echo "https://github.com/googleapis/python-genai/blob/main/CHANGELOG.md" ;;
+    langdetect)     echo "https://pypi.org/project/langdetect/#history" ;;
+    python-dotenv)  echo "https://github.com/theskumar/python-dotenv/blob/main/CHANGELOG.md" ;;
+    certifi)        echo "https://github.com/certifi/python-certifi/releases" ;;
+    *)              echo "https://pypi.org/project/$pkg/#history" ;;
+  esac
+  return 0
+}
 
 if [[ ! -f requirements.txt ]]; then
   echo "requirements.txt introuvable" >&2
@@ -96,14 +121,31 @@ if [[ "$CHECKED" -ne "$EXPECTED" ]]; then
   exit 1
 fi
 
+# Les notes de version des paquets en retard, majeures et mineures confondues :
+# c'est ce qu'il faut lire avant de figer une version, et le retrouver soi-même
+# est la friction qui fait sauter l'étape.
+print_changelogs() {
+  local entries="$1" entry pkg
+  for entry in $entries; do
+    pkg="${entry%%(*}"
+    printf '    %-14s %s\n' "$pkg" "$(changelog_url "$pkg")" >&2
+  done
+  return 0
+}
+
 if [[ -n "$OUTDATED_MINOR" ]]; then
   printf '⚠ mineures en retard :%s\n' "$OUTDATED_MINOR" >&2
+  echo "  Lire les notes de version avant de figer — une mineure de SDK a déjà" >&2
+  echo "  changé ce dont ce projet dépend :" >&2
+  print_changelogs "$OUTDATED_MINOR"
 fi
 
 if [[ -n "$OUTDATED_MAJOR" ]]; then
   printf '✗ MAJEURES en retard :%s\n' "$OUTDATED_MAJOR" >&2
   echo "  Une majeure de SDK peut casser le code sans que la doc le dise :" >&2
-  echo "  valider par un appel RÉEL, provider par provider, avant de figer." >&2
+  echo "  lire les notes de version, puis valider par un appel RÉEL, provider" >&2
+  echo "  par provider, avant de figer." >&2
+  print_changelogs "$OUTDATED_MAJOR"
   exit 1
 fi
 
