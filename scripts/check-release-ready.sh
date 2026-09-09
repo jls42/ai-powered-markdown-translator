@@ -21,12 +21,20 @@ FAILURES=0
 # Compteur dérivé des pass() réellement émis : le total était codé en dur
 # (« 12 »), donc faux dès qu'une vérification était ajoutée.
 CHECKS=0
+# Avertissements : ce qui n'empêche pas de releaser mais doit être lu.
+WARNINGS=0
 # `local msg="$1"` et `return 0` explicites : sans eux, le statut de sortie de
 # ces helpers est celui de leur dernière commande, ce qui les rend fragiles dès
 # qu'on les enchaîne (`pass "x" && …`). Le script existant pour produire un
 # verdict fiable, autant que ses primitives en aient un.
 pass() { local msg="$1"; printf '  \033[32m✓\033[0m %s\n' "$msg"; CHECKS=$((CHECKS + 1)); return 0; }
 fail() { local msg="$1"; printf '  \033[31m✗\033[0m %s\n' "$msg"; FAILURES=$((FAILURES + 1)); return 0; }
+# Un avertissement ne fait pas échouer le gate — un retard de version mineure
+# ne doit pas rendre le verdict rouge en permanence, sinon il devient du bruit
+# qu'on ignore. Mais il doit être COMPTÉ : la ligne de synthèse ne disait que
+# les échecs, si bien qu'un « PRÊT : N au vert » masquait un retard signalé
+# quelques lignes plus haut. Le lecteur ne voit souvent que la dernière ligne.
+warn() { local msg="$1"; printf '  \033[33m~\033[0m %s\n' "$msg"; WARNINGS=$((WARNINGS + 1)); return 0; }
 section() { local title="$1"; printf '\n\033[1m%s\033[0m\n' "$title"; return 0; }
 
 PY=./venv/bin/python
@@ -91,7 +99,7 @@ if $FULL; then
     fail "hooks pre-push — lancer: pre-commit run --hook-stage pre-push --all-files"
   fi
 else
-  printf '  \033[33m~\033[0m hooks pre-push non exécutés (utiliser --full)\n'
+  warn "hooks pre-push non exécutés (utiliser --full)"
 fi
 
 # Le retard de dépendances ne se voyait nulle part dans ce verdict : Dependabot
@@ -99,7 +107,7 @@ fi
 if DEPS_OUT=$(./scripts/check-deps-fresh.sh 2>&1); then
   pass "dépendances directes à jour (majeures)"
   # Les mineures ne font pas échouer, mais doivent rester lisibles.
-  printf '%s\n' "$DEPS_OUT" | grep -q '⚠' && printf '  \033[33m~\033[0m %s\n' "$(printf '%s' "$DEPS_OUT" | grep '⚠' | head -1)"
+  printf '%s\n' "$DEPS_OUT" | grep -q '⚠' && warn "$(printf '%s' "$DEPS_OUT" | grep '⚠' | head -1)"
 else
   fail "dépendances en retard — $(printf '%s' "$DEPS_OUT" | grep '✗' | head -1)"
 fi
@@ -410,9 +418,13 @@ then
 fi
 
 printf '\n'
+SUFFIXE=""
+if [[ $WARNINGS -gt 0 ]]; then
+  SUFFIXE=$(printf ', \033[33m%d avertissement(s)\033[0m' "$WARNINGS")
+fi
 if [[ $FAILURES -eq 0 ]]; then
-  printf '\033[32m════ PRÊT : %d vérifications au vert ════\033[0m\n' "$CHECKS"
+  printf '\033[32m════ PRÊT : %d vérifications au vert\033[0m%s\033[32m ════\033[0m\n' "$CHECKS" "$SUFFIXE"
   exit 0
 fi
-printf '\033[31m════ PAS PRÊT : %d vérification(s) en échec ════\033[0m\n' "$FAILURES"
+printf '\033[31m════ PAS PRÊT : %d vérification(s) en échec\033[0m%s\033[31m ════\033[0m\n' "$FAILURES" "$SUFFIXE"
 exit 1
