@@ -38,9 +38,71 @@ Points de méthode qui ont coûté cher et que le script encode :
   sur la disponibilité d'un modèle Gemini ; un appel réel de 30 secondes a
   tranché. Face à un doute vérifiable, vérifier.
 
+- **Un rapport d'agent de recherche est une PISTE, jamais une conclusion.**
+  Le 2026-09-05, un rapport de workflow affirmait que `reasoning.enabled=false`
+  désactivait le raisonnement de `z-ai/glm-5.3-flash` sur OpenRouter ; je l'ai
+  répété à l'utilisateur comme un fait. Mesuré deux minutes plus tard : ce
+  paramètre rend un **HTTP 400 « Reasoning is mandatory for this endpoint and
+  cannot be disabled »**, comme `reasoning.max_tokens=0` et
+  `reasoning_effort="none"`. Et le réglage le plus économe s'est révélé être
+  l'absence de tout paramètre — 1 token de raisonnement, contre 165 avec
+  `effort: minimal`. La règle qui en découle : **lire la doc officielle et
+  mesurer AVANT d'annoncer, y compris ce qu'un sous-agent a rapporté.** Un
+  rapport bien sourcé reste une affirmation à vérifier, pas une mesure.
+
 Si une vérification échoue, le travail continue — on ne rend pas la main sur un
 « presque ». Pour enchaîner les corrections sans supervision, `/loop` permet de
 reprendre la tâche jusqu'à ce que le script passe au vert.
+
+## Traductions de ce dépôt : JAMAIS par une API facturée
+
+**Décision du propriétaire, non négociable, formulée le 2026-09-04 :** les 28
+traductions (README, CHANGELOG) se font sur **l'abonnement ChatGPT via Codex**,
+avec **`gpt-5.6-sol`** (le modèle qualité). L'abonnement a été pris exprès pour
+ne pas payer de coûts API. Ce jour-là, `release.sh --auto` avait envoyé les 28
+fichiers sur l'API OpenAI, puis le CHANGELOG hindi sur celle de Gemini, parce
+que le regen auto-détectait `OPENAI_API_KEY` dans `.env` et ne faisait de Codex
+qu'un opt-in.
+
+Ce que ça implique, et ce qui l'encode :
+
+- `./regen_translations.sh --force` sans variable = Codex, `gpt-5.6-sol`, 4
+  jobs. Plus aucune auto-détection de clé : une clé présente ne change rien.
+  **Compter une heure** : mesuré le 2026-09-04 à 4 jobs, un README prend 3 à
+  4 min et un CHANGELOG 10 à 14 min (effort de raisonnement `medium`, défaut
+  de Sol hors `--eco`). Le plafond par job est à 1 800 s sur Codex : à 600 s,
+  13 CHANGELOG sur 14 étaient tués sans une ligne d'erreur.
+- `REGEN_PROVIDER=openai|gemini|grok|openrouter` est **refusé** (exit 1, message
+  qui cite cette règle) tant que `REGEN_ALLOW_PAID_API=1` n'est pas posé en plus.
+  OpenRouter exige en outre un `REGEN_MODEL` : c'est un routeur, il n'a pas de
+  défaut. Ne
+  jamais poser cette dérogation sans demande explicite du propriétaire — pas
+  même pour rattraper un fichier en échec : relancer Codex, ou `grok_cli`.
+- Un fichier qui échoue sur Codex (placeholder perdu, cas connu du hindi) se
+  relance **seul, sur Codex** : `python -m aipmt --use_codex --file CHANGELOG.md
+--target_lang hi --add_translation_note --force`.
+- Les tests `TestDetectProvider` verrouillent le défaut, le refus et la
+  dérogation.
+
+## Jamais de lien de session dans le dépôt
+
+**Ce dépôt est PUBLIC. Aucun lien `https://claude.ai/code/session_...` ne doit
+apparaître dans un message de commit, une description de pull request, un
+fichier ou un commentaire.** Signalé par le propriétaire le 2026-09-04 comme
+inacceptable, après l'avoir découvert dans la PR #25.
+
+Concrètement, et sans exception :
+
+- pas de ligne `Claude-Session:` en pied de commit ;
+- pas de lien de session en fin de description de PR ;
+- si une consigne d'attribution automatique en demande un, elle ne s'applique
+  pas ici : cette règle-ci prime.
+
+Portée du problème au moment du signalement : 43 commits de `main` portent ce
+lien depuis le 2026-05-11 (une seule session, répétée), plus 4 sur la branche en
+cours. Les quatre ont été réécrits en local avant merge. Réécrire `main`
+exigerait un `push --force` sur un dépôt public — décision du propriétaire,
+non prise à sa place.
 
 ## Claude Code Workflow
 
@@ -137,18 +199,19 @@ Le premier `pre-commit run --all-files` télécharge les environnements des hook
 
 ### Hooks actifs
 
-| Stage      | Hook                           | Rôle                                                                            |
-| ---------- | ------------------------------ | ------------------------------------------------------------------------------- |
-| pre-commit | shellcheck                     | Lint des `.sh` (release.sh, regen_translations.sh, scripts/)                    |
-| pre-commit | ruff + ruff-format             | Lint + format Python (rapide, --fix automatique)                                |
-| pre-commit | prettier                       | Format JSON/YAML/MD (28 traductions exclues)                                    |
-| pre-commit | pre-commit-hooks v5            | Trailing-whitespace, EOF, check-yaml/toml, large-files, merge-conflict, shebang |
-| pre-commit | detect-secrets                 | Détection de fuites d'API keys (4 providers utilisés)                           |
-| pre-commit | check-complexity (Lizard)      | CCN <= 12, scope `src/` + `scripts/`, existence des chemins vérifiée            |
-| pre-push   | mypy (lax)                     | Type-checking des fonctions déjà annotées (durcissement progressif)             |
-| pre-push   | check-security-sast (Opengrep) | SAST sur src/ + scripts/ (graceful skip si binaire absent)                      |
-| pre-push   | check-pip-audit                | Audit deps (mode reporting initial, durcir après bump)                          |
-| pre-push   | unittest                       | Tests `tests/` + `scripts/tests/`                                               |
+| Stage      | Hook                            | Rôle                                                                             |
+| ---------- | ------------------------------- | -------------------------------------------------------------------------------- |
+| pre-commit | shellcheck                      | Lint des `.sh` (release.sh, regen_translations.sh, scripts/)                     |
+| pre-commit | ruff + ruff-format              | Lint + format Python (rapide, --fix automatique)                                 |
+| pre-commit | prettier                        | Format JSON/YAML/MD (28 traductions exclues)                                     |
+| pre-commit | pre-commit-hooks v5             | Trailing-whitespace, EOF, check-yaml/toml, large-files, merge-conflict, shebang  |
+| pre-commit | detect-secrets                  | Détection de fuites d'API keys (6 providers à clé)                               |
+| pre-commit | check-complexity (Lizard)       | CCN <= 12, scope `src/` + `scripts/`, existence des chemins et plancher vérifiés |
+| pre-commit | check-split-purity (temporaire) | Le découpage de `translate.py` reste un déplacement pur, cf. § ci-dessous        |
+| pre-push   | mypy (lax)                      | Type-checking des fonctions déjà annotées (durcissement progressif)              |
+| pre-push   | check-security-sast (Opengrep)  | SAST sur src/ + scripts/ (graceful skip si binaire absent)                       |
+| pre-push   | check-pip-audit                 | Audit deps (mode reporting initial, durcir après bump)                           |
+| pre-push   | unittest                        | Tests `tests/` + `scripts/tests/`                                                |
 
 ### Lancer manuellement
 
@@ -172,36 +235,40 @@ mypy est en mode **Lax** au démarrage (`disallow_untyped_defs = false`, `check_
 Trajectoire :
 
 1. **Phase 1 (actuel)** : mypy lax, 0 effort initial. Filet de sécurité quand on ajoute des annotations.
-2. **Phase 2** : annoter les fonctions critiques de `src/aipmt/translate.py` (`segment_text`, `translate`, `translate_markdown_file`). Bumper `check_untyped_defs = true`.
+2. **Phase 2** : annoter les fonctions critiques (`segment_text` dans `aipmt.segmentation`, `translate` et `translate_markdown_file` dans `aipmt.pipeline`). Bumper `check_untyped_defs = true`.
 3. **Phase 3** : `disallow_untyped_defs = true` (mypy strict). Tout le code annoté.
 
 ### Lizard CCN — scope et fail-closed
 
-Le seuil est 12 (futur 8). `src/aipmt/translate.py` est **dans** le scope depuis que
-le refactor des providers l'a fait repasser dessous : 158 fonctions, CCN moyen
-3,3, zéro dépassement. L'exclusion documentée ici auparavant ne correspondait
-plus au script depuis ce refactor.
+Le seuil est 12 (futur 8). Tout le paquet `src/aipmt/` est **dans** le scope :
+203 fonctions au découpage de la 1.13.0 (192 déplacées, six scindées pour tenir
+sous la limite 8 de Codacy, cinq helpers nés de la revue), CCN moyen 3,4, zéro
+dépassement.
 
-Le scope vit dans un tableau `SCOPE` en tête de `scripts/check-complexity.sh`,
-dont **chaque entrée est vérifiée existante avant l'analyse**. Sans cette garde,
-un simple déplacement de fichier désarmait le gate en silence : `lizard` ignore
-un chemin absent, sort en 0 et n'écrit rien. Mesuré sur une copie migrée — de
-158 fonctions / 2247 nloc à 3 fonctions / 34 nloc, sortie de zéro octet.
+Le scope vit dans un tableau `SCOPE` en tête de `scripts/check-complexity.sh`
+— des RÉPERTOIRES (`src/`, `scripts/`), pas des fichiers, et un **plancher de
+185 fonctions** lu par l'API Python de Lizard. Deux gardes, parce que chacune
+seule a un angle mort : `lizard` ignore un chemin absent, sort en 0 et n'écrit
+rien (mesuré sur une copie migrée — de 158 fonctions / 2247 nloc à 3 fonctions
+/ 34 nloc, sortie de zéro octet) ; et l'existence d'un répertoire ne prouve pas
+qu'il contient quelque chose. Le plancher se lit par l'API parce que
+`--warnings_only` n'imprime AUCUNE ligne de synthèse quand tout est vert.
 
 Le hook `files:` de `.pre-commit-config.yaml` doit suivre le même chemin : une
 regex qui ne matche plus ne fait pas échouer pre-commit, elle fait **sauter** le
 hook. La 7ᵉ section de `check-release-ready.sh` confronte les deux.
 
-Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python src/aipmt/translate.py`.
+Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python src/`.
 
 ### Deux gardes CI ajoutées pour la publication
 
 - **Plancher de couverture** (`sonarcloud.yml`) : `coverage run --source=module_absent`
   n'échoue PAS — avertissement sur stderr, rc 0 pour unittest comme pour
   `coverage xml`, rapport quand même poussé à Sonar. Mesuré : 1453 → 141
-  statements sur un simple renommage, projet « sain » parce que plus analysé. Deux
-  planchers à 1000 : le total, et le plus gros fichier mesuré — ce second attrape
-  la sortie du module principal sans coder son chemin en dur.
+  statements sur un simple renommage, projet « sain » parce que plus analysé. Trois
+  planchers : le total ≥ 1000, la somme sous `src/aipmt/` ≥ 1550, et aucun module
+  suivi du paquet à zéro exécution — un module sorti du `--source` disparaît du
+  rapport, un module renommé n'y est plus mesuré.
 - **Matrice `tests.yml`** (3.10 / 3.11 / 3.12) : `requires-python = ">=3.10"` est une
   promesse publique, et ce poste n'a que 3.12. La matrice installe le PAQUET (donc
   les bornes publiques) et non le lock, avec `fail-fast: false`.
@@ -216,13 +283,14 @@ git ls-files --cached -z | xargs -0 detect-secrets scan \
   --exclude-files 'tests/fixtures/.*' \
   --exclude-files 'venv/.*' \
   --exclude-files '\.secrets\.baseline' \
+  --exclude-files 'scripts/split-reference/.*' \
   > .secrets.baseline
 
 # Auditer manuellement les findings (interactif)
 detect-secrets audit .secrets.baseline
 ```
 
-Findings actuels (tous faux positifs attendus) : 4 placeholders `votre-cle-api-*-par-defaut` dans `src/aipmt/translate.py` (OpenAI/Anthropic/Mistral/Google), 1 exemple dans README.md, 1 fixture dans tests/test_silent_failure.py. À auditer ponctuellement pour passer `is_secret: false`.
+Findings actuels (tous faux positifs attendus) : 1 exemple dans README.md, 1 fixture dans `tests/test_codex_provider.py`, 1 dans `tests/test_grok_provider.py`. Les 6 placeholders `votre-cle-api-*-par-defaut` (une constante `DEFAULT_*_API_KEY` par provider à clé) ne sont plus dans la baseline : ils portent `# pragma: allowlist secret` sur leur ligne, parce que la baseline est indexée par FICHIER et qu'un placeholder déplacé dans un autre module y redevenait un « nouveau secret ». Le marqueur voyage avec la ligne. À auditer ponctuellement pour passer `is_secret: false`.
 
 ### Pré-requis lors du clone sur une autre machine
 
@@ -245,7 +313,7 @@ Quand l'utilisateur demande "release", "tag", "publie cette version" :
 ./release.sh --auto
 ```
 
-Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
+Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`, Codex + `gpt-5.6-sol`, cf. règle en tête) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
 
 **Pas de tag à ce stade.** Le tag est créé en phase 2 pour qu'il pointe sur le commit de merge dans `main` (pas sur la branche feature).
 
@@ -325,18 +393,19 @@ les deux depuis l'arbre source.
 #### Régénération seule (sans release)
 
 ```bash
-./regen_translations.sh --force   # réécrit les 28 traductions
+./regen_translations.sh --force   # réécrit les 28 traductions — Codex, gpt-5.6-sol, 0 € à l'usage
 ./regen_translations.sh           # skip celles qui existent déjà
 ```
 
-Le script lance 10 jobs en parallèle par défaut (4 pour Codex, 2 pour Grok). En
+Le script lance 4 jobs en parallèle sur Codex (défaut), 2 pour Grok et OpenCode,
+10 seulement sur une API facturée en dérogation. En
 relance manuelle d'un sous-ensemble — boucle directe sur `aipmt` — **5 en
 parallèle sont acceptés sur OpenAI**, demande explicite du propriétaire : 2 fait
 traîner un jeu de 14 CHANGELOG sur un quart d'heure.
 
 ## Project Overview
 
-AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex) and Grok subscription CLIs, with no per-use billing — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
+AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex) and Grok subscription CLIs, with no per-use billing — or OpenCode, the open-source agent, routed to whatever provider the user configured in OpenCode (local model, free gateway, subscription or key) — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
 
 ## Commands
 
@@ -382,21 +451,61 @@ pip install -r requirements.txt
 
 ## Architecture
 
-**Installable package, single-module logic**: le paquet est `src/aipmt/`, et toute
-la logique tient dans `src/aipmt/translate.py`. `__init__.py` n'expose que `main`
-(cité par `[project.scripts] aipmt`), `__main__.py` permet `python -m aipmt`.
+**Paquet installable, découpé par responsabilité** : le paquet est `src/aipmt/`.
+`__init__.py` importe `config` EN PREMIER (il charge `.env` à l'import, avant
+que les providers lisent `os.getenv` au niveau module) puis expose `main` (cité
+par `[project.scripts] aipmt`) ; `__main__.py` permet `python -m aipmt`.
+L'exécution directe du fichier (`python src/aipmt/translate.py`) n'existe plus
+depuis le découpage : les imports sont relatifs.
 
 Le nom d'import est `aipmt` et **jamais** `translate` : le paquet PyPI `translate`
 (v3.8.1, actif) installe un répertoire homonyme qui masquerait le module — le
 point d'entrée casse alors sur `AttributeError` et `pip check` ne voit rien.
 
-Contenu de `src/aipmt/translate.py` :
+Modules, dans l'ordre topologique des imports : chaque flèche de dépendance va vers
+un module plus HAUT dans le tableau, jamais l'inverse.
 
-- **API clients**: OpenAI, Mistral, Claude (Anthropic), and Gemini are initialized based on CLI flags
-- **Text segmentation**: `segment_text()` splits long documents at natural breakpoints (sentences, paragraphs, headers) respecting model token limits defined in `MODEL_TOKEN_LIMITS`
-- **Code preservation**: Regex extracts fenced code blocks AND inline code (`` `...` ``) before translation, replaces with placeholders, restores after
-- **News mode**: `--news` protects English quotes with `<NEWSQUOTE id="N"/>` XML self-closing tags, validates placeholder integrity before restoration, manages flag emojis per target language. (La forme legacy `#NEWSQUOTE\d+#` n'est plus émise mais reste détectée comme résidu.)
-- **Directory traversal**: `translate_directory()` walks source directory, skips patterns in `EXCLUDE_PATTERNS`, checks for existing translations
+| Module                  | Rôle                                                                                                           |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `config.py`             | Trois couches de clés (env, `.env`, `~/.config/aipmt/.env`), `_missing_key_message`                            |
+| `markdown.py`           | Lexique partagé : regex de lignes structurelles, liens, balises, placeholders ; plages d'écritures             |
+| `segmentation.py`       | `segment_text()`, `MODEL_TOKEN_LIMITS` (objet unique, OpenRouter y écrit la fenêtre lue au préflight)          |
+| `naming.py`             | `EXCLUDE_PATTERNS`, nom de sortie, traduction déjà présente, garde anti-traversée, écriture                    |
+| `notes.py`              | Note de traduction (constructeurs purs)                                                                        |
+| `guards.py`             | Gardes de sortie : langue détectée, extrait source verbatim, ratio, écriture cible ; graine langdetect         |
+| `placeholders.py`       | Protection/restauration des blocs de code, code inline, URL, ancres, labels — et leurs validations             |
+| `news.py`               | Mode `--news` : `<NEWSQUOTE id="N"/>`, drapeaux par langue, règles du prompt et validations                    |
+| `prompts.py`            | Instructions système : contrat Markdown, placeholders, ancres, addenda news et écritures non latines           |
+| `providers/base.py`     | Socle des CLI : sous-processus, secrets, back-off, erreurs, refus en CI                                        |
+| `providers/<nom>.py`    | Un module par provider : `openai`, `mistral`, `anthropic`, `gemini`, `codex`, `grok`, `opencode`, `openrouter` |
+| `providers/registry.py` | `_resolve_provider`, `_PROVIDER_LABELS`, `_dispatch_provider_call`, `_select_provider_client`, flags           |
+| `pipeline.py`           | `translate()`, `translate_markdown_file()`, `translate_directory()`, `_append_translation_note()`              |
+| `cli.py`                | argparse hors providers, validation des chemins, `main()`                                                      |
+| `translate.py`          | FAÇADE de compatibilité : les 64 noms publics de l'ancien module unique, par identité ; `__all__` à 9          |
+
+Deux règles qui découlent du découpage, verrouillées par `tests/test_facade_contract.py` :
+
+- **Un patch de test vise le module qui CONSULTE le nom, jamais la façade.**
+  `patch("aipmt.translate.translate_markdown_file")` réussissait sans rien
+  intercepter (le nom consommé est celui de `aipmt.cli`) — et deux tests
+  restaient verts sans leur patch. Détection par AST dans `tests/` et
+  `scripts/tests/`, quotes simples et appels multilignes compris.
+- **La façade ne ré-exporte ni nom privé, ni SDK, ni module stdlib.** Un patch
+  posé au mauvais endroit lève `AttributeError` au lieu de ne plus mordre.
+
+**Vérificateur de pureté (temporaire, retiré par la PR qui suit le découpage)** :
+`scripts/check-split-purity.py`, hook pre-commit `check-split-purity` et étape
+de `tests.yml`. Il compare le multiensemble des nœuds AST de premier niveau du
+paquet à un snapshot versionné (`scripts/split-reference/package-6ae1505.json`,
+304 nœuds au 2026-09-07) plus un manifeste cumulatif d'écarts déclarés
+(`manifest.json` : docstrings de module, `__all__`, scissions demandées par
+Codacy…) ; il vérifie l'emplacement
+de chaque symbole, la survie verbatim des marqueurs `# nosec` / `# nosemgrep` /
+`NOSONAR`, et refuse tout `.py` non suivi sous `src/aipmt/`, `tests/` ou
+`scripts/tests/` (pre-commit ne voit que l'index : un module créé sans `git add`
+passait tous les hooks). Le snapshot est dans le dépôt parce que la CI fait un
+checkout superficiel. Neuf tests (`scripts/tests/test_check_split_purity.py`), dont sept
+refus, prouvent qu'il mord.
 
 **Output naming**:
 
@@ -438,14 +547,21 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 - `GOOGLE_API_KEY` (for Gemini)
 - `XAI_API_KEY` (for Grok via the xAI API)
 - `GEMINI_API_KEY` accepted as an alternative to `GOOGLE_API_KEY`
+- `OPENROUTER_API_KEY` (for OpenRouter, `--use_openrouter`)
 
 Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
-`GROK_TRANSLATE_SANDBOX`, `REGEN_PROVIDER`, `REGEN_MODEL`,
-`REGEN_JOB_TIMEOUT` (défaut 600 s, plafond par job du regen),
+`GROK_TRANSLATE_SANDBOX`, `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
+`OPENROUTER_BASE_URL` (https exigé), `OPENROUTER_TIMEOUT` (défaut 900 s),
+`OPENROUTER_PREFLIGHT_TIMEOUT` (défaut 30 s),
+`REGEN_PROVIDER`, `REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation, cf. règle en tête),
+`REGEN_JOB_TIMEOUT` (plafond par job du regen : 600 s, 1 800 s sur Codex),
 `XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
 
 ## Recommended Usage
+
+**Pour les traductions de CE dépôt, voir la règle en tête : Codex + `gpt-5.6-sol`,
+jamais l'API.** Ce qui suit vaut pour un usage général de l'outil sur une clé API.
 
 For batch translations (README, CHANGELOG, blog articles), use `--eco` mode:
 
@@ -463,8 +579,8 @@ pas facturée à l'usage.
 
 ```bash
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
-REGEN_PROVIDER=codex ./regen_translations.sh --force   # opt-in explicite
-REGEN_PROVIDER=codex REGEN_MODEL=gpt-5.6-sol ./regen_translations.sh --force
+./regen_translations.sh --force                         # Codex est le défaut : gpt-5.6-sol
+REGEN_MODEL=gpt-5.6-luna ./regen_translations.sh --force   # éco, si le propriétaire le demande
 ```
 
 Coût réel mesuré : régénérer les 28 traductions (70 turns) avec `gpt-5.6-sol` a
@@ -500,7 +616,9 @@ Points à connaître avant de toucher à ce code :
   offre 250-2 000 msg/5 h contre 10-100 pour Sol → toujours `--eco` en batch.
   Quota lisible en direct via `codex app-server` (RPC `account/rateLimits/read`).
 - **Refusé en CI** : l'auth par abonnement n'est pas prévue pour un runner
-  partagé, et OpenAI déconseille ce workflow sur les dépôts publics.
+  partagé : l'auth passe par un fichier de session personnel, qu'OpenAI
+  déconseille d'injecter sur un runner. La mise en garde vise ce dépôt de
+  secret, pas le caractère public du dépôt de code.
 
 ### Providers Grok (`--use_grok` API / `--use_grok_cli` abonnement)
 
@@ -533,6 +651,177 @@ end_turn` là où OpenAI émet `stop`.
 - **Quota non mesurable** : pool hebdomadaire partagé avec Chat, Imagine et
   Voice, aucune commande ne l'expose. D'où `max_jobs=2` au regen.
 
+### Provider OpenCode (`--use_opencode`) — routeur open source, `--model` obligatoire
+
+```bash
+aipmt --use_opencode --model opencode/mimo-v2.5-free --file README.md --target_dir . --target_lang en
+aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . --target_lang de
+REGEN_PROVIDER=opencode REGEN_MODEL=ollama/qwen2.5:7b ./regen_translations.sh --force
+REGEN_PROVIDER=openrouter REGEN_ALLOW_PAID_API=1 REGEN_MODEL=z-ai/glm-5.2 ./regen_translations.sh --force
+```
+
+Huitième chemin. OpenCode (MIT) n'est pas un fournisseur mais un routeur vers
+ceux que l'utilisateur a configurés dans OpenCode lui-même : clé, abonnement
+(GitHub Copilot, ChatGPT, SuperGrok — Claude Pro/Max est interdit par
+Anthropic depuis la 1.3.0), passerelle Zen (modèles gratuits SANS compte) ou
+modèle local (Ollama, LM Studio, llama.cpp). Tout ce qui suit a été **mesuré
+sur opencode 1.18.27**, pas déduit de la doc :
+
+- **`--model provider/modèle` est obligatoire**, `--eco` sans effet. Sans
+  `--model`, OpenCode retombe sur `opencode/big-pickle`, modèle gratuit
+  « stealth » dont les échanges peuvent servir à l'entraînement : ce choix ne
+  se fait pas à la place de l'utilisateur. Le « / » du modèle est remplacé
+  avant toute interpolation dans un nom de fichier (`_model_filename_label`),
+  et la garde anti-traversée contrôle la valeur INTERPOLÉE, plus la valeur
+  brute — `..` seul reste refusé.
+- **Un `--agent` inconnu ne fait pas échouer `opencode run`** : avertissement
+  sur stderr et repli silencieux sur l'agent de codage, outils actifs. Le
+  contrat de sortie vérifie donc l'absence de ce message, en plus de : rc 0,
+  aucun événement `error`, aucun `tool_use`, dernier `step_finish` en `stop`,
+  texte non vide.
+- **Le JSON d'erreur est opaque** (« Unexpected server error », `ref`) : la
+  cause réelle (`ProviderModelNotFoundError`, `ProviderAuthError`…) n'est que
+  dans les logs `--print-logs`, d'où `--print-logs --log-level ERROR` et la
+  lecture du champ `error="…"` de stderr.
+- **Confinement par config inline** (`OPENCODE_CONFIG_CONTENT`, dernière
+  dans l'ordre de fusion) : agent `aipmt` avec `permission: {"*": "deny"}` —
+  aucun outil n'est même proposé au modèle —, `share: disabled`, pas de
+  `--auto`, `--pure`. Répertoire de travail jetable et vide.
+- **Contexte injecté à l'insu de l'appelant** : sans
+  `OPENCODE_DISABLE_CLAUDE_CODE`, `~/.claude/CLAUDE.md` entre dans chaque
+  prompt (515 tokens d'entrée au lieu de 186) ; sans
+  `OPENCODE_DISABLE_PROJECT_CONFIG`, l'`AGENTS.md` du cwd aussi (une consigne
+  « finir par BANANA » y a été suivie). Le `~/.config/opencode/AGENTS.md`
+  global reste injecté, aucun interrupteur ne l'écarte : documenté au lieu
+  d'être contourné par un `XDG_CONFIG_HOME` détourné, qui masquerait aussi les
+  fournisseurs de l'utilisateur.
+- **`--title` évite un appel LLM** : sans lui, OpenCode génère un titre de
+  session par un tour supplémentaire sur le `small_model`.
+- **stdin est lu jusqu'à EOF** et concaténé après l'argument : le segment
+  part par stdin, jamais par argv, et `communicate()` ferme toujours.
+- **Secrets** : même filtrage par motif que Codex/Grok, à une exception
+  nominative près, `OPENCODE_API_KEY` (clé d'OpenCode lui-même, Zen/Go).
+- **Modèles gratuits Zen** : `mimo-v2.5-free` traduit ce README en une passe
+  (49 s, structure identique) ; `big-pickle` met 40 s pour 200 mots et deux
+  requêtes simultanées y restent sans réponse 5 minutes ; `nemotron-3.5-lightning-free`
+  n'a rien répondu en 3 minutes. D'où `max_jobs=2` au regen.
+- **Modèle local** : Ollama configure souvent 4 096 tokens de contexte, les
+  segments font jusqu'à 16 000 caractères → `PARAMETER num_ctx 32768` dans un
+  Modelfile. Un 7B (qwen2.5) a abîmé une clôture de bloc de code sur un
+  fichier d'essai, là où le modèle de la passerelle a tout préservé.
+- **Pas de refus en CI** : contrairement aux CLI d'abonnement, une clé API ou
+  un modèle auto-hébergé sur un runner sont des usages légitimes.
+- OpenCode écrit `~/.config/opencode/` (config vide, `node_modules` de son
+  runtime de plugins) et journalise chaque session dans sa base SQLite
+  `~/.local/share/opencode/opencode.db`.
+
+**Poste local (installé et mesuré le 2026-09-04)** — RTX 3060 12 Go, 62 Go de RAM :
+
+- Ollama 0.33.3, mis à jour par le script officiel (`curl -fsSL
+https://ollama.com/install.sh | sh`, sudo sans mot de passe sur ce poste).
+  Le script réécrit l'unité systemd mais pas le drop-in
+  `/etc/systemd/system/ollama.service.d/override.conf`, qui place le magasin
+  sur `OLLAMA_MODELS=/mnt/msi/ollama` (NVMe de 916 Go). Il ne touche pas aux
+  modèles téléchargés.
+- Modèles : `gemma4:12b` (7,6 Go, Apache 2.0, 140+ langues) et `gpt-oss:20b`
+  (13 Go, Apache 2.0), plus leurs variantes `gemma4-12b-32k` et `gpt-oss-20b-32k`
+  créées depuis `~/ollama/*.Modelfile` : sous 24 Go de VRAM, Ollama plafonne le
+  contexte à 4 096 par défaut, et l'API OpenAI-compatible n'a aucun moyen de le
+  régler par requête — d'où `PARAMETER num_ctx 32768`. `qwen3.5:9b` a été
+  supprimé après le tableau ci-dessous.
+- `~/.config/opencode/opencode.jsonc` déclare le fournisseur `ollama`
+  (`@ai-sdk/openai-compatible`, `http://127.0.0.1:11434/v1`) avec, sur chaque
+  modèle, `options.reasoningEffort: "none"`. Indispensable et mesuré : Ollama
+  active la réflexion par défaut sur Qwen 3.5 et Gemma 4, un Modelfile ne
+  peut pas la couper ; sans l'option, « Le chat dort sur le tapis » coûte 919
+  tokens de raisonnement et 68 s, avec elle 9 tokens.
+- Écartés après recherche : GLM 5.3 Flash et tous les Kimi n'existent sur
+  Ollama qu'en `:cloud` (320 B et ~1 T de paramètres) ; Qwen 3.6/3.8 font 18 à
+  23 Go ; `translategemma` est limité à 2 K tokens d'entrée.
+
+**Matrice des modèles testés sur un article réel du blog** (589 lignes, 140
+liens, 3 citations EN protégées, mode `--news`, cible `en`, même commande) — le
+barème du propriétaire est « aussi bien que gpt-5.6-luna / gpt-5.4-mini », et
+les modèles qui échouent sont supprimés du poste :
+
+| Modèle                                   | Poids  | Répartition           | Durée         | Résultat                                                                                                                                                                                                                     | Verdict                                |
+| ---------------------------------------- | ------ | --------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `opencode/mimo-v2.5-free` (Zen, hébergé) | —      | —                     | 4 min 26 s    | structure identique, 0 écart                                                                                                                                                                                                 | référence                              |
+| `ollama/gemma4-12b-32k`                  | 7,6 Go | 100 % GPU, 10 Go VRAM | 10 min 10 s   | liens/URL/tableaux/gras/code identiques ; 1 ligne de citation inventée (🇺🇸 + paraphrase), 1 attribution dupliquée                                                                                                            | insuffisant, le plus proche — conservé |
+| `ollama/qwen3.5-9b-32k`                  | 6,6 Go | 100 % GPU             | 8 min 18 s    | idem citation inventée + gras/code ajoutés, 1 segment repassé                                                                                                                                                                | échec — supprimé                       |
+| `ollama/qwen3.6-35b-a3b-32k`             | 22 Go  | 65 % CPU / 35 % GPU   | échec à 3 min | segment 1 : placeholder perdu, puis à la reprise un JSON `{"error": true, "message": "Translation contract violation…"}` à la place de la traduction                                                                         | échec — supprimé                       |
+| `ollama/gpt-oss-20b-32k`                 | 13 Go  | 37 % CPU / 63 % GPU   | 11 min 28 s   | **structure identique** ; a retiré lui-même la ligne 🇫🇷 sous 2 citations sur 3, la 3ᵉ laissée intacte a été enlevée par `_cleanup_source_flag_for_en` (garde du mode news depuis février 2026, commune à tous les providers) | conservé                               |
+
+Le point de rupture n'est ni la traduction ni la structure, mais **une seule
+consigne** : « pour une cible anglaise, supprimer la ligne `> 🇫🇷 _…_` sous
+chaque citation ». Deux façons de la rater, très inégales :
+
+- **Omettre** (gpt-oss) : la ligne source reste telle quelle, avec son drapeau
+  d'origine. `_cleanup_source_flag_for_en` la retire, comme elle le fait depuis
+  février 2026 pour tous les providers — ce n'est pas un rattrapage ajouté pour
+  un modèle, c'est le contrat du mode news.
+- **Inventer** (Gemma 12B, Qwen 3.5) : produire `> 🇺🇸 _paraphrase anglaise_`,
+  un drapeau qui n'existe nulle part dans le contrat. Aucune garde ne l'attrape,
+  et le contenu publié est faux.
+
+**Règle du propriétaire, formulée le 2026-09-04 : pas de rattrapage.** Un modèle
+qui ne tient pas la consigne n'est pas utilisé ; on n'ajoute pas de
+post-traitement et on ne raccourcit pas les segments pour lui plaire. Le prompt
+news est déjà explicite (`REMOVE the whole source-translation line
+
+> 🇫🇷 _..._`) : il n'y a rien à clarifier sans dégrader le reste.
+
+### Provider OpenRouter (`--use_openrouter`) — routeur payant, `--model` obligatoire
+
+```bash
+aipmt --use_openrouter --model z-ai/glm-5.2 --file README.md --target_dir . --target_lang en
+```
+
+Neuvième chemin. OpenRouter est un routeur devant ~430 modèles hébergés par des
+tiers, sur un crédit unique. Il donne accès aux modèles chinois ouverts (Kimi,
+Qwen, DeepSeek, Z.ai) qu'aucun autre provider n'expose ici. Tout ce qui suit a
+été **mesuré sur l'API le 2026-09-05**, pas lu dans la doc :
+
+- **Un même slug est servi par des dizaines d'hébergeurs aux plafonds de sortie
+  différents.** 33 pour `z-ai/glm-5.2`, 23 pour `glm-5.3-flash` — dont un à
+  **2 048 tokens**. Sans épinglage, une traduction longue sur 23 partait
+  tronquée, au hasard du routage. Le préflight lit
+  `/api/v1/models/{slug}/endpoints`, écarte les plafonds sous 8 000 et les
+  statuts négatifs, puis épingle le reste. `provider.only` **sans**
+  `allow_fallbacks: false` n'est qu'une préférence : le routeur repart vers un
+  hébergeur écarté. Les deux formes de `only` sont acceptées, nom nu
+  (`deepinfra`) ou tag (`deepinfra/fp4`) ; on envoie le tag, plus précis.
+- **Le raisonnement est facturé au tarif de sortie**, et il est actif par défaut
+  sur beaucoup de modèles. Même requête sur `z-ai/glm-5.2`, réponse « OK » :
+  **107 tokens de complétion contre 2** avec `reasoning: {"enabled": false}`.
+  D'où la coupure par défaut. 288 des 431 modèles l'imposent
+  (`reasoning.mandatory`) et répondent 400 « Reasoning is mandatory for this
+  endpoint and cannot be disabled ». Pour ceux-là on demande le **plus bas
+  effort déclaré** dans `supported_efforts` : ne rien envoyer laisse le défaut
+  du catalogue, qui vaut `max` sur `glm-5.3-flash` et **tronque la sortie à
+  32 768 tokens** avant la fin de la traduction. Monter l'enveloppe n'y change
+  rien — l'effort en alloue un POURCENTAGE, que le raisonnement consomme en
+  premier. Contre-épreuve : la langue qui échouait passe, structure identique.
+- **`finish_reason=error` est une panne de l'hébergeur amont**, pas une fin
+  anormale du modèle : `native_finish_reason` est nul, et deux langues ont été
+  coupées à 750 s exactement. Message distinct, sinon on cherche le défaut dans
+  le document.
+- **Le catalogue n'a pas d'endpoint unitaire** : `/api/v1/models/{slug}` répond
+  404, seul `/api/v1/models` (714 Ko) porte `reasoning` et `context_length`.
+- **`finish_reason=length` avec un texte vide n'est pas une troncature** mais un
+  budget mangé par le raisonnement (mesuré : 15 850 tokens de raisonnement pour
+  148 utiles). Les deux cas appellent des gestes opposés, le message les
+  distingue.
+- **Le routeur répond 200 avec un corps ne portant qu'une erreur** quand
+  l'hébergeur amont échoue : `choices[0]` levait un TypeError opaque, une garde
+  lit `error` avant.
+- **La fenêtre de contexte vient du préflight**, écrite dans
+  `MODEL_TOKEN_LIMITS` : `DEFAULT_TOKEN_LIMIT` est faux pour 44 modèles du
+  catalogue, dont deux plafonnés à 4 095 tokens.
+- **Le slug est interpolé dans l'URL de préflight** : sa forme est validée
+  avant tout réseau, et le segment `..` refusé — la regex namespacée commune
+  aux deux routeurs accepte `a/b/..`.
+
 ## Key Constants
 
 - `EXCLUDE_PATTERNS`: Paths containing these strings are skipped (`traductions_`, `venv`, `PRIVACY.md`)
@@ -540,15 +829,16 @@ end_turn` là où OpenAI émet `stop`.
 
 ### Default Models (2026)
 
-| Provider | Quality (default)      | Economic (`--eco`)      |
-| -------- | ---------------------- | ----------------------- |
-| OpenAI   | `gpt-5.6-terra`        | `gpt-5.6-luna`          |
-| Claude   | `claude-sonnet-5`      | `claude-haiku-4-5`      |
-| Mistral  | `mistral-large-latest` | `mistral-small-latest`  |
-| Gemini   | `gemini-3.7-flash`     | `gemini-3.1-flash-lite` |
-| Codex    | `gpt-5.6-sol`          | `gpt-5.6-luna`          |
-| Grok API | `grok-4.6`             | `grok-4.3`              |
-| Grok CLI | `grok-4.6`             | `grok-4.5`              |
+| Provider | Quality (default)                     | Economic (`--eco`)      |
+| -------- | ------------------------------------- | ----------------------- |
+| OpenAI   | `gpt-5.6-terra`                       | `gpt-5.6-luna`          |
+| Claude   | `claude-sonnet-5`                     | `claude-haiku-4-5`      |
+| Mistral  | `mistral-large-latest`                | `mistral-small-latest`  |
+| Gemini   | `gemini-3.7-flash`                    | `gemini-3.1-flash-lite` |
+| Codex    | `gpt-5.6-sol`                         | `gpt-5.6-luna`          |
+| Grok API | `grok-4.6`                            | `grok-4.3`              |
+| Grok CLI | `grok-4.6`                            | `grok-4.5`              |
+| OpenCode | `--model provider/modèle` obligatoire | idem                    |
 
 ### Model lifecycle — dates to watch (audited 2026-08-29)
 

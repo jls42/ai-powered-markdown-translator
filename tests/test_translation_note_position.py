@@ -20,17 +20,16 @@ from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
-from aipmt.translate import (
-    _append_translation_note,
+from aipmt import pipeline
+from aipmt.notes import (
     _build_translation_note_block,
     _build_translation_note_source,
     _compose_with_notes,
     _quote_lines,
     _sanitize_model,
     _split_frontmatter,
-    translate_markdown_file,
 )
+from aipmt.pipeline import _append_translation_note, translate_markdown_file
 
 
 def _args(**overrides):
@@ -339,7 +338,7 @@ class TestIntegrationWithMarkdownFile(unittest.TestCase):
             mock_client = MagicMock()
             mock_client.chat.completions.create.side_effect = mock_responses
             args = _args(source_dir=tmpdir, target_dir=tmpdir, **args_overrides)
-            config = translate._TranslationConfig(
+            config = pipeline._TranslationConfig(
                 client=mock_client,
                 args=args,
                 add_translation_note=True,

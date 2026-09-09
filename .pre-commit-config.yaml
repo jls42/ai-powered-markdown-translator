@@ -66,6 +66,7 @@ repos:
             traductions_.*|
             tests/fixtures/.*|
             \.secrets\.baseline|
+            scripts/split-reference/.*|
             venv/.*
           )$
 
@@ -81,6 +82,19 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
         files: ^(src/.*|scripts/.*|tests/.*)\.py$
+
+      # Pureté du découpage de src/aipmt/translate.py : déplacement pur, texte
+      # normalisé identique nœud par nœud, marqueurs conservés, aucun fichier non suivi. Temporaire :
+      # retiré avec la PR qui suit le découpage. Le déclencheur couvre aussi
+      # l'outil lui-même — une modification isolée du vérificateur doit le
+      # relancer, sinon rien ne dit qu'il mord encore.
+      - id: check-split-purity
+        name: Pureté du découpage (scripts/check-split-purity.py)
+        entry: scripts/check-split-purity.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+        files: ^(src/aipmt/.*\.py|tests/.*\.py|scripts/tests/.*\.py|scripts/split-reference/.*|scripts/check-split-purity\.(py|sh)|\.pre-commit-config\.yaml)$
 
       # mypy lax au démarrage (filet de sécurité progressif)
       - id: mypy

@@ -50,6 +50,9 @@ jobs:
           aipmt --help > /dev/null
           python -m aipmt --help > /dev/null
 
+      - name: Le découpage du module principal reste un déplacement pur
+        run: python scripts/check-split-purity.py
+
       - name: Suite de tests
         run: |
           # Les tests importent `aipmt` depuis `src/` via sys.path ; ils

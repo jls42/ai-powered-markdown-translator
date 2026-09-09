@@ -1,0 +1,195 @@
+"""Résolution, sélection et dispatch des providers.
+
+Un provider est identifié par une clé (`codex`, `grok_cli`…) résolue depuis les
+flags ; à chaque clé correspondent un libellé, un constructeur de client et un
+appel de traduction. Les fonctions de ce module viennent du module principal,
+scindées depuis pour tenir sous la complexité que Codacy tolère, sans changer
+l'ordre d'évaluation : leurs chaînes de `if` restent le contrat observable
+(précédence, libellés, ordre de l'aide) jusqu'à ce qu'un registre déclaratif
+les remplace, dans un changement nommé comme tel.
+"""
+
+from .anthropic import _call_claude, _init_claude_client
+from .codex import _call_codex, _init_codex_client
+from .gemini import _call_gemini, _init_gemini_client
+from .grok import _call_grok_cli, _init_grok_cli_client, _init_grok_client
+from .mistral import _call_mistral, _init_mistral_client
+from .openai import _call_openai, _init_openai_client
+from .opencode import _call_opencode, _init_opencode_client
+from .openrouter import _call_openrouter, _init_openrouter_client
+
+
+def _resolve_provider(args, use_mistral=False, use_claude=False, use_gemini=False):
+    """Nom du provider à utiliser. Les booléens explicites priment (plusieurs
+    tests appellent `translate(..., use_mistral=True)` avec un Namespace qui
+    n'a aucun attribut `use_*`), `args` ne sert que de repli."""
+    if use_mistral:
+        return "mistral"
+    if use_claude:
+        return "claude"
+    if use_gemini:
+        return "gemini"
+    return _resolve_provider_from_args(args)
+
+
+def _resolve_provider_from_args(args):
+    """Provider désigné par les flags `use_*` du Namespace, `openai` à défaut.
+    Lus par `getattr` : un Namespace construit à la main peut ne pas les porter."""
+    if getattr(args, "use_codex", False):
+        return "codex"
+    if getattr(args, "use_grok_cli", False):
+        return "grok_cli"
+    if getattr(args, "use_grok", False):
+        return "grok"
+    if getattr(args, "use_opencode", False):
+        return "opencode"
+    if getattr(args, "use_openrouter", False):
+        return "openrouter"
+    return "openai"
+
+
+# `provider` sert de clé de dispatch, pas de libellé : `.capitalize()` affichait
+# « Grok_cli » et « Openai » à l'utilisateur.
+_PROVIDER_LABELS = {
+    "openai": "OpenAI",
+    "mistral": "Mistral",
+    "claude": "Claude",
+    "gemini": "Gemini",
+    "codex": "Codex CLI",
+    "grok": "Grok (API xAI)",
+    "grok_cli": "Grok CLI",
+    "opencode": "OpenCode",
+    "openrouter": "OpenRouter",
+}
+
+
+def _call_provider(client, args, prompt, segment, provider, is_translation_note):
+    """L'appel de traduction de `provider`, sans garde sur ce qu'il retourne."""
+    if provider == "mistral":
+        return _call_mistral(client, args, prompt, segment)
+    if provider == "claude":
+        return _call_claude(client, args, prompt, segment)
+    if provider == "gemini":
+        return _call_gemini(client, args, prompt, segment)
+    if provider == "codex":
+        return _call_codex(client, args, prompt, segment)
+    if provider == "grok_cli":
+        return _call_grok_cli(client, args, prompt, segment)
+    if provider == "opencode":
+        return _call_opencode(client, args, prompt, segment)
+    if provider == "openrouter":
+        return _call_openrouter(client, args, prompt, segment)
+    # `grok` (API xAI) inclus : endpoint compatible OpenAI, donc même appel.
+    return _call_openai(client, args, prompt, segment, is_translation_note)
+
+
+def _dispatch_provider_call(client, args, prompt, segment, provider, is_translation_note):
+    text = _call_provider(client, args, prompt, segment, provider, is_translation_note)
+    # Empty-content guard : un provider qui retourne "" avec finish_reason="stop"
+    # produirait sinon un fichier vide marqué success.
+    if not text.strip():
+        raise RuntimeError(
+            f"{_PROVIDER_LABELS[provider]} returned empty content (model={args.model})"
+        )
+    return text
+
+
+# Les huit flags du groupe exclusif, dans l'ordre de l'aide — qui n'est pas
+# l'ordre de précédence de `_resolve_provider`, sans conséquence tant que le
+# groupe interdit d'en lever deux. Tous sont des `store_true` : seuls le nom
+# et le texte d'aide changent, d'où une table plutôt que huit appels.
+_PROVIDER_FLAGS = (
+    ("use_mistral", "Utiliser l'API Mistral AI pour la traduction"),
+    ("use_claude", "Utiliser l'API Claude d'Anthropic pour la traduction"),
+    ("use_gemini", "Utiliser l'API Gemini de Google pour la traduction"),
+    ("use_grok", "Utiliser l'API xAI (Grok) — nécessite XAI_API_KEY, facturé à l'usage"),
+    (
+        "use_grok_cli",
+        "Utiliser le CLI Grok sur le quota de l'abonnement Grok "
+        "(nécessite `grok login` ; confinement plus faible que --use_codex)",
+    ),
+    (
+        "use_codex",
+        "Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT "
+        "(aucune facturation à l'usage ; nécessite `codex login`)",
+    ),
+    (
+        "use_opencode",
+        "Utiliser OpenCode (agent open source) vers le fournisseur configuré "
+        "dans OpenCode — modèle local, gratuit, abonnement ou clé ; exige "
+        "--model provider/modèle",
+    ),
+    (
+        "use_openrouter",
+        "Utiliser OpenRouter (routeur vers ~430 modèles) — nécessite "
+        "OPENROUTER_API_KEY, facturé à l'usage ; exige --model fournisseur/modèle",
+    ),
+)
+
+
+def _add_provider_args(parser):
+    parser.add_argument(
+        "--model",
+        type=str,
+        help=(
+            "Modèle à utiliser pour la traduction ; la valeur par défaut dépend du "
+            "provider sélectionné. Obligatoire avec --use_opencode et "
+            "--use_openrouter, au format provider/modèle (liste : "
+            "`opencode models`, https://openrouter.ai/models)"
+        ),
+    )
+    # Groupe exclusif : deux flags provider simultanés étaient acceptés en
+    # silence, et la précédence divergeait entre _select_provider_client (qui
+    # teste Mistral en premier) et _resolve_provider (qui donne priorité aux
+    # booléens explicites). `--use_codex --use_mistral` instanciait donc un
+    # client Mistral ET dispatchait vers Mistral : la traduction partait en
+    # facturation à l'usage alors que l'utilisateur avait demandé son quota
+    # d'abonnement — exactement ce que --use_codex existe pour empêcher, et
+    # sans le moindre avertissement. argparse refuse désormais la combinaison.
+    provider_group = parser.add_mutually_exclusive_group()
+    for flag, help_text in _PROVIDER_FLAGS:
+        provider_group.add_argument(f"--{flag}", action="store_true", help=help_text)
+    parser.add_argument(
+        "--eco",
+        action="store_true",
+        help="Utiliser les modèles économiques (mini/flash) au lieu des modèles qualité",
+    )
+    parser.add_argument(
+        "--reasoning_effort",
+        choices=("none", "low", "medium", "high", "xhigh"),
+        default=None,
+        help=(
+            "Effort de raisonnement, transmis à OpenAI, Codex, OpenCode (--variant) "
+            "et OpenRouter. Par défaut : 'none' avec --eco (le raisonnement "
+            "n'apporte rien à une traduction et double les tokens de sortie), "
+            "'medium' sinon. Toutes les valeurs ne sont pas acceptées par tous les "
+            "modèles ; sur OpenAI, un refus déclenche un retry sans le paramètre."
+        ),
+    )
+
+
+def _select_provider_client(args):
+    if args.use_mistral:
+        return _init_mistral_client(args)
+    if args.use_claude:
+        return _init_claude_client(args)
+    if args.use_gemini:
+        return _init_gemini_client(args)
+    return _select_later_provider_client(args)
+
+
+def _select_later_provider_client(args):
+    """Suite de `_select_provider_client` : les providers ajoutés après le trio
+    initial, dont un Namespace construit à la main (tests) peut ne pas porter le
+    flag — d'où `getattr` —, puis OpenAI à défaut."""
+    if getattr(args, "use_codex", False):
+        return _init_codex_client(args)
+    if getattr(args, "use_grok_cli", False):
+        return _init_grok_cli_client(args)
+    if getattr(args, "use_grok", False):
+        return _init_grok_client(args)
+    if getattr(args, "use_opencode", False):
+        return _init_opencode_client(args)
+    if getattr(args, "use_openrouter", False):
+        return _init_openrouter_client(args)
+    return _init_openai_client(args)

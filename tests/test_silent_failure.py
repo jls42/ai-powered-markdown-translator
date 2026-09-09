@@ -6,7 +6,7 @@ Couvre :
 - Whitelist finish_reason / stop_reason
 - Segmentation heading-aware (priorité H2/H3)
 - Propagation jusqu'à sys.exit(1) côté CLI (single-file et directory)
-- detect_provider() bash : auto-fallback OpenAI quand GOOGLE_API_KEY absent/placeholder
+- detect_provider() bash : Codex par défaut, API facturée refusée sans dérogation nommée
 
 Lancement : python -m unittest discover tests/ -v
 """
@@ -23,9 +23,11 @@ from unittest.mock import MagicMock, patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
-from aipmt.translate import segment_text, translate_markdown_file
-from aipmt.translate import translate as translate_fn
+from aipmt import cli, guards, markdown, news, notes, pipeline, placeholders, prompts
+from aipmt.pipeline import translate as translate_fn
+from aipmt.pipeline import translate_markdown_file
+from aipmt.providers import anthropic, gemini, mistral, openai
+from aipmt.segmentation import segment_text
 
 FIXTURE_PATH = os.path.join(os.path.dirname(__file__), "fixtures", "long_fr_excerpt.txt")
 
@@ -107,7 +109,7 @@ def _run_markdown_file_translation(
             news=news,
         )
 
-        config = translate._TranslationConfig(
+        config = pipeline._TranslationConfig(
             client=mock_client,
             args=args,
             add_translation_note=add_translation_note,
@@ -182,7 +184,7 @@ class TestSilentFailure(unittest.TestCase):
             mock_client.chat.completions.create.side_effect = responses
 
             args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
-            config = translate._TranslationConfig(client=mock_client, args=args)
+            config = pipeline._TranslationConfig(client=mock_client, args=args)
             status = translate_markdown_file(src, dst, config)
             self.assertEqual(status, "failure")
             self.assertFalse(
@@ -225,15 +227,18 @@ class TestSilentFailure(unittest.TestCase):
         """main() avec --file doit sys.exit(1) quand translate_markdown_file retourne 'failure'."""
         with (
             patch.dict(os.environ, _fake_openai_env()),
-            patch("aipmt.translate.translate_markdown_file", return_value="failure"),
-            patch("aipmt.translate.OpenAI"),
+            patch("aipmt.cli.translate_markdown_file", return_value="failure") as fake_tmf,
+            patch("aipmt.providers.openai.OpenAI") as fake_openai,
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
             patch("sys.argv", ["aipmt", "--file", "/source/fake.md", "--target_dir", "/dest"]),
         ):
             with self.assertRaises(SystemExit) as cm:
-                translate.main()
+                cli.main()
             self.assertEqual(cm.exception.code, 1)
+            fake_openai.assert_called_once()
+            # Sans patch, le vrai translate_markdown_file rend déjà « failure » ici.
+            fake_tmf.assert_called_once()
 
     def test_main_exits_nonzero_on_failure_directory(self):
         """main() avec --source_dir doit sys.exit(1) quand translate_directory rapporte
@@ -241,10 +246,10 @@ class TestSilentFailure(unittest.TestCase):
         with (
             patch.dict(os.environ, _fake_openai_env()),
             patch(
-                "aipmt.translate.translate_directory",
+                "aipmt.cli.translate_directory",
                 return_value={"failed": ["a.md"], "skipped": []},
             ),
-            patch("aipmt.translate.OpenAI"),
+            patch("aipmt.providers.openai.OpenAI") as fake_openai,
             patch("os.path.isdir", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
@@ -259,8 +264,9 @@ class TestSilentFailure(unittest.TestCase):
             ),
         ):
             with self.assertRaises(SystemExit) as cm:
-                translate.main()
+                cli.main()
             self.assertEqual(cm.exception.code, 1)
+            fake_openai.assert_called_once()
 
     def test_openai_reasoning_effort_is_configurable(self):
         """translate() doit transmettre l'effort demandé aux modèles GPT-5.x."""
@@ -299,7 +305,7 @@ class TestSilentFailure(unittest.TestCase):
     def test_markdown_contract_applies_to_non_news_translations(self):
         """Le contrat complétude/prose doit aussi couvrir les README non-news."""
         args = _base_args(news=False)
-        system_prompt = translate._build_system_instructions(args, is_translation_note=False)
+        system_prompt = prompts._build_system_instructions(args, is_translation_note=False)
 
         self.assertIn("<markdown_translation_contract>", system_prompt)
         self.assertIn("Translate ALL prose into the target language", system_prompt)
@@ -309,7 +315,7 @@ class TestSilentFailure(unittest.TestCase):
     def test_news_prompt_combines_markdown_contract_and_news_checks(self):
         """Le mode --news garde le contrat markdown général + checks spécifiques news."""
         args = _base_args(news=True, target_lang="pl")
-        system_prompt = translate._build_system_instructions(args, is_translation_note=False)
+        system_prompt = prompts._build_system_instructions(args, is_translation_note=False)
 
         self.assertIn("<markdown_translation_contract>", system_prompt)
         self.assertIn("Translate ALL prose into the target language", system_prompt)
@@ -510,7 +516,7 @@ class TestCodePlaceholders(unittest.TestCase):
     def test_fenced_block_no_lang(self):
         """Fence sans info string ``` → doit être protégée."""
         content = "Texte\n\n```\ncode brut\n```\n\nSuite."
-        protected, blocks, _ph = translate._protect_code_blocks(content)
+        protected, blocks, _ph = placeholders._protect_code_blocks(content)
         self.assertEqual(len(blocks), 1)
         self.assertIn("#CODEBLOCK0#", protected)
         self.assertNotIn("code brut", protected)
@@ -518,14 +524,14 @@ class TestCodePlaceholders(unittest.TestCase):
     def test_fenced_block_hyphenated_lang(self):
         """Fence avec lang hyphené ```python-repl → doit être protégée."""
         content = "```python-repl\n>>> 1+1\n```"
-        protected, blocks, _ph = translate._protect_code_blocks(content)
+        protected, blocks, _ph = placeholders._protect_code_blocks(content)
         self.assertEqual(len(blocks), 1)
         self.assertIn("#CODEBLOCK0#", protected)
 
     def test_fenced_orphan_does_not_match(self):
         """Une fence ouverte sans fermeture ne doit pas être consommée greedy."""
         content = "Texte\n```\npas de fermeture"
-        protected, blocks, _ = translate._protect_code_blocks(content)
+        protected, blocks, _ = placeholders._protect_code_blocks(content)
         self.assertEqual(blocks, [])
         self.assertEqual(protected, content)
 
@@ -537,16 +543,16 @@ class TestCodePlaceholders(unittest.TestCase):
             "Avec `inline_code` au milieu.\n\n"
             "```\nautre bloc\n```\n"
         )
-        c1, blocks, b_ph = translate._protect_code_blocks(content)
-        c2, inlines, i_ph = translate._protect_inline_code(c1)
+        c1, blocks, b_ph = placeholders._protect_code_blocks(content)
+        c2, inlines, i_ph = placeholders._protect_inline_code(c1)
         # Simule un LLM qui ne touche pas au texte (round-trip pur).
-        restored = translate._restore_code(c2, inlines, i_ph, blocks, b_ph)
+        restored = placeholders._restore_code(c2, inlines, i_ph, blocks, b_ph)
         self.assertEqual(restored, content)
 
     def test_double_backtick_inline_not_swallowed(self):
         """Backticks doubles ``foo`` ne doivent pas être pris pour inline-code single-tick."""
         content = "Voir ``literal`backtick`` dans la doc."
-        _, inlines, _ = translate._protect_inline_code(content)
+        _, inlines, _ = placeholders._protect_inline_code(content)
         # Le pattern actuel (?<!`)`...`(?!`) exclut les doubles → 0 match attendu.
         self.assertEqual(inlines, [])
 
@@ -554,26 +560,26 @@ class TestCodePlaceholders(unittest.TestCase):
         """Un #CODEBLOCK0# qui n'a pas été restauré (mismatch d'index) doit lever."""
         text = "Translated text with leftover #CODEBLOCK7# that was never restored."
         with self.assertRaisesRegex(RuntimeError, r"non restauré|leftover|Placeholder"):
-            translate._validate_no_code_placeholder_leftover(text)
+            placeholders._validate_no_code_placeholder_leftover(text)
 
     def test_placeholder_eaten_by_llm_raises(self):
         """Un placeholder #CODEBLOCK0# émis mais absent de la sortie du LLM doit lever."""
         text = "LLM output that lost the placeholder."
         with self.assertRaisesRegex(RuntimeError, r"manquant|Placeholder"):
-            translate._validate_code_placeholders_present(text, ["#CODEBLOCK0#"], [])
+            placeholders._validate_code_placeholders_present(text, ["#CODEBLOCK0#"], [])
 
 
 class TestHeadingAnchors(unittest.TestCase):
     def test_github_slug_preserves_devanagari_marks(self):
         """Les matras Devanagari doivent survivre dans les slugs heading-derived."""
-        self.assertEqual(translate._github_slug("विषय-सूची"), "विषय-सूची")
-        self.assertEqual(translate._github_slug("इंस्टॉलेशन"), "इंस्टॉलेशन")
-        self.assertEqual(translate._github_slug("TC (तकनीकी समिति)"), "tc-तकनीकी-समिति")
+        self.assertEqual(placeholders._github_slug("विषय-सूची"), "विषय-सूची")
+        self.assertEqual(placeholders._github_slug("इंस्टॉलेशन"), "इंस्टॉलेशन")
+        self.assertEqual(placeholders._github_slug("TC (तकनीकी समिति)"), "tc-तकनीकी-समिति")
 
     def test_heading_anchor_restore_uses_devanagari_slug_with_marks(self):
         source_slugs = ["tc-technical-committee"]
-        target_slugs = [translate._github_slug("TC (तकनीकी समिति)")]
-        out = translate._restore_anchors(
+        target_slugs = [placeholders._github_slug("TC (तकनीकी समिति)")]
+        out = placeholders._restore_anchors(
             "[TC (तकनीकी समिति)]#ANCHOR0#",
             ["(#tc-technical-committee)"],
             ["#ANCHOR0#"],
@@ -594,27 +600,27 @@ class TestNewsPlaceholderValidator(unittest.TestCase):
         """LLM remplace <NEWSQUOTE id="0"/> par <新闻引用 id="0"/> → doit lever."""
         bad = '<新闻引用 id="0"/>\n>\n> 🇨🇳 _十年磨一剑_\n'
         with self.assertRaisesRegex(RuntimeError, r"Placeholder.*manquant"):
-            translate._validate_news_placeholders_intact(bad, n_quotes=1)
+            news._validate_news_placeholders_intact(bad, n_quotes=1)
 
     def test_korean_localized_tag_rejected(self):
         bad = '<뉴스인용 id="0"/>\n>\n> 🇰🇷 _10년간의 작업._\n'
         with self.assertRaisesRegex(RuntimeError, r"Placeholder.*manquant"):
-            translate._validate_news_placeholders_intact(bad, n_quotes=1)
+            news._validate_news_placeholders_intact(bad, n_quotes=1)
 
     def test_japanese_deleted_placeholder_rejected(self):
         """Sortie JA sans aucun tag XML (LLM a remplacé par la quote traduite)."""
         bad = "> 🇯🇵 _十年の月日を経て._\n> — [@GoogleAI X上で](https://x.com/google)\n"
         with self.assertRaisesRegex(RuntimeError, r"Placeholder.*manquant"):
-            translate._validate_news_placeholders_intact(bad, n_quotes=1)
+            news._validate_news_placeholders_intact(bad, n_quotes=1)
 
     def test_arabic_correct_tag_passes(self):
         """Tag NEWSQUOTE correct dans une sortie AR doit passer."""
         good = '<NEWSQUOTE id="0"/>\n>\n> 🇸🇦 _عقد من العمل._\n'
-        translate._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
+        news._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
 
     def test_hindi_correct_tag_passes(self):
         good = '<NEWSQUOTE id="0"/>\n>\n> 🇮🇳 _एक दशक का काम._\n'
-        translate._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
+        news._validate_news_placeholders_intact(good, n_quotes=1)  # no raise
 
 
 class TestLangDetectLayer2(unittest.TestCase):
@@ -641,7 +647,7 @@ class TestLangDetectLayer2(unittest.TestCase):
         )
         args = _base_args()
         with self.assertRaisesRegex(RuntimeError, r"Output language mismatch"):
-            translate._validate_translation_output(
+            guards._validate_translation_output(
                 source_segment, paraphrased_fr_output, args, is_translation_note=False
             )
 
@@ -664,7 +670,7 @@ class TestGenericBlockquoteValidation(unittest.TestCase):
         args = _base_args(source_lang="en", target_lang="es", news=False)
 
         with self.assertRaisesRegex(RuntimeError, r"untranslated source excerpt"):
-            translate._validate_translation_output(
+            guards._validate_translation_output(
                 source_segment, source_segment, args, is_translation_note=False
             )
 
@@ -676,7 +682,7 @@ class TestGenericBlockquoteValidation(unittest.TestCase):
             "> — [@GoogleAI sur X](https://x.com/GoogleAI/status/1)"
         )
 
-        windows = translate._extract_source_windows(source_segment, ignore_blockquotes=True)
+        windows = guards._extract_source_windows(source_segment, ignore_blockquotes=True)
 
         self.assertEqual(windows, [])
 
@@ -701,10 +707,16 @@ class TestHindiTechnicalReadmeValidation(unittest.TestCase):
         )
         args = _base_args(source_lang="en", target_lang="hi", news=False)
 
-        with patch("aipmt.translate.detect_langs", return_value=[MagicMock(lang="en", prob=0.86)]):
-            translate._validate_translation_output(
+        with patch(
+            "aipmt.guards.detect_langs", return_value=[MagicMock(lang="en", prob=0.86)]
+        ) as fake_detect:
+            guards._validate_translation_output(
                 source_segment, translated, args, is_translation_note=False
             )
+        # Le signal d'écriture cible (devanagari) court-circuite la détection :
+        # c'est lui qui fait passer ce test, pas le mock — mesuré, le test restait
+        # vert sans le patch.
+        fake_detect.assert_not_called()
 
     def test_hindi_header_only_still_fails_language_mismatch(self):
         source_segment = (
@@ -719,14 +731,16 @@ class TestHindiTechnicalReadmeValidation(unittest.TestCase):
 
         with (
             patch(
-                "aipmt.translate.detect_langs",
+                "aipmt.guards.detect_langs",
                 return_value=[MagicMock(lang="en", prob=0.95), MagicMock(lang="hi", prob=0.05)],
-            ),
+            ) as fake_detect,
             self.assertRaisesRegex(RuntimeError, r"Output language mismatch"),
         ):
-            translate._validate_translation_output(
+            guards._validate_translation_output(
                 source_segment, translated, args, is_translation_note=False
             )
+        # Un en-tête hindi ne suffit pas : la détection est bien consultée.
+        fake_detect.assert_called_once()
 
 
 class TestMultiProviderStopReasons(unittest.TestCase):
@@ -741,7 +755,7 @@ class TestMultiProviderStopReasons(unittest.TestCase):
         )
         args = _base_args(model="claude-haiku-4-5-20251001")
         with self.assertRaisesRegex(RuntimeError, r"Claude abnormal stop_reason"):
-            translate._call_claude(client, args, "prompt", "segment")
+            anthropic._call_claude(client, args, "prompt", "segment")
 
     def test_mistral_abnormal_finish_reason_raises(self):
         client = MagicMock()
@@ -750,7 +764,7 @@ class TestMultiProviderStopReasons(unittest.TestCase):
         )
         args = _base_args(model="mistral-small-latest")
         with self.assertRaisesRegex(RuntimeError, r"Mistral abnormal finish_reason"):
-            translate._call_mistral(client, args, "prompt", "segment")
+            mistral._call_mistral(client, args, "prompt", "segment")
 
     def test_gemini_abnormal_finish_reason_raises(self):
         gen_model = MagicMock()
@@ -762,7 +776,7 @@ class TestMultiProviderStopReasons(unittest.TestCase):
         client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"Gemini abnormal finish_reason"):
-            translate._call_gemini(client, args, "prompt", "segment")
+            gemini._call_gemini(client, args, "prompt", "segment")
 
 
 class TestStructuralLineLanguageBar(unittest.TestCase):
@@ -776,11 +790,11 @@ class TestStructuralLineLanguageBar(unittest.TestCase):
     def test_language_bar_with_globe_emoji_is_structural(self):
         """README.md / CHANGELOG.md commencent par une ligne `🌍 [Français](...)`."""
         line = "🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md)"
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_language_bar_without_emoji_is_structural(self):
         line = "[français](readme.md) | [english](readme-en.md) | [中文](readme-zh.md)"
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_long_real_language_bar_is_structural(self):
         """La barre complète à 14 langues du README/CHANGELOG actuel."""
@@ -788,7 +802,7 @@ class TestStructuralLineLanguageBar(unittest.TestCase):
             "🌍 [Français](README.md) | [English](README-en.md) | [Español](README-es.md) | "
             "[中文](README-zh.md) | [Deutsch](README-de.md) | [日本語](README-ja.md)"
         )
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_blog_prose_with_two_links_is_NOT_structural(self):
         """La phrase `Voici les [docs](a.md) | [tutorial](b.md) à consulter.` du blog
@@ -796,16 +810,16 @@ class TestStructuralLineLanguageBar(unittest.TestCase):
         empêche le faux positif quand il y a du texte après le dernier lien.
         """
         line = "Voici les [docs](a.md) | [tutorial](b.md) à consulter."
-        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_single_link_is_NOT_structural(self):
         line = "Voir la [doc](docs.md) pour plus d'info."
-        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_comma_separated_links_is_NOT_structural(self):
         """Séparateur autre que `|` → pas une barre de langues."""
         line = "Voir aussi : [a](a.md), [b](b.md)"
-        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNone(markdown._STRUCTURAL_LINE.match(line))
 
 
 class TestStructuralLineHTML(unittest.TestCase):
@@ -816,15 +830,15 @@ class TestStructuralLineHTML(unittest.TestCase):
 
     def test_html_open_tag_alone_is_structural(self):
         for line in ('<p align="center">', "<p>", "<div class='hero'>", "<section>"):
-            self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line), line)
+            self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line), line)
 
     def test_html_close_tag_alone_is_structural(self):
         for line in ("</p>", "</div>", "</section>"):
-            self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line), line)
+            self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line), line)
 
     def test_html_self_closing_tag_alone_is_structural(self):
         for line in ("<br>", "<br/>", "<br />", "<hr>", '<img src="x.png" alt="y" />'):
-            self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line), line)
+            self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line), line)
 
     def test_html_nav_bar_with_flags_is_structural(self):
         """Le bandeau language switcher EurekAI."""
@@ -833,16 +847,16 @@ class TestStructuralLineHTML(unittest.TestCase):
             '<a href="README-es.md">🇪🇸 Español</a> · '
             '<a href="README-pt.md">🇧🇷 Português</a><br>'
         )
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_html_nav_bar_pipe_separator_is_structural(self):
         line = '<a href="a.md">A</a> | <a href="b.md">B</a> | <a href="c.md">C</a>'
-        self.assertIsNotNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNotNone(markdown._STRUCTURAL_LINE.match(line))
 
     def test_html_paragraph_with_strong_text_is_NOT_structural(self):
         """Une vraie phrase avec balises inline doit rester traduite (pas skip)."""
         line = "<strong>Transforme votre contenu en expérience interactive.</strong>"
-        self.assertIsNone(translate._STRUCTURAL_LINE.match(line))
+        self.assertIsNone(markdown._STRUCTURAL_LINE.match(line))
 
 
 class TestLooksLikeProperNounList(unittest.TestCase):
@@ -856,32 +870,32 @@ class TestLooksLikeProperNounList(unittest.TestCase):
             "* opencode, Roo, Amp, Goose, Kiro CLI, Augment, Aider Desk, "
             "Continue, Kilo, Junie (JetBrains), Trae"
         )
-        self.assertTrue(translate._looks_like_proper_noun_list(window))
+        self.assertTrue(guards._looks_like_proper_noun_list(window))
 
     def test_normal_french_prose_is_not_proper_noun_dominated(self):
         window = (
             "Le projet utilise une approche moderne pour la traduction "
             "automatique des documents techniques."
         )
-        self.assertFalse(translate._looks_like_proper_noun_list(window))
+        self.assertFalse(guards._looks_like_proper_noun_list(window))
 
     def test_normal_english_prose_with_acronyms_is_not_proper_noun_dominated(self):
         window = (
             "The API uses HTTP for communication and JSON for data exchange "
             "between the client and the server."
         )
-        self.assertFalse(translate._looks_like_proper_noun_list(window))
+        self.assertFalse(guards._looks_like_proper_noun_list(window))
 
     def test_short_window_under_5_words_is_not_filtered(self):
         # Sécurité : ne pas skip à tort des fenêtres trop courtes.
         window = "Mistral AI Service"
-        self.assertFalse(translate._looks_like_proper_noun_list(window))
+        self.assertFalse(guards._looks_like_proper_noun_list(window))
 
     def test_title_case_long_heading_is_not_filtered_at_70pct(self):
         # Title case 6 mots, mais "for" est lowercase → 5/6 = 83% — skip.
         # Avec des "and"/"the" intercalés, on tombe sous 70%.
         window = "Setup and the configuration of advanced features in production environments"
-        self.assertFalse(translate._looks_like_proper_noun_list(window))
+        self.assertFalse(guards._looks_like_proper_noun_list(window))
 
 
 class TestExtractSourceWindowsStripsHTML(unittest.TestCase):
@@ -896,7 +910,7 @@ class TestExtractSourceWindowsStripsHTML(unittest.TestCase):
             "caracteres apres avoir retire les balises HTML inline du texte "
             "source.</strong>"
         )
-        windows = translate._extract_source_windows(prose)
+        windows = guards._extract_source_windows(prose)
         self.assertEqual(len(windows), 1)
         self.assertNotIn("<strong>", windows[0])
         self.assertNotIn("</strong>", windows[0])
@@ -906,7 +920,7 @@ class TestExtractSourceWindowsStripsHTML(unittest.TestCase):
         # Un paragraphe composé uniquement de balises HTML + URLs courtes
         # doit produire un cleaned trop court (<120 chars) → 0 fenêtre.
         prose = '<a href="README-en.md">English</a> · <a href="README-es.md">Español</a>'
-        windows = translate._extract_source_windows(prose)
+        windows = guards._extract_source_windows(prose)
         self.assertEqual(windows, [])
 
 
@@ -918,9 +932,11 @@ REGEN_SCRIPT = os.path.abspath(
 class TestDetectProvider(unittest.TestCase):
     """Teste detect_provider() de regen_translations.sh.
 
-    Comportement : OpenAI par défaut. Fallback Gemini Flash si
-    OPENAI_API_KEY absent/placeholder mais GOOGLE_API_KEY valide. Override
-    explicite via REGEN_PROVIDER=openai|gemini.
+    Règle du propriétaire : les traductions de ce dépôt ne passent JAMAIS par
+    une API facturée. Codex (abonnement ChatGPT, gpt-5.6-sol) est le défaut,
+    sans aucune auto-détection de clé ; `openai`, `gemini`, `grok` et `openrouter`
+    exigent
+    `REGEN_ALLOW_PAID_API=1` en plus de `REGEN_PROVIDER`.
     """
 
     def _run_detect(self, env_content=None, exported_env=None):
@@ -937,8 +953,15 @@ class TestDetectProvider(unittest.TestCase):
             wrapper = f'source "{REGEN_SCRIPT}"; detect_provider'
 
             env = os.environ.copy()
-            # Baseline propre : retirer toutes les clés API du shell parent
-            for var in ("OPENAI_API_KEY", "GOOGLE_API_KEY", "GEMINI_API_KEY", "REGEN_PROVIDER"):
+            # Baseline propre : retirer clés et réglages du shell parent
+            for var in (
+                "OPENAI_API_KEY",
+                "GOOGLE_API_KEY",
+                "GEMINI_API_KEY",
+                "REGEN_PROVIDER",
+                "REGEN_MODEL",
+                "REGEN_ALLOW_PAID_API",
+            ):
                 env.pop(var, None)
             if exported_env:
                 env.update(exported_env)
@@ -953,86 +976,113 @@ class TestDetectProvider(unittest.TestCase):
             return result.stdout.strip(), result.stderr.strip(), result.returncode
 
     # Note: aucune des chaînes ci-dessous n'est une vraie clé. detect_provider()
-    # ne valide pas le format, seulement non-vide ET != placeholders connus.
+    # ne lit plus les clés du tout ; elles sont là pour prouver qu'elles ne
+    # changent rien.
     _FAKE_OPENAI_KEY = "fixture-fake-openai-key-do-not-use-aaaaaaaaaaaaaaaa"
     _FAKE_GEMINI_KEY = "fixture-fake-gemini-key-do-not-use-bbbbbbbbbbbbbbbb"
 
-    def test_no_env_file_no_keys_aborts(self):
-        """Pas de .env, pas de clés exportées → exit 1 + ERROR sur stderr.
-
-        Fail-closed plutôt qu'émettre `--eco` avec une clé placeholder : sinon
-        les jobs en aval tomberaient en 401 silencieux et release.sh validerait
-        '28 fichiers présents' contre des traductions stales.
-        """
+    def test_default_is_codex_subscription_without_any_key(self):
+        """Pas de .env, rien d'exporté → Codex, sans --eco : gpt-5.6-sol."""
         stdout, stderr, rc = self._run_detect(env_content=None)
-        self.assertEqual(rc, 1)
-        self.assertEqual(stdout, "")
-        self.assertIn("ERROR", stderr)
-
-    def test_openai_key_picks_openai(self):
-        """OPENAI_API_KEY valide dans .env → --eco (OpenAI par défaut)."""
-        stdout, stderr, rc = self._run_detect(
-            env_content=f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n"
-        )
         self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--eco")
-        # On asserte le PROVIDER, pas le nom du modèle : celui-ci change à
-        # chaque renouvellement du catalogue, et un test qui le fige devient
-        # un rappel de mise à jour plutôt qu'une garantie de comportement.
-        self.assertIn("OpenAI", stderr)
-        self.assertIn("--eco", stderr)
+        self.assertEqual(stdout, "--use_codex")
+        self.assertIn("Codex", stderr)
+        self.assertIn("gpt-5.6-sol", stderr)
 
-    def test_both_keys_prefers_openai(self):
-        """OPENAI et GOOGLE valides → OpenAI par défaut (priorité OpenAI)."""
+    def test_empty_regen_provider_is_the_default(self):
+        stdout, _stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": ""})
+        self.assertEqual((rc, stdout), (0, "--use_codex"))
+
+    def test_api_keys_in_env_never_switch_to_a_paid_api(self):
+        """C'est le cœur de la règle : une clé qui traîne dans .env ne doit
+        plus jamais faire partir les traductions sur une API payante."""
         stdout, stderr, rc = self._run_detect(
             env_content=(
                 f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\nGOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n"
             )
         )
         self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--eco")
-        self.assertIn("OpenAI", stderr)
+        self.assertEqual(stdout, "--use_codex")
+        self.assertNotIn("--eco", stdout)
+        self.assertNotIn("OpenAI", stderr)
 
-    def test_only_gemini_falls_back_to_gemini(self):
-        """OPENAI absent mais GOOGLE valide → fallback Gemini Flash."""
-        stdout, stderr, rc = self._run_detect(
-            env_content=f"GOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n"
-        )
-        self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--use_gemini --eco")
-        self.assertIn("fallback Gemini", stderr)
+    def test_paid_api_is_refused_without_explicit_opt_in(self):
+        for provider in ("openai", "gemini", "grok"):
+            with self.subTest(provider=provider):
+                stdout, stderr, rc = self._run_detect(
+                    env_content=f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n",
+                    exported_env={"REGEN_PROVIDER": provider},
+                )
+                self.assertEqual(rc, 1)
+                self.assertEqual(stdout, "")
+                self.assertIn("FACTURÉE", stderr)
+                self.assertIn("REGEN_ALLOW_PAID_API=1", stderr)
 
-    def test_both_placeholders_aborts(self):
-        """Les deux clés en placeholder → exit 1 + ERROR (aucun flag bidon émis)."""
-        stdout, stderr, rc = self._run_detect(
-            env_content=(
-                "OPENAI_API_KEY=votre-cle-api-openai-par-defaut\n"
-                "GOOGLE_API_KEY=votre-cle-api-gemini-par-defaut\n"
-            )
-        )
-        self.assertEqual(rc, 1)
-        self.assertEqual(stdout, "")
-        self.assertIn("ERROR", stderr)
+    def test_paid_api_with_named_opt_in_emits_flags_and_warns(self):
+        expected = {"openai": "--eco", "gemini": "--use_gemini --eco", "grok": "--use_grok --eco"}
+        for provider, flags in expected.items():
+            with self.subTest(provider=provider):
+                stdout, stderr, rc = self._run_detect(
+                    exported_env={"REGEN_PROVIDER": provider, "REGEN_ALLOW_PAID_API": "1"}
+                )
+                self.assertEqual(rc, 0)
+                self.assertEqual(stdout, flags)
+                self.assertIn("FACTURÉ", stderr)
 
-    def test_regen_provider_override_openai(self):
-        """REGEN_PROVIDER=openai force OpenAI même si seul Gemini est valide."""
-        stdout, stderr, rc = self._run_detect(
-            env_content=f"GOOGLE_API_KEY={self._FAKE_GEMINI_KEY}\n",
-            exported_env={"REGEN_PROVIDER": "openai"},
+    def test_opt_in_value_must_be_exactly_one(self):
+        stdout, _stderr, rc = self._run_detect(
+            exported_env={"REGEN_PROVIDER": "openai", "REGEN_ALLOW_PAID_API": "yes"}
         )
-        self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--eco")
-        self.assertIn("REGEN_PROVIDER=openai", stderr)
+        self.assertEqual((rc, stdout), (1, ""))
 
-    def test_regen_provider_override_gemini(self):
-        """REGEN_PROVIDER=gemini force Gemini même si OpenAI est dispo."""
+    def test_grok_cli_subscription(self):
+        stdout, stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": "grok_cli"})
+        self.assertEqual((rc, stdout), (0, "--use_grok_cli --eco"))
+        self.assertIn("abonnement Grok", stderr)
+
+    def test_opencode_requires_a_model(self):
+        stdout, stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": "opencode"})
+        self.assertEqual((rc, stdout), (1, ""))
+        self.assertIn("REGEN_MODEL", stderr)
+
+    def test_opencode_with_model(self):
         stdout, stderr, rc = self._run_detect(
-            env_content=f"OPENAI_API_KEY={self._FAKE_OPENAI_KEY}\n",
-            exported_env={"REGEN_PROVIDER": "gemini"},
+            exported_env={"REGEN_PROVIDER": "opencode", "REGEN_MODEL": "ollama/qwen2.5:7b"}
         )
-        self.assertEqual(rc, 0)
-        self.assertEqual(stdout, "--use_gemini --eco")
-        self.assertIn("REGEN_PROVIDER=gemini", stderr)
+        self.assertEqual((rc, stdout), (0, "--use_opencode"))
+        self.assertIn("ollama/qwen2.5:7b", stderr)
+
+    def test_unknown_provider_aborts_instead_of_guessing(self):
+        """L'ancienne version avertissait puis retombait sur l'auto-détection,
+        donc sur l'API OpenAI : une faute de frappe coûtait de l'argent."""
+        stdout, stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": "opnai"})
+        self.assertEqual((rc, stdout), (1, ""))
+        self.assertIn("inconnu", stderr)
+
+    def test_openrouter_is_a_paid_api(self):
+        """OpenRouter facture à l'usage : même règle que les autres API, la
+        dérogation doit être nommée."""
+        stdout, stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": "openrouter"})
+        self.assertEqual((rc, stdout), (1, ""))
+        self.assertIn("FACTURÉE", stderr)
+
+    def test_openrouter_requires_a_model_even_with_the_waiver(self):
+        stdout, stderr, rc = self._run_detect(
+            exported_env={"REGEN_PROVIDER": "openrouter", "REGEN_ALLOW_PAID_API": "1"}
+        )
+        self.assertEqual((rc, stdout), (1, ""))
+        self.assertIn("REGEN_MODEL", stderr)
+
+    def test_openrouter_with_waiver_and_model(self):
+        stdout, stderr, rc = self._run_detect(
+            exported_env={
+                "REGEN_PROVIDER": "openrouter",
+                "REGEN_ALLOW_PAID_API": "1",
+                "REGEN_MODEL": "z-ai/glm-5.2",
+            }
+        )
+        self.assertEqual((rc, stdout), (0, "--use_openrouter"))
+        self.assertIn("FACTURÉ À L'USAGE", stderr)
 
 
 class TestNewsPipelinePerProvider(unittest.TestCase):
@@ -1087,7 +1137,7 @@ locale: 'pl'
                     "gemini": "gemini-3-flash-preview",
                 }[provider],
             )
-            config = translate._TranslationConfig(
+            config = pipeline._TranslationConfig(
                 client=mock_client_factory(),
                 args=args,
                 use_mistral=(provider == "mistral"),
@@ -1184,7 +1234,7 @@ locale: 'pl'
                 news=True,
                 model="claude-haiku-4-5-20251001",
             )
-            config = translate._TranslationConfig(
+            config = pipeline._TranslationConfig(
                 client=client,
                 args=args,
                 use_mistral=False,
@@ -1211,16 +1261,16 @@ class TestRestoreNewsQuotesCount(unittest.TestCase):
             '<NEWSQUOTE id="0"/>\n>\n> 🇵🇱 _trad._\n\n<NEWSQUOTE id="0"/>\n>\n> Doublon parasite.\n'
         )
         with self.assertRaisesRegex(RuntimeError, r"restauré 2 fois"):
-            translate._restore_news_quotes(translated, ["> Quote source EN."])
+            news._restore_news_quotes(translated, ["> Quote source EN."])
 
     def test_zero_placeholder_raises(self):
         translated = "Sortie qui a perdu le placeholder.\n"
         with self.assertRaisesRegex(RuntimeError, r"restauré 0 fois"):
-            translate._restore_news_quotes(translated, ["> Quote source EN."])
+            news._restore_news_quotes(translated, ["> Quote source EN."])
 
     def test_exactly_one_placeholder_passes(self):
         translated = '<NEWSQUOTE id="0"/>\n>\n> 🇵🇱 _trad._\n'
-        out = translate._restore_news_quotes(translated, ["> Quote source EN."])
+        out = news._restore_news_quotes(translated, ["> Quote source EN."])
         self.assertIn("> Quote source EN.", out)
         self.assertNotIn("<NEWSQUOTE", out)
 
@@ -1237,7 +1287,7 @@ class TestValidateNewsPost(unittest.TestCase):
         translated = "Sortie sans la citation source.\n"
         args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"citation EN brute non restaurée"):
-            translate._validate_news_post(
+            news._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=[],
@@ -1248,7 +1298,7 @@ class TestValidateNewsPost(unittest.TestCase):
         translated = "> A decade in the making.\n> 🇵🇱 _trad_\n"
         args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"URL d'attribution.*manquante"):
-            translate._validate_news_post(
+            news._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=["https://x.com/google"],
@@ -1259,7 +1309,7 @@ class TestValidateNewsPost(unittest.TestCase):
         translated = '> A decade in the making.\n> 🇵🇱 _trad_\n<NEWSQUOTE id="1"/>\n'
         args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
-            translate._validate_news_post(
+            news._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=[],
@@ -1270,7 +1320,7 @@ class TestValidateNewsPost(unittest.TestCase):
         translated = "> A decade in the making.\n> 🇵🇱 _trad_\n#NEWSQUOTE1#\n"
         args = self._args()
         with self.assertRaisesRegex(RuntimeError, r"placeholder news résiduel"):
-            translate._validate_news_post(
+            news._validate_news_post(
                 translated,
                 original_quotes=["> A decade in the making."],
                 attribution_urls=[],
@@ -1313,14 +1363,14 @@ class TestMainExitsOnRealSilentFailure(unittest.TestCase):
 
             with (
                 patch.dict(os.environ, _fake_openai_env()),
-                patch("aipmt.translate.OpenAI", return_value=mock_instance),
+                patch("aipmt.providers.openai.OpenAI", return_value=mock_instance),
                 patch(
                     "sys.argv",
                     ["aipmt", "--file", src_path, "--target_dir", tmpdir],
                 ),
             ):
                 with self.assertRaises(SystemExit) as cm:
-                    translate.main()
+                    cli.main()
                 self.assertEqual(cm.exception.code, 1)
 
             dst = os.path.join(tmpdir, "input-en.md")
@@ -1482,14 +1532,14 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Une décennie en gestation._\n"
             "> — [@GoogleAI](https://x.com/g)\n"
         )
-        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        protected, quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertIn('<NEWSQUOTE id="0"/>', protected)
         self.assertEqual(quotes, ["> A decade in the making."])
         self.assertEqual(urls, ["https://x.com/g"])
 
     def test_extract_without_attribution(self):
         content = "## Section\n\n> A short EN quote.\n>\n> 🇫🇷 _Une courte citation EN._\n"
-        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        protected, quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertIn('<NEWSQUOTE id="0"/>', protected)
         self.assertEqual(quotes, ["> A short EN quote."])
         self.assertEqual(urls, [])
@@ -1508,7 +1558,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Citation traduite multi-ligne._\n"
             "> — [@source](https://x.com/source)\n"
         )
-        protected, quotes, _urls = translate._protect_news_quotes(content, self._args())
+        protected, quotes, _urls = news._protect_news_quotes(content, self._args())
         self.assertEqual(len(quotes), 1)
         # Les 3 lignes EN doivent être capturées intégralement dans le quote
         self.assertIn("First line of the EN quote.", quotes[0])
@@ -1532,7 +1582,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Citation B._\n"
             "> — [@b](https://x.com/b)\n"
         )
-        protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        protected, quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertEqual(len(quotes), 2)
         self.assertIn('<NEWSQUOTE id="0"/>', protected)
         self.assertIn('<NEWSQUOTE id="1"/>', protected)
@@ -1541,7 +1591,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
     def test_news_disabled_passthrough(self):
         content = "> Looks like a quote\n>\n> 🇫🇷 _trad_\n"
         args = _base_args(news=False)
-        protected, quotes, urls = translate._protect_news_quotes(content, args)
+        protected, quotes, urls = news._protect_news_quotes(content, args)
         self.assertEqual(protected, content)
         self.assertEqual(quotes, [])
         self.assertEqual(urls, [])
@@ -1563,7 +1613,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Une citation en FR._\n"
             "> — Vasek Mlejnsky, CEO E2B (relayé par [@genspark_ai sur X](https://x.com/genspark_ai/status/2052602512360808652))\n"
         )
-        _protected, quotes, urls = translate._protect_news_quotes(content, self._args())
+        _protected, quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertEqual(quotes, ["> A quote in EN."])
         # Extraction propre : juste l'URL, sans préfixe FR ni `)` tronqué.
         self.assertEqual(urls, ["https://x.com/genspark_ai/status/2052602512360808652"])
@@ -1579,7 +1629,7 @@ class TestNewsCitationExtraction(unittest.TestCase):
             "> 🇫🇷 _Citation._\n"
             "> — via [@source officielle](https://example.com/post/42)\n"
         )
-        _protected, _quotes, urls = translate._protect_news_quotes(content, self._args())
+        _protected, _quotes, urls = news._protect_news_quotes(content, self._args())
         self.assertEqual(urls, ["https://example.com/post/42"])
 
 
@@ -1612,7 +1662,7 @@ class TestGeminiEdgeCases(unittest.TestCase):
         client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"no candidates.*prompt_feedback"):
-            translate._call_gemini(client, args, "prompt", "segment")
+            gemini._call_gemini(client, args, "prompt", "segment")
 
     def test_gemini_blocked_response_raises(self):
         gen_model = MagicMock()
@@ -1621,7 +1671,7 @@ class TestGeminiEdgeCases(unittest.TestCase):
         client.models.generate_content = gen_model.generate_content
         args = _base_args(model="gemini-3-flash-preview")
         with self.assertRaisesRegex(RuntimeError, r"Gemini response has no text|blocked"):
-            translate._call_gemini(client, args, "prompt", "segment")
+            gemini._call_gemini(client, args, "prompt", "segment")
 
 
 class TestOpenAINoneContent(unittest.TestCase):
@@ -1636,7 +1686,7 @@ class TestOpenAINoneContent(unittest.TestCase):
         mock_client.chat.completions.create.return_value = response
         args = _base_args()
         with self.assertRaisesRegex(RuntimeError, r"message\.content=None.*refusal"):
-            translate._call_openai(mock_client, args, "prompt", "segment", False)
+            openai._call_openai(mock_client, args, "prompt", "segment", False)
 
 
 class TestComposeWithNotesBottomTolerantToMalformedFM(unittest.TestCase):
@@ -1649,7 +1699,7 @@ class TestComposeWithNotesBottomTolerantToMalformedFM(unittest.TestCase):
         args = _base_args()
         args.note_position = "bottom"
         args.note_format = "legacy"
-        out = translate._compose_with_notes(content, args, "Note traduite", "legacy")
+        out = notes._compose_with_notes(content, args, "Note traduite", "legacy")
         self.assertIn("**Note traduite**", out)
         self.assertTrue(out.endswith("\n"))
 
@@ -1659,7 +1709,7 @@ class TestComposeWithNotesBottomTolerantToMalformedFM(unittest.TestCase):
         args.note_position = "top"
         args.note_format = "legacy"
         with self.assertRaisesRegex(RuntimeError, r"malformed frontmatter"):
-            translate._compose_with_notes(content, args, "Note traduite", "legacy")
+            notes._compose_with_notes(content, args, "Note traduite", "legacy")
 
 
 if __name__ == "__main__":

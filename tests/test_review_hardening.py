@@ -26,9 +26,12 @@ from types import SimpleNamespace
 from typing import ClassVar
 from unittest.mock import MagicMock, patch
 
+from google.genai import errors as genai_errors
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
+from aipmt import naming, news
+from aipmt.providers import base, codex, gemini, grok, opencode, registry
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -45,7 +48,7 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
         import argparse
 
         parser = argparse.ArgumentParser()
-        translate._add_provider_args(parser)
+        registry._add_provider_args(parser)
         return parser
 
     def test_two_provider_flags_are_refused(self):
@@ -55,6 +58,8 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
             ["--use_codex", "--use_claude"],
             ["--use_grok", "--use_grok_cli"],
             ["--use_gemini", "--use_grok"],
+            ["--use_opencode", "--use_codex"],
+            ["--use_opencode", "--use_mistral"],
         ):
             with self.subTest(pair=pair), self.assertRaises(SystemExit):
                 parser.parse_args(pair)
@@ -68,6 +73,7 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
             "--use_grok",
             "--use_grok_cli",
             "--use_codex",
+            "--use_opencode",
         ):
             with self.subTest(flag=flag):
                 args = parser.parse_args([flag])
@@ -75,7 +81,7 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
 
     def test_no_provider_flag_defaults_to_openai(self):
         args = self._parser().parse_args([])
-        self.assertEqual(translate._resolve_provider(args), "openai")
+        self.assertEqual(registry._resolve_provider(args), "openai")
 
 
 class TestGrokStopReasonIsMandatory(unittest.TestCase):
@@ -92,23 +98,23 @@ class TestGrokStopReasonIsMandatory(unittest.TestCase):
 
     def test_missing_stop_reason_is_refused(self):
         args = self._args()
-        with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload({"text": "trad"}, args)
+        with self.assertRaises(grok._GrokCallError) as ctx:
+            grok._grok_check_payload({"text": "trad"}, args)
         self.assertIn("stopReason", str(ctx.exception))
 
     def test_renamed_stop_reason_field_is_refused(self):
         payload = {"type": "result", "text": "trad", "stop_reason": "max_turn_requests"}
         args = self._args()
-        with self.assertRaises(translate._GrokCallError):
-            translate._grok_check_payload(payload, args)
+        with self.assertRaises(grok._GrokCallError):
+            grok._grok_check_payload(payload, args)
 
     def test_null_stop_reason_is_refused(self):
         args = self._args()
-        with self.assertRaises(translate._GrokCallError):
-            translate._grok_check_payload({"text": "t", "stopReason": None}, args)
+        with self.assertRaises(grok._GrokCallError):
+            grok._grok_check_payload({"text": "t", "stopReason": None}, args)
 
     def test_end_turn_still_accepted(self):
-        translate._grok_check_payload({"text": "t", "stopReason": "end_turn"}, self._args())
+        grok._grok_check_payload({"text": "t", "stopReason": "end_turn"}, self._args())
 
     def test_turn_budget_exhaustion_is_not_a_rate_limit(self):
         """`max_turn_requests` = budget de tours épuisé, pas un rate limit.
@@ -117,8 +123,8 @@ class TestGrokStopReasonIsMandatory(unittest.TestCase):
         rejouer à l'identique une erreur déterministe (`--max-turns` inchangé).
         """
         args = self._args()
-        with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload({"text": "t", "stopReason": "max_turn_requests"}, args)
+        with self.assertRaises(grok._GrokCallError) as ctx:
+            grok._grok_check_payload({"text": "t", "stopReason": "max_turn_requests"}, args)
         self.assertFalse(ctx.exception.rate_limited)
 
     def test_quota_marker_is_not_treated_as_rate_limit(self):
@@ -129,15 +135,15 @@ class TestGrokStopReasonIsMandatory(unittest.TestCase):
         """
         payload = {"type": "error", "message": "quota exhausted, upgrade your plan"}
         args = self._args()
-        with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload(payload, args)
+        with self.assertRaises(grok._GrokCallError) as ctx:
+            grok._grok_check_payload(payload, args)
         self.assertFalse(ctx.exception.rate_limited)
 
     def test_real_rate_limit_is_still_retryable(self):
         payload = {"type": "error", "message": "429 Too Many Requests — rate limit reached"}
         args = self._args()
-        with self.assertRaises(translate._GrokCallError) as ctx:
-            translate._grok_check_payload(payload, args)
+        with self.assertRaises(grok._GrokCallError) as ctx:
+            grok._grok_check_payload(payload, args)
         self.assertTrue(ctx.exception.rate_limited)
 
 
@@ -159,7 +165,7 @@ class TestNewsCitationRegexIsLinear(unittest.TestCase):
 
     def _elapsed(self, text):
         start = time.perf_counter()
-        translate._NEWS_CITATION_REGEX.search(text)
+        news._NEWS_CITATION_REGEX.search(text)
         return time.perf_counter() - start
 
     def test_indented_quote_lines_stay_linear(self):
@@ -184,7 +190,7 @@ class TestNewsCitationRegexIsLinear(unittest.TestCase):
             "> 🇫🇷 _La traduction._\n"
             "> — [@source](https://x.com/source/1)"
         )
-        match = translate._NEWS_CITATION_REGEX.search(text)
+        match = news._NEWS_CITATION_REGEX.search(text)
         self.assertIsNotNone(match)
         body = match.group(1)
         self.assertIn("Premier paragraphe EN.", body)
@@ -193,7 +199,7 @@ class TestNewsCitationRegexIsLinear(unittest.TestCase):
 
     def test_attribution_line_is_never_absorbed_into_body(self):
         text = "> EN quote.\n>\n> 🇫🇷 _Trad._\n> — [@a](https://x.com/a/1)"
-        match = translate._NEWS_CITATION_REGEX.search(text)
+        match = news._NEWS_CITATION_REGEX.search(text)
         self.assertIsNotNone(match)
         self.assertNotIn("—", match.group(1))
         self.assertEqual(match.group(3), "> — [@a](https://x.com/a/1)")
@@ -212,7 +218,7 @@ class TestCiRejectionNamesTheRightProvider(unittest.TestCase):
             patch.dict(os.environ, {"CI": "1"}, clear=False),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._codex_reject_ci_environment(flag="--use_grok_cli")
+            base._codex_reject_ci_environment(flag="--use_grok_cli")
         message = str(ctx.exception)
         self.assertIn("XAI_API_KEY", message)
         self.assertNotIn("OPENAI_API_KEY", message)
@@ -222,7 +228,7 @@ class TestCiRejectionNamesTheRightProvider(unittest.TestCase):
             patch.dict(os.environ, {"CI": "1"}, clear=False),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._codex_reject_ci_environment(flag="--use_codex")
+            base._codex_reject_ci_environment(flag="--use_codex")
         self.assertIn("OPENAI_API_KEY", str(ctx.exception))
 
 
@@ -236,10 +242,10 @@ class TestGeminiThinkingLevelIsMemoized(unittest.TestCase):
     """
 
     def setUp(self):
-        translate._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
+        gemini._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
 
     def tearDown(self):
-        translate._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
+        gemini._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
 
     def _client_refusing_first(self, calls):
         def generate_content(model, contents, config):
@@ -249,7 +255,7 @@ class TestGeminiThinkingLevelIsMemoized(unittest.TestCase):
             level = str(getattr(raw, "value", raw)).lower() if raw is not None else None
             calls.append(level)
             if level == "minimal":
-                raise translate.genai_errors.ClientError(
+                raise genai_errors.ClientError(
                     400, {"error": {"message": "Thinking level MINIMAL is not supported"}}
                 )
             return SimpleNamespace(
@@ -265,10 +271,10 @@ class TestGeminiThinkingLevelIsMemoized(unittest.TestCase):
         client = self._client_refusing_first(calls)
         args = Namespace(model="gemini-3.7-flash", target_lang="en", source_lang="fr")
 
-        translate._call_gemini(client, args, "P", "SEGMENT 1")
+        gemini._call_gemini(client, args, "P", "SEGMENT 1")
         self.assertEqual(calls, ["minimal", "low"], "le 1er segment descend la cascade")
 
-        translate._call_gemini(client, args, "P", "SEGMENT 2")
+        gemini._call_gemini(client, args, "P", "SEGMENT 2")
         self.assertEqual(
             calls,
             ["minimal", "low", "low"],
@@ -321,13 +327,23 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
 
     def test_codex_subprocess_receives_no_secret(self):
         with patch.dict(os.environ, self.SECRETS, clear=False):
-            env = translate._codex_env(translate._CodexClient(binary="/bin/true"))
+            env = codex._codex_env(codex._CodexClient(binary="/bin/true"))
         self.assertEqual(self._leaked(env), [])
 
     def test_grok_subprocess_receives_no_secret(self):
         with patch.dict(os.environ, self.SECRETS, clear=False):
-            env = translate._grok_env()
+            env = grok._grok_env()
         self.assertEqual(self._leaked(env), [])
+
+    def test_opencode_subprocess_receives_no_secret_but_its_own_key(self):
+        """OPENCODE_API_KEY est la clé d'OpenCode LUI-MÊME (passerelle Zen,
+        abonnement Go) : l'équivalent de son auth.json, adressée par son nom.
+        C'est la seule exception, et elle est nominative."""
+        with patch.dict(os.environ, {**self.SECRETS, "OPENCODE_API_KEY": _MARQUEUR}, clear=False):
+            env = opencode._opencode_env("prompt")
+        self.assertEqual(self._leaked(env), [])
+        self.assertEqual(env.get("OPENCODE_API_KEY"), _MARQUEUR)
+        self.assertEqual(opencode.OPENCODE_KEPT_ENV_VARS, ("OPENCODE_API_KEY",))
 
     def test_variables_needed_by_the_cli_survive(self):
         """Un filtrage trop large casserait les deux CLI.
@@ -337,8 +353,9 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
         """
         with patch.dict(os.environ, {"PATH": "/usr/bin", "HOME": "/home/u"}, clear=False):
             for env in (
-                translate._codex_env(translate._CodexClient(binary="/bin/true")),
-                translate._grok_env(),
+                codex._codex_env(codex._CodexClient(binary="/bin/true")),
+                grok._grok_env(),
+                opencode._opencode_env("prompt"),
             ):
                 self.assertEqual(env.get("PATH"), "/usr/bin")
                 self.assertEqual(env.get("HOME"), "/home/u")
@@ -377,29 +394,38 @@ class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
     def test_path_separator_in_target_lang_is_refused(self):
         args = self._args(target_lang="../../../tmp/evasion")
         with self.assertRaises(ValueError) as ctx:
-            translate._reject_path_separators_in_components(args)
+            naming._reject_path_separators_in_components(args)
         self.assertIn("target_lang", str(ctx.exception))
 
-    def test_path_separator_in_model_is_refused(self):
-        args = self._args(model="../../evil")
+    def test_path_separator_in_model_is_neutralized_not_refused(self):
+        """`provider/modèle` est la forme légitime d'OpenCode : le « / » n'est
+        plus refusé mais remplacé AVANT interpolation, si bien qu'une tentative
+        de traversée reste un simple nom de fichier sous la cible. Le contrôle
+        porte sur la valeur interpolée ; `..` seul y reste refusé."""
+        args = self._args(model="../../evil", include_model=True, target_lang="en")
+        naming._reject_path_separators_in_components(args)
+        name = naming._resolve_single_output_filename(args)
+        self.assertEqual(name, "doc-en-..-..-evil.md")
+        self.assertNotIn(os.sep, name)
+        dotdot = self._args(model="..")
         with self.assertRaises(ValueError) as ctx:
-            translate._reject_path_separators_in_components(args)
+            naming._reject_path_separators_in_components(dotdot)
         self.assertIn("model", str(ctx.exception))
 
     def test_bare_dotdot_is_refused(self):
         args = self._args(target_lang="..")
         with self.assertRaises(ValueError):
-            translate._reject_path_separators_in_components(args)
+            naming._reject_path_separators_in_components(args)
 
     def test_ordinary_values_pass(self):
-        translate._reject_path_separators_in_components(self._args())
-        translate._reject_path_separators_in_components(self._args(target_lang="zh-Hant"))
+        naming._reject_path_separators_in_components(self._args())
+        naming._reject_path_separators_in_components(self._args(target_lang="zh-Hant"))
 
     def test_perimeter_guard_accepts_paths_inside(self):
         with tempfile.TemporaryDirectory() as base:
             inside = os.path.join(base, "sub", "doc-en.md")
             self.assertEqual(
-                translate._ensure_within_directory(base, inside),
+                naming._ensure_within_directory(base, inside),
                 os.path.realpath(inside),
             )
 
@@ -412,7 +438,7 @@ class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
         with tempfile.TemporaryDirectory() as base:
             outside = os.path.join(base, "..", "EVADE.md")
             with self.assertRaises(ValueError) as ctx:
-                translate._ensure_within_directory(base, outside)
+                naming._ensure_within_directory(base, outside)
         self.assertIn("sort du répertoire cible", str(ctx.exception))
 
 

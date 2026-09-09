@@ -63,38 +63,67 @@ jobs:
       # « CoverageWarning: Module ... was never imported » sur stderr, unittest
       # sort en 0, et `coverage xml` produit quand même un rapport — amputé.
       # Rien dans le step ci-dessus ne transforme cet avertissement en échec.
-      # Un simple renommage de fichier ferait donc passer le rapport de 1453 à
-      # 141 statements, et le projet apparaîtrait sain parce qu'il ne serait
-      # presque plus analysé. Mesuré : le module principal pèse 1312 des 1453
-      # statements, soit 90 % du rapport.
+      # Un simple renommage de fichier ferait donc passer le rapport de 2214 à
+      # 440 statements, et le projet apparaîtrait sain parce qu'il ne serait
+      # presque plus analysé. Mesuré le 2026-09-08 : le paquet pèse 1774 des
+      # 2214 statements.
+      #
+      # Trois planchers, parce qu'un seul avait un angle mort :
+      #   - le total attrape un effondrement global ;
+      #   - la somme sous src/aipmt/ attrape la sortie du paquet de --source,
+      #     sans coder ni un nom de fichier ni une taille de module (l'ancien
+      #     plancher « plus gros fichier ≥ 1000 » supposait un module unique) ;
+      #   - chaque module SUIVI du paquet doit avoir été exécuté : avec
+      #     --source sur un répertoire, coverage liste aussi un module jamais
+      #     importé, avec zéro ligne touchée — « présent dans le rapport » ne
+      #     prouve donc pas « mesuré ». __main__.py est exclu : il ne s'exécute
+      #     que par sous-processus, hors de portée de coverage.
       - name: Plancher de couverture (le rapport doit être complet)
         run: |
           python - <<'EOF'
+          import subprocess
           import sys
           import xml.etree.ElementTree as ET
 
           FLOOR = 1000
+          PACKAGE_FLOOR = 1550
           classes = ET.parse("coverage.xml").getroot().findall(".//class")
-          per_file = {c.get("filename"): len(c.findall("lines/line")) for c in classes}
+          per_file = {}
+          executed = {}
+          for c in classes:
+              lines = c.findall("lines/line")
+              per_file[c.get("filename")] = len(lines)
+              executed[c.get("filename")] = sum(1 for line in lines if int(line.get("hits", "0")) > 0)
           total = sum(per_file.values())
-          biggest, biggest_n = max(per_file.items(), key=lambda kv: kv[1], default=("(aucun)", 0))
+          package_total = sum(n for f, n in per_file.items() if f.startswith("src/aipmt/"))
 
-          print(f"{total} statements dans {len(per_file)} fichier(s)")
+          print(f"{total} statements dans {len(per_file)} fichier(s), {package_total} sous src/aipmt/")
           for name, n in sorted(per_file.items(), key=lambda kv: -kv[1]):
-              print(f"  {n:5d}  {name}")
+              print(f"  {n:5d}  {name}  ({executed[name]} exécutées)")
 
-          # Deux planchers plutôt qu'un : le total attrape un effondrement
-          # global, le plus gros fichier attrape la sortie du module principal
-          # du périmètre — sans coder son chemin en dur, donc sans devoir être
-          # réécrit à chaque réorganisation du dépôt.
+          tracked = subprocess.run(
+              ["git", "ls-files", "src/aipmt/*.py"], capture_output=True, text=True, check=True
+          ).stdout.split()
+          # Un module sans instruction (docstring seule, ex. providers/__init__.py)
+          # n'a rien à exécuter : seul un module qui a des lignes et zéro exécutée
+          # est « jamais mesuré ». Mesuré en CI : le premier plancher échouait sur
+          # un __init__ réduit à sa docstring.
+          silent = [
+              f for f in tracked
+              if not f.endswith("__main__.py")
+              and (f not in per_file or (per_file[f] > 0 and executed.get(f, 0) == 0))
+          ]
+
           if total < FLOOR:
               sys.exit(f"✗ {total} statements seulement (plancher {FLOOR}) : le rapport est amputé.")
-          if biggest_n < FLOOR:
+          if package_total < PACKAGE_FLOOR:
               sys.exit(
-                  f"✗ le plus gros fichier mesuré est {biggest} avec {biggest_n} statements "
-                  f"(plancher {FLOOR}) : le module principal est sorti de --source."
+                  f"✗ {package_total} statements sous src/aipmt/ (plancher {PACKAGE_FLOOR}) : "
+                  "le paquet est sorti de --source."
               )
-          print(f"✓ rapport complet — {biggest} pèse {biggest_n} statements")
+          if silent:
+              sys.exit(f"✗ module(s) du paquet jamais exécutés par la suite : {' '.join(silent)}")
+          print(f"✓ rapport complet — {package_total} statements mesurés sur {len(tracked)} modules du paquet")
           EOF
 
       - name: SonarQube Scan

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import subprocess  # nosec B404 — la suite simule les CLI, elle n'en lance aucun
 import sys
 import types
@@ -22,11 +23,14 @@ from argparse import Namespace
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+from google.genai import errors as genai_errors
+
 # Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
+from aipmt import markdown, news
+from aipmt.providers import anthropic, codex, gemini, openai, registry
 
 
 def _args(**overrides):
@@ -45,7 +49,7 @@ def _args(**overrides):
 def _client(**overrides):
     defaults = {"binary": "codex", "timeout": 600, "reasoning_effort": "medium"}
     defaults.update(overrides)
-    return translate._CodexClient(**defaults)
+    return codex._CodexClient(**defaults)
 
 
 def _jsonl(*events):
@@ -109,16 +113,16 @@ class TestCodexCall(unittest.TestCase):
         quand le prompt est en argv, donc `input=` doit toujours être fourni
         (sans quoi le CLI attend jusqu'au timeout sans appeler le modèle)."""
         fake = _FakePopen(final_message="Translated body")
-        with patch("aipmt.translate.subprocess.Popen", fake):
-            out = translate._call_codex(_client(), _args(), "PROMPT", "SEGMENT")
+        with patch("subprocess.Popen", fake):
+            out = codex._call_codex(_client(), _args(), "PROMPT", "SEGMENT")
         self.assertEqual(out, "Translated body")
         self.assertEqual(fake.communicate_kwargs["input"], "SEGMENT")
         self.assertTrue(fake.kwargs["start_new_session"])
 
     def test_argv_carries_safety_and_model_flags(self):
         fake = _FakePopen()
-        with patch("aipmt.translate.subprocess.Popen", fake):
-            translate._call_codex(_client(reasoning_effort="low"), _args(), "PROMPT", "SEG")
+        with patch("subprocess.Popen", fake):
+            codex._call_codex(_client(reasoning_effort="low"), _args(), "PROMPT", "SEG")
         argv = fake.argv
         self.assertEqual(argv[:2], ["codex", "exec"])
         for flag in ("--sandbox", "--skip-git-repo-check", "--ephemeral", "--ignore-user-config"):
@@ -130,8 +134,8 @@ class TestCodexCall(unittest.TestCase):
     def test_prompt_carries_agent_contract(self):
         """Sans ce contrat, l'agent peut préfixer sa réponse d'un commentaire."""
         fake = _FakePopen()
-        with patch("aipmt.translate.subprocess.Popen", fake):
-            translate._call_codex(_client(), _args(), "PROMPT", "SEG")
+        with patch("subprocess.Popen", fake):
+            codex._call_codex(_client(), _args(), "PROMPT", "SEG")
         self.assertTrue(fake.argv[2].startswith("PROMPT"))
         self.assertIn("Réponds UNIQUEMENT", fake.argv[2])
 
@@ -143,9 +147,9 @@ class TestCodexCall(unittest.TestCase):
         env = {"OPENAI_API_KEY": "sk-should-not-leak", "CODEX_API_KEY": "x", "PATH": "/usr/bin"}
         with (
             patch.dict(os.environ, env, clear=False),
-            patch("aipmt.translate.subprocess.Popen", fake),
+            patch("subprocess.Popen", fake),
         ):
-            translate._call_codex(_client(), _args(), "PROMPT", "SEG")
+            codex._call_codex(_client(), _args(), "PROMPT", "SEG")
         child_env = fake.kwargs["env"]
         self.assertNotIn("OPENAI_API_KEY", child_env)
         self.assertNotIn("CODEX_API_KEY", child_env)
@@ -157,10 +161,10 @@ class TestCodexCall(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", fake),
+            patch("subprocess.Popen", fake),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_codex(client, args, "PROMPT", "SEG")
+            codex._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("sans écrire de message final", str(ctx.exception))
 
     def test_turn_failed_raises_even_with_returncode_zero(self):
@@ -183,10 +187,10 @@ class TestCodexCall(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", fake),
+            patch("subprocess.Popen", fake),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_codex(client, args, "PROMPT", "SEG")
+            codex._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("not supported when using Codex", str(ctx.exception))
 
     def test_nonzero_returncode_raises_with_stderr_tail(self):
@@ -194,10 +198,10 @@ class TestCodexCall(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", fake),
+            patch("subprocess.Popen", fake),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_codex(client, args, "PROMPT", "SEG")
+            codex._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("code 1", str(ctx.exception))
 
     def test_timeout_kills_process_group(self):
@@ -208,15 +212,19 @@ class TestCodexCall(unittest.TestCase):
         client = _client(timeout=42)
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", fake),
-            patch("aipmt.translate.os.getpgid", return_value=4242),
-            patch("aipmt.translate.os.killpg") as killpg,
+            patch("subprocess.Popen", fake),
+            patch("os.getpgid", return_value=4242),
+            patch("os.killpg") as killpg,
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._call_codex(client, args, "PROMPT", "SEG")
+            codex._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("timeout après 42s", str(ctx.exception))
-        killpg.assert_called_once()
-        self.assertEqual(killpg.call_args[0][0], 4242)
+        # SIGTERM, délai de grâce, puis SIGKILL quoi qu'il arrive : le shim meurt
+        # proprement sur SIGTERM, son petit-fils Rust pas forcément.
+        self.assertEqual(
+            [c.args for c in killpg.call_args_list],
+            [(4242, signal.SIGTERM), (4242, signal.SIGKILL)],
+        )
 
 
 class TestCodexRateLimitBackoff(unittest.TestCase):
@@ -232,10 +240,10 @@ class TestCodexRateLimitBackoff(unittest.TestCase):
             return fake(argv, **kwargs)
 
         with (
-            patch("aipmt.translate.subprocess.Popen", popen_factory),
-            patch("aipmt.translate.time.sleep") as sleep,
+            patch("subprocess.Popen", popen_factory),
+            patch("time.sleep") as sleep,
         ):
-            out = translate._call_codex(_client(), _args(), "PROMPT", "SEG")
+            out = codex._call_codex(_client(), _args(), "PROMPT", "SEG")
         self.assertEqual(out, "Done")
         self.assertEqual(len(attempts), 2)
         sleep.assert_called_once()
@@ -252,26 +260,29 @@ class TestCodexRateLimitBackoff(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate.subprocess.Popen", popen_factory),
+            patch("subprocess.Popen", popen_factory),
             self.assertRaises(RuntimeError),
         ):
-            translate._call_codex(client, args, "PROMPT", "SEG")
+            codex._call_codex(client, args, "PROMPT", "SEG")
         self.assertEqual(len(calls), 1)
 
 
 class TestCodexInit(unittest.TestCase):
     def test_defaults_and_eco_models(self):
         with (
-            patch("aipmt.translate._codex_preflight"),
+            patch("aipmt.providers.codex._codex_preflight") as fake_preflight,
             patch.dict(os.environ, {"CI": "", "GITHUB_ACTIONS": ""}, clear=False),
         ):
             args = _args(model=None)
-            translate._init_codex_client(args)
-            self.assertEqual(args.model, translate.DEFAULT_MODEL_CODEX)
+            codex._init_codex_client(args)
+            self.assertEqual(args.model, codex.DEFAULT_MODEL_CODEX)
 
             eco = _args(model=None, eco=True)
-            translate._init_codex_client(eco)
-            self.assertEqual(eco.model, translate.ECO_MODEL_CODEX)
+            codex._init_codex_client(eco)
+            self.assertEqual(eco.model, codex.ECO_MODEL_CODEX)
+        # Deux initialisations, deux préflights : un patch mort lancerait
+        # `codex login status` pour de vrai, vert ici, rouge sur une CI.
+        self.assertEqual(fake_preflight.call_count, 2)
 
     def test_refuses_ci_environment(self):
         args = _args(model=None)
@@ -279,7 +290,7 @@ class TestCodexInit(unittest.TestCase):
             patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=False),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._init_codex_client(args)
+            codex._init_codex_client(args)
         self.assertIn("CI", str(ctx.exception))
 
     def test_preflight_rejects_missing_binary(self):
@@ -287,24 +298,23 @@ class TestCodexInit(unittest.TestCase):
         `None` quand aucune des trois sources n'aboutit ; le preflight n'a plus
         qu'à refuser cette valeur."""
         with self.assertRaises(ValueError) as ctx:
-            translate._codex_preflight(None)
+            codex._codex_preflight(None)
         self.assertIn("introuvable", str(ctx.exception))
 
     def test_preflight_reports_unexecutable_binary(self):
         with (
-            patch("aipmt.translate.subprocess.run", side_effect=OSError("Permission denied")),
+            patch("subprocess.run", side_effect=OSError("Permission denied")),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._codex_preflight("/pkg/bin/codex")
+            codex._codex_preflight("/pkg/bin/codex")
         self.assertIn("Permission denied", str(ctx.exception))
 
     def test_preflight_rejects_logged_out_cli(self):
         with (
-            patch("aipmt.translate.shutil.which", return_value="/usr/bin/codex"),
-            patch("aipmt.translate.subprocess.run", return_value=MagicMock(returncode=1)),
+            patch("subprocess.run", return_value=MagicMock(returncode=1)),
             self.assertRaises(ValueError) as ctx,
         ):
-            translate._codex_preflight("codex")
+            codex._codex_preflight("codex")
         self.assertIn("codex login", str(ctx.exception))
 
 
@@ -313,25 +323,27 @@ class TestProviderResolution(unittest.TestCase):
         """Plusieurs tests existants appellent translate(..., use_mistral=True)
         avec un Namespace dépourvu d'attributs use_* : la résolution doit rester
         tolérante."""
-        self.assertEqual(translate._resolve_provider(_args(), use_mistral=True), "mistral")
-        self.assertEqual(translate._resolve_provider(_args(), use_claude=True), "claude")
-        self.assertEqual(translate._resolve_provider(_args(), use_gemini=True), "gemini")
+        self.assertEqual(registry._resolve_provider(_args(), use_mistral=True), "mistral")
+        self.assertEqual(registry._resolve_provider(_args(), use_claude=True), "claude")
+        self.assertEqual(registry._resolve_provider(_args(), use_gemini=True), "gemini")
 
     def test_args_without_use_codex_defaults_to_openai(self):
-        self.assertEqual(translate._resolve_provider(_args()), "openai")
+        self.assertEqual(registry._resolve_provider(_args()), "openai")
 
     def test_use_codex_from_args(self):
-        self.assertEqual(translate._resolve_provider(_args(use_codex=True)), "codex")
+        self.assertEqual(registry._resolve_provider(_args(use_codex=True)), "codex")
 
     def test_select_provider_client_tolerates_missing_use_codex(self):
         args = _args(model=None, use_mistral=False, use_claude=False, use_gemini=False)
-        with patch("aipmt.translate._init_openai_client", return_value="openai-client") as init:
-            self.assertEqual(translate._select_provider_client(args), "openai-client")
+        with patch(
+            "aipmt.providers.registry._init_openai_client", return_value="openai-client"
+        ) as init:
+            self.assertEqual(registry._select_provider_client(args), "openai-client")
         init.assert_called_once()
 
     def test_dispatch_routes_to_codex(self):
-        with patch("aipmt.translate._call_codex", return_value="translated") as call:
-            out = translate._dispatch_provider_call(
+        with patch("aipmt.providers.registry._call_codex", return_value="translated") as call:
+            out = registry._dispatch_provider_call(
                 _client(), _args(), "PROMPT", "SEG", "codex", False
             )
         self.assertEqual(out, "translated")
@@ -341,10 +353,10 @@ class TestProviderResolution(unittest.TestCase):
         client = _client()
         args = _args()
         with (
-            patch("aipmt.translate._call_codex", return_value="   "),
+            patch("aipmt.providers.registry._call_codex", return_value="   "),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            translate._dispatch_provider_call(client, args, "PROMPT", "SEG", "codex", False)
+            registry._dispatch_provider_call(client, args, "PROMPT", "SEG", "codex", False)
         self.assertIn("Codex CLI returned empty content", str(ctx.exception))
 
 
@@ -354,26 +366,26 @@ class TestReasoningEffortResolution(unittest.TestCase):
 
     def test_eco_defaults_to_none(self):
         self.assertEqual(
-            translate._resolve_reasoning_effort(Namespace(eco=True, reasoning_effort=None)),
+            openai._resolve_reasoning_effort(Namespace(eco=True, reasoning_effort=None)),
             "none",
         )
 
     def test_non_eco_defaults_to_medium(self):
         self.assertEqual(
-            translate._resolve_reasoning_effort(Namespace(eco=False, reasoning_effort=None)),
+            openai._resolve_reasoning_effort(Namespace(eco=False, reasoning_effort=None)),
             "medium",
         )
 
     def test_explicit_value_wins_over_eco(self):
         self.assertEqual(
-            translate._resolve_reasoning_effort(Namespace(eco=True, reasoning_effort="high")),
+            openai._resolve_reasoning_effort(Namespace(eco=True, reasoning_effort="high")),
             "high",
         )
 
     def test_codex_eco_default_is_low_not_none(self):
         """`none` n'est pas une valeur connue de model_reasoning_effort côté CLI."""
         self.assertEqual(
-            translate._resolve_reasoning_effort(
+            openai._resolve_reasoning_effort(
                 Namespace(eco=True, reasoning_effort=None), eco_default="low"
             ),
             "low",
@@ -381,11 +393,11 @@ class TestReasoningEffortResolution(unittest.TestCase):
 
     def test_openai_extra_kwargs_applies_eco_default(self):
         args = Namespace(model="gpt-5.4-mini", eco=True, reasoning_effort=None)
-        self.assertEqual(translate._openai_extra_kwargs(args, False), {"reasoning_effort": "none"})
+        self.assertEqual(openai._openai_extra_kwargs(args, False), {"reasoning_effort": "none"})
 
     def test_translation_note_never_pays_for_reasoning(self):
         args = Namespace(model="gpt-5.4-mini", eco=False, reasoning_effort=None)
-        self.assertEqual(translate._openai_extra_kwargs(args, True), {})
+        self.assertEqual(openai._openai_extra_kwargs(args, True), {})
 
 
 class TestClaudeBlockFiltering(unittest.TestCase):
@@ -406,7 +418,7 @@ class TestClaudeBlockFiltering(unittest.TestCase):
         )
         client = MagicMock()
         client.messages.create.return_value = response
-        out = translate._call_claude(client, _args(model="claude-sonnet-5"), "PROMPT", "SEG")
+        out = anthropic._call_claude(client, _args(model="claude-sonnet-5"), "PROMPT", "SEG")
         self.assertEqual(out, "Translated body")
 
     def test_multiple_text_blocks_keep_structure(self):
@@ -416,7 +428,7 @@ class TestClaudeBlockFiltering(unittest.TestCase):
         )
         client = MagicMock()
         client.messages.create.return_value = response
-        out = translate._call_claude(client, _args(model="claude-sonnet-4-6"), "PROMPT", "SEG")
+        out = anthropic._call_claude(client, _args(model="claude-sonnet-4-6"), "PROMPT", "SEG")
         self.assertEqual(out, "# Title\n\nBody")
 
     def test_no_text_block_raises_explicitly(self):
@@ -425,7 +437,7 @@ class TestClaudeBlockFiltering(unittest.TestCase):
         client.messages.create.return_value = response
         args = _args(model="claude-sonnet-5")
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_claude(client, args, "PROMPT", "SEG")
+            anthropic._call_claude(client, args, "PROMPT", "SEG")
         self.assertIn("aucun bloc de texte", str(ctx.exception))
 
 
@@ -442,7 +454,7 @@ class TestGeminiThinkingFallback(unittest.TestCase):
         def generate_content(model, contents, config):
             calls.append(getattr(config, "thinking_config", None))
             if len(calls) <= n_levels:
-                raise translate.genai_errors.ClientError(
+                raise genai_errors.ClientError(
                     400, {"error": {"message": "Thinking level MINIMAL is not supported"}}
                 )
             return SimpleNamespace(
@@ -458,23 +470,23 @@ class TestGeminiThinkingFallback(unittest.TestCase):
         # aller-retour 400 par segment en production. C'est un état global :
         # sans cette remise à zéro, un test qui a déjà fait accepter `low` sur
         # gemini-3.7-flash ferait sauter la cascade au test suivant.
-        translate._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
+        gemini._GEMINI_ACCEPTED_THINKING_LEVEL.clear()
 
     def test_first_level_accepted_stops_cascade(self):
         client, calls = self._client_refusing(0)
-        out = translate._call_gemini(client, _args(model="gemini-3.1-flash-lite"), "P", "SEG")
+        out = gemini._call_gemini(client, _args(model="gemini-3.1-flash-lite"), "P", "SEG")
         self.assertEqual(out, "Translated")
         self.assertEqual(len(calls), 1)
 
     def test_falls_back_to_next_level(self):
         client, calls = self._client_refusing(1)
-        out = translate._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
+        out = gemini._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
         self.assertEqual(out, "Translated")
         self.assertEqual(len(calls), 2)
 
     def test_last_level_sends_no_thinking_config(self):
         client, calls = self._client_refusing(2)
-        out = translate._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
+        out = gemini._call_gemini(client, _args(model="gemini-3.7-flash"), "P", "SEG")
         self.assertEqual(out, "Translated")
         self.assertEqual(len(calls), 3)
         self.assertIsNone(calls[-1], "le dernier essai ne doit porter aucun thinking_config")
@@ -483,7 +495,7 @@ class TestGeminiThinkingFallback(unittest.TestCase):
         client, _ = self._client_refusing(99)
         args = _args(model="gemini-3.7-flash")
         with self.assertRaises(RuntimeError) as ctx:
-            translate._call_gemini(client, args, "P", "SEG")
+            gemini._call_gemini(client, args, "P", "SEG")
         self.assertIn("refusé tous les niveaux", str(ctx.exception))
 
     def test_unrelated_client_error_is_not_retried(self):
@@ -493,15 +505,13 @@ class TestGeminiThinkingFallback(unittest.TestCase):
 
         def generate_content(model, contents, config):
             calls.append(config)
-            raise translate.genai_errors.ClientError(
-                429, {"error": {"message": "Resource exhausted"}}
-            )
+            raise genai_errors.ClientError(429, {"error": {"message": "Resource exhausted"}})
 
         client = MagicMock()
         client.models.generate_content = generate_content
         args = _args(model="gemini-3.7-flash")
-        with self.assertRaises(translate.genai_errors.ClientError):
-            translate._call_gemini(client, args, "P", "SEG")
+        with self.assertRaises(genai_errors.ClientError):
+            gemini._call_gemini(client, args, "P", "SEG")
         self.assertEqual(len(calls), 1)
 
     def test_system_instruction_carries_the_prompt(self):
@@ -516,7 +526,7 @@ class TestGeminiThinkingFallback(unittest.TestCase):
             )
 
         client.models.generate_content = generate_content
-        translate._call_gemini(client, _args(model="gemini-3.7-flash"), "PROMPT", "SEGMENT")
+        gemini._call_gemini(client, _args(model="gemini-3.7-flash"), "PROMPT", "SEGMENT")
         self.assertEqual(captured["config"].system_instruction, "PROMPT")
         self.assertEqual(captured["contents"], "SEGMENT")
 
@@ -543,7 +553,7 @@ class TestNewsMultiParagraphQuotes(unittest.TestCase):
     )
 
     def _protect(self, content):
-        return translate._protect_news_quotes(content, Namespace(news=True))
+        return news._protect_news_quotes(content, Namespace(news=True))
 
     def test_single_paragraph_unchanged(self):
         _, quotes, urls = self._protect(self.SINGLE)
@@ -562,11 +572,11 @@ class TestNewsMultiParagraphQuotes(unittest.TestCase):
         protected, _, _ = self._protect(self.MULTI)
         self.assertNotIn("GLM-5.3 is now open-weight.", protected)
         self.assertNotIn("Our most capable model", protected)
-        self.assertIn(translate.news_quote_placeholder(0), protected)
+        self.assertIn(markdown.news_quote_placeholder(0), protected)
 
     def test_round_trip_restores_every_paragraph(self):
         protected, quotes, _ = self._protect(self.MULTI)
-        restored = translate._restore_news_quotes(protected, quotes)
+        restored = news._restore_news_quotes(protected, quotes)
         self.assertIn("> GLM-5.3 is now open-weight.", restored)
         self.assertIn("> Our most capable model is now available to download.", restored)
 
@@ -595,49 +605,50 @@ class TestCodexBinaryResolution(unittest.TestCase):
     def test_explicit_codex_bin_wins(self):
         with (
             patch.dict(os.environ, {"CODEX_BIN": "/custom/codex"}, clear=False),
-            patch("aipmt.translate.shutil.which", side_effect=lambda b: b),
+            patch("shutil.which", side_effect=lambda b: b),
         ):
-            self.assertEqual(translate._resolve_codex_binary(), "/custom/codex")
+            self.assertEqual(codex._resolve_codex_binary(), "/custom/codex")
 
     def test_path_used_when_no_explicit_bin(self):
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("aipmt.translate.shutil.which", return_value="/usr/bin/codex"),
+            patch("shutil.which", return_value="/usr/bin/codex"),
         ):
-            self.assertEqual(translate._resolve_codex_binary(), "/usr/bin/codex")
+            self.assertEqual(codex._resolve_codex_binary(), "/usr/bin/codex")
 
     def test_falls_back_to_python_package(self):
         """Cas npm absent : le binaire installé par pip doit être trouvé."""
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("aipmt.translate.shutil.which", return_value=None),
+            patch("shutil.which", return_value=None),
             patch.dict(sys.modules, {"codex_cli_bin": self._fake_package()}),
         ):
-            self.assertEqual(translate._resolve_codex_binary(), "/pkg/bin/codex")
+            self.assertEqual(codex._resolve_codex_binary(), "/pkg/bin/codex")
 
     def test_returns_none_when_nothing_available(self):
         with (
             patch.dict(os.environ, {}, clear=True),
-            patch("aipmt.translate.shutil.which", return_value=None),
+            patch("shutil.which", return_value=None),
             patch.dict(sys.modules, {"codex_cli_bin": None}),
         ):
-            self.assertIsNone(translate._resolve_codex_binary())
+            self.assertIsNone(codex._resolve_codex_binary())
 
     def test_preflight_error_mentions_both_install_paths(self):
         with self.assertRaises(ValueError) as ctx:
-            translate._codex_preflight(None)
+            codex._codex_preflight(None)
         message = str(ctx.exception)
         self.assertIn("pip install openai-codex-cli-bin", message)
         self.assertIn("npm install -g @openai/codex", message)
 
     def test_init_uses_resolved_binary(self):
         with (
-            patch("aipmt.translate._resolve_codex_binary", return_value="/pkg/bin/codex"),
-            patch("aipmt.translate._codex_preflight"),
+            patch("aipmt.providers.codex._resolve_codex_binary", return_value="/pkg/bin/codex"),
+            patch("aipmt.providers.codex._codex_preflight") as fake_preflight,
             patch.dict(os.environ, {"CI": "", "GITHUB_ACTIONS": ""}, clear=False),
         ):
-            client = translate._init_codex_client(_args(model=None))
+            client = codex._init_codex_client(_args(model=None))
         self.assertEqual(client.binary, "/pkg/bin/codex")
+        fake_preflight.assert_called_once_with("/pkg/bin/codex")
 
 
 if __name__ == "__main__":

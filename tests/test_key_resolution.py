@@ -17,6 +17,7 @@ Deux défauts en découlaient, tous deux mesurés avant correction :
 from __future__ import annotations
 
 import inspect
+import io
 import os
 import subprocess  # nosec B404 — exerce le point d'entrée réel, cf. TestMissingKeyIsNotATraceback
 import sys
@@ -29,7 +30,9 @@ from unittest.mock import patch
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
+from aipmt import cli
+from aipmt import config as aipmt_config
+from aipmt.providers import anthropic, base, gemini, grok, mistral, openai
 
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 
@@ -39,7 +42,7 @@ class TestUserConfigPathFollowsOsConvention(unittest.TestCase):
 
     def test_absolute_xdg_config_home_is_honoured(self) -> None:
         with patch.dict(os.environ, {"XDG_CONFIG_HOME": "/opt/conf"}, clear=False):
-            self.assertEqual(translate._user_config_path(), "/opt/conf/aipmt/.env")
+            self.assertEqual(aipmt_config._user_config_path(), "/opt/conf/aipmt/.env")
 
     def test_relative_xdg_config_home_is_ignored(self) -> None:
         """La spécification XDG impose un chemin absolu et dit d'ignorer sinon.
@@ -49,7 +52,7 @@ class TestUserConfigPathFollowsOsConvention(unittest.TestCase):
         défaut que cette couche existe pour supprimer.
         """
         with patch.dict(os.environ, {"XDG_CONFIG_HOME": "relatif/conf"}, clear=False):
-            path = translate._user_config_path()
+            path = aipmt_config._user_config_path()
         self.assertTrue(os.path.isabs(path), f"{path!r} devrait être absolu")
         self.assertNotIn("relatif", path)
         self.assertTrue(path.endswith(os.path.join(".config", "aipmt", ".env")))
@@ -57,7 +60,7 @@ class TestUserConfigPathFollowsOsConvention(unittest.TestCase):
     def test_falls_back_to_dot_config_when_unset(self) -> None:
         env = {k: v for k, v in os.environ.items() if k != "XDG_CONFIG_HOME"}
         with patch.dict(os.environ, env, clear=True):
-            path = translate._user_config_path()
+            path = aipmt_config._user_config_path()
         self.assertTrue(path.endswith(os.path.join(".config", "aipmt", ".env")))
 
     def test_windows_uses_appdata(self) -> None:
@@ -65,7 +68,7 @@ class TestUserConfigPathFollowsOsConvention(unittest.TestCase):
             patch.object(os, "name", "nt"),
             patch.dict(os.environ, {"APPDATA": r"C:\Users\x\AppData\Roaming"}, clear=False),
         ):
-            path = translate._user_config_path()
+            path = aipmt_config._user_config_path()
         self.assertIn("AppData", path)
         self.assertTrue(path.endswith(os.path.join("aipmt", ".env")))
 
@@ -100,7 +103,7 @@ class TestThreeLayerPriority(unittest.TestCase):
                 with patch.dict(os.environ, overrides, clear=False):
                     if env_value is None:
                         os.environ.pop(self.VAR, None)
-                    translate._load_configuration()
+                    aipmt_config._load_configuration()
                     return os.environ.get(self.VAR)
             finally:
                 os.chdir(previous)
@@ -127,24 +130,224 @@ class TestThreeLayerPriority(unittest.TestCase):
         self.assertIsNone(self._run_layers())
 
 
+# Valeurs passées par référence, comme le `_MARQUEUR` de
+# `test_opencode_provider` : un littéral en face d'une variable nommée
+# `secret` fait crier les scanners, et le préfixe d'un vrai fournisseur ferait
+# en plus échouer la sixième section du gate de release.
+_JETON_UTILISATEUR = "jeton-de-test-utilisateur"  # pragma: allowlist secret
+_JETON_ROUTEUR = "jeton-de-test-routeur"  # pragma: allowlist secret
+
+
+class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
+    """Un `.env` de projet ne pose pas d'URL d'endpoint.
+
+    `find_dotenv(usecwd=True)` remonte depuis le répertoire courant : un dépôt
+    qu'on vient de cloner peut donc poser `OPENROUTER_BASE_URL` sans connaître
+    aucune clé, et la vraie clé — venue de l'environnement ou de la
+    configuration utilisateur — partirait ensuite dans l'en-tête
+    d'autorisation d'un serveur tiers. Les deux couches que l'utilisateur
+    contrôle vraiment gardent le droit de rediriger.
+    """
+
+    HOSTILE = "https://attaquant.example/v1"
+    LEGITIME = "https://relais-interne.example/v1"
+
+    def _run(self, variable, project=None, user=None, env=None):
+        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
+            if project is not None:
+                Path(projet, ".env").write_text(f"{variable}={project}\n", encoding="utf-8")
+            user_env = Path(config, "aipmt", ".env")
+            if user is not None:
+                user_env.parent.mkdir(parents=True)
+                user_env.write_text(f"{variable}={user}\n", encoding="utf-8")
+            overrides = {"XDG_CONFIG_HOME": config}
+            if env is not None:
+                overrides[variable] = env
+            previous = os.getcwd()
+            try:
+                os.chdir(projet)
+                with (
+                    patch.dict(os.environ, overrides, clear=False),
+                    patch("sys.stderr", io.StringIO()) as err,
+                ):
+                    if env is None:
+                        os.environ.pop(variable, None)
+                    aipmt_config._load_configuration()
+                    return os.environ.get(variable), err.getvalue()
+            finally:
+                os.chdir(previous)
+                os.environ.pop(variable, None)
+
+    def test_every_routing_variable_is_refused_from_the_project(self) -> None:
+        """Recensé sur les SDK installés : douze variables de routage sont
+        lues, dont six par le seul client Anthropic. Le filtre est donc par
+        motif, et couvre aussi proxies et magasins de certificats."""
+        for variable in (
+            "OPENAI_BASE_URL",
+            "OPENROUTER_BASE_URL",
+            "XAI_BASE_URL",
+            "ANTHROPIC_BASE_URL",
+            "ANTHROPIC_VERTEX_BASE_URL",
+            "GOOGLE_GEMINI_BASE_URL",
+            "GOOGLE_VERTEX_BASE_URL",
+            "AZURE_OPENAI_ENDPOINT",
+            "UN_SDK_INCONNU_API_BASE",
+            "HTTPS_PROXY",
+            "SSL_CERT_FILE",
+            "REQUESTS_CA_BUNDLE",
+        ):
+            with self.subTest(variable=variable):
+                valeur, avertissement = self._run(variable, project=self.HOSTILE)
+                self.assertIsNone(valeur)
+                self.assertIn(variable, avertissement)
+                self.assertIn("détournerait votre clé", avertissement)
+
+    def test_the_project_cannot_relocate_the_user_configuration(self) -> None:
+        """Contournement mesuré : le projet posait `XDG_CONFIG_HOME` vers un
+        répertoire qu'il contrôle, dont l'`aipmt/.env` fournissait alors l'URL
+        hostile — le filtre était contourné par la couche 3 elle-même.
+
+        `XDG_CONFIG_HOME` est donc absent de l'environnement ici : sinon la
+        valeur du projet ne s'appliquerait pas, et le test passerait sans rien
+        prouver.
+        """
+        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as maison:
+            piege = Path(projet, "piege", "aipmt")
+            piege.mkdir(parents=True)
+            piege.joinpath(".env").write_text(
+                f"OPENROUTER_BASE_URL={self.HOSTILE}\n", encoding="utf-8"
+            )
+            Path(projet, ".env").write_text(
+                f"XDG_CONFIG_HOME={Path(projet, 'piege')}\n", encoding="utf-8"
+            )
+            previous = os.getcwd()
+            try:
+                os.chdir(projet)
+                with (
+                    patch.dict(os.environ, {"HOME": maison}, clear=False),
+                    patch("sys.stderr", io.StringIO()) as err,
+                ):
+                    for variable in ("XDG_CONFIG_HOME", "OPENROUTER_BASE_URL"):
+                        os.environ.pop(variable, None)
+                    aipmt_config._load_configuration()
+                    hostile_charge = os.environ.get("OPENROUTER_BASE_URL")
+                    xdg = os.environ.get("XDG_CONFIG_HOME")
+                    avertissement = err.getvalue()
+            finally:
+                os.chdir(previous)
+                for variable in ("XDG_CONFIG_HOME", "OPENROUTER_BASE_URL"):
+                    os.environ.pop(variable, None)
+        self.assertIsNone(hostile_charge)
+        self.assertIsNone(xdg)
+        # L'avertissement cite la valeur refusée — donc le piège — mais le
+        # chemin qu'il CONSEILLE doit être la vraie configuration utilisateur :
+        # résolu après la lecture du projet, il désignait le répertoire que le
+        # projet venait d'imposer.
+        conseil = avertissement.split("le mettre dans ")[-1]
+        self.assertIn(maison, conseil)
+        self.assertNotIn("piege", conseil)
+
+    def test_an_exported_variable_is_kept(self) -> None:
+        valeur, avertissement = self._run(
+            "OPENROUTER_BASE_URL", project=self.HOSTILE, env=self.LEGITIME
+        )
+        self.assertEqual(valeur, self.LEGITIME)
+        self.assertEqual(avertissement, "")
+
+    def test_the_user_configuration_may_still_redirect(self) -> None:
+        """La couche que l'utilisateur possède garde le droit : un relais
+        d'entreprise s'y déclare une fois pour toutes."""
+        valeur, _ = self._run("OPENROUTER_BASE_URL", user=self.LEGITIME)
+        self.assertEqual(valeur, self.LEGITIME)
+
+    def test_the_hostile_project_value_never_reaches_the_user_layer(self) -> None:
+        valeur, _ = self._run("OPENROUTER_BASE_URL", project=self.HOSTILE, user=self.LEGITIME)
+        self.assertEqual(valeur, self.LEGITIME)
+
+    def test_the_project_cannot_copy_a_secret_under_an_innocent_name(self) -> None:
+        """`load_dotenv` développe `${VAR}` par défaut. Un `.env` non fiable
+        contenant `NOM_ANODIN=${OPENAI_API_KEY}` recopiait donc la vraie clé
+        sous un nom que le filtrage par motif des sous-processus ne reconnaît
+        pas, et elle entrait dans l'environnement de `codex exec` — mesuré."""
+        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
+            Path(projet, ".env").write_text("NOM_ANODIN=${OPENAI_API_KEY}\n", encoding="utf-8")
+            previous = os.getcwd()
+            try:
+                os.chdir(projet)
+                with patch.dict(
+                    os.environ,
+                    {"XDG_CONFIG_HOME": config, "OPENAI_API_KEY": _JETON_UTILISATEUR},
+                    clear=False,
+                ):
+                    os.environ.pop("NOM_ANODIN", None)
+                    aipmt_config._load_configuration()
+                    alias = os.environ.get("NOM_ANODIN")
+                    expurge = base._strip_secret_env(dict(os.environ), keep=())
+            finally:
+                os.chdir(previous)
+                os.environ.pop("NOM_ANODIN", None)
+        self.assertEqual(alias, "${OPENAI_API_KEY}")
+        self.assertNotIn(_JETON_UTILISATEUR, expurge.values())
+        # La variable au nom explicite reste retirée, elle : c'est l'alias qui
+        # échappait au filtre, pas le filtre qui a cessé de mordre.
+        self.assertNotIn("OPENAI_API_KEY", expurge)
+
+    def test_a_refused_value_never_reaches_the_warning(self) -> None:
+        """Une URL de la forme `https://${CLE}@hôte/` est bien refusée, mais la
+        clé interpolée fuyait dans le message envoyé sur stderr — donc dans les
+        journaux — alors même qu'on refusait la variable."""
+        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
+            Path(projet, ".env").write_text(
+                "OPENROUTER_BASE_URL=https://${OPENROUTER_API_KEY}@attaquant.example/v1\n",
+                encoding="utf-8",
+            )
+            previous = os.getcwd()
+            try:
+                os.chdir(projet)
+                with (
+                    patch.dict(
+                        os.environ,
+                        {"XDG_CONFIG_HOME": config, "OPENROUTER_API_KEY": _JETON_ROUTEUR},
+                        clear=False,
+                    ),
+                    patch("sys.stderr", io.StringIO()) as err,
+                ):
+                    os.environ.pop("OPENROUTER_BASE_URL", None)
+                    aipmt_config._load_configuration()
+                    avertissement = err.getvalue()
+                    refusee = os.environ.get("OPENROUTER_BASE_URL")
+            finally:
+                os.chdir(previous)
+                os.environ.pop("OPENROUTER_BASE_URL", None)
+        self.assertIsNone(refusee)
+        self.assertIn("OPENROUTER_BASE_URL", avertissement)
+        self.assertNotIn(_JETON_ROUTEUR, avertissement)
+        self.assertNotIn("attaquant.example", avertissement)
+
+    def test_an_ordinary_variable_is_still_read_from_the_project(self) -> None:
+        """Contre-épreuve : le refus vise les URL, pas la couche entière."""
+        valeur, _ = self._run("AIPMT_TEST_ORDINARY", project="valeur-du-projet")
+        self.assertEqual(valeur, "valeur-du-projet")
+
+
 class TestMissingKeyMessageIsActionable(unittest.TestCase):
     """Le message doit MONTRER les emplacements, pas seulement les nommer."""
 
     def test_message_names_the_three_locations(self) -> None:
-        message = translate._missing_key_message("OpenAI", ["OPENAI_API_KEY"])
+        message = aipmt_config._missing_key_message("OpenAI", ["OPENAI_API_KEY"])
         self.assertIn("OPENAI_API_KEY", message)
         self.assertIn(os.path.join(os.getcwd(), ".env"), message)
-        self.assertIn(translate._user_config_path(), message)
+        self.assertIn(aipmt_config._user_config_path(), message)
 
     def test_every_provider_message_shows_the_user_config_path(self) -> None:
         """Aucun provider ne doit garder l'ancien message tronqué."""
         Args = type("Args", (), {"model": None, "eco": True})
         initialisers = (
-            translate._init_openai_client,
-            translate._init_claude_client,
-            translate._init_mistral_client,
-            translate._init_gemini_client,
-            translate._init_grok_client,
+            openai._init_openai_client,
+            anthropic._init_claude_client,
+            mistral._init_mistral_client,
+            gemini._init_gemini_client,
+            grok._init_grok_client,
         )
         # Liste EXPLICITE plutôt que dérivée de `os.environ` : la seconde
         # dépendrait de ce que la machine a chargé, donc le test ne prouverait
@@ -170,7 +373,7 @@ class TestMissingKeyMessageIsActionable(unittest.TestCase):
             ):
                 with self.assertRaises(ValueError) as raised:
                     initialiser(provider_args)
-                self.assertIn(translate._user_config_path(), str(raised.exception))
+                self.assertIn(aipmt_config._user_config_path(), str(raised.exception))
 
 
 class TestMissingKeyIsNotATraceback(unittest.TestCase):
@@ -215,7 +418,7 @@ class TestMissingKeyIsNotATraceback(unittest.TestCase):
         traduction deviendrait un message rassurant — le mode de défaillance
         que ce dépôt traque. Seule la phase de configuration est enveloppée.
         """
-        body = inspect.getsource(translate.main)
+        body = inspect.getsource(cli.main)
         self.assertIn("except ValueError", body)
         self.assertNotIn("except Exception", body)
         self.assertNotIn("except:", body)

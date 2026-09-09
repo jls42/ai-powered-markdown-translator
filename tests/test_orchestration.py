@@ -17,11 +17,14 @@ import unittest
 from argparse import Namespace
 from unittest.mock import MagicMock, patch
 
+from langdetect import LangDetectException
+
 # Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import translate
+from aipmt import cli, guards, naming, news, pipeline, placeholders
+from aipmt.providers import anthropic, gemini, mistral, openai, registry
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
 _FAKE_OPENAI_ENV = {"OPENAI_API_KEY": "fixture-openai-key"}  # pragma: allowlist secret
@@ -70,20 +73,20 @@ class TestValidateTranslationOutputShortCircuits(unittest.TestCase):
         segment = "Texte identique source = cible."
         args = _base_args(source_lang="fr", target_lang="fr")
         # Pas d'exception attendue même si translated == segment.
-        translate._validate_translation_output(segment, segment, args, False)
+        guards._validate_translation_output(segment, segment, args, False)
 
     def test_empty_translation_skips_validation(self):
         """Une sortie vide après strip() est traitée plus haut (empty-content
         guard) ; ici on garantit que _validate_translation_output ne lève pas
         sur un blanc."""
         args = _base_args()
-        translate._validate_translation_output("Source", "   \n  ", args, False)
+        guards._validate_translation_output("Source", "   \n  ", args, False)
 
     def test_translation_note_skips_validation(self):
         """is_translation_note=True : la note est forcément courte et peut
         ressembler au segment source — on ne valide pas."""
         args = _base_args()
-        translate._validate_translation_output("Source", "Source", args, True)
+        guards._validate_translation_output("Source", "Source", args, True)
 
     def test_langdetect_exception_does_not_raise(self):
         """Une LangDetectException sur la sortie doit écrire un warning sur
@@ -92,10 +95,13 @@ class TestValidateTranslationOutputShortCircuits(unittest.TestCase):
         # Sortie >= 100 chars pour atteindre la couche langdetect.
         translated = "1234567890" * 12  # 120 chars de chiffres → langdetect lève
         with patch(
-            "aipmt.translate.detect_langs",
-            side_effect=translate.LangDetectException(0, "no features"),
-        ):
-            translate._validate_translation_output("Source longue.", translated, args, False)
+            "aipmt.guards.detect_langs",
+            side_effect=LangDetectException(0, "no features"),
+        ) as fake_detect:
+            guards._validate_translation_output("Source longue.", translated, args, False)
+        # Sans cette assertion, un patch qui ne mord plus laisserait le test
+        # vert : le vrai langdetect lève déjà sur cette sortie.
+        fake_detect.assert_called_once()
 
 
 class TestResolveOutputFilename(unittest.TestCase):
@@ -103,21 +109,19 @@ class TestResolveOutputFilename(unittest.TestCase):
 
     def test_keep_filename(self):
         args = _base_args(keep_filename=True)
-        self.assertEqual(
-            translate._resolve_output_filename("README.md", "README", args), "README.md"
-        )
+        self.assertEqual(naming._resolve_output_filename("README.md", "README", args), "README.md")
 
     def test_include_model(self):
         args = _base_args(include_model=True, model="gpt-5.4-mini", target_lang="es")
         self.assertEqual(
-            translate._resolve_output_filename("README.md", "README", args),
+            naming._resolve_output_filename("README.md", "README", args),
             "README-es-gpt-5.4-mini.md",
         )
 
     def test_default_target_lang_suffix(self):
         args = _base_args(target_lang="de")
         self.assertEqual(
-            translate._resolve_output_filename("README.md", "README", args),
+            naming._resolve_output_filename("README.md", "README", args),
             "README-de.md",
         )
 
@@ -125,7 +129,7 @@ class TestResolveOutputFilename(unittest.TestCase):
 class TestResolveSingleOutputFilename(unittest.TestCase):
     def test_keep_filename(self):
         args = _base_args(keep_filename=True, file="/source/foo/article.mdx")
-        self.assertEqual(translate._resolve_single_output_filename(args), "article.mdx")
+        self.assertEqual(naming._resolve_single_output_filename(args), "article.mdx")
 
     def test_include_model(self):
         args = _base_args(
@@ -134,62 +138,60 @@ class TestResolveSingleOutputFilename(unittest.TestCase):
             target_lang="ja",
             model="gpt-5.4-mini",
         )
-        self.assertEqual(
-            translate._resolve_single_output_filename(args), "article-ja-gpt-5.4-mini.md"
-        )
+        self.assertEqual(naming._resolve_single_output_filename(args), "article-ja-gpt-5.4-mini.md")
 
     def test_default(self):
         args = _base_args(file="/source/foo/article.md", target_lang="pt")
-        self.assertEqual(translate._resolve_single_output_filename(args), "article-pt.md")
+        self.assertEqual(naming._resolve_single_output_filename(args), "article-pt.md")
 
 
 class TestExcludePatterns(unittest.TestCase):
     def test_is_excluded_match(self):
-        self.assertTrue(translate.is_excluded("/source/traductions_en/foo.md"))
-        self.assertTrue(translate.is_excluded("/source/foo/PRIVACY.md"))
-        self.assertTrue(translate.is_excluded("/source/venv/lib/foo.md"))
+        self.assertTrue(naming.is_excluded("/source/traductions_en/foo.md"))
+        self.assertTrue(naming.is_excluded("/source/foo/PRIVACY.md"))
+        self.assertTrue(naming.is_excluded("/source/venv/lib/foo.md"))
 
     def test_is_excluded_no_match(self):
-        self.assertFalse(translate.is_excluded("/source/content/posts/foo.md"))
+        self.assertFalse(naming.is_excluded("/source/content/posts/foo.md"))
 
     def test_is_translatable_markdown_md(self):
-        self.assertTrue(translate._is_translatable_markdown("article.md"))
+        self.assertTrue(pipeline._is_translatable_markdown("article.md"))
 
     def test_is_translatable_markdown_mdx(self):
-        self.assertTrue(translate._is_translatable_markdown("article.mdx"))
+        self.assertTrue(pipeline._is_translatable_markdown("article.mdx"))
 
     def test_is_translatable_markdown_skips_excluded(self):
-        self.assertFalse(translate._is_translatable_markdown("PRIVACY.md"))
+        self.assertFalse(pipeline._is_translatable_markdown("PRIVACY.md"))
 
     def test_is_translatable_markdown_rejects_other(self):
-        self.assertFalse(translate._is_translatable_markdown("README.txt"))
+        self.assertFalse(pipeline._is_translatable_markdown("README.txt"))
 
 
 class TestShouldSkipWalkDir(unittest.TestCase):
     def test_skip_excluded_root(self):
         self.assertTrue(
-            translate._should_skip_walk_dir(
+            naming._should_skip_walk_dir(
                 "/source/foo/venv/lib", "/source/out", "out", "/source/foo"
             )
         )
 
     def test_skip_root_inside_output_dir(self):
         self.assertTrue(
-            translate._should_skip_walk_dir("/source/out/sub", "/source/out", "out", "/source/in")
+            naming._should_skip_walk_dir("/source/out/sub", "/source/out", "out", "/source/in")
         )
 
     def test_skip_subdir_named_like_output(self):
         """Un sous-répertoire direct d'input qui a le même nom que le dossier
         de sortie doit être skippé pour éviter de lire les traductions."""
         self.assertTrue(
-            translate._should_skip_walk_dir(
+            naming._should_skip_walk_dir(
                 "/source/in/out", "/source/elsewhere/out", "out", "/source/in"
             )
         )
 
     def test_dont_skip_unrelated_dir(self):
         self.assertFalse(
-            translate._should_skip_walk_dir("/source/in/posts", "/source/out", "out", "/source/in")
+            naming._should_skip_walk_dir("/source/in/posts", "/source/out", "out", "/source/in")
         )
 
 
@@ -199,15 +201,13 @@ class TestExistingTranslationExists(unittest.TestCase):
             existing = os.path.join(tmpdir, "README.md")
             open(existing, "w").close()
             args = _base_args(keep_filename=True, target_lang="en")
-            self.assertTrue(
-                translate._existing_translation_exists(existing, tmpdir, "README", args)
-            )
+            self.assertTrue(naming._existing_translation_exists(existing, tmpdir, "README", args))
 
     def test_keep_filename_no_match(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             args = _base_args(keep_filename=True, target_lang="en")
             self.assertFalse(
-                translate._existing_translation_exists(
+                naming._existing_translation_exists(
                     os.path.join(tmpdir, "missing.md"), tmpdir, "missing", args
                 )
             )
@@ -218,7 +218,7 @@ class TestExistingTranslationExists(unittest.TestCase):
             open(existing, "w").close()
             args = _base_args(keep_filename=False, target_lang="en")
             self.assertTrue(
-                translate._existing_translation_exists(
+                naming._existing_translation_exists(
                     os.path.join(tmpdir, "README-en.md"), tmpdir, "README", args
                 )
             )
@@ -227,7 +227,7 @@ class TestExistingTranslationExists(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             args = _base_args(keep_filename=False, target_lang="ja")
             self.assertFalse(
-                translate._existing_translation_exists(
+                naming._existing_translation_exists(
                     os.path.join(tmpdir, "README-ja.md"), tmpdir, "README", args
                 )
             )
@@ -236,19 +236,19 @@ class TestExistingTranslationExists(unittest.TestCase):
 class TestRecordTranslationStatus(unittest.TestCase):
     def test_success_does_not_track(self):
         failed, skipped = [], []
-        translate._record_translation_status("success", "f.md", "/abs/f.md", failed, skipped)
+        pipeline._record_translation_status("success", "f.md", "/abs/f.md", failed, skipped)
         self.assertEqual(failed, [])
         self.assertEqual(skipped, [])
 
     def test_skipped_appends_to_skipped(self):
         failed, skipped = [], []
-        translate._record_translation_status("skipped", "f.md", "/abs/f.md", failed, skipped)
+        pipeline._record_translation_status("skipped", "f.md", "/abs/f.md", failed, skipped)
         self.assertEqual(failed, [])
         self.assertEqual(skipped, ["/abs/f.md"])
 
     def test_failure_appends_to_failed(self):
         failed, skipped = [], []
-        translate._record_translation_status("failure", "f.md", "/abs/f.md", failed, skipped)
+        pipeline._record_translation_status("failure", "f.md", "/abs/f.md", failed, skipped)
         self.assertEqual(failed, ["/abs/f.md"])
         self.assertEqual(skipped, [])
 
@@ -256,7 +256,7 @@ class TestRecordTranslationStatus(unittest.TestCase):
         """Default-fail : tout statut hors {success, skipped, failure} doit être
         traité comme un échec (régression future)."""
         failed, skipped = [], []
-        translate._record_translation_status("???", "f.md", "/abs/f.md", failed, skipped)
+        pipeline._record_translation_status("???", "f.md", "/abs/f.md", failed, skipped)
         self.assertEqual(failed, ["/abs/f.md"])
         self.assertEqual(skipped, [])
 
@@ -267,7 +267,7 @@ class TestWriteOutputFile(unittest.TestCase):
             dst = os.path.join(tmpdir, "existing.md")
             with open(dst, "w") as f:
                 f.write("ancien contenu")
-            status = translate._write_output_file(
+            status = naming._write_output_file(
                 dst, "nouveau", force=False, relative_output_path="rel/existing.md"
             )
             self.assertEqual(status, "skipped")
@@ -279,7 +279,7 @@ class TestWriteOutputFile(unittest.TestCase):
             dst = os.path.join(tmpdir, "existing.md")
             with open(dst, "w") as f:
                 f.write("ancien contenu")
-            status = translate._write_output_file(
+            status = naming._write_output_file(
                 dst, "nouveau", force=True, relative_output_path="rel/existing.md"
             )
             self.assertEqual(status, "success")
@@ -293,8 +293,8 @@ class TestEmptyAndIOErrorPaths(unittest.TestCase):
             src = os.path.join(tmpdir, "empty.md")
             open(src, "w").close()
             args = _base_args(source_dir=tmpdir, target_dir=tmpdir)
-            config = translate._TranslationConfig(client=MagicMock(), args=args)
-            status = translate.translate_markdown_file(
+            config = pipeline._TranslationConfig(client=MagicMock(), args=args)
+            status = pipeline.translate_markdown_file(
                 src,
                 os.path.join(tmpdir, "empty-en.md"),
                 config,
@@ -317,8 +317,8 @@ class TestEmptyAndIOErrorPaths(unittest.TestCase):
                 return real_open(path, *a, **kw)
 
             with patch("builtins.open", side_effect=selective_open):
-                config = translate._TranslationConfig(client=MagicMock(), args=args)
-                status = translate.translate_markdown_file(
+                config = pipeline._TranslationConfig(client=MagicMock(), args=args)
+                status = pipeline.translate_markdown_file(
                     src,
                     os.path.join(tmpdir, "exists-en.md"),
                     config,
@@ -345,15 +345,15 @@ class TestProcessOneMarkdownFileSkip(unittest.TestCase):
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
             failed, skipped = [], []
             mock_client = MagicMock()
-            config = translate._TranslationConfig(client=mock_client, args=args, force=False)
-            ctx = translate._DirectoryWalkContext(
+            config = pipeline._TranslationConfig(client=mock_client, args=args, force=False)
+            ctx = pipeline._DirectoryWalkContext(
                 input_dir=input_dir,
                 output_dir=output_dir,
                 config=config,
                 failed_files=failed,
                 skipped_files=skipped,
             )
-            translate._process_one_markdown_file("article.md", input_dir, ctx)
+            pipeline._process_one_markdown_file("article.md", input_dir, ctx)
             self.assertEqual(skipped, [src])
             self.assertEqual(failed, [])
             mock_client.chat.completions.create.assert_not_called()
@@ -374,15 +374,15 @@ class TestProcessOneMarkdownFileSkip(unittest.TestCase):
             failed, skipped = [], []
             mock_client = MagicMock()
             mock_client.chat.completions.create.return_value = _make_openai_response("Hello.")
-            config = translate._TranslationConfig(client=mock_client, args=args, force=True)
-            ctx = translate._DirectoryWalkContext(
+            config = pipeline._TranslationConfig(client=mock_client, args=args, force=True)
+            ctx = pipeline._DirectoryWalkContext(
                 input_dir=input_dir,
                 output_dir=output_dir,
                 config=config,
                 failed_files=failed,
                 skipped_files=skipped,
             )
-            translate._process_one_markdown_file("article.md", input_dir, ctx)
+            pipeline._process_one_markdown_file("article.md", input_dir, ctx)
             self.assertEqual(failed, [])
             self.assertEqual(skipped, [])
             with open(os.path.join(output_dir, "article-en.md")) as f:
@@ -406,8 +406,8 @@ class TestTranslateDirectory(unittest.TestCase):
             mock_client = MagicMock()
             mock_client.chat.completions.create.return_value = _make_openai_response("Hello.")
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
-            config = translate._TranslationConfig(client=mock_client, args=args)
-            result = translate.translate_directory(input_dir, output_dir, config)
+            config = pipeline._TranslationConfig(client=mock_client, args=args)
+            result = pipeline.translate_directory(input_dir, output_dir, config)
             self.assertEqual(result["failed"], [])
             self.assertTrue(os.path.exists(os.path.join(output_dir, "a-en.md")))
             # Sans --keep_filename, l'extension de sortie est forcée à .md
@@ -424,8 +424,8 @@ class TestTranslateDirectory(unittest.TestCase):
 
             mock_client = MagicMock()
             args = _base_args(target_lang="en", source_dir=input_dir, target_dir=output_dir)
-            config = translate._TranslationConfig(client=mock_client, args=args)
-            translate.translate_directory(input_dir, output_dir, config)
+            config = pipeline._TranslationConfig(client=mock_client, args=args)
+            pipeline.translate_directory(input_dir, output_dir, config)
             self.assertFalse(
                 os.path.exists(os.path.join(output_dir, "traductions_old", "skip-en.md"))
             )
@@ -436,18 +436,18 @@ class TestValidateInputPaths(unittest.TestCase):
     def test_file_does_not_exist_raises(self):
         args = _base_args(file="/source/__inexistant_xyz_42.md", target_dir="/dest")
         with self.assertRaisesRegex(ValueError, "fichier spécifié n'existe pas"):
-            translate._validate_input_paths(args)
+            naming._validate_input_paths(args)
 
     def test_source_dir_does_not_exist_raises(self):
         args = _base_args(file=None, source_dir="/source/__inexistant_xyz_42", target_dir="/dest")
         with self.assertRaisesRegex(ValueError, "répertoire source"):
-            translate._validate_input_paths(args)
+            naming._validate_input_paths(args)
 
     def test_creates_target_dir_if_missing(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             target = os.path.join(tmpdir, "new_target")
             args = _base_args(file=None, source_dir=tmpdir, target_dir=target)
-            translate._validate_input_paths(args)
+            naming._validate_input_paths(args)
             self.assertTrue(os.path.isdir(target))
 
 
@@ -457,47 +457,48 @@ class TestProviderClientInit(unittest.TestCase):
     def test_init_mistral_missing_key_raises(self):
         args = _base_args()
         with patch.dict(os.environ, {}, clear=True), self.assertRaisesRegex(ValueError, "Mistral"):
-            translate._init_mistral_client(args)
+            mistral._init_mistral_client(args)
 
     def test_init_mistral_happy_path(self):
         args = _base_args()
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
-            patch("aipmt.translate.Mistral") as mock_cls,
+            patch("aipmt.providers.mistral.Mistral") as mock_cls,
         ):
-            client = translate._init_mistral_client(args)
+            client = mistral._init_mistral_client(args)
             mock_cls.assert_called_once_with(api_key=_FAKE_MISTRAL_ENV["MISTRAL_API_KEY"])
             self.assertIs(client, mock_cls.return_value)
         # eco override applique aussi le modèle économique
         args2 = _base_args(eco=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
-            patch("aipmt.translate.Mistral"),
+            patch("aipmt.providers.mistral.Mistral") as fake_mistral,
         ):
-            translate._init_mistral_client(args2)
-        self.assertEqual(args2.model, translate.ECO_MODEL_MISTRAL)
+            mistral._init_mistral_client(args2)
+        self.assertEqual(args2.model, mistral.ECO_MODEL_MISTRAL)
+        fake_mistral.assert_called_once()
 
     def test_init_claude_missing_key_raises(self):
         args = _base_args()
         with patch.dict(os.environ, {}, clear=True), self.assertRaisesRegex(ValueError, "Claude"):
-            translate._init_claude_client(args)
+            anthropic._init_claude_client(args)
 
     def test_init_claude_happy_path(self):
         args = _base_args(model=None)
         with (
             patch.dict(os.environ, _FAKE_CLAUDE_ENV, clear=True),
-            patch("aipmt.translate.anthropic") as mock_anthropic,
+            patch("aipmt.providers.anthropic.anthropic") as mock_anthropic,
         ):
-            translate._init_claude_client(args)
+            anthropic._init_claude_client(args)
             mock_anthropic.Anthropic.assert_called_once_with(
                 api_key=_FAKE_CLAUDE_ENV["ANTHROPIC_API_KEY"]
             )
-        self.assertEqual(args.model, translate.DEFAULT_MODEL_CLAUDE)
+        self.assertEqual(args.model, anthropic.DEFAULT_MODEL_CLAUDE)
 
     def test_init_gemini_missing_key_raises(self):
         args = _base_args()
         with patch.dict(os.environ, {}, clear=True), self.assertRaisesRegex(ValueError, "Gemini"):
-            translate._init_gemini_client(args)
+            gemini._init_gemini_client(args)
 
     def test_init_gemini_accepts_GEMINI_API_KEY(self):
         """Le SDK accepte aussi GEMINI_API_KEY (convention AI Studio)."""
@@ -505,33 +506,33 @@ class TestProviderClientInit(unittest.TestCase):
         args = _base_args(model=None, eco=True)
         with (
             patch.dict(os.environ, gemini_env, clear=True),
-            patch("aipmt.translate.genai") as mock_genai,
+            patch("aipmt.providers.gemini.genai") as mock_genai,
         ):
-            translate._init_gemini_client(args)
+            gemini._init_gemini_client(args)
             mock_genai.Client.assert_called_once_with(api_key=gemini_env["GEMINI_API_KEY"])
-        self.assertEqual(args.model, translate.ECO_MODEL_GEMINI)
+        self.assertEqual(args.model, gemini.ECO_MODEL_GEMINI)
 
     def test_init_openai_missing_key_raises(self):
         args = _base_args()
         with patch.dict(os.environ, {}, clear=True), self.assertRaisesRegex(ValueError, "OpenAI"):
-            translate._init_openai_client(args)
+            openai._init_openai_client(args)
 
     def test_init_openai_placeholder_key_raises(self):
         """Le placeholder de défaut doit être traité comme une clé absente."""
         args = _base_args()
-        env = {"OPENAI_API_KEY": translate.DEFAULT_OPENAI_API_KEY}
+        env = {"OPENAI_API_KEY": openai.DEFAULT_OPENAI_API_KEY}
         with patch.dict(os.environ, env, clear=True), self.assertRaisesRegex(ValueError, "OpenAI"):
-            translate._init_openai_client(args)
+            openai._init_openai_client(args)
 
     def test_init_openai_happy_path(self):
         args = _base_args(model=None)
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV, clear=True),
-            patch("aipmt.translate.OpenAI") as mock_cls,
+            patch("aipmt.providers.openai.OpenAI") as mock_cls,
         ):
-            translate._init_openai_client(args)
+            openai._init_openai_client(args)
             mock_cls.assert_called_once_with(api_key=_FAKE_OPENAI_ENV["OPENAI_API_KEY"])
-        self.assertEqual(args.model, translate.DEFAULT_MODEL_OPENAI)
+        self.assertEqual(args.model, openai.DEFAULT_MODEL_OPENAI)
 
 
 class TestSelectProviderClient(unittest.TestCase):
@@ -541,36 +542,36 @@ class TestSelectProviderClient(unittest.TestCase):
         args = _base_args(use_mistral=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV, clear=True),
-            patch("aipmt.translate.Mistral") as mock_cls,
+            patch("aipmt.providers.mistral.Mistral") as mock_cls,
         ):
-            translate._select_provider_client(args)
+            registry._select_provider_client(args)
             mock_cls.assert_called_once()
 
     def test_claude_branch(self):
         args = _base_args(use_claude=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_CLAUDE_ENV, clear=True),
-            patch("aipmt.translate.anthropic") as mock_anthropic,
+            patch("aipmt.providers.anthropic.anthropic") as mock_anthropic,
         ):
-            translate._select_provider_client(args)
+            registry._select_provider_client(args)
             mock_anthropic.Anthropic.assert_called_once()
 
     def test_gemini_branch(self):
         args = _base_args(use_gemini=True, model=None)
         with (
             patch.dict(os.environ, _FAKE_GEMINI_ENV, clear=True),
-            patch("aipmt.translate.genai") as mock_genai,
+            patch("aipmt.providers.gemini.genai") as mock_genai,
         ):
-            translate._select_provider_client(args)
+            registry._select_provider_client(args)
             mock_genai.Client.assert_called_once()
 
     def test_openai_default_branch(self):
         args = _base_args(model=None)
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV, clear=True),
-            patch("aipmt.translate.OpenAI") as mock_cls,
+            patch("aipmt.providers.openai.OpenAI") as mock_cls,
         ):
-            translate._select_provider_client(args)
+            registry._select_provider_client(args)
             mock_cls.assert_called_once()
 
 
@@ -579,7 +580,7 @@ class TestNewsRulesEnglish(unittest.TestCase):
 
     def test_news_addendum_en_uses_english_rules(self):
         args = _base_args(news=True, target_lang="en")
-        addendum = translate._build_news_addendum(args)
+        addendum = news._build_news_addendum(args)
         self.assertIn("placeholder_rule", addendum)
         # La variante EN ne doit pas mentionner de drapeau cible
         self.assertNotIn("Translate to fr", addendum)
@@ -587,23 +588,23 @@ class TestNewsRulesEnglish(unittest.TestCase):
 
 class TestNormalizeCollapsedMarkdown(unittest.TestCase):
     def test_separator_collapse_is_split(self):
-        out = translate._normalize_collapsed_markdown("--- ## Titre\n")
+        out = placeholders._normalize_collapsed_markdown("--- ## Titre\n")
         self.assertEqual(out, "---\n\n## Titre\n")
 
     def test_link_collapse_with_heading_is_split(self):
-        out = translate._normalize_collapsed_markdown("[texte](https://x.com) ## Titre\n")
+        out = placeholders._normalize_collapsed_markdown("[texte](https://x.com) ## Titre\n")
         self.assertEqual(out, "[texte](https://x.com)\n\n## Titre\n")
 
     def test_no_collapse_passes_through(self):
         text = "## Titre\n\nParagraphe normal.\n"
-        self.assertEqual(translate._normalize_collapsed_markdown(text), text)
+        self.assertEqual(placeholders._normalize_collapsed_markdown(text), text)
 
 
 class TestCleanupSourceFlag(unittest.TestCase):
     def test_no_news_passthrough(self):
         args = _base_args(news=False, source_lang="fr", target_lang="en")
         text = "> 🇫🇷 _trad_\n"
-        self.assertEqual(translate._cleanup_source_flag(text, args), text)
+        self.assertEqual(news._cleanup_source_flag(text, args), text)
 
     def test_target_en_removes_orphan_source_flag_line(self):
         """Quand cible=en, le bloc `> 🇫🇷 _trad_` orphelin doit être supprimé."""
@@ -611,7 +612,7 @@ class TestCleanupSourceFlag(unittest.TestCase):
         translated = (
             "> Some EN quote.\n>\n> 🇫🇷 _Citation traduite._\n> — [@source](https://x.com/s)\n"
         )
-        out = translate._cleanup_source_flag(translated, args)
+        out = news._cleanup_source_flag(translated, args)
         self.assertNotIn("🇫🇷", out)
         self.assertIn("> Some EN quote.", out)
 
@@ -620,36 +621,36 @@ class TestCleanupSourceFlag(unittest.TestCase):
         remplacé par le drapeau cible."""
         args = _base_args(news=True, source_lang="fr", target_lang="es")
         translated = "> 🇫🇷 _Texto traducido._\n"
-        out = translate._cleanup_source_flag(translated, args)
+        out = news._cleanup_source_flag(translated, args)
         self.assertIn("🇪🇸", out)
         self.assertNotIn("🇫🇷", out)
 
     def test_no_flag_in_content_passthrough(self):
         args = _base_args(news=True, source_lang="fr", target_lang="es")
         text = "> Aucun drapeau ici.\n"
-        self.assertEqual(translate._cleanup_source_flag(text, args), text)
+        self.assertEqual(news._cleanup_source_flag(text, args), text)
 
 
 class TestValidateNewsPostFlags(unittest.TestCase):
     def test_en_target_with_other_flag_raises(self):
         with self.assertRaisesRegex(RuntimeError, "Drapeau .* trouvé"):
-            translate._validate_news_flags_for_en("contenu avec 🇪🇸 drapeau")
+            news._validate_news_flags_for_en("contenu avec 🇪🇸 drapeau")
 
     def test_other_target_wrong_flag_count_raises(self):
         args = _base_args(target_lang="es", source_lang="fr")
         # Aucune occurrence du drapeau cible alors qu'on attendait 1.
         with self.assertRaisesRegex(RuntimeError, "Drapeau .* trouvé 0 fois"):
-            translate._validate_news_flags_for_other("contenu sans drapeau", args, 1)
+            news._validate_news_flags_for_other("contenu sans drapeau", args, 1)
 
     def test_other_target_residual_source_flag_raises(self):
         args = _base_args(target_lang="es", source_lang="fr")
         # Bon compte de drapeaux cibles, mais drapeau source résiduel.
         with self.assertRaisesRegex(RuntimeError, "Drapeau source .* encore présent"):
-            translate._validate_news_flags_for_other("🇪🇸 drapeau cible et 🇫🇷 source", args, 1)
+            news._validate_news_flags_for_other("🇪🇸 drapeau cible et 🇫🇷 source", args, 1)
 
     def test_other_target_correct_state_passes(self):
         args = _base_args(target_lang="es", source_lang="fr")
-        translate._validate_news_flags_for_other("Texte avec 🇪🇸 ok", args, 1)
+        news._validate_news_flags_for_other("Texte avec 🇪🇸 ok", args, 1)
 
 
 class TestNormalizeCollapsedRaisesOnPersistence(unittest.TestCase):
@@ -661,12 +662,12 @@ class TestNormalizeCollapsedRaisesOnPersistence(unittest.TestCase):
         # par le check final → on attend RuntimeError.
         text = "---\t## Titre\n"
         with self.assertRaisesRegex(RuntimeError, "séparateur markdown collé"):
-            translate._normalize_collapsed_markdown(text)
+            placeholders._normalize_collapsed_markdown(text)
 
     def test_link_with_tab_still_raises(self):
         text = "[t](https://x.com)\t## Titre\n"
         with self.assertRaisesRegex(RuntimeError, "lien markdown collé"):
-            translate._normalize_collapsed_markdown(text)
+            placeholders._normalize_collapsed_markdown(text)
 
 
 class TestOpenAIO1Series(unittest.TestCase):
@@ -675,7 +676,7 @@ class TestOpenAIO1Series(unittest.TestCase):
 
     def test_o1_single_user_message(self):
         args = _base_args(model="o1-mini")
-        msgs = translate._build_openai_messages(args, "PROMPT", "SEGMENT")
+        msgs = openai._build_openai_messages(args, "PROMPT", "SEGMENT")
         self.assertEqual(len(msgs), 1)
         self.assertEqual(msgs[0]["role"], "user")
         self.assertIn("PROMPT", msgs[0]["content"])
@@ -683,7 +684,7 @@ class TestOpenAIO1Series(unittest.TestCase):
 
     def test_non_o1_uses_system_user_split(self):
         args = _base_args(model="gpt-5.4-mini")
-        msgs = translate._build_openai_messages(args, "PROMPT", "SEGMENT")
+        msgs = openai._build_openai_messages(args, "PROMPT", "SEGMENT")
         self.assertEqual(len(msgs), 2)
         self.assertEqual(msgs[0]["role"], "system")
         self.assertEqual(msgs[1]["role"], "user")
@@ -701,7 +702,7 @@ class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
             ok_response,
         ]
         args = _base_args(model="gpt-5.4-mini")
-        out = translate._openai_create_with_fallback(
+        out = openai._openai_create_with_fallback(
             client, args, [{"role": "user", "content": "x"}], {"reasoning_effort": "medium"}
         )
         self.assertIs(out, ok_response)
@@ -712,7 +713,7 @@ class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
         client.chat.completions.create.side_effect = TypeError("unrelated")
         args = _base_args(model="gpt-5.4-mini")
         with self.assertRaises(TypeError):
-            translate._openai_create_with_fallback(
+            openai._openai_create_with_fallback(
                 client, args, [{"role": "user", "content": "x"}], {"reasoning_effort": "medium"}
             )
 
@@ -728,7 +729,7 @@ class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
         )
         client.chat.completions.create.side_effect = [bad_request, ok_response]
         args = _base_args(model="gpt-5.4-mini")
-        out = translate._openai_create_with_fallback(
+        out = openai._openai_create_with_fallback(
             client, args, [{"role": "user", "content": "x"}], {"reasoning_effort": "medium"}
         )
         self.assertIs(out, ok_response)
@@ -740,37 +741,42 @@ class TestRunSingleAndDirectory(unittest.TestCase):
 
     def test_run_single_file_failure_listed(self):
         args = _base_args(file="/source/foo.md", target_dir="/dest")
-        with patch("aipmt.translate.translate_markdown_file", return_value="failure"):
-            failed = translate._run_single_file(args, MagicMock())
+        with patch("aipmt.cli.translate_markdown_file", return_value="failure") as fake_tmf:
+            failed = cli._run_single_file(args, MagicMock())
         self.assertEqual(failed, ["/source/foo.md"])
+        # Mesuré : sans patch, le vrai translate_markdown_file rend « failure » sur
+        # un chemin inexistant — la valeur attendue. Seul l'appel du double prouve.
+        fake_tmf.assert_called_once()
 
     def test_run_single_file_success_empty(self):
         args = _base_args(file="/source/foo.md", target_dir="/dest")
-        with patch("aipmt.translate.translate_markdown_file", return_value="success"):
-            failed = translate._run_single_file(args, MagicMock())
+        with patch("aipmt.cli.translate_markdown_file", return_value="success"):
+            failed = cli._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
 
     def test_run_single_file_skipped_empty(self):
         args = _base_args(file="/source/foo.md", target_dir="/dest")
-        with patch("aipmt.translate.translate_markdown_file", return_value="skipped"):
-            failed = translate._run_single_file(args, MagicMock())
+        with patch("aipmt.cli.translate_markdown_file", return_value="skipped"):
+            failed = cli._run_single_file(args, MagicMock())
         self.assertEqual(failed, [])
 
     def test_run_directory_dict_with_failed(self):
         args = _base_args(source_dir="/source/src", target_dir="/source/dst")
         with patch(
-            "aipmt.translate.translate_directory",
+            "aipmt.cli.translate_directory",
             return_value={"failed": ["a.md"], "skipped": []},
-        ):
-            self.assertEqual(translate._run_directory(args, MagicMock()), ["a.md"])
+        ) as fake_td:
+            self.assertEqual(cli._run_directory(args, MagicMock()), ["a.md"])
+        fake_td.assert_called_once()
 
     def test_run_directory_default_fail_on_malformed(self):
         """Default-fail : si translate_directory renvoie une dict mal formée
         (sans clé 'failed'), on traite comme un échec."""
         args = _base_args(source_dir="/source/src", target_dir="/source/dst")
-        with patch("aipmt.translate.translate_directory", return_value={"oops": []}):
-            failed = translate._run_directory(args, MagicMock())
+        with patch("aipmt.cli.translate_directory", return_value={"oops": []}) as fake_td:
+            failed = cli._run_directory(args, MagicMock())
         self.assertTrue(failed)
+        fake_td.assert_called_once()
 
 
 class TestMainModelWarning(unittest.TestCase):
@@ -779,8 +785,8 @@ class TestMainModelWarning(unittest.TestCase):
     def test_unknown_model_prints_warning(self):
         with (
             patch.dict(os.environ, _FAKE_OPENAI_ENV),
-            patch("aipmt.translate.translate_markdown_file", return_value="success"),
-            patch("aipmt.translate.OpenAI"),
+            patch("aipmt.cli.translate_markdown_file", return_value="success"),
+            patch("aipmt.providers.openai.OpenAI") as fake_openai,
             patch("os.path.isfile", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
@@ -797,7 +803,8 @@ class TestMainModelWarning(unittest.TestCase):
             ),
             patch("builtins.print") as mock_print,
         ):
-            translate.main()
+            cli.main()
+        fake_openai.assert_called_once()
         printed = " ".join(str(c) for c in mock_print.call_args_list)
         self.assertIn("modele-inconnu-xyz", printed)
 
@@ -809,10 +816,8 @@ class TestMainCleansUpMistralClient(unittest.TestCase):
     def test_mistral_branch_executes_del(self):
         with (
             patch.dict(os.environ, _FAKE_MISTRAL_ENV),
-            patch(
-                "aipmt.translate.translate_directory", return_value={"failed": [], "skipped": []}
-            ),
-            patch("aipmt.translate.Mistral"),
+            patch("aipmt.cli.translate_directory", return_value={"failed": [], "skipped": []}),
+            patch("aipmt.providers.mistral.Mistral") as fake_mistral,
             patch("os.path.isdir", return_value=True),
             patch("os.path.exists", return_value=True),
             patch(
@@ -828,12 +833,16 @@ class TestMainCleansUpMistralClient(unittest.TestCase):
             ),
         ):
             # Ne doit pas lever : la branche `del client` exécute proprement.
-            translate.main()
+            cli.main()
+        # main() revient sans lever même quand rien n'est patché (mesuré) :
+        # seul l'appel du double prouve que la branche Mistral a été prise.
+        fake_mistral.assert_called_once()
 
 
 class TestModuleEntrypoint(unittest.TestCase):
-    """Couvre `if __name__ == '__main__': main()` (ligne ~1459) en exécutant
-    le script avec une invocation rapide qui sort en erreur (validation paths)."""
+    """Exécute `python -m aipmt` en sous-processus, avec une invocation rapide
+    qui sort en erreur (validation des chemins) : le point d'entrée installable
+    est la seule forme d'exécution supportée depuis le découpage du module."""
 
     def test_module_entrypoint_invokes_main(self):
         import subprocess  # nosec B404 — test exécute la CLI aipmt

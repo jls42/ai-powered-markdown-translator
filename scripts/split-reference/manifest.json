@@ -1,0 +1,731 @@
+{
+  "_comment": "Manifeste CUMULATIF des écarts déclarés par rapport au snapshot de référence (package-6ae1505.json). Lu par scripts/check-split-purity.py. added : nœuds de premier niveau ajoutés (docstrings de module, __all__…) ; removed : nœuds retirés ; modified : nœuds dont le corps a changé (old_hash → new_hash). Chaque entrée dit pourquoi.",
+  "added": [
+    {
+      "hash": "fac53b21a025fbfa1bafdbb53db0c4f021a40abb67c8a8d6614c384a4ffb1649",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/config.py",
+      "why": "docstring du module config, né du découpage"
+    },
+    {
+      "hash": "1b9b902744144b708816c4c111d63703546cafd83e49db4d1e7432f2cafcbbcc",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/markdown.py",
+      "why": "docstring du module markdown, né du découpage"
+    },
+    {
+      "hash": "f1cc7e2a02fb87c122d3f096f5c5092091873034553d0ce043541476ae971fc6",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/segmentation.py",
+      "why": "docstring du module segmentation, né du découpage"
+    },
+    {
+      "hash": "2bc893f0672315e347bda4c69193075a3f7b999eab39fa3c38d1a76d1a0767af",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/guards.py",
+      "why": "docstring du module guards, né du découpage"
+    },
+    {
+      "hash": "58a6340fc0465cf3df0af07a2a3cb84fbe7cdaa9fc4fcb8e543dd67eaea24680",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/placeholders.py",
+      "why": "docstring du module placeholders, né du découpage"
+    },
+    {
+      "hash": "6726cb9fe7c5006fd044c67c306564c3b58c04d22c0abc0fde220c72f269f786",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/news.py",
+      "why": "docstring du module news, né du découpage"
+    },
+    {
+      "hash": "95d6f8b304294a8385640a1ecf13e4ad2e26db024f8662a1fd77a866cf6958a4",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/prompts.py",
+      "why": "docstring du module prompts, né du découpage"
+    },
+    {
+      "hash": "593288646a347004fb0b17c0b31dc9d1d80bbff850c6e2110c54080517a7451c",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/notes.py",
+      "why": "docstring du module notes, né du découpage"
+    },
+    {
+      "hash": "cd7c55ef65011fdb9913fc16aa540c853b63f19cff6cbb8a6da5d768834011f5",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/naming.py",
+      "why": "docstring du module naming, né du découpage"
+    },
+    {
+      "hash": "a4b7a0d091531f43e8c03a25dc40077befa806f72fd0438270dd77df1056fb4f",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/base.py",
+      "why": "docstring du module providers/base, né du découpage"
+    },
+    {
+      "hash": "ff3bf1da8b4120cc895c3df20c7d9703a67490ee842bc59ea032a7cdda5c5b3c",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/__init__.py",
+      "why": "docstring du sous-paquet providers, né du découpage"
+    },
+    {
+      "hash": "0faa1be6b47b9462a0e7d37db9c9f84971b41e4815b7191cfe5486afc8892a9b",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/openai.py",
+      "why": "docstring du module providers/openai, né du découpage"
+    },
+    {
+      "hash": "7b7320c512b1177cad0b8794bd3ab38df573a6a0528c0b6628214c4d386ffb7a",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/mistral.py",
+      "why": "docstring du module providers/mistral, né du découpage"
+    },
+    {
+      "hash": "6ab2ce726f699864a417431c6715fd56a762bd9977a04c01eda880c8eff621ed",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/anthropic.py",
+      "why": "docstring du module providers/anthropic, né du découpage"
+    },
+    {
+      "hash": "bd5504bd7bab634dce8865c5c47f81df564b2339a9d5c608eec7fc857d0bac77",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/gemini.py",
+      "why": "docstring du module providers/gemini, né du découpage"
+    },
+    {
+      "hash": "b07ecc0c212b33a3fd647b9a2ed5db0fa4f5b83d233243acb48645db071332f1",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/codex.py",
+      "why": "docstring du module providers/codex, né du découpage"
+    },
+    {
+      "hash": "a6b46bd4448e5d367c1450c792b08ae38a192572e0c798614b40dc4da8ed7a39",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/grok.py",
+      "why": "docstring du module providers/grok, né du découpage"
+    },
+    {
+      "hash": "23b76a2ce0d2b4d9234899912ab8843ebb8c87ce0a5bb8cff9195a3dcc5145d7",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/opencode.py",
+      "why": "docstring du module providers/opencode, né du découpage"
+    },
+    {
+      "hash": "75381da99b05755c06d48f0fa08f613a6e878f4dde9f2ec20fbba24d9f25913f",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "docstring du module providers/openrouter, né du découpage"
+    },
+    {
+      "hash": "76975be5f55734e71698038b2bc89e673f73952440873c76baa3dfd732c2ecc5",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "docstring du module providers/registry, né du découpage"
+    },
+    {
+      "hash": "5df261ad88aef97908e432353feb14fe9668dc8d879b847245a3742aea633abc",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/pipeline.py",
+      "why": "docstring du module pipeline, né du découpage"
+    },
+    {
+      "hash": "6cee25e646da77b151612df6056825d698dd047d5fa900b696579677fc331ef5",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/cli.py",
+      "why": "docstring du module cli, né du découpage"
+    },
+    {
+      "hash": "42a672c46f26f0100cb9b717660a884eb096fd11431a5223ad0bcd32fc1e601a",
+      "name": "<docstring>",
+      "kind": "Expr",
+      "file": "src/aipmt/translate.py",
+      "why": "docstring de la façade de compatibilité"
+    },
+    {
+      "hash": "6799ebcedbf3ed0c952932506f0dbac9286efa18fc6888714a09a53e6b748d5b",
+      "name": "__all__",
+      "kind": "Assign",
+      "file": "src/aipmt/translate.py",
+      "why": "__all__ de la façade : les neuf noms supportés"
+    },
+    {
+      "hash": "a5d5d348f7e84faf62d719be59740b412fc4ac6a855ec6946da5895f11be6805",
+      "name": "_resolve_provider_from_args",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "scission de _resolve_provider pour Codacy"
+    },
+    {
+      "hash": "9e7fe2fc071c0176baeca71569a8738533ae236632d0a3ae98ffc0b1da63dd8d",
+      "name": "_call_provider",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "scission de _dispatch_provider_call pour Codacy"
+    },
+    {
+      "hash": "0a01c5c308f283a674b88febdc7bbec693c8f59cb069a12e4b47cfc83f6bcf8a",
+      "name": "_PROVIDER_FLAGS",
+      "kind": "Assign",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "table des huit flags exclusifs, née de la scission de _add_provider_args pour Codacy"
+    },
+    {
+      "hash": "0f82341d5fc1897c77bd34350f038a80ea488c5b056006b21b715c45e9356778",
+      "name": "_select_later_provider_client",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/registry.py",
+      "why": "scission de _select_provider_client pour Codacy"
+    },
+    {
+      "hash": "c53d7defe2343b9c738f2a2418266dd36bbd2ab32428fc3ea6652950160f8873",
+      "name": "_openrouter_endpoint_usable",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "scission de _openrouter_pin pour Codacy"
+    },
+    {
+      "hash": "c23b85f78c07adcf49c5edd1a9fc0a476539db5070379c01894ddda705242e7d",
+      "name": "_openrouter_api_key",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "scission de _init_openrouter_client pour Codacy"
+    },
+    {
+      "hash": "1357b9bda8df5dafc36d8792937fd2048f9cf4dcc906e403012eca7848b74122",
+      "name": "_openrouter_reasoning_constraints",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "scission de _init_openrouter_client pour Codacy"
+    },
+    {
+      "hash": "dac795baaec9fd5ab5ad55cbfb6c9c5e0f7fccc04eae5b7146cca80d4b240a44",
+      "name": "_kill_group_on_sigterm",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/base.py",
+      "why": "revue : gestionnaire SIGTERM qui tue le groupe de l'agent avant de terminer"
+    },
+    {
+      "hash": "f55f161c81c3faa281cded5c4c20545ab71e477eb329bd00f5d7f66c0d438484",
+      "name": "_opencode_reject_corrupted_stream",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/opencode.py",
+      "why": "revue : refus d'un flux JSONL corrompu"
+    },
+    {
+      "hash": "195e8bd0e584550a7e6751f7116a084cb7f25e1b1c42cf91c897a421c6591a9e",
+      "name": "_openrouter_context_length",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue : fenêtre de contexte refusée si absente ou illisible"
+    },
+    {
+      "hash": "fb322f546d9948bd8c7ec0b1ff0a03236800a04a8871270e400c9901f45e3775",
+      "name": "_opencode_parts",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/opencode.py",
+      "why": "revue : part: null compte comme vide"
+    },
+    {
+      "hash": "e2ecf5810a810ba2cd108c5ac0dc1d272586dc7b052b1881bde5bd75c9a77877",
+      "name": "_openrouter_error_detail",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue max : un seul rendu des objets d'erreur du routeur"
+    },
+    {
+      "hash": "06854ab621e9b3355343f92110b2e943709e93638f051a9e2feacc196a4e9716",
+      "name": "_openrouter_upstream_failure",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue max : un seul message pour la panne amont, détail + conseil"
+    },
+    {
+      "hash": "9036b9fc5c7ec4069ebc9ed4447318b929fdc6a49488f6c42cae78879ac32150",
+      "name": "_OPENCODE_HTTP_429_REGEX",
+      "kind": "Assign",
+      "file": "src/aipmt/providers/opencode.py",
+      "why": "revue Codex : 429 borné par des frontières de mot"
+    },
+    {
+      "hash": "f5844b0e53347e9bb224a9b1681b4df93ec6f5e59695bb023d217ebc5d03c6f4",
+      "name": "_kill_process_only",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/base.py",
+      "why": "revue Codex : repli sans groupes de processus"
+    },
+    {
+      "hash": "4dda438b48e3efb4c5427b98dba1fb2d737abc4a3b93f7abc4ee76be91c5ad50",
+      "name": "OPENROUTER_INPUT_RESERVE",
+      "kind": "Assign",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : part du contexte réservée à l'entrée"
+    },
+    {
+      "hash": "827e59d8d7527dd0296826ce83793ff6baab562c402de35024c32f8d699c7032",
+      "name": "_openrouter_output_budget",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : plafond de sortie borné par le contexte, refus avant facturation"
+    },
+    {
+      "hash": "a7823aa7cce0f5e3b7b4b658b5aed3cc7126c6a797ebcf72573a243590ae8d0d",
+      "name": "_ENDPOINT_VARIABLES",
+      "kind": "Assign",
+      "file": "src/aipmt/config.py",
+      "why": "revue Codex : variables qui décident où part une clé"
+    },
+    {
+      "hash": "52218b49638ee6c132f2681b1dd97ddbe4c088f24da36d9e2484729294c9c782",
+      "name": "_drop_project_endpoints",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/config.py",
+      "why": "revue Codex : refus des URL d'endpoint venues du projet"
+    },
+    {
+      "hash": "c876cb06fcdc434ce5c3de2848dce6b3c293eddaac29258de68e5be38516d667",
+      "name": "OPENROUTER_BYTES_PER_TOKEN",
+      "kind": "Assign",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : majorant mesuré des tokens par octet"
+    },
+    {
+      "hash": "6c884c67f6ed9bc4e3a80ef73e82137ca70162d40d2a22ebb94f8d4189f51151",
+      "name": "_openrouter_estimated_tokens",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : majorant du nombre de tokens d'un texte"
+    },
+    {
+      "hash": "7ac6b804617a8b297c7fa3b1141a64818e9aa121d39302dfe6fa761dad522921",
+      "name": "_openrouter_call_budget",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : enveloppe de sortie calculée sur le texte réel"
+    },
+    {
+      "hash": "bc5ba773c25e308719d74206fe52faa41d56ea26b8c5c8b83e87e803414a08f4",
+      "name": "_ROUTING_SUFFIXES",
+      "kind": "Assign",
+      "file": "src/aipmt/config.py",
+      "why": "revue Codex : motifs des variables de routage"
+    },
+    {
+      "hash": "81519dedb6d25251e354d878711390a51a7f223002b65984a5a9b44e9261fe6d",
+      "name": "_ROUTING_NAMES",
+      "kind": "Assign",
+      "file": "src/aipmt/config.py",
+      "why": "revue Codex : proxies, magasins de certificats, emplacement de la configuration"
+    },
+    {
+      "hash": "51989f74624e46476cdff94bebda819eaa4f380b6ad3bad2e59a10b5aba015fa",
+      "name": "_is_routing_variable",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/config.py",
+      "why": "revue Codex : reconnaît une variable qui détourne ou intercepte"
+    },
+    {
+      "hash": "d473db99f67722443d028e1159e8089bb8071a36cbd5c94e53c4318657d7e5de",
+      "name": "_drop_project_routing",
+      "kind": "FunctionDef",
+      "file": "src/aipmt/config.py",
+      "why": "revue Codex : refus des variables de routage venues du projet"
+    },
+    {
+      "hash": "805f8f3e5b26e05d0fc74220e4ecfb54aeab1806dcde80167aab4a993c49ec13",
+      "name": "OPENROUTER_FRAMING_TOKENS",
+      "kind": "Assign",
+      "file": "src/aipmt/providers/openrouter.py",
+      "why": "revue Codex : marge pour l'encadrement des messages"
+    }
+  ],
+  "removed": [
+    {
+      "hash": "a7823aa7cce0f5e3b7b4b658b5aed3cc7126c6a797ebcf72573a243590ae8d0d",
+      "name": "_ENDPOINT_VARIABLES",
+      "why": "revue Codex : liste nominative remplacée par un filtrage par motif"
+    },
+    {
+      "hash": "52218b49638ee6c132f2681b1dd97ddbe4c088f24da36d9e2484729294c9c782",
+      "name": "_drop_project_endpoints",
+      "why": "revue Codex : devient _drop_project_routing"
+    },
+    {
+      "hash": "c876cb06fcdc434ce5c3de2848dce6b3c293eddaac29258de68e5be38516d667",
+      "name": "OPENROUTER_BYTES_PER_TOKEN",
+      "why": "revue Codex : aucun ratio moyen ne majore, la borne est le nombre d'octets"
+    }
+  ],
+  "modified": [
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/__init__.py",
+      "old_hash": "31da5444c63d040cb2c69fffba9c392bc0cd30bec55624b136978b7380f15d25",
+      "new_hash": "187abf09417bbafa55a764453c0759691136eb5c22ed37003167a65c8216ac98",
+      "why": "docstring du paquet : décrit le découpage au lieu d'un module unique"
+    },
+    {
+      "name": "_is_translatable_markdown",
+      "file": "src/aipmt/pipeline.py",
+      "old_hash": "68750e5159a2432e1f7266afa155de5b709f9d35b33f8a5253cedbcb37c9427d",
+      "new_hash": "e487cd02c473cf0f2e41ab75e479e1d646c40fd3dd3f58a419701e1760aa8360",
+      "why": "Sonar S8513 : deux endswith chaînés remplacés par un endswith à tuple, comportement identique (le code déplacé compte comme nouveau pour Sonar)"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "76975be5f55734e71698038b2bc89e673f73952440873c76baa3dfd732c2ecc5",
+      "new_hash": "57aad80ad91ff688082c3dc480d4ba60c75afb27841e78a251fa1946786207b3",
+      "why": "docstring du module : ses fonctions ne sont plus « déplacées telles quelles », elles sont scindées pour Codacy sans changer l'ordre d'évaluation"
+    },
+    {
+      "name": "_resolve_provider",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "7c32bcb9e5c7cf70ee19ac804d2dd28c2822217b8237a99479f17fa712e279f4",
+      "new_hash": "d22f0fbfeaa233db40d48032208d2f1bf775b005eda9f09ae9a7b4c1fa5aaef8",
+      "why": "Codacy CCN 9 > 8 : la chaîne des flags du Namespace devient _resolve_provider_from_args, même ordre d'évaluation"
+    },
+    {
+      "name": "_dispatch_provider_call",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "7c86f4626307e81d5bf6f38fd19f3dd218d3374f4058864e7349fa963ef67274",
+      "new_hash": "5649c81b64820a6f5b3f1e7b5fa0b7c57035a773ed85bc51ec909f998576c24e",
+      "why": "Codacy CCN 9 > 8 : la chaîne d'appels devient _call_provider, la garde de contenu vide reste ici"
+    },
+    {
+      "name": "_add_provider_args",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "11a676712465b230625e28ea09098d03cc90015408737dcc92e0964d4a320964",
+      "new_hash": "49c1fa01a50f59b657ae4d635ff6e4ea22019e1690f99d6aabbe653b47e2bf7f",
+      "why": "Codacy 80 lignes > 50 : les huit flags exclusifs viennent de la table _PROVIDER_FLAGS ; parser identique, sha256 de --help inchangé"
+    },
+    {
+      "name": "_select_provider_client",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "76aab0abe3fce22bdce81f3c488c87f07eb69abd81094c53550e2cfae7dad774",
+      "new_hash": "21b6eb9e0c046a286a238022b3745788b85dc6442ac3968e7b3d26bba8d07157",
+      "why": "Codacy CCN 9 > 8 : la suite de la chaîne devient _select_later_provider_client, même ordre d'évaluation"
+    },
+    {
+      "name": "_openrouter_pin",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "d04025aa9fe96010e9bb24af1f72026327e6a4cc3da0ee1c170711092b693019",
+      "new_hash": "1b04062baedfe4aec3b1431bc6162d55b845610da2564b6c776d4cf71a45eef0",
+      "why": "Codacy CCN 9 > 8 : le prédicat de filtre devient _openrouter_endpoint_usable"
+    },
+    {
+      "name": "_init_openrouter_client",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "a6a33c12aeb9abc5bc982f56b2e81c0d85306e08b3032152e6fa099ef0416a3c",
+      "new_hash": "0d307aff8b5d05ae36745586ce6122dcf67c2e4b13e6c63c8a92fc0ae410a679",
+      "why": "Codacy CCN 10 > 8 : lecture de la clé et contraintes de raisonnement extraites (_openrouter_api_key, _openrouter_reasoning_constraints)"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/guards.py",
+      "old_hash": "2bc893f0672315e347bda4c69193075a3f7b999eab39fa3c38d1a76d1a0767af",
+      "new_hash": "80ce8e5c2a542c50acfbb3cdce666377c4114db7158219b06986cb1bc49bd9e9",
+      "why": "revue : trois gardes lèvent, le signal d'écriture court-circuite ; « La graine »"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/markdown.py",
+      "old_hash": "1b9b902744144b708816c4c111d63703546cafd83e49db4d1e7432f2cafcbbcc",
+      "new_hash": "a3402920c6e2af407bd293228ae8fc51789a6caad3c863d0fadc7a9463c950af",
+      "why": "revue : la segmentation n'importe pas ce module, les instructions système si"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/naming.py",
+      "old_hash": "cd7c55ef65011fdb9913fc16aa540c853b63f19cff6cbb8a6da5d768834011f5",
+      "new_hash": "64130507a8cbcf90e1a0de5f5697b9c92501bcaccff44549673ce174e9e47bb7",
+      "why": "revue : deux couches de garde, pas « la seule »"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/news.py",
+      "old_hash": "6726cb9fe7c5006fd044c67c306564c3b58c04d22c0abc0fde220c72f269f786",
+      "new_hash": "adfae4f6e8c5442c032ebdcc5467ff8f347fcc1de4df1a205ec30274ad5cd032",
+      "why": "revue : le prompt demande le retrait/la permutation, le module n'est qu'un repli"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/notes.py",
+      "old_hash": "593288646a347004fb0b17c0b31dc9d1d80bbff850c6e2110c54080517a7451c",
+      "new_hash": "0c075a05e0c1eae8e31d4c07a06e53254835f2e3c0042777abd2ee3c6c6330f0",
+      "why": "revue :  rend « purs » inexact"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/pipeline.py",
+      "old_hash": "5df261ad88aef97908e432353feb14fe9668dc8d879b847245a3742aea633abc",
+      "new_hash": "2e33cf72388b005ffa291448bc7112621fb33c68b483cd92489f6739c5f0e1a8",
+      "why": "revue : la borne d'écriture est chez les appelants, pas dans translate_markdown_file"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/anthropic.py",
+      "old_hash": "6ab2ce726f699864a417431c6715fd56a762bd9977a04c01eda880c8eff621ed",
+      "new_hash": "0a415fd1abfb3b85e9b86c47708c91febce1c346022ee34efc1de7a28a42579c",
+      "why": "revue : c'est le timeout explicite qui évite le refus du SDK (921 s pour 32 768 tokens), pas un calibrage"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "a4b7a0d091531f43e8c03a25dc40077befa806f72fd0438270dd77df1056fb4f",
+      "new_hash": "f64b408c1c1b831cc31033f06beef2376a72d1b5e4f6253a59aec3be437d301f",
+      "why": "revue : OpenCode n'est pas un CLI d'abonnement ; SIGTERM reçu tue aussi le groupe"
+    },
+    {
+      "name": "_strip_secret_env",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "d9a493be6e3b2edb03c0ed01b1b42e6c66bcde1d0531da59999573491bdde6f1",
+      "new_hash": "b1028c12c917bb0fcc0c910d138bf540ae6788e08b1f54b1a04836f7cff743d5",
+      "why": "revue : OpenCode conserve OPENCODE_API_KEY par keep, la docstring disait « aucune »"
+    },
+    {
+      "name": "_codex_kill_group",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "b7e4bc08cbc7988b12661979c512e8282b30bb4ff327dd84f907b3421e998599",
+      "new_hash": "98193d4ce2f37cce3ba5d41886cc0b6e20307a3988cb70c84c58729d7ae7328f",
+      "why": "revue (code déplacé) : SIGKILL du groupe systématique après le délai de grâce — un fils qui meurt proprement sur SIGTERM laissait vivre le petit-fils"
+    },
+    {
+      "name": "_codex_run_process",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "8bc77cd10e2b6eb7ad81772c5ef11168d1cc95816bc768ddd4bfe3a8de7835ff",
+      "new_hash": "55645db8c0408bc9afcbf9946d25aa20fe2a34fb696c580eb9919a99447ba3cb",
+      "why": "revue : SIGTERM reçu pendant l'attente tue le groupe de l'agent (le timeout du regen laissait l'agent survivre) ; argv/stdin d'OpenCode nommés"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/gemini.py",
+      "old_hash": "bd5504bd7bab634dce8865c5c47f81df564b2339a9d5c608eec7fc857d0bac77",
+      "new_hash": "d753cb1f830102f8537caa8b3b40ce1b91a40db6629390f049b68e6208f8b167",
+      "why": "revue : le niveau ACCEPTÉ est mémorisé, pas la cascade après un refus"
+    },
+    {
+      "name": "_opencode_events",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "031bf923bceb1faae30ac125dd28bc124189af27e9b613149f77d38dff82c528",
+      "new_hash": "160f6eb209f32a527d6599f527fb8150d1911a984dd2c5b64d757dda834cd218",
+      "why": "revue : compte les lignes d'événement illisibles au lieu de les ignorer"
+    },
+    {
+      "name": "_opencode_check_completion",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "9d116a69f8b2f1a13d8156b54d389be155e56a35b99809e631ff42a6f8991576",
+      "new_hash": "1bdd64a31dba244f51a6dc4493aac92a3a3c5838bfbf162cdd4c7ea922f5be87",
+      "why": "revue : part: null donnait AttributeError au lieu de l'erreur de contrat"
+    },
+    {
+      "name": "_opencode_attempt",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "8d749a6f996a83971c17c8bc240319b438f180bafeb8ed448bd1b2e91e1ac648",
+      "new_hash": "a89cef75b689b05de1e70cc51245e17ad38cb223034fc37e73f83f54737c774b",
+      "why": "revue : refuse un flux d'événements corrompu après les contrôles de sortie"
+    },
+    {
+      "name": "_OpenRouterClient",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "a42352f4b062da7a360f75b4ecf838e459e8654822f57fdfe9c737b6c9f06668",
+      "new_hash": "19054ed0cc67e9f0cc79d46fd149f4dc324dc3d7b14d66b63838b5d29252a7b7",
+      "why": "revue : quatre champs de contrainte, pas trois"
+    },
+    {
+      "name": "_openrouter_reasoning",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "204979dba49fe64606623bc45d3f6f5ccf0506d184500db6ec5123a75fe6de0c",
+      "new_hash": "b5d75a656f845b6b7fa7c42068bfe884d8c8db71b0c144774a6b183781d49192",
+      "why": "revue : la docstring disait l'inverse du code (plus bas effort envoyé quand le modèle impose)"
+    },
+    {
+      "name": "_init_openrouter_client",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "0d307aff8b5d05ae36745586ce6122dcf67c2e4b13e6c63c8a92fc0ae410a679",
+      "new_hash": "64422faa929223e3f54c65e1a0569b353408fb807c4f7960f4eb8dfb0a2eef7e",
+      "why": "revue : fiche sans context_length refusée au lieu d'un défaut inscrit comme mesure"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "57aad80ad91ff688082c3dc480d4ba60c75afb27841e78a251fa1946786207b3",
+      "new_hash": "4d3897470509e6c55ba8a3ed233e6c51a42243accee3475f59a0924567318c49",
+      "why": "revue : chaînes de if, plus d'elif"
+    },
+    {
+      "name": "_add_provider_args",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "49c1fa01a50f59b657ae4d635ff6e4ea22019e1690f99d6aabbe653b47e2bf7f",
+      "new_hash": "4e467ed0dd4db0c3ed861939f3a5050585957533879b5ce4c338f57419095f8e",
+      "why": "revue : l'aide de --reasoning_effort nomme les quatre providers qui le consomment"
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/segmentation.py",
+      "old_hash": "f1cc7e2a02fb87c122d3f096f5c5092091873034553d0ce043541476ae971fc6",
+      "new_hash": "b2c0b25b4f7abcd6d56828361595da6d95d33e9d274683500f63a9257830fd21",
+      "why": "revue : segmentation en caractères ; MODEL_TOKEN_LIMITS est lu par le pipeline"
+    },
+    {
+      "name": "_openrouter_check_finish",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "0d29edc41566adbcf536fad6f809019561a119afd03ad6f0bac66242e1c28b6e",
+      "new_hash": "926914eb12244ab93e267323a74a11d86c9acc7cdae201ab7b1ffa2216e66b49",
+      "why": "revue : finish_reason nul (type documenté string | null) → la raison brute de l'amont fait foi, max_tokens vaut length"
+    },
+    {
+      "name": "_opencode_check_completion",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "1bdd64a31dba244f51a6dc4493aac92a3a3c5838bfbf162cdd4c7ea922f5be87",
+      "new_hash": "cbce6a9f12d04f1d7c3f0fc36261869ae518728cc762e71a1e5575c862dc0538",
+      "why": "revue : les part passent par _opencode_parts (CCN 11 → 6)"
+    },
+    {
+      "name": "_openrouter_http_get",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "7c902fac701f5d0823b26b5fbd973a5b81c715a03815b118821933fc18a15f94",
+      "new_hash": "5930d68494dc1a7b3f8c25e8a0117983d7e81226aa2001e8bf8381e0e7242eef",
+      "why": "revue : un corps 200 portant une erreur se lisait « slug inconnu » ; l'erreur du routeur est nommée"
+    },
+    {
+      "name": "_openrouter_first_choice",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "fb1302f739955381a3180572fe5bef7b3c9fe327d2ea2b1a28dc58ac2d26db51",
+      "new_hash": "0dd39f1395154ebc52df6e42b51304d8f196e6909c173c88dd11aeceb52466f9",
+      "why": "revue (Codex) : l'erreur portée par le choix lui-même (NonStreamingChoice.error) refuse le contenu partiel"
+    },
+    {
+      "name": "_openrouter_first_choice",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "0dd39f1395154ebc52df6e42b51304d8f196e6909c173c88dd11aeceb52466f9",
+      "new_hash": "6fb82f48b20acd1d18ea6ad51c9b52701e465327236e458e869c4f30f9eb5b4c",
+      "why": "revue max : l'erreur du choix rejoint le contrat de sortie ; rendu de l'erreur factorisé"
+    },
+    {
+      "name": "_openrouter_check_finish",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "926914eb12244ab93e267323a74a11d86c9acc7cdae201ab7b1ffa2216e66b49",
+      "new_hash": "ed6dfd3a752982e4adb8424d22daec08a39fc1d3d25619457f5f330d410d56c7",
+      "why": "revue max : panne amont regroupée (finish_reason=error et/ou error du choix), objet présent mais vide refusé"
+    },
+    {
+      "name": "_opencode_is_rate_limited",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "02cf3ca86a115a276e4f4d0d0884bc6427173b4bd817b0937a02cc65496d682b",
+      "new_hash": "db71a202c75a766066e382cbc1046241ce78581e9f454033878e7a708d6dbdc3",
+      "why": "revue Codex : « 429 » cherché comme nombre, plus en sous-chaîne (err_84290b, foo429bar)"
+    },
+    {
+      "name": "_codex_kill_group",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "98193d4ce2f37cce3ba5d41886cc0b6e20307a3988cb70c84c58729d7ae7328f",
+      "new_hash": "ac70dc393ddf594523de12ace6aeaac04cb48e0947efdc5eefb2f86c524366ba",
+      "why": "revue Codex : repli sans groupes POSIX (Windows), l'AttributeError faisait attendre le Popen indéfiniment"
+    },
+    {
+      "name": "_OpenRouterClient",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "19054ed0cc67e9f0cc79d46fd149f4dc324dc3d7b14d66b63838b5d29252a7b7",
+      "new_hash": "3ef966d8e783c40c9f674213e5f61aa1a2037175bdf9560f0653fe84e1619ed2",
+      "why": "revue Codex : le plafond de sortie tient compte du contexte réservé à l'entrée"
+    },
+    {
+      "name": "_OPENCODE_RATE_LIMIT_MARKERS",
+      "file": "src/aipmt/providers/opencode.py",
+      "old_hash": "05694ee7495cc1759b699a5a11a9b2965ee2cbe149d7fc2d4e61c960ab377579",
+      "new_hash": "8aa8e8c097f64421bd554402c402f2ad5fa413c8e7d3aad15e3db039a0d9bc92",
+      "why": "revue Codex : « 429 » sort du tuple, il devient une regex bornée"
+    },
+    {
+      "name": "_init_openrouter_client",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "64422faa929223e3f54c65e1a0569b353408fb807c4f7960f4eb8dfb0a2eef7e",
+      "new_hash": "1b88dea93b43d29a500205b15ecb68294b1b228f0f4cc75f89486f911c8a83ca",
+      "why": "revue Codex : entrée réservée dans le contexte, endpoint non canonique affiché"
+    },
+    {
+      "name": "_load_configuration",
+      "file": "src/aipmt/config.py",
+      "old_hash": "c522fa6e85655225fadcf4c4538a5d32c9049bec229d8eb3fb33da0e33e2527a",
+      "new_hash": "779d8fa75a05b02b12309f33eb170021c5310649daf6682bf65b4a5d2e3b9095",
+      "why": "revue Codex : les URL d'endpoint sont retirées entre la couche projet et la couche utilisateur"
+    },
+    {
+      "name": "_call_openrouter",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "e56e20d5484142d3aaa97f3451be268a0c36c1ab1445d9f4c61aeea21c367794",
+      "new_hash": "b1b70333b178ba192905c0adf6178489fd2c0f5037c39dd44cf1f06271edc586",
+      "why": "revue Codex : le plafond de sortie est calculé pour cet appel"
+    },
+    {
+      "name": "_init_openrouter_client",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "1b88dea93b43d29a500205b15ecb68294b1b228f0f4cc75f89486f911c8a83ca",
+      "new_hash": "c1ee601b0e0c563ca25a92cb2a6be6e957c067183812f736a760d1365c4eaae2",
+      "why": "revue Codex : le client porte la fenêtre de contexte"
+    },
+    {
+      "name": "_OpenRouterClient",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "3ef966d8e783c40c9f674213e5f61aa1a2037175bdf9560f0653fe84e1619ed2",
+      "new_hash": "a84c7d8f671257a0ff241325355152992d938aff16f4016f69a270a73c53f7e1",
+      "why": "revue Codex : le client porte la fenêtre de contexte, lue à chaque appel"
+    },
+    {
+      "name": "_load_configuration",
+      "file": "src/aipmt/config.py",
+      "old_hash": "779d8fa75a05b02b12309f33eb170021c5310649daf6682bf65b4a5d2e3b9095",
+      "new_hash": "2e7a59ba6532033de80f3adf62f97c722636f6f44d8eb15d1e0335d3272047f9",
+      "why": "revue Codex : chemin utilisateur figé avant la lecture du projet, filtrage par motif"
+    },
+    {
+      "name": "_openrouter_estimated_tokens",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "6c884c67f6ed9bc4e3a80ef73e82137ca70162d40d2a22ebb94f8d4189f51151",
+      "new_hash": "d15636405b8a25df2da9d72d935547a10dcb4149fd3e287376150b8924613c4d",
+      "why": "revue Codex : borne stricte, le nombre d'octets majore le nombre de tokens"
+    },
+    {
+      "name": "_openrouter_call_budget",
+      "file": "src/aipmt/providers/openrouter.py",
+      "old_hash": "7ac6b804617a8b297c7fa3b1141a64818e9aa121d39302dfe6fa761dad522921",
+      "new_hash": "2cda6f2adc3379cb8b4df1559f82aa8259adb1446a7cf96430707bf2557cbb41",
+      "why": "revue Codex : plancher du préflight, marge d'encadrement"
+    },
+    {
+      "name": "_load_configuration",
+      "file": "src/aipmt/config.py",
+      "old_hash": "2e7a59ba6532033de80f3adf62f97c722636f6f44d8eb15d1e0335d3272047f9",
+      "new_hash": "5993420a1baf107841df4ea790d37f72041fedc4a0bffb419c87ecc7b5798aac",
+      "why": "revue Codex : interpolation coupée sur la couche projet, un alias recopiait la vraie clé"
+    },
+    {
+      "name": "_drop_project_routing",
+      "file": "src/aipmt/config.py",
+      "old_hash": "d473db99f67722443d028e1159e8089bb8071a36cbd5c94e53c4318657d7e5de",
+      "new_hash": "3b620d840a017f7bb60d5edadf7450f1ffbbcac5f6b573e5ce85355ee8e3fa32",
+      "why": "revue Codex : le nom seul est affiché, la valeur refusée pouvait porter un secret interpolé"
+    }
+  ]
+}
