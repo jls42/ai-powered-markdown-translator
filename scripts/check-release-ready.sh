@@ -98,6 +98,15 @@ if $FULL; then
   else
     fail "hooks pre-push — lancer: pre-commit run --hook-stage pre-push --all-files"
   fi
+  # Le paquet tel qu'un utilisateur le reçoit, pas l'arbre de travail : la suite
+  # de tests reste verte alors qu'un module manque au wheel ou qu'un point
+  # d'entrée ne résout plus. Sans traduction ici — aucun appel de modèle, aucun
+  # coût ; la version complète se lance à la main avant de tagger.
+  if ./scripts/check-package-smoke.sh --wheel --no-translation >/dev/null 2>&1; then
+    pass "paquet installable et importable depuis un wheel neuf"
+  else
+    fail "paquet cassé — lancer: ./scripts/check-package-smoke.sh --wheel"
+  fi
 else
   warn "hooks pre-push non exécutés (utiliser --full)"
 fi
