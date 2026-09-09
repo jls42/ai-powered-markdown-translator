@@ -57,10 +57,11 @@ OPENROUTER_MAX_TOKENS = 32768
 OPENROUTER_INPUT_RESERVE = 8400
 
 
-# Un token vaut au moins un octet UTF-8 : le nombre d'octets MAJORE donc le
-# nombre de tokens, quel que soit le tokenizer à fusion d'octets — et
-# OpenRouter route vers des dizaines de tokenizers différents, dont aucun n'est
-# connu d'ici.
+# Un token vaut au moins un octet UTF-8 chez tout tokenizer à fusion d'octets —
+# BPE au niveau octet, SentencePiece avec repli octet : les familles qu'emploie
+# le catalogue. Le nombre d'octets majore donc le nombre de tokens, et c'est la
+# seule majoration disponible ici, où OpenRouter route vers des dizaines de
+# tokenizers qu'on ne connaît pas.
 #
 # Aucun ratio moyen ne convient. Compter en CARACTÈRES ne majore rien
 # (16 000 caractères valent 3 200 tokens en français, 12 300 en japonais,
@@ -69,9 +70,11 @@ OPENROUTER_INPUT_RESERVE = 8400
 # supplémentaire (𠀀) tombe à 1,33 octet par token et un caractère combinant à
 # 1,00. Seule la borne stricte tient.
 #
-# Elle est large — cinq fois l'entrée réelle sur du texte latin — mais elle ne
-# coûte qu'une enveloppe de sortie réduite, jamais un dépassement : ce qui est
-# refusé ici l'aurait été par l'hébergeur, après facturation.
+# Elle est large : cinq fois l'entrée réelle sur du texte latin. Le prix en est
+# une enveloppe de sortie réduite, et parfois un refus qui serait passé avec le
+# vrai tokenizer — sur un modèle à petite fenêtre et un texte dense. Le sens de
+# l'erreur est choisi : refuser ici coûte un message, accepter à tort coûte un
+# refus de l'hébergeur, après facturation.
 OPENROUTER_FRAMING_TOKENS = 64
 
 

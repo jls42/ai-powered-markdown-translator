@@ -116,7 +116,14 @@ def _load_configuration():
     """
     user_path = _user_config_path()
     avant = {name for name in os.environ if _is_routing_variable(name)}
-    load_dotenv(find_dotenv(usecwd=True))
+    # `interpolate=False` sur la SEULE couche projet. `load_dotenv` développe
+    # `${VAR}` par défaut : un `.env` non fiable contenant
+    # `NOM_ANODIN=${OPENAI_API_KEY}` recopiait la vraie clé sous un nom que le
+    # filtrage par motif des sous-processus ne reconnaît pas, et elle entrait
+    # dans l'environnement de `codex exec` malgré l'invariant contraire
+    # (reproduit en processus neuf). La couche utilisateur garde
+    # l'interpolation : ce fichier-là est le sien.
+    load_dotenv(find_dotenv(usecwd=True), interpolate=False)
     _drop_project_routing(avant, user_path)
     load_dotenv(user_path)
 
@@ -129,9 +136,13 @@ def _drop_project_routing(avant, user_path):
     sienne juste après. Le refus est dit sur stderr — silencieux, il ferait
     chercher pourquoi un relais légitime n'est pas pris en compte."""
     for name in [n for n in os.environ if _is_routing_variable(n) and n not in avant]:
-        valeur = os.environ.pop(name)
+        # Le NOM seulement : la valeur refusée vient d'un fichier non fiable et
+        # peut porter un secret que l'utilisateur, lui, connaît — une URL de la
+        # forme `https://${CLE}@hôte/` le ferait fuir dans les journaux, alors
+        # même qu'on la refuse (reproduit en processus neuf).
+        del os.environ[name]
         print(
-            f"⚠ {name}={valeur} ignoré : un .env de projet ne peut pas rediriger les "
+            f"⚠ {name} ignoré : un .env de projet ne peut pas rediriger les "
             "appels d'API, sinon un répertoire non fiable détournerait votre clé. "
             f"L'exporter dans l'environnement, ou le mettre dans {user_path}.",
             file=sys.stderr,

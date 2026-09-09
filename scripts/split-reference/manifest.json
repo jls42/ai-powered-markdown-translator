@@ -712,6 +712,20 @@
       "old_hash": "7ac6b804617a8b297c7fa3b1141a64818e9aa121d39302dfe6fa761dad522921",
       "new_hash": "2cda6f2adc3379cb8b4df1559f82aa8259adb1446a7cf96430707bf2557cbb41",
       "why": "revue Codex : plancher du préflight, marge d'encadrement"
+    },
+    {
+      "name": "_load_configuration",
+      "file": "src/aipmt/config.py",
+      "old_hash": "2e7a59ba6532033de80f3adf62f97c722636f6f44d8eb15d1e0335d3272047f9",
+      "new_hash": "5993420a1baf107841df4ea790d37f72041fedc4a0bffb419c87ecc7b5798aac",
+      "why": "revue Codex : interpolation coupée sur la couche projet, un alias recopiait la vraie clé"
+    },
+    {
+      "name": "_drop_project_routing",
+      "file": "src/aipmt/config.py",
+      "old_hash": "d473db99f67722443d028e1159e8089bb8071a36cbd5c94e53c4318657d7e5de",
+      "new_hash": "3b620d840a017f7bb60d5edadf7450f1ffbbcac5f6b573e5ce85355ee8e3fa32",
+      "why": "revue Codex : le nom seul est affiché, la valeur refusée pouvait porter un secret interpolé"
     }
   ]
 }
