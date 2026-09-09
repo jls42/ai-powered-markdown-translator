@@ -55,7 +55,7 @@ classifiers = [
 # surveillé par check-deps-fresh.sh, où l'enjeu est le magasin de CA.
 dependencies = [
     "openai>=1.58.1",
-    "anthropic>=0.47.0",
+    "anthropic>=1.4.0",
     "mistralai>=2.0.0",
     "google-genai>=1.51.0",
     "langdetect>=1.0.9",
