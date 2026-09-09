@@ -81,7 +81,10 @@ def _write_then_rename(clean_output_path, translated_content):
         with os.fdopen(descripteur, "w", encoding="utf-8") as f:
             f.write(translated_content)
         os.chmod(temporaire, _mode_du_fichier_ecrit(clean_output_path))
-        os.replace(temporaire, clean_output_path)
+        # NOSONAR pythonsecurity:S8707 — même borne que l'ouverture ci-dessus :
+        # clean_output_path est vérifié par _ensure_within_directory chez les
+        # deux appelants, et temporaire vient de mkstemp dans le même répertoire.
+        os.replace(temporaire, clean_output_path)  # NOSONAR
     except BaseException:
         # Le temporaire ne doit pas survivre à l'échec, y compris sur Ctrl-C :
         # il porterait le même contenu tronqué, à un nom près.
@@ -107,7 +110,10 @@ def _mode_du_fichier_ecrit(clean_output_path):
     try:
         return stat.S_IMODE(os.stat(clean_output_path).st_mode)
     except OSError:
-        umask = os.umask(0)
+        # NOSONAR python:S2612 — lecture du umask, restauré à la ligne suivante :
+        # rien n'est créé entre les deux, l'outil est mono-thread. C'est l'idiome
+        # de la bibliothèque standard, faute d'accesseur en lecture seule.
+        umask = os.umask(0)  # NOSONAR
         os.umask(umask)
         return 0o666 & ~umask
 

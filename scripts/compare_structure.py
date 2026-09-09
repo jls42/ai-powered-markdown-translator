@@ -97,9 +97,12 @@ def main(argv):
     if len(argv) != 3:
         print(__doc__.strip().splitlines()[-2].strip(), file=sys.stderr)
         return 2
-    with open(argv[1], encoding="utf-8") as f:
+    # NOSONAR pythonsecurity:S8707 — les deux chemins SONT les arguments de la
+    # commande, ouverts en lecture seule : comparer deux fichiers que l'on nomme
+    # est l'objet même de l'outil, il n'y a aucune racine à imposer.
+    with open(argv[1], encoding="utf-8") as f:  # NOSONAR
         source = f.read()
-    with open(argv[2], encoding="utf-8") as f:
+    with open(argv[2], encoding="utf-8") as f:  # NOSONAR
         traduction = f.read()
     trouves = ecarts(source, corps_sans_note(traduction))
     print("; ".join(trouves) if trouves else "structure identique")

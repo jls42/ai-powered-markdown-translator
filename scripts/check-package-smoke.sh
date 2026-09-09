@@ -47,9 +47,9 @@ EXPECTED=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
 [[ -z "$VERSION" ]] && VERSION="$EXPECTED"
 
 FAILURES=0
-pass() { printf '  \033[32m✓\033[0m %s\n' "$1"; }
-fail() { printf '  \033[31m✗\033[0m %s\n' "$1"; FAILURES=$((FAILURES + 1)); }
-skip() { printf '  \033[33m~\033[0m %s\n' "$1"; }
+pass() { local msg="$1"; printf '  \033[32m✓\033[0m %s\n' "$msg"; return 0; }
+fail() { local msg="$1"; printf '  \033[31m✗\033[0m %s\n' "$msg"; FAILURES=$((FAILURES + 1)); return 0; }
+skip() { local msg="$1"; printf '  \033[33m~\033[0m %s\n' "$msg"; return 0; }
 
 TMP=$(mktemp -d) || exit 1
 trap 'rm -rf "$TMP"' EXIT
@@ -93,7 +93,12 @@ pass "installé dans un venv neuf"
 # À partir d'ici, TOUT s'exécute hors du dépôt et sans PYTHONPATH : sinon
 # l'arbre de travail serait importé à la place du paquet, et le contrôle
 # vérifierait exactement ce qu'il est censé ignorer.
-run_installed() { (cd / && env -u PYTHONPATH "$@"); }
+run_installed() {
+  local rc
+  (cd / && env -u PYTHONPATH "$@")
+  rc=$?
+  return "$rc"
+}
 
 INSTALLED=$(run_installed "$PY" -c "import importlib.metadata as m; print(m.version('$PKG'))" 2>/dev/null)
 if [[ "$INSTALLED" == "$VERSION" ]]; then pass "version installée : $INSTALLED"; else fail "version installée $INSTALLED, attendue $VERSION"; fi
