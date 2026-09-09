@@ -114,7 +114,11 @@ class TestPlatformWithoutProcessGroups(unittest.TestCase):
         proc = MagicMock(pid=4242)
         # Le délai de grâce expire, puis `wait()` sans délai rend la main après
         # le kill — un `wait()` sans timeout bloque, il n'expire jamais.
-        proc.wait.side_effect = [subprocess.TimeoutExpired(cmd="x", timeout=1), 0]
+        # TimeoutExpired est une classe d'exception construite pour une
+        # doublure, pas un lancement de process.
+        # nosemgrep
+        expiration = subprocess.TimeoutExpired(cmd="doublure", timeout=1)  # nosemgrep
+        proc.wait.side_effect = [expiration, 0]
         with patch.object(base, "os", self._os_sans_groupes()):
             base._codex_kill_group(proc)
         proc.terminate.assert_called_once()

