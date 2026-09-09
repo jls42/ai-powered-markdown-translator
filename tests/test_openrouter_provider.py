@@ -610,11 +610,12 @@ class TestRequeteReelle(unittest.TestCase):
 
 
 class TestBudgetDeContexteParAppel(unittest.TestCase):
-    """`context_length` couvre l'entrée ET la sortie. Une réserve fixe calibrée
-    sur du texte latin ne borne rien : mesuré au tokenizer `o200k_base`,
-    16 000 caractères valent 3 200 tokens en français, 12 300 en japonais et
-    17 500 en emoji. Le budget est donc recalculé sur le texte réellement
-    envoyé, et l'invariant entrée + sortie ≤ contexte tient par construction."""
+    """`context_length` couvre l'entrée ET la sortie, et aucun ratio moyen ne
+    borne l'entrée : mesuré au tokenizer `o200k_base`, 16 000 caractères valent
+    3 200 tokens en français, 12 300 en japonais, 17 500 en emoji, et un
+    idéogramme du plan supplémentaire descend à 1,33 octet par token. Le budget
+    vient donc du texte réel, majoré par son nombre d'octets — un token en vaut
+    au moins un, quel que soit le tokenizer."""
 
     PROMPT = "P" * 6064  # taille mesurée du prompt système, cible anglaise
 
@@ -623,39 +624,57 @@ class TestBudgetDeContexteParAppel(unittest.TestCase):
         client.context_length = context_length
         return openrouter._openrouter_call_budget(client, _args(), self.PROMPT, segment)
 
-    def test_l_estimation_majore_sur_toutes_les_ecritures(self):
+    def test_l_estimation_majore_toutes_les_ecritures(self):
+        """Comptes relevés au tokenizer o200k_base sur ces textes exacts, y
+        compris ceux dont un ratio de deux octets par token ne rendait pas
+        compte."""
         estime = openrouter._openrouter_estimated_tokens
-        # Comptes relevés au tokenizer o200k_base sur ces échantillons exacts.
         for texte, reels in (
             ("Le découpage d'un module exige une preuve mécanique. ", 12),
             ("モジュールをパッケージに分割するには機械的な証明が必要です。", 30),
             ("将模块拆分为包需要机械证明。", 12),
             ("🇫🇷 🇯🇵 ✅ ⚠️ 🔥 ", 15),
+            ("𠀀" * 100, 300),
+            ("\u034f" * 100, 200),
         ):
             with self.subTest(texte=texte[:20]):
                 self.assertGreaterEqual(estime(texte), reels)
 
     def test_entree_plus_sortie_tiennent_dans_la_fenetre(self):
-        for label, segment, contexte in (
-            ("français", "é" * 8000 + "a" * 8000, 32768),
-            ("japonais", "モ" * 16000, 1048576),
-            ("latin court", "a" * 2000, 32768),
+        """Confronté aux tokens RÉELS (comptés hors suite, au tokenizer) et non
+        à la seule arithmétique de l'estimateur."""
+        for label, segment, contexte, reels in (
+            ("français 16k", "é" * 8000 + "a" * 8000, 1048576, 12032),
+            ("japonais 16k", "モ" * 16000, 1048576, 19032),
+            ("CJK plan 2", "𠀀" * 12000, 65536, 39032),
+            ("combinant", "\u034f" * 16000, 1048576, 35032),
         ):
             with self.subTest(label=label):
-                budget = self._budget(segment, contexte)
-                entree = openrouter._openrouter_estimated_tokens(
-                    self.PROMPT
-                ) + openrouter._openrouter_estimated_tokens(segment)
-                self.assertLessEqual(entree + budget, contexte)
+                self.assertLessEqual(reels + self._budget(segment, contexte), contexte)
 
     def test_un_segment_dense_en_tokens_est_refuse_avant_l_appel(self):
-        """Le cas que la réserve fixe laissait passer : 16 000 caractères
-        japonais dans une fenêtre de 32 768."""
-        for label, segment in (("japonais", "モ" * 16000), ("emoji", "🇫🇷" * 4000)):
+        """Le cas qu'un ratio moyen laissait passer : un contexte de 65 536
+        tokens face à 12 000 idéogrammes du plan supplémentaire acceptait une
+        requête de 70 116 tokens."""
+        for label, segment, contexte in (
+            ("japonais 16k", "モ" * 16000, 32768),
+            ("emoji", "🇫🇷" * 4000, 32768),
+            ("CJK plan 2", "𠀀" * 12000, 32768),
+        ):
             with self.subTest(label=label):
                 with self.assertRaises(RuntimeError) as ctx:
-                    self._budget(segment, 32768)
+                    self._budget(segment, contexte)
                 self.assertIn("trop courte pour ce segment", str(ctx.exception))
+
+    def test_le_plancher_est_celui_du_preflight(self):
+        """Juste au-dessus du plancher on passe, juste en dessous on refuse."""
+        marge = openrouter.OPENROUTER_FRAMING_TOKENS + len(self.PROMPT.encode("utf-8"))
+        segment = "a" * 1000
+        plancher = openrouter.OPENROUTER_MIN_COMPLETION_TOKENS
+        juste_assez = marge + len(segment) + plancher
+        self.assertEqual(self._budget(segment, juste_assez), plancher)
+        with self.assertRaises(RuntimeError):
+            self._budget(segment, juste_assez - 1)
 
     def test_le_plafond_du_preflight_reste_un_maximum(self):
         """Une immense fenêtre ne fait pas dépasser l'enveloppe du projet."""
@@ -663,12 +682,14 @@ class TestBudgetDeContexteParAppel(unittest.TestCase):
 
     def test_le_budget_part_bien_dans_la_requete(self):
         client = _client(max_tokens=32768)
-        client.context_length = 32768
+        # Fenêtre choisie pour que ce soit ELLE qui borne, et non le plafond
+        # du préflight : sinon le test passerait sans que le budget serve.
+        client.context_length = 40000
         client.client.chat.completions.create.return_value = SimpleNamespace(
             choices=[_choice("Hello")]
         )
         args = _args()
-        segment = "a" * 4000
+        segment = "a" * 20000
         openrouter._call_openrouter(client, args, self.PROMPT, segment)
         envoye = client.client.chat.completions.create.call_args.kwargs["max_tokens"]
         self.assertEqual(

@@ -17,16 +17,44 @@ import sys
 
 from dotenv import find_dotenv, load_dotenv
 
-# Variables qui décident OÙ part une clé d'API. Le `.env` du projet est cherché
-# depuis le répertoire courant et ses parents : une arborescence non fiable —
-# un dépôt qu'on vient de cloner — peut donc en poser une, et la vraie clé,
-# venue de l'environnement ou de la configuration utilisateur, partirait
-# ensuite dans l'en-tête d'autorisation d'un serveur tiers. Ces variables-là ne
-# sont acceptées que des deux couches que l'utilisateur contrôle vraiment.
+# Variables qui décident OÙ part une requête, ou par quel chemin. Le `.env` du
+# projet est cherché depuis le répertoire courant et ses parents : une
+# arborescence non fiable — un dépôt qu'on vient de cloner — peut donc en poser
+# une sans connaître aucune clé, et la vraie clé, venue de l'environnement ou
+# de la configuration utilisateur, partirait ensuite dans l'en-tête
+# d'autorisation d'un serveur tiers. Elles ne sont acceptées que des deux
+# couches que l'utilisateur contrôle vraiment.
 #
-# `OPENAI_BASE_URL` est lue par le SDK lui-même, pas par ce paquet : la retirer
-# de l'environnement est le seul moyen de l'empêcher d'agir.
-_ENDPOINT_VARIABLES = ("OPENAI_BASE_URL", "OPENROUTER_BASE_URL", "XAI_BASE_URL")
+# Par MOTIF et non par liste nominative, pour la raison qui vaut déjà pour les
+# secrets dans `providers/base.py` : l'énumération ne tient pas. Recensé sur
+# les SDK installés, douze variables de routage sont lues, dont six par le seul
+# client Anthropic (`ANTHROPIC_BASE_URL`, `…_VERTEX_BASE_URL`, `…_FOUNDRY_…`) ;
+# une liste écrite à la main en aurait oublié la moitié, et un SDK mis à jour
+# en ajoute sans prévenir.
+_ROUTING_SUFFIXES = ("_BASE_URL", "_API_BASE", "_ENDPOINT")
+# Nommées, celles qui ne suivent aucun motif :
+#  - proxies : httpx les lit tout seul (`trust_env`) et route tout le trafic ;
+#  - magasins de certificats : les pointer sur une AC contrôlée rend un
+#    intercepteur indiscernable d'un vrai serveur ;
+#  - emplacement de la configuration utilisateur : le poser, c'est décider
+#    quel fichier constitue la couche 3, donc contourner ce filtre par la bande.
+_ROUTING_NAMES = (
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "ALL_PROXY",
+    "SSL_CERT_FILE",
+    "SSL_CERT_DIR",
+    "REQUESTS_CA_BUNDLE",
+    "CURL_CA_BUNDLE",
+    "XDG_CONFIG_HOME",
+    "APPDATA",
+)
+
+
+def _is_routing_variable(name):
+    """Vrai si `name` peut détourner ou intercepter une requête."""
+    majuscule = name.upper()
+    return majuscule in _ROUTING_NAMES or majuscule.endswith(_ROUTING_SUFFIXES)
 
 
 def _user_config_path():
@@ -73,31 +101,39 @@ def _load_configuration():
     deux formes donnent le même résultat, ce qui explique que le défaut soit
     resté invisible tant que l'outil n'était pas installable.
 
-    Exception à la couche 2 : elle ne peut pas poser d'URL d'endpoint. Voir
-    `_ENDPOINT_VARIABLES` — un `.env` de projet qui redirige les appels
+    Exception à la couche 2 : elle ne peut poser aucune variable de routage,
+    cf. `_is_routing_variable` — un `.env` de projet qui redirige les appels
     détournerait une clé qu'il ne connaît pas.
+
+    Le contournement que cela ferme, reproduit en processus neuf : le projet
+    posait `XDG_CONFIG_HOME` vers un répertoire qu'il contrôle, dont
+    l'`aipmt/.env` fournissait ensuite l'URL hostile — le filtre était
+    contourné par la couche 3 elle-même. La variable fait donc partie des
+    variables de routage, et le chemin est en outre résolu AVANT la lecture du
+    projet : le filtre suffit à fermer le trou, mais l'ordre garantit que le
+    message d'avertissement nomme la VRAIE configuration utilisateur et non
+    celle que le projet aurait désignée.
     """
-    deja_definies = {name for name in _ENDPOINT_VARIABLES if name in os.environ}
+    user_path = _user_config_path()
+    avant = {name for name in os.environ if _is_routing_variable(name)}
     load_dotenv(find_dotenv(usecwd=True))
-    _drop_project_endpoints(deja_definies)
-    load_dotenv(_user_config_path())
+    _drop_project_routing(avant, user_path)
+    load_dotenv(user_path)
 
 
-def _drop_project_endpoints(deja_definies):
-    """Retire les URL d'endpoint que le `.env` du projet vient de poser.
+def _drop_project_routing(avant, user_path):
+    """Retire les variables de routage que le `.env` du projet vient de poser.
 
     Appelée ENTRE les deux couches : ce qui vient d'apparaître ne peut venir
     que du projet, et la configuration utilisateur pourra encore fournir la
     sienne juste après. Le refus est dit sur stderr — silencieux, il ferait
     chercher pourquoi un relais légitime n'est pas pris en compte."""
-    for name in _ENDPOINT_VARIABLES:
-        if name in deja_definies or name not in os.environ:
-            continue
+    for name in [n for n in os.environ if _is_routing_variable(n) and n not in avant]:
         valeur = os.environ.pop(name)
         print(
             f"⚠ {name}={valeur} ignoré : un .env de projet ne peut pas rediriger les "
             "appels d'API, sinon un répertoire non fiable détournerait votre clé. "
-            f"L'exporter dans l'environnement, ou le mettre dans {_user_config_path()}.",
+            f"L'exporter dans l'environnement, ou le mettre dans {user_path}.",
             file=sys.stderr,
         )
 

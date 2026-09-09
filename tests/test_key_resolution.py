@@ -170,13 +170,74 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
                 os.chdir(previous)
                 os.environ.pop(variable, None)
 
-    def test_the_three_endpoint_variables_are_refused_from_the_project(self) -> None:
-        for variable in aipmt_config._ENDPOINT_VARIABLES:
+    def test_every_routing_variable_is_refused_from_the_project(self) -> None:
+        """Recensé sur les SDK installés : douze variables de routage sont
+        lues, dont six par le seul client Anthropic. Le filtre est donc par
+        motif, et couvre aussi proxies et magasins de certificats."""
+        for variable in (
+            "OPENAI_BASE_URL",
+            "OPENROUTER_BASE_URL",
+            "XAI_BASE_URL",
+            "ANTHROPIC_BASE_URL",
+            "ANTHROPIC_VERTEX_BASE_URL",
+            "GOOGLE_GEMINI_BASE_URL",
+            "GOOGLE_VERTEX_BASE_URL",
+            "AZURE_OPENAI_ENDPOINT",
+            "UN_SDK_INCONNU_API_BASE",
+            "HTTPS_PROXY",
+            "SSL_CERT_FILE",
+            "REQUESTS_CA_BUNDLE",
+        ):
             with self.subTest(variable=variable):
                 valeur, avertissement = self._run(variable, project=self.HOSTILE)
                 self.assertIsNone(valeur)
                 self.assertIn(variable, avertissement)
                 self.assertIn("détournerait votre clé", avertissement)
+
+    def test_the_project_cannot_relocate_the_user_configuration(self) -> None:
+        """Contournement mesuré : le projet posait `XDG_CONFIG_HOME` vers un
+        répertoire qu'il contrôle, dont l'`aipmt/.env` fournissait alors l'URL
+        hostile — le filtre était contourné par la couche 3 elle-même.
+
+        `XDG_CONFIG_HOME` est donc absent de l'environnement ici : sinon la
+        valeur du projet ne s'appliquerait pas, et le test passerait sans rien
+        prouver.
+        """
+        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as maison:
+            piege = Path(projet, "piege", "aipmt")
+            piege.mkdir(parents=True)
+            piege.joinpath(".env").write_text(
+                f"OPENROUTER_BASE_URL={self.HOSTILE}\n", encoding="utf-8"
+            )
+            Path(projet, ".env").write_text(
+                f"XDG_CONFIG_HOME={Path(projet, 'piege')}\n", encoding="utf-8"
+            )
+            previous = os.getcwd()
+            try:
+                os.chdir(projet)
+                with (
+                    patch.dict(os.environ, {"HOME": maison}, clear=False),
+                    patch("sys.stderr", io.StringIO()) as err,
+                ):
+                    for variable in ("XDG_CONFIG_HOME", "OPENROUTER_BASE_URL"):
+                        os.environ.pop(variable, None)
+                    aipmt_config._load_configuration()
+                    hostile_charge = os.environ.get("OPENROUTER_BASE_URL")
+                    xdg = os.environ.get("XDG_CONFIG_HOME")
+                    avertissement = err.getvalue()
+            finally:
+                os.chdir(previous)
+                for variable in ("XDG_CONFIG_HOME", "OPENROUTER_BASE_URL"):
+                    os.environ.pop(variable, None)
+        self.assertIsNone(hostile_charge)
+        self.assertIsNone(xdg)
+        # L'avertissement cite la valeur refusée — donc le piège — mais le
+        # chemin qu'il CONSEILLE doit être la vraie configuration utilisateur :
+        # résolu après la lecture du projet, il désignait le répertoire que le
+        # projet venait d'imposer.
+        conseil = avertissement.split("le mettre dans ")[-1]
+        self.assertIn(maison, conseil)
+        self.assertNotIn("piege", conseil)
 
     def test_an_exported_variable_is_kept(self) -> None:
         valeur, avertissement = self._run(

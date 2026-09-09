@@ -57,16 +57,22 @@ OPENROUTER_MAX_TOKENS = 32768
 OPENROUTER_INPUT_RESERVE = 8400
 
 
-# Octets par token dans le PIRE cas mesuré. Mesuré au tokenizer `o200k_base`
-# sur huit échantillons — français 5,12, anglais 5,23, arabe 5,17, hindi 7,90,
-# japonais 3,91, chinois 4,08, code et URL 2,68, emoji 2,39 : diviser le nombre
-# d'octets UTF-8 par deux majore donc l'entrée partout, avec de la marge.
+# Un token vaut au moins un octet UTF-8 : le nombre d'octets MAJORE donc le
+# nombre de tokens, quel que soit le tokenizer à fusion d'octets — et
+# OpenRouter route vers des dizaines de tokenizers différents, dont aucun n'est
+# connu d'ici.
 #
-# Compter en CARACTÈRES ne majore rien : 16 000 caractères valent 3 200 tokens
-# en français mais 12 300 en japonais et 17 500 en emoji. Une réserve fixe
-# calibrée sur du latin laissait donc passer le dépassement qu'elle devait
-# empêcher.
-OPENROUTER_BYTES_PER_TOKEN = 2
+# Aucun ratio moyen ne convient. Compter en CARACTÈRES ne majore rien
+# (16 000 caractères valent 3 200 tokens en français, 12 300 en japonais,
+# 17 500 en emoji), et un ratio « prudent » de deux octets par token ne majore
+# pas davantage : mesuré au tokenizer `o200k_base`, un idéogramme du plan
+# supplémentaire (𠀀) tombe à 1,33 octet par token et un caractère combinant à
+# 1,00. Seule la borne stricte tient.
+#
+# Elle est large — cinq fois l'entrée réelle sur du texte latin — mais elle ne
+# coûte qu'une enveloppe de sortie réduite, jamais un dépassement : ce qui est
+# refusé ici l'aurait été par l'hébergeur, après facturation.
+OPENROUTER_FRAMING_TOKENS = 64
 
 
 # Efforts de raisonnement du moins au plus coûteux, tels que le catalogue les
@@ -238,8 +244,8 @@ def _openrouter_reasoning_label(client, args):
 
 
 def _openrouter_estimated_tokens(text):
-    """Majorant du nombre de tokens d'un texte, cf. `OPENROUTER_BYTES_PER_TOKEN`."""
-    return len((text or "").encode("utf-8")) // OPENROUTER_BYTES_PER_TOKEN + 1
+    """Majorant du nombre de tokens d'un texte : son nombre d'octets UTF-8."""
+    return len((text or "").encode("utf-8"))
 
 
 def _openrouter_call_budget(client, args, prompt, segment):
@@ -250,18 +256,24 @@ def _openrouter_call_budget(client, args, prompt, segment):
     pèsent jusqu'à 17 500 tokens. Ici le texte est connu : entrée estimée plus
     sortie demandée tiennent dans la fenêtre, par construction.
 
-    Refus quand il ne reste pas de quoi rendre un texte de la taille de
-    l'entrée — une traduction fait grosso modo la longueur de sa source, et
-    partir quand même achèterait une troncature. L'estimation étant prudente,
-    le message le dit : le refus peut être sévère sur un contenu latin."""
-    entree = _openrouter_estimated_tokens(prompt) + _openrouter_estimated_tokens(segment)
+    Le plancher est celui du préflight : sous ce seuil, l'enveloppe restante ne
+    permet plus une traduction utile, et partir quand même achèterait une
+    troncature. La borne étant large, le message le dit — le refus peut être
+    sévère sur un contenu latin, où l'entrée réelle vaut le cinquième de sa
+    majoration."""
+    entree = (
+        _openrouter_estimated_tokens(prompt)
+        + _openrouter_estimated_tokens(segment)
+        + OPENROUTER_FRAMING_TOKENS
+    )
     budget = min(client.max_tokens, client.context_length - entree)
-    if budget < entree:
+    if budget < OPENROUTER_MIN_COMPLETION_TOKENS:
         raise RuntimeError(
             f"OpenRouter : fenêtre de {client.context_length} tokens trop courte pour ce "
-            f"segment (model={args.model}) — entrée estimée à {entree} tokens, il ne "
-            f"resterait que {max(budget, 0)} tokens de sortie pour une traduction de taille "
-            "comparable. Estimation prudente ; choisir un modèle à plus grande fenêtre."
+            f"segment (model={args.model}) — entrée majorée à {entree} tokens, il ne "
+            f"resterait que {max(budget, 0)} tokens de sortie pour un plancher de "
+            f"{OPENROUTER_MIN_COMPLETION_TOKENS}. Majoration stricte (un token vaut au "
+            "moins un octet) ; choisir un modèle à plus grande fenêtre."
         )
     return budget
 
