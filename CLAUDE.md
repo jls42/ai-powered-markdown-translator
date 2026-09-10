@@ -659,9 +659,17 @@ Points à connaître avant de toucher à ce code :
 - **Allowlist de modèles côté serveur** : la famille `gpt-5.6-*` est commune au
   CLI et à l'API Platform, mais un compte ChatGPT n'y a pas forcément droit à
   tout. Un modèle refusé donne un 400 « model is not supported when using Codex
-  with a ChatGPT account », sans validation locale préalable.
-- **Quota** : 1 segment = 1 « message local » de la fenêtre 5 h. Sur Plus, Luna
-  offre 250-2 000 msg/5 h contre 10-100 pour Sol → toujours `--eco` en batch.
+  with a ChatGPT account », sans validation locale préalable. Mesuré sur ce
+  compte le 2026-09-09 : `sol`, `terra` et `luna` répondent tous les trois par
+  `codex exec -m`. Le défaut reste **`sol`** — décision du propriétaire, c'est
+  le modèle qualité, et le seul mesuré à quatorze langues sans perte sur un
+  document dense. `terra` s'obtient par `--model gpt-5.6-terra` si l'on veut,
+  par l'abonnement, le modèle que l'API sert par défaut.
+- **Quota** : un segment consomme grosso modo un « message » de la fenêtre 5 h,
+  mais OpenAI ne publie AUCUNE équivalence comptable — l'assimilation vient
+  d'une observation locale, pas d'un contrat. Sur Plus, les fourchettes
+  annoncées sont 250-2 000 msg/5 h pour Luna contre 10-100 pour Sol, et ce sont
+  des estimations variables, pas des plafonds → toujours `--eco` en batch.
   Quota lisible en direct via `codex app-server` (RPC `account/rateLimits/read`).
 - **Refusé en CI** : l'auth par abonnement n'est pas prévue pour un runner
   partagé : l'auth passe par un fichier de session personnel, qu'OpenAI

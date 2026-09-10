@@ -12,7 +12,7 @@ name = "ai-powered-markdown-translator"
 # déplacerait la logique dans un endroit qu'aucun gate n'exerce ; ici, la
 # cohérence des deux est vérifiée par check-release-ready.sh. L'enjeu est
 # irréversible — PyPI n'autorise pas la réutilisation d'un numéro de version.
-version = "1.13.1"
+version = "1.14.0"
 description = "Traduit des fichiers Markdown avec OpenAI, Claude, Mistral, Gemini, Grok, Codex, OpenCode ou OpenRouter, en préservant la mise en forme, les blocs de code et le front matter."
 readme = "README.md"
 # 3.10 et non 3.12 : aucune syntaxe postérieure à PEP 604 dans le module
@@ -89,6 +89,14 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E402"]
 "scripts/tests/*" = ["E402"]
+# Les caractères pleine chasse SONT le sujet de ce fichier : la regex d'URL et
+# la liste de ponctuation doivent les porter littéralement, sans quoi une URL
+# chinoise suivie de « ）、 » est comptée comme différente de la même URL en
+# français. Les signaler comme ambigus reviendrait à demander de casser l'outil.
+"scripts/compare_structure.py" = ["RUF001", "RUF002", "RUF003"]
+# Même raison : le test qui prouve la neutralisation des écritures non
+# latines doit comparer une URL suivie de « ）、 » à la même en français.
+"scripts/tests/test_compare_structure.py" = ["E402", "RUF001", "RUF002", "RUF003"]
 
 [tool.mypy]
 python_version = "3.12"

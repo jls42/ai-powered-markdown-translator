@@ -1,5 +1,5 @@
 {
-  "_comment": "Manifeste CUMULATIF des écarts déclarés par rapport au snapshot de référence (package-6ae1505.json). Lu par scripts/check-split-purity.py. added : nœuds de premier niveau ajoutés (docstrings de module, __all__…) ; removed : nœuds retirés ; modified : nœuds dont le corps a changé (old_hash → new_hash). Chaque entrée dit pourquoi.",
+  "_comment": "Manifeste CUMULATIF des écarts déclarés par rapport au snapshot de référence (package-6ae1505.json). Lu par scripts/check-split-purity.py. added : nœuds de premier niveau ajoutés (docstrings de module, __all__…) ; removed : nœuds retirés ; modified : nœuds dont le corps a changé (old_hash → new_hash). Chaque entrée dit pourquoi. markers : lignes porteuses d'un marqueur de suppression réécrites (old → new) ; une disparition reste refusée.",
   "added": [
     {
       "hash": "fac53b21a025fbfa1bafdbb53db0c4f021a40abb67c8a8d6614c384a4ffb1649",
@@ -357,6 +357,18 @@
       "kind": "Assign",
       "file": "src/aipmt/providers/openrouter.py",
       "why": "revue Codex : marge pour l'encadrement des messages"
+    },
+    {
+      "name": "_write_then_rename",
+      "file": "src/aipmt/naming.py",
+      "hash": "bc6da7ec843040469530a21ee6f8c52891b9061a606714951c3a0fd563fdacaa",
+      "why": "scission de _write_output_file : écriture dans un temporaire unique créé par mkstemp (O_CREAT|O_EXCL, donc insensible à un lien symbolique planté au nom prévisible et non partageable entre deux exécutions), puis os.replace ; nettoyage du temporaire sur échec. Cf. l'entrée `modified` du même nom."
+    },
+    {
+      "name": "_mode_du_fichier_ecrit",
+      "file": "src/aipmt/naming.py",
+      "hash": "3be11cd3cf780695965f913465ec5369e407551d339cbf26080a65ab766f109f",
+      "why": "mkstemp crée en 0600 : sans reprise explicite, remplacer une cible existante lui donnait les droits du nouveau fichier (0600 élargi en 0664, mesuré). Reprend les droits de la cible, sinon ceux d'un open() ordinaire."
     }
   ],
   "removed": [
@@ -726,6 +738,20 @@
       "old_hash": "d473db99f67722443d028e1159e8089bb8071a36cbd5c94e53c4318657d7e5de",
       "new_hash": "3b620d840a017f7bb60d5edadf7450f1ffbbcac5f6b573e5ce85355ee8e3fa32",
       "why": "revue Codex : le nom seul est affiché, la valeur refusée pouvait porter un secret interpolé"
+    },
+    {
+      "name": "_write_output_file",
+      "file": "src/aipmt/naming.py",
+      "old_hash": "45146b6f7fd292ec37767c93d8628c7164104b699357c8f89f25816a811032d0",
+      "new_hash": "e584262117e4526dd8c08e720145cdb5f7339a38025e1a790d726c27fc4fdb7f",
+      "why": "revue Codex : `open(cible, \"w\")` tronque avant de remplir, donc une erreur d'écriture laissait une cible partielle que la relance suivante comptait pour une traduction faite (reproduit : 8 octets, statut failure, puis skipped). L'écriture passe par un temporaire du même répertoire, puis os.replace ; le corps utile part dans _write_then_rename."
+    }
+  ],
+  "markers": [
+    {
+      "old": "with open(clean_output_path, \"w\", encoding=\"utf-8\") as f:  # NOSONAR",
+      "new": "descripteur, temporaire = tempfile.mkstemp(  # NOSONAR",
+      "why": "l'écriture passe par un temporaire unique créé par mkstemp dans le répertoire de la cible : la suppression S8707 est inchangée, c'est l'appel qui ouvre le fichier qui a changé."
     }
   ]
 }
