@@ -154,11 +154,9 @@ class TestMistralRetry(unittest.TestCase):
         client, requests = self._client_on(
             [httpx.Response(400, json={"object": "error", "message": "bad request"})]
         )
-        with (
-            patch("mistralai.client.utils.retries.time.sleep") as sleep,
-            self.assertRaises(SDKError),
-        ):
-            mistral._call_mistral(client, _args(), "prompt", "segment")
+        args = _args()
+        with patch("mistralai.client.utils.retries.time.sleep") as sleep:
+            self.assertRaises(SDKError, mistral._call_mistral, client, args, "prompt", "segment")
         self.assertEqual(len(requests), 1)
         sleep.assert_not_called()
 
@@ -166,12 +164,14 @@ class TestMistralRetry(unittest.TestCase):
         """Un compte durablement bridé échoue en clair au lieu de boucler."""
         client, requests = self._client_on([httpx.Response(429, json=_RATE_LIMITED)])
         clock = iter(range(0, 10_000, 100))  # chaque lecture de l'horloge avance de 100 s
+        args = _args()
         with (
             patch("mistralai.client.utils.retries.time.sleep"),
             patch("mistralai.client.utils.retries.time.time", side_effect=lambda: next(clock)),
-            self.assertRaisesRegex(SDKError, "429"),
         ):
-            mistral._call_mistral(client, _args(), "prompt", "segment")
+            self.assertRaisesRegex(
+                SDKError, "429", mistral._call_mistral, client, args, "prompt", "segment"
+            )
         self.assertLessEqual(len(requests), 5)
 
     def test_le_backoff_couvre_une_fenetre_d_une_minute(self) -> None:
