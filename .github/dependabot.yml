@@ -12,11 +12,24 @@ version: 2
 updates:
   - package-ecosystem: pip
     directory: "/"
+    # Quotidien, parce que les mineures et correctifs se fusionnent seuls
+    # (.github/workflows/dependabot-auto-merge.yml) : le coût d'une PR n'est
+    # plus une revue humaine, et une version absorbée en quatre jours au plus
+    # ne laisse pas au retard le temps de s'installer.
     schedule:
-      interval: weekly
-      day: monday
+      interval: daily
       time: "06:00"
       timezone: Europe/Paris
+    # Une version n'est proposée que trois jours après sa publication. C'est le
+    # défaut de GitHub depuis le 2026-07-14, écrit ici parce que le délai du gate
+    # en dépend : GRACE_DAYS de scripts/check-deps-fresh.sh vaut ce
+    # refroidissement + la cadence ci-dessus + 1 jour de marge, égalité vérifiée
+    # par scripts/tests/test_pypi_versions.py. Le délai protège aussi la fusion
+    # automatique : c'est le temps qu'une version compromise ou cassée soit
+    # repérée avant d'atteindre le dépôt — la raison qu'en donne GitHub. Les
+    # security updates, elles, n'attendent pas.
+    cooldown:
+      default-days: 3
     open-pull-requests-limit: 10
     # requirements.txt est la fermeture transitive ENTIÈREMENT ÉPINGLÉE. Sans
     # filtre, Dependabot y bumpe des paquets transitifs pris isolément, qui
@@ -58,23 +71,29 @@ updates:
       - dependencies
     groups:
       # Le bruit est l'ennemi de la mise à jour : un patch bump par PR finit
-      # ignoré. Les mineures et correctifs partent groupés — une PR par semaine,
-      # que la CI valide en bloc.
+      # ignoré. Les mineures et correctifs partent groupés — une PR par jour au
+      # plus, que la CI valide en bloc et qui se fusionne seule quand elle est
+      # verte.
       routine:
         applies-to: version-updates
         update-types:
           - minor
           - patch
-      # Les majeures restent SÉPARÉES et non groupées : chacune peut casser le
-      # code de façon invisible à la doc. Deux précédents mesurés dans ce dépôt :
-      # anthropic ≥ 1.0 refuse côté client un appel non-streamé à max_tokens
-      # élevé, et google-genai a changé toute la surface d'appel. Une majeure
-      # exige une validation par appel réel, provider par provider.
+      # Les majeures restent SÉPARÉES et non groupées, et ne sont JAMAIS
+      # fusionnées automatiquement : chacune peut casser le code de façon
+      # invisible à la doc. Deux précédents mesurés dans ce dépôt : anthropic ≥
+      # 1.0 refuse côté client un appel non-streamé à max_tokens élevé, et
+      # google-genai a changé toute la surface d'appel. Une majeure exige une
+      # validation par appel réel, provider par provider.
       # (Aucun `update-types` ici : le groupe ne capte que ce qui reste.)
     # Aucune exclusion. Toute `ignore:` ajoutée ici doit nommer la raison ET la
     # condition de levée — une exclusion sans date de péremption est la façon la
     # plus discrète de recréer le retard qu'on vient de corriger.
 
+  # Hebdomadaire et JAMAIS fusionné automatiquement : une action s'exécute dans
+  # les workflows, à côté de SONAR_TOKEN et du jeton OIDC qui publie sur PyPI.
+  # Une action compromise qui se fusionnerait seule aurait accès à la
+  # publication du paquet ; la fusion automatique se limite donc à pip.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
