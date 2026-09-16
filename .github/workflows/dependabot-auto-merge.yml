@@ -1,0 +1,116 @@
+name: Dependabot auto-merge
+
+# Fusionne seules les PR Dependabot pip MINEURES et CORRECTIVES, une fois la CI
+# verte. Raison d'être : chaque PR de dépendances demandait une revue manuelle,
+# et le retard se découvrait dans le gate au lieu de s'absorber tout seul.
+#
+# Ce qui reste manuel, volontairement :
+#   - les MAJEURES : une majeure de SDK peut casser le code sans que la doc le
+#     dise, elle se valide par un appel réel, provider par provider ;
+#   - les actions GitHub : une action s'exécute à côté de SONAR_TOKEN et du
+#     jeton OIDC qui publie sur PyPI.
+#
+# `gh pr merge --auto` ne crée PAS d'attente s'il n'y a rien à attendre : quand
+# la PR est déjà fusionnable, il fusionne tout de suite (mesuré dans le code de
+# gh, `isImmediatelyMergeable`). Sans check REQUIS sur main, une PR serait donc
+# fusionnée avant la fin de sa CI. D'où l'étape qui vérifie le ruleset et
+# refuse de fusionner s'il n'exige pas les checks : un garde-fou retiré ne doit
+# jamais se traduire par des fusions à l'aveugle.
+#
+# Déclencheur `pull_request` et non `pull_request_target` : le job ne récupère
+# ni n'exécute le code de la PR, et c'est la forme de l'exemple officiel. Pour
+# un run déclenché par Dependabot, le GITHUB_TOKEN est en lecture seule par
+# défaut ; la clé `permissions` du job l'élève (doc « Troubleshooting Dependabot
+# on GitHub Actions »). Le README de fetch-metadata affirme le contraire : si
+# l'activation échoue sur 403, c'est ce point, et rien n'aura été fusionné.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  auto-merge:
+    name: Fusion automatique Dependabot
+    runs-on: ubuntu-latest
+    # Ouverte ET poussée par Dependabot. Si quelqu'un d'autre pousse sur la
+    # branche, c'est à lui de décider de la suite.
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]'
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      # Doit rester égal à la liste des checks requis du ruleset de main.
+      REQUIRED_CHECKS: |-
+        Python 3.10
+        Python 3.11
+        Python 3.12
+        Résolution des dépendances
+        Fermeture et tests du lock
+    steps:
+      - name: Métadonnées de la PR
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Décider
+        id: decision
+        env:
+          ECOSYSTEM: ${{ steps.metadata.outputs.package-ecosystem }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          DEPENDENCIES: ${{ steps.metadata.outputs.dependency-names }}
+        run: |
+          case "$ECOSYSTEM:$UPDATE_TYPE" in
+            pip:version-update:semver-minor | pip:version-update:semver-patch)
+              echo "merge=true" >> "$GITHUB_OUTPUT"
+              ;;
+            pip:version-update:semver-major)
+              echo "::notice::Majeure ($DEPENDENCIES) : jamais fusionnée automatiquement. Lire les notes de version et valider par un appel réel, provider par provider."
+              echo "merge=false" >> "$GITHUB_OUTPUT"
+              ;;
+            pip:*)
+              # Un type illisible n'est ni une mineure ni une majeure : dans le
+              # doute, rien n'est fusionné, et le check est rouge pour se voir.
+              echo "::error::Type de mise à jour illisible pour $DEPENDENCIES : '$UPDATE_TYPE'. Rien n'est fusionné."
+              exit 1
+              ;;
+            *)
+              echo "::notice::Écosystème '$ECOSYSTEM' : la fusion automatique se limite à pip."
+              echo "merge=false" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Le ruleset de la branche cible exige les checks
+        if: steps.decision.outputs.merge == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BASE: ${{ github.event.pull_request.base.ref }}
+        run: |
+          required=$(gh api "repos/$REPO/rules/branches/$BASE" \
+            --jq '.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context')
+          missing=""
+          while IFS= read -r check; do
+            grep -qxF "$check" <<< "$required" || missing="$missing '$check'"
+          done <<< "$REQUIRED_CHECKS"
+          if [ -n "$missing" ]; then
+            echo "::error::Checks non requis sur $BASE :$missing. Sans eux, gh fusionnerait avant la fin de la CI : rien n'est fusionné."
+            exit 1
+          fi
+          echo "Checks requis présents sur $BASE."
+
+      - name: Activer la fusion automatique
+        if: steps.decision.outputs.merge == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          # Déjà active après un rebase de Dependabot : ne rien redemander.
+          if [ "$(gh pr view "$PR_URL" --json autoMergeRequest --jq '.autoMergeRequest != null')" = "true" ]; then
+            echo "Fusion automatique déjà active."
+            exit 0
+          fi
+          gh pr merge --auto --squash "$PR_URL"

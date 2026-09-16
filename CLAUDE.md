@@ -158,7 +158,7 @@ non prise à sa place.
 - **Recherche web**: Utiliser l'agent `web-research-specialist:web-research-specialist` pour les recherches de documentation (évite de polluer le contexte principal)
 - **Après chaque `git push`** (sur une PR, jamais main) : surveiller automatiquement les checks GitHub jusqu'à résolution.
   1. Attendre ~30-60s que SonarCloud / CodeQL terminent leur scan initial.
-  2. `gh pr checks <num>` pour lire l'état (workflows actifs : `Analyze (python)` et `Analyze (actions)` (CodeQL), `SonarQube`, `SonarCloud Code Analysis`, `Python 3.10` / `3.11` / `3.12` (tests.yml), `Résolution des dépendances` (deps-check.yml), `Codacy Static Code Analysis`, `CodeFactor`).
+  2. `gh pr checks <num>` pour lire l'état (workflows actifs : `Analyze (python)` et `Analyze (actions)` (CodeQL), `SonarQube`, `SonarCloud Code Analysis`, `Python 3.10` / `3.11` / `3.12` (tests.yml), `Résolution des dépendances` et `Fermeture et tests du lock` (deps-check.yml), `Fusion automatique Dependabot` (sauté hors PR Dependabot), `Codacy Static Code Analysis`, `CodeFactor`). Sur `main`, un ruleset rend requis les trois `Python`, `Résolution des dépendances` et `Fermeture et tests du lock` (cf. § Fraîcheur des dépendances).
   3. Si tous `pass` → **toujours** requêter l'API Sonar des issues ouvertes en complément (cf. piège ci-dessous), puis signaler à l'utilisateur et stop.
   4. Si un check est `pending` → re-check dans 60-90s (utiliser `ScheduleWakeup` pour ne pas bloquer le main thread, ou `gh run watch <run-id>` pour follow live).
   5. Si un check est `fail` :
@@ -188,7 +188,7 @@ non prise à sa place.
      - detect-secrets régénère parfois `.secrets.baseline` en pre-commit ; bien `git add` la baseline AVANT le commit suivant (sinon le pre-commit hook re-mute la baseline en boucle).
      - Hooks pre-push lents (~30s mypy + 5s SAST + 10s pip-audit + tests) : si on enchaîne plusieurs petits commits, préférer batcher en local et un seul `git push` à la fin.
 
-## Fraîcheur des dépendances — deux filets, parce qu'un seul a déjà lâché
+## Fraîcheur des dépendances — automatique, avec une alerte quand ça coince
 
 **Le retard de dépendances est passé inaperçu pendant des mois.** Dependabot
 tournait, mais sans `.github/dependabot.yml` GitHub n'active que les _security
@@ -197,23 +197,80 @@ donc bien bumpé `urllib3` et `idna`, pendant qu'`openai` dérivait de 2.54 à 3
 `anthropic` de 0.125 à 1.2, et que `certifi` — le magasin de certificats racine
 qui valide TLS pour tous les appels providers — accumulait deux ans de retard.
 
-Deux mesures, volontairement redondantes :
+**Puis le retard s'est vu, mais à tort, et en exigeant une revue à chaque
+fois.** Le 2026-09-16, le gate signalait trois versions publiées depuis moins
+de deux jours, que Dependabot n'avait pas encore le droit de proposer : depuis
+le 2026-07-14, il attend trois jours après chaque publication. Et chaque PR
+Dependabot attendait une revue manuelle. **Décision du propriétaire, ce
+jour-là** : les mineures et correctifs se fusionnent seuls, sans clé API en CI,
+avec un passage quotidien.
 
-1. **`.github/dependabot.yml`** active les _version updates_ hebdomadaires (pip
-   et github-actions). Mineures et correctifs sont groupés en une PR — un patch
-   bump par PR finit ignoré, et le bruit est l'ennemi de la mise à jour. Les
-   **majeures restent séparées** : chacune peut casser le code sans que la doc
-   le dise.
+Le dispositif, en cinq pièces :
 
-2. **`./scripts/check-deps-fresh.sh`**, câblé dans le gate de fin de travail.
-   Dependabot _propose_, il ne garantit pas : ses PR peuvent s'empiler sans
-   être mergées. Ce contrôle rend le retard visible dans le verdict du projet.
-   - retard de **majeure** → échec ;
-   - retard de mineure/correctif → avertissement. Échouer sur chaque patch
-     rendrait le gate rouge en permanence, donc ignoré — précisément le mode de
-     défaillance qu'on cherche à éviter ;
+1. **`.github/dependabot.yml`** : pip **quotidien**, `cooldown.default-days: 3`
+   écrit en clair (c'est le défaut de GitHub, mais le délai du gate en dépend) ;
+   github-actions hebdomadaire. Mineures et correctifs groupés en une PR ;
+   **majeures séparées**.
+
+2. **`.github/workflows/dependabot-auto-merge.yml`** lance
+   `gh pr merge --auto --squash` sur les PR pip **mineures et correctives**
+   seulement. Jamais les majeures, qui exigent un appel réel ; jamais les
+   actions GitHub, qui s'exécutent à côté du jeton OIDC de publication. Un type
+   de mise à jour illisible fait échouer le job sans rien fusionner.
+
+3. **Un ruleset sur `main`** (« Checks requis ») exige `Python 3.10`,
+   `Python 3.11`, `Python 3.12`, `Résolution des dépendances` et
+   `Fermeture et tests du lock`, avec le rôle admin en bypass ; le réglage
+   « Allow auto-merge » du dépôt est activé. **Le ruleset est indispensable** :
+   sans check requis, `gh pr merge --auto` fusionne sur-le-champ, avant la fin
+   de la CI (`isImmediatelyMergeable` dans le code de gh). Le workflow vérifie donc sa
+   présence et **refuse de fusionner** s'il manque un de ces checks. Renommer un
+   de ces jobs impose de mettre à jour le ruleset ET la liste `REQUIRED_CHECKS`
+   du workflow — sinon toute PR attend un check qui ne viendra jamais.
+
+4. **Job `Fermeture et tests du lock`** (`deps-check.yml`) : installe les seules
+   dépendances directes de `pyproject.toml` avec le lock pour contrainte,
+   compare `pip freeze` au fichier (trou, orphelin, divergence), puis lance les
+   deux suites sur ces versions. `tests.yml` exerce le contrat public, jamais le
+   lock : c'est ce job qui remplace la vérification faite à la main avant
+   chaque bump.
+
+5. **`./scripts/check-deps-fresh.sh`**, dans le gate et chaque jour en CI (job
+   `Fraîcheur des dépendances`, `--strict`) :
+   - un retard ne compte qu'au-delà de `GRACE_DAYS` = refroidissement (3) +
+     cadence (1) + marge (1) = **5 jours** ; avant, la version est « en route »,
+     sans avertissement. L'égalité avec `dependabot.yml` est vérifiée par un
+     test (`scripts/tests/test_pypi_versions.py`) ;
+   - retard de **majeure** → échec ; de mineure → avertissement dans le gate,
+     **échec en CI** : l'échec d'un workflow planifié envoie un mail, une alerte
+     plutôt qu'une découverte ;
    - PyPI injoignable → skip explicite en local, **fail-closed en CI**. Un
      contrôle qui ne s'est pas exécuté n'est pas un succès.
+
+**Deux points que la doc ne tranche pas, à mesurer sur la première vraie PR
+Dependabot :**
+
+- **Le droit du `GITHUB_TOKEN` à activer l'auto-merge sur un run Dependabot.**
+  La doc GitHub dit que la clé `permissions` l'élève ; le README de
+  fetch-metadata dit le contraire. Un refus se lit en 403 sur l'étape « Activer
+  la fusion automatique », et rien n'est fusionné.
+- **Les workflows `on: push` après une fusion automatique.** Une action faite
+  avec le `GITHUB_TOKEN` n'en déclenche aucun, et la doc ne dit pas si la
+  fusion différée compte comme telle. C'est pourquoi `deps-check.yml` vérifie
+  `main` chaque jour ; `gh run list --branch main --event push` tranche.
+
+**Limite connue** : Dependabot ne modifie qu'une ligne du lock. Si une nouvelle
+version exige de monter une dépendance transitive, le job de fermeture échoue,
+la PR reste ouverte, et l'alerte part au-delà du délai. Correction à la main :
+régénérer le lock (paragraphe suivant) et pousser sur la branche Dependabot. Si
+ça devient fréquent, la parade est un lock compilé (`pip-compile` ou `uv.lock`),
+que Dependabot régénère par l'outil lui-même au lieu d'éditer une ligne — à
+mesurer avant d'y passer.
+
+**Ce qu'on a lâché, en connaissance de cause** : personne ne lit plus les notes
+de version d'une mineure avant sa fusion, et la CI n'appelle aucun provider.
+Les utilisateurs du paquet reçoivent de toute façon les derniers SDK (bornes
+`>=` de `pyproject.toml`) : le lock ne les a jamais protégés.
 
 **Une majeure de SDK se valide par un appel réel, provider par provider.** Deux
 précédents mesurés : `anthropic` ≥ 1.0 refuse côté client un appel non-streamé
@@ -228,7 +285,8 @@ bien qu'une install fraîche ne reproduisait pas l'environnement testé. Le
 régénérer par `pip freeze` d'un venv construit à partir des seules dépendances
 directes évite à la fois ce trou et l'accumulation d'orphelins (`tokenizers` et
 `huggingface-hub`, reliquats de `mistralai` 1.x, n'étaient plus requis par
-rien).
+rien). Le job `Fermeture et tests du lock` fait exactement cette vérification
+sur chaque PR et chaque jour sur `main`.
 
 ## Quality / pre-commit (workflow)
 
