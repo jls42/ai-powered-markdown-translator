@@ -14,7 +14,7 @@ import re
 import sys
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -27,12 +27,14 @@ from scripts.pypi_versions import (
     version_key,
 )
 
-NOW = datetime(2026, 9, 16, 12, 0, tzinfo=UTC)
+# `timezone.utc` et non `datetime.UTC` : ces tests tournent aussi en 3.10.
+NOW = datetime(2026, 9, 16, 12, 0, tzinfo=timezone.utc)  # noqa: UP017
 
 
 def _file(days_ago: float, yanked: bool = False) -> dict:
+    """Un fichier au format exact de PyPI, suffixe `Z` compris."""
     uploaded = NOW - timedelta(days=days_ago)
-    return {"upload_time_iso_8601": uploaded.isoformat(), "yanked": yanked}
+    return {"upload_time_iso_8601": uploaded.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "yanked": yanked}
 
 
 def _releases(**ages: float) -> dict[str, datetime]:
