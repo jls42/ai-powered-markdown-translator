@@ -13,6 +13,14 @@ name: Dependencies
 # mergeable en l'état.
 #
 # Ce job rétablit la garde là où elle a du sens, sans dépendre d'un secret.
+#
+# Depuis que les mineures de Dependabot se fusionnent seules
+# (dependabot-auto-merge.yml), ce workflow porte aussi ce qu'une revue humaine
+# vérifiait : le lock est exactement la fermeture des dépendances directes, et
+# les suites passent sur SES versions. « Résolution des dépendances » et
+# « Fermeture et tests du lock » sont des checks REQUIS par le ruleset de main :
+# renommer un de ces jobs bloque toute fusion jusqu'à mise à jour du ruleset et
+# de la liste de dependabot-auto-merge.yml.
 
 on:
   push:
@@ -20,6 +28,13 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+  # Chaque jour sur main : une fusion faite avec le GITHUB_TOKEN ne déclenche
+  # aucun workflow `on: push` (doc GitHub), donc main ne serait plus vérifié
+  # après une fusion automatique. Le passage planifié le vérifie quand même, et
+  # porte le contrôle de fraîcheur, dont l'échec envoie un mail.
+  schedule:
+    - cron: "17 8 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -59,3 +74,93 @@ jobs:
           # personne : elles ne servent qu'aux utilisateurs, jamais au dépôt,
           # qui installe toujours son lock.
           python -m pip install --dry-run --quiet .
+
+  lock:
+    name: Fermeture et tests du lock
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Le lock est exactement la fermeture des dépendances directes
+        run: |
+          # Dependabot bumpe une ligne de requirements.txt, jamais le reste : si
+          # la nouvelle version tire une dépendance transitive absente du lock,
+          # `pip install -r` l'installe sans épinglage et la résolution reste
+          # verte. On installe donc les SEULES dépendances directes du paquet,
+          # avec le lock pour contrainte, puis on compare l'environnement
+          # obtenu au fichier : un paquet installé mais non épinglé est un
+          # trou, un épinglage que rien ne requiert est un orphelin.
+          python -m venv "$RUNNER_TEMP/lock"
+          "$RUNNER_TEMP/lock/bin/python" -m pip install --quiet --upgrade pip
+          mapfile -t direct < <(python -c 'import tomllib; print("\n".join(tomllib.load(open("pyproject.toml", "rb"))["project"]["dependencies"]))')
+          if [ "${#direct[@]}" -eq 0 ]; then
+            echo "::error::aucune dépendance directe lue dans pyproject.toml : contrôle vide"
+            exit 1
+          fi
+          "$RUNNER_TEMP/lock/bin/python" -m pip install --quiet -c requirements.txt "${direct[@]}"
+          "$RUNNER_TEMP/lock/bin/python" -m pip check
+          "$RUNNER_TEMP/lock/bin/python" -m pip freeze --exclude pip > "$RUNNER_TEMP/freeze.txt"
+          python - "$RUNNER_TEMP/freeze.txt" <<'EOF'
+          import re
+          import sys
+
+          def pins(path):
+              result = {}
+              for raw in open(path, encoding="utf-8"):
+                  line = raw.split("#", 1)[0].strip()
+                  if not line:
+                      continue
+                  name, sep, version = line.partition("==")
+                  if not sep:
+                      sys.exit(f"✗ ligne non épinglée dans {path} : {line}")
+                  result[re.sub(r"[-_.]+", "-", name).lower()] = version.strip()
+              return result
+
+          lock, env = pins("requirements.txt"), pins(sys.argv[1])
+          holes = sorted(f"{n}=={env[n]}" for n in env.keys() - lock.keys())
+          orphans = sorted(f"{n}=={lock[n]}" for n in lock.keys() - env.keys())
+          drift = sorted(f"{n} {lock[n]} ≠ {env[n]}" for n in lock.keys() & env.keys() if lock[n] != env[n])
+          if holes:
+              print("✗ installés mais absents du lock (trou) :", ", ".join(holes))
+          if orphans:
+              print("✗ épinglés mais requis par rien (orphelins) :", ", ".join(orphans))
+          if drift:
+              print("✗ versions divergentes :", ", ".join(drift))
+          if holes or orphans or drift:
+              sys.exit("Régénérer requirements.txt depuis les seules dépendances directes (cf. CLAUDE.md).")
+          print(f"✓ lock exact : {len(lock)} épinglages, ni trou ni orphelin")
+          EOF
+
+      - name: Suites de tests sur les versions du lock
+        run: |
+          # tests.yml exerce le CONTRAT PUBLIC (`pip install .`, donc les
+          # dernières versions de PyPI) ; ici, ce sont les versions épinglées,
+          # celles qu'une PR Dependabot propose de figer.
+          "$RUNNER_TEMP/lock/bin/python" -m unittest discover tests
+          "$RUNNER_TEMP/lock/bin/python" -m unittest discover scripts/tests
+
+  fresh:
+    name: Fraîcheur des dépendances
+    # Planifié ou à la demande seulement : sur une PR, un retard sans rapport
+    # avec son contenu la ferait échouer.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Aucune mise à jour bloquée au-delà du délai d'absorption
+        # `--strict` : une mineure en retard de plus de GRACE_DAYS est une
+        # fusion automatique qui n'a pas eu lieu. L'échec d'un workflow planifié
+        # envoie un mail à qui a écrit sa ligne `cron` — une alerte, plutôt
+        # qu'un retard découvert par hasard dans le gate.
+        run: ./scripts/check-deps-fresh.sh --strict
