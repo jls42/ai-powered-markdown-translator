@@ -580,7 +580,12 @@ class TestProviderClientInit(unittest.TestCase):
             patch("aipmt.providers.mistral.Mistral") as mock_cls,
         ):
             client = mistral._init_mistral_client(args)
-            mock_cls.assert_called_once_with(api_key=_FAKE_MISTRAL_ENV["MISTRAL_API_KEY"])
+            # Le client réessaie sur 429 : sans `retry_config`, le SDK Mistral ne
+            # réessaie rien et un seul dépassement de débit perdait le fichier.
+            mock_cls.assert_called_once_with(
+                api_key=_FAKE_MISTRAL_ENV["MISTRAL_API_KEY"],
+                retry_config=mistral.MISTRAL_RETRY_CONFIG,
+            )
             self.assertIs(client, mock_cls.return_value)
         # eco override applique aussi le modèle économique
         args2 = _base_args(eco=True, model=None)

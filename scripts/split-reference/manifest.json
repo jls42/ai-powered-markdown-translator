@@ -369,6 +369,24 @@
       "file": "src/aipmt/naming.py",
       "hash": "3be11cd3cf780695965f913465ec5369e407551d339cbf26080a65ab766f109f",
       "why": "mkstemp crée en 0600 : sans reprise explicite, remplacer une cible existante lui donnait les droits du nouveau fichier (0600 élargi en 0664, mesuré). Reprend les droits de la cible, sinon ceux d'un open() ordinaire."
+    },
+    {
+      "name": "MISTRAL_RETRY_CONFIG",
+      "file": "src/aipmt/providers/mistral.py",
+      "hash": "60596cfb05939b44f51036e05ad45d75a3b45df1b88421b55458c078ea17080e",
+      "why": "réessais du SDK sur 429/5xx et erreurs de connexion : le 429 de Mistral ne porte aucun Retry-After (mesuré), le backoff 2 s → 60 s sur 5 minutes couvre une fenêtre d'une minute."
+    },
+    {
+      "name": "_MISTRAL_NON_TEXT_CHUNK_TYPES",
+      "file": "src/aipmt/providers/mistral.py",
+      "hash": "afc3c48243a6fb2bfc0c5e2a9459022b1bcd936fb153b998260112c21caa9945",
+      "why": "types de blocs écartés de la traduction (`thinking`), même garde-fou que pour Claude."
+    },
+    {
+      "name": "_mistral_text",
+      "file": "src/aipmt/providers/mistral.py",
+      "hash": "a48758df2567cf4e6affdd93806b686cbc9088ac40d422d61163300bede38b2c",
+      "why": "extrait le texte d'une réponse Mistral, chaîne ou liste de blocs, raisonnement écarté ; erreur explicite si aucun bloc de texte."
     }
   ],
   "removed": [
@@ -745,6 +763,34 @@
       "old_hash": "45146b6f7fd292ec37767c93d8628c7164104b699357c8f89f25816a811032d0",
       "new_hash": "e584262117e4526dd8c08e720145cdb5f7339a38025e1a790d726c27fc4fdb7f",
       "why": "revue Codex : `open(cible, \"w\")` tronque avant de remplir, donc une erreur d'écriture laissait une cible partielle que la relance suivante comptait pour une traduction faite (reproduit : 8 octets, statut failure, puis skipped). L'écriture passe par un temporaire du même répertoire, puis os.replace ; le corps utile part dans _write_then_rename."
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/mistral.py",
+      "old_hash": "7b7320c512b1177cad0b8794bd3ab38df573a6a0528c0b6628214c4d386ffb7a",
+      "new_hash": "156b612ebecdf1bf9e22c8e199ab75edf7c9852e8a0f667e0e858813d154b25d",
+      "why": "docstring du module : dit pourquoi le client réessaie — le SDK mistralai ne réessaie rien par défaut, et les plafonds mesurés le 2026-09-17 (15 requêtes/min pour Large 3, 100 000 tokens/min pour Small 4) ont fait perdre 5 traductions sur 84 d'une campagne."
+    },
+    {
+      "name": "_call_mistral",
+      "file": "src/aipmt/providers/mistral.py",
+      "old_hash": "c1a40de5a98c7f24cba3aefebbc16cdd85386fe5b52759f636effe670131cd50",
+      "new_hash": "e28f73149082ec095a9f38510adc99a7ad08c3d1ab937e936a86e972956d8329",
+      "why": "le texte passe par _mistral_text : une réponse en blocs `thinking` + `text` (mesurée avec reasoning_effort=high) cassait sur `.strip()` ; la garde du contenu absent y est déplacée à l'identique."
+    },
+    {
+      "name": "_init_mistral_client",
+      "file": "src/aipmt/providers/mistral.py",
+      "old_hash": "10658a152ea4ce74383b3f8b13dddb813af87df126780d33b749638b8a3860f8",
+      "new_hash": "bcfa12ba8e5fcf3048a6a742e798c75e8fa1011e7b9c57a48db21fb7892a8468",
+      "why": "le client reçoit MISTRAL_RETRY_CONFIG : sans elle, un seul HTTP 429 faisait échouer le fichier entier. Mesuré : rafale de 20 appels sur Large 3 (15/min), 20 réussis, le 16ᵉ après 33 s d'attente."
+    },
+    {
+      "name": "MODEL_TOKEN_LIMITS",
+      "file": "src/aipmt/segmentation.py",
+      "old_hash": "dc7030b6c2598101541fe06a5a013d025d9920a89679e619dfd44efe84f32506",
+      "new_hash": "89746704e4226402e7f35fccbb7bfe639d324df762415ba6a7c94d4a22736be9",
+      "why": "entrées Mistral resynchronisées sur `max_context_length` de GET /v1/models (2026-09-17) : 262 144 au lieu de 256 000, 131 072 pour ministral-3b, et ajout des IDs datés (mistral-medium-2604 déclenchait l'avertissement « non listé »)."
     }
   ],
   "markers": [

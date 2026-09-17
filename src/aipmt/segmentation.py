@@ -76,18 +76,27 @@ MODEL_TOKEN_LIMITS = {
     "claude-sonnet-4-5-20250929": 200000,
     "claude-haiku-4-5": 200000,
     "claude-haiku-4-5-20251001": 200000,
-    # Mistral — 256K depuis la génération Large 3 / Small 4. La gamme
-    # Magistral a été retirée le 2026-07-31. Les alias `-latest` fonctionnent
-    # (vérifié par appel réel) mais leur résolution vers une version n'est pas
-    # publiée : les IDs datés sont là pour qui veut épingler.
-    "mistral-large-latest": 256000,
-    "mistral-large-2512": 256000,
-    "mistral-small-2603": 256000,
-    "mistral-medium-latest": 256000,
-    "mistral-small-latest": 256000,
-    "ministral-14b-latest": 256000,
-    "ministral-8b-latest": 256000,
-    "ministral-3b-latest": 256000,
+    # Mistral — `max_context_length` lu sur `GET /v1/models` le 2026-09-17 :
+    # 262 144 tokens (le « 256k » de la doc est arrondi), 131 072 pour
+    # ministral-3b. Le même appel publie la résolution des alias :
+    # `mistral-large-latest` → `mistral-large-2512` (Large 3),
+    # `mistral-medium-latest` → `mistral-medium-2604` (Medium 3.5),
+    # `mistral-small-latest` → `mistral-small-2603` (Small 4). Les IDs datés
+    # sont là pour qui veut épingler. La gamme Magistral a été retirée le
+    # 2026-07-31.
+    "mistral-large-latest": 262144,
+    "mistral-large-2512": 262144,
+    "mistral-medium-latest": 262144,
+    "mistral-medium-2604": 262144,
+    "mistral-medium-3-5": 262144,
+    "mistral-small-latest": 262144,
+    "mistral-small-2603": 262144,
+    "ministral-14b-latest": 262144,
+    "ministral-14b-2512": 262144,
+    "ministral-8b-latest": 262144,
+    "ministral-8b-2512": 262144,
+    "ministral-3b-latest": 131072,
+    "ministral-3b-2512": 131072,
     # Google Gemini — la limite d'input exacte est 1048576, pas 1000000.
     # gemini-2.0-* et gemini-3-pro-preview ont été arrêtés en 2026.
     "gemini-3.7-flash": 1048576,
