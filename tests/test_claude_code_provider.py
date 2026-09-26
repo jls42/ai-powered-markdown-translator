@@ -60,6 +60,14 @@ _NE_DOIT_PAS_SERVIR = AssertionError("ce double ne doit jamais être appelé")
 _TMPDIR_REEL = tempfile.gettempdir()
 _VERSION = "2.1.283"
 _MODELE_SONNET = "claude-sonnet-5"
+_MODELE_OPUS = "claude-opus-5-5"
+# Avis que Claude Code écrit quand les garde-fous coupent une réponse (mesuré).
+_AVIS_GARDE_FOUS = {
+    "type": "system",
+    "subtype": "informational",
+    "level": "notice",
+    "content": "Opus 5.5's safeguards stopped the response above · continuing once with that noted",
+}
 
 
 def _args(**overrides):
@@ -259,7 +267,7 @@ class TestClaudeCodeInvocation(unittest.TestCase):
         self.assertEqual(argv[argv.index("--output-format") + 1], "stream-json")
         self.assertEqual(argv[argv.index("--system-prompt-file") + 1], "/p/prompt.txt")
         self.assertEqual(argv[argv.index("--model") + 1], "opus")
-        self.assertEqual(argv[argv.index("--effort") + 1], "medium")
+        self.assertEqual(argv[argv.index("--effort") + 1], "low")
         settings = json.loads(argv[argv.index("--settings") + 1])
         self.assertEqual(
             settings, {"disableAllHooks": True, "crossSessionInbound": "refuse", "fastMode": False}
@@ -269,7 +277,8 @@ class TestClaudeCodeInvocation(unittest.TestCase):
 
     def test_effort_levels(self):
         cas = {
-            (("sonnet", False, None)): "medium",
+            (("sonnet", False, None)): "low",
+            (("opus", False, None)): "low",
             (("sonnet", True, None)): "low",
             (("opus", False, "none")): "low",
             (("opus", False, "xhigh")): "xhigh",
@@ -436,6 +445,62 @@ class TestClaudeCodeOutputContract(unittest.TestCase):
             stdout = _flux(_init(), _rate(), _result(**override))
             with self.subTest(nom=nom), self.assertRaises(claude_code._ClaudeCodeCallError):
                 self._check(stdout)
+
+    def test_a_safeguard_stop_in_two_turns_is_named_and_never_retried(self):
+        """Flux mesuré le 2026-09-26 (Opus 5.5, dernier segment d'un article de
+        veille) : avis « safeguards », relance synthétique, puis refus du modèle
+        rendu en `success`, sans erreur, sur deux tours."""
+        stdout = _flux(
+            _init(model=_MODELE_OPUS),
+            _rate(),
+            {"type": "assistant", "message": {"model": _MODELE_OPUS}},
+            _AVIS_GARDE_FOUS,
+            {"type": "user", "message": {"content": [{"type": "text", "text": "stopped"}]}},
+            _result(
+                num_turns=2,
+                modelUsage={_MODELE_OPUS: {}},
+                result="I can't continue this translation.",
+            ),
+        )
+        client, args = _client(), _args(model="opus")
+        with self.assertRaisesRegex(claude_code._ClaudeCodeCallError, "garde-fous") as ctx:
+            self._check(stdout, client=client, args=args)
+        self.assertFalse(ctx.exception.rate_limited)
+        self.assertIn("catégorie non précisée", str(ctx.exception))
+        self.assertIn("--model sonnet", str(ctx.exception))
+        self.assertEqual(client.windows["five_hour"], (0.1, 111))
+
+    def test_a_refused_request_names_its_category(self):
+        """Flux mesuré le 2026-09-26 (la brève seule) : la requête est refusée
+        par l'API, catégorie « bio », `is_error` vrai."""
+        stdout = _flux(
+            _init(model=_MODELE_OPUS),
+            _rate(),
+            _AVIS_GARDE_FOUS,
+            {
+                "type": "system",
+                "subtype": "model_refusal_no_fallback",
+                "original_model": _MODELE_OPUS,
+                "api_refusal_category": "bio",
+            },
+            {"type": "assistant", "message": {"model": _MODELE_OPUS}, "error": "invalid_request"},
+            _result(
+                is_error=True,
+                num_turns=2,
+                stop_reason="refusal",
+                result="API Error: Opus 5.5's safeguards flagged this session",
+            ),
+        )
+        args = _args(model="opus")
+        with self.assertRaisesRegex(claude_code._ClaudeCodeCallError, "catégorie bio") as ctx:
+            self._check(stdout, args=args)
+        self.assertFalse(ctx.exception.rate_limited)
+
+    def test_a_refusal_stop_reason_alone_is_a_refusal_and_the_advice_follows_the_model(self):
+        stdout = _flux(_init(), _rate(), _result(stop_reason="refusal"))
+        with self.assertRaisesRegex(claude_code._ClaudeCodeCallError, "garde-fous") as ctx:
+            self._check(stdout)
+        self.assertIn("un autre modèle ou un autre provider", str(ctx.exception))
 
     def test_a_hook_event_or_an_unreadable_line_is_refused(self):
         for extra in ({"type": "hook_started", "hook_name": "SessionStart"}, None):

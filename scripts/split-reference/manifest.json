@@ -823,14 +823,14 @@
     {
       "name": "DEFAULT_MODEL_CLAUDE_CODE",
       "file": "src/aipmt/providers/claude_code.py",
-      "hash": "5e3c5a5c8762fb8b9793bb2a9a49f4a844cf82285845f0f67172485fd1e74fad",
-      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : alias qualité `opus`, provisoire jusqu'à la campagne de mesure."
+      "hash": "74806cdb663a475752ebd79be68d759f68f0b04c7f70352f1a6d7cf603991614",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : alias qualité `sonnet`, fixé par les campagnes du 2026-09-26."
     },
     {
       "name": "ECO_MODEL_CLAUDE_CODE",
       "file": "src/aipmt/providers/claude_code.py",
       "hash": "0db8d7a18051422dde2e770cc2dd6396148bfa7afcade0739e236db103df7669",
-      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : alias --eco `sonnet`, provisoire jusqu'à la campagne de mesure."
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : alias --eco `sonnet`, fixé par les campagnes du 2026-09-26."
     },
     {
       "name": "AIPMT_CLAUDE_TIMEOUT",
@@ -1003,7 +1003,7 @@
     {
       "name": "_claude_code_effort",
       "file": "src/aipmt/providers/claude_code.py",
-      "hash": "7f299b279c44ea3bd85ef9f19ec70504fee921593d62e1d33e70ba27369d63d4",
+      "hash": "537a9460346d197bf7896ab349fe0462619e3a1acea6df09101d1da9d99b45bf",
       "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_effort)."
     },
     {
@@ -1099,7 +1099,7 @@
     {
       "name": "_claude_code_check_output",
       "file": "src/aipmt/providers/claude_code.py",
-      "hash": "90828c20a97b5f6d663fb318532a27548435b74d6a08986cf163a66ac81486aa",
+      "hash": "a5c5804f56bc924fc2ca31523884fcc4c0cebecefb841dff9f16e2e7dc9187f1",
       "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_check_output)."
     },
     {
@@ -1185,6 +1185,24 @@
       "file": "src/aipmt/providers/claude_code.py",
       "hash": "accaeddc0c2a110b699a74567e0ba579f7a965c0d537e9f3b18aa2dfd9a5dc62",
       "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_init_claude_code_client)."
+    },
+    {
+      "name": "_CLAUDE_CODE_REFUSAL_ADVICE",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "30e204640551966e25c60f12aae953eafc03b574a78ac0a40b91ef633e31b5fe",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : conseil d'un refus des garde-fous par alias : `sonnet` a traduit dans les mesures ce qu'Opus refusait."
+    },
+    {
+      "name": "_claude_code_refusal_sign",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "f7e0ff04b2a4756e09374a165cc61f423cca21a40cd810d8865797b7f6c57136",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : signes mesurés d'un refus des garde-fous (avis « safeguards », refus sans repli, stop_reason refusal)."
+    },
+    {
+      "name": "_claude_code_check_refusal",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "16d99f4d0b35a0832aa612078b4e8173c5377c6067bc07c681449f7941715d89",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : refus des garde-fous d'Anthropic nommé, catégorie comprise, sans relance (mesuré sur Opus 5.5, classifieur « bio »)."
     }
   ],
   "removed": [

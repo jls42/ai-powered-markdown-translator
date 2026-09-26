@@ -38,10 +38,12 @@ from .base import (
 # Code 2.1.283 le 2026-09-26.
 #
 # Des ALIAS, jamais un identifiant figé : l'alias suit le dernier modèle de sa
-# famille (règle du propriétaire pour `claude -p`). Défauts provisoires : la
-# campagne qui doit les fixer attend la réinitialisation du quota hebdomadaire,
-# à 98 % le jour de l'écriture.
-DEFAULT_MODEL_CLAUDE_CODE = "opus"
+# famille (règle du propriétaire pour `claude -p`). Défauts fixés par les
+# campagnes du 2026-09-26 — un article de veille dense en --news et un README,
+# quatorze langues chacun : `sonnet` en effort bas écrit les 28 traductions, 26
+# sans écart. `opus` va plus vite, mais ses garde-fous refusent une brève de
+# biologie dans les quatorze articles (cf. `_claude_code_check_refusal`).
+DEFAULT_MODEL_CLAUDE_CODE = "sonnet"
 
 
 ECO_MODEL_CLAUDE_CODE = "sonnet"
@@ -89,6 +91,14 @@ _CLAUDE_CODE_EFFORTS = {
     "medium": "medium",
     "high": "high",
     "xhigh": "xhigh",
+}
+
+
+# Conseil d'un refus des garde-fous, par alias. Mesuré : la brève de veille
+# qu'Opus 5.5 refusait (classifieur « bio »), `sonnet` l'a traduite dans les
+# quatorze langues.
+_CLAUDE_CODE_REFUSAL_ADVICE = {
+    "opus": "--model sonnet, qui a traduit dans nos mesures ce qu'Opus refusait"
 }
 
 
@@ -304,14 +314,16 @@ def _claude_code_work_base():
 
 def _claude_code_effort(args):
     """Niveau d'effort transmis, ou None pour un modèle qui n'en accepte pas.
-    Défaut : `low` en --eco, `medium` sinon — une traduction ne gagne rien à
-    raisonner longtemps, et le raisonnement se paie en quota."""
+    Défaut : `low`, en --eco comme sans. Mesuré le 2026-09-26 : une traduction
+    ne raisonne presque pas — aucun token de raisonnement pour `sonnet`, 1 %
+    des tokens de sortie pour `opus` en `medium` —, et l'effort moyen n'a rien
+    gagné sur le faible, ni en structure ni en durée."""
     if args.model in _CLAUDE_CODE_NO_EFFORT_MODELS:
         return None
     explicit = getattr(args, "reasoning_effort", None)
     if explicit:
         return _CLAUDE_CODE_EFFORTS[explicit]
-    return "low" if args.eco else "medium"
+    return "low"
 
 
 def _claude_code_argv(client, args, prompt_path):
@@ -517,6 +529,41 @@ def _claude_code_restore_edges(segment, text):
     return lead + text.strip("\n") + trail
 
 
+def _claude_code_refusal_sign(event):
+    """Vrai pour un signe de refus par les garde-fous du modèle : l'avis
+    « safeguards » que Claude Code écrit en événement système, l'événement de
+    refus sans repli de modèle (`CLAUDE_CODE_NO_MODEL_FALLBACK`), ou un
+    `stop_reason` à `refusal`."""
+    if event.get("type") == "result":
+        return event.get("stop_reason") == "refusal"
+    if event.get("type") != "system":
+        return False
+    return event.get("subtype") == "model_refusal_no_fallback" or "safeguards" in str(
+        event.get("content") or ""
+    )
+
+
+def _claude_code_check_refusal(events, model):
+    """Un refus des garde-fous d'Anthropic, nommé comme tel et sans relance.
+
+    Mesuré le 2026-09-26 sur Opus 5.5, dans les quatorze langues d'un article
+    de veille : une brève sur des molécules générées déclenche le classifieur
+    « bio ». Claude Code coupe la réponse, relance une fois, et le modèle rend
+    « I can't continue this translation » en `success`, sans erreur, sur deux
+    tours : seul le contrat du tour unique l'arrêtait, avec un message muet sur
+    la cause. Relancer rejouerait le même refus ; `sonnet` a traduit la brève."""
+    signs = [event for event in events if _claude_code_refusal_sign(event)]
+    if not signs:
+        return
+    categories = [str(e["api_refusal_category"]) for e in signs if e.get("api_refusal_category")]
+    raise _ClaudeCodeCallError(
+        f"Les garde-fous d'Anthropic ont arrêté la réponse (model={model}, catégorie "
+        f"{categories[0] if categories else 'non précisée'}) : segment non traduit, sans "
+        "relance — le même texte redéclencherait le même refus. Relancer ce fichier avec "
+        f"{_CLAUDE_CODE_REFUSAL_ADVICE.get(model, 'un autre modèle ou un autre provider')}."
+    )
+
+
 def _claude_code_contract_problems(init, result, events, client, args):
     """Tout ce que l'appel doit attester, initialisation et résultat."""
     if init is None:
@@ -533,11 +580,16 @@ def _claude_code_check_output(returncode, stdout, stderr, client, args):
     """Contrat complet d'un appel ; rend le texte traduit brut."""
     events = _claude_code_events(stdout)
     result = _claude_code_first(events, "result")
+    # Un refus des garde-fous se nomme dans les deux cas mesurés : la requête
+    # refusée par l'API (échec), ou la réponse coupée puis le refus du modèle
+    # rendu en `success` sur deux tours.
     if returncode != 0 or result is None or result.get("is_error") is not False:
+        _claude_code_check_refusal(events, args.model)
         raise _claude_code_failure(_claude_code_error_text(result, events, stderr), args.model)
     for event in events:
         if event.get("type") == "rate_limit_event":
             _claude_code_rate_limit(event, client, args.model)
+    _claude_code_check_refusal(events, args.model)
     init = _claude_code_first(events, "system", "init")
     problems = _claude_code_contract_problems(init, result, events, client, args)
     if problems:

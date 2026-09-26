@@ -291,10 +291,12 @@ except ValueError as e:
       echo "[regen] ERROR: contrôle Claude Code en échec — aucune traduction lancée" >&2
       exit 1
     fi
-    # Deux jobs : le verrou de rafraîchissement du jeton OAuth est partagé avec
-    # les sessions Claude Code de l'utilisateur, et le quota aussi. À mesurer
-    # avant d'aller plus loin.
-    max_jobs=2
+    # Quatre jobs, mesurés le 2026-09-26 : trois campagnes de 28 traductions à
+    # quatre en parallèle, sans une erreur de débit ni de verrou de
+    # rafraîchissement du jeton OAuth, que partagent pourtant les sessions
+    # Claude Code de l'utilisateur. Le quota aussi est partagé : le plafond
+    # d'aipmt (AIPMT_CLAUDE_MAX_UTILIZATION) arrête tout segment au-delà.
+    max_jobs=4
   fi
   local langs="ar de en es hi it ja ko nl pl pt ro sv zh"
   # Volontairement global, pas `local` : le trap EXIT s'exécute APRÈS la sortie
