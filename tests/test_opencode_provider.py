@@ -37,6 +37,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from aipmt import naming
 from aipmt.providers import antigravity, base, codex, grok, opencode, registry
 
+# Pid de faux processus au-delà du plus grand pid possible (pid_max vaut
+# 4 194 304) : si un doublage de `os.getpgid` sautait un jour, le vrai
+# `getpgid` échouerait avant tout `killpg`, au lieu de viser le groupe d'un
+# vrai processus — les pid font le tour en quelques heures sur ce poste, et
+# 4242 peut exister. Cf. l'incident kill(-1) du 2026-09-26 dans CLAUDE.md.
+_PID_INEXISTANT = 2**22 + 4242
+
 # Valeur passée par référence : un littéral en face d'une clé *_API_KEY fait
 # crier les scanners de secrets, alors qu'il ne s'agit que d'un jeton de test.
 _MARQUEUR = "jeton-de-test"
@@ -108,7 +115,7 @@ class _FakePopen:
         self._stdout, self.returncode, self._stderr = stdout, returncode, stderr
         self._timeout = timeout
         self.argv = self.kwargs = self.communicate_kwargs = None
-        self.pid = 4242
+        self.pid = _PID_INEXISTANT
 
     def __call__(self, argv, **kwargs):
         self.argv, self.kwargs = argv, kwargs
@@ -312,7 +319,7 @@ class TestOpencodeCall(unittest.TestCase):
         client, args = _client(timeout=7), _args()
         with (
             patch.object(subprocess, "Popen", fake),
-            patch.object(os, "getpgid", return_value=4242),
+            patch.object(os, "getpgid", return_value=_PID_INEXISTANT),
             patch.object(os, "killpg") as killpg,
             self.assertRaisesRegex(RuntimeError, "OPENCODE_TIMEOUT"),
         ):

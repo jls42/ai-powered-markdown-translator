@@ -80,6 +80,29 @@ def _kill_process_only(proc):
             pass
 
 
+def _agent_group(proc):
+    """Le groupe de l'agent à viser par `killpg`, ou None s'il ne faut viser
+    que le fils direct. Lève OSError si le processus n'existe plus.
+
+    Garde-fou : sous Linux, killpg(1, sig) vaut kill(-1, sig) — le signal part
+    vers TOUS les processus de l'utilisateur. C'est arrivé le 2026-09-26 : un
+    test passait un faux processus dont le pid était un MagicMock, que Python
+    convertit en 1 (`__index__`), et killpg(1, SIGTERM) puis killpg(1, SIGKILL)
+    ont tué la session graphique entière — terminal, navigateur, éditeurs,
+    conteneurs. Lancé avec start_new_session, un agent est chef de son propre
+    groupe : son groupe n'est visé que si son pid est un vrai entier (`type`
+    strict : ni bool, ni double de test) supérieur à 1, que getpgid rend ce
+    même pid, et que ce n'est pas le groupe de ce processus. Tout autre
+    résultat est un bug, et seul le fils direct est alors visé."""
+    pid = proc.pid
+    if type(pid) is not int or pid <= 1:
+        return None
+    pgid = os.getpgid(pid)
+    if pgid != pid or pgid == os.getpgrp():
+        return None
+    return pgid
+
+
 def _codex_kill_group(proc):
     """Tue tout le groupe de process : SIGTERM, délai de grâce, puis SIGKILL
     quoi qu'il arrive. Le `codex` installé par npm est un shim Node qui `spawn`
@@ -99,8 +122,11 @@ def _codex_kill_group(proc):
     # ProcessLookupError est une sous-classe d'OSError : la capture est écrite
     # `except OSError` partout, sans la mentionner séparément.
     try:
-        pgid = os.getpgid(proc.pid)
+        pgid = _agent_group(proc)
     except OSError:
+        return
+    if pgid is None:
+        _kill_process_only(proc)
         return
     try:
         os.killpg(pgid, signal.SIGTERM)

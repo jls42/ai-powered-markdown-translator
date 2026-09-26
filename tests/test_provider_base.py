@@ -40,6 +40,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from aipmt.providers import base
 
+# Pid de faux processus au-delà du plus grand pid possible (pid_max vaut
+# 4 194 304) : si un doublage de `os.getpgid` sautait un jour, le vrai
+# `getpgid` échouerait avant tout `killpg`, au lieu de viser le groupe d'un
+# vrai processus — les pid font le tour en quelques heures sur ce poste, et
+# 4242 peut exister. Cf. l'incident kill(-1) du 2026-09-26 dans CLAUDE.md.
+_PID_INEXISTANT = 2**22 + 4242
+
 
 def _alive(pid):
     try:
@@ -265,14 +272,14 @@ class TestInterruptDuringWait(unittest.TestCase):
     def _interrupted(self, exc):
         """(exception remontée, appels à `killpg`) quand `exc` tombe pendant
         `communicate`. Popen et killpg sont doublés : rien n'est lancé."""
-        proc = MagicMock(pid=4242)
+        proc = MagicMock(pid=_PID_INEXISTANT)
         proc.communicate.side_effect = exc
         proc.wait.return_value = 0
         popen = MagicMock()
         popen.return_value.__enter__.return_value = proc
         with (
             patch.object(base.subprocess, "Popen", popen),
-            patch("os.getpgid", return_value=4242),
+            patch("os.getpgid", return_value=_PID_INEXISTANT),
             patch("os.killpg") as killpg,
             self.assertRaises(type(exc)) as ctx,
         ):
@@ -283,14 +290,18 @@ class TestInterruptDuringWait(unittest.TestCase):
         interruption = KeyboardInterrupt()
         remontee, killpg = self._interrupted(interruption)
         self.assertIs(remontee, interruption)
-        self.assertEqual(killpg, [(4242, signal.SIGTERM), (4242, signal.SIGKILL)])
+        self.assertEqual(
+            killpg, [(_PID_INEXISTANT, signal.SIGTERM), (_PID_INEXISTANT, signal.SIGKILL)]
+        )
 
     def test_system_exit_kills_the_group_then_propagates(self):
         sortie = SystemExit(3)
         remontee, killpg = self._interrupted(sortie)
         self.assertIs(remontee, sortie)
         self.assertEqual(remontee.code, 3)
-        self.assertEqual(killpg, [(4242, signal.SIGTERM), (4242, signal.SIGKILL)])
+        self.assertEqual(
+            killpg, [(_PID_INEXISTANT, signal.SIGTERM), (_PID_INEXISTANT, signal.SIGKILL)]
+        )
 
     @unittest.skipUnless(os.name == "posix", "groupes de processus : POSIX seulement")
     def test_ctrl_c_leaves_no_agent_behind(self):
@@ -321,7 +332,7 @@ class TestPlatformWithoutProcessGroups(unittest.TestCase):
         return SimpleNamespace()
 
     def test_the_direct_child_is_still_killed(self):
-        proc = MagicMock(pid=4242)
+        proc = MagicMock(pid=_PID_INEXISTANT)
         # Le délai de grâce expire, puis `wait()` sans délai rend la main après
         # le kill — un `wait()` sans timeout bloque, il n'expire jamais.
         # TimeoutExpired est une classe d'exception construite pour une
@@ -335,7 +346,7 @@ class TestPlatformWithoutProcessGroups(unittest.TestCase):
         proc.kill.assert_called_once()
 
     def test_a_child_that_stops_on_terminate_is_not_killed(self):
-        proc = MagicMock(pid=4242)
+        proc = MagicMock(pid=_PID_INEXISTANT)
         proc.wait.return_value = 0
         with patch.object(base, "os", self._os_sans_groupes()):
             base._codex_kill_group(proc)
@@ -374,22 +385,85 @@ class TestWorkingDirectory(unittest.TestCase):
         self.assertIsNone(self._popen_kwargs()["cwd"])
 
 
+class TestKillGroupNeverTargetsTheWholeSession(unittest.TestCase):
+    """Sous Linux, killpg(1, sig) vaut kill(-1, sig) : le signal part vers TOUS
+    les processus de l'utilisateur. Le 2026-09-26, un test passait un faux
+    processus au pid MagicMock — que Python convertit en 1 par `__index__` —
+    sans doubler `os.killpg`, et a tué la session graphique entière. Le pilote
+    refuse désormais de viser le groupe 1 ou son propre groupe, et ne tue alors
+    que le fils direct. `os.killpg` est TOUJOURS doublé ici : ces tests ne
+    doivent jamais pouvoir envoyer un vrai signal de groupe."""
+
+    def _kill(self, proc, getpgid=None):
+        """(appels à killpg, proc) pour `_codex_kill_group(proc)`, killpg doublé.
+        `getpgid=None` laisse le vrai `os.getpgid` répondre."""
+        with contextlib.ExitStack() as pile:
+            killpg = pile.enter_context(patch("os.killpg"))
+            if getpgid is not None:
+                pile.enter_context(patch("os.getpgid", return_value=getpgid))
+            base._codex_kill_group(proc)
+        return [c.args for c in killpg.call_args_list], proc
+
+    def test_a_magicmock_pid_reads_as_1_and_is_never_signalled(self):
+        # Sans doublure de getpgid : MagicMock.__index__ vaut 1, et le vrai
+        # os.getpgid(1) rend 1 — exactement le chemin de l'incident.
+        appels, proc = self._kill(MagicMock())
+        self.assertEqual(appels, [])
+        proc.terminate.assert_called_once()
+
+    def test_group_1_or_below_is_never_signalled(self):
+        for pgid in (1, 0, -1):
+            with self.subTest(pgid=pgid):
+                appels, proc = self._kill(MagicMock(pid=_PID_INEXISTANT), getpgid=pgid)
+                self.assertEqual(appels, [])
+                proc.terminate.assert_called_once()
+
+    def test_our_own_group_is_never_signalled(self):
+        appels, proc = self._kill(MagicMock(pid=_PID_INEXISTANT), getpgid=os.getpgrp())
+        self.assertEqual(appels, [])
+        proc.terminate.assert_called_once()
+
+    def test_a_pid_that_is_not_a_strict_int_above_1_is_never_signalled(self):
+        """`type(pid) is int` et non `isinstance` : True est un int pour
+        isinstance, et vaut 1. Un pid de chaîne ou de flottant n'est pas non
+        plus un pid ; `getpgid` rendrait le même pid pour qu'aucun autre
+        garde-fou ne prenne le relais."""
+        for pid in (True, 1, 0, -1, "4243", 4243.0):
+            with self.subTest(pid=pid):
+                appels, proc = self._kill(MagicMock(pid=pid), getpgid=pid)
+                self.assertEqual(appels, [])
+                proc.terminate.assert_called_once()
+
+    def test_a_group_other_than_the_agent_pid_is_never_signalled(self):
+        """Lancé avec start_new_session, l'agent est chef de son groupe : un
+        getpgid qui rend autre chose que son pid désigne le groupe d'un autre."""
+        appels, proc = self._kill(MagicMock(pid=_PID_INEXISTANT), getpgid=_PID_INEXISTANT + 1)
+        self.assertEqual(appels, [])
+        proc.terminate.assert_called_once()
+
+    def test_the_agent_group_is_still_signalled(self):
+        appels, _proc = self._kill(MagicMock(pid=_PID_INEXISTANT), getpgid=_PID_INEXISTANT)
+        self.assertEqual(
+            appels, [(_PID_INEXISTANT, signal.SIGTERM), (_PID_INEXISTANT, signal.SIGKILL)]
+        )
+
+
 class TestKillGroup(unittest.TestCase):
     def test_sigkill_always_follows_sigterm(self):
-        proc = MagicMock(pid=4242)
+        proc = MagicMock(pid=_PID_INEXISTANT)
         proc.wait.return_value = 0  # le fils direct meurt proprement sur SIGTERM
-        with patch("os.getpgid", return_value=4242), patch("os.killpg") as killpg:
+        with patch("os.getpgid", return_value=_PID_INEXISTANT), patch("os.killpg") as killpg:
             base._codex_kill_group(proc)
         self.assertEqual(
             [c.args for c in killpg.call_args_list],
-            [(4242, signal.SIGTERM), (4242, signal.SIGKILL)],
+            [(_PID_INEXISTANT, signal.SIGTERM), (_PID_INEXISTANT, signal.SIGKILL)],
         )
 
     def test_a_group_already_dead_is_not_an_error(self):
-        proc = MagicMock(pid=4242)
+        proc = MagicMock(pid=_PID_INEXISTANT)
         proc.wait.return_value = 0
         with (
-            patch("os.getpgid", return_value=4242),
+            patch("os.getpgid", return_value=_PID_INEXISTANT),
             patch("os.killpg", side_effect=ProcessLookupError),
         ):
             base._codex_kill_group(proc)  # ne lève pas

@@ -553,7 +553,7 @@
     {
       "name": "_ANTIGRAVITY_VERSION_REGEX",
       "file": "src/aipmt/providers/antigravity.py",
-      "hash": "6d42145e83e3dbcdd4af9c5d63b71b8444ed81fa15c005ad49a80fd6fb155ea4",
+      "hash": "5f107a26f043071bef1959c0e4e5cfa074671560962cdac7c2f874a3acfa9fc9",
       "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : version lue dans la sortie de `agy --version`."
     },
     {
@@ -739,7 +739,7 @@
     {
       "name": "_antigravity_billing_problems",
       "file": "src/aipmt/providers/antigravity.py",
-      "hash": "2268d22c371b488847c60e5769e9b46f8ffaf4ab56cb2ff49d3e62e9cd73b088",
+      "hash": "287bb02a35162d1c2e0962903be883b12415cda2f9b2e33201974ce8b04e22b0",
       "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : réglages qui ouvriraient une voie payante (useG1Credits, modelProvider, gcp), absents compris."
     },
     {
@@ -783,6 +783,12 @@
       "file": "src/aipmt/providers/antigravity.py",
       "hash": "3967ed808fc94cc6aee66ff83df6242360faeaf369c4bd7a83ef331806d87e0e",
       "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : initialisation : modèle, refus CI, plateforme, modèle, préflight."
+    },
+    {
+      "name": "_agent_group",
+      "file": "src/aipmt/providers/base.py",
+      "hash": "09ad95b13881602d62f1b86b2ea5d4ec048bdc26ea2994757f439a7440b189d7",
+      "why": "garde-fou de _codex_kill_group : un groupe n'est visé que si le pid est un entier strict > 1, que getpgid rend ce même pid et que ce n'est pas le groupe courant — killpg(1) vaut kill(-1), qui a tué la session de l'utilisateur le 2026-09-26 (pid MagicMock lu 1)."
     },
     {
       "name": "_CLI_PROVIDERS",
@@ -1248,6 +1254,13 @@
       "old_hash": "f64b408c1c1b831cc31033f06beef2376a72d1b5e4f6253a59aec3be437d301f",
       "new_hash": "edc82038ad07a835a73f58566d7ffb6d543b18920a98720858640c4caaef8566",
       "why": "docstring : quatre CLI agentiques, dont Antigravity."
+    },
+    {
+      "name": "_codex_kill_group",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "ac70dc393ddf594523de12ace6aeaac04cb48e0947efdc5eefb2f86c524366ba",
+      "new_hash": "e50fb32e318af5aff596bc8ec1c1e646f4d35b289267b8a00fb3b88345bfaf90",
+      "why": "passe par _agent_group, qui refuse tout groupe autre que celui de l'agent (killpg(1) vaut kill(-1) et a tué la session de l'utilisateur pendant l'écriture des tests) ; seul le fils direct est alors visé."
     },
     {
       "name": "_kill_group_on_sigterm",

@@ -49,7 +49,7 @@ import tempfile
 import time
 import unittest
 from argparse import Namespace
-from types import SimpleNamespace
+from types import MappingProxyType, SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 # Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
@@ -84,6 +84,22 @@ _PARTIEL = "The cat is slee"
 _ABSENT = object()
 
 _FAUX_HOME = "/home/utilisateur-de-test"
+
+# Pid des faux processus : au-delà de PID_MAX_LIMIT (2**22 sous Linux, 99 999
+# sous macOS), aucun processus ne peut le porter. Si un chemin d'erreur
+# atteignait `_codex_kill_group` sans que le test ait remplacé os.getpgid et
+# os.killpg, getpgid échouerait (ESRCH) au lieu de désigner le groupe d'un vrai
+# processus de l'utilisateur. Jamais un MagicMock : converti en 1, il a fait
+# envoyer killpg(1, …), c'est-à-dire kill(-1, …), à toute la session.
+_PID_INEXISTANT = 2**22 + 4242
+
+
+# Effet des doubles de Popen et de run qui ne doivent JAMAIS servir. Un double
+# nu, appelé par une régression, rend un faux processus dont le pid est un
+# MagicMock — lu 1 par `__index__` — et `killpg(1)` vaut `kill(-1)` : le
+# 2026-09-26, c'est ce chemin, ouvert par un mutant, qui a tué toute la
+# session de l'utilisateur. Un appel imprévu échoue ici, avant tout processus.
+_NE_DOIT_PAS_SERVIR = AssertionError("ce double ne doit jamais être appelé")
 
 # Lu à l'import, dans l'environnement réel : `gettempdir()` garde sa première
 # valeur en cache, et un test qui vide l'environnement ne doit pas déplacer le
@@ -386,7 +402,7 @@ class _FakePopen:
         self._journal, self._timeout = journal, timeout
         self.calls = 0
         self.argv = self.kwargs = self.communicate_kwargs = self.photo = None
-        self.pid = 4242
+        self.pid = _PID_INEXISTANT
 
     def __call__(self, argv, **kwargs):
         self.calls += 1
@@ -440,20 +456,39 @@ class _FakeRun:
     `agy -p /config`, dont il écrit le journal là où --log-file le demande.
     Toute autre commande fait échouer le test."""
 
-    def __init__(
-        self,
-        version="1.2.11\n",
-        version_rc=0,
-        version_stderr="",
-        config=_CONFIG_MESUREE,
-        config_stdout=None,
-        config_rc=0,
-        config_stderr="",
-        journal=_JOURNAL_PREFLIGHT,
-    ):
-        self.version = SimpleNamespace(returncode=version_rc, stdout=version, stderr=version_stderr)
-        stdout = _sortie_config(config) if config_stdout is None else config_stdout
-        self.config = SimpleNamespace(returncode=config_rc, stdout=stdout, stderr=config_stderr)
+    # Réponses d'agy 1.2.11 connecté à l'abonnement, chacune remplaçable par
+    # mot-clé ; `config_stdout=None` : la sortie est tirée de `config`. En
+    # lecture seule : un test ne peut pas changer le défaut des suivants.
+    _REPONSES = MappingProxyType(
+        {
+            "version": "1.2.11\n",
+            "version_rc": 0,
+            "version_stderr": "",
+            "config": _CONFIG_MESUREE,
+            "config_stdout": None,
+            "config_rc": 0,
+            "config_stderr": "",
+        }
+    )
+
+    def __init__(self, *, journal=_JOURNAL_PREFLIGHT, **reponses):
+        inconnues = sorted(set(reponses) - set(self._REPONSES))
+        if inconnues:
+            # Une faute de frappe dans un test ne doit pas passer en silence
+            # en laissant la valeur par défaut.
+            raise TypeError(f"_FakeRun : réglages inconnus {inconnues}")
+        reglages = {**self._REPONSES, **reponses}
+        self.version = SimpleNamespace(
+            returncode=reglages["version_rc"],
+            stdout=reglages["version"],
+            stderr=reglages["version_stderr"],
+        )
+        stdout = reglages["config_stdout"]
+        if stdout is None:
+            stdout = _sortie_config(reglages["config"])
+        self.config = SimpleNamespace(
+            returncode=reglages["config_rc"], stdout=stdout, stderr=reglages["config_stderr"]
+        )
         self._journal = journal
         self.appels = []
 
@@ -650,12 +685,24 @@ class TestAntigravityPrivateDirectory(_AgyTestCase):
                 self.assertFalse(os.path.exists(fake.photo.base))
 
     def test_sandbox_is_removed_on_any_exception_and_log_is_left_to_agy(self):
-        with self.assertRaises(RuntimeError), antigravity._antigravity_sandbox(_PROMPT) as box:
-            base_dir = os.path.dirname(box.work)
-            self.assertEqual(os.path.dirname(box.log), base_dir)
-            self.assertFalse(os.path.exists(box.log))
-            raise RuntimeError("échec simulé")
-        self.assertFalse(os.path.exists(base_dir))
+        releve = SimpleNamespace()
+
+        def echouer_dans_le_repertoire_prive():
+            """Relève, DANS le répertoire privé, ce que le test vérifie ensuite
+            hors de la portée d'assertRaises, puis lève l'échec simulé."""
+            with antigravity._antigravity_sandbox(_PROMPT) as box:
+                releve.base = os.path.dirname(box.work)
+                releve.journal = box.log
+                releve.journal_existe = os.path.exists(box.log)
+                raise RuntimeError("échec simulé")
+
+        with self.assertRaises(RuntimeError) as cm:
+            echouer_dans_le_repertoire_prive()
+        # L'échec remonté est bien celui levé dans le répertoire privé.
+        self.assertEqual(str(cm.exception), "échec simulé")
+        self.assertEqual(os.path.dirname(releve.journal), releve.base)
+        self.assertFalse(releve.journal_existe)
+        self.assertFalse(os.path.exists(releve.base))
 
 
 class TestAntigravityOutputContract(_AgyTestCase):
@@ -689,10 +736,11 @@ class TestAntigravityOutputContract(_AgyTestCase):
         """Mesuré : un stdin vide ouvre l'interface interactive, qui sort en 0
         avec une erreur non JSON sur stdout (forme illustrative ci-dessous)."""
         tui = "Error: could not open a new TTY: open /dev/tty: no such device or address\n"
+        fake = _FakePopen(stdout=tui)
         with self.assertRaisesRegex(
             antigravity._AntigravityCallError, "code 0.*sortie illisible.*open a new TTY"
         ):
-            self._traduire(_FakePopen(stdout=tui))
+            self._traduire(fake)
 
     def test_failure_detail_goes_from_the_most_precise_to_the_vaguest(self):
         """Le détail clôt le message, seul : un code couleur ou un « } » écrits
@@ -782,11 +830,10 @@ class TestAntigravityOutputContract(_AgyTestCase):
 
     def test_blank_or_missing_response_is_refused(self):
         for reponse in ("", " \n\t", None, 42, ["texte"], _ABSENT):
-            with (
-                self.subTest(reponse=reponse),
-                self.assertRaisesRegex(antigravity._AntigravityCallError, "aucun texte"),
-            ):
-                self._traduire(_FakePopen(stdout=_sortie(response=reponse)))
+            with self.subTest(reponse=reponse):
+                fake = _FakePopen(stdout=_sortie(response=reponse))
+                with self.assertRaisesRegex(antigravity._AntigravityCallError, "aucun texte"):
+                    self._traduire(fake)
 
     def test_agent_fallback_refuses_even_a_fluent_answer(self):
         """Mesuré : l'agent introuvable, agy est retombé sur son agent de codage
@@ -816,13 +863,12 @@ class TestAntigravityOutputContract(_AgyTestCase):
             "journal absent": None,
         }
         for nom, journal in cas.items():
-            with (
-                self.subTest(nom),
-                self.assertRaisesRegex(
+            with self.subTest(nom):
+                fake = _FakePopen(journal=journal)
+                with self.assertRaisesRegex(
                     antigravity._AntigravityCallError, "ne confirme pas le chargement"
-                ),
-            ):
-                self._traduire(_FakePopen(journal=journal))
+                ):
+                    self._traduire(fake)
 
     def test_log_must_attest_the_subscription(self):
         """Seules les méthodes autres que l'abonnement sont nommées : c'est
@@ -839,25 +885,32 @@ class TestAntigravityOutputContract(_AgyTestCase):
             "aucune méthode": (_journal(auth=None), "ne dit pas par quel compte.*lancer `agy`"),
         }
         for nom, (journal, motif) in cas.items():
-            with (
-                self.subTest(nom),
-                self.assertRaisesRegex(antigravity._AntigravityCallError, motif),
-            ):
-                self._traduire(_FakePopen(journal=journal))
+            with self.subTest(nom):
+                fake = _FakePopen(journal=journal)
+                with self.assertRaisesRegex(antigravity._AntigravityCallError, motif):
+                    self._traduire(fake)
 
     def test_empty_segment_is_refused_before_any_launch(self):
         """Sans texte sur stdin, agy ouvrirait son interface interactive."""
         for segment in ("", "   \n\t"):
             with self.subTest(segment=segment):
-                popen = MagicMock(name="Popen")
+                popen = MagicMock(name="Popen", side_effect=_NE_DOIT_PAS_SERVIR)
+                client, args = _client(), _args()
+                # Si la garde régressait, le processus rendu par ce Popen aurait
+                # un MagicMock pour pid, converti en 1 : killpg(1, …) viserait
+                # toute la session. getpgid et killpg restent donc remplacés.
                 with (
                     patch.object(subprocess, "Popen", popen),
                     patch.object(time, "sleep") as sommeil,
+                    patch.object(os, "getpgid", return_value=_PID_INEXISTANT) as getpgid,
+                    patch.object(os, "killpg") as killpg,
                     self.assertRaisesRegex(antigravity._AntigravityCallError, "Segment vide"),
                 ):
-                    antigravity._call_antigravity(_client(), _args(), _PROMPT, segment)
+                    antigravity._call_antigravity(client, args, _PROMPT, segment)
                 popen.assert_not_called()
                 sommeil.assert_not_called()
+                getpgid.assert_not_called()
+                killpg.assert_not_called()
 
 
 class TestAntigravityLogAnchoring(_AgyTestCase):
@@ -887,13 +940,12 @@ class TestAntigravityLogAnchoring(_AgyTestCase):
             "ligne glog indentée": _journal(agent=None, echos=[f"  {_LIGNE_AGENT['true']}"]),
         }
         for nom, journal in cas.items():
-            with (
-                self.subTest(nom),
-                self.assertRaisesRegex(
+            with self.subTest(nom):
+                fake = _FakePopen(journal=journal)
+                with self.assertRaisesRegex(
                     antigravity._AntigravityCallError, "ne confirme pas le chargement"
-                ),
-            ):
-                self._traduire(_FakePopen(journal=journal))
+                ):
+                    self._traduire(fake)
 
     def test_fallback_text_outside_a_glog_line_does_not_refuse(self):
         """Faux positif évité : traduire un texte qui cite le repli ne doit pas
@@ -916,13 +968,12 @@ class TestAntigravityLogAnchoring(_AgyTestCase):
             "autre ligne glog": "I0926 10:36:47.700112       1 session.go:120] session: authMethod=consumer",
         }
         for nom, ligne in cas.items():
-            with (
-                self.subTest(nom),
-                self.assertRaisesRegex(
+            with self.subTest(nom):
+                fake = _FakePopen(journal=_journal(auth=None, echos=[ligne]))
+                with self.assertRaisesRegex(
                     antigravity._AntigravityCallError, "ne dit pas par quel compte"
-                ),
-            ):
-                self._traduire(_FakePopen(journal=_journal(auth=None, echos=[ligne])))
+                ):
+                    self._traduire(fake)
 
     def test_any_other_auth_method_anywhere_is_refused(self):
         """À côté d'un `applyAuthResult` consumer, toute autre méthode écrite,
@@ -937,14 +988,13 @@ class TestAntigravityLogAnchoring(_AgyTestCase):
             "casse relâchée, ligne brute": ("authmethod=gcp_adc", "gcp_adc"),
         }
         for nom, (ligne, methode) in cas.items():
-            with (
-                self.subTest(nom),
-                self.assertRaisesRegex(
+            with self.subTest(nom):
+                fake = _FakePopen(journal=_journal(echos=[ligne]))
+                with self.assertRaisesRegex(
                     antigravity._AntigravityCallError,
                     f"authentifié en {methode} et non sur l'abonnement",
-                ),
-            ):
-                self._traduire(_FakePopen(journal=_journal(echos=[ligne])))
+                ):
+                    self._traduire(fake)
 
     def test_consumer_written_elsewhere_is_harmless(self):
         for ligne in (_echo("authMethod=consumer"), "auth_method=consumer"):
@@ -1055,8 +1105,9 @@ class TestAntigravityRetries(_AgyTestCase):
             _FakePopen(stdout="", returncode=3, stderr="HTTP 429 Too Many Requests\n")
             for _ in range(3)
         ]
+        sequence = _Sequence(*echecs)
         with self.assertRaises(antigravity._AntigravityCallError) as cm:
-            self._traduire(_Sequence(*echecs), appels=3)
+            self._traduire(sequence, appels=3)
         self.assertTrue(cm.exception.rate_limited)
         self.assertEqual([c.args for c in self.faux_sommeil.call_args_list], [(1.0,), (2.0,)])
 
@@ -1075,8 +1126,9 @@ class TestAntigravityRetries(_AgyTestCase):
         }
         for nom, kwargs in cas.items():
             with self.subTest(nom):
+                fake = _FakePopen(**kwargs)
                 with self.assertRaises(antigravity._AntigravityCallError) as cm:
-                    self._traduire(_FakePopen(**kwargs))
+                    self._traduire(fake)
                 message = str(cm.exception)
                 self.assertIn("lancer `agy`", message)
                 self.assertIn("se connecter", message)
@@ -1085,18 +1137,19 @@ class TestAntigravityRetries(_AgyTestCase):
 
     def test_timeout_kills_the_group_and_names_agy_timeout(self):
         fake = _FakePopen(timeout=True)
+        client = _client(timeout=7)
         with (
-            patch.object(os, "getpgid", return_value=4242) as getpgid,
+            patch.object(os, "getpgid", return_value=_PID_INEXISTANT) as getpgid,
             patch.object(os, "killpg") as killpg,
             self.assertRaises(RuntimeError) as cm,
         ):
-            self._traduire(fake, client=_client(timeout=7))
+            self._traduire(fake, client=client)
         self.assertIn("Antigravity CLI timeout après 7s", str(cm.exception))
         self.assertIn("AGY_TIMEOUT", str(cm.exception))
         getpgid.assert_called_once_with(fake.pid)
         self.assertEqual(
             [c.args for c in killpg.call_args_list],
-            [(4242, signal.SIGTERM), (4242, signal.SIGKILL)],
+            [(_PID_INEXISTANT, signal.SIGTERM), (_PID_INEXISTANT, signal.SIGKILL)],
         )
         self.assertEqual(fake.communicate_kwargs["timeout"], 7)
         self.assertFalse(os.path.exists(fake.photo.base))
@@ -1112,7 +1165,7 @@ class TestAntigravityRetries(_AgyTestCase):
                 fake = _FakePopen()
                 fake.communicate = MagicMock(side_effect=interruption)
                 with (
-                    patch.object(os, "getpgid", return_value=4242) as getpgid,
+                    patch.object(os, "getpgid", return_value=_PID_INEXISTANT) as getpgid,
                     patch.object(os, "killpg") as killpg,
                     self.assertRaises(type(interruption)),
                 ):
@@ -1120,7 +1173,7 @@ class TestAntigravityRetries(_AgyTestCase):
                 getpgid.assert_called_once_with(fake.pid)
                 self.assertEqual(
                     [c.args for c in killpg.call_args_list],
-                    [(4242, signal.SIGTERM), (4242, signal.SIGKILL)],
+                    [(_PID_INEXISTANT, signal.SIGTERM), (_PID_INEXISTANT, signal.SIGKILL)],
                 )
                 self.assertFalse(os.path.exists(fake.photo.base))
                 self.faux_sommeil.assert_not_called()
@@ -1254,7 +1307,7 @@ class TestAntigravityPreflight(_AgyTestCase):
                 self.assertGreaterEqual(run.calls, 1, "le double de subprocess.run n'a pas servi")
 
     def test_missing_binary_names_agy_bin_and_the_install_page(self):
-        run = MagicMock(name="run")
+        run = MagicMock(name="run", side_effect=_NE_DOIT_PAS_SERVIR)
         with patch.object(subprocess, "run", run), self.assertRaises(ValueError) as cm:
             antigravity._antigravity_preflight(None)
         for indice in ("introuvable", "AGY_BIN", "https://antigravity.google/docs/cli/install/"):
@@ -1326,6 +1379,21 @@ class TestAntigravityPreflight(_AgyTestCase):
                     "répertoire privé resté sur le disque",
                 )
                 self.assertEqual(signal.getsignal(signum), avant)
+
+    def test_version_reading_stays_linear_and_refuses_oversized_numbers(self):
+        """`(\\d+)\\.(\\d+)\\.(\\d+)` non ancré retentait à chaque position d'une
+        longue suite de chiffres : 1,7 s mesurée sur 20 000 chiffres (Sonar
+        S8786). Bornée, la lecture reste immédiate, et un numéro trop long
+        échoue en fermé au lieu d'être lu tronqué."""
+        regex = antigravity._ANTIGRAVITY_VERSION_REGEX
+        chiffres = "1" * 20_000
+        debut = time.monotonic()
+        trouve = regex.search(chiffres)
+        duree = time.monotonic() - debut
+        self.assertIsNone(trouve)
+        self.assertLess(duree, 0.5)
+        self.assertIsNone(regex.search("1234567890.1.1"))
+        self.assertEqual(regex.search("agy 1.2.11 (linux/amd64)").groups(), ("1", "2", "11"))
 
     def test_versions_from_the_floor_up_are_accepted(self):
         # 1.10.0 : comparaison numérique, qu'une comparaison de chaînes inverserait.
@@ -1459,8 +1527,9 @@ class TestAntigravityPreflight(_AgyTestCase):
         }
         for nom, (journal, attendu) in cas.items():
             with self.subTest(nom):
+                run = _FakeRun(journal=journal)
                 with self.assertRaises(ValueError) as cm:
-                    self._preflight(_FakeRun(journal=journal))
+                    self._preflight(run)
                 self.assertIn(attendu, str(cm.exception))
                 self.assertIn("--use_antigravity refuse de traduire", str(cm.exception))
 
@@ -1585,6 +1654,7 @@ class TestAntigravityInit(unittest.TestCase):
         """Sur un runner, sans bus de session par nature, c'est la CI qu'on
         nomme : la vraie vérification de plateforme n'interroge même pas le
         bus."""
+        args = _args(model=None)
         with (
             patch.dict(os.environ, {"CI": "true", "GITHUB_ACTIONS": ""}),
             patch.object(sys, "platform", "linux"),
@@ -1593,7 +1663,7 @@ class TestAntigravityInit(unittest.TestCase):
             ) as bus,
             self.assertRaises(ValueError) as cm,
         ):
-            antigravity._init_antigravity_client(_args(model=None))
+            antigravity._init_antigravity_client(args)
         self.assertIn("refusé en environnement CI", str(cm.exception))
         bus.assert_not_called()
 
@@ -1615,7 +1685,9 @@ class TestAntigravityInit(unittest.TestCase):
         }
         for nom, (plateforme, attendu) in cas.items():
             with self.subTest(nom):
-                run, popen = MagicMock(name="run"), MagicMock(name="Popen")
+                run = MagicMock(name="run", side_effect=_NE_DOIT_PAS_SERVIR)
+                popen = MagicMock(name="Popen", side_effect=_NE_DOIT_PAS_SERVIR)
+                args = _args(model=None)
                 with contextlib.ExitStack() as pile:
                     pile.enter_context(patch.dict(os.environ, _HORS_CI))
                     for simulation in plateforme:
@@ -1626,7 +1698,7 @@ class TestAntigravityInit(unittest.TestCase):
                     pile.enter_context(patch.object(subprocess, "run", run))
                     pile.enter_context(patch.object(subprocess, "Popen", popen))
                     erreur = pile.enter_context(self.assertRaises(ValueError))
-                    antigravity._init_antigravity_client(_args(model=None))
+                    antigravity._init_antigravity_client(args)
                 self.assertEqual(str(erreur.exception), attendu)
                 resoudre.assert_not_called()
                 run.assert_not_called()
@@ -1693,7 +1765,8 @@ class TestAntigravityInit(unittest.TestCase):
         self.assertNotIn("Claude and GPT models", avertissements)
 
     def test_missing_binary_stops_before_any_subprocess(self):
-        run = MagicMock(name="run")
+        run = MagicMock(name="run", side_effect=_NE_DOIT_PAS_SERVIR)
+        args = _args(model=None)
         with (
             patch.dict(os.environ, _HORS_CI),
             patch.object(antigravity, "_antigravity_check_platform") as plateforme,
@@ -1701,7 +1774,7 @@ class TestAntigravityInit(unittest.TestCase):
             patch.object(subprocess, "run", run),
             self.assertRaisesRegex(ValueError, "introuvable"),
         ):
-            antigravity._init_antigravity_client(_args(model=None))
+            antigravity._init_antigravity_client(args)
         plateforme.assert_called_once_with()
         resoudre.assert_called_once_with()
         run.assert_not_called()
@@ -1930,6 +2003,9 @@ class TestAntigravityBinaryResolution(unittest.TestCase):
             os.mkdir(os.path.dirname(faux))
             with open(faux, "w", encoding="utf-8") as f:
                 f.write(_script_faux_agy(temoins))
+            # Marqueur sur la ligne qui PRÉCÈDE l'appel : posé sur l'appel, ruff-format
+            # l'emportait sur la parenthèse fermante, où il ne couvre plus rien.
+            # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions — 0700, propriétaire seul : faux agy de test, répertoire privé
             os.chmod(faux, 0o700)
             precedent = os.getcwd()
             os.chdir(dossier)
@@ -1979,11 +2055,12 @@ class TestAntigravityWiring(unittest.TestCase):
         appel.assert_called_once_with("client", args, "P", "S")
 
     def test_empty_content_guard_names_antigravity(self):
+        args = _args()
         with (
             patch.object(registry, "_call_antigravity", return_value=" \n") as appel,
             self.assertRaisesRegex(RuntimeError, "Antigravity CLI returned empty content"),
         ):
-            registry._dispatch_provider_call("client", _args(), "P", "S", "antigravity", False)
+            registry._dispatch_provider_call("client", args, "P", "S", "antigravity", False)
         appel.assert_called_once()
 
     def test_select_provider_client_routes_to_init(self):
@@ -2015,6 +2092,7 @@ class TestAntigravityWiring(unittest.TestCase):
         self.assertIn("antigravity", registry._CLI_PROVIDERS)
 
     def test_unknown_cli_provider_raises_instead_of_using_another_subscription(self):
+        args = _args()
         with (
             patch.object(registry, "_call_antigravity") as appel_agy,
             patch.object(registry, "_call_codex") as appel_codex,
@@ -2022,7 +2100,7 @@ class TestAntigravityWiring(unittest.TestCase):
             patch.object(registry, "_call_opencode") as appel_opencode,
             self.assertRaisesRegex(ValueError, "provider CLI inconnu : 'antigravite'"),
         ):
-            registry._call_cli_provider("client", _args(), "P", "S", "antigravite")
+            registry._call_cli_provider("client", args, "P", "S", "antigravite")
         for double in (appel_agy, appel_codex, appel_grok, appel_opencode):
             double.assert_not_called()
 

@@ -32,6 +32,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from aipmt import markdown, news
 from aipmt.providers import anthropic, codex, gemini, openai, registry
 
+# Pid de faux processus au-delà du plus grand pid possible (pid_max vaut
+# 4 194 304) : si un doublage de `os.getpgid` sautait un jour, le vrai
+# `getpgid` échouerait avant tout `killpg`, au lieu de viser le groupe d'un
+# vrai processus — les pid font le tour en quelques heures sur ce poste, et
+# 4242 peut exister. Cf. l'incident kill(-1) du 2026-09-26 dans CLAUDE.md.
+_PID_INEXISTANT = 2**22 + 4242
+
 
 def _args(**overrides):
     defaults = {
@@ -77,7 +84,7 @@ class _FakePopen:
         self.argv = None
         self.kwargs = None
         self.communicate_kwargs = None
-        self.pid = 4242
+        self.pid = _PID_INEXISTANT
 
     def __call__(self, argv, **kwargs):
         self.argv = argv
@@ -213,7 +220,7 @@ class TestCodexCall(unittest.TestCase):
         args = _args()
         with (
             patch("subprocess.Popen", fake),
-            patch("os.getpgid", return_value=4242),
+            patch("os.getpgid", return_value=_PID_INEXISTANT),
             patch("os.killpg") as killpg,
             self.assertRaises(RuntimeError) as ctx,
         ):
@@ -223,7 +230,7 @@ class TestCodexCall(unittest.TestCase):
         # proprement sur SIGTERM, son petit-fils Rust pas forcément.
         self.assertEqual(
             [c.args for c in killpg.call_args_list],
-            [(4242, signal.SIGTERM), (4242, signal.SIGKILL)],
+            [(_PID_INEXISTANT, signal.SIGTERM), (_PID_INEXISTANT, signal.SIGKILL)],
         )
 
 

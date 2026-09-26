@@ -256,7 +256,10 @@ _ANTIGRAVITY_MODEL_REGEX = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _ANTIGRAVITY_BARE_GEMINI_REGEX = re.compile(r"^gemini-[0-9.]+-(flash|pro)$")
 
 
-_ANTIGRAVITY_VERSION_REGEX = re.compile(r"(\d+)\.(\d+)\.(\d+)")
+# Répétitions bornées : `\d+` non ancré retentait à chaque position d'une
+# longue suite de chiffres, un coût quadratique (Sonar S8786). Les frontières
+# de mot font échouer en fermé un numéro trop long au lieu d'en lire la fin.
+_ANTIGRAVITY_VERSION_REGEX = re.compile(r"\b(\d{1,9})\.(\d{1,9})\.(\d{1,9})\b")
 
 
 @dataclass
@@ -670,10 +673,10 @@ def _antigravity_billing_problems(config):
     comme un problème, pour chacun des trois : une version d'agy qui le
     renommerait ne doit pas faire passer un contrôle qui n'a rien vérifié."""
     problems = []
-    credits = config.get("useG1Credits", _ANTIGRAVITY_ABSENT)
-    if credits is not False:
+    g1_credits = config.get("useG1Credits", _ANTIGRAVITY_ABSENT)
+    if g1_credits is not False:
         problems.append(
-            f"useG1Credits={credits!r} : doit valoir false, sans quoi des crédits IA "
+            f"useG1Credits={g1_credits!r} : doit valoir false, sans quoi des crédits IA "
             "payants prennent le relais d'un quota épuisé"
         )
     provider = config.get("modelProvider", _ANTIGRAVITY_ABSENT)
