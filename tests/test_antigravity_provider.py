@@ -1620,11 +1620,12 @@ class TestAntigravityInit(unittest.TestCase):
         self.assertEqual(eco.model, antigravity.ECO_MODEL_ANTIGRAVITY)
 
     def test_defaults_are_the_campaign_choices(self):
-        """Fixés par la campagne du 2026-09-26 (README en japonais, arabe et
-        hindi) : les quatre Flash candidats rendaient une structure identique,
-        `gemini-3.7-flash-low` le plus vite et presque sans raisonner. Les
-        changer est une décision, pas un détail."""
-        self.assertEqual(antigravity.DEFAULT_MODEL_ANTIGRAVITY, "gemini-3.7-flash-medium")
+        """Fixés par les mesures du 2026-09-26 : 3.8 Flash medium rend la même
+        structure que 3.7 Flash medium pour un septième de quota en plus ;
+        3.7 Flash low reste le palier éco, 3.8 low cassant des liens internes
+        que 3.7 low laissait intacts. Les changer est une décision, pas un
+        détail."""
+        self.assertEqual(antigravity.DEFAULT_MODEL_ANTIGRAVITY, "gemini-3.8-flash-medium")
         self.assertEqual(antigravity.ECO_MODEL_ANTIGRAVITY, "gemini-3.7-flash-low")
 
     def test_defaults_are_catalogue_identifiers_on_the_gemini_quota(self):

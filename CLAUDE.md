@@ -220,6 +220,46 @@ Ce qui l'empêche désormais, et ce qu'il faut respecter :
   qu'aucun appel n'est sorti de la portée du `patch("os.killpg")` avant de
   relancer la suite.
 
+## Liens internes : le jeton d'ancre avale ses parenthèses
+
+**Mesuré le 2026-09-26, sur le README de la 1.15.0.** `_protect_anchors`
+(`placeholders.py`) remplace `(#fragment)` PARENTHÈSES COMPRISES par
+`#ANCHORn#` : le modèle reçoit `[Mesures détaillées]#ANCHOR2#`, un lien
+d'apparence cassée, et il lui arrive de le « réparer ». Deux effets :
+
+- **Un lien cassé que rien ne voit.** Réparé en `[…](#ANCHOR2#)`, le lien
+  devient à la restauration `[…]((#fragment))`, qui ne mène nulle part. Ni la
+  validation des jetons (le jeton est là), ni `compare_structure.py` (il compte
+  un lien), ni la section 4 du gate avant ce jour ne l'attrapaient. Constaté
+  dans les README espagnol et coréen de la régénération Antigravity, et dans
+  les mesures de l'après-midi sur tous les modèles essayés, 3.7 comme 3.8.
+- **Un segment refusé.** Quand le modèle réécrit le jeton au lieu de le
+  recopier, la garde refuse le segment : les 8 pertes de jeton de la mesure de
+  l'après-midi portaient toutes sur `#ANCHOR2#`, et chacun des deux Flash en
+  `-low` y a perdu un README entier.
+
+Le déclencheur était un lien placé entre parenthèses —
+`(cf. [Mesures détaillées](#mesures-détaillées))` —, ajouté par la 1.15.0 :
+sur le README 1.14.0, sans lui, les quatre Flash passaient 3 sur 3. Mais le
+défaut est général : 3.8 low a aussi doublé en hindi les deux liens qui ne
+sont pas entre parenthèses.
+
+Ce qui est en place : la section 4 du gate compte les liens internes intacts
+(`](#…)`) de chaque traduction contre la source, et le README n'écrit plus de
+lien entre parenthèses. **Ce qui ne l'est pas** : le correctif de fond —
+laisser les parenthèses hors du jeton, `[texte](#ANCHOR0#)`, et ne restaurer
+que `#fragment` — vit dans `placeholders.py`, où le propriétaire avait ce
+jour-là un travail en cours non commité (`_FENCED_CODE_REGEX`). Décision du
+propriétaire, non prise à sa place.
+
+**Corollaire pour la documentation : jamais de jeton littéral dans le README
+ni le CHANGELOG** — ni `#ANCHOR0#`, ni `#INLINECODE0#`, ni leurs cousins,
+même entre accents graves. `_validate_no_code_placeholder_leftover` cherche ce
+motif dans la traduction RESTAURÉE : le code en ligne y revient tel quel, et
+chaque langue serait refusée (vérifié sur la fonction). Une première rédaction
+de l'entrée 1.15.0 en citait un ; la relecture l'a retiré avant la campagne.
+Même famille de piège que `authMethod=` (cf. § Provider Antigravity).
+
 ## Claude Code Workflow
 
 - **Commits**: Utiliser le skill `/helping-with-commits` pour tous les commits
@@ -1125,28 +1165,37 @@ Vertex/ADC (<https://antigravity.google/docs/sdk/overview/>). Tout ce qui suit a
   est refusé par agy : aipmt le refuse avant l'appel et propose les suffixes
   qui existent — `-high` ou `-low` pour un Pro, `-medium` ou `-low` pour un
   Flash (la première version proposait `gemini-3.1-pro-medium`, qu'agy
-  refuse). Défauts **fixés par la campagne du 2026-09-26** (ci-dessous), écrits
+  refuse). Défauts **fixés par les mesures du 2026-09-26** (ci-dessous), écrits
   en toutes lettres et jamais alias de `DEFAULT_MODEL_GEMINI` :
-  `DEFAULT_MODEL_ANTIGRAVITY` = `gemini-3.7-flash-medium`,
-  `ECO_MODEL_ANTIGRAVITY` = `gemini-3.7-flash-low`. `gemini-3.8-flash-medium`
-  est écarté : le plus lent du pilote (103 à 128 s par README), et 79 % de sa
-  sortie consacrés au raisonnement sur une sonde (3 658 tokens sur 4 606),
-  décomptés au tarif de sortie. `--reasoning_effort` : sans effet,
-  avertissement.
+  `DEFAULT_MODEL_ANTIGRAVITY` = `gemini-3.8-flash-medium`,
+  `ECO_MODEL_ANTIGRAVITY` = `gemini-3.7-flash-low`. Le matin, le défaut était
+  `gemini-3.7-flash-medium` et 3.8 medium écarté sur deux arguments ; la
+  mesure de l'après-midi, demandée par le propriétaire, en a démenti un : les
+  « 79 % de raisonnement » venaient d'une sonde isolée, et sur des documents
+  3.8 medium raisonne autant que 3.7 medium (63 % contre 60 % des tokens de
+  sortie). Reste qu'il est un quart plus lent. `--reasoning_effort` : sans
+  effet, avertissement.
 - **Quota** : deux groupes, Gemini et « Claude and GPT models », chacun avec une
   fenêtre de 5 h et une hebdomadaire, lisibles gratuitement par
   `agy -p /usage --output-format json` (`remaining_fraction`, `reset_time`).
   Texte officiel de `/usage` : le quota se décompte proportionnellement au coût
   des tokens, et la limite hebdomadaire dépend du palier de l'abonnement. Un
   appel Claude ou GPT-OSS a coûté environ 1 % de la fenêtre de 5 h, contre
-  0,05 % en Flash : avertissement. Coût d'une traduction réelle : cf. la
-  campagne ci-dessous, environ 12 points de la fenêtre de 5 h par million de
-  caractères source en `gemini-3.7-flash-medium`.
+  0,05 % en Flash : avertissement. Coût d'une traduction réelle, en points de
+  la fenêtre de 5 h par million de caractères source (mesures ci-dessous) :
+  16,2 en `gemini-3.8-flash-medium`, 14,2 en `gemini-3.7-flash-medium` (12 sur
+  la campagne du matin), 7,6 en `gemini-3.7-flash-low`, 7,2 en
+  `gemini-3.8-flash-low` ; la semaine en perd six fois moins.
+  **`usage.output_tokens` du JSON d'agy INCLUT `thinking_tokens`** : le texte
+  rendu vaut `output_tokens − thinking_tokens` (mesuré, rapport caractères par
+  token constant d'un appel et d'un modèle à l'autre), et la part de
+  raisonnement se lit `thinking / output`, pas `thinking / (thinking + output)`.
 - **Parallélisme** : 4 appels simultanés mesurés sans erreur, chacun dans son
   HOME, puis les 45 traductions de la campagne du 2026-09-26 à 4 en parallèle,
   sans un échec. D'où `max_jobs=4` au regen. Le plafond de 1 800 s par job,
   repris de Codex, est validé par la mesure : le CHANGELOG entier en hindi
-  (HEAD 1.14.1, 94 080 caractères) traduit en 273 s, marge ×6,5.
+  (HEAD 1.14.1, 94 080 caractères) traduit en 273 s, marge ×6,5 ; celui de la
+  1.15.0 (111 861 caractères) en 350 s par `gemini-3.8-flash-medium`, marge ×5.
 - **Refusé en CI**, comme Codex et Grok CLI : l'auth par trousseau personnel
   n'est pas prévue pour un runner partagé. Repli proposé par le message :
   `--use_gemini` avec `GOOGLE_API_KEY` (`_CLI_PROVIDER_CI_FALLBACK`).
@@ -1181,20 +1230,31 @@ caractères) ; l'article dense du tableau de compatibilité,
 | Complète | `gemini-3.7-flash-medium` | article `--news`, 14 langues      | 14/14 · 14/14        | médiane 3 min 14 s (162 à 259 s) |
 | Complète | `gemini-3.7-flash-medium` | README, 14 langues                | 14/14 · 13/14        | médiane 1 min 22 s (59 à 110 s)  |
 | Complète | `gemini-3.7-flash-low`    | article `--news` (en, ja, ar, hi) | 4/4 · 4/4            | médiane 1 min 52 s (85 à 139 s)  |
+| Rejouée  | `gemini-3.8-flash-medium` | article `--news`, 14 langues      | 14/14 · 14/14        | médiane 3 min 59 s (191 à 272 s) |
+| Rejouée  | `gemini-3.8-flash-medium` | README, 14 langues                | 14/14 · 14/14        | médiane 1 min 43 s (73 à 154 s)  |
 
-- **Choix des défauts** : aucun écart de structure ne départage les quatre
-  Flash du pilote. Le défaut qualité reste donc dans la famille qui a le plus
-  de preuves — Gemini 3.7 Flash, 14/14 sur l'article par l'API —, à l'effort
-  moyen ; l'éco est la même famille à l'effort bas, la plus rapide.
-  `gemini-3.8-flash-medium` est écarté (cf. Modèles).
-- **Le seul écart** : le README en coréen, « gras 36≠37 », un mot en gras de
-  moins.
+- **Choix des défauts** : le matin, aucun écart de structure ne départageait
+  les quatre Flash du pilote, et le défaut qualité est resté dans la famille
+  qui avait le plus de preuves, Gemini 3.7 Flash ; 3.8 medium était écarté
+  sur la foi d'une sonde (cf. Modèles). L'après-midi, le propriétaire a
+  demandé 3.8 Flash, le modèle que l'interface d'agy propose ; les mesures
+  ci-dessous l'ont départagé : même structure sur un lot commun, puis la
+  campagne rejouée sans aucun écart sur l'article ni sur le README, là où
+  3.7 medium perdait un gras en coréen, et les liens internes intacts dans
+  les quatorze README, que 3.7 medium cassait en italien. Défaut qualité :
+  `gemini-3.8-flash-medium`. L'éco reste `gemini-3.7-flash-low` : aucun des
+  deux Flash en `-low` ne raisonne (0 token) et chacun coûte moitié moins,
+  mais 3.8 low a doublé en hindi les trois liens internes d'un README et
+  perdu un gras dans le CHANGELOG.
+- **Le seul écart du matin** : le README en coréen, « gras 36≠37 », un mot en
+  gras de moins, en `gemini-3.7-flash-medium`. La campagne rejouée en 3.8
+  n'en a aucun.
 - **Mode `--news` en anglais** : les trois lignes `> 🇫🇷 _…_` absentes de la
   sortie, aucun 🇺🇸 ni 🇬🇧 inventé — l'échec qui a disqualifié Gemma 4 et
   Qwen 3.5 —, les trois citations anglaises verbatim. C'est le modèle qui les a
   retirées : aucun journal de la campagne ne porte la ligne « (cleanup) » que
   `_cleanup_source_flag_for_en` imprime quand il agit. Même résultat en
-  `gemini-3.7-flash-low`.
+  `gemini-3.7-flash-low` et en `gemini-3.8-flash-medium`.
 - **Quota** (`remaining_fraction` du groupe Gemini) : la campagne complète —
   32 traductions, 2,20 millions de caractères source — a fait passer la
   fenêtre de 5 h de 88,87 % à 62,61 % (26,3 points) et la semaine de 91,05 % à
@@ -1204,7 +1264,35 @@ caractères) ; l'article dense du tableau de compatibilité,
   caractères : un README de 40 000 caractères ≈ 0,5 point, une régénération
   des 28 traductions de ce dépôt ≈ un quart de la fenêtre. Valable pour le
   palier du compte du propriétaire : `/usage` dit que la limite hebdomadaire
-  dépend du palier.
+  dépend du palier. La campagne rejouée en `gemini-3.8-flash-medium`, 28
+  traductions et 1,83 million de caractères : 24,5 points de la fenêtre de
+  5 h (88,55 % → 64,02 %) et 4,1 de la semaine (77,37 % → 73,28 %), soit
+  13,4 points par million.
+
+**Mesures de l'après-midi du 2026-09-26**, demandées par le propriétaire
+(« Gemini 3.8 Flash, ça serait mieux »). Par `aipmt` lui-même, l'usage de
+chaque appel lu dans le JSON d'agy par un espion posé sur
+`_antigravity_parse_payload`, le quota par `/usage` entre deux modèles, lancés
+l'un après l'autre pour que l'écart soit attribuable. Lot commun : le README
+de la 1.15.0 en anglais, japonais et hindi, le CHANGELOG en hindi, 254 031
+caractères, quatre traductions en parallèle.
+
+| Modèle                    | Écrites · sans écart | Segments repassés | Quota 5 h | Raisonnement | README / CHANGELOG |
+| ------------------------- | -------------------- | ----------------- | --------- | ------------ | ------------------ |
+| `gemini-3.7-flash-medium` | 4/4 · 4/4            | 0                 | 3,6 pts   | 60 %         | 94–132 s / 287 s   |
+| `gemini-3.8-flash-medium` | 4/4 · 4/4            | 1                 | 4,1 pts   | 63 %         | 125–171 s / 350 s  |
+| `gemini-3.8-flash-low`    | 3/4 · 2/4            | 2                 | 1,8 pt    | 0 %          | 75–96 s / 216 s    |
+| `gemini-3.7-flash-low`    | 3/4 · 3/4            | 3                 | 1,9 pt    | 0 %          | 68–85 s / 157 s    |
+
+- Les segments repassés et les deux README refusés tiennent tous au même
+  jeton, `#ANCHOR2#`, celui d'un lien placé entre parenthèses (cf. § Liens
+  internes). L'écart de 3.8 low : un gras de moins dans le CHANGELOG hindi.
+- Le coût par million de caractères varie avec le contenu : 16,2 points pour
+  3.8 medium sur ce lot, chargé en hindi, 13,4 sur la campagne rejouée.
+- Qualité du texte, lue sur des passages du README anglais : les trois
+  modèles se valent ; 3.7 medium ajoute parfois ce que la source ne dit pas
+  (« explicitly mentioned », « no official text »), 3.8 medium colle un peu
+  plus au sens. Une lecture, pas une mesure.
 
 **Conditions d'utilisation, que le README dit sans les adoucir.** Les CGU
 d'Antigravity (section 6, <https://antigravity.google/terms>) et la FAQ
@@ -1462,7 +1550,7 @@ ligne ou URL perdus —, aucun n'est dû à l'infrastructure.
 | Codex       | `gpt-5.6-sol`                         | `gpt-5.6-luna`          |
 | Grok API    | `grok-4.6`                            | `grok-4.3`              |
 | Grok CLI    | `grok-4.6`                            | `grok-4.5`              |
-| Antigravity | `gemini-3.7-flash-medium`             | `gemini-3.7-flash-low`  |
+| Antigravity | `gemini-3.8-flash-medium`             | `gemini-3.7-flash-low`  |
 | OpenCode    | `--model provider/modèle` obligatoire | idem                    |
 
 ### Model lifecycle — dates to watch (audited 2026-08-29)

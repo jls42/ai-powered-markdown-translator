@@ -280,7 +280,9 @@ except ValueError as e:
   # abat python avant tout message. Même plafond pour Antigravity, validé par
   # la mesure du 2026-09-26 : le CHANGELOG entier de la 1.14.1 (94 080
   # caractères, 7 segments) traduit en hindi par gemini-3.7-flash-medium en
-  # 273 s, préflight compris — marge ×6,5. Un job y enchaîne son préflight puis
+  # 273 s, préflight compris — marge ×6,5 ; celui de la 1.15.0 (111 861
+  # caractères) en 350 s par gemini-3.8-flash-medium, le défaut qui lui a
+  # succédé — marge ×5. Un job y enchaîne son préflight puis
   # ses segments l'un après l'autre, chacun borné par AGY_TIMEOUT (900 s),
   # démarrage d'agy compris. REGEN_JOB_TIMEOUT reste souverain.
   local default_timeout=600

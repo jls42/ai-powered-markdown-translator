@@ -397,14 +397,14 @@
     {
       "name": "DEFAULT_MODEL_ANTIGRAVITY",
       "file": "src/aipmt/providers/antigravity.py",
-      "hash": "6df2c235bc208946395f1fc1340e8354d7a237e280f32ec14279520ebcc0b901",
-      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : modèle qualité, gemini-3.7-flash-medium, choisi par la campagne du 2026-09-26 (article dense 14/14 sans écart)."
+      "hash": "9273a9908a3219fa9cd5ce768a1db6020efe55ef4c0f8b3165faa27141075b27",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : modèle qualité, gemini-3.8-flash-medium : même structure que 3.7 Flash medium sur un lot commun, pour un septième de quota en plus, puis campagne complète sur 14 langues (2026-09-26)."
     },
     {
       "name": "ECO_MODEL_ANTIGRAVITY",
       "file": "src/aipmt/providers/antigravity.py",
       "hash": "5c7d409fff913fe1918402fd91faa9990d6e3e7ff969349b7df76ccb0051d525",
-      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : modèle --eco, gemini-3.7-flash-low : même famille, effort bas, le plus rapide des quatre candidats mesurés."
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : modèle --eco, gemini-3.7-flash-low : effort bas, deux fois moins de quota ; 3.8 low cassait des liens internes que 3.7 low laissait intacts."
     },
     {
       "name": "AGY_TIMEOUT",

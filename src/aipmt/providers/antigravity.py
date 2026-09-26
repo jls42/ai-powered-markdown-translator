@@ -40,17 +40,25 @@ from .base import (
 #
 # Identifiants écrits en toutes lettres, jamais alias de DEFAULT_MODEL_GEMINI :
 # le catalogue d'`agy models` n'est pas celui de l'API — l'effort de
-# raisonnement fait partie de l'identifiant, et `gemini-3.7-flash` seul y est
+# raisonnement fait partie de l'identifiant, et `gemini-3.8-flash` seul y est
 # refusé.
-DEFAULT_MODEL_ANTIGRAVITY = "gemini-3.7-flash-medium"
+#
+# Gemini 3.8 Flash, effort moyen. Mesuré le 2026-09-26 contre
+# `gemini-3.7-flash-medium`, le défaut précédent, sur un même lot (README en
+# anglais, japonais et hindi, CHANGELOG en hindi) : structure identique pour
+# les deux, 4,1 points de la fenêtre de 5 h contre 3,6, un quart plus lent, et
+# à la relecture de passages en anglais un texte un peu plus proche de la
+# source. Le raisonnement y pèse autant (63 % des tokens de sortie contre
+# 60 %) : les 79 % relevés sur une sonde isolée ne se retrouvent pas sur un
+# document.
+DEFAULT_MODEL_ANTIGRAVITY = "gemini-3.8-flash-medium"
 
 
-# Même famille, effort bas. Mesuré le 2026-09-26 sur le README en japonais,
-# arabe et hindi : les quatre candidats Flash (3.7 et 3.8, low et medium) ont
-# rendu une structure identique à la source ; `gemini-3.7-flash-low` était le
-# plus rapide (42 à 56 s par README) et ne raisonne presque pas, là où
-# `gemini-3.8-flash-medium` consacrait 79 % de sa sortie au raisonnement,
-# décompté du quota au tarif de sortie.
+# Gemini 3.7 Flash, effort bas : deux fois moins de quota que l'effort moyen
+# (1,9 point sur le même lot) et aucun raisonnement. Les deux Flash en `-low`
+# ont chacun refusé un README sur trois ce jour-là, sur un même jeton d'ancre ;
+# 3.8 low y ajoutait trois liens internes cassés en hindi et un gras perdu, là
+# où 3.7 low n'a laissé aucun écart dans ce qu'il a écrit.
 ECO_MODEL_ANTIGRAVITY = "gemini-3.7-flash-low"
 
 
