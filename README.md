@@ -28,15 +28,16 @@
 
 Traduit des fichiers Markdown d'une langue à une autre en préservant la
 structure : blocs de code, code en ligne, URL, ancres, tableaux et front
-matter. Neuf façons d'appeler un modèle — cinq API, deux abonnements sans
+matter. Dix façons d'appeler un modèle — cinq API, trois abonnements sans
 facturation à l'usage, deux routeurs — et une mesure publiée de ce que chaque
 modèle préserve réellement.
 
 ## En bref
 
-- **Neuf chemins de provider** : API OpenAI, Mistral, Claude, Gemini et Grok ;
-  abonnements ChatGPT (Codex) et Grok sans facturation à l'usage ; routeurs
-  OpenCode (open source, gratuit ou local) et OpenRouter (plus de 400 modèles).
+- **Dix chemins de provider** : API OpenAI, Mistral, Claude, Gemini et Grok ;
+  abonnements ChatGPT (Codex), Grok et Google (Antigravity) sans facturation à
+  l'usage ; routeurs OpenCode (open source, gratuit ou local) et OpenRouter
+  (plus de 400 modèles).
 - **Rien de faux à cause d'un jeton perdu** : blocs de code, code en ligne,
   URL, ancres et citations sont remplacés par des jetons avant l'appel et
   vérifiés au retour. S'il en manque un, le fichier n'est pas écrit.
@@ -84,23 +85,26 @@ chmod 600 ~/.config/aipmt/.env
 utilisateur suit `XDG_CONFIG_HOME` (chemin absolu seulement) et `%APPDATA%`
 sous Windows. Sans clé, la commande énumère les trois emplacements.
 
-**Le `.env` d'un projet ne peut pas rediriger les appels.** Il fournit des clés,
-jamais une destination : toute variable en `_BASE_URL`, `_API_BASE` ou
-`_ENDPOINT`, les proxies (`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`), les
-magasins de certificats (`SSL_CERT_FILE`, `SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`,
-`CURL_CA_BUNDLE`) et `XDG_CONFIG_HOME` / `APPDATA` y sont ignorés, avec un
-avertissement. Un dépôt cloné ne doit pas pouvoir détourner votre clé. Ce
-fichier est aussi lu sans interpolation : `NOM=${OPENAI_API_KEY}` n'y recopie
-pas la clé. Posez ces variables dans l'environnement ou dans
-`~/.config/aipmt/.env`.
+**Le `.env` d'un projet ne peut ni rediriger les appels ni choisir le programme
+exécuté.** Il fournit des clés, jamais une destination ni un binaire : toute
+variable en `_BASE_URL`, `_API_BASE`, `_ENDPOINT` ou `_BIN` (`CODEX_BIN`,
+`GROK_BIN`, `OPENCODE_BIN`, `AGY_BIN`), `GROK_HOME`, les proxies (`HTTP_PROXY`,
+`HTTPS_PROXY`, `ALL_PROXY`), les magasins de certificats (`SSL_CERT_FILE`,
+`SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`) et `XDG_CONFIG_HOME` /
+`APPDATA` y sont ignorés, avec un avertissement. Un dépôt cloné ne doit pas
+pouvoir détourner votre clé, ni vous faire lancer son propre programme à la
+première traduction. Ce fichier est aussi lu sans interpolation :
+`NOM=${OPENAI_API_KEY}` n'y recopie pas la clé. Posez ces variables dans
+l'environnement ou dans `~/.config/aipmt/.env`.
 
 Variables optionnelles : `XAI_BASE_URL` (défaut `https://api.x.ai/v1`),
 `CLAUDE_TIMEOUT` (secondes par appel, défaut 900), `CODEX_BIN`, `CODEX_TIMEOUT`
 (défaut 600), `GROK_BIN`, `GROK_HOME` (défaut `~/.grok`), `GROK_TIMEOUT`
-(défaut 900), `GROK_TRANSLATE_SANDBOX`, `OPENCODE_BIN`, `OPENCODE_TIMEOUT`
-(défaut 600), `OPENROUTER_BASE_URL` (`https://` exigé), `OPENROUTER_TIMEOUT`
-(défaut 900), `OPENROUTER_PREFLIGHT_TIMEOUT` (défaut 30). Chacune est détaillée
-dans la section de son provider.
+(défaut 900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT` (défaut 900),
+`OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600), `OPENROUTER_BASE_URL`
+(`https://` exigé), `OPENROUTER_TIMEOUT` (défaut 900),
+`OPENROUTER_PREFLIGHT_TIMEOUT` (défaut 30). Chacune est détaillée dans la
+section de son provider.
 
 ## Premiers pas
 
@@ -134,7 +138,9 @@ traduction est écrite et où rien ne diffère de la source.**
 
 | Modèle               | Comment y accéder                 | Article de veille dense | Ce README    | Ce qui diffère, et sur combien de langues                                                                                             |
 | -------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Gemini 3.8 Flash** | abonnement Google (Antigravity)   | ✅ 14/14                | ✅ 14/14     | rien, sur aucun des deux documents                                                                                                    |
 | **Gemini 3.7 Flash** | clé API Google                    | ✅ 14/14                | ⚠️ 13/14     | 1 langue sur 14 : un mot en gras de plus (ja)                                                                                         |
+| **Gemini 3.7 Flash** | abonnement Google (Antigravity)   | ✅ 14/14                | ⚠️ 13/14     | 1 langue sur 14 : un mot en gras de moins (ko)                                                                                        |
 | **GPT-5.6 Sol**      | abonnement ChatGPT, ou clé OpenAI | ✅ 14/14                | ⚠️ 12/14     | 2 langues sur 14 : un mot en gras de moins (ar, ja)                                                                                   |
 | **GLM-5.2**          | clé OpenRouter                    | ✅ 14/14                | ⚠️ 11/14     | 3 langues sur 14 : un mot en gras de moins (hi, ja, ko)                                                                               |
 | Claude Sonnet 5      | clé API Anthropic                 | ⚠️ 11/14                | ⚠️ 12/14     | 3 langues sur l'article : un bloc de code apparu (es, de, hi) ; 2 sur ce README : un lien sans son balisage (sv), un mot en gras (zh) |
@@ -170,10 +176,14 @@ Ce qu'il faut en retenir :
 
 Dates et documents : la colonne « Ce README » a été mesurée le 9 septembre 2026
 sur une révision figée de ce fichier (785 lignes, 285 codes en ligne, 89 lignes
-de tableau), retouchée depuis. La colonne « Article de veille dense » vient de
-la campagne des 4 et 5 septembre sur un article de 589 lignes, sauf la ligne
-Grok, remesurée le 9 septembre sur une autre édition de la même veille. Les
-tableaux complets, les durées et le protocole sont dans
+de tableau), retouchée depuis — sauf les deux lignes Antigravity, mesurées le
+26 septembre sur la révision publiée avec la 1.14.0, plus courte (600 lignes,
+257 codes en ligne, 85 lignes de tableau). La colonne « Article de veille
+dense » vient de la campagne des 4 et 5 septembre sur un article de 589 lignes,
+sauf la ligne Grok, remesurée le 9 septembre sur une autre édition de la même
+veille, et les deux lignes Antigravity, mesurées le 26 septembre sur le même
+article.
+Les tableaux complets, les durées et le protocole sont dans
 [Mesures détaillées](#mesures-détaillées).
 
 ## Toutes les options
@@ -193,6 +203,7 @@ tableaux complets, les durées et le protocole sont dans
 | `--use_grok`             | Utiliser l'API xAI (Grok) — nécessite `XAI_API_KEY`                                                           |
 | `--use_codex`            | Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT                                                    |
 | `--use_grok_cli`         | Utiliser le CLI Grok sur le quota de l'abonnement Grok                                                        |
+| `--use_antigravity`      | Utiliser le CLI Antigravity (`agy`) sur le quota de l'abonnement Google AI Pro ou Ultra                       |
 | `--use_opencode`         | Utiliser OpenCode (open source) vers le fournisseur configuré dans OpenCode ; exige `--model provider/modèle` |
 | `--use_openrouter`       | Utiliser OpenRouter — nécessite `OPENROUTER_API_KEY` et `--model fournisseur/modèle`                          |
 | `--force`                | Forcer la re-traduction                                                                                       |
@@ -204,7 +215,7 @@ tableaux complets, les durées et le protocole sont dans
 | `--include_model`        | Inclure le nom du modèle dans le fichier de sortie                                                            |
 | `--reasoning_effort`     | Effort de raisonnement GPT-5.x : `none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-Les huit flags `--use_*` sont mutuellement exclusifs : en combiner deux est
+Les neuf flags `--use_*` sont mutuellement exclusifs : en combiner deux est
 refusé.
 
 ## Providers
@@ -221,17 +232,18 @@ aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lan
 
 `--eco` bascule sur le palier économique de chaque fournisseur.
 
-| Provider   | Qualité (défaut)                                      | Économique (`--eco`)      |
-| ---------- | ----------------------------------------------------- | ------------------------- |
-| OpenAI     | `gpt-5.6-terra`                                       | `gpt-5.6-luna`            |
-| Claude     | `claude-sonnet-5`                                     | `claude-haiku-4-5`        |
-| Mistral    | `mistral-large-latest`                                | `mistral-small-latest`    |
-| Gemini     | `gemini-3.7-flash`                                    | `gemini-3.1-flash-lite`   |
-| Codex      | `gpt-5.6-sol` (aussi `terra` et `luna` par `--model`) | `gpt-5.6-luna`            |
-| Grok API   | `grok-4.6`                                            | `grok-4.3`                |
-| Grok CLI   | `grok-4.6`                                            | `grok-4.5`                |
-| OpenCode   | `--model provider/modèle` obligatoire                 | idem — `--eco` sans effet |
-| OpenRouter | `--model fournisseur/modèle` obligatoire              | idem — `--eco` sans effet |
+| Provider    | Qualité (défaut)                                      | Économique (`--eco`)      |
+| ----------- | ----------------------------------------------------- | ------------------------- |
+| OpenAI      | `gpt-5.6-terra`                                       | `gpt-5.6-luna`            |
+| Claude      | `claude-sonnet-5`                                     | `claude-haiku-4-5`        |
+| Mistral     | `mistral-large-latest`                                | `mistral-small-latest`    |
+| Gemini      | `gemini-3.7-flash`                                    | `gemini-3.1-flash-lite`   |
+| Codex       | `gpt-5.6-sol` (aussi `terra` et `luna` par `--model`) | `gpt-5.6-luna`            |
+| Grok API    | `grok-4.6`                                            | `grok-4.3`                |
+| Grok CLI    | `grok-4.6`                                            | `grok-4.5`                |
+| Antigravity | `gemini-3.8-flash-medium`                             | `gemini-3.7-flash-low`    |
+| OpenCode    | `--model provider/modèle` obligatoire                 | idem — `--eco` sans effet |
+| OpenRouter  | `--model fournisseur/modèle` obligatoire              | idem — `--eco` sans effet |
 
 ### Sur l'abonnement ChatGPT : `--use_codex`
 
@@ -287,6 +299,93 @@ aipmt --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
   sans signal.
 - Variables : `GROK_BIN`, `GROK_HOME` (répertoire du CLI, défaut `~/.grok`),
   `GROK_TIMEOUT` (défaut 900), `GROK_TRANSLATE_SANDBOX`.
+
+### Sur l'abonnement Google : `--use_antigravity`
+
+Même principe avec `agy`, le CLI officiel d'Antigravity : pour qui paie Google
+AI Pro ou Ultra, la traduction est décomptée du quota de l'abonnement au lieu
+d'être facturée au token. C'est le seul chemin vers ce quota : Gemini CLI ne
+sert plus ces comptes depuis le 18 juin 2026
+([annonce](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)),
+et le SDK d'Antigravity n'accepte qu'une clé API ou un projet Google Cloud.
+
+```bash
+# agy 1.2.11 ou plus récent : https://antigravity.google/docs/cli/install/
+agy                                  # une fois : se connecter avec le compte de l'abonnement
+aipmt --use_antigravity --file README.md --target_dir . --target_lang en
+agy -p /usage --output-format json   # quota restant, sans en consommer
+```
+
+- **Aucune voie payante ne reste ouverte.** agy ne reçoit de votre
+  environnement qu'une liste fermée de variables — `PATH`, langue et fuseau,
+  terminal, identité, proxies et certificats, bus de session — et aucune clé :
+  plusieurs de ses variables font basculer un appel sans rien afficher (mesuré :
+  l'une envoie le document à une passerelle tierce, une autre à un projet
+  Google Cloud facturé), et une liste de refus en oubliait à chaque relecture.
+  Avant tout segment, `agy -p /config`, qui ne coûte aucun quota, doit montrer
+  les crédits IA payants désactivés, sans clé API ni projet Google Cloud — un
+  réglage absent vaut refus —, sinon rien n'est traduit ; le journal de chaque
+  appel doit ensuite attester l'abonnement (`authMethod=consumer`), sinon la
+  réponse est refusée.
+- **Confinement.** Chaque appel tourne dans un répertoire personnel privé et
+  jetable, avec un agent de traduction sans outil : vos réglages, règles,
+  plugins, serveurs MCP et hooks d'agy n'y entrent pas, rien ne s'ajoute à votre
+  historique, et la connexion reste dans le trousseau, qu'aipmt ne lit jamais.
+  Un agent introuvable fait retomber agy, en silence, sur son agent de codage
+  et ses outils : une ligne entière du journal doit confirmer le bon agent — un
+  document qui cite ce message ne la remplace pas —, sinon refus.
+- **Plateformes** : Linux, dans une session qui a un trousseau (bus de session
+  D-Bus, Secret Service) ; macOS est accepté, sans y avoir été mesuré. Refusé
+  sous Windows, où agy ne lit pas les variables qui isolent chaque appel, et
+  sous Linux sans bus de session — session SSH, conteneur, serveur : agy y
+  range son jeton dans un fichier de `~/.gemini`, que l'isolation masque. Le
+  refus vient avant tout lancement, avec sa cause, au lieu d'une minute
+  d'attente d'un code de connexion.
+- **Modèles** : ceux d'`agy models`. Les Gemini portent l'effort dans leur nom
+  (`gemini-3.8-flash-medium`…) : un nom sans suffixe est refusé avant l'appel,
+  et `--reasoning_effort` est sans effet. Par défaut `gemini-3.8-flash-medium`,
+  et `gemini-3.7-flash-low` en `--eco` ; les campagnes qui les ont fixés sont
+  décrites dans [Mesures détaillées](#mesures-détaillées). Claude et GPT-OSS
+  ont leur propre quota, bien plus petit : environ 1 % de la fenêtre de
+  5 heures par appel mesuré, contre 0,05 % en Flash.
+- **Quota** : par groupe, une fenêtre de 5 heures et une hebdomadaire, au
+  prorata du coût en tokens. Mesuré sur le compte de l'auteur : environ
+  16 points de la fenêtre de 5 heures par million de caractères source en
+  `gemini-3.8-flash-medium`, 14 en `gemini-3.7-flash-medium` et 7 à 8 à
+  l'effort bas — un README de 40 000 caractères coûte donc un peu plus d'un
+  demi-point. La limite hebdomadaire, elle, dépend du palier. La relance suit
+  ce qu'agy déclare réessayable ; à défaut, une fenêtre épuisée n'est jamais
+  relancée : elle fait échouer chaque fichier jusqu'à la réinitialisation
+  qu'affiche `/usage`.
+- **Plus lent que l'API** : sur l'article dense des mesures, 3 min 59 s par
+  langue en médiane en `gemini-3.8-flash-medium` et 3 min 14 s en
+  `gemini-3.7-flash-medium`, contre 1 min 18 s pour Gemini 3.7 Flash par l'API.
+- **Interruption** : Ctrl-C, ou un terminal fermé, arrêtent agy avec la
+  commande au lieu de le laisser finir son tour sur votre quota ; il en va de
+  même pour Codex, Grok CLI et OpenCode. Sous `nohup`, la traduction continue.
+- Refusé en CI (`CI` ou `GITHUB_ACTIONS` défini) : la connexion vit dans un
+  trousseau personnel. Sur un runner, `--use_gemini` avec `GOOGLE_API_KEY`.
+- Variables : `AGY_BIN` (sinon le `PATH`, puis `~/.local/bin/agy`),
+  `AGY_TIMEOUT` (secondes par segment, démarrage compris, défaut 900).
+
+**Conditions d'utilisation : c'est votre compte qui est engagé.** Les
+[conditions d'Antigravity](https://antigravity.google/terms) (section 6) et sa
+[FAQ](https://antigravity.google/docs/faq/) interdisent d'accéder au service
+par un logiciel tiers à l'aide de la connexion Antigravity — Claude Code,
+OpenClaw et OpenCode y sont cités —, sous peine de suspension du compte. aipmt
+ne lit ni ne réutilise le jeton : il lance le binaire officiel dans le
+[mode headless](https://antigravity.google/docs/cli/headless/) que Google
+documente pour les scripts et la CI. Un membre de Google a jugé « standard »
+de lancer `agy -p` depuis un script local pour son propre travail
+([forum officiel, 25 septembre 2026, réponse non contractuelle](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829)) ;
+aucun texte ne tranche le cas d'un outil distribué comme celui-ci.
+
+**Documents publics seulement.** Selon la section 5 des mêmes conditions, les
+échanges — prompts, réponses, métadonnées — peuvent servir à améliorer les
+produits et l'apprentissage automatique de Google et être relus par des
+humains, abonnement payant compris. Le retrait passe par le réglage
+`enableTelemetry`, à l'effet non documenté, qu'aipmt ne pose pas ; vos réglages
+d'agy ne suivent pas dans son isolement. N'y faites passer rien de confidentiel.
 
 ### Vers le fournisseur de son choix : `--use_opencode`
 
@@ -445,7 +544,9 @@ codes en ligne, de lignes de tableau, de blocs de citation et de mots en gras.
 « Sans écart » veut dire « rien de détecté », pas « identique » : le comparateur
 compte des éléments sans lire leur contenu. Il ne signale ni un titre de
 niveau 4 supprimé, ni le texte d'un code en ligne remplacé, ni un drapeau
-échangé, et ne juge pas la langue.
+échangé, ni un lien interne rendu avec une parenthèse de trop,
+`[texte]((#ancre))`, qui ne mène plus nulle part — et il ne juge pas la
+langue.
 
 ### Article de veille dense, mode `--news`
 
@@ -453,19 +554,21 @@ Une édition de la [veille IA de jls42.org](https://jls42.org/fr/news) :
 589 lignes, 140 liens, 21 sections, 3 citations anglaises protégées. Campagne
 des 4 et 5 septembre 2026.
 
-| Modèle                            | Accès              | Écrites | Sans écart   | Médiane/langue |
-| --------------------------------- | ------------------ | ------- | ------------ | -------------- |
-| `gemini-3.7-flash`                | API Google         | 14/14   | ✅ **14/14** | 1 min 18 s     |
-| `gpt-5.6-sol` (`--use_codex`)     | abonnement ChatGPT | 14/14   | ✅ **14/14** | 11 min 28 s    |
-| `z-ai/glm-5.2`                    | OpenRouter         | 14/14   | ✅ **14/14** | 5 min 37 s     |
-| `qwen/qwen3.8-flash`              | OpenRouter         | 14/14   | ✅ **14/14** | 26 min 23 s    |
-| `claude-sonnet-5`                 | API Anthropic      | 14/14   | ⚠️ 11/14     | 6 min 31 s     |
-| `opencode/mimo-v2.5-free`         | OpenCode Zen       | 13/14   | ❌ 11/14     | 9 min 27 s     |
-| `qwen/qwen3.7-flash`              | OpenRouter         | 13/14   | ❌ 8/14      | 10 min 09 s    |
-| `ollama/gpt-oss-20b-32k`          | local              | 10/14   | ❌ 7/14      | 12 min 39 s    |
-| `mistral-large-latest`            | API Mistral        | 11/14   | ❌ 5/14      | 5 min 32 s     |
-| `deepseek/deepseek-v4-flash-0731` | OpenRouter         | 4/14    | ❌ 3/14      | 37 min 27 s    |
-| `grok-4.6` (`--use_grok_cli`)     | abonnement Grok    | 1/14    | ❌ 1/14      | 23 min 11 s    |
+| Modèle                                          | Accès              | Écrites | Sans écart   | Médiane/langue |
+| ----------------------------------------------- | ------------------ | ------- | ------------ | -------------- |
+| `gemini-3.7-flash`                              | API Google         | 14/14   | ✅ **14/14** | 1 min 18 s     |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | abonnement Google  | 14/14   | ✅ **14/14** | 3 min 59 s     |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | abonnement Google  | 14/14   | ✅ **14/14** | 3 min 14 s     |
+| `gpt-5.6-sol` (`--use_codex`)                   | abonnement ChatGPT | 14/14   | ✅ **14/14** | 11 min 28 s    |
+| `z-ai/glm-5.2`                                  | OpenRouter         | 14/14   | ✅ **14/14** | 5 min 37 s     |
+| `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14   | ✅ **14/14** | 26 min 23 s    |
+| `claude-sonnet-5`                               | API Anthropic      | 14/14   | ⚠️ 11/14     | 6 min 31 s     |
+| `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14   | ❌ 11/14     | 9 min 27 s     |
+| `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14   | ❌ 8/14      | 10 min 09 s    |
+| `ollama/gpt-oss-20b-32k`                        | local              | 10/14   | ❌ 7/14      | 12 min 39 s    |
+| `mistral-large-latest`                          | API Mistral        | 11/14   | ❌ 5/14      | 5 min 32 s     |
+| `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14    | ❌ 3/14      | 37 min 27 s    |
+| `grok-4.6` (`--use_grok_cli`)                   | abonnement Grok    | 1/14    | ❌ 1/14      | 23 min 11 s    |
 
 Grok a été remesuré le 9 septembre sur une autre édition de la même veille
 (356 lignes) : 9 langues écrites sur 14, 8 sans écart. C'est ce chiffre qui
@@ -479,19 +582,33 @@ recalculés le 10 septembre avec le comparateur actuel : `qwen3.8-flash` et
 `qwen3.7-flash` gagnent chacun une langue par rapport à la première
 publication, les autres sont inchangés.
 
+Les lignes `--use_antigravity` ont été mesurées le 26 septembre sur le même
+article, quatre traductions en parallèle : `gemini-3.7-flash-medium` le matin,
+`gemini-3.8-flash-medium` l'après-midi. En anglais, chacun a retiré lui-même
+les trois lignes de traduction française sous les citations, sans inventer de
+drapeau, et les citations anglaises sont intactes : le nettoyage de repli n'a
+rien eu à faire. En `--eco` (`gemini-3.7-flash-low`), sur quatre langues
+seulement (en, ja, ar, hi) : 4 écrites sur 4, toutes sans écart, 1 min 52 s de
+médiane. Contre-épreuve le même jour sur une édition plus récente de la veille,
+celle du 25 septembre (438 lignes, 2 citations anglaises), traduite hors du
+blog par `gemini-3.7-flash-medium` : 14 écrites sur 14, toutes sans écart, 87 à
+128 s par langue.
+
 ### README de ce projet, Markdown standard
 
 Révision figée le 9 septembre 2026 : 785 lignes, 285 codes en ligne, 40
 clôtures de blocs, 89 lignes de tableau. Quatre traductions en parallèle.
 
-| Modèle                        | Écrites | Sans écart | Médiane/langue | Ce qui diffère                                                           |
-| ----------------------------- | ------- | ---------- | -------------- | ------------------------------------------------------------------------ |
-| `gemini-3.7-flash`            | 14/14   | ⚠️ 13/14   | 36 s           | un mot en gras (ja)                                                      |
-| `claude-sonnet-5`             | 14/14   | ⚠️ 12/14   | 2 min 56 s     | un lien (sv), un mot en gras (zh)                                        |
-| `gpt-5.6-sol` (`--use_codex`) | 14/14   | ⚠️ 12/14   | 6 min 46 s     | un mot en gras (ar, ja)                                                  |
-| `z-ai/glm-5.2` (OpenRouter)   | 14/14   | ⚠️ 11/14   | 2 min 34 s     | un mot en gras (hi, ja, ko)                                              |
-| `qwen/qwen3.7-flash`          | 14/14   | ⚠️ 10/14   | 2 min 17 s     | 40 codes en ligne ajoutés en arabe ; gras (hi, ja, ko)                   |
-| `mistral-large-latest`        | 14/14   | ❌ 1/14    | 2 min 44 s     | une section perdue (ar, hi, ko) ; blocs de code ajoutés (ja, ko, ro, zh) |
+| Modèle                                          | Écrites | Sans écart | Médiane/langue | Ce qui diffère                                                           |
+| ----------------------------------------------- | ------- | ---------- | -------------- | ------------------------------------------------------------------------ |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14   | 1 min 43 s     | rien                                                                     |
+| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36 s           | un mot en gras (ja)                                                      |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1 min 22 s     | un mot en gras (ko)                                                      |
+| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | 2 min 56 s     | un lien (sv), un mot en gras (zh)                                        |
+| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6 min 46 s     | un mot en gras (ar, ja)                                                  |
+| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | 2 min 34 s     | un mot en gras (hi, ja, ko)                                              |
+| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14   | 2 min 17 s     | 40 codes en ligne ajoutés en arabe ; gras (hi, ja, ko)                   |
+| `mistral-large-latest`                          | 14/14   | ❌ 1/14    | 2 min 44 s     | une section perdue (ar, hi, ko) ; blocs de code ajoutés (ja, ko, ro, zh) |
 
 Deux campagnes interrompues ne sont pas notées : Grok, session CLI expirée
 après douze langues (onze sans écart), et `qwen3.8-flash`, HTTP 429 de son
@@ -499,6 +616,15 @@ hébergeur après deux. `opencode/mimo-v2.5-free` et `ollama/gpt-oss-20b-32k`
 n'ont pas été remesurés sur cette révision ; sur celle des 4 et 5 septembre,
 plus courte de 277 lignes, ils écrivaient chacun 9 traductions sur 14, dont 7
 et 1 sans écart.
+
+Les lignes `--use_antigravity` n'ont pas été mesurées sur la révision figée,
+mais le 26 septembre sur celle publiée avec la 1.14.0 : 600 lignes, 257 codes
+en ligne, 30 clôtures de blocs, 85 lignes de tableau. Plus courte de 185
+lignes, elle ne se compare pas terme à terme aux autres lignes ; les deux
+lignes Antigravity, elles, se comparent entre elles. Sur les liens internes,
+que le comparateur ne contrôle pas, `gemini-3.8-flash-medium` les a gardés
+intacts dans les quatorze langues, `gemini-3.7-flash-medium` les a cassés en
+italien.
 
 ### Quatre README de projets connus
 
@@ -556,10 +682,11 @@ pre-commit install --hook-type pre-push  # mypy, SAST, pip-audit, tests avant ch
 Les 28 traductions du dépôt (README et CHANGELOG, quatorze langues) se
 régénèrent avec `./regen_translations.sh --force` — Codex et `gpt-5.6-sol` sur
 l'abonnement ChatGPT par défaut, quatre en parallèle. `REGEN_PROVIDER` et
-`REGEN_MODEL` changent le chemin ; une API facturée (`openai`, `gemini`,
+`REGEN_MODEL` changent le chemin : `antigravity` reste sur un abonnement, celui
+de Google, et passe sans dérogation ; une API facturée (`openai`, `gemini`,
 `grok`, `openrouter`) est refusée sans `REGEN_ALLOW_PAID_API=1` ;
-`REGEN_JOB_TIMEOUT` plafonne chaque job (600 s, 1 800 s sur Codex). Le détail
-de l'outillage est dans `CLAUDE.md`.
+`REGEN_JOB_TIMEOUT` plafonne chaque job (600 s, 1 800 s sur Codex et
+Antigravity). Le détail de l'outillage est dans `CLAUDE.md`.
 
 ## Projets utilisant ce script
 
@@ -589,8 +716,10 @@ licence prime sur ce résumé.
   titres, ni les tableaux, ni le front matter, ni le sens de vos phrases.
 - **Vos documents partent chez le fournisseur choisi**, sous ses conditions
   d'utilisation et sa politique de données. Certains modèles gratuits peuvent
-  réutiliser vos échanges pour l'entraînement ; un modèle local est la seule
-  voie qui ne fasse sortir aucune donnée de votre machine.
+  réutiliser vos échanges pour l'entraînement, et les conditions d'Antigravity
+  permettent à Google de les réutiliser et de les faire relire par des humains,
+  abonnement payant compris ; un modèle local est la seule voie qui ne fasse
+  sortir aucune donnée de votre machine.
 - **Les appels d'API vous sont facturés.** Ce programme ne plafonne pas la
   dépense : un document long, une reprise après échec ou un modèle qui raisonne
   beaucoup coûtent davantage.

@@ -559,7 +559,13 @@ class TestIntegrationCLI(unittest.TestCase):
         parser = argparse.ArgumentParser()
         registry._add_provider_args(parser)
         self.assertTrue(parser.parse_args(["--use_openrouter"]).use_openrouter)
-        for autre in ("--use_codex", "--use_mistral", "--use_grok", "--use_opencode"):
+        for autre in (
+            "--use_codex",
+            "--use_mistral",
+            "--use_grok",
+            "--use_opencode",
+            "--use_antigravity",
+        ):
             with patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit):
                 parser.parse_args(["--use_openrouter", autre])
 

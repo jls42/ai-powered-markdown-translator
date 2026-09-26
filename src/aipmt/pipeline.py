@@ -138,6 +138,14 @@ def translate(
     )
     translated_segments = []
     for idx, segment in enumerate(segments, start=1):
+        # Un segment sans texte — la fin blanche d'un document, coupée à part —
+        # n'a rien à traduire : il est rendu tel quel. Envoyé au modèle, il
+        # revenait vide, et la garde de contenu vide faisait échouer le FICHIER
+        # après que le quota des segments précédents était consommé (reproduit
+        # par une revue : 16 001 caractères terminés par « \n\n\n »).
+        if not segment.strip():
+            translated_segments.append(segment)
+            continue
         try:
             translated_text = _translate_segment_with_retry(segment, idx, len(segments), spec)
         except Exception as e:

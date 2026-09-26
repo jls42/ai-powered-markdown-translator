@@ -2,11 +2,16 @@
 
 Les chaînes if/elif de `_resolve_provider`, `_dispatch_provider_call` et
 `_select_provider_client` ont été coupées en deux pour tenir sous la complexité
-que Codacy tolère (CCN 8), et les huit flags exclusifs sont désormais décrits
+que Codacy tolère (CCN 8), et les neuf flags exclusifs sont désormais décrits
 une fois. Ce que ces tests verrouillent, c'est ce que la scission ne devait pas
 changer : l'ORDRE d'évaluation des flags — la précédence est un contrat
 observable, cf. `TestProviderFlagsAreMutuallyExclusive` — et le routage de
 chaque clé vers son constructeur et son appel.
+
+L'ajout d'Antigravity a scindé l'appel une seconde fois : les quatre CLI
+passent par `_call_cli_provider`. Le routage de chaque clé reste vérifié de
+bout en bout, depuis `_dispatch_provider_call`, et la nouvelle chaîne lève sur
+un nom qu'elle ne connaît pas au lieu de retomber sur un autre CLI.
 """
 
 from __future__ import annotations
@@ -35,6 +40,7 @@ CHAIN = (
     ("use_grok", "grok"),
     ("use_opencode", "opencode"),
     ("use_openrouter", "openrouter"),
+    ("use_antigravity", "antigravity"),
 )
 # Ordre de l'aide (`--help`), distinct de l'ordre de précédence : le groupe
 # exclusif rend la différence sans conséquence en ligne de commande.
@@ -45,6 +51,7 @@ HELP_ORDER = (
     "use_grok",
     "use_grok_cli",
     "use_codex",
+    "use_antigravity",
     "use_opencode",
     "use_openrouter",
 )
@@ -57,6 +64,7 @@ INITS = {
     "grok": "_init_grok_client",
     "opencode": "_init_opencode_client",
     "openrouter": "_init_openrouter_client",
+    "antigravity": "_init_antigravity_client",
     "openai": "_init_openai_client",
 }
 CALLS = {
@@ -67,6 +75,7 @@ CALLS = {
     "grok_cli": "_call_grok_cli",
     "opencode": "_call_opencode",
     "openrouter": "_call_openrouter",
+    "antigravity": "_call_antigravity",
     "grok": "_call_openai",
     "openai": "_call_openai",
 }
@@ -114,6 +123,32 @@ class TestPrecedenceSurvivesTheSplit(unittest.TestCase):
                     else:
                         fakes[name].assert_called_with("client", args, "P", "S")
 
+    def test_tables_cover_every_provider_of_the_registry(self):
+        """Les deux tests précédents ne parcourent que INITS et CALLS : un
+        provider ajouté au registre mais oublié ici échapperait à la
+        vérification de son routage, sans qu'aucun test ne rougisse."""
+        self.assertEqual(set(INITS), set(registry._PROVIDER_LABELS))
+        self.assertEqual(set(CALLS), set(registry._PROVIDER_LABELS))
+        self.assertLessEqual(set(registry._CLI_PROVIDERS), set(CALLS))
+
+    def test_cli_chain_refuses_an_unknown_name(self):
+        """Un nom listé dans `_CLI_PROVIDERS` mais oublié dans
+        `_call_cli_provider` doit lever, pas retomber sur un autre CLI, qui
+        puiserait dans un autre abonnement que celui demandé."""
+        fakes = {name: MagicMock(return_value="ok") for name in set(CALLS.values())}
+        args = Namespace(model="m")
+        with patch.multiple(registry, **fakes):
+            # Contre-épreuve : un nom connu atteint sa doublure, qui mord donc
+            # bien — le silence des autres ci-dessous n'est pas celui d'un
+            # patch posé au mauvais endroit.
+            out = registry._call_cli_provider("client", args, "P", "S", "antigravity")
+            with self.assertRaises(ValueError) as ctx:
+                registry._call_cli_provider("client", args, "P", "S", "inconnu")
+        self.assertEqual(out, "ok")
+        self.assertIn("inconnu", str(ctx.exception))
+        called = {name: fake.call_count for name, fake in fakes.items() if fake.call_count}
+        self.assertEqual(called, {"_call_antigravity": 1})
+
 
 class TestProviderFlagsDeclaredOnce(unittest.TestCase):
     def _parser(self):
@@ -121,7 +156,7 @@ class TestProviderFlagsDeclaredOnce(unittest.TestCase):
         registry._add_provider_args(parser)
         return parser
 
-    def test_the_eight_flags_form_one_exclusive_group_in_help_order(self):
+    def test_the_nine_flags_form_one_exclusive_group_in_help_order(self):
         parser = self._parser()
         # argparse n'expose pas la composition d'un groupe : attributs privés,
         # stables depuis Python 2.7, seule façon de lire l'ORDRE du groupe.

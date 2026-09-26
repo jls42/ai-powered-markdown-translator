@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 # Regenerate README and CHANGELOG translations in parallel.
-# Concurrence : 4 jobs pour Codex (défaut), 2 pour Grok CLI et OpenCode, 10 sur
-# une API facturée en dérogation (cf. main()).
+# Concurrence : 4 jobs pour Codex (défaut) et Antigravity, 2 pour Grok CLI et
+# OpenCode, 10 sur une API facturée en dérogation (cf. main()).
 #
 # Usage:
 #   ./regen_translations.sh           # skip si fichier existe
@@ -12,6 +12,7 @@ set -euo pipefail
 # une API facturée à l'usage. L'abonnement ChatGPT (Codex) existe pour ça :
 #   - défaut                     → Codex, gpt-5.6-sol (modèle qualité), 0 € à l'usage
 #   - REGEN_PROVIDER=grok_cli    → quota de l'abonnement Grok
+#   - REGEN_PROVIDER=antigravity → quota de l'abonnement Google (AI Pro ou Ultra), CLI agy
 #   - REGEN_PROVIDER=opencode    → routeur OpenCode, REGEN_MODEL=provider/modèle obligatoire
 #   - REGEN_PROVIDER=openai|gemini|grok|openrouter → API FACTURÉE : refusée sans
 #     REGEN_ALLOW_PAID_API=1, dérogation nommée pour que la règle morde au
@@ -24,14 +25,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Détection du provider de traduction selon les clés d'API disponibles.
-# Stdout : flags à injecter dans `python -m aipmt` (ex: "--eco" ou "--use_gemini --eco").
-# Stderr : message de log (info ou warning).
+# Choix du provider de traduction par REGEN_PROVIDER seul, Codex par défaut :
+# aucune clé d'API n'est lue (cf. règle en tête).
+# Stdout : flags à injecter dans `python -m aipmt` (ex: "--use_codex" ou "--use_antigravity").
+# Stderr : message de log (info, warning ou erreur).
 # Le caller utilise: PROVIDER_FLAGS=$(detect_provider)
 #
-# Priorité par défaut : OpenAI en --eco. Fallback Gemini Flash si
-# OPENAI_API_KEY absente/placeholder mais GOOGLE_API_KEY valide. L'utilisateur
-# peut forcer Gemini avec REGEN_PROVIDER=gemini./regen_translations.sh.
 # Charge .env si présent. set -a/+a exporte toutes les variables assignées pour
 # qu'elles soient héritées par les sous-processus (python -m aipmt).
 #
@@ -72,6 +71,20 @@ detect_provider() {
       echo "[regen] REGEN_PROVIDER=grok_cli → --use_grok_cli --eco (quota abonnement Grok)" >&2
       return
       ;;
+    antigravity)
+      # Quota de l'abonnement Google (AI Pro ou Ultra) par le CLI officiel
+      # `agy`, sans facturation à l'usage : un chemin d'abonnement comme Codex,
+      # donc hors de la dérogation REGEN_ALLOW_PAID_API. Sans --eco, comme
+      # Codex : le modèle qualité du module. Son nom est lu dans le module au
+      # lieu d'être recopié ici : les défauts d'Antigravity évoluent au fil des
+      # mesures, et une copie divergerait sans que rien ne le signale.
+      local agy_model
+      agy_model=$(sed -nE 's/^DEFAULT_MODEL_ANTIGRAVITY(: *str)? *= *"([^"]+)".*/\2/p' \
+        "$SCRIPT_DIR/src/aipmt/providers/antigravity.py" 2>/dev/null || true)
+      echo "--use_antigravity"
+      echo "[regen] REGEN_PROVIDER=antigravity → --use_antigravity (abonnement Google, ${agy_model:-modèle qualité du module} par défaut, aucune facturation à l'usage)" >&2
+      return
+      ;;
     opencode)
       # Routeur open source vers le fournisseur configuré dans OpenCode (local,
       # gratuit, abonnement ou clé). Aucun défaut n'est choisi à la place de
@@ -108,7 +121,7 @@ detect_provider() {
       return
       ;;
     *)
-      echo "[regen] ERROR: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: codex|grok_cli|opencode, ou openai|gemini|grok|openrouter avec REGEN_ALLOW_PAID_API=1)" >&2
+      echo "[regen] ERROR: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: codex|grok_cli|antigravity|opencode, ou openai|gemini|grok|openrouter avec REGEN_ALLOW_PAID_API=1)" >&2
       exit 1
       ;;
   esac
@@ -126,7 +139,7 @@ main() {
   # shellcheck disable=SC1091
   source venv/bin/activate
 
-  # Avant toute lecture de GROK_BIN / GROK_HOME / REGEN_MODEL ci-dessous :
+  # Avant toute lecture de GROK_BIN / GROK_HOME / AGY_BIN / REGEN_MODEL ci-dessous :
   # detect_provider tourne dans un sous-shell et ne peut pas les exporter ici.
   load_env
 
@@ -209,6 +222,47 @@ main() {
     # concurrence pour ne pas déclencher de rate limit sur la fenêtre 5h.
     max_jobs=4
   fi
+  if [[ "$provider_flags" == *--use_antigravity* ]]; then
+    # Binaire résolu comme dans le module (_resolve_antigravity_binary) :
+    # AGY_BIN, nom nu compris (le module le cherche dans le PATH), puis le PATH,
+    # puis ~/.local/bin/agy, où l'installeur le dépose. Jamais `antigravity`,
+    # qui est le lanceur de l'IDE.
+    local agy_bin
+    if [[ -n "${AGY_BIN:-}" ]]; then
+      agy_bin=$(command -v "$AGY_BIN" || echo "$AGY_BIN")
+    else
+      agy_bin=$(command -v agy || echo "$HOME/.local/bin/agy")
+    fi
+    if [[ ! -f "$agy_bin" || ! -x "$agy_bin" ]]; then
+      echo "[regen] ERROR: binaire Antigravity introuvable ou non exécutable ($agy_bin) — installer agy (https://antigravity.google/docs/cli/install/) ou définir AGY_BIN" >&2
+      exit 1
+    fi
+    # Contrôle unique avant d'ouvrir le parallélisme, par le préflight du module
+    # lui-même : une copie en bash divergerait. Il vérifie la version (1.2.11 au
+    # moins), la connexion et la voie de facturation (useG1Credits,
+    # modelProvider, gcp, authMethod=consumer dans le journal) par
+    # `agy --version` et `agy -p /config`, sans consommer de quota (usage à
+    # zéro, mesuré). Chaque job le refait à son démarrage : celui-ci évite d'en
+    # lancer 28 sur un agy déconnecté ou réglé pour facturer. REGEN_MODEL est
+    # validé d'abord, sans lancer agy : un nom de base sans effort
+    # (gemini-3.7-flash), refusé par agy, ferait échouer les 28 jobs un à un.
+    echo "[regen] Antigravity : contrôle de la version, de la connexion et de la voie de facturation..."
+    if ! PYTHONPATH="$SCRIPT_DIR/src" python -c '
+import sys
+from aipmt.providers import antigravity as agy
+try:
+    if sys.argv[1]:
+        agy._antigravity_check_model(sys.argv[1])
+    agy._antigravity_preflight(agy._resolve_antigravity_binary())
+except ValueError as e:
+    sys.exit(f"[regen] ERROR: {e}")
+' "${REGEN_MODEL:-}"; then
+      echo "[regen] ERROR: contrôle Antigravity en échec — aucune traduction lancée" >&2
+      exit 1
+    fi
+    # Mesuré : 4 appels simultanés sans erreur, chacun dans son HOME jetable.
+    max_jobs=4
+  fi
   local langs="ar de en es hi it ja ko nl pl pt ro sv zh"
   # Volontairement global, pas `local` : le trap EXIT s'exécute APRÈS la sortie
   # de main(), où une variable locale n'existe plus. Avec `set -u`, le trap
@@ -223,9 +277,18 @@ main() {
   # le plafond est de 1800 s : mesuré le 2026-09-04 avec gpt-5.6-sol et 4 jobs,
   # un README prend 180-245 s et CHANGELOG-en 548 s ; les 13 autres CHANGELOG,
   # tués à 600 s, ont fait échouer le regen sans une ligne d'erreur — `timeout`
-  # abat python avant tout message. REGEN_JOB_TIMEOUT reste souverain.
+  # abat python avant tout message. Même plafond pour Antigravity, validé par
+  # la mesure du 2026-09-26 : le CHANGELOG entier de la 1.14.1 (94 080
+  # caractères, 7 segments) traduit en hindi par gemini-3.7-flash-medium en
+  # 273 s, préflight compris — marge ×6,5 ; celui de la 1.15.0 (111 861
+  # caractères) en 350 s par gemini-3.8-flash-medium, le défaut qui lui a
+  # succédé — marge ×5. Un job y enchaîne son préflight puis
+  # ses segments l'un après l'autre, chacun borné par AGY_TIMEOUT (900 s),
+  # démarrage d'agy compris. REGEN_JOB_TIMEOUT reste souverain.
   local default_timeout=600
-  [[ "$provider_flags" == *--use_codex* ]] && default_timeout=1800
+  if [[ "$provider_flags" == *--use_codex* || "$provider_flags" == *--use_antigravity* ]]; then
+    default_timeout=1800
+  fi
   local job_timeout="${REGEN_JOB_TIMEOUT:-$default_timeout}"
 
   run_one() {

@@ -35,7 +35,14 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming
-from aipmt.providers import base, codex, grok, opencode, registry
+from aipmt.providers import antigravity, base, codex, grok, opencode, registry
+
+# Pid de faux processus au-delà du plus grand pid possible (pid_max vaut
+# 4 194 304) : si un doublage de `os.getpgid` sautait un jour, le vrai
+# `getpgid` échouerait avant tout `killpg`, au lieu de viser le groupe d'un
+# vrai processus — les pid font le tour en quelques heures sur ce poste, et
+# 4242 peut exister. Cf. l'incident kill(-1) du 2026-09-26 dans CLAUDE.md.
+_PID_INEXISTANT = 2**22 + 4242
 
 # Valeur passée par référence : un littéral en face d'une clé *_API_KEY fait
 # crier les scanners de secrets, alors qu'il ne s'agit que d'un jeton de test.
@@ -108,7 +115,7 @@ class _FakePopen:
         self._stdout, self.returncode, self._stderr = stdout, returncode, stderr
         self._timeout = timeout
         self.argv = self.kwargs = self.communicate_kwargs = None
-        self.pid = 4242
+        self.pid = _PID_INEXISTANT
 
     def __call__(self, argv, **kwargs):
         self.argv, self.kwargs = argv, kwargs
@@ -312,7 +319,7 @@ class TestOpencodeCall(unittest.TestCase):
         client, args = _client(timeout=7), _args()
         with (
             patch.object(subprocess, "Popen", fake),
-            patch.object(os, "getpgid", return_value=4242),
+            patch.object(os, "getpgid", return_value=_PID_INEXISTANT),
             patch.object(os, "killpg") as killpg,
             self.assertRaisesRegex(RuntimeError, "OPENCODE_TIMEOUT"),
         ):
@@ -372,12 +379,14 @@ class TestOpencodeRateLimitBackoff(unittest.TestCase):
             opencode._call_opencode(client, args, "P", "S")
         sleep.assert_not_called()
 
-    def test_shared_backoff_covers_the_three_clis(self):
-        """Le back-off est commun : les erreurs Codex et Grok doivent rester
-        des `_CliCallError`, sinon la boucle partagée ne les verrait plus."""
+    def test_shared_backoff_covers_the_four_clis(self):
+        """Le back-off est commun : les erreurs Codex, Grok et Antigravity
+        doivent rester des `_CliCallError`, sinon la boucle partagée ne les
+        verrait plus."""
         self.assertTrue(issubclass(codex._CodexCallError, base._CliCallError))
         self.assertTrue(issubclass(grok._GrokCallError, base._CliCallError))
         self.assertTrue(issubclass(opencode._OpencodeCallError, base._CliCallError))
+        self.assertTrue(issubclass(antigravity._AntigravityCallError, base._CliCallError))
 
 
 class TestOpencodeRateLimitDetection(unittest.TestCase):
@@ -597,7 +606,7 @@ class TestProviderWiring(unittest.TestCase):
         parser = argparse.ArgumentParser()
         registry._add_provider_args(parser)
         self.assertTrue(parser.parse_args(["--use_opencode"]).use_opencode)
-        for other in ("--use_codex", "--use_mistral", "--use_grok_cli"):
+        for other in ("--use_codex", "--use_mistral", "--use_grok_cli", "--use_antigravity"):
             with self.subTest(other=other), self.assertRaises(SystemExit):
                 parser.parse_args(["--use_opencode", other])
 

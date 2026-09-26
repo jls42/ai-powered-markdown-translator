@@ -24,7 +24,7 @@ from langdetect import LangDetectException
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import cli, guards, naming, news, pipeline, placeholders
+from aipmt import cli, guards, naming, news, pipeline, placeholders, segmentation
 from aipmt.providers import anthropic, gemini, mistral, openai, registry
 
 # Clé bidon non-placeholder pour traverser les gardes _init_*_client.
@@ -103,6 +103,79 @@ class TestValidateTranslationOutputShortCircuits(unittest.TestCase):
         # Sans cette assertion, un patch qui ne mord plus laisserait le test
         # vert : le vrai langdetect lève déjà sur cette sortie.
         fake_detect.assert_called_once()
+
+
+# Traduction rendue par le faux modèle : assez longue pour la garde de ratio (un
+# vingtième de la source), en anglais pour langdetect, et sans aucun extrait de
+# la source française.
+_TRADUCTION_ANGLAISE = (
+    "The translator keeps the structure of the document, its code blocks and its links. " * 40
+).strip()
+
+
+class TestBlankSegmentIsNotSentToTheModel(unittest.TestCase):
+    """Un segment sans texte — la fin blanche d'un document, que la
+    segmentation coupe à part — était envoyé au modèle. Il revenait vide, et la
+    garde de contenu vide faisait échouer le FICHIER, après que le quota des
+    segments précédents avait été consommé. Reproduit par une revue sur 16 001
+    caractères terminés par trois sauts de ligne. Le faux modèle ci-dessous
+    rend vide ce qu'on lui envoie de blanc, comme le vrai : sans le correctif,
+    ces tests échouent sur cette garde."""
+
+    @staticmethod
+    def _model(traduire):
+        """Faux client OpenAI : `traduire(segment)` pour un segment non blanc,
+        une réponse vide pour un blanc. Renvoie (client, segments reçus) ; le
+        reste du chemin — `_call_openai`, garde de contenu vide, validations de
+        sortie — est le vrai."""
+        recus = []
+
+        def create(**kwargs):
+            segment = kwargs["messages"][-1]["content"]
+            recus.append(segment)
+            return _make_openai_response(traduire(segment) if segment.strip() else "")
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = create
+        return client, recus
+
+    def test_the_blank_tail_of_a_long_document_costs_no_call(self):
+        """Le cas de la revue : aucun titre H2/H3, la coupure tombe sur le
+        dernier double saut de ligne, et le reste n'est que du blanc."""
+        phrase = "Le traducteur préserve la structure du document, ses blocs de code et ses liens. "
+        corps = (phrase * (15998 // len(phrase) + 1))[:15998]
+        texte = corps + "\n\n\n"
+        # Précondition : sans segment blanc final, le test passerait sans rien
+        # prouver. 16 000 est la taille de segment que `translate` retient ici.
+        self.assertEqual(len(texte), 16001)
+        self.assertEqual(segmentation.segment_text(texte, 16000), [corps + "\n", "\n\n"])
+
+        client, recus = self._model(lambda _segment: _TRADUCTION_ANGLAISE)
+        traduit = pipeline.translate(texte, client, _base_args())
+
+        self.assertEqual(recus, [corps + "\n"])
+        # Le segment traduit, puis le blanc rendu tel quel : la fin du document
+        # garde ses sauts de ligne.
+        self.assertEqual(traduit, _TRADUCTION_ANGLAISE + "\n" + "\n\n")
+
+    def test_a_blank_segment_does_not_stop_the_next_one(self):
+        """Un segment blanc au milieu — espaces et tabulation cette fois — est
+        rendu tel quel, et le segment normal qui le suit reste traduit, à sa
+        place. La segmentation est doublée : la coupure tombant dans la seconde
+        moitié de la fenêtre, un segment blanc au milieu exigerait plus de
+        8 000 caractères blancs d'affilée."""
+        segments = ["Premier paragraphe.", "  \n\t\n", "Second paragraphe."]
+        traductions = {
+            "Premier paragraphe.": "First paragraph.",
+            "Second paragraphe.": "Second paragraph.",
+        }
+        client, recus = self._model(traductions.__getitem__)
+        with patch.object(pipeline, "segment_text", return_value=segments) as segmenter:
+            traduit = pipeline.translate("texte source", client, _base_args())
+
+        segmenter.assert_called_once()
+        self.assertEqual(recus, ["Premier paragraphe.", "Second paragraphe."])
+        self.assertEqual(traduit, "First paragraph.\n  \n\t\n\nSecond paragraph.")
 
 
 class TestResolveOutputFilename(unittest.TestCase):

@@ -31,13 +31,20 @@ from dotenv import find_dotenv, load_dotenv
 # client Anthropic (`ANTHROPIC_BASE_URL`, `…_VERTEX_BASE_URL`, `…_FOUNDRY_…`) ;
 # une liste écrite à la main en aurait oublié la moitié, et un SDK mis à jour
 # en ajoute sans prévenir.
-_ROUTING_SUFFIXES = ("_BASE_URL", "_API_BASE", "_ENDPOINT")
+#
+# `_BIN` en fait partie, pour une raison plus grave encore : CODEX_BIN,
+# GROK_BIN, OPENCODE_BIN et AGY_BIN désignent le binaire que la traduction
+# EXÉCUTE, avec les droits de l'utilisateur. Posé par le `.env` d'un dépôt
+# cloné, il ferait lancer un fichier de ce dépôt à la première traduction.
+_ROUTING_SUFFIXES = ("_BASE_URL", "_API_BASE", "_ENDPOINT", "_BIN")
 # Nommées, celles qui ne suivent aucun motif :
 #  - proxies : httpx les lit tout seul (`trust_env`) et route tout le trafic ;
 #  - magasins de certificats : les pointer sur une AC contrôlée rend un
 #    intercepteur indiscernable d'un vrai serveur ;
 #  - emplacement de la configuration utilisateur : le poser, c'est décider
-#    quel fichier constitue la couche 3, donc contourner ce filtre par la bande.
+#    quel fichier constitue la couche 3, donc contourner ce filtre par la bande ;
+#  - GROK_HOME : le binaire Grok est cherché sous `$GROK_HOME/bin/grok`, c'est
+#    un `_BIN` qui ne dit pas son nom.
 _ROUTING_NAMES = (
     "HTTP_PROXY",
     "HTTPS_PROXY",
@@ -48,11 +55,13 @@ _ROUTING_NAMES = (
     "CURL_CA_BUNDLE",
     "XDG_CONFIG_HOME",
     "APPDATA",
+    "GROK_HOME",
 )
 
 
 def _is_routing_variable(name):
-    """Vrai si `name` peut détourner ou intercepter une requête."""
+    """Vrai si `name` peut détourner ou intercepter une requête, ou désigner le
+    binaire qu'une traduction exécute."""
     majuscule = name.upper()
     return majuscule in _ROUTING_NAMES or majuscule.endswith(_ROUTING_SUFFIXES)
 
@@ -142,8 +151,9 @@ def _drop_project_routing(avant, user_path):
         # même qu'on la refuse (reproduit en processus neuf).
         del os.environ[name]
         print(
-            f"⚠ {name} ignoré : un .env de projet ne peut pas rediriger les "
-            "appels d'API, sinon un répertoire non fiable détournerait votre clé. "
+            f"⚠ {name} ignoré : un .env de projet ne peut ni rediriger les appels "
+            "d'API ni choisir le binaire exécuté, sinon un répertoire non fiable "
+            "détournerait votre clé ou lancerait son propre programme. "
             f"L'exporter dans l'environnement, ou le mettre dans {user_path}.",
             file=sys.stderr,
         )

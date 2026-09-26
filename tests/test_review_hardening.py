@@ -31,7 +31,7 @@ from google.genai import errors as genai_errors
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from aipmt import naming, news
-from aipmt.providers import base, codex, gemini, grok, opencode, registry
+from aipmt.providers import antigravity, base, codex, gemini, grok, opencode, registry
 
 
 class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
@@ -60,6 +60,12 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
             ["--use_gemini", "--use_grok"],
             ["--use_opencode", "--use_codex"],
             ["--use_opencode", "--use_mistral"],
+            # Deux abonnements à la fois ; puis l'abonnement Google et l'API
+            # Gemini, que `_select_provider_client` et `_resolve_provider`
+            # font passer en premier : la traduction partirait sur la clé,
+            # facturée à l'usage, comme le faisait `--use_codex --use_mistral`.
+            ["--use_antigravity", "--use_codex"],
+            ["--use_antigravity", "--use_gemini"],
         ):
             with self.subTest(pair=pair), self.assertRaises(SystemExit):
                 parser.parse_args(pair)
@@ -73,7 +79,9 @@ class TestProviderFlagsAreMutuallyExclusive(unittest.TestCase):
             "--use_grok",
             "--use_grok_cli",
             "--use_codex",
+            "--use_antigravity",
             "--use_opencode",
+            "--use_openrouter",
         ):
             with self.subTest(flag=flag):
                 args = parser.parse_args([flag])
@@ -231,6 +239,67 @@ class TestCiRejectionNamesTheRightProvider(unittest.TestCase):
             base._codex_reject_ci_environment(flag="--use_codex")
         self.assertIn("OPENAI_API_KEY", str(ctx.exception))
 
+    def test_antigravity_rejection_points_to_gemini(self):
+        """Le repli d'un abonnement Google est l'API Gemini sur une clé Google,
+        pas l'API OpenAI ni un abonnement ChatGPT."""
+        with (
+            patch.dict(os.environ, {"CI": "1"}, clear=False),
+            self.assertRaises(ValueError) as ctx,
+        ):
+            base._codex_reject_ci_environment(flag="--use_antigravity")
+        message = str(ctx.exception)
+        self.assertIn("GOOGLE_API_KEY", message)
+        self.assertIn("--use_gemini", message)
+        self.assertNotIn("OPENAI_API_KEY", message)
+        self.assertNotIn("ChatGPT", message)
+
+    def test_antigravity_client_refuses_ci_under_its_own_flag(self):
+        """La table ne sert que si le constructeur passe SON flag : sans lui,
+        le message retombe sur celui de Codex. Le refus précède en outre toute
+        résolution du binaire, donc tout lancement d'agy.
+
+        Le contrôle de plateforme est doublé des deux côtés : un runner GitHub
+        n'a pas de bus de session D-Bus, et la contre-épreuve y tomberait sur
+        ANTIGRAVITY_NO_SESSION_BUS au lieu de vérifier ce qu'elle vérifie. En
+        CI, il ne doit pas même être atteint : le refus qui oriente vers
+        `--use_gemini` est le message utile sur un runner, et il passe avant."""
+        args = Namespace(model=None, eco=False, reasoning_effort=None)
+        with (
+            patch.dict(os.environ, {"CI": "1"}, clear=False),
+            patch.object(antigravity, "_antigravity_check_platform") as platform,
+            patch.object(antigravity, "_resolve_antigravity_binary") as resolve,
+            patch.object(antigravity, "_antigravity_preflight") as preflight,
+            self.assertRaises(ValueError) as ctx,
+        ):
+            antigravity._init_antigravity_client(args)
+        message = str(ctx.exception)
+        self.assertIn("--use_antigravity", message)
+        self.assertIn("GOOGLE_API_KEY", message)
+        self.assertNotIn("ChatGPT", message)
+        platform.assert_not_called()
+        resolve.assert_not_called()
+        preflight.assert_not_called()
+
+        # Contre-épreuve hors CI : les mêmes doublures sont appelées, leur
+        # silence ci-dessus n'est donc pas celui d'un patch qui ne mord pas.
+        # CI et GITHUB_ACTIONS sont retirées : ce test tourne aussi sur un runner.
+        args = Namespace(model=None, eco=False, reasoning_effort=None)
+        with (
+            patch.dict(os.environ, {}, clear=False),
+            patch.object(antigravity, "_antigravity_check_platform") as platform,
+            patch.object(
+                antigravity, "_resolve_antigravity_binary", return_value="agy-factice"
+            ) as resolve,
+            patch.object(antigravity, "_antigravity_preflight") as preflight,
+        ):
+            for var in ("CI", "GITHUB_ACTIONS"):
+                os.environ.pop(var, None)
+            client = antigravity._init_antigravity_client(args)
+        platform.assert_called_once_with()
+        resolve.assert_called_once_with()
+        preflight.assert_called_once_with("agy-factice")
+        self.assertEqual(client.binary, "agy-factice")
+
 
 class TestGeminiThinkingLevelIsMemoized(unittest.TestCase):
     """La cascade repartait de `minimal` à chaque segment.
@@ -345,6 +414,16 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
         self.assertEqual(env.get("OPENCODE_API_KEY"), _MARQUEUR)
         self.assertEqual(opencode.OPENCODE_KEPT_ENV_VARS, ("OPENCODE_API_KEY",))
 
+    def test_antigravity_subprocess_receives_no_secret(self):
+        """Les deux étages : l'environnement expurgé, puis celui d'un appel,
+        qui y pose le HOME et le TMPDIR privés. Le préflight (`--version`,
+        `-p /config`) tourne dans le même isolement que la traduction."""
+        with patch.dict(os.environ, self.SECRETS, clear=False):
+            base_env = antigravity._antigravity_env_base()
+            call_env = antigravity._antigravity_env("/chemin/prive/home", "/chemin/prive/tmp")
+        self.assertEqual(self._leaked(base_env), [])
+        self.assertEqual(self._leaked(call_env), [])
+
     def test_variables_needed_by_the_cli_survive(self):
         """Un filtrage trop large casserait les deux CLI.
 
@@ -352,6 +431,8 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
         et via Grok CLI avec cet environnement.
         """
         with patch.dict(os.environ, {"PATH": "/usr/bin", "HOME": "/home/u"}, clear=False):
+            # Antigravity n'est pas dans cette boucle : son HOME est remplacé à
+            # chaque appel, à dessein — cf. le test suivant.
             for env in (
                 codex._codex_env(codex._CodexClient(binary="/bin/true")),
                 grok._grok_env(),
@@ -359,6 +440,27 @@ class TestNoSecretReachesTheAgenticSubprocess(unittest.TestCase):
             ):
                 self.assertEqual(env.get("PATH"), "/usr/bin")
                 self.assertEqual(env.get("HOME"), "/home/u")
+
+    def test_antigravity_keeps_path_and_the_keychain_bus_not_home(self):
+        """Pour Antigravity, HOME n'est PAS conservé : chaque appel reçoit un
+        HOME privé et jetable, pour que rien ne soit hérité des réglages de
+        l'utilisateur ni écrit dans son historique. agy s'y authentifie quand
+        même, par le trousseau, qu'il atteint par le bus de session (mesuré :
+        bus masqué, agy attend 60 s un code de connexion puis échoue). Les
+        variables nécessaires sont donc PATH, XDG_RUNTIME_DIR et
+        DBUS_SESSION_BUS_ADDRESS, et c'est leur survie qu'il faut vérifier."""
+        needed = {
+            "PATH": "/usr/bin",
+            "XDG_RUNTIME_DIR": "/run/user/1000",
+            "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/user/1000/bus",
+        }
+        with patch.dict(os.environ, {**needed, "HOME": "/home/u"}, clear=False):
+            call_env = antigravity._antigravity_env("/chemin/prive/home", "/chemin/prive/tmp")
+        for name, value in needed.items():
+            with self.subTest(name=name):
+                self.assertEqual(call_env.get(name), value)
+        self.assertEqual(call_env.get("HOME"), "/chemin/prive/home")
+        self.assertEqual(call_env.get("TMPDIR"), "/chemin/prive/tmp")
 
 
 class TestOutputPathCannotEscapeTargetDir(unittest.TestCase):
