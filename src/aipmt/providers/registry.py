@@ -10,6 +10,7 @@ les remplace, dans un changement nommé comme tel.
 """
 
 from .anthropic import _call_claude, _init_claude_client
+from .antigravity import _call_antigravity, _init_antigravity_client
 from .codex import _call_codex, _init_codex_client
 from .gemini import _call_gemini, _init_gemini_client
 from .grok import _call_grok_cli, _init_grok_cli_client, _init_grok_client
@@ -45,6 +46,8 @@ def _resolve_provider_from_args(args):
         return "opencode"
     if getattr(args, "use_openrouter", False):
         return "openrouter"
+    if getattr(args, "use_antigravity", False):
+        return "antigravity"
     return "openai"
 
 
@@ -60,27 +63,45 @@ _PROVIDER_LABELS = {
     "grok_cli": "Grok CLI",
     "opencode": "OpenCode",
     "openrouter": "OpenRouter",
+    "antigravity": "Antigravity CLI",
 }
 
 
+# Les providers pilotés en sous-processus, dispatchés par `_call_cli_provider`.
+_CLI_PROVIDERS = ("codex", "grok_cli", "opencode", "antigravity")
+
+
 def _call_provider(client, args, prompt, segment, provider, is_translation_note):
-    """L'appel de traduction de `provider`, sans garde sur ce qu'il retourne."""
+    """L'appel de traduction de `provider`, sans garde sur ce qu'il retourne.
+    Les CLI ont leur propre chaîne : une seule en aurait porté la complexité
+    au-delà de ce que Codacy tolère."""
+    if provider in _CLI_PROVIDERS:
+        return _call_cli_provider(client, args, prompt, segment, provider)
     if provider == "mistral":
         return _call_mistral(client, args, prompt, segment)
     if provider == "claude":
         return _call_claude(client, args, prompt, segment)
     if provider == "gemini":
         return _call_gemini(client, args, prompt, segment)
+    if provider == "openrouter":
+        return _call_openrouter(client, args, prompt, segment)
+    # `grok` (API xAI) inclus : endpoint compatible OpenAI, donc même appel.
+    return _call_openai(client, args, prompt, segment, is_translation_note)
+
+
+def _call_cli_provider(client, args, prompt, segment, provider):
+    """L'appel d'un CLI agentique. Aucun ne reçoit `is_translation_note` : seul
+    `_call_openai` en fait usage. Un nom inconnu lève au lieu de retomber sur
+    un autre CLI, qui consommerait un autre abonnement."""
     if provider == "codex":
         return _call_codex(client, args, prompt, segment)
     if provider == "grok_cli":
         return _call_grok_cli(client, args, prompt, segment)
     if provider == "opencode":
         return _call_opencode(client, args, prompt, segment)
-    if provider == "openrouter":
-        return _call_openrouter(client, args, prompt, segment)
-    # `grok` (API xAI) inclus : endpoint compatible OpenAI, donc même appel.
-    return _call_openai(client, args, prompt, segment, is_translation_note)
+    if provider == "antigravity":
+        return _call_antigravity(client, args, prompt, segment)
+    raise ValueError(f"provider CLI inconnu : {provider!r}")
 
 
 def _dispatch_provider_call(client, args, prompt, segment, provider, is_translation_note):
@@ -94,10 +115,10 @@ def _dispatch_provider_call(client, args, prompt, segment, provider, is_translat
     return text
 
 
-# Les huit flags du groupe exclusif, dans l'ordre de l'aide — qui n'est pas
+# Les neuf flags du groupe exclusif, dans l'ordre de l'aide — qui n'est pas
 # l'ordre de précédence de `_resolve_provider`, sans conséquence tant que le
 # groupe interdit d'en lever deux. Tous sont des `store_true` : seuls le nom
-# et le texte d'aide changent, d'où une table plutôt que huit appels.
+# et le texte d'aide changent, d'où une table plutôt que neuf appels.
 _PROVIDER_FLAGS = (
     ("use_mistral", "Utiliser l'API Mistral AI pour la traduction"),
     ("use_claude", "Utiliser l'API Claude d'Anthropic pour la traduction"),
@@ -112,6 +133,11 @@ _PROVIDER_FLAGS = (
         "use_codex",
         "Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT "
         "(aucune facturation à l'usage ; nécessite `codex login`)",
+    ),
+    (
+        "use_antigravity",
+        "Utiliser le CLI Antigravity (`agy`) sur le quota de l'abonnement Google "
+        "(aucune facturation à l'usage ; nécessite une connexion Google dans agy)",
     ),
     (
         "use_opencode",
@@ -192,4 +218,6 @@ def _select_later_provider_client(args):
         return _init_opencode_client(args)
     if getattr(args, "use_openrouter", False):
         return _init_openrouter_client(args)
+    if getattr(args, "use_antigravity", False):
+        return _init_antigravity_client(args)
     return _init_openai_client(args)

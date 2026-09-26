@@ -1,7 +1,7 @@
 """Socle commun des providers : sous-processus, secrets, back-off, erreurs.
 
-Les trois CLI agentiques (Codex et Grok sur abonnement, OpenCode en routeur)
-partagent le même pilote de sous-processus — groupe de processus propre,
+Les quatre CLI agentiques (Codex, Grok et Antigravity sur abonnement, OpenCode
+en routeur) partagent le même pilote de sous-processus — groupe de processus propre,
 `SIGTERM` puis `SIGKILL` au timeout ou quand ce processus reçoit lui-même
 `SIGTERM`, stdin toujours fermé — le même filtrage des variables d'environnement
 secrètes, la même relance sur limitation de débit et la même hiérarchie
@@ -14,7 +14,7 @@ import contextlib
 import os
 import re
 import signal
-import subprocess  # nosec B404 — pilote les CLI Codex, Grok et OpenCode, cf. _codex_run_process
+import subprocess  # nosec B404 — pilote les CLI Codex, Grok, OpenCode et Antigravity, cf. _codex_run_process
 import sys
 import threading
 import time
@@ -120,15 +120,19 @@ def _codex_kill_group(proc):
 
 @contextlib.contextmanager
 def _kill_group_on_sigterm(holder):
-    """Pendant l'attente d'un CLI, un SIGTERM reçu par CE processus tue d'abord
-    le groupe de l'agent, puis termine avec le code conventionnel 143.
+    """Pendant l'attente d'un CLI, un SIGTERM — ou un SIGHUP, terminal fermé ou
+    session SSH coupée — reçu par CE processus tue d'abord le groupe de
+    l'agent, puis termine avec le code conventionnel 128 + signal (143, 129).
 
     Mesuré : le `timeout` de `regen_translations.sh` signale Python, qui meurt
     sans exécuter aucune clause `except` ; l'agent, placé dans sa propre
     session par `start_new_session`, survivait et consommait son quota jusqu'au
-    bout. `holder["proc"]` est renseigné par l'appelant dès que le processus
-    existe. Le gestionnaire n'est posé que depuis le thread principal, seul
-    autorisé à en installer un."""
+    bout. SIGHUP : même mort sans nettoyage, vérifiée par une revue sur un faux
+    binaire — l'agent continuait, et le répertoire privé d'Antigravity restait
+    sur le disque, journal compris. Un SIGHUP IGNORÉ (lancement par `nohup`)
+    le reste : c'est un choix de l'utilisateur. `holder["proc"]` est renseigné
+    par l'appelant dès que le processus existe. Le gestionnaire n'est posé que
+    depuis le thread principal, seul autorisé à en installer un."""
     if threading.current_thread() is not threading.main_thread():
         yield
         return
@@ -139,11 +143,17 @@ def _kill_group_on_sigterm(holder):
             _codex_kill_group(proc)
         raise SystemExit(128 + signum)
 
-    previous = signal.signal(signal.SIGTERM, _on_sigterm)
+    signums = [signal.SIGTERM]
+    sighup = getattr(signal, "SIGHUP", None)  # absent sous Windows
+    if sighup is not None and signal.getsignal(sighup) is not signal.SIG_IGN:
+        signums.append(sighup)
+    previous = {signum: signal.signal(signum, _on_sigterm) for signum in signums}
     try:
         yield
     finally:
-        signal.signal(signal.SIGTERM, previous)
+        for signum, handler in previous.items():
+            # None : gestionnaire posé hors de Python, qu'on ne peut pas reposer.
+            signal.signal(signum, handler if handler is not None else signal.SIG_DFL)
 
 
 # Variable à augmenter, citée dans le message de timeout de chaque CLI.
@@ -151,13 +161,16 @@ _CLI_TIMEOUT_ENV_VARS = {
     "Codex": "CODEX_TIMEOUT",
     "Grok": "GROK_TIMEOUT",
     "OpenCode": "OPENCODE_TIMEOUT",
+    "Antigravity": "AGY_TIMEOUT",
 }
 
 
-def _codex_run_process(argv, stdin_data, timeout, env, label, model):
+def _codex_run_process(argv, stdin_data, timeout, env, label, model, cwd=None):
     """Lance un CLI agentique dans son propre groupe de process et renvoie
-    (returncode, stdout, stderr). Socle commun aux providers Codex, Grok et
-    OpenCode.
+    (returncode, stdout, stderr). Socle commun aux providers Codex, Grok,
+    OpenCode et Antigravity. `cwd` sert au CLI qui n'a pas d'option de
+    répertoire de travail : agy prend le sien pour racine d'espace de travail,
+    et c'est là qu'il cherche l'agent de traduction.
 
     Le groupe de process n'est pas une précaution de principe : ces CLI sont
     des agents, qui lancent leurs propres sous-process. Codex ajoute un
@@ -178,13 +191,14 @@ def _codex_run_process(argv, stdin_data, timeout, env, label, model):
     # marqueurs nosec/nosemgrep que le vérificateur de pureté exige verbatim.
     with _kill_group_on_sigterm(holder):  # noqa: SIM117
         # argv est une LISTE (jamais shell=True) construite par _codex_argv,
-        # _grok_argv ou _opencode_argv : binaire résolu et validé par le préflight,
-        # flags littéraux, et `args.model` placé en valeur juste après son flag —
-        # une valeur commençant par `--` y est donc consommée comme valeur, pas
-        # réinterprétée en drapeau. Le contenu du document ne transite JAMAIS par
-        # argv : il part par stdin (Codex, OpenCode) ou par fichier (Grok,
-        # --prompt-file). Le marqueur nosemgrep doit rester sur la ligne
-        # immédiatement précédente : plus haut, il n'est pas pris en compte.
+        # _grok_argv, _opencode_argv ou _antigravity_argv : binaire résolu et
+        # validé par le préflight, flags littéraux, et `args.model` placé en
+        # valeur juste après son flag — une valeur commençant par `--` y est donc
+        # consommée comme valeur, pas réinterprétée en drapeau. Le contenu du
+        # document ne transite JAMAIS par argv : il part par stdin (Codex,
+        # OpenCode, Antigravity) ou par fichier (Grok, --prompt-file). Le marqueur
+        # nosemgrep doit rester sur la ligne immédiatement précédente : plus
+        # haut, il n'est pas pris en compte.
         # nosemgrep
         with subprocess.Popen(  # nosec B603
             argv,  # nosemgrep — la finding est ancrée sur l'argument, pas sur l'appel
@@ -194,6 +208,7 @@ def _codex_run_process(argv, stdin_data, timeout, env, label, model):
             text=True,
             encoding="utf-8",
             env=env,
+            cwd=cwd,
             start_new_session=True,
         ) as proc:
             holder["proc"] = proc
@@ -205,19 +220,29 @@ def _codex_run_process(argv, stdin_data, timeout, env, label, model):
                     f"{label} CLI timeout après {timeout}s (model={model}). "
                     f"Augmenter {timeout_var} si les segments sont longs."
                 ) from None
+            except BaseException:
+                # Ctrl-C (KeyboardInterrupt) ou SystemExit : l'agent, dans sa
+                # propre session, ne reçoit pas le SIGINT du terminal, et
+                # `Popen.__exit__` ne l'attend que 0,25 s avant de rendre la
+                # main. Il survivait, et consommait son quota pour un résultat
+                # jeté (vérifié par une revue sur un faux binaire).
+                _codex_kill_group(proc)
+                raise
             return proc.returncode, stdout, stderr
 
 
 def _stderr_tail(stderr, lines=3):
     """Dernières lignes de stderr, jointes, pour un message d'erreur qui dit
-    quelque chose — commun aux trois CLI."""
+    quelque chose — commun aux quatre CLI."""
     return " | ".join((stderr or "").strip().splitlines()[-lines:]) or "(stderr vide)"
 
 
 class _CliCallError(RuntimeError):
     """Échec d'une invocation d'un CLI agentique, porteur du caractère
-    récupérable ou non. Aucun des trois CLI n'implémente de retry interne
-    exploitable : le back-off est entièrement à notre charge."""
+    récupérable ou non. Codex, Grok et OpenCode n'implémentent aucun retry
+    interne exploitable ; agy réessaie lui-même les erreurs transitoires, puis
+    dit dans AGY_ERROR si l'échec restant est réessayable. Le back-off reste à
+    notre charge dans tous les cas."""
 
     def __init__(self, message, rate_limited=False):
         super().__init__(message)
@@ -225,12 +250,14 @@ class _CliCallError(RuntimeError):
 
 
 def _retry_on_rate_limit(label, client, attempt_once):
-    """Boucle de back-off commune aux trois CLI : ne retente que sur rate
+    """Boucle de back-off commune aux quatre CLI : ne retente que sur rate
     limit, avec un délai croissant. Sur un plan ChatGPT, chaque tour consomme
     un « message local » de la fenêtre de 5 heures ; le quota Grok est partagé
     avec Chat/Imagine/Voice sans être lisible ; les modèles gratuits de la
-    passerelle Zen n'annoncent aucune limite. Dans les trois cas, mieux vaut
-    attendre que perdre le fichier en cours."""
+    passerelle Zen n'annoncent aucune limite ; le quota Antigravity se lit,
+    mais une fenêtre épuisée ne se rend pas en quelques minutes — d'où, pour
+    lui, la relance réservée aux échecs qu'agy déclare réessayables. Dans tous
+    les cas, mieux vaut attendre que perdre le fichier en cours."""
     last_error = None
     for attempt in range(1, client.max_attempts + 1):
         try:
@@ -256,6 +283,7 @@ def _retry_on_rate_limit(label, client, attempt_once):
 _CLI_PROVIDER_CI_FALLBACK = {
     "--use_codex": ("ChatGPT", "OPENAI_API_KEY", "l'API OpenAI"),
     "--use_grok_cli": ("Grok", "XAI_API_KEY", "--use_grok"),
+    "--use_antigravity": ("Google", "GOOGLE_API_KEY", "--use_gemini"),
 }
 
 

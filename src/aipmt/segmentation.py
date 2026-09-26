@@ -110,6 +110,24 @@ MODEL_TOKEN_LIMITS = {
     "gemini-2.5-pro": 1048576,
     "gemini-2.5-flash": 1048576,
     "gemini-2.5-flash-lite": 1048576,
+    # Antigravity CLI (`agy models`, --use_antigravity) : l'effort de
+    # raisonnement fait partie de l'identifiant, et un nom de base seul y est
+    # refusé (mesuré le 2026-09-26 sur agy 1.2.11). Fenêtres de chaque famille
+    # côté API ; la segmentation plafonne à 16 000 caractères, elles ne
+    # comptent qu'en dessous. `claude-sonnet-4-6` figure déjà plus haut.
+    "gemini-3.8-flash-high": 1048576,
+    "gemini-3.8-flash-medium": 1048576,
+    "gemini-3.8-flash-low": 1048576,
+    "gemini-3.7-flash-high": 1048576,
+    "gemini-3.7-flash-medium": 1048576,
+    "gemini-3.7-flash-low": 1048576,
+    "gemini-3.6-flash-high": 1048576,
+    "gemini-3.6-flash-medium": 1048576,
+    "gemini-3.6-flash-low": 1048576,
+    "gemini-3.1-pro-high": 1048576,
+    "gemini-3.1-pro-low": 1048576,
+    "claude-opus-4-6-thinking": 1000000,
+    "gpt-oss-120b-medium": 131072,
 }
 
 

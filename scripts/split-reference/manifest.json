@@ -387,6 +387,414 @@
       "file": "src/aipmt/providers/mistral.py",
       "hash": "a48758df2567cf4e6affdd93806b686cbc9088ac40d422d61163300bede38b2c",
       "why": "extrait le texte d'une réponse Mistral, chaîne ou liste de blocs, raisonnement écarté ; erreur explicite si aucun bloc de texte."
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "bf39248f15bebf98db47cdd1d97996729ccbef4453ffc55874603e656bebae44",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : docstring du module."
+    },
+    {
+      "name": "DEFAULT_MODEL_ANTIGRAVITY",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "6df2c235bc208946395f1fc1340e8354d7a237e280f32ec14279520ebcc0b901",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : modèle qualité, gemini-3.7-flash-medium, choisi par la campagne du 2026-09-26 (article dense 14/14 sans écart)."
+    },
+    {
+      "name": "ECO_MODEL_ANTIGRAVITY",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "5c7d409fff913fe1918402fd91faa9990d6e3e7ff969349b7df76ccb0051d525",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : modèle --eco, gemini-3.7-flash-low : même famille, effort bas, le plus rapide des quatre candidats mesurés."
+    },
+    {
+      "name": "AGY_TIMEOUT",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "55a8add67cc115b48e81d347cfe8fdd27e02363ef695922c168fd4f687082a4b",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : plafond par segment (AGY_TIMEOUT, 900 s), démarrage réseau compris, que --print-timeout ne borne pas."
+    },
+    {
+      "name": "ANTIGRAVITY_MIN_VERSION",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "c16d411fbb59b0de3d4a443cf411cb59ddc57d3b070d9a561bbd8ea75b4ad166",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : version plancher 1.2.11, première qui trouve un agent de projet en mode headless."
+    },
+    {
+      "name": "ANTIGRAVITY_AGENT_NAME",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "113388235e5be64417f65202f5115c7058a3ec58bfe128b013f2ecf9460130ad",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : nom de l'agent de traduction écrit dans le répertoire privé."
+    },
+    {
+      "name": "ANTIGRAVITY_KEPT_ENV_VARS",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "c2591537b1a8f63a58f7e8e4c9ae6efd4d1077d0bed0c12656997b229569c6bf",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : liste d'autorisation de l'environnement du sous-processus : une liste de refus oubliait des variables qui détournent l'appel (AGY_GATEWAY_URL, AICODE_ENDPOINT_URL…)."
+    },
+    {
+      "name": "ANTIGRAVITY_KEPT_ENV_PREFIXES",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "05b76e8ce652d49700fd353e91087f1f0eed544113c76b0c2160a7644da8a6e7",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : préfixe LC_ autorisé (langue) dans l'environnement du sous-processus."
+    },
+    {
+      "name": "ANTIGRAVITY_ENV_OVERRIDES",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "bb4b17b38107389d931fb1ee3cf04dbf0a01bf4bd855635f1848b2e53d646753",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : AGY_CLI_DISABLE_AUTO_UPDATE=true : sans lui, chaque HOME neuf lance le vérificateur de mise à jour hors du groupe tué (la valeur 1 est sans effet, mesuré)."
+    },
+    {
+      "name": "ANTIGRAVITY_AGENT_CONTRACT",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "fa7e78e691a21a7357a65d5ec42f4189fdb166edbc09b1ccd79593313ef7c766",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : contrat ajouté au prompt système de l'agent : aucun outil, le message entier est le texte à traduire."
+    },
+    {
+      "name": "ANTIGRAVITY_LOGIN_HINT",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "7f965b914f93e948ea1ab818e730c68f79cc18ce233ceda576b7e05b8fa96ee3",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : message d'une session déconnectée, qui nomme aussi le cas du jeton rangé hors trousseau."
+    },
+    {
+      "name": "ANTIGRAVITY_NO_SESSION_BUS",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "5d584971d1316a3503b62518dfcf1e88b717268d18ea822c07be0e71d7c08017",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : refus sous Linux sans bus D-Bus : le jeton irait dans un fichier de ~/.gemini que l'isolation masque."
+    },
+    {
+      "name": "ANTIGRAVITY_UNSUPPORTED_WINDOWS",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "88526ed6d9b8ad021297ec03c09955651240768fa89ec12f2f6756bfcbe94538",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : refus sous Windows, où agy ne lit ni HOME ni TMPDIR : l'isolation n'y tiendrait pas."
+    },
+    {
+      "name": "ANTIGRAVITY_CHECK_TIMEOUT",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "366c93bf9944c790b54a340455a4f3d11e16025bfccc3a7d7da05c8fe523ca29",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : plafond du préflight /config (120 s), au-delà de l'attente de 60 s d'une session déconnectée."
+    },
+    {
+      "name": "_GLOG_LINE",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "b4ccdff43fa76b7c0fa3b6b5ee60e18139cf92577ac89c81a5dcbd03d246c6ac",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : préfixe glog mesuré d'une ligne du journal d'agy, pour ancrer chaque marqueur sur une ligne entière."
+    },
+    {
+      "name": "_ANTIGRAVITY_AGENT_LOADED_REGEX",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "67c7185514d80d042ff7446489d65870d33001ebd365d50c2e111e7b35d34586",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : marqueur POSITIF du chargement de l'agent confiné (agent=true), exigé dans le journal."
+    },
+    {
+      "name": "_ANTIGRAVITY_AGENT_FALLBACK_REGEX",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "ed7df1bd452b06bbb4cc78489d4e35be4c1e5d340bab878cd9b76b58b14ae59a",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : ligne du repli silencieux sur l'agent de codage, mesuré : rc 0, SUCCESS, une réponse de chat au lieu de la traduction."
+    },
+    {
+      "name": "_ANTIGRAVITY_AUTH_METHOD_REGEX",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "7794fd099f7fefde748e743e481fc6d4f849a5df9e7134559d524c0fa87d9d1a",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : ligne applyAuthResult qui atteste l'authentification par l'abonnement (authMethod=consumer)."
+    },
+    {
+      "name": "_ANTIGRAVITY_ANY_AUTH_METHOD_REGEX",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "798ffa8d240efff5d19ceba37862267b2dee216643f6c3730f5d3193ca0f7573",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : toute autre écriture d'une méthode d'authentification (auth_method=), refusée si elle n'est pas consumer."
+    },
+    {
+      "name": "_AGY_ERROR_MARKER",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "308caf98949a780e97f36adcfceb5668200b9f253645c2b4b9e559d8643c1ed7",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : marqueur de la ligne d'échec structurée AGY_ERROR sur stderr."
+    },
+    {
+      "name": "_ANTIGRAVITY_STDERR_REFUSALS",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "28ee95d2710266270c99b9948df4ea2b3a32e641832e94058f9451714ae65f74",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : notes de stderr qui accompagnent une réponse incomplète rendue en SUCCESS."
+    },
+    {
+      "name": "_ANTIGRAVITY_SUSPECT_KEYS",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "5d92146f071ee8650fb6f5cd8921a06518348286da3b72b58f8eeba9094e39ed",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : clés JSON (denied_actions, command, error) qui font refuser un SUCCESS."
+    },
+    {
+      "name": "_ANTIGRAVITY_AUTH_REQUIRED_MARKERS",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "c6ebe62a85fda8815a36a5ccfb1fea2e35910287f59d303683f80c46afe3fac4",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : messages d'une session déconnectée, rendus en conseil de connexion sans relance."
+    },
+    {
+      "name": "_ANTIGRAVITY_RATE_LIMIT_MARKERS",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "5dd8a4cc3feeaf6ef3995c25058ca6a1037ff7afc7b1c1275a5d4ff6cce6e149",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : marqueurs de limitation de débit, en repli quand AGY_ERROR ne dit pas si l'échec est réessayable."
+    },
+    {
+      "name": "_ANTIGRAVITY_HTTP_429_REGEX",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "23901d1d7bb06a71a65e9ed8c945dcef0c12f77596dc7bb7e7aae1c353b63e76",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : 429 comme nombre isolé, jamais en sous-chaîne d'un identifiant."
+    },
+    {
+      "name": "_ANTIGRAVITY_MODEL_REGEX",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "be16d75e40a491318bb920916f0f53335427656a2059e3097453eea6140b3f14",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : forme d'un identifiant de modèle, dont une valeur commençant par « - » est exclue."
+    },
+    {
+      "name": "_ANTIGRAVITY_BARE_GEMINI_REGEX",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "7f964792eb172e5806f8f0407df9289d40123a7ac108eaf05d415adee3a4fe4c",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : nom de base sans effort (gemini-3.7-flash), refusé par agy : refusé avant l'appel avec le suffixe à ajouter."
+    },
+    {
+      "name": "_ANTIGRAVITY_VERSION_REGEX",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "6d42145e83e3dbcdd4af9c5d63b71b8444ed81fa15c005ad49a80fd6fb155ea4",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : version lue dans la sortie de `agy --version`."
+    },
+    {
+      "name": "_AntigravityClient",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "31b5c6ab4f9033d0df033ad5abf093636c4d52524dc5526ca23a26a53c9fb35a",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : configuration d'invocation du CLI (binaire, timeout, relances)."
+    },
+    {
+      "name": "_AntigravitySandbox",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "3ddedc26b878ab815a7536278df1b77faa9b01f9541a84673e25ae27267dce4e",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : répertoire privé d'un appel : répertoire de travail, journal, environnement."
+    },
+    {
+      "name": "_AntigravityCallError",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "fab484d8704b745c2d09bd3b1f95def5fdbd99d18e10af21252fbbd03306eff8",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : erreur d'invocation, sous-classe de _CliCallError pour la boucle de relance commune."
+    },
+    {
+      "name": "_antigravity_env_base",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "175681960dcd5148d4a399292632a5d996b2dca6e91fc5c941f352775ce85598",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : environnement autorisé du sous-processus, secrets filtrés, mise à jour automatique coupée."
+    },
+    {
+      "name": "_antigravity_env",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "3f47e96e22e9d5a44ed66f7939185c3427d2ee726214cc33147b62076acbac38",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : environnement d'un appel, HOME et TMPDIR privés : rien n'est hérité des réglages de l'utilisateur ni écrit dans son historique (mesuré)."
+    },
+    {
+      "name": "_antigravity_agent_markdown",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "eac5a8244db309a24cdb62e01da00820834073783f7ad0d2851fe38aab669295",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : agent Markdown sans outil ni héritage (tools: [], excludeDefaultComponents, inheritCustomizations: false)."
+    },
+    {
+      "name": "_antigravity_write_agent",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "6944a5a49504908c05664e99550636ba6f3d42640580325a71481ab75205cead",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : écrit l'agent dans .agents/agents/ du répertoire de travail privé."
+    },
+    {
+      "name": "_antigravity_sandbox",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "3d18e4d85dde627aa4087c958b8273f0ec95b060cd9b507ee21031ae0dfcfcb3",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : répertoire privé 0700 d'un appel, effacé à la sortie avec la conversation et le journal."
+    },
+    {
+      "name": "_antigravity_argv",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "4a77890126d1cfe255da87d475e89d34d1c3f3ed5dd41024b76f41f4c8193d26",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : argv sans -p (avec lui, agy ignore stdin), avec --disable-slash-commands et un journal privé."
+    },
+    {
+      "name": "_antigravity_read_log",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "a3561ca0162c2f82e597e92dfa63924257770c02ddfcf67d86e4e9180ec1804b",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : lit le journal de l'appel, chaîne vide s'il manque."
+    },
+    {
+      "name": "_antigravity_parse_payload",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "376710ecf8d240dd14e9537f355a9d3adc4598936a0fc46a7f35c895f4da923c",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : l'objet JSON de --output-format json, ou None."
+    },
+    {
+      "name": "_antigravity_agy_error_data",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "681f85c6d695ca19d5d124b260e9b2879d4e41a4272c56985d8981fb3cc7336a",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : décode AGY_ERROR par raw_decode, sans avaler ce qui suit l'objet."
+    },
+    {
+      "name": "_antigravity_agy_error",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "b5dfa78364331861ca50f33c6f5681b098732532956b8d69416400a24fc3bbd1",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : AGY_ERROR compacté pour un message d'erreur."
+    },
+    {
+      "name": "_antigravity_error_detail",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "41df72a70658518f6bad60b6435e58a8230d0605f68c92f47e691cb88d07c613",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : cause d'un échec, du champ error du JSON à la sortie illisible."
+    },
+    {
+      "name": "_antigravity_auth_required",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "c6d1673f74ca4d4d92580e8d5e980b191a872d07ac6a97665d9c6f8d8470d77d",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : reconnaît une session déconnectée."
+    },
+    {
+      "name": "_antigravity_is_rate_limited",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "a6092da41eef7f4cde59dc9dea0a305976382384790a77c9321dd5d6b27b62db",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : relance pilotée par `retryable` d'AGY_ERROR, jamais sur une fenêtre de quota épuisée."
+    },
+    {
+      "name": "_antigravity_check_exit",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "c8053b9242d912fabc9e1ff9614505b54fb366a768de85180eb100512623ff11",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : échec franc : code non nul, JSON absent ou status autre que SUCCESS ; la réponse partielle n'est jamais lue."
+    },
+    {
+      "name": "_antigravity_confinement_problem",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "af27bfe8079309c8ef18a5140ced48ab94b953380da5ea9aeb0b7e90b1c476e3",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : garde du repli silencieux sur l'agent de codage, par le journal."
+    },
+    {
+      "name": "_antigravity_auth_problem",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "900414ae4350a021d3879aa83a655737136224fcf7f6ed257c85d4f2a3a059ba",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : garde de la voie de facturation : le journal doit attester authMethod=consumer."
+    },
+    {
+      "name": "_antigravity_check_log",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "5df7821703937abdbc62fea924afde29bc01f2da14e5356d7036183052df8f4c",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : applique les deux gardes du journal."
+    },
+    {
+      "name": "_antigravity_reject_non_answers",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "29d7a630c06110c786b6814031fcf7660413d7a04728110e05552771e3d51ed4",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : écarte les réponses rendues en SUCCESS qui n'en sont pas."
+    },
+    {
+      "name": "_antigravity_extract_answer",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "8f80f0aaf38cd5986c598ab1c970d29a20bf5734b26a9c4f9fbda7f6cc47f904",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : texte traduit, avec la fin de ligne du segment source."
+    },
+    {
+      "name": "_antigravity_attempt",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "858c8723b4fe5ec4d020fbe2fa4f5f3dfc0a90017d43309875bf66125ac1bd65",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : une invocation complète dans un répertoire privé."
+    },
+    {
+      "name": "_call_antigravity",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "eb4289da5f7d4217cb85b0e5ace1406cd61aabec5ef3d46fcbf041870f4ed6e6",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : appel de traduction, avec la boucle de relance commune."
+    },
+    {
+      "name": "_resolve_antigravity_binary",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "939ecb98c32187db7fd2a7a0deb8ee89cadd2cb3883f3bdeb1d2a3aafbb40c5d",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : chemin absolu d'agy : AGY_BIN, PATH, ~/.local/bin/agy."
+    },
+    {
+      "name": "_antigravity_run_check",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "bf4d3baa807376b7d8f37938d874d998ac7b6442066cce0d069ea35a3902b9ea",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : commande de contrôle du préflight, dans le même isolement, sans terminal."
+    },
+    {
+      "name": "_antigravity_read_version",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "8f7de4eeeebf7c18eb01149e63ceaf682f115090df7bd3aa496d6e336befd491",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : version lue dans `agy --version`."
+    },
+    {
+      "name": "_antigravity_check_version",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "653ceba412240263ad45f064da2e1f5549053031d0a9940b1cd894fb74d90a4e",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : refuse une version antérieure au plancher."
+    },
+    {
+      "name": "_antigravity_read_config",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "1e92d47ae6f7c593d559d5f92bc7ac36706cd8f2a8201af7ecb0e5e98eb3f993",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : lit command.data.config de `agy -p /config`."
+    },
+    {
+      "name": "_ANTIGRAVITY_ABSENT",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "4eaa81eeeb83f80ff6697582d95d971fa270d05c16859c9c2b8122dc97505fd8",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : valeur affichée d'un réglage absent de /config, compté comme problème."
+    },
+    {
+      "name": "_antigravity_billing_problems",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "2268d22c371b488847c60e5769e9b46f8ffaf4ab56cb2ff49d3e62e9cd73b088",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : réglages qui ouvriraient une voie payante (useG1Credits, modelProvider, gcp), absents compris."
+    },
+    {
+      "name": "_antigravity_check_billing",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "9edd9b7667df791807a33fb3f14ff88a268f07a7fbea77061ff4e2f36c683df3",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : préflight de facturation : /config et journal, sans quota consommé (mesuré)."
+    },
+    {
+      "name": "_antigravity_preflight",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "f35dbba2fd0336618c31284b7c3cefbd2e9274f8e89dce33c119ed5069a0c059",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : binaire, version et facturation avant le premier segment."
+    },
+    {
+      "name": "_antigravity_check_model",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "fc7d47f7b326e8bcc0b0f16fc8f3a1694ae635f6d8d38c5edabe283ceeb36d44",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : forme de l'identifiant et nom de base incomplet."
+    },
+    {
+      "name": "_antigravity_session_bus_reachable",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "974bf6d1af76d6b63e9f47c03f6c017187e11ad5b2ec32e6b5bfd8fcc1a88a29",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : bus de session D-Bus joignable (adresse explicite ou socket par défaut)."
+    },
+    {
+      "name": "_antigravity_check_platform",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "7405837b3e2bb23e6a191f5eb84d2324f4bef341edb7f498c51f34e8d22cc12e",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : refus en fermé sous Windows et sous Linux sans bus de session."
+    },
+    {
+      "name": "_antigravity_warn_options",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "9aad809469f8d83e260fe95a492ec1dc217929315ae643c7536aa4959c29b662",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : avertit que --reasoning_effort est sans effet et que Claude/GPT-OSS puisent dans un quota bien plus petit."
+    },
+    {
+      "name": "_init_antigravity_client",
+      "file": "src/aipmt/providers/antigravity.py",
+      "hash": "3967ed808fc94cc6aee66ff83df6242360faeaf369c4bd7a83ef331806d87e0e",
+      "why": "nouveau provider --use_antigravity (CLI `agy` sur le quota de l'abonnement Google) : initialisation : modèle, refus CI, plateforme, modèle, préflight."
+    },
+    {
+      "name": "_CLI_PROVIDERS",
+      "file": "src/aipmt/providers/registry.py",
+      "hash": "10683c19868ece27eeb355a25480ad77c974c105885a6bfa5aca50c64e66fc33",
+      "why": "registre : les quatre providers pilotés en sous-processus, dispatchés par _call_cli_provider."
+    },
+    {
+      "name": "_call_cli_provider",
+      "file": "src/aipmt/providers/registry.py",
+      "hash": "20ecfe0e0fddc19e21bfc96cfa9a1012f60ddee66079d601f050a3cd1bc76064",
+      "why": "scission de _call_provider : la neuvième branche l'aurait porté au-delà de la complexité 8 que Codacy tolère ; un nom inconnu lève au lieu de retomber sur un autre CLI."
     }
   ],
   "removed": [
@@ -791,6 +1199,146 @@
       "old_hash": "dc7030b6c2598101541fe06a5a013d025d9920a89679e619dfd44efe84f32506",
       "new_hash": "89746704e4226402e7f35fccbb7bfe639d324df762415ba6a7c94d4a22736be9",
       "why": "entrées Mistral resynchronisées sur `max_context_length` de GET /v1/models (2026-09-17) : 262 144 au lieu de 256 000, 131 072 pour ministral-3b, et ajout des IDs datés (mistral-medium-2604 déclenchait l'avertissement « non listé »)."
+    },
+    {
+      "name": "_ROUTING_SUFFIXES",
+      "file": "src/aipmt/config.py",
+      "old_hash": "bc5ba773c25e308719d74206fe52faa41d56ea26b8c5c8b83e87e803414a08f4",
+      "new_hash": "fa5dcd64ef44deb8a42ef7607124174cca3152cc95914a4cfe8cff36ccbfdc66",
+      "why": "suffixe _BIN : un .env de projet ne peut plus choisir le binaire exécuté (CODEX_BIN, GROK_BIN, OPENCODE_BIN, AGY_BIN), qu'un dépôt cloné aurait pu pointer sur son propre programme."
+    },
+    {
+      "name": "_ROUTING_NAMES",
+      "file": "src/aipmt/config.py",
+      "old_hash": "81519dedb6d25251e354d878711390a51a7f223002b65984a5a9b44e9261fe6d",
+      "new_hash": "94b882752a68d99142197d4f8a0cfe6b77ddd72778202f9a3fea6d907d4bf4e4",
+      "why": "GROK_HOME : le binaire Grok est cherché sous $GROK_HOME/bin/grok, c'est un _BIN qui ne dit pas son nom."
+    },
+    {
+      "name": "_is_routing_variable",
+      "file": "src/aipmt/config.py",
+      "old_hash": "51989f74624e46476cdff94bebda819eaa4f380b6ad3bad2e59a10b5aba015fa",
+      "new_hash": "115543fc4d2b52d439dc785240c6a606367e6bdabb1624882e129028ce42505e",
+      "why": "docstring : couvre aussi les variables qui désignent le binaire exécuté."
+    },
+    {
+      "name": "_drop_project_routing",
+      "file": "src/aipmt/config.py",
+      "old_hash": "3b620d840a017f7bb60d5edadf7450f1ffbbcac5f6b573e5ce85355ee8e3fa32",
+      "new_hash": "ab9ae39b5bba35546f6b735a01cf6aa2c78badba967b18fdc32c30047d5ec4c2",
+      "why": "message : un .env de projet ne peut ni rediriger les appels ni choisir le binaire exécuté."
+    },
+    {
+      "name": "translate",
+      "file": "src/aipmt/pipeline.py",
+      "old_hash": "e44f49e4733dce38bb43c033a6c916b982d7be94e51112cb8d41c3523ee4f73a",
+      "new_hash": "ee909d5809aef83500f48e9ee311c7b4dfebb62831eb84668c134c177ff9fdfb",
+      "why": "un segment blanc est rendu tel quel au lieu d'être envoyé au modèle, dont la sortie vide faisait échouer tout le fichier (reproduit par une revue)."
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/__init__.py",
+      "old_hash": "ff3bf1da8b4120cc895c3df20c7d9703a67490ee842bc59ea032a7cdda5c5b3c",
+      "new_hash": "6f0bec6288776238cb3e4bc7d0bd9fedf35f6b2b9b87a6f857a2b5b5d2be7702",
+      "why": "docstring du sous-paquet : Antigravity parmi les CLI d'abonnement."
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "f64b408c1c1b831cc31033f06beef2376a72d1b5e4f6253a59aec3be437d301f",
+      "new_hash": "edc82038ad07a835a73f58566d7ffb6d543b18920a98720858640c4caaef8566",
+      "why": "docstring : quatre CLI agentiques, dont Antigravity."
+    },
+    {
+      "name": "_kill_group_on_sigterm",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "dac795baaec9fd5ab5ad55cbfb6c9c5e0f7fccc04eae5b7146cca80d4b240a44",
+      "new_hash": "07a1dff30ddc7649ac7c1da46c9dedec6b48b12354506d40ea19bb01f7608606",
+      "why": "SIGHUP tue aussi le groupe de l'agent (terminal fermé), sauf s'il est ignoré par nohup ; restauration de SIG_DFL si le gestionnaire d'origine était None."
+    },
+    {
+      "name": "_CLI_TIMEOUT_ENV_VARS",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "b38b3679e84f80cbc347a93a0cf233d61ea8b7ffba36be110d0101b7ebac5940",
+      "new_hash": "b7ab19a405d9c6aab4371cef06ae3c968e930598252be536cb1d844b33952dc9",
+      "why": "Antigravity → AGY_TIMEOUT, sans quoi le message de timeout conseillerait CODEX_TIMEOUT."
+    },
+    {
+      "name": "_codex_run_process",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "55645db8c0408bc9afcbf9946d25aa20fe2a34fb696c580eb9919a99447ba3cb",
+      "new_hash": "37574af508ffe70c1fed98d81e6e2f7ec60bdb9e4ca7078db7b86cb3defa5c3e",
+      "why": "paramètre cwd (agy n'a pas d'option de répertoire de travail) ; Ctrl-C et SystemExit tuent le groupe de l'agent avant de remonter, au lieu de le laisser consommer du quota (vérifié par une revue)."
+    },
+    {
+      "name": "_stderr_tail",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "e1367ca713d7001a4c9cde3fd1b5f73a86434b3e259c85cd670cd1bcc8af41a1",
+      "new_hash": "2615f88aaf1e3c8f90013cd34244fd059b4fcf4dc8dcbc26216ebb3c874c3ace",
+      "why": "docstring : quatre CLI."
+    },
+    {
+      "name": "_CliCallError",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "040b700377f22087ad5af180282f1fc2719dccb839f7f33b5a54b4d9e43bb551",
+      "new_hash": "82851b05e6a459e8565a1789ec083eb60a5c7297898872607ab76b83630f24b1",
+      "why": "docstring : agy réessaie lui-même les erreurs transitoires et dit si l'échec restant est réessayable."
+    },
+    {
+      "name": "_retry_on_rate_limit",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "d2099e1187a52de98a8c27898e22ff7c28ba3d1f16539f893973ba94dea04046",
+      "new_hash": "4860615f6b248b4ac3b1fe01bbf6a7d27b39f5e52f5c87073b6f59b035665407",
+      "why": "docstring : le cas d'Antigravity, relancé seulement sur un échec réessayable."
+    },
+    {
+      "name": "_CLI_PROVIDER_CI_FALLBACK",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "c281fefaa427171e6d65059ed3e1c699354c0449e133d54da143dc4496f571c1",
+      "new_hash": "ec95c638ee7e6de37723437a685740db9b53aa2f9d79ef580c03f85401d8a35c",
+      "why": "--use_antigravity → repli --use_gemini avec GOOGLE_API_KEY dans le refus en CI."
+    },
+    {
+      "name": "_resolve_provider_from_args",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "a5d5d348f7e84faf62d719be59740b412fc4ac6a855ec6946da5895f11be6805",
+      "new_hash": "454623e3463197323d5838a4b874de43107d15f57c292ffbc02756820b02d6ba",
+      "why": "use_antigravity → antigravity, en fin de chaîne : la précédence existante est inchangée."
+    },
+    {
+      "name": "_PROVIDER_LABELS",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "e2e36e7e7a10592774a34dbc16264fe1203c2eb51c47d3c14e9c9144c38d21e2",
+      "new_hash": "31931bb7e45fc71c4879d6d48877cecf391f45b704dca45b917bd88a99dd3f51",
+      "why": "libellé « Antigravity CLI » de la garde de contenu vide."
+    },
+    {
+      "name": "_call_provider",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "9e7fe2fc071c0176baeca71569a8738533ae236632d0a3ae98ffc0b1da63dd8d",
+      "new_hash": "be165dd7903e5b83c816723e031601e07217e77ee72ec8f8ecc1f4b9b60d37f3",
+      "why": "les CLI passent par _call_cli_provider, pour rester sous la complexité 8 de Codacy."
+    },
+    {
+      "name": "_PROVIDER_FLAGS",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "0a01c5c308f283a674b88febdc7bbec693c8f59cb069a12e4b47cfc83f6bcf8a",
+      "new_hash": "ce83ffe04cebeb990671e0225ea98570cfcfd3909e20d5ff71d1c47aca482f98",
+      "why": "neuvième flag du groupe exclusif, --use_antigravity, après --use_codex."
+    },
+    {
+      "name": "_select_later_provider_client",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "0f82341d5fc1897c77bd34350f038a80ea488c5b056006b21b715c45e9356778",
+      "new_hash": "cc664d797b1f5bc1f687f8cb480098e3b853e742b3cc44027d0b0a4d576a0d80",
+      "why": "use_antigravity → _init_antigravity_client, avant le repli OpenAI."
+    },
+    {
+      "name": "MODEL_TOKEN_LIMITS",
+      "file": "src/aipmt/segmentation.py",
+      "old_hash": "89746704e4226402e7f35fccbb7bfe639d324df762415ba6a7c94d4a22736be9",
+      "new_hash": "485bc868c0978143e4f673d86bf24f56e841045adeb895015ecc8a669287787c",
+      "why": "identifiants d'`agy models` (effort dans le nom), sans quoi chaque appel avertissait « modèle non listé »."
     }
   ],
   "markers": [

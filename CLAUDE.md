@@ -103,9 +103,10 @@ printf '%s\n' ja hi it ko nl pl pt ro sv zh | xargs -P 4 -I{} bash regen_one.sh 
 Celles déjà terminées portent le même contenu source : les refaire ne
 changerait rien qu'une dépense.
 
-**Le coût par campagne croît avec le CHANGELOG.** Il fait 83 000 caractères, se
-découpe en six segments, soit six tours Codex par langue et 84 tours pour les
-quatorze. La référence « 28 fichiers pour 70 tours, 1 point de la fenêtre »
+**Le coût par campagne croît avec le CHANGELOG.** Il fait 111 000 caractères
+avec l'entrée 1.15.0 (94 000 à la 1.14.1) et se découpe en huit segments —
+compté par `segment_text` le 2026-09-26 —, soit huit tours Codex par langue et
+112 tours pour les quatorze. La référence « 28 fichiers pour 70 tours, 1 point de la fenêtre »
 notée plus bas date d'un fichier bien plus court : le coût par fichier a plus
 que doublé depuis, et chaque release retraduit intégralement des entrées de
 versions publiées il y a des mois. Archiver l'historique dans un
@@ -125,7 +126,20 @@ Ce que ça implique, et ce qui l'encode :
   OpenRouter exige en outre un `REGEN_MODEL` : c'est un routeur, il n'a pas de
   défaut. Ne
   jamais poser cette dérogation sans demande explicite du propriétaire — pas
-  même pour rattraper un fichier en échec : relancer Codex, ou `grok_cli`.
+  même pour rattraper un fichier en échec : relancer Codex, ou `grok_cli`, ou
+  `antigravity`.
+- `REGEN_PROVIDER=antigravity` passe **sans** dérogation : c'est l'abonnement
+  Google (AI Pro ou Ultra), décompté en quota, pas une API facturée — 4 jobs
+  et 1 800 s par job, comme Codex (cf. § Provider Antigravity). Le plafond est
+  validé par la mesure du 2026-09-26 : le CHANGELOG entier en hindi — le
+  fichier où Codex perd des placeholders — traduit sans écart en 273 s par
+  `gemini-3.7-flash-medium`, marge ×6,5. Coût estimé d'une campagne complète :
+  un quart de la fenêtre Gemini de 5 h, sur le palier du compte du
+  propriétaire. Avant d'ouvrir les 28 jobs, le script valide `REGEN_MODEL` et
+  lance une fois le préflight du module (version, connexion, voie de
+  facturation) : un agy déconnecté ou réglé pour facturer n'en démarre aucun. Il ne remplace pas le défaut : Codex +
+  `gpt-5.6-sol` reste le chemin de ces traductions, décision du propriétaire
+  qu'un abonnement de plus ne change pas.
 - Un fichier qui échoue sur Codex (placeholder perdu, cas connu du hindi) se
   relance **seul, sur Codex** : `python -m aipmt --use_codex --file CHANGELOG.md
 --target_lang hi --add_translation_note --force`.
@@ -503,15 +517,15 @@ les deux depuis l'arbre source.
 ./regen_translations.sh           # skip celles qui existent déjà
 ```
 
-Le script lance 4 jobs en parallèle sur Codex (défaut), 2 pour Grok et OpenCode,
-10 seulement sur une API facturée en dérogation. En
+Le script lance 4 jobs en parallèle sur Codex (défaut) et Antigravity, 2 pour
+Grok et OpenCode, 10 seulement sur une API facturée en dérogation. En
 relance manuelle d'un sous-ensemble — boucle directe sur `aipmt` — **5 en
 parallèle sont acceptés sur OpenAI**, demande explicite du propriétaire : 2 fait
 traîner un jeu de 14 CHANGELOG sur un quart d'heure.
 
 ## Project Overview
 
-AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex) and Grok subscription CLIs, with no per-use billing — or OpenCode, the open-source agent, routed to whatever provider the user configured in OpenCode (local model, free gateway, subscription or key) — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
+AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex), Grok and Google (Antigravity) subscription CLIs, with no per-use billing — or OpenCode, the open-source agent, routed to whatever provider the user configured in OpenCode (local model, free gateway, subscription or key) — or OpenRouter, a paid router to ~430 hosted models — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
 
 ## Commands
 
@@ -571,23 +585,23 @@ point d'entrée casse alors sur `AttributeError` et `pip check` ne voit rien.
 Modules, dans l'ordre topologique des imports : chaque flèche de dépendance va vers
 un module plus HAUT dans le tableau, jamais l'inverse.
 
-| Module                  | Rôle                                                                                                           |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `config.py`             | Trois couches de clés (env, `.env`, `~/.config/aipmt/.env`), `_missing_key_message`                            |
-| `markdown.py`           | Lexique partagé : regex de lignes structurelles, liens, balises, placeholders ; plages d'écritures             |
-| `segmentation.py`       | `segment_text()`, `MODEL_TOKEN_LIMITS` (objet unique, OpenRouter y écrit la fenêtre lue au préflight)          |
-| `naming.py`             | `EXCLUDE_PATTERNS`, nom de sortie, traduction déjà présente, garde anti-traversée, écriture                    |
-| `notes.py`              | Note de traduction (constructeurs purs)                                                                        |
-| `guards.py`             | Gardes de sortie : langue détectée, extrait source verbatim, ratio, écriture cible ; graine langdetect         |
-| `placeholders.py`       | Protection/restauration des blocs de code, code inline, URL, ancres, labels — et leurs validations             |
-| `news.py`               | Mode `--news` : `<NEWSQUOTE id="N"/>`, drapeaux par langue, règles du prompt et validations                    |
-| `prompts.py`            | Instructions système : contrat Markdown, placeholders, ancres, addenda news et écritures non latines           |
-| `providers/base.py`     | Socle des CLI : sous-processus, secrets, back-off, erreurs, refus en CI                                        |
-| `providers/<nom>.py`    | Un module par provider : `openai`, `mistral`, `anthropic`, `gemini`, `codex`, `grok`, `opencode`, `openrouter` |
-| `providers/registry.py` | `_resolve_provider`, `_PROVIDER_LABELS`, `_dispatch_provider_call`, `_select_provider_client`, flags           |
-| `pipeline.py`           | `translate()`, `translate_markdown_file()`, `translate_directory()`, `_append_translation_note()`              |
-| `cli.py`                | argparse hors providers, validation des chemins, `main()`                                                      |
-| `translate.py`          | FAÇADE de compatibilité : les 64 noms publics de l'ancien module unique, par identité ; `__all__` à 9          |
+| Module                  | Rôle                                                                                                                          |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `config.py`             | Trois couches de clés (env, `.env`, `~/.config/aipmt/.env`), `_missing_key_message`                                           |
+| `markdown.py`           | Lexique partagé : regex de lignes structurelles, liens, balises, placeholders ; plages d'écritures                            |
+| `segmentation.py`       | `segment_text()`, `MODEL_TOKEN_LIMITS` (objet unique, OpenRouter y écrit la fenêtre lue au préflight)                         |
+| `naming.py`             | `EXCLUDE_PATTERNS`, nom de sortie, traduction déjà présente, garde anti-traversée, écriture                                   |
+| `notes.py`              | Note de traduction (constructeurs purs)                                                                                       |
+| `guards.py`             | Gardes de sortie : langue détectée, extrait source verbatim, ratio, écriture cible ; graine langdetect                        |
+| `placeholders.py`       | Protection/restauration des blocs de code, code inline, URL, ancres, labels — et leurs validations                            |
+| `news.py`               | Mode `--news` : `<NEWSQUOTE id="N"/>`, drapeaux par langue, règles du prompt et validations                                   |
+| `prompts.py`            | Instructions système : contrat Markdown, placeholders, ancres, addenda news et écritures non latines                          |
+| `providers/base.py`     | Socle des CLI : sous-processus, secrets, back-off, erreurs, refus en CI                                                       |
+| `providers/<nom>.py`    | Un module par provider : `openai`, `mistral`, `anthropic`, `gemini`, `codex`, `grok`, `antigravity`, `opencode`, `openrouter` |
+| `providers/registry.py` | `_resolve_provider`, `_PROVIDER_LABELS`, `_dispatch_provider_call`, `_select_provider_client`, flags                          |
+| `pipeline.py`           | `translate()`, `translate_markdown_file()`, `translate_directory()`, `_append_translation_note()`                             |
+| `cli.py`                | argparse hors providers, validation des chemins, `main()`                                                                     |
+| `translate.py`          | FAÇADE de compatibilité : les 64 noms publics de l'ancien module unique, par identité ; `__all__` à 9                         |
 
 Deux règles qui découlent du découpage, verrouillées par `tests/test_facade_contract.py` :
 
@@ -635,6 +649,31 @@ commande. `_user_config_path()` suit `XDG_CONFIG_HOME` s'il est ABSOLU (la
 spécification demande d'ignorer une valeur relative, sans quoi l'emplacement
 redeviendrait fonction du répertoire courant) et `APPDATA` sous Windows.
 
+**La couche projet ne fournit que des clés.** Le `.env` est cherché depuis le
+répertoire courant et ses parents : un dépôt qu'on vient de cloner peut en
+poser un. `_drop_project_routing`, appelée entre la couche projet et la couche
+utilisateur, retire ce que le projet vient de poser parmi les variables qui
+décident où part une requête ou quel programme s'exécute
+(`_is_routing_variable`, casse ignorée) : tout nom en `_BASE_URL`, `_API_BASE`,
+`_ENDPOINT` ou `_BIN` — un MOTIF, parce que douze variables de routage ont été
+recensées dans les SDK installés, dont six pour le seul client Anthropic —,
+plus `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `SSL_CERT_FILE`, `SSL_CERT_DIR`,
+`REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`, `XDG_CONFIG_HOME`, `APPDATA` et
+`GROK_HOME`. `_BIN` et `GROK_HOME` depuis la 1.15.0 : `CODEX_BIN`, `GROK_BIN`,
+`OPENCODE_BIN`, `AGY_BIN` et `$GROK_HOME/bin/grok` désignent le binaire que la
+traduction EXÉCUTE, avec les droits de l'utilisateur — posés par le `.env` d'un
+dépôt cloné, ils faisaient lancer un fichier de ce dépôt. Toutes restent
+acceptées de l'environnement exporté et de `~/.config/aipmt/.env`. Chaque refus
+est dit sur stderr par son NOM seul : une valeur `https://${CLE}@hôte/` ferait
+fuir la clé dans les journaux. La couche projet est en outre lue sans
+interpolation (`interpolate=False`) : `NOM_ANODIN=${OPENAI_API_KEY}` y
+recopiait la vraie clé sous un nom que le filtrage par motif des
+sous-processus ne reconnaît pas. `regen_translations.sh` exporte le `.env` de
+CE dépôt (`set -a`) avant d'appeler aipmt : ses variables y arrivent donc par
+l'environnement, que le filtre ne touche pas — voulu, c'est le dépôt du
+propriétaire, et le script lit lui-même `GROK_BIN` et `AGY_BIN` pour ses
+contrôles préalables.
+
 Le trousseau système (`keyring`) a été écarté comme défaut : il échoue en
 headless — serveur, conteneur, CI — c'est-à-dire le cas d'usage même d'une
 traduction par lot. Un flag `--api-key` l'a été aussi : la clé atterrirait dans
@@ -657,11 +696,12 @@ Required API keys (set one based on which API you use). Use `.env` file or expor
 
 Optional: `XAI_BASE_URL`, `CLAUDE_TIMEOUT` (default 900s), `CODEX_BIN`,
 `CODEX_TIMEOUT`, `GROK_BIN`, `GROK_HOME`, `GROK_TIMEOUT`,
-`GROK_TRANSLATE_SANDBOX`, `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
+`GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT` (défaut 900 s par segment,
+démarrage compris), `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
 `OPENROUTER_BASE_URL` (https exigé), `OPENROUTER_TIMEOUT` (défaut 900 s),
 `OPENROUTER_PREFLIGHT_TIMEOUT` (défaut 30 s),
 `REGEN_PROVIDER`, `REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation, cf. règle en tête),
-`REGEN_JOB_TIMEOUT` (plafond par job du regen : 600 s, 1 800 s sur Codex),
+`REGEN_JOB_TIMEOUT` (plafond par job du regen : 600 s, 1 800 s sur Codex et Antigravity),
 `XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
 
 ## Recommended Usage
@@ -708,7 +748,19 @@ Points à connaître avant de toucher à ce code :
 - **Le timeout doit tuer le groupe de process.** Le `codex` de npm est un shim
   Node ; le vrai binaire Rust est un petit-fils qui survit à
   `subprocess.run(timeout=)` et continue à consommer du quota. D'où
-  `Popen(start_new_session=True)` + `os.killpg`.
+  `Popen(start_new_session=True)` + `os.killpg`. La contrepartie de la session
+  propre, pour les quatre CLI : l'agent ne reçoit ni le `SIGINT` d'un Ctrl-C ni
+  le `SIGHUP` d'un terminal fermé. Vérifié par la revue du 2026-09-26 sur un
+  faux binaire : il survivait à Python et finissait son tour sur le quota —
+  `Popen.__exit__` n'attend que 0,25 s sur `KeyboardInterrupt`, et `SIGHUP`
+  tuait Python sans exécuter aucun `finally`, laissant le répertoire privé
+  d'Antigravity sur le disque, journal compris. D'où, dans
+  `_codex_run_process`, `except BaseException: _codex_kill_group(proc); raise`
+  (Ctrl-C et `SystemExit`), et `_kill_group_on_sigterm`, qui couvre `SIGTERM`
+  ET `SIGHUP` — sortie en 128 + signal —, sauf un `SIGHUP` déjà ignoré
+  (`SIG_IGN`, lancement par `nohup`, choix de l'utilisateur), et qui restaure
+  `SIG_DFL` quand le gestionnaire précédent était `None` (posé hors de Python,
+  impossible à reposer).
 - **Exit code 0 ne veut pas dire succès** : inspecter la sortie JSONL
   (`turn.failed`/`error`) et l'existence du fichier `-o`.
 - **Les clés API sont retirées de l'env du sous-processus.** C'est la garantie
@@ -764,6 +816,365 @@ end_turn` là où OpenAI émet `stop`.
   d'outils, la sortie serait tronquée. Le plancher mesuré est 2.
 - **Quota non mesurable** : pool hebdomadaire partagé avec Chat, Imagine et
   Voice, aucune commande ne l'expose. D'où `max_jobs=2` au regen.
+
+### Provider Antigravity (`--use_antigravity`) — quota d'abonnement Google
+
+```bash
+aipmt --use_antigravity --file README.md --target_dir . --target_lang en
+aipmt --use_antigravity --eco --file README.md --target_dir . --target_lang ja
+REGEN_PROVIDER=antigravity ./regen_translations.sh --force   # abonnement : sans dérogation
+agy -p /usage --output-format json                            # quota restant, sans en consommer
+```
+
+Dixième chemin. Pilote `agy`, le CLI officiel d'Antigravity (binaire Go de
+219 Mo, `~/.local/bin/agy`), en mode headless : la traduction est décomptée du
+quota de l'abonnement Google AI Pro ou Ultra, pas facturée au token. **C'est le
+seul chemin vers ce quota** : Gemini CLI ne sert plus les comptes Pro, Ultra ni
+gratuits depuis le 2026-06-18
+(<https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/>),
+et le SDK Python Antigravity ne s'authentifie que par `GEMINI_API_KEY` ou
+Vertex/ADC (<https://antigravity.google/docs/sdk/overview/>). Tout ce qui suit a
+été **mesuré sur agy 1.2.11 le 2026-09-26**, pas déduit de la doc :
+
+- **Binaire** : `AGY_BIN`, puis le `PATH`, puis `~/.local/bin/agy`, où il est
+  installé sans que le `PATH` de la session le sache. **Jamais `antigravity`**,
+  lanceur de l'IDE, qui ouvrirait l'éditeur. Plancher 1.2.11, vérifié au
+  préflight : avant, un agent de projet pouvait rester introuvable en headless.
+  Le chemin rendu est ABSOLU (`os.path.abspath`) : l'appel tourne avec pour
+  `cwd` le répertoire privé, où un `AGY_BIN` ou une entrée de `PATH` relatifs
+  étaient introuvables (reproduit par la revue sur un faux binaire). `AGY_BIN`
+  n'est pas accepté d'un `.env` de projet (cf. § Environment Variables).
+- **Auth** : le compte Google de l'abonnement, rangé dans le trousseau du
+  système (Secret Service, par D-Bus), **jamais lu par aipmt** — lancer `agy`
+  une fois et s'y connecter suffit. Une session déconnectée (« Authentication
+  required », « authentication failed or timed out », « not logged in ») donne
+  `ANTIGRAVITY_LOGIN_HINT` : relancer `agy` dans un terminal de la session
+  graphique pour se connecter ; sans trousseau joignable, agy range son jeton
+  dans un fichier de `~/.gemini`, que l'isolation masque volontairement.
+- **Plateformes : `_antigravity_check_platform()`**, appelée par
+  `_init_antigravity_client` juste après le refus en CI, avant la validation
+  du modèle et tout lancement d'agy. Refus en fermé :
+  - `os.name == "nt"` → `ANTIGRAVITY_UNSUPPORTED_WINDOWS`. Go y lit
+    `USERPROFILE`, `APPDATA`, `LOCALAPPDATA` et `TEMP`, pas `HOME` ni `TMPDIR`
+    (doc de Go et chaînes du binaire ; non mesuré sous Windows) : rien n'y
+    isolerait l'appel des réglages ni de l'historique, et sans session propre
+    agy garderait la console pour y demander un code (changelog 1.1.2).
+  - Linux sans bus de session → `ANTIGRAVITY_NO_SESSION_BUS`.
+    `_antigravity_session_bus_reachable` accepte un `DBUS_SESSION_BUS_ADDRESS`
+    non vide, sinon l'existence de `$XDG_RUNTIME_DIR/bus`, à défaut de
+    `/run/user/<uid>/bus` — la socket par défaut que la bibliothèque D-Bus
+    essaie seule (mesuré : un `env -i` sans aucune des deux variables
+    s'authentifie quand même). Sans bus — SSH, conteneur, serveur —, agy range
+    son jeton dans un FICHIER sous le HOME réel (changelog 1.1.3 : « bypasses
+    the keyring when no D-Bus session bus is present »), que le HOME privé
+    masque : le préflight y attendrait 60 s un code, comme dans le cas mesuré
+    « bus masqué », puis conseillerait une reconnexion qui ne résout rien. Non
+    mesuré de bout en bout sur un hôte sans bus.
+  - macOS passe : trousseau du système, pas de D-Bus. L'isolation par HOME n'y
+    est pas mesurée ; la garde de facturation, qui lit la configuration
+    effective, y tient.
+  - **Piège CI** : les runners GitHub (Linux) n'ont pas de bus de session. Tout
+    test qui appelle `_init_antigravity_client` neutralise
+    `_antigravity_check_platform` (ou `_antigravity_session_bus_reachable`) par
+    un patch sur `aipmt.providers.antigravity` — sinon vert sur ce poste, rouge
+    en CI.
+- **Invocation** : `agy --output-format json --agent aipmt
+--disable-slash-commands --log-file <journal> --model <slug>`, segment sur
+  stdin, **sans `-p`** : avec `-p`, agy ignore stdin ; sans lui, stdin n'étant
+  pas un terminal, il passe en mode print et lit stdin jusqu'à EOF. Un stdin
+  vide ouvre la TUI (rc 0, erreur non JSON sur stdout). `translate()` ne
+  transmet plus aucun segment blanc, à aucun provider : il le rend tel quel
+  (`not segment.strip()`). La revue l'avait reproduit — 16 001 caractères
+  terminés par « \n\n\n » donnent un second segment « \n\n », dont le refus
+  faisait échouer le FICHIER après consommation du quota du premier.
+  `_antigravity_attempt` garde son refus en dernier filet.
+- **Isolation par appel** : HOME, TMPDIR et répertoire de travail privés
+  (`tempfile`, 0700), effacés après l'appel avec le journal, qui contient
+  l'adresse du compte. agy s'authentifie quand même, par le trousseau, et le
+  jeton rafraîchi y est réécrit pour toutes les sessions. Rien n'est hérité de
+  l'utilisateur : ni son `settings.json` (`permissions.allow`, qui laissait
+  l'agent par défaut lancer `ls` et `git` sans rien demander ;
+  `allowNonWorkspaceAccess` ; `modelProvider`), ni ses `GEMINI.md` et
+  `AGENTS.md` globaux, plugins, MCP, hooks et skills. Rien n'est écrit dans son
+  historique : chaque appel y laissait une conversation d'environ 200 Ko, texte
+  traduit compris, et la campagne de sondes y avait laissé ~95 conversations et
+  évincé 17 entrées du cache `implicit/`, plafonné à 100. Parmi les variables
+  de session, seules `XDG_RUNTIME_DIR` et `DBUS_SESSION_BUS_ADDRESS` passent la
+  liste d'autorisation (cf. Environnement) : c'est par le bus de session qu'agy
+  atteint le trousseau (bus masqué : 60 s d'attente d'un code de connexion,
+  puis échec). `XDG_CONFIG_HOME` et ses sœurs n'y sont pas, si bien que tout
+  chemin dérivé tombe dans le HOME privé. Vérifié de bout en bout : aucun
+  fichier écrit dans `~/.gemini/antigravity-cli`.
+- **Agent confiné**, écrit dans le répertoire jetable :
+  `.agents/agents/aipmt.md`, frontmatter `name`, `description`, `tools: []`,
+  `excludeDefaultComponents: true`, `inheritCustomizations: false`, puis
+  `# aipmt`, puis les instructions système et `ANTIGRAVITY_AGENT_CONTRACT`.
+  Environ 800 tokens d'entrée au lieu de 12 400 avec l'agent par défaut.
+  `excludeDefaultComponents` seul laisse les hooks du workspace exécuter leurs
+  commandes et injecter leur texte ; `inheritCustomizations: false` les coupe.
+- **Repli silencieux, démontré** : un agent introuvable donne rc 0, status
+  `SUCCESS` et l'agent de codage, 57 outils actifs. À « Le chat dort. », il a
+  répondu « Chut, ne le réveillons pas ! 🐱💤 Que puis-je faire pour vous
+  aujourd'hui ? ». Aucune trace sur stdout ni stderr : **seul le journal le
+  dit**. La garde refuse si le journal annonce le repli, et exige le marqueur
+  POSITIF du chargement de l'agent — l'agent par défaut écrit `agent=false`. Ce
+  ne sont que des lignes de log, pas un contrat : une évolution du format fait
+  refuser la traduction au lieu de retirer la garde en silence.
+- **Marqueurs ancrés sur une ligne ENTIÈRE, au format glog mesuré**
+  (`_GLOG_LINE` : sévérité `[IWEF]`, date `MMJJ`, heure à la microseconde, fil,
+  `fichier:ligne]`, en `re.MULTILINE`, fin de ligne comprise). Lignes réelles
+  d'agy 1.2.11, à reprendre telles quelles dans les fixtures :
+
+  ```text
+  I0926 10:36:51.895710       1 conversation_manager.go:512] Starting new conversation (agent=true)
+  I0926 10:36:08.477937       1 conversation_manager.go:512] Starting new conversation (agent=false)
+  W0926 10:30:43.128362       1 session.go:94] Agent "agent-inexistant" not found, falling back to default
+  I0926 10:36:47.628476       1 server_oauth.go:196] applyAuthResult: email=compte@example.com, authMethod=consumer, quotaProject=
+  ```
+
+  Pourquoi l'ancrage : le binaire contient aussi
+  `HandleUserInput called with text: %q`, qui recopierait le segment dans le
+  journal. Non ancré, un document qui cite ces messages satisfaisait la garde
+  positive à la place d'agy (vérifié par la revue sur un journal synthétique).
+  `%q` échappe les sauts de ligne : l'écho reste sur une seule ligne, que
+  l'ancrage écarte. Mesuré le 2026-09-26 : aucun des 78 journaux réels des
+  sondes ne porte cette ligne au niveau de log par défaut. Validé contre le vrai
+  agy après correctif : agent forcé inexistant → « agy est retombé en silence
+  sur son agent de codage », réponse refusée.
+
+- **Voie de facturation attestée par appel** : le journal doit porter la ligne
+  glog `applyAuthResult: … authMethod=consumer` (l'abonnement), sinon refus
+  avec `ANTIGRAVITY_LOGIN_HINT`. Et toute occurrence de `authMethod=` ou
+  `auth_method=` — les deux graphies figurent dans le binaire — portant une
+  autre valeur que `consumer`, OÙ QU'ELLE SOIT dans le journal, fait refuser :
+  même hors d'une ligne glog, puisque refuser est le côté sûr. Conséquence
+  pour la documentation : ne jamais écrire dans le README ni le CHANGELOG, que
+  ce chemin peut traduire, un exemple de `authMethod=` suivi d'une autre
+  valeur ; un agy qui recopierait l'entrée ferait refuser le segment.
+- **Environnement : une liste d'AUTORISATION** (`_antigravity_env_base`),
+  préflight compris, dans cet ordre :
+
+  1. ne passent que `ANTIGRAVITY_KEPT_ENV_VARS` — `PATH`, `LANG`, `LANGUAGE`,
+     `TZ`, `TERM`, `USER`, `LOGNAME`, `XDG_RUNTIME_DIR`,
+     `DBUS_SESSION_BUS_ADDRESS`, `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`,
+     `NO_PROXY` et leurs minuscules, `SSL_CERT_FILE`, `SSL_CERT_DIR` — et le
+     préfixe `LC_`. C'est ce dont un `env -i` a prouvé qu'agy a besoin. Tout le
+     reste disparaît, dont `HOME`, `TMPDIR`, `XDG_CONFIG_HOME` et ses sœurs,
+     `DISPLAY` et `BROWSER` (aucun navigateur ne doit s'ouvrir depuis un job de
+     traduction), `OPENAI_BASE_URL` et toute variable `AGY_`, `GOOGLE_`,
+     `GEMINI_`… ;
+  2. `_strip_secret_env` (motifs `API_KEY`, `_TOKEN`, `SECRET`, `PASSWORD`,
+     `CREDENTIALS`) passe quand même : un nom de la liste qui porterait un de
+     ces motifs resterait refusé ;
+  3. `AGY_CLI_DISABLE_AUTO_UPDATE=true` (`ANTIGRAVITY_ENV_OVERRIDES`) ;
+  4. `HOME` et `TMPDIR` privés, propres à l'appel (`_antigravity_env`).
+
+  Pourquoi une autorisation et non un refus : la première version retirait des
+  familles de préfixes (`AGY_`, `ANTIGRAVITY_`, `JETSKI_`, `CLOUD_CODE_`,
+  `CLOUDSDK_`, `GOOGLE_`, `GEMINI_`), et la revue du 2026-09-26 a trouvé dans
+  les chaînes du binaire des surcharges d'endpoint qui la traversaient :
+  `AICODE_ENDPOINT_URL` et ses variantes `BAICODE_*`, `UNLEASH_URL` (drapeaux
+  de fonctionnalité), `GCE_METADATA_HOST` — leur effet sur agy n'est pas
+  mesuré, et c'est justement le problème d'une liste de refus. Mesuré en
+  revanche : `AGY_GATEWAY_URL` envoie le prompt à une passerelle tierce,
+  `AGY_ADC_AUTH` bascule sur un projet Google Cloud facturé, `CLOUD_CODE_URL`
+  détourne l'endpoint authentifié vers n'importe quelle URL ; `GEMINI_API_KEY`
+  ne bascule sur l'API que si `settings.json` porte `modelProvider="gemini"`,
+  ce que le HOME neuf n'a pas. Les proxies et certificats transmis ne peuvent
+  venir que de l'environnement exporté ou de `~/.config/aipmt/.env` : le filtre
+  de la couche projet les écarte (cf. § Environment Variables).
+  `AGY_CLI_DISABLE_AUTO_UPDATE` est posée APRÈS le filtrage : la valeur `1` est
+  sans effet, `true` fait écrire « Auto-update disabled via environment
+  variable » au journal. Sans elle, un HOME neuf lance à chaque appel le
+  vérificateur de mise à jour, dans sa propre session, hors d'atteinte du
+  `killpg`.
+
+- **Préflight, zéro quota** (usage à zéro, mesuré) : `agy --version` ≥ 1.2.11,
+  puis `agy -p /config --output-format json --log-file …` dans le même
+  isolement. Refus si `useG1Credits` ne vaut pas `false` (crédits IA payants
+  au-delà du quota), si `modelProvider` n'est pas vide (clé API), si `gcp`
+  n'est pas nul (projet Google Cloud), ou si le journal n'atteste pas
+  `authMethod=consumer`. **Un réglage ABSENT compte comme un problème, pour
+  chacun des trois** (`_antigravity_billing_problems`, sentinelle
+  `_ANTIGRAVITY_ABSENT` affichée « (absent de /config) », messages « doit
+  valoir false / doit être vide / doit être nul ») : une version d'agy qui en
+  renommerait un ne doit pas faire passer un contrôle qui n'a rien vérifié. La
+  première version, par `.get()`, acceptait `{"useG1Credits": false}` seul, ou
+  un `gcp` renommé en `gcpProject` (vérifié par la revue). Sur le compte du
+  propriétaire le 2026-09-26 : `useG1Credits` false, 0 crédit restant,
+  `modelProvider` vide, `gcp` null. `/config` prend de 2 à 11 s, sous un plafond de 120 s
+  (`ANTIGRAVITY_CHECK_TIMEOUT`) : une session déconnectée y attend 60 s un code
+  de connexion. Les deux commandes du préflight passent par
+  `_antigravity_run_check`, un `subprocess.run` enveloppé dans
+  `_kill_group_on_sigterm({})` : un `SIGTERM` ou un `SIGHUP` reçu pendant le
+  contrôle lève `SystemExit`, `subprocess.run` tue agy, et le répertoire privé
+  est effacé en remontant. Sans ce gestionnaire, Python mourait sans nettoyage
+  et le répertoire restait sur le disque avec son journal (relevé par la
+  revue ; le test appelle le gestionnaire au lieu d'envoyer un vrai signal au
+  lanceur de tests).
+- **Contrat de sortie**, dans cet ordre : rc 0 ET objet JSON ET
+  `status == "SUCCESS"`, sinon échec — rc 3 = échec du modèle ou de l'agent,
+  avec une ligne `AGY_ERROR: {json}` sur stderr (depuis la 1.2.6), lue par
+  `json.JSONDecoder().raw_decode` juste après le marqueur
+  (`_antigravity_agy_error_data` → dict ou None ; `_antigravity_agy_error` →
+  chaîne compacte pour le message) : `raw_decode` s'arrête à la fin de l'objet,
+  un code couleur ou un « } » écrits après ne s'y mêlent pas ; rc 1 = argument
+  refusé, un modèle inconnu par exemple, sans repli silencieux depuis la 1.1.2 ;
+  la réponse partielle que peut porter le JSON d'un échec n'est jamais lue.
+  Puis la garde du journal (agent, `authMethod`). Puis
+  `_antigravity_reject_non_answers` : refus si le JSON porte `denied_actions`,
+  `command` ou `error`, ou si stderr contient « print timeout », « no output
+  produced » ou « may be truncated ». Enfin `_antigravity_extract_answer` :
+  `response` non vide, qui reprend la fin de ligne du SEGMENT —
+  `text.rstrip("\n")`, plus `"\n"` si le segment finit par un saut de ligne.
+  agy termine chaque réponse par un saut de ligne, que le segment en ait un ou
+  non (mesuré sur les quatorze modèles) ; rendue telle quelle, la réponse
+  insérait une ligne vide à la jonction d'une coupure en milieu de phrase et
+  scindait le paragraphe — ou un tableau, sur une coupure dure (revue). Validé
+  contre le vrai agy dans les deux sens.
+- **Jamais `--print-timeout`** : à expiration, la sortie partielle sort en
+  `SUCCESS`, rc 0. Le plafond est externe — `AGY_TIMEOUT`, 900 s par segment,
+  démarrage compris, agy payant de 2 à 30 s d'appels réseau avant d'envoyer le
+  message — et tue le groupe de processus, `SIGTERM` puis `SIGKILL`
+  (`base._codex_run_process`, qui prend désormais un `cwd` : agy n'a pas
+  d'option de répertoire de travail et y cherche l'agent). Ctrl-C et `SIGHUP`
+  tuent aussi le groupe, puis le répertoire privé est effacé (cf. § Codex,
+  « Le timeout doit tuer le groupe de process »).
+- **Relance pilotée par `retryable`** :
+  `_antigravity_is_rate_limited(text, agy_error)` reçoit le détail ET le dict
+  d'`AGY_ERROR`, que le détail vienne ou non du champ `error` du JSON :
+
+  - `AGY_ERROR` porte un booléen `retryable` → il décide SEUL. agy réessaie
+    déjà lui-même, en processus, les 502, 503, 504 et les 429 par minute (son
+    changelog), puis dit si l'échec restant l'est encore ;
+  - sinon, aucune relance si le texte contient « exhausted » : chez Google,
+    `RESOURCE_EXHAUSTED` porte le même 429 qu'une limite par minute, mais une
+    fenêtre de 5 h épuisée ne se rendra pas en 90 s ;
+  - sinon, relance sur « rate limit », « rate_limit », « too many requests » ou
+    `429` comme nombre, cherchés dans le détail ET dans `AGY_ERROR`. « quota »
+    seul n'est pas un marqueur.
+
+  3 tentatives, 30 puis 60 s d'attente. La première version, sur sous-chaînes,
+  relançait trois fois une fenêtre épuisée (`\b429\b` captait son code) et
+  jamais un 503 `retryable: true` (revue, sur des lignes `AGY_ERROR`
+  synthétiques : le format réel d'un échec n'a pas été mesuré).
+
+- **Injection** : grâce à `--disable-slash-commands`, un segment qui commence
+  par `!commande`, `@fichier` ou `/commande` n'est ni exécuté, ni résolu, ni
+  développé. Sans lui, un segment « /help » s'exécutait à la place d'être
+  traduit.
+- **Modèles** : les identifiants d'`agy models`, effort compris —
+  `gemini-3.8-flash-{high,medium,low}`, `gemini-3.7-flash-{high,medium,low}`,
+  `gemini-3.6-flash-{high,medium,low}`, `gemini-3.1-pro-{high,low}`,
+  `claude-sonnet-4-6`, `claude-opus-4-6-thinking`, `gpt-oss-120b-medium` ; tous
+  figurent dans `MODEL_TOKEN_LIMITS`. Un nom de base seul (`gemini-3.7-flash`)
+  est refusé par agy : aipmt le refuse avant l'appel et propose les suffixes
+  qui existent — `-high` ou `-low` pour un Pro, `-medium` ou `-low` pour un
+  Flash (la première version proposait `gemini-3.1-pro-medium`, qu'agy
+  refuse). Défauts **fixés par la campagne du 2026-09-26** (ci-dessous), écrits
+  en toutes lettres et jamais alias de `DEFAULT_MODEL_GEMINI` :
+  `DEFAULT_MODEL_ANTIGRAVITY` = `gemini-3.7-flash-medium`,
+  `ECO_MODEL_ANTIGRAVITY` = `gemini-3.7-flash-low`. `gemini-3.8-flash-medium`
+  est écarté : le plus lent du pilote (103 à 128 s par README), et 79 % de sa
+  sortie consacrés au raisonnement sur une sonde (3 658 tokens sur 4 606),
+  décomptés au tarif de sortie. `--reasoning_effort` : sans effet,
+  avertissement.
+- **Quota** : deux groupes, Gemini et « Claude and GPT models », chacun avec une
+  fenêtre de 5 h et une hebdomadaire, lisibles gratuitement par
+  `agy -p /usage --output-format json` (`remaining_fraction`, `reset_time`).
+  Texte officiel de `/usage` : le quota se décompte proportionnellement au coût
+  des tokens, et la limite hebdomadaire dépend du palier de l'abonnement. Un
+  appel Claude ou GPT-OSS a coûté environ 1 % de la fenêtre de 5 h, contre
+  0,05 % en Flash : avertissement. Coût d'une traduction réelle : cf. la
+  campagne ci-dessous, environ 12 points de la fenêtre de 5 h par million de
+  caractères source en `gemini-3.7-flash-medium`.
+- **Parallélisme** : 4 appels simultanés mesurés sans erreur, chacun dans son
+  HOME, puis les 45 traductions de la campagne du 2026-09-26 à 4 en parallèle,
+  sans un échec. D'où `max_jobs=4` au regen. Le plafond de 1 800 s par job,
+  repris de Codex, est validé par la mesure : le CHANGELOG entier en hindi
+  (HEAD 1.14.1, 94 080 caractères) traduit en 273 s, marge ×6,5.
+- **Refusé en CI**, comme Codex et Grok CLI : l'auth par trousseau personnel
+  n'est pas prévue pour un runner partagé. Repli proposé par le message :
+  `--use_gemini` avec `GOOGLE_API_KEY` (`_CLI_PROVIDER_CI_FALLBACK`).
+- **Câblage** : les CLI ont leur propre chaîne de dispatch
+  (`_call_cli_provider` dans `registry`), une seule fonction dépassant ce que
+  Codacy tolère ; un nom de CLI inconnu y lève au lieu de retomber sur un autre
+  abonnement.
+- **Bout en bout, 2026-09-26** : un guide Markdown (front matter, gras, lien à
+  parenthèses, code en ligne, bloc de code indenté dans une liste, tableau,
+  citation) traduit en anglais en 14 s préflight compris, structure identique,
+  note de traduction ajoutée ; rien d'écrit dans `~/.gemini/antigravity-cli`.
+  Revalidé après les correctifs de la revue, contre le vrai agy : le même guide
+  en allemand, structure identique en 19 s, rien d'écrit dans `~/.gemini`.
+
+**Campagne du 2026-09-26**, par `aipmt --use_antigravity` lui-même
+(`--add_translation_note --force`, `--news` pour l'article), quatre traductions
+en parallèle (`xargs -P 4`), chacune comparée à sa source par
+`scripts/compare_structure.py`, quota lu par `agy -p /usage` avant et après
+chaque phase. Sources : le README de HEAD, c'est-à-dire celui de la 1.14.0
+(600 lignes, 39 075 caractères — pas la révision figée du 9 septembre des
+autres lignes du tableau du README) ; le CHANGELOG de HEAD (1.14.1, 315 lignes, 94 080
+caractères) ; l'article dense du tableau de compatibilité,
+`ia-actualites-3-sep-2026.mdx` (589 lignes, 91 973 caractères).
+
+| Phase    | Modèle                    | Document                          | Écrites · sans écart | Durée par langue                 |
+| -------- | ------------------------- | --------------------------------- | -------------------- | -------------------------------- |
+| Pilote   | `gemini-3.7-flash-medium` | README (ja, ar, hi)               | 3/3 · 3/3            | 72 à 84 s                        |
+| Pilote   | `gemini-3.7-flash-low`    | README (ja, ar, hi)               | 3/3 · 3/3            | 42 à 56 s                        |
+| Pilote   | `gemini-3.8-flash-low`    | README (ja, ar, hi)               | 3/3 · 3/3            | 54 à 58 s                        |
+| Pilote   | `gemini-3.8-flash-medium` | README (ja, ar, hi)               | 3/3 · 3/3            | 103 à 128 s                      |
+| Pilote   | `gemini-3.7-flash-medium` | CHANGELOG entier (hi)             | 1/1 · 1/1            | 273 s                            |
+| Complète | `gemini-3.7-flash-medium` | article `--news`, 14 langues      | 14/14 · 14/14        | médiane 3 min 14 s (162 à 259 s) |
+| Complète | `gemini-3.7-flash-medium` | README, 14 langues                | 14/14 · 13/14        | médiane 1 min 22 s (59 à 110 s)  |
+| Complète | `gemini-3.7-flash-low`    | article `--news` (en, ja, ar, hi) | 4/4 · 4/4            | médiane 1 min 52 s (85 à 139 s)  |
+
+- **Choix des défauts** : aucun écart de structure ne départage les quatre
+  Flash du pilote. Le défaut qualité reste donc dans la famille qui a le plus
+  de preuves — Gemini 3.7 Flash, 14/14 sur l'article par l'API —, à l'effort
+  moyen ; l'éco est la même famille à l'effort bas, la plus rapide.
+  `gemini-3.8-flash-medium` est écarté (cf. Modèles).
+- **Le seul écart** : le README en coréen, « gras 36≠37 », un mot en gras de
+  moins.
+- **Mode `--news` en anglais** : les trois lignes `> 🇫🇷 _…_` absentes de la
+  sortie, aucun 🇺🇸 ni 🇬🇧 inventé — l'échec qui a disqualifié Gemma 4 et
+  Qwen 3.5 —, les trois citations anglaises verbatim. C'est le modèle qui les a
+  retirées : aucun journal de la campagne ne porte la ligne « (cleanup) » que
+  `_cleanup_source_flag_for_en` imprime quand il agit. Même résultat en
+  `gemini-3.7-flash-low`.
+- **Quota** (`remaining_fraction` du groupe Gemini) : la campagne complète —
+  32 traductions, 2,20 millions de caractères source — a fait passer la
+  fenêtre de 5 h de 88,87 % à 62,61 % (26,3 points) et la semaine de 91,05 % à
+  86,67 % (4,4 points) ; le pilote — 13 traductions, 0,56 million de
+  caractères — 6,2 et 1,0 point. Le groupe « Claude and GPT models » n'a pas
+  bougé. Soit environ 12 points de la fenêtre de 5 h par million de
+  caractères : un README de 40 000 caractères ≈ 0,5 point, une régénération
+  des 28 traductions de ce dépôt ≈ un quart de la fenêtre. Valable pour le
+  palier du compte du propriétaire : `/usage` dit que la limite hebdomadaire
+  dépend du palier.
+
+**Conditions d'utilisation, que le README dit sans les adoucir.** Les CGU
+d'Antigravity (section 6, <https://antigravity.google/terms>) et la FAQ
+(<https://antigravity.google/docs/faq/>) interdisent l'accès au service par un
+logiciel tiers sur le login Antigravity — Claude Code, OpenClaw et OpenCode y
+sont cités —, sous peine de suspension du compte. aipmt ne réutilise jamais le
+jeton : il lance le binaire officiel en mode headless, que Google documente pour
+les scripts et la CI (<https://antigravity.google/docs/cli/headless/>). Un
+membre de Google a jugé « standard », sur le forum officiel le 2026-09-25, de
+lancer `agy -p` depuis un script local pour son propre workflow (réponse non
+contractuelle :
+<https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829>).
+Aucun texte ne tranche le cas d'un outil distribué : l'utilisateur engage son
+compte.
+
+**Données** : CGU section 5, les Interactions (prompts, réponses, métadonnées)
+peuvent servir à améliorer les produits et le ML de Google et être relues par
+des humains, sans distinction entre l'offre gratuite et Pro/Ultra. Le retrait
+passe par le réglage `enableTelemetry`, dont l'effet exact n'est pas documenté.
+D'où la consigne du README : documents publics (README, articles), jamais de
+confidentiel. **Non mesuré** : si `enableTelemetry` vit dans `settings.json`,
+comme les réglages que le HOME privé écarte, le retrait posé par l'utilisateur
+ne suit pas dans les appels d'aipmt — `agy -p /config` lancé dans le même
+isolement le trancherait.
 
 ### Provider OpenCode (`--use_opencode`) — routeur open source, `--model` obligatoire
 
@@ -988,16 +1399,17 @@ ligne ou URL perdus —, aucun n'est dû à l'infrastructure.
 
 ### Default Models (2026)
 
-| Provider | Quality (default)                     | Economic (`--eco`)      |
-| -------- | ------------------------------------- | ----------------------- |
-| OpenAI   | `gpt-5.6-terra`                       | `gpt-5.6-luna`          |
-| Claude   | `claude-sonnet-5`                     | `claude-haiku-4-5`      |
-| Mistral  | `mistral-large-latest`                | `mistral-small-latest`  |
-| Gemini   | `gemini-3.7-flash`                    | `gemini-3.1-flash-lite` |
-| Codex    | `gpt-5.6-sol`                         | `gpt-5.6-luna`          |
-| Grok API | `grok-4.6`                            | `grok-4.3`              |
-| Grok CLI | `grok-4.6`                            | `grok-4.5`              |
-| OpenCode | `--model provider/modèle` obligatoire | idem                    |
+| Provider    | Quality (default)                     | Economic (`--eco`)      |
+| ----------- | ------------------------------------- | ----------------------- |
+| OpenAI      | `gpt-5.6-terra`                       | `gpt-5.6-luna`          |
+| Claude      | `claude-sonnet-5`                     | `claude-haiku-4-5`      |
+| Mistral     | `mistral-large-latest`                | `mistral-small-latest`  |
+| Gemini      | `gemini-3.7-flash`                    | `gemini-3.1-flash-lite` |
+| Codex       | `gpt-5.6-sol`                         | `gpt-5.6-luna`          |
+| Grok API    | `grok-4.6`                            | `grok-4.3`              |
+| Grok CLI    | `grok-4.6`                            | `grok-4.5`              |
+| Antigravity | `gemini-3.7-flash-medium`             | `gemini-3.7-flash-low`  |
+| OpenCode    | `--model provider/modèle` obligatoire | idem                    |
 
 ### Model lifecycle — dates to watch (audited 2026-08-29)
 

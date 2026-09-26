@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import inspect
 import io
+import json
 import os
 import subprocess  # nosec B404 — exerce le point d'entrée réel, cf. TestMissingKeyIsNotATraceback
 import sys
@@ -138,6 +139,37 @@ _JETON_UTILISATEUR = "jeton-de-test-utilisateur"  # pragma: allowlist secret
 _JETON_ROUTEUR = "jeton-de-test-routeur"  # pragma: allowlist secret
 
 
+def _charger_les_couches(variable, project=None, user=None, env=None):
+    """Banc commun aux URL et aux binaires : pose `variable` dans les couches
+    demandées — `.env` du projet, configuration utilisateur sous un
+    `XDG_CONFIG_HOME` temporaire, environnement —, charge la configuration
+    depuis le projet, puis renvoie (valeur vue par le module, stderr)."""
+    with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
+        if project is not None:
+            Path(projet, ".env").write_text(f"{variable}={project}\n", encoding="utf-8")
+        user_env = Path(config, "aipmt", ".env")
+        if user is not None:
+            user_env.parent.mkdir(parents=True)
+            user_env.write_text(f"{variable}={user}\n", encoding="utf-8")
+        overrides = {"XDG_CONFIG_HOME": config}
+        if env is not None:
+            overrides[variable] = env
+        previous = os.getcwd()
+        try:
+            os.chdir(projet)
+            with (
+                patch.dict(os.environ, overrides, clear=False),
+                patch("sys.stderr", io.StringIO()) as err,
+            ):
+                if env is None:
+                    os.environ.pop(variable, None)
+                aipmt_config._load_configuration()
+                return os.environ.get(variable), err.getvalue()
+        finally:
+            os.chdir(previous)
+            os.environ.pop(variable, None)
+
+
 class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
     """Un `.env` de projet ne pose pas d'URL d'endpoint.
 
@@ -152,31 +184,7 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
     HOSTILE = "https://attaquant.example/v1"
     LEGITIME = "https://relais-interne.example/v1"
 
-    def _run(self, variable, project=None, user=None, env=None):
-        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as config:
-            if project is not None:
-                Path(projet, ".env").write_text(f"{variable}={project}\n", encoding="utf-8")
-            user_env = Path(config, "aipmt", ".env")
-            if user is not None:
-                user_env.parent.mkdir(parents=True)
-                user_env.write_text(f"{variable}={user}\n", encoding="utf-8")
-            overrides = {"XDG_CONFIG_HOME": config}
-            if env is not None:
-                overrides[variable] = env
-            previous = os.getcwd()
-            try:
-                os.chdir(projet)
-                with (
-                    patch.dict(os.environ, overrides, clear=False),
-                    patch("sys.stderr", io.StringIO()) as err,
-                ):
-                    if env is None:
-                        os.environ.pop(variable, None)
-                    aipmt_config._load_configuration()
-                    return os.environ.get(variable), err.getvalue()
-            finally:
-                os.chdir(previous)
-                os.environ.pop(variable, None)
+    _run = staticmethod(_charger_les_couches)
 
     def test_every_routing_variable_is_refused_from_the_project(self) -> None:
         """Recensé sur les SDK installés : douze variables de routage sont
@@ -328,6 +336,160 @@ class TestProjectDotenvCannotRedirectApiCalls(unittest.TestCase):
         """Contre-épreuve : le refus vise les URL, pas la couche entière."""
         valeur, _ = self._run("AIPMT_TEST_ORDINARY", project="valeur-du-projet")
         self.assertEqual(valeur, "valeur-du-projet")
+
+
+# Les variables qui désignent le binaire qu'une traduction EXÉCUTE : les `_BIN`
+# des quatre CLI, et GROK_HOME, sous lequel le binaire Grok est cherché.
+_BINARY_VARIABLES = ("AGY_BIN", "CODEX_BIN", "GROK_BIN", "OPENCODE_BIN", "GROK_HOME")
+
+
+# Exécuté dans un processus neuf, depuis le projet : `import aipmt` y charge les
+# trois couches, comme la commande installée, puis chaque provider résout son
+# binaire. Les résolveurs ne font que chercher un fichier : rien n'est lancé.
+_RESOUDRE_LES_BINAIRES = """
+import json
+
+import aipmt
+from aipmt.providers import antigravity, codex, grok, opencode
+
+print(json.dumps({
+    "agy": antigravity._resolve_antigravity_binary(),
+    "codex": codex._resolve_codex_binary(),
+    "grok": grok._resolve_grok_binary(),
+    "opencode": opencode._resolve_opencode_binary(),
+}))
+"""
+
+
+def _executable(path):
+    """Un exécutable inoffensif à `path`, qui laisse une trace à côté de lui
+    s'il est jamais lancé. Droits 0700 : rien au-delà de l'utilisateur."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text('#!/bin/sh\n: > "$0.execute"\n', encoding="utf-8")
+    path.chmod(0o700)
+    return path
+
+
+def _projet_hostile(projet, maison):
+    """Le dépôt cloné et la maison de l'utilisateur, pour le processus neuf.
+
+    Le projet fournit un exécutable pour chacune des cinq variables ;
+    l'environnement exporte CODEX_BIN et la configuration utilisateur pose
+    OPENCODE_BIN. HOME et PATH pointent sur des répertoires sans binaire :
+    aucune résolution de repli ne trouve un vrai CLI de la machine. Renvoie
+    (environnement du processus, binaire attendu de chaque résolveur)."""
+    piege = Path(projet, "piege")
+    _executable(piege / "bin" / "grok")  # `$GROK_HOME/bin/grok`
+    depot = {
+        "AGY_BIN": _executable(piege / "agy"),
+        "CODEX_BIN": _executable(piege / "codex"),
+        "GROK_BIN": _executable(piege / "grok"),
+        "OPENCODE_BIN": _executable(piege / "opencode"),
+        "GROK_HOME": piege,
+    }
+    Path(projet, ".env").write_text(
+        "".join(f"{nom}={valeur}\n" for nom, valeur in depot.items()), encoding="utf-8"
+    )
+    codex_legitime = str(_executable(Path(maison, "outils", "codex")))
+    opencode_legitime = str(_executable(Path(maison, "outils", "opencode")))
+    Path(maison, "aipmt").mkdir()
+    Path(maison, "aipmt", ".env").write_text(
+        f"OPENCODE_BIN={opencode_legitime}\n", encoding="utf-8"
+    )
+    sans_binaire = Path(maison, "vide")
+    sans_binaire.mkdir()
+    ecartees = (*_BINARY_VARIABLES, "HOME", "PATH", "XDG_CONFIG_HOME", "PYTHONPATH")
+    env = {k: v for k, v in os.environ.items() if k not in ecartees}
+    env.update(
+        PYTHONPATH=str(SRC_ROOT),
+        HOME=maison,
+        PATH=str(sans_binaire),
+        XDG_CONFIG_HOME=maison,
+        CODEX_BIN=codex_legitime,
+    )
+    attendus = {"agy": None, "codex": codex_legitime, "grok": None, "opencode": opencode_legitime}
+    return env, attendus
+
+
+class TestProjectDotenvCannotChooseTheBinary(unittest.TestCase):
+    """Un `.env` de projet ne désigne pas le binaire qu'une traduction exécute.
+
+    CODEX_BIN, GROK_BIN, OPENCODE_BIN et AGY_BIN nomment le programme que
+    `--use_codex`, `--use_grok_cli`, `--use_opencode` et `--use_antigravity`
+    lancent avec les droits de l'utilisateur ; GROK_HOME, le répertoire sous
+    lequel le binaire Grok est cherché. Posées par le `.env` d'un dépôt qu'on
+    vient de cloner, elles faisaient exécuter un fichier de ce dépôt à la
+    première traduction, sans qu'il connaisse aucune clé. L'environnement et la
+    configuration utilisateur gardent ce droit : c'est là qu'un binaire
+    installé hors du PATH se déclare.
+    """
+
+    HOSTILE = "./piege/agent-du-depot"
+    LEGITIME = "/opt/outils/bin/agent"
+
+    # Même banc que pour les URL.
+    _run = staticmethod(_charger_les_couches)
+
+    def test_no_binary_is_accepted_from_the_project(self) -> None:
+        for variable in _BINARY_VARIABLES:
+            with self.subTest(variable=variable):
+                valeur, avertissement = self._run(variable, project=self.HOSTILE)
+                self.assertIsNone(valeur)
+                self.assertIn(f"⚠ {variable} ignoré", avertissement)
+                self.assertIn("choisir le binaire exécuté", avertissement)
+                # Le nom seul : la valeur vient d'un fichier non fiable.
+                self.assertNotIn(self.HOSTILE, avertissement)
+
+    def test_an_exported_binary_is_kept(self) -> None:
+        for variable in _BINARY_VARIABLES:
+            with self.subTest(variable=variable):
+                valeur, avertissement = self._run(variable, project=self.HOSTILE, env=self.LEGITIME)
+                self.assertEqual(valeur, self.LEGITIME)
+                self.assertEqual(avertissement, "")
+
+    def test_the_user_configuration_may_still_choose_the_binary(self) -> None:
+        for variable in _BINARY_VARIABLES:
+            with self.subTest(variable=variable):
+                valeur, avertissement = self._run(variable, user=self.LEGITIME)
+                self.assertEqual(valeur, self.LEGITIME)
+                self.assertEqual(avertissement, "")
+                # Le refus de la valeur du projet n'empêche pas la couche
+                # utilisateur de s'appliquer ensuite.
+                valeur, avertissement = self._run(
+                    variable, project=self.HOSTILE, user=self.LEGITIME
+                )
+                self.assertEqual(valeur, self.LEGITIME)
+                self.assertIn(f"⚠ {variable} ignoré", avertissement)
+
+    @unittest.skipUnless(os.name == "posix", "exécutables de script : POSIX seulement")
+    def test_a_fresh_process_never_resolves_a_binary_from_the_project(self) -> None:
+        """Le chemin réel, en processus neuf, jusqu'aux résolveurs : seuls les
+        binaires venus de l'environnement et de la configuration utilisateur
+        sont retenus, aucun de ceux du projet (cf. `_projet_hostile`)."""
+        with tempfile.TemporaryDirectory() as projet, tempfile.TemporaryDirectory() as maison:
+            env, attendus = _projet_hostile(projet, maison)
+            argv = [sys.executable, "-c", _RESOUDRE_LES_BINAIRES]
+            # nosemgrep
+            proc = subprocess.run(  # nosec B603 # nosemgrep — interpréteur du venv, code littéral
+                argv,  # nosemgrep
+                cwd=projet,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            lances = [
+                p.name for dossier in (projet, maison) for p in Path(dossier).rglob("*.execute")
+            ]
+        self.assertEqual(proc.returncode, 0, f"stderr:\n{proc.stderr}")
+        self.assertEqual(json.loads(proc.stdout.strip().splitlines()[-1]), attendus)
+        for variable in ("AGY_BIN", "GROK_BIN", "OPENCODE_BIN", "GROK_HOME"):
+            self.assertIn(f"⚠ {variable} ignoré", proc.stderr)
+        # Exportée, CODEX_BIN n'a jamais été lue dans le projet : rien à refuser.
+        self.assertNotIn("CODEX_BIN", proc.stderr)
+        # Le nom seul, jamais la valeur refusée.
+        self.assertNotIn(str(Path(projet, "piege")), proc.stderr)
+        self.assertEqual(lances, [])
 
 
 class TestMissingKeyMessageIsActionable(unittest.TestCase):
