@@ -13,6 +13,7 @@ set -euo pipefail
 #   - défaut                     → Codex, gpt-5.6-sol (modèle qualité), 0 € à l'usage
 #   - REGEN_PROVIDER=grok_cli    → quota de l'abonnement Grok
 #   - REGEN_PROVIDER=antigravity → quota de l'abonnement Google (AI Pro ou Ultra), CLI agy
+#   - REGEN_PROVIDER=claude_code → quota de l'abonnement Claude (Pro ou Max), CLI claude -p
 #   - REGEN_PROVIDER=opencode    → routeur OpenCode, REGEN_MODEL=provider/modèle obligatoire
 #   - REGEN_PROVIDER=openai|gemini|grok|openrouter → API FACTURÉE : refusée sans
 #     REGEN_ALLOW_PAID_API=1, dérogation nommée pour que la règle morde au
@@ -85,6 +86,13 @@ detect_provider() {
       echo "[regen] REGEN_PROVIDER=antigravity → --use_antigravity (abonnement Google, ${agy_model:-modèle qualité du module} par défaut, aucune facturation à l'usage)" >&2
       return
       ;;
+    claude_code)
+      # CLI officiel d'Anthropic, `claude -p`, sur le quota de l'abonnement Claude :
+      # un chemin d'abonnement, donc hors de la dérogation REGEN_ALLOW_PAID_API.
+      echo "--use_claude_code"
+      echo "[regen] REGEN_PROVIDER=claude_code → --use_claude_code (abonnement Claude, aucune facturation à l'usage)" >&2
+      return
+      ;;
     opencode)
       # Routeur open source vers le fournisseur configuré dans OpenCode (local,
       # gratuit, abonnement ou clé). Aucun défaut n'est choisi à la place de
@@ -121,7 +129,7 @@ detect_provider() {
       return
       ;;
     *)
-      echo "[regen] ERROR: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: codex|grok_cli|antigravity|opencode, ou openai|gemini|grok|openrouter avec REGEN_ALLOW_PAID_API=1)" >&2
+      echo "[regen] ERROR: REGEN_PROVIDER='${REGEN_PROVIDER}' inconnu (attendu: codex|grok_cli|antigravity|claude_code|opencode, ou openai|gemini|grok|openrouter avec REGEN_ALLOW_PAID_API=1)" >&2
       exit 1
       ;;
   esac
@@ -263,6 +271,33 @@ except ValueError as e:
     # Mesuré : 4 appels simultanés sans erreur, chacun dans son HOME jetable.
     max_jobs=4
   fi
+  if [[ "$provider_flags" == *--use_claude_code* ]]; then
+    # Motif `*--use_claude_code*`, jamais `*--use_claude*`, qui prendrait aussi
+    # l'API facturée. Contrôle unique avant d'ouvrir le parallélisme, par le
+    # préflight du module : version, réglages gérés, `claude auth status` et
+    # `/usage` — sans tour de modèle. REGEN_MODEL est validé d'abord : seuls les
+    # alias opus, sonnet et haiku sont acceptés.
+    echo "[regen] Claude Code : contrôle de la version, de la connexion et de la voie de facturation..."
+    if ! PYTHONPATH="$SCRIPT_DIR/src" python -c '
+import sys
+from aipmt.providers import claude_code as cc
+try:
+    if sys.argv[1]:
+        cc._claude_code_check_model(sys.argv[1])
+    cc._claude_code_preflight(cc._resolve_claude_code_binary())
+except ValueError as e:
+    sys.exit(f"[regen] ERROR: {e}")
+' "${REGEN_MODEL:-}"; then
+      echo "[regen] ERROR: contrôle Claude Code en échec — aucune traduction lancée" >&2
+      exit 1
+    fi
+    # Quatre jobs, mesurés le 2026-09-26 : trois campagnes de 28 traductions à
+    # quatre en parallèle, sans une erreur de débit ni de verrou de
+    # rafraîchissement du jeton OAuth, que partagent pourtant les sessions
+    # Claude Code de l'utilisateur. Le quota aussi est partagé : le plafond
+    # d'aipmt (AIPMT_CLAUDE_MAX_UTILIZATION) arrête tout segment au-delà.
+    max_jobs=4
+  fi
   local langs="ar de en es hi it ja ko nl pl pt ro sv zh"
   # Volontairement global, pas `local` : le trap EXIT s'exécute APRÈS la sortie
   # de main(), où une variable locale n'existe plus. Avec `set -u`, le trap
@@ -286,7 +321,7 @@ except ValueError as e:
   # ses segments l'un après l'autre, chacun borné par AGY_TIMEOUT (900 s),
   # démarrage d'agy compris. REGEN_JOB_TIMEOUT reste souverain.
   local default_timeout=600
-  if [[ "$provider_flags" == *--use_codex* || "$provider_flags" == *--use_antigravity* ]]; then
+  if [[ "$provider_flags" == *--use_codex* || "$provider_flags" == *--use_antigravity* || "$provider_flags" == *--use_claude_code* ]]; then
     default_timeout=1800
   fi
   local job_timeout="${REGEN_JOB_TIMEOUT:-$default_timeout}"

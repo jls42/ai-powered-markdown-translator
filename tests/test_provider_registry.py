@@ -2,13 +2,13 @@
 
 Les chaînes if/elif de `_resolve_provider`, `_dispatch_provider_call` et
 `_select_provider_client` ont été coupées en deux pour tenir sous la complexité
-que Codacy tolère (CCN 8), et les neuf flags exclusifs sont désormais décrits
+que Codacy tolère (CCN 8), et les dix flags exclusifs sont désormais décrits
 une fois. Ce que ces tests verrouillent, c'est ce que la scission ne devait pas
 changer : l'ORDRE d'évaluation des flags — la précédence est un contrat
 observable, cf. `TestProviderFlagsAreMutuallyExclusive` — et le routage de
 chaque clé vers son constructeur et son appel.
 
-L'ajout d'Antigravity a scindé l'appel une seconde fois : les quatre CLI
+L'ajout d'Antigravity a scindé l'appel une seconde fois : les CLI
 passent par `_call_cli_provider`. Le routage de chaque clé reste vérifié de
 bout en bout, depuis `_dispatch_provider_call`, et la nouvelle chaîne lève sur
 un nom qu'elle ne connaît pas au lieu de retomber sur un autre CLI.
@@ -41,6 +41,7 @@ CHAIN = (
     ("use_opencode", "opencode"),
     ("use_openrouter", "openrouter"),
     ("use_antigravity", "antigravity"),
+    ("use_claude_code", "claude_code"),
 )
 # Ordre de l'aide (`--help`), distinct de l'ordre de précédence : le groupe
 # exclusif rend la différence sans conséquence en ligne de commande.
@@ -52,6 +53,7 @@ HELP_ORDER = (
     "use_grok_cli",
     "use_codex",
     "use_antigravity",
+    "use_claude_code",
     "use_opencode",
     "use_openrouter",
 )
@@ -65,6 +67,7 @@ INITS = {
     "opencode": "_init_opencode_client",
     "openrouter": "_init_openrouter_client",
     "antigravity": "_init_antigravity_client",
+    "claude_code": "_init_claude_code_client",
     "openai": "_init_openai_client",
 }
 CALLS = {
@@ -76,6 +79,7 @@ CALLS = {
     "opencode": "_call_opencode",
     "openrouter": "_call_openrouter",
     "antigravity": "_call_antigravity",
+    "claude_code": "_call_claude_code",
     "grok": "_call_openai",
     "openai": "_call_openai",
 }
@@ -156,7 +160,7 @@ class TestProviderFlagsDeclaredOnce(unittest.TestCase):
         registry._add_provider_args(parser)
         return parser
 
-    def test_the_nine_flags_form_one_exclusive_group_in_help_order(self):
+    def test_the_ten_flags_form_one_exclusive_group_in_help_order(self):
         parser = self._parser()
         # argparse n'expose pas la composition d'un groupe : attributs privés,
         # stables depuis Python 2.7, seule façon de lire l'ORDRE du groupe.

@@ -188,6 +188,7 @@ _CLI_TIMEOUT_ENV_VARS = {
     "Grok": "GROK_TIMEOUT",
     "OpenCode": "OPENCODE_TIMEOUT",
     "Antigravity": "AGY_TIMEOUT",
+    "Claude Code": "AIPMT_CLAUDE_TIMEOUT",
 }
 
 
@@ -310,6 +311,7 @@ _CLI_PROVIDER_CI_FALLBACK = {
     "--use_codex": ("ChatGPT", "OPENAI_API_KEY", "l'API OpenAI"),
     "--use_grok_cli": ("Grok", "XAI_API_KEY", "--use_grok"),
     "--use_antigravity": ("Google", "GOOGLE_API_KEY", "--use_gemini"),
+    "--use_claude_code": ("Claude", "ANTHROPIC_API_KEY", "--use_claude"),
 }
 
 

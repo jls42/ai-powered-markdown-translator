@@ -44,7 +44,11 @@ _ROUTING_SUFFIXES = ("_BASE_URL", "_API_BASE", "_ENDPOINT", "_BIN")
 #  - emplacement de la configuration utilisateur : le poser, c'est décider
 #    quel fichier constitue la couche 3, donc contourner ce filtre par la bande ;
 #  - GROK_HOME : le binaire Grok est cherché sous `$GROK_HOME/bin/grok`, c'est
-#    un `_BIN` qui ne dit pas son nom.
+#    un `_BIN` qui ne dit pas son nom ;
+#  - CLAUDE_CONFIG_DIR : le répertoire, donc le COMPTE, que Claude Code utilise ;
+#    NODE_EXTRA_CA_CERTS : son magasin de certificats ; HOME, quand il manque
+#    (cron, `env -i`) : il désignerait le répertoire, donc le compte, de
+#    n'importe quel CLI d'abonnement.
 _ROUTING_NAMES = (
     "HTTP_PROXY",
     "HTTPS_PROXY",
@@ -56,6 +60,9 @@ _ROUTING_NAMES = (
     "XDG_CONFIG_HOME",
     "APPDATA",
     "GROK_HOME",
+    "CLAUDE_CONFIG_DIR",
+    "NODE_EXTRA_CA_CERTS",
+    "HOME",
 )
 
 

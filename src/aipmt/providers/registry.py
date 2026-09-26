@@ -11,6 +11,7 @@ les remplace, dans un changement nommé comme tel.
 
 from .anthropic import _call_claude, _init_claude_client
 from .antigravity import _call_antigravity, _init_antigravity_client
+from .claude_code import _call_claude_code, _init_claude_code_client
 from .codex import _call_codex, _init_codex_client
 from .gemini import _call_gemini, _init_gemini_client
 from .grok import _call_grok_cli, _init_grok_cli_client, _init_grok_client
@@ -48,6 +49,8 @@ def _resolve_provider_from_args(args):
         return "openrouter"
     if getattr(args, "use_antigravity", False):
         return "antigravity"
+    if getattr(args, "use_claude_code", False):
+        return "claude_code"
     return "openai"
 
 
@@ -64,11 +67,12 @@ _PROVIDER_LABELS = {
     "opencode": "OpenCode",
     "openrouter": "OpenRouter",
     "antigravity": "Antigravity CLI",
+    "claude_code": "Claude Code CLI",
 }
 
 
 # Les providers pilotés en sous-processus, dispatchés par `_call_cli_provider`.
-_CLI_PROVIDERS = ("codex", "grok_cli", "opencode", "antigravity")
+_CLI_PROVIDERS = ("codex", "grok_cli", "opencode", "antigravity", "claude_code")
 
 
 def _call_provider(client, args, prompt, segment, provider, is_translation_note):
@@ -101,6 +105,8 @@ def _call_cli_provider(client, args, prompt, segment, provider):
         return _call_opencode(client, args, prompt, segment)
     if provider == "antigravity":
         return _call_antigravity(client, args, prompt, segment)
+    if provider == "claude_code":
+        return _call_claude_code(client, args, prompt, segment)
     raise ValueError(f"provider CLI inconnu : {provider!r}")
 
 
@@ -115,7 +121,7 @@ def _dispatch_provider_call(client, args, prompt, segment, provider, is_translat
     return text
 
 
-# Les neuf flags du groupe exclusif, dans l'ordre de l'aide — qui n'est pas
+# Les dix flags du groupe exclusif, dans l'ordre de l'aide — qui n'est pas
 # l'ordre de précédence de `_resolve_provider`, sans conséquence tant que le
 # groupe interdit d'en lever deux. Tous sont des `store_true` : seuls le nom
 # et le texte d'aide changent, d'où une table plutôt que neuf appels.
@@ -138,6 +144,12 @@ _PROVIDER_FLAGS = (
         "use_antigravity",
         "Utiliser le CLI Antigravity (`agy`) sur le quota de l'abonnement Google "
         "(aucune facturation à l'usage ; nécessite une connexion Google dans agy)",
+    ),
+    (
+        "use_claude_code",
+        "Utiliser le CLI Claude Code (`claude -p`) sur le quota de l'abonnement Claude "
+        "(aucune facturation à l'usage ; nécessite une connexion `claude` par /login) "
+        "— à ne pas confondre avec --use_claude, l'API facturée",
     ),
     (
         "use_opencode",
@@ -220,4 +232,6 @@ def _select_later_provider_client(args):
         return _init_openrouter_client(args)
     if getattr(args, "use_antigravity", False):
         return _init_antigravity_client(args)
+    if getattr(args, "use_claude_code", False):
+        return _init_claude_code_client(args)
     return _init_openai_client(args)
