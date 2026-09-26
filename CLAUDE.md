@@ -64,6 +64,16 @@ fichiers sur l'API OpenAI, puis le CHANGELOG hindi sur celle de Gemini, parce
 que le regen auto-détectait `OPENAI_API_KEY` dans `.env` et ne faisait de Codex
 qu'un opt-in.
 
+**Complétée par le propriétaire le 2026-09-26 : Codex d'abord, et si Codex
+n'est pas disponible, l'abonnement Google.** Quota de la fenêtre épuisé,
+session expirée : la campagne passe par
+`REGEN_PROVIDER=antigravity ./regen_translations.sh --force`
+(`gemini-3.8-flash-medium`, cf. § Provider Antigravity), sans attendre le
+retour de Codex ni demander. Ce jour-là, le quota Codex était épuisé jusqu'au
+lendemain, et les 28 traductions de la 1.15.0 sont passées par Antigravity.
+Le repli reste un abonnement : jamais d'API facturée, dans un cas comme dans
+l'autre.
+
 ### QUAND régénérer : une seule fois, juste avant le merge
 
 **La régénération se lance quand le README et le CHANGELOG sont FIGÉS, pas à
@@ -144,10 +154,11 @@ Ce que ça implique, et ce qui l'encode :
   Liens internes). Avant d'ouvrir les 28 jobs, le script valide `REGEN_MODEL` et
   lance une fois le préflight du module (version, connexion, voie de
   facturation) : un agy déconnecté ou réglé pour facturer n'en démarre aucun. Il ne remplace pas le défaut : Codex +
-  `gpt-5.6-sol` reste le chemin de ces traductions, décision du propriétaire
-  qu'un abonnement de plus ne change pas.
+  `gpt-5.6-sol` reste le premier chemin de ces traductions, Antigravity le
+  repli quand Codex n'est pas disponible (cf. règle en tête).
 - Un fichier qui échoue sur Codex (placeholder perdu, cas connu du hindi) se
-  relance **seul, sur Codex** : `python -m aipmt --use_codex --file CHANGELOG.md
+  relance **seul, sur Codex** — sur Antigravity si Codex n'est plus
+  disponible : `python -m aipmt --use_codex --file CHANGELOG.md
 --target_lang hi --add_translation_note --force`.
 - Les tests `TestDetectProvider` verrouillent le défaut, le refus et la
   dérogation.
@@ -540,7 +551,7 @@ Quand l'utilisateur demande "release", "tag", "publie cette version" :
 ./release.sh --auto
 ```
 
-Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`, Codex + `gpt-5.6-sol`, cf. règle en tête) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
+Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`, Codex + `gpt-5.6-sol`, Antigravity si Codex n'est pas disponible, cf. règle en tête) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
 
 **Pas de tag à ce stade.** Le tag est créé en phase 2 pour qu'il pointe sur le commit de merge dans `main` (pas sur la branche feature).
 
@@ -814,7 +825,7 @@ démarrage compris), `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
 ## Recommended Usage
 
 **Pour les traductions de CE dépôt, voir la règle en tête : Codex + `gpt-5.6-sol`,
-jamais l'API.** Ce qui suit vaut pour un usage général de l'outil sur une clé API.
+Antigravity en repli, jamais l'API.** Ce qui suit vaut pour un usage général de l'outil sur une clé API.
 
 For batch translations (README, CHANGELOG, blog articles), use `--eco` mode:
 
