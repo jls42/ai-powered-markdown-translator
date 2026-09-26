@@ -268,18 +268,19 @@ sont pas entre parenthèses.
 
 Ce qui est en place : la section 4 du gate compte les liens internes intacts
 (`](#…)`) de chaque traduction contre la source, et le README n'écrit plus de
-lien entre parenthèses. **Ce qui ne l'est pas** : le correctif de fond —
-laisser les parenthèses hors du jeton, `[texte](#ANCHOR0#)`, et ne restaurer
-que `#fragment` — vit dans `placeholders.py`, où le propriétaire avait ce
-jour-là un travail en cours non commité (`_FENCED_CODE_REGEX`). Décision du
-propriétaire, non prise à sa place. Le correctif existe sur la branche locale
-`fix/ancres-entre-parentheses` (non poussée), et il a été validé de bout en
+lien entre parenthèses. Et le correctif de fond : `_anchor_token` laisse les
+parenthèses d'un lien Markdown hors du jeton — le modèle reçoit
+`[texte](#ANCHOR0#)`, un lien valide qu'il n'a plus de raison de réparer —,
+et `_restore_anchors` restaure le jeton entre ses parenthèses, puis un jeton
+nu en lien complet. Les ancres HTML et `<a name>` gardent un jeton nu. Trois
+tests de `TestHeadingAnchors` échouent sur l'ancien code. Validé de bout en
 bout : le README d'avant la reformulation, lien entre parenthèses compris,
 traduit par `gemini-3.8-flash-low` en japonais, hindi et anglais — refusé,
 trois liens doublés et un segment repassé sans le correctif ; avec lui, trois
-liens intacts sur trois partout, aucune reprise, structure identique. Même
-après la reformulation, la régénération de la 1.15.0 a encore doublé un lien
-en italien : le défaut ne tient pas qu'aux parenthèses.
+liens intacts sur trois partout, aucune reprise, structure identique. Le
+défaut ne tenait pas qu'aux parenthèses : même après la reformulation, les
+régénérations de la 1.15.0 et de la 1.16.0 avaient encore doublé un lien, en
+italien puis en allemand.
 
 **Corollaire pour la documentation : jamais de jeton littéral dans le README
 ni le CHANGELOG** — ni `#ANCHOR0#`, ni `#INLINECODE0#`, ni leurs cousins,
