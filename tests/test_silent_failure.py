@@ -629,6 +629,15 @@ class TestHeadingAnchors(unittest.TestCase):
         out = placeholders._restore_anchors(protected, anchors, jetons, metadata, slugs, slugs)
         self.assertEqual(out, content)
 
+    def test_translated_heading_slug_replaces_an_html_href_fragment(self):
+        """`href="#X"` vers un heading : le jeton reste nu, et le fragment
+        restauré suit le heading TRADUIT, guillemets compris."""
+        content = '<a href="#usage">U</a>\n\n## Usage\n'
+        protected, anchors, jetons, metadata = placeholders._protect_anchors(content)
+        traduit = protected.replace("## Usage", "## Use")
+        out = placeholders._restore_anchors(traduit, anchors, jetons, metadata, ["usage"], ["use"])
+        self.assertEqual(out, '<a href="#use">U</a>\n\n## Use\n')
+
 
 class TestNewsPlaceholderValidator(unittest.TestCase):
     """_validate_news_placeholders_intact doit rejeter les sorties où le LLM a
