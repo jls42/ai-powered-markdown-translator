@@ -9,11 +9,13 @@ identique) reste vert, sinon le hook bloquerait tout commit.
 import contextlib
 import io
 import json
+import os
 import pathlib
 import subprocess  # nosec B404 — `git init`/`git add` dans un répertoire temporaire
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -43,12 +45,22 @@ def beta(x):
 '''
 
 
+def _env_sans_git():
+    """L'environnement, moins toute variable GIT_*. Poussé depuis un worktree
+    lié, git exporte GIT_DIR à ses hooks — mesuré le 2026-09-27, et pas depuis
+    le dépôt principal. Hérité par le hook pre-push qui lance ces tests, il
+    faisait opérer `git init` et `git add` sur le VRAI dépôt, dont la
+    configuration passait à `core.bare = true`."""
+    return {name: value for name, value in os.environ.items() if not name.startswith("GIT_")}
+
+
 def _git(cwd, *args):
     argv = ["git", *args]
     # nosemgrep
     subprocess.run(  # nosec B603 B607 # nosemgrep — git du PATH, argv littéral, dépôt jetable
         argv,  # nosemgrep
         cwd=cwd,
+        env=_env_sans_git(),
         check=True,
         capture_output=True,
     )
@@ -56,6 +68,11 @@ def _git(cwd, *args):
 
 class PurityCheckerBites(unittest.TestCase):
     def setUp(self):
+        # Le vérificateur appelle lui aussi git (fichiers non suivis) : sans
+        # GIT_* hérité, il lit le dépôt jetable et non celui du hook.
+        environ = patch.dict(os.environ, _env_sans_git(), clear=True)
+        environ.start()
+        self.addCleanup(environ.stop)
         self._tmp = tempfile.TemporaryDirectory()
         self.root = pathlib.Path(self._tmp.name)
         self.package = self.root / "src" / "aipmt"
@@ -73,6 +90,15 @@ class PurityCheckerBites(unittest.TestCase):
 
     def tearDown(self):
         self._tmp.cleanup()
+
+    def test_a_hook_git_dir_never_reaches_git(self):
+        """Un GIT_DIR hérité désigne ici un dépôt nu : s'il passait, `git
+        status` y échouerait faute d'arbre de travail, comme le `git add` de
+        ces tests a échoué dans le vrai dépôt après l'avoir rendu nu."""
+        with tempfile.TemporaryDirectory() as leurre:
+            _git(leurre, "init", "-q", "--bare")
+            with patch.dict(os.environ, {"GIT_DIR": leurre}):
+                _git(self.root, "status", "--porcelain")
 
     def _run(self, *extra):
         argv = [
