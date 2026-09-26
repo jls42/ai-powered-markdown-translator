@@ -589,6 +589,55 @@ class TestHeadingAnchors(unittest.TestCase):
         )
         self.assertEqual(out, "[TC (तकनीकी समिति)](#tc-तकनीकी-समिति)")
 
+    def test_markdown_anchor_token_keeps_its_parentheses(self):
+        """Le jeton d'un lien `[texte](#X)` garde ses parenthèses. Nu, il faisait
+        recevoir au modèle `[texte]#ANCHOR0#`, qu'il « réparait » en un lien
+        doublé après restauration, ou réécrivait (README de la 1.15.0)."""
+        content = "Voir (cf. [Usage](#usage)).\n\n## Usage\n"
+        protected, anchors, _, _ = placeholders._protect_anchors(content)
+        self.assertIn("(cf. [Usage](#ANCHOR0#)).", protected)
+        self.assertEqual(anchors, ["(#usage)"])
+
+    def test_anchor_restore_accepts_the_token_with_or_without_parentheses(self):
+        """Entre ses parenthèses, le cas normal, ou nu : le lien restauré est le
+        même, jamais `[Usage]((#usage))`."""
+        anchors, jetons = ["(#usage)"], ["#ANCHOR0#"]
+        metadata = [{"type": "heading", "slug": "usage"}]
+        for sortie in ("Voir [Usage](#ANCHOR0#).", "Voir [Usage]#ANCHOR0#."):
+            with self.subTest(sortie=sortie):
+                out = placeholders._restore_anchors(
+                    sortie, anchors, jetons, metadata, ["usage"], ["usage"]
+                )
+                self.assertEqual(out, "Voir [Usage](#usage).")
+
+    def test_translated_heading_slug_replaces_the_fragment_inside_the_parentheses(self):
+        out = placeholders._restore_anchors(
+            "See [Use](#ANCHOR0#).\n\n## Use\n",
+            ["(#usage)"],
+            ["#ANCHOR0#"],
+            [{"type": "heading", "slug": "usage"}],
+            ["usage"],
+            ["use"],
+        )
+        self.assertEqual(out, "See [Use](#use).\n\n## Use\n")
+
+    def test_html_and_explicit_anchors_keep_a_bare_token(self):
+        content = '<a name="x"></a>\n<a href="#usage">U</a>\n\n## Usage\n'
+        protected, anchors, jetons, metadata = placeholders._protect_anchors(content)
+        self.assertNotIn("(#ANCHOR", protected)
+        slugs = placeholders._extract_heading_slugs(content)
+        out = placeholders._restore_anchors(protected, anchors, jetons, metadata, slugs, slugs)
+        self.assertEqual(out, content)
+
+    def test_translated_heading_slug_replaces_an_html_href_fragment(self):
+        """`href="#X"` vers un heading : le jeton reste nu, et le fragment
+        restauré suit le heading TRADUIT, guillemets compris."""
+        content = '<a href="#usage">U</a>\n\n## Usage\n'
+        protected, anchors, jetons, metadata = placeholders._protect_anchors(content)
+        traduit = protected.replace("## Usage", "## Use")
+        out = placeholders._restore_anchors(traduit, anchors, jetons, metadata, ["usage"], ["use"])
+        self.assertEqual(out, '<a href="#use">U</a>\n\n## Use\n')
+
 
 class TestNewsPlaceholderValidator(unittest.TestCase):
     """_validate_news_placeholders_intact doit rejeter les sorties où le LLM a

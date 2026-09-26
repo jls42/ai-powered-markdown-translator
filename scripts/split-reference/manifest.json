@@ -1203,6 +1203,24 @@
       "file": "src/aipmt/providers/claude_code.py",
       "hash": "16d99f4d0b35a0832aa612078b4e8173c5377c6067bc07c681449f7941715d89",
       "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : refus des garde-fous d'Anthropic nommé, catégorie comprise, sans relance (mesuré sur Opus 5.5, classifieur « bio »)."
+    },
+    {
+      "name": "_MD_ANCHOR_TYPES",
+      "file": "src/aipmt/placeholders.py",
+      "hash": "b2c1045abbe0a10d01bc0f6e8fa61e61a602a8e72d77d7c1a5f53c83fea44a0d",
+      "why": "jeton d'ancre : les parenthèses d'un lien Markdown restent hors du jeton, `[texte](#ANCHORn#)`, sans quoi le modèle recevait un lien d'apparence cassée et le « réparait » en `((#ancre))` ou perdait le jeton (README 1.15.0, 2026-09-26) : types d'ancres Markdown dont le jeton garde ses parenthèses."
+    },
+    {
+      "name": "_anchor_token",
+      "file": "src/aipmt/placeholders.py",
+      "hash": "4e411c8af6f227e96a27f60c38c9b6f9ef545f87b453d11e64082c7761c3f491",
+      "why": "jeton d'ancre : les parenthèses d'un lien Markdown restent hors du jeton, `[texte](#ANCHORn#)`, sans quoi le modèle recevait un lien d'apparence cassée et le « réparait » en `((#ancre))` ou perdait le jeton (README 1.15.0, 2026-09-26) : forme du jeton envoyé au modèle, parenthèses comprises pour un lien Markdown."
+    },
+    {
+      "name": "_restored_anchor",
+      "file": "src/aipmt/placeholders.py",
+      "hash": "048f6d257de22f383ba3a96823569a6ce15db7241e0ef56f0fb30707902a926f",
+      "why": "jeton d'ancre : les parenthèses d'un lien Markdown restent hors du jeton, `[texte](#ANCHORn#)`, sans quoi le modèle recevait un lien d'apparence cassée et le « réparait » en `((#ancre))` ou perdait le jeton (README 1.15.0, 2026-09-26) : texte de restauration d'une ancre, extrait de _restore_anchors pour la limite de complexité."
     }
   ],
   "removed": [
@@ -1824,6 +1842,20 @@
       "old_hash": "cc664d797b1f5bc1f687f8cb480098e3b853e742b3cc44027d0b0a4d576a0d80",
       "new_hash": "d0a46e739b1c59575b68f9a6e61b30ad263c4efc2a46bc041c7198ad3c508bf1",
       "why": "use_claude_code → _init_claude_code_client, avant le repli OpenAI."
+    },
+    {
+      "name": "_protect_anchors",
+      "file": "src/aipmt/placeholders.py",
+      "old_hash": "3bd4a7f47ad674056d9faa6bd2edb2f76699c2a6fca428e12ad9b48497161e3e",
+      "new_hash": "0d52199a4c1d7a7e59875e1c39addc4c73918c93caae4255760c1099fd1782ac",
+      "why": "jeton d'ancre : les parenthèses d'un lien Markdown restent hors du jeton, `[texte](#ANCHORn#)`, sans quoi le modèle recevait un lien d'apparence cassée et le « réparait » en `((#ancre))` ou perdait le jeton (README 1.15.0, 2026-09-26) : le jeton d'un lien Markdown garde ses parenthèses."
+    },
+    {
+      "name": "_restore_anchors",
+      "file": "src/aipmt/placeholders.py",
+      "old_hash": "e6e8a96a868ee99e2b93e657b077d0cfefa0d171536a1f332e3faf95c13a21c8",
+      "new_hash": "d38d4be4217aace5377671a3f4934d51ab489fafae2c470c05c8bb5e8ec95689",
+      "why": "jeton d'ancre : les parenthèses d'un lien Markdown restent hors du jeton, `[texte](#ANCHORn#)`, sans quoi le modèle recevait un lien d'apparence cassée et le « réparait » en `((#ancre))` ou perdait le jeton (README 1.15.0, 2026-09-26) : restaure le jeton entre parenthèses, puis un jeton nu, en lien valide."
     }
   ],
   "markers": [

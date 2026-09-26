@@ -212,9 +212,24 @@ def _protect_anchors(content):
         metadata.append(meta)
 
     placeholders = [f"#ANCHOR{i}#" for i in range(len(anchors))]
-    for placeholder, anchor in zip(placeholders, anchors, strict=False):
-        content = content.replace(anchor, placeholder, 1)
+    for placeholder, anchor, meta in zip(placeholders, anchors, metadata, strict=False):
+        content = content.replace(anchor, _anchor_token(placeholder, meta), 1)
     return content, anchors, placeholders, metadata
+
+
+# Types d'ancres Markdown `(#X)`, dont le jeton garde les parenthèses.
+_MD_ANCHOR_TYPES = ("heading", "terraform")
+
+
+def _anchor_token(placeholder, meta):
+    """Ce qui remplace une ancre dans le texte envoyé au modèle. Un lien
+    Markdown garde ses parenthèses : `[texte](#ANCHOR0#)` reste un lien valide.
+    Le jeton nu les avalait, et le modèle recevait `[texte]#ANCHOR0#`, qu'il
+    lui arrivait de « réparer » en `[texte](#ANCHOR0#)` — rendu, après
+    restauration, `[texte]((#ancre))`, cassé et invisible des gardes — ou de
+    réécrire, faisant refuser le segment (mesuré le 2026-09-26 sur le README
+    de la 1.15.0, tous modèles Gemini Flash confondus)."""
+    return f"({placeholder})" if meta["type"] in _MD_ANCHOR_TYPES else placeholder
 
 
 def _restore_anchors(
@@ -227,15 +242,23 @@ def _restore_anchors(
     """
     slug_map = _build_heading_slug_map(source_heading_slugs, target_heading_slugs)
     for placeholder, anchor, meta in zip(placeholders, anchors, metadata, strict=False):
-        if meta["type"] == "heading" and meta["slug"] in slug_map:
-            new_anchor = f"(#{slug_map[meta['slug']]})"
-            translated_content = translated_content.replace(placeholder, new_anchor)
-        elif meta["type"] == "heading_html" and meta["slug"] in slug_map:
-            new_anchor = f"href={meta['quote']}#{slug_map[meta['slug']]}{meta['quote']}"
-            translated_content = translated_content.replace(placeholder, new_anchor)
-        else:
-            translated_content = translated_content.replace(placeholder, anchor)
+        restored = _restored_anchor(anchor, meta, slug_map)
+        # Jeton d'une ancre Markdown : entre ses parenthèses d'abord, le cas
+        # normal ; nu ensuite, pour un modèle qui les aurait retirées — le lien
+        # retrouve les siennes au lieu de rester `[texte]#fragment`.
+        translated_content = translated_content.replace(_anchor_token(placeholder, meta), restored)
+        translated_content = translated_content.replace(placeholder, restored)
     return translated_content
+
+
+def _restored_anchor(anchor, meta, slug_map):
+    """Ce qui remplace le jeton d'une ancre : pour une ancre de heading, le
+    fragment regénéré sur le heading TRADUIT ; l'ancre d'origine sinon."""
+    if meta["type"] == "heading" and meta["slug"] in slug_map:
+        return f"(#{slug_map[meta['slug']]})"
+    if meta["type"] == "heading_html" and meta["slug"] in slug_map:
+        return f"href={meta['quote']}#{slug_map[meta['slug']]}{meta['quote']}"
+    return anchor
 
 
 def _build_heading_slug_map(source_slugs, target_slugs):
