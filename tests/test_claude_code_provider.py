@@ -37,6 +37,7 @@ import sys
 import tempfile
 import unittest
 from argparse import Namespace
+from types import SimpleNamespace
 from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
@@ -173,10 +174,10 @@ class TestClaudeCodeEnvironment(unittest.TestCase):
             "HTTPS_PROXY": "http://proxy:3128",
             "CLAUDE_CONFIG_DIR": "/home/x/.config/aipmt/claude",
             "ANTHROPIC_API_KEY": "sk-ant-test",  # pragma: allowlist secret
-            "ANTHROPIC_AUTH_TOKEN": "bearer",  # pragma: allowlist secret
+            "ANTHROPIC_AUTH_TOKEN": "bearer",  # pragma: allowlist secret  # nosec B105
             "ANTHROPIC_BASE_URL": "https://gateway.example",
             "ANTHROPIC_PROFILE": "work",
-            "CLAUDE_CODE_OAUTH_TOKEN": "tok",  # pragma: allowlist secret
+            "CLAUDE_CODE_OAUTH_TOKEN": "tok",  # pragma: allowlist secret  # nosec B105
             "CLAUDE_CODE_USE_BEDROCK": "1",
             "CLAUDE_CODE_USE_VERTEX": "1",
             "CLAUDE_CODE_RETRY_WATCHDOG": "1",
@@ -184,7 +185,7 @@ class TestClaudeCodeEnvironment(unittest.TestCase):
             "CLAUDECODE": "1",
             "CLAUDE_CODE_SESSION_ID": "s",
             "CLAUDE_CODE_MESSAGING_SOCKET": "/run/x.sock",
-            "CLAUDE_CODE_MESSAGING_TOKEN": "t",  # pragma: allowlist secret
+            "CLAUDE_CODE_MESSAGING_TOKEN": "t",  # pragma: allowlist secret  # nosec B105
             "CLAUDE_CODE_CHILD_SESSION": "1",
             "CLAUDE_PID": "123",
             "CLAUDE_CODE_SIMPLE": "1",
@@ -383,8 +384,9 @@ class TestClaudeCodeOutputContract(unittest.TestCase):
                 self._check(stdout, returncode=rc)
 
     def test_init_missing_is_refused(self):
+        stdout = _flux(_result())
         with self.assertRaisesRegex(claude_code._ClaudeCodeCallError, "initialisation absent"):
-            self._check(_flux(_result()))
+            self._check(stdout)
 
     def test_every_init_attestation_is_enforced(self):
         cas = {
@@ -411,8 +413,9 @@ class TestClaudeCodeOutputContract(unittest.TestCase):
                 usage = {init["model"]: {}}
             else:
                 usage = {_MODELE_SONNET: {}}
+            stdout = _flux(init, _rate(), _result(modelUsage=usage))
             with self.subTest(nom=nom), self.assertRaises(claude_code._ClaudeCodeCallError):
-                self._check(_flux(init, _rate(), _result(modelUsage=usage)))
+                self._check(stdout)
 
     def test_a_missing_empty_list_counts_as_a_leak(self):
         init = _init()
@@ -430,8 +433,9 @@ class TestClaudeCodeOutputContract(unittest.TestCase):
             "texte absent": {"result": None},
         }
         for nom, override in cas.items():
+            stdout = _flux(_init(), _rate(), _result(**override))
             with self.subTest(nom=nom), self.assertRaises(claude_code._ClaudeCodeCallError):
-                self._check(_flux(_init(), _rate(), _result(**override)))
+                self._check(stdout)
 
     def test_a_hook_event_or_an_unreadable_line_is_refused(self):
         for extra in ({"type": "hook_started", "hook_name": "SessionStart"}, None):
@@ -452,8 +456,9 @@ class TestClaudeCodeQuota(unittest.TestCase):
             {"status": "rejected"},
         ):
             with self.subTest(info=info):
+                event, client = _rate(**info), _client()
                 with self.assertRaises(claude_code._ClaudeCodeCallError) as cm:
-                    claude_code._claude_code_rate_limit(_rate(**info), _client(), "opus")
+                    claude_code._claude_code_rate_limit(event, client, "opus")
                 self.assertFalse(cm.exception.rate_limited)
 
     def test_windows_without_a_number_are_ignored(self):
@@ -476,19 +481,20 @@ class TestClaudeCodeQuota(unittest.TestCase):
 
 class TestClaudeCodeAttempt(_CcTestCase):
     def test_blank_segment_is_refused_before_any_launch(self):
+        client, args = _client(), _args()
         with (
             patch.object(claude_code, "_codex_run_process", side_effect=_NE_DOIT_PAS_SERVIR),
             self.assertRaisesRegex(claude_code._ClaudeCodeCallError, "Segment vide"),
         ):
-            claude_code._claude_code_attempt(_client(), _args(), "P", " \n ")
+            claude_code._claude_code_attempt(client, args, "P", " \n ")
 
     def test_quota_is_checked_before_any_launch(self):
-        client = _client(windows={"seven_day": (0.95, 1)})
+        client, args = _client(windows={"seven_day": (0.95, 1)}), _args()
         with (
             patch.object(claude_code, "_codex_run_process", side_effect=_NE_DOIT_PAS_SERVIR),
             self.assertRaises(claude_code._ClaudeCodeCallError),
         ):
-            claude_code._claude_code_attempt(client, _args(), "P", "Le chat.\n")
+            claude_code._claude_code_attempt(client, args, "P", "Le chat.\n")
 
     def test_one_call_in_a_private_directory_then_erased(self):
         vus = {}
@@ -530,7 +536,8 @@ class TestClaudeCodeAttempt(_CcTestCase):
 
 
 def _completed(stdout="", returncode=0, stderr=""):
-    return subprocess.CompletedProcess(args=[], returncode=returncode, stdout=stdout, stderr=stderr)
+    """Résultat de `run` : seuls returncode, stdout et stderr sont lus."""
+    return SimpleNamespace(returncode=returncode, stdout=stdout, stderr=stderr)
 
 
 _AUTH_OK = {
@@ -699,20 +706,22 @@ class TestClaudeCodeInit(_CcTestCase):
             self.assertEqual(eco.model, claude_code.ECO_MODEL_CLAUDE_CODE)
 
     def test_refused_in_ci_before_any_launch(self):
+        args = _args()
         with (
             patch.dict(os.environ, {"CI": "true"}),
             patch.object(claude_code, "_claude_code_preflight", side_effect=_NE_DOIT_PAS_SERVIR),
             self.assertRaisesRegex(ValueError, "ANTHROPIC_API_KEY"),
         ):
-            claude_code._init_claude_code_client(_args())
+            claude_code._init_claude_code_client(args)
 
     def test_refused_on_windows(self):
+        args = _args()
         with (
             patch.object(claude_code.os, "name", "nt"),
             patch.object(claude_code, "_claude_code_preflight", side_effect=_NE_DOIT_PAS_SERVIR),
             self.assertRaisesRegex(ValueError, "Windows"),
         ):
-            claude_code._init_claude_code_client(_args())
+            claude_code._init_claude_code_client(args)
 
     def test_only_the_three_aliases_are_accepted(self):
         for model in ("fable", "best", "sonnet[1m]", "opusplan", "default", "claude-opus-5-5"):
@@ -764,8 +773,10 @@ class TestRegenClaudeCode(unittest.TestCase):
         # argv court : la ligne reste sous 100 colonnes (cf. CLAUDE.md, nosemgrep).
         script = f"source {_REGEN} >/dev/null 2>&1; detect_provider"
         vide = {"PATH": "/usr/bin:/bin", "HOME": _TMPDIR_REEL, **env}
-        return subprocess.run(  # nosec B603 B607 — bash local, script du dépôt
-            ["bash", "-c", script],
+        argv = ["bash", "-c", script]
+        # nosemgrep
+        return subprocess.run(  # nosec B603 B607 # nosemgrep — bash local, script du dépôt
+            argv,  # nosemgrep
             capture_output=True,
             text=True,
             env=vide,

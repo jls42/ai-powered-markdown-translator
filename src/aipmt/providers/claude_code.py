@@ -294,6 +294,7 @@ def _claude_code_work_base():
         cache = os.path.join(os.path.expanduser("~"), ".cache")
     base = os.path.join(cache, "aipmt", "claude-code")
     os.makedirs(base, mode=0o700, exist_ok=True)
+    # nosemgrep: python.lang.security.audit.insecure-file-permissions.insecure-file-permissions — 0700, propriétaire seul : répertoire privé des appels
     os.chmod(base, 0o700)
     return base
 
