@@ -192,8 +192,12 @@ if [[ $MISSING -eq 0 ]]; then pass "28/28 fichiers présents"; fi
 if probe "structure des traductions" <<'PYEOF'
 import re, sys
 seen = 0
+# "ancre" : lien interne intact, `](#fragment)`. Le jeton d'ancre avale les
+# parenthèses (`[texte]#ANCHOR0#`) ; un modèle qui « répare » ce lien en
+# `[texte](#ANCHOR0#)` rend, après restauration, `[texte]((#fragment))` — cassé,
+# et invisible des jetons comme de compare_structure (README es et ko, 1.15.0).
 P = {"fence": r"^```", "head": r"^#{1,6} ", "list": r"^\s*[-*] ", "table": r"^\|",
-     "a": r"<a\s+href=", "img": r"<img\s+src="}
+     "a": r"<a\s+href=", "img": r"<img\s+src=", "ancre": r"\]\(#[^)\s]+\)"}
 URL = re.compile(r"https?://[^\s)\"'<>`,]+")
 RES = re.compile(r"#(?:CODEBLOCK|INLINECODE|URL|ANCHOR|REFLABEL)\d+#|<NEWSQUOTE\s+id=")
 bad = []
