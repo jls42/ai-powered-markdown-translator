@@ -133,9 +133,15 @@ Ce que ça implique, et ce qui l'encode :
   et 1 800 s par job, comme Codex (cf. § Provider Antigravity). Le plafond est
   validé par la mesure du 2026-09-26 : le CHANGELOG entier en hindi — le
   fichier où Codex perd des placeholders — traduit sans écart en 273 s par
-  `gemini-3.7-flash-medium`, marge ×6,5. Coût estimé d'une campagne complète :
-  un quart de la fenêtre Gemini de 5 h, sur le palier du compte du
-  propriétaire. Avant d'ouvrir les 28 jobs, le script valide `REGEN_MODEL` et
+  `gemini-3.7-flash-medium`, marge ×6,5. Coût mesuré sur la régénération de la
+  1.15.0, le 2026-09-26, en `gemini-3.8-flash-medium` : 27 fichiers sur 28 en
+  29 min 39 s à 4 jobs, **36,4 points de la fenêtre Gemini de 5 h** et 6,1 de
+  la semaine, sur le palier du compte du propriétaire — plus d'un tiers de la
+  fenêtre (la même en `gemini-3.7-flash-medium`, le matin : 28 fichiers en
+  21 min environ). Deux fichiers relancés seuls : le CHANGELOG hindi, bloqué
+  par le filtre de contenu de Google (cf. § Provider Antigravity), et le README
+  italien, un lien interne doublé que la section 4 du gate a attrapé (cf. §
+  Liens internes). Avant d'ouvrir les 28 jobs, le script valide `REGEN_MODEL` et
   lance une fois le préflight du module (version, connexion, voie de
   facturation) : un agy déconnecté ou réglé pour facturer n'en démarre aucun. Il ne remplace pas le défaut : Codex +
   `gpt-5.6-sol` reste le chemin de ces traductions, décision du propriétaire
@@ -250,7 +256,14 @@ lien entre parenthèses. **Ce qui ne l'est pas** : le correctif de fond —
 laisser les parenthèses hors du jeton, `[texte](#ANCHOR0#)`, et ne restaurer
 que `#fragment` — vit dans `placeholders.py`, où le propriétaire avait ce
 jour-là un travail en cours non commité (`_FENCED_CODE_REGEX`). Décision du
-propriétaire, non prise à sa place.
+propriétaire, non prise à sa place. Le correctif existe sur la branche locale
+`fix/ancres-entre-parentheses` (non poussée), et il a été validé de bout en
+bout : le README d'avant la reformulation, lien entre parenthèses compris,
+traduit par `gemini-3.8-flash-low` en japonais, hindi et anglais — refusé,
+trois liens doublés et un segment repassé sans le correctif ; avec lui, trois
+liens intacts sur trois partout, aucune reprise, structure identique. Même
+après la reformulation, la régénération de la 1.15.0 a encore doublé un lien
+en italien : le défaut ne tient pas qu'aux parenthèses.
 
 **Corollaire pour la documentation : jamais de jeton littéral dans le README
 ni le CHANGELOG** — ni `#ANCHOR0#`, ni `#INLINECODE0#`, ni leurs cousins,
@@ -1153,6 +1166,18 @@ Vertex/ADC (<https://antigravity.google/docs/sdk/overview/>). Tout ce qui suit a
   jamais un 503 `retryable: true` (revue, sur des lignes `AGY_ERROR`
   synthétiques : le format réel d'un échec n'a pas été mesuré).
 
+- **Filtre de contenu de Google** : agy peut rendre rc 0, `status: ERROR`,
+  « Your previous response was blocked by content safety filters: … sensitive
+  words that violate Google's Generative AI Prohibited Use policy » — une
+  sortie refusée par Google, pas par aipmt. Vu une fois le 2026-09-26 à la
+  régénération : segment 4/8 du CHANGELOG en hindi, en `gemini-3.8-flash-medium`
+  (entrées 1.12.0 et 1.11.1, où figurent « kill », « SIGKILL », « injection »).
+  Aléatoire : le même modèle avait traduit ce CHANGELOG une heure plus tôt, et
+  la relance de la langue seule a abouti. Aucune relance automatique — le
+  message n'est ni une limite de débit ni `retryable` — : le fichier échoue
+  après avoir consommé le quota des segments précédents, et l'on relance la
+  langue seule. Une relance unique sur ce message serait défendable ; non
+  faite.
 - **Injection** : grâce à `--disable-slash-commands`, un segment qui commence
   par `!commande`, `@fichier` ou `/commande` n'est ni exécuté, ni résolu, ni
   développé. Sans lui, un segment « /help » s'exécutait à la place d'être
