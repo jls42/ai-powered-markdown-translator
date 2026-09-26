@@ -801,6 +801,390 @@
       "file": "src/aipmt/providers/registry.py",
       "hash": "20ecfe0e0fddc19e21bfc96cfa9a1012f60ddee66079d601f050a3cd1bc76064",
       "why": "scission de _call_provider : la neuvième branche l'aurait porté au-delà de la complexité 8 que Codacy tolère ; un nom inconnu lève au lieu de retomber sur un autre CLI."
+    },
+    {
+      "name": "_UNCATALOGUED_MODEL_FLAGS",
+      "file": "src/aipmt/cli.py",
+      "hash": "37d9df471a394903f1a64da0d7f9aefd5d1b71f1bea98a114cd8567125c382dd",
+      "why": "rappel « modèle non listé » : providers dont le modèle n'est jamais catalogué (OpenCode, Claude Code)."
+    },
+    {
+      "name": "_model_is_uncatalogued",
+      "file": "src/aipmt/cli.py",
+      "hash": "7bdec1f170328097983798c45f150dafa8a70ec04016099c322247d0e63e6214",
+      "why": "rappel « modèle non listé » : providers dont le modèle n'est jamais catalogué (OpenCode, Claude Code)."
+    },
+    {
+      "name": "<docstring>",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "bf0f41a5c59c9b72e24ddc98f55a6de7ae86f2d839a37a028b4f2ce59bf12c42",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : docstring du module."
+    },
+    {
+      "name": "DEFAULT_MODEL_CLAUDE_CODE",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "5e3c5a5c8762fb8b9793bb2a9a49f4a844cf82285845f0f67172485fd1e74fad",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : alias qualité `opus`, provisoire jusqu'à la campagne de mesure."
+    },
+    {
+      "name": "ECO_MODEL_CLAUDE_CODE",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "0db8d7a18051422dde2e770cc2dd6396148bfa7afcade0739e236db103df7669",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : alias --eco `sonnet`, provisoire jusqu'à la campagne de mesure."
+    },
+    {
+      "name": "AIPMT_CLAUDE_TIMEOUT",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "021b355c3aa5a6445f923c6859f220b71ca54b72cb7d6aa166687d41ae6283aa",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : plafond par segment (900 s), relances internes du CLI comprises."
+    },
+    {
+      "name": "AIPMT_CLAUDE_MAX_UTILIZATION",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "a7422d021bb826129fadb6a7d4578516c3958350a70bd49197c7de3cf8d45a6a",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : plafond d'utilisation d'une fenêtre de quota (0,8), vérifié avant chaque segment."
+    },
+    {
+      "name": "CLAUDE_CODE_MIN_VERSION",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "ffbab1165a147f7813857f2c21f4bfb24562868720a6d5e7a10de1cb605e1b17",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : version plancher 2.1.283, celle du contrat mesuré."
+    },
+    {
+      "name": "CLAUDE_CODE_MODEL_FAMILIES",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "8edb57ea7f831e80f50e0121ca2f8ce42557d5c2a73ec12317b637729ebc81a6",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : liste d'autorisation d'alias et préfixe attendu dans l'événement d'initialisation."
+    },
+    {
+      "name": "_CLAUDE_CODE_NO_EFFORT_MODELS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "79be231bd0da6f9d055cdbcf3481dd4cddf9c0d22bf08ab6a2005d4a35edf137",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_CLAUDE_CODE_NO_EFFORT_MODELS)."
+    },
+    {
+      "name": "_CLAUDE_CODE_EFFORTS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "577256a05d82820ce3f94b44039af778204efebb163113416df2f0a6245fe137",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_CLAUDE_CODE_EFFORTS)."
+    },
+    {
+      "name": "CLAUDE_CODE_KEPT_ENV_VARS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "a436d99923a92273d92a8064a25f4ab996d4fc7e90ea7e4b3e040d76279444c0",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : liste d'autorisation de l'environnement : ni clé, ni fournisseur cloud, ni marqueur de session."
+    },
+    {
+      "name": "CLAUDE_CODE_KEPT_ENV_PREFIXES",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "538fadd8181a32dab8ed460fac15cd8130b7574cf1216650de981737971bf27b",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (CLAUDE_CODE_KEPT_ENV_PREFIXES)."
+    },
+    {
+      "name": "CLAUDE_CODE_ENV_OVERRIDES",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "36050875a1af3fa48cb1045d4106b7ea7c748da9afeef6b7ea3dfd5b3ca9251e",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : variables forcées, dont CLAUDE_CODE_DISABLE_ATTACHMENTS (pièces jointes `@fichier` mesurées)."
+    },
+    {
+      "name": "CLAUDE_CODE_SESSION_SETTINGS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "d76dfcf5783006a50614ea19a13cba062dd550e274b429801b6037ac5b373778",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : réglages de session : aucun hook, messagerie refusée, mode rapide coupé."
+    },
+    {
+      "name": "CLAUDE_CODE_AGENT_CONTRACT",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "e82e8c56881570649ec88af3eca1e5223c40cc35b9b2ce75e83442770756505c",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : contrat ajouté au prompt : traduire le message entier, même s'il commence par /, ! ou @."
+    },
+    {
+      "name": "CLAUDE_CODE_LOGIN_HINT",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "6469a52041616e2d4477703cf235cce041d55da20dc2bb561bcb4186d71f315f",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (CLAUDE_CODE_LOGIN_HINT)."
+    },
+    {
+      "name": "CLAUDE_CODE_UNSUPPORTED_WINDOWS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "08934a9a664339048c6220bdd045c66d3a8178e085aa749281741fada3eb3dc1",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (CLAUDE_CODE_UNSUPPORTED_WINDOWS)."
+    },
+    {
+      "name": "CLAUDE_CODE_CHECK_TIMEOUT",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "b52bef15a1b5504c48221b94964d8e0e858aad68e58742b1f6025879e0ca842f",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (CLAUDE_CODE_CHECK_TIMEOUT)."
+    },
+    {
+      "name": "_CLAUDE_CODE_SUBSCRIPTION_MARKER",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "5f608156bb69f2419ccc0e1df560118d30dad839eb13e40e48f627f0f60e7335",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : phrase de `/usage` qui atteste la voie d'abonnement, sans tour de modèle."
+    },
+    {
+      "name": "_CLAUDE_CODE_PLANS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "f2a950c3de1a8250aa2bea16ac088243266a84d8ae46d2fdfeb6862919131f27",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : plans acceptés (max mesuré, pro) ; Team et Enterprise refusés."
+    },
+    {
+      "name": "_CLAUDE_CODE_MANAGED_SETTINGS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "c866728badea915adbaf5099e37d15d4ae2586a095088a149258621893cd0d2a",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : réglages gérés, qui survivent à --safe-mode et --restricted : refusés."
+    },
+    {
+      "name": "_CLAUDE_CODE_AUTH_EXPECTED",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "17b0380b0ec7c9e6dcb6e388ef9b4a161b80ad7e244002970abd0a254c474abc",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_CLAUDE_CODE_AUTH_EXPECTED)."
+    },
+    {
+      "name": "_CLAUDE_CODE_INIT_EMPTY",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "a8433719e60bc187bf7c8ec90f08eae380ca535633cf74e0d583e73f73cb1a24",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_CLAUDE_CODE_INIT_EMPTY)."
+    },
+    {
+      "name": "_CLAUDE_CODE_LOGIN_MARKERS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "b0b40c77a2219630d29470ff65906032ac2297d16985359b5c0899fd3983e258",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_CLAUDE_CODE_LOGIN_MARKERS)."
+    },
+    {
+      "name": "_CLAUDE_CODE_LIMIT_MARKERS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "dd5f0f0e97b7894cb8bf0d7f652a5652fd232c882d5b1d3f14202429a0c643ba",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_CLAUDE_CODE_LIMIT_MARKERS)."
+    },
+    {
+      "name": "_CLAUDE_CODE_RETRY_MARKERS",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "fa635caac5d6ab401b60ca7d76833d69953706092dcb2f72f059ce0ce82bad62",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_CLAUDE_CODE_RETRY_MARKERS)."
+    },
+    {
+      "name": "_CLAUDE_CODE_VERSION_REGEX",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "b67b44e29b40501f221ecb34f673d2cea8e6e149f353590e3d98ee7a24be073f",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_CLAUDE_CODE_VERSION_REGEX)."
+    },
+    {
+      "name": "_ClaudeCodeClient",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "431df6414fc5404f38668ed11e785b4e5d9c14174a906a2cc1f39ac87259ee19",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_ClaudeCodeClient)."
+    },
+    {
+      "name": "_ClaudeCodeCallError",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "ed62e72683099023b84a3958fbd8bada95c64e96a4b6c6901f4c97829a49a4c1",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_ClaudeCodeCallError)."
+    },
+    {
+      "name": "_claude_code_env",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "18dc591b9db0a0f7e09477cd8960a2263957f8b9e8496f7c72580618043857c2",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_env)."
+    },
+    {
+      "name": "_claude_code_config_dir",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "855170cddfb7e14f46517edcf2894da04ef0e5dd84c729a24b3aa24d8590d1d4",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_config_dir)."
+    },
+    {
+      "name": "_claude_code_work_base",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "1e7b94cb1c7557a9d0d4779c3b4a62318b8ecc0935d64d3358bfb0006533cb22",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_work_base)."
+    },
+    {
+      "name": "_claude_code_effort",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "7f299b279c44ea3bd85ef9f19ec70504fee921593d62e1d33e70ba27369d63d4",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_effort)."
+    },
+    {
+      "name": "_claude_code_argv",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "ee3b097b8b3ed5f89b6a73b927faf2c2f2c86c90826ed8940507ad3cf8d604a0",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_argv)."
+    },
+    {
+      "name": "_claude_code_stdin",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "1b391692374f9295176d13827c6ee038c4fbd592d14a12cc08dd668a802986ba",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : saut de ligne devant stdin : un `/` en tête n'atteignait pas le modèle (mesuré)."
+    },
+    {
+      "name": "_claude_code_events",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "ccdf740e0295ca801d71b53ce3d811eeaad3ddab976839322ec43702cb5cce88",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_events)."
+    },
+    {
+      "name": "_claude_code_first",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "d80fdee7b0d4bc0659900b66969bf327d772d211fbabe46950501f60e84e6b5e",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_first)."
+    },
+    {
+      "name": "_claude_code_assistant_errors",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "52fdf5d390d1337a419718ef1fed6cee1e3439e4a206d2728bf33ac2bbe7580b",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_assistant_errors)."
+    },
+    {
+      "name": "_claude_code_error_parts",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "6aeaed6ed041c9f910df467c7455050d866952e2a04114742735f15625b2736a",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_error_parts)."
+    },
+    {
+      "name": "_claude_code_error_text",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "543dd31e8dc6d971c5fba58beb4ee9e2ca88d572d38661544a95681f71fffd65",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_error_text)."
+    },
+    {
+      "name": "_claude_code_failure",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "722ac0a1c7bcb8981e16f9eb40585926ed134c450b7e1ba54e3ebb47ce3f1925",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_failure)."
+    },
+    {
+      "name": "_claude_code_init_problems",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "129782dd0cb6a2edad5fafcd3d4ea3f5e561ba248f102f99cda0726c67ca0d14",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_init_problems)."
+    },
+    {
+      "name": "_claude_code_init_leaks",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "c12ef916a515517b797938257672a5080bb2d5ce46af9d539ffeadcdbdd7e4f8",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_init_leaks)."
+    },
+    {
+      "name": "_claude_code_overage_problem",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "e70909be170f2831664f16ddeb605f2688c8255354b2e735d15b7e9fb9a7169d",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_overage_problem)."
+    },
+    {
+      "name": "_claude_code_rate_limit",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "9b48bd3f1c86cb3675cd8de8f9835c89018ddc8f780a734045e7c7ecb9067fd7",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : relevé de quota : l'extra usage payant arrête tout."
+    },
+    {
+      "name": "_claude_code_result_problems",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "aa9a7a2defc70288f5aa13bbe6a06c22f5c9769988f6d608b12c3f8e85f8242f",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_result_problems)."
+    },
+    {
+      "name": "_claude_code_restore_edges",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "cb17c41e990626ab64be13d64200301a6262ad56e92818c3c11eb545a227efb9",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_restore_edges)."
+    },
+    {
+      "name": "_claude_code_contract_problems",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "d20ee9d7af03b42031cf2373dec5c026f7417e4fa0f860fb7a5333514853c129",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_contract_problems)."
+    },
+    {
+      "name": "_claude_code_check_output",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "90828c20a97b5f6d663fb318532a27548435b74d6a08986cf163a66ac81486aa",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_check_output)."
+    },
+    {
+      "name": "_claude_code_check_quota",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "21f5add51f0392db817bf395df9d5430e536a56f2e7e2acc8840229dc0fd9dc9",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_check_quota)."
+    },
+    {
+      "name": "_claude_code_attempt",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "8db7136c5081942dc1f24ac78a0d46aee8af21864dd1b549c4097c3ca8eff8c7",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_attempt)."
+    },
+    {
+      "name": "_call_claude_code",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "7a23de96905ffd0c5ce603e81bcc68c5eaabba06236f4db316f4bf5a1756fddb",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_call_claude_code)."
+    },
+    {
+      "name": "_resolve_claude_code_binary",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "2a6498b1416403414e56e49d599ef713485fa15382e389ff51e042abdd75f630",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_resolve_claude_code_binary)."
+    },
+    {
+      "name": "_claude_code_run_check",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "76d9faf31b58b80844e76ece31b38b2fdbdd28b36a12c1a40c36239cac93f7df",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_run_check)."
+    },
+    {
+      "name": "_claude_code_read_version",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "f81b0a28ac678d013b00ed0d9589021e070c0d9eac6f39c01415f9d86ca57c49",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_read_version)."
+    },
+    {
+      "name": "_claude_code_check_version",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "8bb8b2408d506eb841a9ec8c9f164eaac5f17570b8b48a40dedd0add353d8908",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_check_version)."
+    },
+    {
+      "name": "_claude_code_auth_problems",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "f653c572049be140530c8ec9ec66dae69df87e9cbcbe280c06aea35ee6908783",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_auth_problems)."
+    },
+    {
+      "name": "_claude_code_check_auth",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "d83b40adc4f79dd05bb2c60e7810c51ffa61db3202fdf02c764842e8be5f4170",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_check_auth)."
+    },
+    {
+      "name": "_claude_code_check_usage",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "867b8509610049be88c78bc79e7dca9f461efd819a236e85a3d9e4963acf4519",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : attestation gratuite de l'abonnement par `/usage`."
+    },
+    {
+      "name": "_claude_code_preflight",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "10d0cb4ae14e4763e5d6bab70511e1d9d77881a86405f22777cc8a94852c3ad7",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_preflight)."
+    },
+    {
+      "name": "_claude_code_check_model",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "7b8bc36b3c78bde7e492656c970f1748d56e6af7cc18161005655f96705af4e3",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_check_model)."
+    },
+    {
+      "name": "_claude_code_warn_options",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "8b930cc9309c4f1e514d8484c197d1323fb4c319fef68e8585cbecb91bb59eac",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_claude_code_warn_options)."
+    },
+    {
+      "name": "_init_claude_code_client",
+      "file": "src/aipmt/providers/claude_code.py",
+      "hash": "accaeddc0c2a110b699a74567e0ba579f7a965c0d537e9f3b18aa2dfd9a5dc62",
+      "why": "nouveau provider --use_claude_code (CLI `claude -p` sur le quota de l'abonnement Claude) : élément du contrat mesuré sur Claude Code 2.1.283 (_init_claude_code_client)."
     }
   ],
   "removed": [
@@ -1352,6 +1736,76 @@
       "old_hash": "89746704e4226402e7f35fccbb7bfe639d324df762415ba6a7c94d4a22736be9",
       "new_hash": "485bc868c0978143e4f673d86bf24f56e841045adeb895015ecc8a669287787c",
       "why": "identifiants d'`agy models` (effort dans le nom), sans quoi chaque appel avertissait « modèle non listé »."
+    },
+    {
+      "name": "main",
+      "file": "src/aipmt/cli.py",
+      "old_hash": "4653dbdf12a059e5e07bcd1d0e96167d62fc9e671b0dfd3dddf08fad5f6c9279",
+      "new_hash": "f076229755c3ff5bb086b1c6bacc373ab208fac5bc3f11bca92dd013fe99f3a5",
+      "why": "le rappel « modèle non listé » exempte aussi --use_claude_code, dont les alias suivent le dernier modèle."
+    },
+    {
+      "name": "_ROUTING_NAMES",
+      "file": "src/aipmt/config.py",
+      "old_hash": "94b882752a68d99142197d4f8a0cfe6b77ddd72778202f9a3fea6d907d4bf4e4",
+      "new_hash": "beafb0f69d65e7926ff7002c04fbfb46adaacc9e427afcca87e7018ebf6a8a7a",
+      "why": "CLAUDE_CONFIG_DIR, NODE_EXTRA_CA_CERTS et HOME : un .env de projet ne choisit ni le compte ni les certificats de Claude Code."
+    },
+    {
+      "name": "_CLI_TIMEOUT_ENV_VARS",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "b7ab19a405d9c6aab4371cef06ae3c968e930598252be536cb1d844b33952dc9",
+      "new_hash": "d8d5038fc3e53211ce18f4fe85dd5f473a954a2ba857b2977141f3144841f78e",
+      "why": "Claude Code → AIPMT_CLAUDE_TIMEOUT."
+    },
+    {
+      "name": "_CLI_PROVIDER_CI_FALLBACK",
+      "file": "src/aipmt/providers/base.py",
+      "old_hash": "ec95c638ee7e6de37723437a685740db9b53aa2f9d79ef580c03f85401d8a35c",
+      "new_hash": "3a931004e89026b48cd35de8700c3d7361003da578c28b3c7e6b91aae369d46b",
+      "why": "--use_claude_code → repli --use_claude avec ANTHROPIC_API_KEY dans le refus en CI."
+    },
+    {
+      "name": "_resolve_provider_from_args",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "454623e3463197323d5838a4b874de43107d15f57c292ffbc02756820b02d6ba",
+      "new_hash": "81642599b5792bdd583046e86b8f55058548482952f9defb8e9b2ffadc200083",
+      "why": "use_claude_code → claude_code, en fin de chaîne."
+    },
+    {
+      "name": "_PROVIDER_LABELS",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "31931bb7e45fc71c4879d6d48877cecf391f45b704dca45b917bd88a99dd3f51",
+      "new_hash": "13f2760d2f154b66110a64a94d39e9be035f6956660f75fb62bf9392dd21dca0",
+      "why": "libellé « Claude Code CLI »."
+    },
+    {
+      "name": "_CLI_PROVIDERS",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "10683c19868ece27eeb355a25480ad77c974c105885a6bfa5aca50c64e66fc33",
+      "new_hash": "e7f3c6613db214360499d94ef8f681d056803bcb8873dc87745aa72cbe4d546a",
+      "why": "claude_code parmi les CLI dispatchés par _call_cli_provider."
+    },
+    {
+      "name": "_call_cli_provider",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "20ecfe0e0fddc19e21bfc96cfa9a1012f60ddee66079d601f050a3cd1bc76064",
+      "new_hash": "f460b14611a99dd0e82dbcb753084f64e524be69ce7c7f43e4dc947e2b692fa3",
+      "why": "branche claude_code."
+    },
+    {
+      "name": "_PROVIDER_FLAGS",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "ce83ffe04cebeb990671e0225ea98570cfcfd3909e20d5ff71d1c47aca482f98",
+      "new_hash": "86609843a78438e60c20719b286ba28ff7eb092173a471d643de2b2bd5f93a87",
+      "why": "dixième flag, --use_claude_code, contrasté avec --use_claude (API facturée)."
+    },
+    {
+      "name": "_select_later_provider_client",
+      "file": "src/aipmt/providers/registry.py",
+      "old_hash": "cc664d797b1f5bc1f687f8cb480098e3b853e742b3cc44027d0b0a4d576a0d80",
+      "new_hash": "d0a46e739b1c59575b68f9a6e61b30ad263c4efc2a46bc041c7198ad3c508bf1",
+      "why": "use_claude_code → _init_claude_code_client, avant le repli OpenAI."
     }
   ],
   "markers": [

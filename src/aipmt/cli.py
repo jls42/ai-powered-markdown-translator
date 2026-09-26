@@ -158,6 +158,15 @@ def _run_directory(args, client):
     return result.get("failed", ["<unexpected translate_directory result>"])
 
 
+# Providers dont le modèle n'est jamais catalogué dans MODEL_TOKEN_LIMITS :
+# OpenCode (`provider/modèle`) et Claude Code (alias mouvant).
+_UNCATALOGUED_MODEL_FLAGS = ("use_opencode", "use_claude_code")
+
+
+def _model_is_uncatalogued(args):
+    return any(getattr(args, flag, False) for flag in _UNCATALOGUED_MODEL_FLAGS)
+
+
 def main():
     """Entrée CLI : exit(1) si au moins un fichier a échoué, exit(0) sinon."""
     args = _build_arg_parser().parse_args()
@@ -177,9 +186,10 @@ def main():
         print(f"✗ {err}", file=sys.stderr)
         sys.exit(2)
 
-    # Avec OpenCode le modèle est `provider/modèle`, jamais catalogué ici : le
-    # rappel serait systématique, donc ignoré, donc un masque.
-    if args.model not in MODEL_TOKEN_LIMITS and not getattr(args, "use_opencode", False):
+    # Avec OpenCode le modèle est `provider/modèle`, et avec Claude Code un alias
+    # qui suit le dernier modèle de sa famille : jamais catalogués ici, le rappel
+    # serait systématique, donc ignoré, donc un masque.
+    if args.model not in MODEL_TOKEN_LIMITS and not _model_is_uncatalogued(args):
         print(
             f"⚠ Modèle '{args.model}' non listé, utilisation de la limite par défaut ({DEFAULT_TOKEN_LIMIT} tokens)"
         )

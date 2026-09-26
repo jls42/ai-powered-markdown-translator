@@ -218,6 +218,11 @@ Ce qui l'empêche désormais, et ce qu'il faut respecter :
   remplace le module `os` de `base` entier.
 - Jamais de `MagicMock` nu comme `pid` ; jamais de vrai `os.kill` ou
   `os.killpg` vers -1, 0, 1 ou un pid arbitraire (4242 peut exister).
+- **Jamais de `pkill`, `killall` ni `pgrep … | xargs kill` sur un nom de
+  binaire** (`claude`, `codex`, `agy`) : les sessions vivantes de
+  l'utilisateur portent le même nom — six sessions Claude Code tournaient
+  pendant l'écriture de `--use_claude_code`. Un agent ne s'arrête que par
+  `_codex_run_process` et `_agent_group`, qui visent SON groupe.
 - Un test à vrai signal ne vise qu'un sous-processus factice inoffensif lancé
   par le test lui-même (`_interrupt_a_real_agent`) ; un signal envoyé au
   lanceur de tests passe par un gestionnaire neutre posé en filet.
@@ -632,7 +637,7 @@ traîner un jeu de 14 CHANGELOG sur un quart d'heure.
 
 ## Project Overview
 
-AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex), Grok and Google (Antigravity) subscription CLIs, with no per-use billing — or OpenCode, the open-source agent, routed to whatever provider the user configured in OpenCode (local model, free gateway, subscription or key) — or OpenRouter, a paid router to ~430 hosted models — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
+AI-powered Markdown translator that uses OpenAI, Mistral AI, Claude (Anthropic), Google Gemini and Grok (xAI) APIs — or the ChatGPT (Codex), Grok, Google (Antigravity) and Claude (Claude Code) subscription CLIs, with no per-use billing — or OpenCode, the open-source agent, routed to whatever provider the user configured in OpenCode (local model, free gateway, subscription or key) — or OpenRouter, a paid router to ~430 hosted models — to translate Markdown files while preserving formatting, code blocks, and front matter metadata.
 
 ## Commands
 
@@ -808,7 +813,10 @@ démarrage compris), `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
 `OPENROUTER_BASE_URL` (https exigé), `OPENROUTER_TIMEOUT` (défaut 900 s),
 `OPENROUTER_PREFLIGHT_TIMEOUT` (défaut 30 s),
 `REGEN_PROVIDER`, `REGEN_MODEL`, `REGEN_ALLOW_PAID_API` (dérogation, cf. règle en tête),
-`REGEN_JOB_TIMEOUT` (plafond par job du regen : 600 s, 1 800 s sur Codex et Antigravity),
+`REGEN_JOB_TIMEOUT` (plafond par job du regen : 600 s, 1 800 s sur Codex, Antigravity et Claude Code),
+`AIPMT_CLAUDE_BIN`, `AIPMT_CLAUDE_TIMEOUT` (défaut 900 s), `AIPMT_CLAUDE_MAX_UTILIZATION`
+(défaut 0,8), `CLAUDE_CONFIG_DIR` (compte de Claude Code, filtré de la couche projet),
+`XDG_CACHE_HOME` (répertoires de travail de Claude Code),
 `XDG_CONFIG_HOME` et `APPDATA` (emplacement de la configuration utilisateur).
 
 ## Recommended Usage
@@ -1343,6 +1351,97 @@ comme les réglages que le HOME privé écarte, le retrait posé par l'utilisate
 ne suit pas dans les appels d'aipmt — `agy -p /config` lancé dans le même
 isolement le trancherait.
 
+### Provider Claude Code (`--use_claude_code`) — quota d'abonnement Claude
+
+```bash
+aipmt --use_claude_code --file README.md --target_dir . --target_lang en   # opus (provisoire)
+aipmt --use_claude_code --eco --file README.md --target_dir . --target_lang ja   # sonnet
+REGEN_PROVIDER=claude_code ./regen_translations.sh --force   # abonnement : sans dérogation, 2 jobs
+```
+
+Onzième chemin. Pilote `claude -p`, le CLI officiel de Claude Code, sur le quota
+de l'abonnement Claude (Pro ou Max). Contrat **mesuré sur Claude Code 2.1.283 le
+2026-09-26** (phase 0 du plan, sondes une à une par l'environnement du module,
+`~/.claude.json` sauvegardé, jeton surveillé par `stat` seulement) :
+
+- **Invocation** : `claude -p --output-format stream-json --verbose
+--include-hook-events --model <alias> --system-prompt-file <privé> --tools ""
+--safe-mode --restricted --strict-mcp-config --disable-slash-commands
+--no-session-persistence --permission-prompts none --no-chrome --max-turns 1
+--settings '{"disableAllHooks":true,"crossSessionInbound":"refuse","fastMode":false}'`
+  (+ `--effort`, sauf pour haiku qui l'ignore) ; toutes ces options passent
+  ensemble. Segment sur stdin **précédé d'un saut de ligne** : sous
+  `--disable-slash-commands`, un message qui commence par `/` n'atteint pas le
+  modèle — réponse synthétique « /usage isn't available in this environment. »,
+  `success`, `num_turns: 0`, `modelUsage: {}`. `#`, `##`, `!` et `@` en tête
+  passent normalement. Le saut de ligne ne change pas la sortie ; les bords du
+  segment sont restitués à l'identique.
+- **Environnement : liste d'AUTORISATION** (`CLAUDE_CODE_KEPT_ENV_VARS`), puis
+  `_strip_secret_env`, puis `CLAUDE_CODE_ENV_OVERRIDES`. Mesuré : une session
+  Claude Code exporte quinze variables (`CLAUDECODE`, `CLAUDE_CODE_SESSION_ID`,
+  `CLAUDE_CODE_MESSAGING_SOCKET`, `CLAUDE_CODE_MESSAGING_TOKEN`,
+  `CLAUDE_CODE_CHILD_SESSION`, `CLAUDE_PID`, `CLAUDE_CODE_EFFORT_LEVEL`…) qu'un
+  `claude -p` hériterait. **`CLAUDE_CODE_DISABLE_ATTACHMENTS=1` est
+  indispensable** : sans lui, un `@chemin` du document devient une pièce
+  jointe (+214 tokens d'entrée) et le modèle rend `{"file_path": …}` au lieu de
+  traduire. `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1` fait annoncer
+  `analyticsDisabled: true` par `auth status` et `analytics_disabled: true` par
+  l'`init` : la preuve que l'environnement forcé est arrivé.
+- **Préflight, zéro quota** : version ≥ 2.1.283, aucun réglage géré
+  (`/etc/claude-code/managed-settings*`), `claude auth status --json`
+  (`loggedIn`, `authMethod: claude.ai`, `apiProvider: firstParty`,
+  `analyticsDisabled: true`, `subscriptionType ∈ {max, pro}`, **aucune clé
+  `apiKeySource`**, `configDirectory` attendu ; identité jamais affichée), puis
+  `claude -p /usage --output-format json` SANS `--disable-slash-commands` :
+  réponse locale (`num_turns: 0`, `modelUsage: {}`, `local_command: usage`) qui
+  commence par « You are currently using your subscription to power your Claude
+  Code usage ».
+- **Attestation par appel** : `system/init` → `apiKeySource` vaut `none` (encore
+  émis en 2.1.283, contrairement à une rumeur), modèle de la famille de l'alias
+  (`opus` → `claude-opus-5-5`, `sonnet` → `claude-sonnet-5`, `haiku` →
+  `claude-haiku-4-5-20251001`), `fast_mode_state: off`, version = préflight,
+  `tools`/`mcp_servers`/`skills`/`slash_commands` vides, plugins intégrés
+  seulement (`agents-md@builtin` figure même sous `--safe-mode`, sans rien
+  charger) ; `result` → `success`, `is_error` faux, `num_turns: 1`,
+  `stop_reason: end_turn`, `permission_denials` vide, `modelUsage` = {modèle
+  d'init} exactement ; aucun événement `hook_*`. `rate_limit_event` →
+  `isUsingOverage`/`overageInUse`/type `overage`/`status: rejected` arrêtent
+  tout sans relance ; `unifiedWindows.<fenêtre>.utilization` est gardé et
+  vérifié avant chaque segment (plafond `AIPMT_CLAUDE_MAX_UTILIZATION`, 0,8).
+- **Échecs mesurés** : session déconnectée (config dir vide) → `auth status`
+  `loggedIn: false, authMethod: none` ; `-p` → assistant `error:
+authentication_failed`, `result` `is_error: true` « Not logged in · Please run
+  /login » — sous un `subtype: success` : c'est `is_error` qui fait foi. Sortie
+  plafonnée (`CLAUDE_CODE_MAX_OUTPUT_TOKENS=8`) → rc 1, `is_error: true`,
+  `num_turns: 4` (le CLI relance seul), `terminal_reason: api_error`.
+- **Isolation** : 14 sondes, chacune dans son répertoire temporaire → aucune
+  entrée ajoutée à `~/.claude.json` (44 projets avant et après), aucun fichier
+  dans `~/.claude`, jeton jamais rafraîchi, aucun processus restant. Même sans
+  `--safe-mode`, `CLAUDE.md` et `AGENTS.md` canaris du répertoire de travail ne
+  sont pas chargés (`--restricted` et le prompt système remplacé) : les gardes
+  restent, ceinture et bretelles. Le socket de messagerie s'ouvre quand même en
+  `-p` ; `crossSessionInbound: refuse` jette ce qui y arrive.
+- **Bout en bout** : un guide Markdown (front matter, gras, lien, code en ligne,
+  bloc indenté dans une liste, tableau, citation) traduit en anglais par
+  `aipmt --use_claude_code --model sonnet --eco`, structure identique, note de
+  traduction comprise, en 4,3 s ; répertoire de travail effacé.
+- **Quota partagé avec les sessions interactives** : le `rate_limit_event` de la
+  première sonde annonçait la semaine du propriétaire à **98 %** (99 % une heure
+  plus tard), réinitialisation le mercredi 30 septembre à 18 h. `/usage` en `-p`
+  détaille l'origine : 96 % des dernières 24 h viennent de sessions lourdes en
+  sous-agents, 88 % à plus de 150 000 tokens de contexte. D'où le plafond avant
+  segment, et **aucune campagne de mesure des modèles avant la
+  réinitialisation** : les défauts `opus`/`sonnet` sont provisoires.
+- **Refus** : CI, Windows, alias hors `{opus, sonnet, haiku}` (`fable` et `best`
+  facturent en crédits en `-p`, `[1m]` aussi, un identifiant complet se fige).
+- **Conditions** : la page légale admet l'utilisateur qui se connecte « to the
+  unmodified Claude Code binary with their own Claude subscription », mais
+  interdit aux développeurs tiers de « route requests through Free, Pro, or Max
+  plan credentials on behalf of their users » ; l'aide Claude préfère la clé API
+  pour les outils tiers « including open-source projects » et se réserve
+  d'imputer leur usage sur les crédits. Citations vérifiées sur les pages
+  brutes le 2026-09-26. Le README le dit sans l'adoucir.
+
 ### Provider OpenCode (`--use_opencode`) — routeur open source, `--model` obligatoire
 
 ```bash
@@ -1576,6 +1675,7 @@ ligne ou URL perdus —, aucun n'est dû à l'infrastructure.
 | Grok API    | `grok-4.6`                            | `grok-4.3`              |
 | Grok CLI    | `grok-4.6`                            | `grok-4.5`              |
 | Antigravity | `gemini-3.8-flash-medium`             | `gemini-3.7-flash-low`  |
+| Claude Code | `opus` (provisoire)                   | `sonnet` (provisoire)   |
 | OpenCode    | `--model provider/modèle` obligatoire | idem                    |
 
 ### Model lifecycle — dates to watch (audited 2026-08-29)

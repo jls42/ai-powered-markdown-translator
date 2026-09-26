@@ -28,15 +28,15 @@
 
 Traduit des fichiers Markdown d'une langue à une autre en préservant la
 structure : blocs de code, code en ligne, URL, ancres, tableaux et front
-matter. Dix façons d'appeler un modèle — cinq API, trois abonnements sans
+matter. Onze façons d'appeler un modèle — cinq API, quatre abonnements sans
 facturation à l'usage, deux routeurs — et une mesure publiée de ce que chaque
 modèle préserve réellement.
 
 ## En bref
 
-- **Dix chemins de provider** : API OpenAI, Mistral, Claude, Gemini et Grok ;
-  abonnements ChatGPT (Codex), Grok et Google (Antigravity) sans facturation à
-  l'usage ; routeurs OpenCode (open source, gratuit ou local) et OpenRouter
+- **Onze chemins de provider** : API OpenAI, Mistral, Claude, Gemini et Grok ;
+  abonnements ChatGPT (Codex), Grok, Google (Antigravity) et Claude (Claude
+  Code) sans facturation à l'usage ; routeurs OpenCode (open source, gratuit ou local) et OpenRouter
   (plus de 400 modèles).
 - **Rien de faux à cause d'un jeton perdu** : blocs de code, code en ligne,
   URL, ancres et citations sont remplacés par des jetons avant l'appel et
@@ -204,6 +204,7 @@ Les tableaux complets, les durées et le protocole sont dans
 | `--use_codex`            | Utiliser le CLI Codex sur le quota de l'abonnement ChatGPT                                                    |
 | `--use_grok_cli`         | Utiliser le CLI Grok sur le quota de l'abonnement Grok                                                        |
 | `--use_antigravity`      | Utiliser le CLI Antigravity (`agy`) sur le quota de l'abonnement Google AI Pro ou Ultra                       |
+| `--use_claude_code`      | Utiliser le CLI Claude Code (`claude -p`) sur le quota de l'abonnement Claude Pro ou Max                      |
 | `--use_opencode`         | Utiliser OpenCode (open source) vers le fournisseur configuré dans OpenCode ; exige `--model provider/modèle` |
 | `--use_openrouter`       | Utiliser OpenRouter — nécessite `OPENROUTER_API_KEY` et `--model fournisseur/modèle`                          |
 | `--force`                | Forcer la re-traduction                                                                                       |
@@ -242,6 +243,7 @@ aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lan
 | Grok API    | `grok-4.6`                                            | `grok-4.3`                |
 | Grok CLI    | `grok-4.6`                                            | `grok-4.5`                |
 | Antigravity | `gemini-3.8-flash-medium`                             | `gemini-3.7-flash-low`    |
+| Claude Code | `opus` (provisoire)                                   | `sonnet` (provisoire)     |
 | OpenCode    | `--model provider/modèle` obligatoire                 | idem — `--eco` sans effet |
 | OpenRouter  | `--model fournisseur/modèle` obligatoire              | idem — `--eco` sans effet |
 
@@ -386,6 +388,68 @@ produits et l'apprentissage automatique de Google et être relus par des
 humains, abonnement payant compris. Le retrait passe par le réglage
 `enableTelemetry`, à l'effet non documenté, qu'aipmt ne pose pas ; vos réglages
 d'agy ne suivent pas dans son isolement. N'y faites passer rien de confidentiel.
+
+### Sur l'abonnement Claude : `--use_claude_code`
+
+Même principe avec `claude`, le CLI officiel de Claude Code, en mode `-p` : pour
+qui paie Claude Pro ou Max, la traduction est décomptée du quota de
+l'abonnement au lieu d'être facturée au token. À ne pas confondre avec
+`--use_claude`, l'API d'Anthropic, facturée à l'usage.
+
+```bash
+claude                                   # une fois : /login avec le compte de l'abonnement
+aipmt --use_claude_code --file README.md --target_dir . --target_lang en
+```
+
+- **Aucune voie payante ne reste ouverte, et chaque appel le prouve.** Claude
+  Code ne reçoit de votre environnement qu'une liste fermée de variables — ni
+  clé API, ni jeton, ni fournisseur cloud, ni marqueur de la session Claude Code
+  d'où aipmt serait lancé. Avant le premier segment, `claude auth status` doit
+  montrer la connexion d'abonnement, sans clé Console, et `/usage`, qui ne coûte
+  aucun quota, doit l'attester ; chaque appel l'atteste à son tour dans son
+  événement d'initialisation, sinon la réponse est refusée.
+- **Désactivez l'« extra usage »** (claude.ai, Paramètres → Utilisation) pour
+  que le zéro euro tienne : activé, il prend le relais d'une fenêtre épuisée et
+  facture sans afficher d'erreur. aipmt arrête la traduction dès que le relevé
+  de quota d'un appel le signale, mais cet appel-là est déjà compté.
+- **Quota partagé avec vos sessions Claude Code.** Chaque appel rapporte
+  l'utilisation des fenêtres de 5 heures et de la semaine ; au-delà de 80 %
+  (`AIPMT_CLAUDE_MAX_UTILIZATION`), aucun segment de plus n'est lancé, pour ne
+  pas épuiser ce qui sert à votre travail.
+- **Confinement.** Chaque appel tourne sans outil, dans un répertoire privé et
+  jetable, en mode sans personnalisation : ni vos `CLAUDE.md`, ni vos plugins,
+  hooks, serveurs MCP ou réglages ne sont chargés, et rien n'est gardé de la
+  session. Les pièces jointes sont coupées : un `@chemin` dans votre document
+  reste du texte et n'ouvre aucun fichier (mesuré).
+- **Modèles** : les alias `opus` (défaut), `sonnet` (`--eco`) et `haiku`, qui
+  suivent le dernier modèle de leur famille ; `fable` et les variantes `[1m]`
+  sont refusés, parce qu'ils passent en crédits payants. Défauts provisoires
+  jusqu'à la campagne de mesure. `--reasoning_effort` règle l'effort (`low` en
+  `--eco`, `medium` sinon).
+- Refusé en CI (`CI` ou `GITHUB_ACTIONS` défini) et sous Windows (non mesuré).
+- Variables : `AIPMT_CLAUDE_BIN` (sinon le `PATH`, puis `~/.local/bin/claude`),
+  `AIPMT_CLAUDE_TIMEOUT` (secondes par segment, défaut 900),
+  `AIPMT_CLAUDE_MAX_UTILIZATION` (défaut 0.8), `CLAUDE_CONFIG_DIR` (le compte de
+  Claude Code, jamais pris d'un `.env` de projet) ; répertoires de travail sous
+  `XDG_CACHE_HOME/aipmt/claude-code` (défaut `~/.cache`).
+
+**Conditions d'utilisation : c'est votre compte qui est engagé.** La
+[page légale de Claude Code](https://code.claude.com/docs/en/legal-and-compliance)
+n'empêche pas « an end user from signing in to the unmodified Claude Code binary
+with their own Claude subscription » : c'est ce que fait aipmt, qui lance le
+binaire officiel et ne lit jamais le jeton. Mais Anthropic « does not permit
+third-party developers […] to route requests through Free, Pro, or Max plan
+credentials on behalf of their users », préfère la clé API pour les outils
+tiers, « including open-source projects », et se réserve de décompter leur
+usage sur les crédits payants
+([aide Claude](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)).
+Aucun texte ne tranche le cas d'un outil distribué qui lance le binaire.
+
+**Données** : sur les comptes Free, Pro et Max, l'entraînement des modèles
+s'applique aussi à Claude Code quand le réglage de confidentialité l'autorise
+([page données](https://code.claude.com/docs/en/data-usage)). aipmt ne garde
+aucune transcription locale (`--no-session-persistence`). N'y faites passer
+rien de confidentiel.
 
 ### Vers le fournisseur de son choix : `--use_opencode`
 
