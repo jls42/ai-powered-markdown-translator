@@ -136,20 +136,23 @@ Mesuré sur deux documents réels, traduits dans les quatorze mêmes langues par
 chaque modèle. **Le chiffre est le nombre de langues, sur quatorze, où la
 traduction est écrite et où rien ne diffère de la source.**
 
-| Modèle               | Comment y accéder                 | Article de veille dense | Ce README    | Ce qui diffère, et sur combien de langues                                                                                             |
-| -------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Gemini 3.8 Flash** | abonnement Google (Antigravity)   | ✅ 14/14                | ✅ 14/14     | rien, sur aucun des deux documents                                                                                                    |
-| **Gemini 3.7 Flash** | clé API Google                    | ✅ 14/14                | ⚠️ 13/14     | 1 langue sur 14 : un mot en gras de plus (ja)                                                                                         |
-| **Gemini 3.7 Flash** | abonnement Google (Antigravity)   | ✅ 14/14                | ⚠️ 13/14     | 1 langue sur 14 : un mot en gras de moins (ko)                                                                                        |
-| **GPT-5.6 Sol**      | abonnement ChatGPT, ou clé OpenAI | ✅ 14/14                | ⚠️ 12/14     | 2 langues sur 14 : un mot en gras de moins (ar, ja)                                                                                   |
-| **GLM-5.2**          | clé OpenRouter                    | ✅ 14/14                | ⚠️ 11/14     | 3 langues sur 14 : un mot en gras de moins (hi, ja, ko)                                                                               |
-| Claude Sonnet 5      | clé API Anthropic                 | ⚠️ 11/14                | ⚠️ 12/14     | 3 langues sur l'article : un bloc de code apparu (es, de, hi) ; 2 sur ce README : un lien sans son balisage (sv), un mot en gras (zh) |
-| Qwen 3.7 Flash       | clé OpenRouter                    | ❌ 8/14                 | ⚠️ 10/14     | 1 langue refusée sur l'article, 5 autres s'écartent ; sur ce README, une quarantaine de mots mis en `code` (ar)                       |
-| Grok 4.6             | abonnement Grok                   | ❌ 8/14                 | non noté     | 5 langues refusées sur 14, faute de codes en ligne et d'URL rendus ; le néerlandais diverge sur tout                                  |
-| GPT-OSS 20B          | modèle local (Ollama)             | ❌ 7/14                 | non remesuré | 4 langues refusées sur 14 : le modèle y laissait des passages en français, la garde les a arrêtés                                     |
-| MiMo v2.5 (gratuit)  | OpenCode Zen, sans compte         | ❌ 11/14                | non remesuré | 1 langue refusée ; une section perdue en polonais                                                                                     |
-| Mistral Large        | clé API Mistral                   | ❌ 5/14                 | ❌ 1/14      | **une section entière disparaît** : 1 langue sur l'article (hi), 3 sur ce README (ar, hi, ko) — et 3 langues refusées sur l'article   |
-| DeepSeek V4 Flash    | clé OpenRouter                    | ❌ 3/14                 | non remesuré | 10 langues refusées sur 14 ; 37 minutes par langue                                                                                    |
+| Modèle               | Comment y accéder                 | Article de veille dense | Ce README    | Ce qui diffère, et sur combien de langues                                                                                                                          |
+| -------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Gemini 3.8 Flash** | abonnement Google (Antigravity)   | ✅ 14/14                | ✅ 14/14     | rien, sur aucun des deux documents                                                                                                                                 |
+| **Gemini 3.7 Flash** | clé API Google                    | ✅ 14/14                | ⚠️ 13/14     | 1 langue sur 14 : un mot en gras de plus (ja)                                                                                                                      |
+| **Gemini 3.7 Flash** | abonnement Google (Antigravity)   | ✅ 14/14                | ⚠️ 13/14     | 1 langue sur 14 : un mot en gras de moins (ko)                                                                                                                     |
+| **GPT-5.6 Sol**      | abonnement ChatGPT, ou clé OpenAI | ✅ 14/14                | ⚠️ 12/14     | 2 langues sur 14 : un mot en gras de moins (ar, ja)                                                                                                                |
+| **GLM-5.2**          | clé OpenRouter                    | ✅ 14/14                | ⚠️ 11/14     | 3 langues sur 14 : un mot en gras de moins (hi, ja, ko)                                                                                                            |
+| Claude Sonnet 5      | abonnement Claude (Claude Code)   | ⚠️ 13/14                | ⚠️ 13/14     | 1 langue sur 14 sur l'article : un mot en gras de plus (zh) ; 1 sur ce README : une ligne de tableau collée à la précédente, masquée à l'affichage (ar)            |
+| Claude Haiku 4.5     | abonnement Claude (Claude Code)   | ⚠️ 11/14                | ✅ 14/14     | 3 langues sur l'article : un titre de section passé au niveau 1 (en, pl, ro) ; sur ce README, rien pour le comparateur, mais les liens internes doublés en anglais |
+| Claude Sonnet 5      | clé API Anthropic                 | ⚠️ 11/14                | ⚠️ 12/14     | 3 langues sur l'article : un bloc de code apparu (es, de, hi) ; 2 sur ce README : un lien sans son balisage (sv), un mot en gras (zh)                              |
+| Qwen 3.7 Flash       | clé OpenRouter                    | ❌ 8/14                 | ⚠️ 10/14     | 1 langue refusée sur l'article, 5 autres s'écartent ; sur ce README, une quarantaine de mots mis en `code` (ar)                                                    |
+| Grok 4.6             | abonnement Grok                   | ❌ 8/14                 | non noté     | 5 langues refusées sur 14, faute de codes en ligne et d'URL rendus ; le néerlandais diverge sur tout                                                               |
+| GPT-OSS 20B          | modèle local (Ollama)             | ❌ 7/14                 | non remesuré | 4 langues refusées sur 14 : le modèle y laissait des passages en français, la garde les a arrêtés                                                                  |
+| MiMo v2.5 (gratuit)  | OpenCode Zen, sans compte         | ❌ 11/14                | non remesuré | 1 langue refusée ; une section perdue en polonais                                                                                                                  |
+| Mistral Large        | clé API Mistral                   | ❌ 5/14                 | ❌ 1/14      | **une section entière disparaît** : 1 langue sur l'article (hi), 3 sur ce README (ar, hi, ko) — et 3 langues refusées sur l'article                                |
+| DeepSeek V4 Flash    | clé OpenRouter                    | ❌ 3/14                 | non remesuré | 10 langues refusées sur 14 ; 37 minutes par langue                                                                                                                 |
+| Claude Opus 5.5      | abonnement Claude (Claude Code)   | ❌ 0/14                 | ✅ 14/14     | l'article refusé dans les 14 langues par les garde-fous d'Opus, à cause d'une brève de biologie ; rien sur ce README                                               |
 
 |     | Ce que dit le symbole                                                                                                                                                                                 |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -163,6 +166,10 @@ Ce qu'il faut en retenir :
   manque au retour, le fichier n'est pas écrit et la langue compte comme
   refusée. C'est ce qui arrive à Grok sur l'article : quatre codes en ligne et
   trois URL perdus dès le premier segment, sur les cinq écritures non latines.
+- **Un modèle peut refuser tout un document pour une seule phrase.** Opus 5.5
+  traduit ce README sans un écart, mais aucun article de veille : ses
+  garde-fous arrêtent la réponse sur une brève de biologie. Le fichier n'est
+  pas écrit, et aipmt dit pourquoi.
 - **Ce filet ne couvre pas les titres, les tableaux, le front matter ni le
   texte.** Un modèle qui supprime une section rend un fichier que l'outil écrit
   sans broncher — c'est le cas de Mistral. Ces éléments ne sont pas
@@ -176,14 +183,13 @@ Ce qu'il faut en retenir :
 
 Dates et documents : la colonne « Ce README » a été mesurée le 9 septembre 2026
 sur une révision figée de ce fichier (785 lignes, 285 codes en ligne, 89 lignes
-de tableau), retouchée depuis — sauf les deux lignes Antigravity, mesurées le
-26 septembre sur la révision publiée avec la 1.14.0, plus courte (600 lignes,
-257 codes en ligne, 85 lignes de tableau). La colonne « Article de veille
-dense » vient de la campagne des 4 et 5 septembre sur un article de 589 lignes,
-sauf la ligne Grok, remesurée le 9 septembre sur une autre édition de la même
-veille, et les deux lignes Antigravity, mesurées le 26 septembre sur le même
-article.
-Les tableaux complets, les durées et le protocole sont dans
+de tableau), retouchée depuis — sauf les lignes Antigravity et Claude Code,
+mesurées le 26 septembre sur la révision publiée avec la 1.14.0, plus courte
+(600 lignes, 257 codes en ligne, 85 lignes de tableau). La colonne « Article de
+veille dense » vient de la campagne des 4 et 5 septembre sur un article de 589
+lignes, sauf la ligne Grok, remesurée le 9 septembre sur une autre édition de la
+même veille, et les lignes Antigravity et Claude Code, mesurées le 26 septembre
+sur le même article. Les tableaux complets, les durées et le protocole sont dans
 [Mesures détaillées](#mesures-détaillées).
 
 ## Toutes les options
@@ -243,7 +249,7 @@ aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lan
 | Grok API    | `grok-4.6`                                            | `grok-4.3`                |
 | Grok CLI    | `grok-4.6`                                            | `grok-4.5`                |
 | Antigravity | `gemini-3.8-flash-medium`                             | `gemini-3.7-flash-low`    |
-| Claude Code | `opus` (provisoire)                                   | `sonnet` (provisoire)     |
+| Claude Code | `sonnet`, effort `low`                                | idem — `--eco` sans effet |
 | OpenCode    | `--model provider/modèle` obligatoire                 | idem — `--eco` sans effet |
 | OpenRouter  | `--model fournisseur/modèle` obligatoire              | idem — `--eco` sans effet |
 
@@ -421,11 +427,20 @@ aipmt --use_claude_code --file README.md --target_dir . --target_lang en
   hooks, serveurs MCP ou réglages ne sont chargés, et rien n'est gardé de la
   session. Les pièces jointes sont coupées : un `@chemin` dans votre document
   reste du texte et n'ouvre aucun fichier (mesuré).
-- **Modèles** : les alias `opus` (défaut), `sonnet` (`--eco`) et `haiku`, qui
-  suivent le dernier modèle de leur famille ; `fable` et les variantes `[1m]`
-  sont refusés, parce qu'ils passent en crédits payants. Défauts provisoires
-  jusqu'à la campagne de mesure. `--reasoning_effort` règle l'effort (`low` en
-  `--eco`, `medium` sinon).
+- **Modèles** : `sonnet` par défaut, à l'effort `low`, et en `--eco` aussi :
+  `--eco` ne change rien sur ce chemin. Mesurés sur les mêmes documents, `haiku`
+  est deux fois plus lent — il raisonne sans qu'on puisse l'en empêcher — pour
+  un coût à peine inférieur, et `opus` refuse des contenus de biologie (point
+  suivant). Tous deux restent accessibles par `--model` ; ces alias suivent le
+  dernier modèle de leur famille. `fable` et les variantes `[1m]` sont refusés,
+  parce qu'ils passent en crédits payants. `--reasoning_effort` règle l'effort,
+  dont une traduction ne tire rien : le raisonnement mesuré est nul ou presque.
+- **Opus refuse certains contenus de biologie.** Ses garde-fous sont plus
+  stricts que ceux de Sonnet, et le message d'erreur d'Anthropic prévient qu'ils
+  « can sometimes flag biology-research-adjacent work ». Mesuré : une brève de
+  veille sur 279 molécules générées a fait refuser l'article dans les quatorze
+  langues. Rien n'est écrit : aipmt refuse la réponse coupée, nomme les
+  garde-fous et conseille `--model sonnet`.
 - Refusé en CI (`CI` ou `GITHUB_ACTIONS` défini) et sous Windows (non mesuré).
 - Variables : `AIPMT_CLAUDE_BIN` (sinon le `PATH`, puis `~/.local/bin/claude`),
   `AIPMT_CLAUDE_TIMEOUT` (secondes par segment, défaut 900),
@@ -626,13 +641,16 @@ des 4 et 5 septembre 2026.
 | `gpt-5.6-sol` (`--use_codex`)                   | abonnement ChatGPT | 14/14   | ✅ **14/14** | 11 min 28 s    |
 | `z-ai/glm-5.2`                                  | OpenRouter         | 14/14   | ✅ **14/14** | 5 min 37 s     |
 | `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14   | ✅ **14/14** | 26 min 23 s    |
+| `sonnet` (`--use_claude_code`)                  | abonnement Claude  | 14/14   | ⚠️ 13/14     | 6 min 49 s     |
 | `claude-sonnet-5`                               | API Anthropic      | 14/14   | ⚠️ 11/14     | 6 min 31 s     |
+| `haiku` (`--use_claude_code`)                   | abonnement Claude  | 14/14   | ⚠️ 11/14     | 15 min 54 s    |
 | `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14   | ❌ 11/14     | 9 min 27 s     |
 | `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14   | ❌ 8/14      | 10 min 09 s    |
 | `ollama/gpt-oss-20b-32k`                        | local              | 10/14   | ❌ 7/14      | 12 min 39 s    |
 | `mistral-large-latest`                          | API Mistral        | 11/14   | ❌ 5/14      | 5 min 32 s     |
 | `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14    | ❌ 3/14      | 37 min 27 s    |
 | `grok-4.6` (`--use_grok_cli`)                   | abonnement Grok    | 1/14    | ❌ 1/14      | 23 min 11 s    |
+| `opus` (`--use_claude_code`)                    | abonnement Claude  | 0/14    | ❌ 0/14      | —              |
 
 Grok a été remesuré le 9 septembre sur une autre édition de la même veille
 (356 lignes) : 9 langues écrites sur 14, 8 sans écart. C'est ce chiffre qui
@@ -658,6 +676,18 @@ celle du 25 septembre (438 lignes, 2 citations anglaises), traduite hors du
 blog par `gemini-3.7-flash-medium` : 14 écrites sur 14, toutes sans écart, 87 à
 128 s par langue.
 
+Les lignes `--use_claude_code` ont été mesurées le 26 septembre sur le même
+article, quatre traductions en parallèle, à l'effort `low`. Avec `sonnet`, les
+citations anglaises sont intactes dans les quatorze langues et, en anglais, le
+modèle a retiré lui-même les lignes de traduction française, sans inventer de
+drapeau. `opus` n'a écrit aucune langue : dans chacune, ses garde-fous ont
+arrêté la réponse au dernier segment, à cause d'une brève sur 279 molécules
+générées pour un site de liaison. Envoyée seule, cette brève est refusée au
+titre de la catégorie « bio » ; `sonnet` l'a traduite partout. `haiku` écrit
+les quatorze langues ; dans trois (en, pl, ro), un titre de section passe du
+niveau 2 au niveau 1. Il raisonne sans qu'on puisse l'en empêcher — 61 % de
+ses tokens de sortie —, d'où plus du double du temps de `sonnet`.
+
 ### README de ce projet, Markdown standard
 
 Révision figée le 9 septembre 2026 : 785 lignes, 285 codes en ligne, 40
@@ -666,8 +696,11 @@ clôtures de blocs, 89 lignes de tableau. Quatre traductions en parallèle.
 | Modèle                                          | Écrites | Sans écart | Médiane/langue | Ce qui diffère                                                           |
 | ----------------------------------------------- | ------- | ---------- | -------------- | ------------------------------------------------------------------------ |
 | `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14   | 1 min 43 s     | rien                                                                     |
+| `opus` (`--use_claude_code`)                    | 14/14   | ✅ 14/14   | 1 min 48 s     | rien                                                                     |
+| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14   | 4 min 02 s     | rien pour le comparateur ; liens internes doublés (en)                   |
 | `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36 s           | un mot en gras (ja)                                                      |
 | `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1 min 22 s     | un mot en gras (ko)                                                      |
+| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14   | 2 min 20 s     | une ligne de tableau collée à la précédente (ar)                         |
 | `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | 2 min 56 s     | un lien (sv), un mot en gras (zh)                                        |
 | `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6 min 46 s     | un mot en gras (ar, ja)                                                  |
 | `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | 2 min 34 s     | un mot en gras (hi, ja, ko)                                              |
@@ -681,14 +714,15 @@ n'ont pas été remesurés sur cette révision ; sur celle des 4 et 5 septembre,
 plus courte de 277 lignes, ils écrivaient chacun 9 traductions sur 14, dont 7
 et 1 sans écart.
 
-Les lignes `--use_antigravity` n'ont pas été mesurées sur la révision figée,
-mais le 26 septembre sur celle publiée avec la 1.14.0 : 600 lignes, 257 codes
-en ligne, 30 clôtures de blocs, 85 lignes de tableau. Plus courte de 185
-lignes, elle ne se compare pas terme à terme aux autres lignes ; les deux
-lignes Antigravity, elles, se comparent entre elles. Sur les liens internes,
-que le comparateur ne contrôle pas, `gemini-3.8-flash-medium` les a gardés
-intacts dans les quatorze langues, `gemini-3.7-flash-medium` les a cassés en
-italien.
+Les lignes `--use_antigravity` et `--use_claude_code` n'ont pas été mesurées sur
+la révision figée, mais le 26 septembre sur celle publiée avec la 1.14.0 : 600
+lignes, 257 codes en ligne, 30 clôtures de blocs, 85 lignes de tableau. Plus
+courte de 185 lignes, elle ne se compare pas terme à terme aux autres lignes ;
+ces lignes-là, elles, se comparent entre elles. Sur les liens internes, que le
+comparateur ne contrôle pas, `gemini-3.8-flash-medium` les a gardés intacts dans
+les quatorze langues, `gemini-3.7-flash-medium` les a cassés en italien ;
+`sonnet` et `opus` les ont gardés intacts partout, `haiku` les a doublés en
+anglais.
 
 ### Quatre README de projets connus
 
