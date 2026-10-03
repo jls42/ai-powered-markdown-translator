@@ -1883,6 +1883,13 @@
       "old_hash": "6c77206409c92655bfdd1dd21b9c60e1cf967d42606d2a4cc80a3ad4270f78da",
       "new_hash": "026b596fcf83e70609e48a3258edfe5695508c2b38f43c527cf06fb02114d728",
       "why": "remplacement par fonction : passée en chaîne, la citation voyait ses antislashs interprétés par re (\\n d'un printf cité, \\d → re.error) ; le code inline d'une citation y transite depuis _settle_code_placeholders_after_news"
+    },
+    {
+      "name": "_FENCED_CODE_REGEX",
+      "file": "src/aipmt/placeholders.py",
+      "old_hash": "f96f6ede0145a1383e8c826109c1ce1f8ad1b3acc4e6b1c4971ac36118242e2e",
+      "new_hash": "ffc6119177a2a19c93536fe835e4703af7b02a48b491ac5f085d49f1b9f88827",
+      "why": "bloc de code indenté : CommonMark autorise une clôture décalée, cas normal d'un bloc dans une liste numérotée ; ancré en colonne 0, le motif en manquait 6 sur 14 dans un README réel, le code partait au modèle comme prose et la garde anti-passthrough refusait le fichier pour toutes les langues"
     }
   ],
   "markers": [
