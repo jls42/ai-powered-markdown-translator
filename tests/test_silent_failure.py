@@ -528,6 +528,52 @@ class TestCodePlaceholders(unittest.TestCase):
         self.assertEqual(len(blocks), 1)
         self.assertIn("#CODEBLOCK0#", protected)
 
+    def test_fenced_block_indented_in_list(self):
+        """Fence indentée dans une liste numérotée → doit être protégée.
+
+        C'est le cas NORMAL d'un bloc de code documentant une étape : il
+        appartient à l'élément de liste, donc il est indenté. Ancré en colonne
+        0, le motif les manquait tous, le code partait au LLM comme prose,
+        revenait identique — ce sont des commandes — et la garde
+        anti-passthrough refusait le fichier pour TOUTES les langues cibles.
+        """
+        content = (
+            "1. Installer :\n\n"
+            "   ```bash\n"
+            "   npm install\n"
+            "   ```\n\n"
+            "2. Lancer :\n\n"
+            "   ```bash\n"
+            "   npm start\n"
+            "   ```\n"
+        )
+        protected, blocks, _ph = placeholders._protect_code_blocks(content)
+        self.assertEqual(len(blocks), 2)
+        self.assertIn("#CODEBLOCK0#", protected)
+        self.assertIn("#CODEBLOCK1#", protected)
+        self.assertNotIn("npm install", protected)
+        self.assertNotIn("npm start", protected)
+
+    def test_fenced_indented_and_flush_mixed(self):
+        """Blocs indentés et en colonne 0 mêlés : aucun ne doit en avaler un autre."""
+        content = "```a\nX\n```\n\n" "1. étape :\n\n" "   ```b\n   Y\n   ```\n\n" "```c\nZ\n```\n"
+        protected, blocks, _ph = placeholders._protect_code_blocks(content)
+        self.assertEqual(len(blocks), 3)
+        for texte in ("X", "Y", "Z"):
+            self.assertNotIn(texte, protected)
+        # le texte hors blocs survit : aucun bloc n'a débordé
+        self.assertIn("1. étape :", protected)
+
+    def test_fenced_indented_round_trip_identity(self):
+        """protect → restore rend le document identique, indentation comprise."""
+        content = "- étape :\n\n  ```sh\n  echo ok\n  ```\n\nfin\n"
+        protected, blocks, phs = placeholders._protect_code_blocks(content)
+        self.assertEqual(len(blocks), 1)
+        restaure = protected
+        for placeholder, bloc in zip(phs, blocks, strict=False):
+            restaure = restaure.replace(placeholder, bloc, 1)
+        self.assertEqual(restaure, content)
+
     def test_fenced_orphan_does_not_match(self):
         """Une fence ouverte sans fermeture ne doit pas être consommée greedy."""
         content = "Texte\n```\npas de fermeture"
