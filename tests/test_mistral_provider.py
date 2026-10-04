@@ -15,7 +15,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-import httpx
+import httpx2
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
@@ -117,15 +117,18 @@ class TestMistralText(unittest.TestCase):
 class TestMistralRetry(unittest.TestCase):
     """Le client construit par le provider réessaie sur 429, pas sur 400."""
 
-    def _client_on(self, responses: list[httpx.Response]):
+    def _client_on(self, responses: list[httpx2.Response]):
         """Client du provider, branché sur un transport qui rejoue `responses`."""
-        requests: list[httpx.Request] = []
+        requests: list[httpx2.Request] = []
 
-        def handler(request: httpx.Request) -> httpx.Response:
+        def handler(request: httpx2.Request) -> httpx2.Response:
             requests.append(request)
             return responses[min(len(requests), len(responses)) - 1]
 
-        http_client = httpx.Client(transport=httpx.MockTransport(handler))
+        # mistralai 3 tourne sur httpx2 et n'attrape plus que ses exceptions : le
+        # client passé en `client=` doit en être un (MIGRATION.md de la 3.0). Un
+        # `httpx.Client` y passait encore, par simple ressemblance des deux API.
+        http_client = httpx2.Client(transport=httpx2.MockTransport(handler))
         real_mistral = mistral.Mistral
         with (
             patch.dict(os.environ, _FAKE_ENV, clear=True),
@@ -139,7 +142,7 @@ class TestMistralRetry(unittest.TestCase):
 
     def test_un_429_sans_retry_after_est_reessaye_apres_une_attente(self) -> None:
         client, requests = self._client_on(
-            [httpx.Response(429, json=_RATE_LIMITED), httpx.Response(200, json=_completion())]
+            [httpx2.Response(429, json=_RATE_LIMITED), httpx2.Response(200, json=_completion())]
         )
         with patch("mistralai.client.utils.retries.time.sleep") as sleep:
             text = mistral._call_mistral(client, _args(), "prompt", "segment")
@@ -152,7 +155,7 @@ class TestMistralRetry(unittest.TestCase):
 
     def test_un_400_n_est_pas_reessaye(self) -> None:
         client, requests = self._client_on(
-            [httpx.Response(400, json={"object": "error", "message": "bad request"})]
+            [httpx2.Response(400, json={"object": "error", "message": "bad request"})]
         )
         args = _args()
         with patch("mistralai.client.utils.retries.time.sleep") as sleep:
@@ -162,7 +165,7 @@ class TestMistralRetry(unittest.TestCase):
 
     def test_un_429_persistant_finit_par_remonter(self) -> None:
         """Un compte durablement bridé échoue en clair au lieu de boucler."""
-        client, requests = self._client_on([httpx.Response(429, json=_RATE_LIMITED)])
+        client, requests = self._client_on([httpx2.Response(429, json=_RATE_LIMITED)])
         clock = iter(range(0, 10_000, 100))  # chaque lecture de l'horloge avance de 100 s
         args = _args()
         with (
