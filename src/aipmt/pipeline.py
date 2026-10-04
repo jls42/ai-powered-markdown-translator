@@ -161,7 +161,15 @@ def translate(
     # leur newline structurant, et les coupures sur ". " ou hard-cut (max_length)
     # ne sont pas garanties de finir/commencer par "\n" — un "\n" explicite ici
     # évite de coller deux paragraphes ou de fusionner un heading avec sa prose.
-    return "\n".join(translated_segments)
+    translated = "\n".join(translated_segments)
+    # Les providers API rendent leur réponse passée à `.strip()` : le dernier
+    # segment perdait le saut de ligne final de la source, et un fichier traduit
+    # sans note de traduction n'en avait plus (mesuré le 2026-10-04 sur l'API
+    # Mistral). `_compose_with_notes` en remet un, les CLI recopient la fin du
+    # segment ; ici, tous les providers rendent celui de la source.
+    if text.endswith("\n") and not translated.endswith("\n"):
+        translated += "\n"
+    return translated
 
 
 def _append_translation_note(translated_content, client, args, use_mistral, use_claude, use_gemini):

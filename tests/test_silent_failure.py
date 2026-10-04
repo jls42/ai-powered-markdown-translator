@@ -1807,5 +1807,39 @@ class TestComposeWithNotesBottomTolerantToMalformedFM(unittest.TestCase):
             notes._compose_with_notes(content, args, "Note traduite", "legacy")
 
 
+class TestSourceFinalNewlineIsKept(unittest.TestCase):
+    """Les providers API rendent leur réponse passée à `.strip()` : le dernier
+    segment perdait le saut de ligne final de la source, et un fichier traduit
+    sans note de traduction n'en avait plus. Mesuré le 2026-10-04 sur l'API
+    Mistral : un guide de 429 octets terminé par un saut de ligne, traduit en
+    423 octets qui n'en avaient pas. Le faux modèle rend sa traduction AVEC le
+    saut de ligne, comme un vrai : c'est le `.strip()` du vrai `_call_openai`
+    qui le retirait. Sans le correctif, les deux premiers tests échouent."""
+
+    _SOURCE = "Le traducteur préserve la structure du document.\n"
+
+    def test_translate_gives_back_the_final_newline_of_the_source(self):
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.return_value = _make_openai_response(
+            _long_en_translation() + "\n"
+        )
+        traduit = translate_fn(self._SOURCE, mock_client, _base_args())
+        self.assertEqual(traduit, _long_en_translation().strip() + "\n")
+
+    def test_a_file_translated_without_note_ends_with_its_newline(self):
+        status, out, _ = _run_markdown_file_translation(
+            self._SOURCE, _make_openai_response(_long_en_translation() + "\n")
+        )
+        self.assertEqual(status, "success")
+        self.assertEqual(out, _long_en_translation().strip() + "\n")
+
+    def test_no_final_newline_is_added_when_the_source_has_none(self):
+        status, out, _ = _run_markdown_file_translation(
+            self._SOURCE.rstrip("\n"), _make_openai_response(_long_en_translation() + "\n")
+        )
+        self.assertEqual(status, "success")
+        self.assertEqual(out, _long_en_translation().strip())
+
+
 if __name__ == "__main__":
     unittest.main()
