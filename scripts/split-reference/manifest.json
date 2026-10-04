@@ -1221,6 +1221,12 @@
       "file": "src/aipmt/placeholders.py",
       "hash": "048f6d257de22f383ba3a96823569a6ce15db7241e0ef56f0fb30707902a926f",
       "why": "jeton d'ancre : les parenthèses d'un lien Markdown restent hors du jeton, `[texte](#ANCHORn#)`, sans quoi le modèle recevait un lien d'apparence cassée et le « réparait » en `((#ancre))` ou perdait le jeton (README 1.15.0, 2026-09-26) : texte de restauration d'une ancre, extrait de _restore_anchors pour la limite de complexité."
+    },
+    {
+      "name": "_settle_code_placeholders_after_news",
+      "file": "src/aipmt/pipeline.py",
+      "hash": "74ca1a584c911b084e8a4a45da2327f886995d511aab39c96bc66b26b9b5a441",
+      "why": "code inline dans une citation news : le code est extrait avant les citations EN, ses placeholders partaient avec elles et la validation les déclarait manquants pour toutes les langues (run news du 2 octobre 2026, #INLINECODE19#) : résout ceux d'une citation dans le texte mis de côté, abandonne ceux de la ligne source retirée en cible EN"
     }
   ],
   "removed": [
@@ -1856,6 +1862,34 @@
       "old_hash": "e6e8a96a868ee99e2b93e657b077d0cfefa0d171536a1f332e3faf95c13a21c8",
       "new_hash": "d38d4be4217aace5377671a3f4934d51ab489fafae2c470c05c8bb5e8ec95689",
       "why": "jeton d'ancre : les parenthèses d'un lien Markdown restent hors du jeton, `[texte](#ANCHORn#)`, sans quoi le modèle recevait un lien d'apparence cassée et le « réparait » en `((#ancre))` ou perdait le jeton (README 1.15.0, 2026-09-26) : restaure le jeton entre parenthèses, puis un jeton nu, en lien valide."
+    },
+    {
+      "name": "_protect_news_quotes",
+      "file": "src/aipmt/news.py",
+      "old_hash": "d0cef8ba5f121f05aa3f8369262975ab5cbf710371865aad14918069ff085123",
+      "new_hash": "3cfb6b555c7766d6f2a423b0e585674b745d53890ed725d91de70991234159ac",
+      "why": "code inline dans une citation news : le code est extrait avant les citations EN, ses placeholders partaient avec elles et la validation les déclarait manquants pour toutes les langues (run news du 2 octobre 2026, #INLINECODE19#) : en cible EN, la ligne `> 🇫🇷 _trad_` et son séparateur sont retirés avant l'appel au modèle au lieu de compter sur lui pour les supprimer"
+    },
+    {
+      "name": "_protect_pipeline_inputs",
+      "file": "src/aipmt/pipeline.py",
+      "old_hash": "6c90f4b34a3c2396456454fd775706a503090151f472358886d6343f9912683b",
+      "new_hash": "0385cbf6cf52607dfda6def5148acbc78e8af49337872340aae6d8c117c767d1",
+      "why": "code inline dans une citation news : le code est extrait avant les citations EN, ses placeholders partaient avec elles et la validation les déclarait manquants pour toutes les langues (run news du 2 octobre 2026, #INLINECODE19#) : appelle _settle_code_placeholders_after_news juste après la protection news"
+    },
+    {
+      "name": "_restore_news_quotes",
+      "file": "src/aipmt/news.py",
+      "old_hash": "6c77206409c92655bfdd1dd21b9c60e1cf967d42606d2a4cc80a3ad4270f78da",
+      "new_hash": "026b596fcf83e70609e48a3258edfe5695508c2b38f43c527cf06fb02114d728",
+      "why": "remplacement par fonction : passée en chaîne, la citation voyait ses antislashs interprétés par re (\\n d'un printf cité, \\d → re.error) ; le code inline d'une citation y transite depuis _settle_code_placeholders_after_news"
+    },
+    {
+      "name": "_FENCED_CODE_REGEX",
+      "file": "src/aipmt/placeholders.py",
+      "old_hash": "f96f6ede0145a1383e8c826109c1ce1f8ad1b3acc4e6b1c4971ac36118242e2e",
+      "new_hash": "ffc6119177a2a19c93536fe835e4703af7b02a48b491ac5f085d49f1b9f88827",
+      "why": "bloc de code indenté : CommonMark autorise une clôture décalée, cas normal d'un bloc dans une liste numérotée ; ancré en colonne 0, le motif en manquait 6 sur 14 dans un README réel, le code partait au modèle comme prose et la garde anti-passthrough refusait le fichier pour toutes les langues"
     }
   ],
   "markers": [

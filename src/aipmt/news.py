@@ -222,7 +222,16 @@ def _protect_news_quotes(content, args):
             url_match = re.search(r"\]\(([^)]+)\)", attribution)
             if url_match:
                 attribution_urls.append(url_match.group(1))
-        protected = f"{news_quote_placeholder(idx)}\n>\n{match.group(2)}"
+        if getattr(args, "target_lang", None) == "en":
+            # Cible EN : la ligne `> 🇫🇷 _trad_` n'a pas d'équivalent, la consigne
+            # demande au modèle de la supprimer avec son séparateur `>`. On la
+            # retire ici, de façon déterministe : le code inline qu'elle portait,
+            # déjà remplacé par `#INLINECODE{n}#`, ne peut plus être compté
+            # « manquant » quand le modèle obéit (cf. pipeline,
+            # `_settle_code_placeholders_after_news`).
+            protected = news_quote_placeholder(idx)
+        else:
+            protected = f"{news_quote_placeholder(idx)}\n>\n{match.group(2)}"
         if attribution:
             protected += f"\n{attribution}"
         return protected
@@ -244,8 +253,11 @@ def _validate_news_placeholders_intact(translated_content, n_quotes):
 
 def _restore_news_quotes(translated_content, original_quotes):
     for idx, quote in enumerate(original_quotes):
+        # Remplacement par fonction : passée en chaîne, la citation verrait ses
+        # antislashs interprétés par `re` (`\n` d'un `printf` cité → saut de
+        # ligne, `\d` → re.error). Le code inline d'une citation y passe aussi.
         translated_content, restored_count = news_quote_placeholder_regex(idx).subn(
-            quote, translated_content
+            lambda _match, quote=quote: quote, translated_content
         )
         if restored_count != 1:
             raise RuntimeError(

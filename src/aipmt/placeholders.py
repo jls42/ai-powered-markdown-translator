@@ -37,7 +37,15 @@ _FENCED_CODE_REGEX = re.compile(
     # (e.g. ` ```Python hl_lines="7  12" ` chez FastAPI, ` ```py title="..." ` chez
     # MkDocs) — sans cette tolérance, le bloc n'est pas protégé, le code part au
     # LLM comme prose, et la garde anti-passthrough lève un faux positif.
-    r"(^```[^\n]*\n)(.*?)(^```[ \t]*$)",
+    #
+    # Indentation : CommonMark autorise une clôture décalée, et c'est le cas
+    # NORMAL d'un bloc dans une liste numérotée — le bloc appartient à l'élément
+    # de liste, donc il est indenté. Ancré en colonne 0, le motif les manquait
+    # tous : mesuré sur un README réel, 8 blocs vus sur 14. Les six autres
+    # partaient au LLM comme prose, revenaient identiques (ce sont des
+    # commandes), et la garde refusait le fichier pour TOUTES les langues, avec
+    # un message qui nomme le symptôme et jamais la cause.
+    r"(^[ \t]*```[^\n]*\n)(.*?)(^[ \t]*```[ \t]*$)",
     re.DOTALL | re.MULTILINE,
 )
 

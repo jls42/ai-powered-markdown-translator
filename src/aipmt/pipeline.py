@@ -205,6 +205,46 @@ class _PipelineState:
     url_placeholders: list
 
 
+def _settle_code_placeholders_after_news(content, original_quotes, code_pairs, args):
+    """Le code est extrait AVANT les citations news : certains de ses
+    placeholders quittent alors le contenu envoyé au modèle.
+
+    - Ceux d'un code placé DANS une citation EN partent avec elle : la citation
+      est mise de côté et restaurée telle quelle, le modèle ne les voit jamais.
+    - En cible EN, ceux de la ligne `> 🇫🇷 _trad_`, que `_protect_news_quotes`
+      retire.
+
+    Restés dans les listes à valider, ils étaient déclarés « manquants », et
+    pour TOUTES les langues dans le premier cas : le run news du 2 octobre 2026
+    s'est arrêté au disjoncteur sur `#INLINECODE19#`, une commande
+    `/plugin enable …` citée dans un tweet. Ceux d'une citation sont résolus
+    dans le texte mis de côté ; ceux de la ligne retirée sont abandonnés.
+
+    Retourne `(citations, paires)` : les paires (originaux, placeholders) ne
+    gardent que les placeholders encore présents dans le contenu."""
+    quotes = list(original_quotes)
+    settled = []
+    for originals, placeholders in code_pairs:
+        kept_originals, kept_placeholders = [], []
+        for original, placeholder in zip(originals, placeholders, strict=True):
+            if placeholder in content:
+                kept_originals.append(original)
+                kept_placeholders.append(placeholder)
+                continue
+            for i, quote in enumerate(quotes):
+                if placeholder in quote:
+                    quotes[i] = quote.replace(placeholder, original)
+                    break
+            else:
+                if not (args.news and getattr(args, "target_lang", None) == "en"):
+                    raise RuntimeError(
+                        f"Placeholder {placeholder} perdu pendant la protection news "
+                        "(absent du contenu comme des citations)"
+                    )
+        settled.append((kept_originals, kept_placeholders))
+    return quotes, settled
+
+
 def _protect_pipeline_inputs(content, args):
     """Phase `protect` du pipeline : extrait dans l'ordre code/news/anchors/
     ref-labels/urls. L'ordre est critique (cf. commentaires inline) — toute
@@ -215,6 +255,14 @@ def _protect_pipeline_inputs(content, args):
     # News quotes AVANT URLs : capture les `attribution_urls` réelles avant
     # qu'elles ne soient remplacées par `#URL{n}#`.
     content, original_quotes, attribution_urls = _protect_news_quotes(content, args)
+    original_quotes, (inline_pair, block_pair) = _settle_code_placeholders_after_news(
+        content,
+        original_quotes,
+        ((inline_codes, inline_placeholders), (code_blocks, block_placeholders)),
+        args,
+    )
+    inline_codes, inline_placeholders = inline_pair
+    code_blocks, block_placeholders = block_pair
     # Capture les slugs des headings source pour resync TOC post-LLM.
     source_heading_slugs = _extract_heading_slugs(content)
     # Anchors AVANT urls : éviter que `\(#[^)\s]+\)` matche `(#URL\d+#)`.
