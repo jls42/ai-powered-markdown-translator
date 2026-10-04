@@ -1890,6 +1890,13 @@
       "old_hash": "f96f6ede0145a1383e8c826109c1ce1f8ad1b3acc4e6b1c4971ac36118242e2e",
       "new_hash": "ffc6119177a2a19c93536fe835e4703af7b02a48b491ac5f085d49f1b9f88827",
       "why": "bloc de code indenté : CommonMark autorise une clôture décalée, cas normal d'un bloc dans une liste numérotée ; ancré en colonne 0, le motif en manquait 6 sur 14 dans un README réel, le code partait au modèle comme prose et la garde anti-passthrough refusait le fichier pour toutes les langues"
+    },
+    {
+      "name": "translate",
+      "file": "src/aipmt/pipeline.py",
+      "old_hash": "ee909d5809aef83500f48e9ee311c7b4dfebb62831eb84668c134c177ff9fdfb",
+      "new_hash": "fc42a14b59d8a961650a29d72d6cdde7d00d38d512d385b590a306d8fda78309",
+      "why": "saut de ligne final : les providers API rendent leur réponse passée à .strip(), le dernier segment perdait le saut de ligne final de la source et un fichier traduit sans note de traduction n'en avait plus (mesuré le 2026-10-04 sur l'API Mistral) ; translate() rend désormais celui de la source"
     }
   ],
   "markers": [
