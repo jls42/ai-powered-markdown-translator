@@ -235,22 +235,32 @@ def _settle_code_placeholders_after_news(content, original_quotes, code_pairs, a
     for originals, placeholders in code_pairs:
         kept_originals, kept_placeholders = [], []
         for original, placeholder in zip(originals, placeholders, strict=True):
-            if placeholder in content:
+            if _settle_code_placeholder(original, placeholder, content, quotes, args):
                 kept_originals.append(original)
                 kept_placeholders.append(placeholder)
-                continue
-            for i, quote in enumerate(quotes):
-                if placeholder in quote:
-                    quotes[i] = quote.replace(placeholder, original)
-                    break
-            else:
-                if not (args.news and getattr(args, "target_lang", None) == "en"):
-                    raise RuntimeError(
-                        f"Placeholder {placeholder} perdu pendant la protection news "
-                        "(absent du contenu comme des citations)"
-                    )
         settled.append((kept_originals, kept_placeholders))
     return quotes, settled
+
+
+def _settle_code_placeholder(original, placeholder, content, quotes, args):
+    """Range un placeholder de code pour `_settle_code_placeholders_after_news`.
+
+    Retourne True s'il est encore dans le contenu, donc à valider au retour du
+    modèle ; False s'il a été résolu dans une citation — `quotes` est alors
+    modifiée sur place — ou abandonné avec la ligne `> 🇫🇷` retirée en cible EN.
+    Lève s'il n'est nulle part ailleurs."""
+    if placeholder in content:
+        return True
+    for i, quote in enumerate(quotes):
+        if placeholder in quote:
+            quotes[i] = quote.replace(placeholder, original)
+            return False
+    if not (args.news and getattr(args, "target_lang", None) == "en"):
+        raise RuntimeError(
+            f"Placeholder {placeholder} perdu pendant la protection news "
+            "(absent du contenu comme des citations)"
+        )
+    return False
 
 
 def _protect_pipeline_inputs(content, args):

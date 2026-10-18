@@ -98,8 +98,9 @@ class TestNewsQuoteCode(unittest.TestCase):
         prose_placeholder = state.inline_placeholders[0]
         self.assertEqual(state.inline_codes[0], "`/plugin list`")
         translated = content.replace("🇫🇷", "🇩🇪").replace(prose_placeholder, "")
+        args = _args("de")
         with self.assertRaisesRegex(RuntimeError, re.escape(prose_placeholder)):
-            pipeline._restore_pipeline_outputs(translated, state, _args("de"))
+            pipeline._restore_pipeline_outputs(translated, state, args)
 
 
 if __name__ == "__main__":
