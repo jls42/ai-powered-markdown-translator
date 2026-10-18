@@ -324,6 +324,15 @@ if [[ -z "$LEAK" ]]; then
 else
   fail "clé API potentielle dans : $LEAK"
 fi
+# pre-commit ne voit que l'index : un module créé sans `git add` passe tous les
+# hooks, les tests locaux l'importent, et la CI — checkout neuf — ne le trouve
+# pas. Repris du vérificateur de pureté, retiré en 1.17.0.
+UNTRACKED=$(git ls-files --others --exclude-standard -- 'src/*.py' 'tests/*.py' 'scripts/*.py' 2>/dev/null | head -3)
+if [[ -z "$UNTRACKED" ]]; then
+  pass "aucun module Python non suivi par git"
+else
+  fail "module(s) Python non suivi(s) par git, invisibles des hooks et de la CI : $UNTRACKED"
+fi
 
 section "7. Gates et doc non désarmés"
 # Quatre angles morts recensés en préparant la publication du paquet. Chacun
