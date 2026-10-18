@@ -12,6 +12,7 @@ Lancement : python -m unittest discover tests/ -v
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import signal
@@ -23,13 +24,15 @@ from argparse import Namespace
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+import anthropic as anthropic_sdk
+import httpx
 from google.genai import errors as genai_errors
 
 # Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
 # l'arbre source, et une erreur d'empaquetage devient visible.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from aipmt import markdown, news
+from aipmt import markdown, news, segmentation
 from aipmt.providers import anthropic, codex, gemini, openai, registry
 
 # Pid de faux processus au-delà du plus grand pid possible (pid_max vaut
@@ -446,6 +449,136 @@ class TestClaudeBlockFiltering(unittest.TestCase):
         with self.assertRaises(RuntimeError) as ctx:
             anthropic._call_claude(client, args, "PROMPT", "SEG")
         self.assertIn("aucun bloc de texte", str(ctx.exception))
+
+
+def _claude_bad_request(message):
+    """Un 400 tel que le SDK Anthropic le lève, message de l'API compris."""
+    request = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+    return anthropic_sdk.BadRequestError(
+        message,
+        response=httpx.Response(400, request=request),
+        body={"type": "error", "error": {"type": "invalid_request_error", "message": message}},
+    )
+
+
+# Valeur enregistrée quand l'appel ne porte aucun champ `thinking` — à
+# distinguer d'un champ présent qui vaudrait None.
+_SANS_CHAMP = "(absent)"
+
+
+class TestClaudeThinkingFallback(unittest.TestCase):
+    """Le réglage qui coupe la réflexion dépend du modèle : Sonnet 5.5 refuse
+    `disabled` par un 400 et n'accepte au plus bas que `between_tools`, Opus 5.5
+    n'accepte aucun champ `thinking` (mesuré le 2026-10-18). Un paramètre
+    d'optimisation ne doit jamais faire échouer une traduction."""
+
+    _REFUS = '"thinking.type.disabled" is not supported for this model.'
+
+    @staticmethod
+    def _client_refusing(n_settings, message=_REFUS):
+        """Client qui refuse les `n_settings` premiers réglages essayés."""
+        calls = []
+
+        def create(**kwargs):
+            calls.append(kwargs.get("thinking", _SANS_CHAMP))
+            if len(calls) <= n_settings:
+                raise _claude_bad_request(message)
+            return SimpleNamespace(
+                stop_reason="end_turn", content=[SimpleNamespace(type="text", text="Translated")]
+            )
+
+        client = MagicMock()
+        client.messages.create = create
+        return client, calls
+
+    def setUp(self):
+        # Même état global que la cascade Gemini : le réglage accepté est
+        # mémorisé au niveau du module, et ferait sauter la cascade au test
+        # suivant.
+        anthropic._CLAUDE_ACCEPTED_THINKING.clear()
+        self.addCleanup(anthropic._CLAUDE_ACCEPTED_THINKING.clear)
+
+    def test_model_accepting_disabled_gets_it_first(self):
+        client, calls = self._client_refusing(0)
+        out = anthropic._call_claude(client, _args(model="claude-sonnet-5"), "P", "SEG")
+        self.assertEqual(out, "Translated")
+        self.assertEqual(calls, [{"type": "disabled"}])
+
+    def test_haiku_5_5_keeps_its_adaptive_thinking(self):
+        """Haiku 5.5 accepte `disabled`, mais laisse alors des paragraphes en
+        français que la garde refuse (9 traductions écrites sur 28, contre 26
+        en réflexion adaptative) : aucun champ `thinking` ne lui est envoyé."""
+        client, calls = self._client_refusing(0)
+        anthropic._call_claude(client, _args(model="claude-haiku-5-5"), "P", "SEG")
+        self.assertEqual(calls, [_SANS_CHAMP])
+
+    def test_sonnet_5_5_starts_with_between_tools_without_warning(self):
+        """`disabled` y rend un 400 : partir de la table évite un aller-retour
+        refusé et un avertissement à chaque exécution."""
+        client, calls = self._client_refusing(0)
+        with patch("sys.stderr", new_callable=io.StringIO) as err:
+            anthropic._call_claude(client, _args(model="claude-sonnet-5-5"), "P", "SEG")
+        self.assertEqual(calls, [{"type": "between_tools"}])
+        self.assertEqual(err.getvalue(), "")
+
+    def test_adaptive_only_model_gets_no_thinking_field(self):
+        client, calls = self._client_refusing(0)
+        anthropic._call_claude(client, _args(model="claude-opus-5-5"), "P", "SEG")
+        self.assertEqual(calls, [_SANS_CHAMP])
+
+    def test_unknown_model_descends_then_remembers(self):
+        """Un modèle hors table descend la cascade au premier segment ; le
+        réglage accepté sert directement aux suivants."""
+        client, calls = self._client_refusing(1)
+        args = _args(model="claude-futur-6")
+        with patch("sys.stderr", new_callable=io.StringIO) as err:
+            anthropic._call_claude(client, args, "P", "SEG")
+            anthropic._call_claude(client, args, "P", "SEG")
+        self.assertEqual(
+            calls, [{"type": "disabled"}, {"type": "between_tools"}, {"type": "between_tools"}]
+        )
+        self.assertEqual(err.getvalue().count("⚠ Claude refuse"), 1)
+
+    def test_remembered_setting_refused_later_continues_the_cascade(self):
+        anthropic._CLAUDE_ACCEPTED_THINKING["claude-futur-6"] = "between_tools"
+        client, calls = self._client_refusing(1)
+        with patch("sys.stderr", new_callable=io.StringIO):
+            out = anthropic._call_claude(client, _args(model="claude-futur-6"), "P", "SEG")
+        self.assertEqual(out, "Translated")
+        self.assertEqual(calls, [{"type": "between_tools"}, {"type": "disabled"}])
+        self.assertEqual(anthropic._CLAUDE_ACCEPTED_THINKING["claude-futur-6"], "disabled")
+
+    def test_all_settings_refused_raises(self):
+        client, calls = self._client_refusing(99)
+        with (
+            patch("sys.stderr", new_callable=io.StringIO),
+            self.assertRaises(RuntimeError) as ctx,
+        ):
+            anthropic._call_claude(client, _args(model="claude-futur-6"), "P", "SEG")
+        self.assertIn("refusé tous les réglages", str(ctx.exception))
+        self.assertEqual(len(calls), len(anthropic._CLAUDE_THINKING_CASCADE))
+
+    def test_unrelated_bad_request_is_not_retried(self):
+        """Un 400 qui ne parle pas de réflexion — prompt trop long, paramètre
+        invalide — remonte tel quel, sans consommer la cascade."""
+        client, calls = self._client_refusing(99, message="prompt is too long: 1200000 tokens")
+        with self.assertRaises(anthropic_sdk.BadRequestError):
+            anthropic._call_claude(client, _args(model="claude-sonnet-5"), "P", "SEG")
+        self.assertEqual(len(calls), 1)
+
+    def test_table_settings_belong_to_the_cascade(self):
+        """`_claude_thinking_order` déplace le réglage de la table en tête de la
+        cascade : un réglage qui n'y figure pas ferait lever `list.remove`."""
+        for model, setting in anthropic._CLAUDE_THINKING_BY_MODEL.items():
+            with self.subTest(model=model):
+                self.assertIn(setting, anthropic._CLAUDE_THINKING_CASCADE)
+
+    def test_claude_defaults_are_catalogued(self):
+        """Un défaut absent de `MODEL_TOKEN_LIMITS` ferait afficher « Modèle non
+        listé » à chaque exécution, et segmenter sur la limite par défaut."""
+        for model in (anthropic.DEFAULT_MODEL_CLAUDE, anthropic.ECO_MODEL_CLAUDE):
+            with self.subTest(model=model):
+                self.assertIn(model, segmentation.MODEL_TOKEN_LIMITS)
 
 
 class TestGeminiThinkingFallback(unittest.TestCase):
