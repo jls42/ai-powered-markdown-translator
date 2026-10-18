@@ -13,7 +13,7 @@ succès, provider non testé de bout en bout).
 
 ```bash
 ./scripts/check-release-ready.sh          # 17 vérifications, ~45 s
-./scripts/check-release-ready.sh --full   # 18 : + hooks pre-push (mypy, SAST, audit), ~3 min
+./scripts/check-release-ready.sh --full   # 19 : + hooks pre-push (mypy, SAST, audit) et wheel neuf, ~3 min
 ```
 
 Ce qu'il vérifie : tests `tests/` et `scripts/tests/`, hooks pre-commit (et
