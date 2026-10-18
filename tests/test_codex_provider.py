@@ -550,11 +550,12 @@ class TestClaudeThinkingFallback(unittest.TestCase):
 
     def test_all_settings_refused_raises(self):
         client, calls = self._client_refusing(99)
+        args = _args(model="claude-futur-6")
         with (
             patch("sys.stderr", new_callable=io.StringIO),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            anthropic._call_claude(client, _args(model="claude-futur-6"), "P", "SEG")
+            anthropic._call_claude(client, args, "P", "SEG")
         self.assertIn("refusé tous les réglages", str(ctx.exception))
         self.assertEqual(len(calls), len(anthropic._CLAUDE_THINKING_CASCADE))
 
@@ -562,8 +563,9 @@ class TestClaudeThinkingFallback(unittest.TestCase):
         """Un 400 qui ne parle pas de réflexion — prompt trop long, paramètre
         invalide — remonte tel quel, sans consommer la cascade."""
         client, calls = self._client_refusing(99, message="prompt is too long: 1200000 tokens")
+        args = _args(model="claude-sonnet-5")
         with self.assertRaises(anthropic_sdk.BadRequestError):
-            anthropic._call_claude(client, _args(model="claude-sonnet-5"), "P", "SEG")
+            anthropic._call_claude(client, args, "P", "SEG")
         self.assertEqual(len(calls), 1)
 
     def test_table_settings_belong_to_the_cascade(self):
