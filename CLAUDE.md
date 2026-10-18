@@ -12,8 +12,8 @@ créé après plusieurs « c'est prêt » démentis ensuite par une vérificatio
 succès, provider non testé de bout en bout).
 
 ```bash
-./scripts/check-release-ready.sh          # 16 vérifications, ~45 s
-./scripts/check-release-ready.sh --full   # 17 : + hooks pre-push (mypy, SAST, audit), ~3 min
+./scripts/check-release-ready.sh          # 17 vérifications, ~45 s
+./scripts/check-release-ready.sh --full   # 18 : + hooks pre-push (mypy, SAST, audit), ~3 min
 ```
 
 Ce qu'il vérifie : tests `tests/` et `scripts/tests/`, hooks pre-commit (et
@@ -21,7 +21,7 @@ pre-push en `--full`), **chaque flag argparse présent dans le README**, **chaqu
 `os.getenv` documenté**, les 28 traductions (présence, structure, URLs,
 placeholders, couverture des flags), la version du CHANGELOG, son extraction
 par `release.sh` et son égalité avec celle de `pyproject.toml`, l'absence de
-secret dans les fichiers suivis, et une 7ᵉ section qui confronte la doc au point
+secret dans les fichiers suivis et de module Python non suivi, et une 7ᵉ section qui confronte la doc au point
 d'entrée console et le déclencheur du hook Lizard à son scope réel (cf. § Lizard).
 
 Points de méthode qui ont coûté cher et que le script encode :
@@ -325,7 +325,7 @@ Même famille de piège que `authMethod=` (cf. § Provider Antigravity).
      - **`ruff-format` peut déplacer un marqueur `# nosemgrep` hors de portée.** Un marqueur ne vaut que pour sa ligne ou celle qui la précède, et les deux règles `dangerous-subprocess-use*` s'ancrent sur des lignes différentes (l'appel pour `-audit`, l'argument pour l'autre). Si l'argument dépasse 100 colonnes, le formateur éclate la liste et emporte le commentaire sur la ligne de FERMETURE, où il ne couvre plus rien — le correctif est défait sans signal. Parade mesurée : sortir l'argv dans une variable courte pour que la ligne ne puisse plus être scindée (cf. `tests/test_orchestration.py`). Le SAST local exclut `*test*` ; Codacy, lui, scanne les tests.
      - detect-secrets régénère parfois `.secrets.baseline` en pre-commit ; bien `git add` la baseline AVANT le commit suivant (sinon le pre-commit hook re-mute la baseline en boucle).
      - Hooks pre-push lents (~30s mypy + 5s SAST + 10s pip-audit + tests) : si on enchaîne plusieurs petits commits, préférer batcher en local et un seul `git push` à la fin.
-     - **Un test qui lance `git` retire toute variable `GIT_*` de son environnement.** Poussé depuis un worktree lié (`git worktree add`), git exporte `GIT_DIR` — le répertoire du worktree sous `.git/worktrees/` — aux hooks ; depuis le dépôt principal, aucun (mesuré le 2026-09-27). Le hook pre-push lance les tests, et le `git init` de `scripts/tests/test_check_split_purity.py`, dans un répertoire temporaire, a réinitialisé le VRAI dépôt : `core.bare = true` dans `.git/config`, puis `git status` refusait de tourner (« this operation must be run in a work tree »). Réparé par `git config --file .git/config core.bare false`, rien d'autre de touché. `_env_sans_git` ferme le trou ; son test de non-régression désigne par `GIT_DIR` un dépôt nu leurre, où un `git status` échouerait.
+     - **Un test qui lance `git` retire toute variable `GIT_*` de son environnement.** Poussé depuis un worktree lié (`git worktree add`), git exporte `GIT_DIR` — le répertoire du worktree sous `.git/worktrees/` — aux hooks ; depuis le dépôt principal, aucun (mesuré le 2026-09-27). Le hook pre-push lance les tests, et le `git init` d'un test du vérificateur de pureté, dans un répertoire temporaire, a réinitialisé le VRAI dépôt : `core.bare = true` dans `.git/config`, puis `git status` refusait de tourner (« this operation must be run in a work tree »). Réparé par `git config --file .git/config core.bare false`, rien d'autre de touché. Ce test est parti avec le vérificateur (1.17.0) et plus aucun test ne lance `git` ; le prochain qui le fera passera à `git` un environnement sans `GIT_*`, comme le faisait son `_env_sans_git`.
 
 ## Fraîcheur des dépendances — automatique, avec une alerte quand ça coince
 
@@ -346,10 +346,18 @@ avec un passage quotidien.
 
 Le dispositif, en cinq pièces :
 
-1. **`.github/dependabot.yml`** : pip **quotidien**, `cooldown.default-days: 3`
+1. **`.github/dependabot.yml`** : pip **tous les jours, week-end compris**
+   (`interval: cron`, `cronjob: "0 6 * * *"`), `cooldown.default-days: 3`
    écrit en clair (c'est le défaut de GitHub, mais le délai du gate en dépend) ;
    github-actions hebdomadaire. Mineures et correctifs groupés en une PR ;
-   **majeures séparées**.
+   **majeures séparées**. **Jamais `interval: daily`** : il ne passe que du
+   lundi au vendredi (référence des options de Dependabot ; mesuré : 55
+   passages depuis avril, aucun un samedi, et les seuls du dimanche le jour de
+   l'ajout du fichier). Une version sortie du refroidissement un vendredi après
+   le passage du matin attendait le lundi : le 2026-10-18, google-genai 2.30.1
+   n'a échappé à l'alerte du dimanche qu'à 1 h 35 près, parce que le contrôle
+   planifié avait démarré à 12 h 36 UTC — 9 des 14 précédents avaient démarré
+   plus tard.
 
 2. **`.github/workflows/dependabot-auto-merge.yml`** lance
    `gh pr merge --auto --squash` sur les PR pip **mineures et correctives**
@@ -379,24 +387,29 @@ Le dispositif, en cinq pièces :
    - un retard ne compte qu'au-delà de `GRACE_DAYS` = refroidissement (3) +
      cadence (1) + marge (1) = **5 jours** ; avant, la version est « en route »,
      sans avertissement. L'égalité avec `dependabot.yml` est vérifiée par un
-     test (`scripts/tests/test_pypi_versions.py`) ;
+     test (`scripts/tests/test_pypi_versions.py`), qui compte 1 jour pour un
+     cron quotidien et 3 pour `daily` — revenir à `daily` sans porter le délai
+     à 7 jours le fait échouer ;
    - retard de **majeure** → échec ; de mineure → avertissement dans le gate,
      **échec en CI** : l'échec d'un workflow planifié envoie un mail, une alerte
      plutôt qu'une découverte ;
    - PyPI injoignable → skip explicite en local, **fail-closed en CI**. Un
      contrôle qui ne s'est pas exécuté n'est pas un succès.
 
-**Deux points que la doc ne tranche pas, à mesurer sur la première vraie PR
-Dependabot :**
+**Les deux points que la doc ne tranchait pas sont mesurés (2026-10-18) :**
 
-- **Le droit du `GITHUB_TOKEN` à activer l'auto-merge sur un run Dependabot.**
-  La doc GitHub dit que la clé `permissions` l'élève ; le README de
-  fetch-metadata dit le contraire. Un refus se lit en 403 sur l'étape « Activer
-  la fusion automatique », et rien n'est fusionné.
-- **Les workflows `on: push` après une fusion automatique.** Une action faite
-  avec le `GITHUB_TOKEN` n'en déclenche aucun, et la doc ne dit pas si la
-  fusion différée compte comme telle. C'est pourquoi `deps-check.yml` vérifie
-  `main` chaque jour ; `gh run list --branch main --event push` tranche.
+- **Le `GITHUB_TOKEN` active bien l'auto-merge sur un run Dependabot.** La doc
+  GitHub disait que la clé `permissions` l'élève, le README de fetch-metadata
+  le contraire : #45, #47, #52, #53, #55, #56 et #58 à #61 ont été fusionnées
+  par `github-actions`, sans un 403.
+- **Une fusion automatique ne déclenche aucun workflow `on: push`.** Sur les
+  commits fusionnés seuls (`81de4f4`, `b542df3`, `f75419f`, `a36040f`,
+  `cc78092`), n'ont tourné que des workflows étrangers au push — CodeQL
+  (configuration par défaut), le graphe de dépendances, les passages de
+  Dependabot et les jobs planifiés —, ni `Tests`, ni `SonarCloud`, ni
+  `Dependencies` en `push` ; une fusion manuelle les déclenche (`87c330c`). `main` reste vérifié chaque jour par `deps-check.yml`
+  (fermeture et tests du lock) ; SonarCloud ne l'analyse qu'à la fusion
+  manuelle suivante.
 
 **Limite connue** : Dependabot ne modifie qu'une ligne du lock. Si une nouvelle
 version exige de monter une dépendance transitive, le job de fermeture échoue,
@@ -444,19 +457,18 @@ Le premier `pre-commit run --all-files` télécharge les environnements des hook
 
 ### Hooks actifs
 
-| Stage      | Hook                            | Rôle                                                                             |
-| ---------- | ------------------------------- | -------------------------------------------------------------------------------- |
-| pre-commit | shellcheck                      | Lint des `.sh` (release.sh, regen_translations.sh, scripts/)                     |
-| pre-commit | ruff + ruff-format              | Lint + format Python (rapide, --fix automatique)                                 |
-| pre-commit | prettier                        | Format JSON/YAML/MD (28 traductions exclues)                                     |
-| pre-commit | pre-commit-hooks v5             | Trailing-whitespace, EOF, check-yaml/toml, large-files, merge-conflict, shebang  |
-| pre-commit | detect-secrets                  | Détection de fuites d'API keys (6 providers à clé)                               |
-| pre-commit | check-complexity (Lizard)       | CCN <= 12, scope `src/` + `scripts/`, existence des chemins et plancher vérifiés |
-| pre-commit | check-split-purity (temporaire) | Le découpage de `translate.py` reste un déplacement pur, cf. § ci-dessous        |
-| pre-push   | mypy (lax)                      | Type-checking des fonctions déjà annotées (durcissement progressif)              |
-| pre-push   | check-security-sast (Opengrep)  | SAST sur src/ + scripts/ (graceful skip si binaire absent)                       |
-| pre-push   | check-pip-audit                 | Audit deps (mode reporting initial, durcir après bump)                           |
-| pre-push   | unittest                        | Tests `tests/` + `scripts/tests/`                                                |
+| Stage      | Hook                           | Rôle                                                                             |
+| ---------- | ------------------------------ | -------------------------------------------------------------------------------- |
+| pre-commit | shellcheck                     | Lint des `.sh` (release.sh, regen_translations.sh, scripts/)                     |
+| pre-commit | ruff + ruff-format             | Lint + format Python (rapide, --fix automatique)                                 |
+| pre-commit | prettier                       | Format JSON/YAML/MD (28 traductions exclues)                                     |
+| pre-commit | pre-commit-hooks v5            | Trailing-whitespace, EOF, check-yaml/toml, large-files, merge-conflict, shebang  |
+| pre-commit | detect-secrets                 | Détection de fuites d'API keys (6 providers à clé)                               |
+| pre-commit | check-complexity (Lizard)      | CCN <= 12, scope `src/` + `scripts/`, existence des chemins et plancher vérifiés |
+| pre-push   | mypy (lax)                     | Type-checking des fonctions déjà annotées (durcissement progressif)              |
+| pre-push   | check-security-sast (Opengrep) | SAST sur src/ + scripts/ (graceful skip si binaire absent)                       |
+| pre-push   | check-pip-audit                | Audit deps (mode reporting initial, durcir après bump)                           |
+| pre-push   | unittest                       | Tests `tests/` + `scripts/tests/`                                                |
 
 ### Lancer manuellement
 
@@ -528,7 +540,6 @@ git ls-files --cached -z | xargs -0 detect-secrets scan \
   --exclude-files 'tests/fixtures/.*' \
   --exclude-files 'venv/.*' \
   --exclude-files '\.secrets\.baseline' \
-  --exclude-files 'scripts/split-reference/.*' \
   > .secrets.baseline
 
 # Auditer manuellement les findings (interactif)
@@ -666,7 +677,7 @@ aipmt --file 'document.md' --target_dir 'output/' --target_lang 'en'
 # Translate a directory with OpenAI (default: gpt-5.6-terra)
 aipmt --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
-# Use economic models (--eco): gpt-5.6-luna, claude-haiku-4-5, gemini-3.1-flash-lite
+# Use economic models (--eco): gpt-5.6-luna, claude-haiku-5-5, gemini-3.1-flash-lite
 aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 # Translate with Mistral AI
@@ -738,19 +749,13 @@ Deux règles qui découlent du découpage, verrouillées par `tests/test_facade_
 - **La façade ne ré-exporte ni nom privé, ni SDK, ni module stdlib.** Un patch
   posé au mauvais endroit lève `AttributeError` au lieu de ne plus mordre.
 
-**Vérificateur de pureté (temporaire, retiré par la PR qui suit le découpage)** :
-`scripts/check-split-purity.py`, hook pre-commit `check-split-purity` et étape
-de `tests.yml`. Il compare le multiensemble des nœuds AST de premier niveau du
-paquet à un snapshot versionné (`scripts/split-reference/package-6ae1505.json`,
-304 nœuds au 2026-09-07) plus un manifeste cumulatif d'écarts déclarés
-(`manifest.json` : docstrings de module, `__all__`, scissions demandées par
-Codacy…) ; il vérifie l'emplacement
-de chaque symbole, la survie verbatim des marqueurs `# nosec` / `# nosemgrep` /
-`NOSONAR`, et refuse tout `.py` non suivi sous `src/aipmt/`, `tests/` ou
-`scripts/tests/` (pre-commit ne voit que l'index : un module créé sans `git add`
-passait tous les hooks). Le snapshot est dans le dépôt parce que la CI fait un
-checkout superficiel. Neuf tests (`scripts/tests/test_check_split_purity.py`), dont sept
-refus, prouvent qu'il mord.
+**Vérificateur de pureté du découpage, retiré en 1.17.0** : il comparait les
+nœuds AST du paquet à un snapshot pris au découpage de la 1.13.0, et devait
+partir avec la PR suivante. Il est resté huit releases, et chaque PR de code
+devait déclarer ses écarts dans son manifeste (#48, #49, #50). Son refus des
+`.py` non suivis par git — pre-commit ne voit que l'index — vit désormais dans
+la section 6 de `check-release-ready.sh`. Le reste est dans l'historique git
+(`scripts/check-split-purity.py`, `scripts/split-reference/`).
 
 **Output naming**:
 
@@ -1722,6 +1727,73 @@ défaut inchangés**, décision du 2026-09-17. Les refus de Large et Small sont
 tous des gardes qui mordent — citation `NEWSQUOTE` restaurée deux fois, code en
 ligne ou URL perdus —, aucun n'est dû à l'infrastructure.
 
+### Provider Claude (`--use_claude`) — API Anthropic, réflexion coupée modèle par modèle
+
+Audit et campagne du 2026-10-18, **mesurés** — `GET /v1/models`, page des
+dépréciations, appels réels :
+
+- **Le réglage qui coupe la réflexion dépend du modèle.** Sonnet 5, Haiku 4.5
+  et Haiku 5.5 acceptent `thinking: {"type": "disabled"}`. **Sonnet 5.5 le
+  refuse par un HTTP 400** (« To turn thinking off on this model, send
+  "thinking": {"type": "between_tools"} instead ») : `between_tools` coupe sa
+  réflexion préalable, et la réponse ne porte aucun bloc `thinking`. Opus 5.5
+  et Fable 5.x refusent les deux et n'acceptent que la réflexion adaptative,
+  c'est-à-dire aucun champ `thinking`. Avant la 1.17.0,
+  `--use_claude --model claude-sonnet-5-5` échouait au premier segment.
+- **Source de vérité : `capabilities.thinking.types` de
+  `GET /v1/models/{id}`**, gratuit, un `supported` par réglage — la doc demande
+  de lire ces capacités plutôt que de déduire du nom. `_CLAUDE_THINKING_BY_MODEL`
+  fige le réglage des modèles mesurés — Haiku 5.5 compris, qui accepte
+  `disabled` mais y gagne d'être laissé en réflexion adaptative (point
+  suivant) ; un modèle absent descend
+  `_CLAUDE_THINKING_CASCADE` (`disabled`, `between_tools`, aucun champ) au
+  premier 400 qui parle de `thinking`, et le réglage accepté est mémorisé dans
+  `_CLAUDE_ACCEPTED_THINKING`, comme pour Gemini. Toute autre erreur remonte.
+  Sans la table, le modèle par défaut repaierait un 400 et un avertissement au
+  premier segment de chaque exécution.
+- **Débit du compte** (en-têtes `anthropic-ratelimit-*`) : 5 000 requêtes,
+  5 M de tokens d'entrée et 1 M de sortie par minute — huit traductions en
+  parallèle sans un 429.
+- **Prix** (page Pricing, par million de tokens, entrée / sortie) : Sonnet 5
+  et Sonnet 5.5 2 $ / 10 $ ; Haiku 4.5 1 $ / 5 $ ; Haiku 5.5 0,10 $ / 0,50 $
+  pour un prompt de moins de 100 000 tokens, 0,50 $ / 2,50 $ au-delà — et son
+  tokenizer compte environ 30 % de tokens de plus que celui d'Haiku 4.5.
+- **Haiku 5.5 sans réflexion laisse des paragraphes en français.** La garde
+  « Output contains untranslated source excerpt » refuse alors le fichier :
+  11 articles sur 14, 8 README sur 14. Avec sa réflexion adaptative (effort par
+  défaut `medium`), il traduit tout ; restent des titres changés de niveau et
+  des jetons de code perdus en arabe et en hindi.
+
+**Campagne**, par `aipmt --use_claude` lui-même, sur les deux documents des
+mesures du README — l'article dense en `--news` et le README de la 1.14.0 —,
+quatorze langues chacun, quatre traductions en parallèle par modèle ; l'usage
+de chaque appel est lu dans sa réponse par un espion posé sur une copie du code.
+
+| Modèle (réflexion)                    | Article : écrites · sans écart | README : écrites · sans écart  | Médianes article / README | Coût   |
+| ------------------------------------- | ------------------------------ | ------------------------------ | ------------------------- | ------ |
+| `claude-sonnet-5-5` (`between_tools`) | 14/14 · 14/14                  | 14/14 · 14/14                  | 3 min 37 s / 1 min 18 s   | 9,21 $ |
+| `claude-haiku-5-5` (`disabled`)       | 3/14 · 2/14                    | 6/14 · 6/14                    | 2 min 00 s / 50 s         | 0,41 $ |
+| `claude-haiku-5-5` (adaptative)       | 14/14 · 11/14 (ja, ko, zh)     | 12/14 · 12/14 (ar, hi refusés) | 2 min 54 s / 1 min 14 s   | 0,57 $ |
+| `claude-haiku-4-5` (`disabled`)       | 14/14 · 7/14                   | 14/14 · 14/14                  | 6 min 00 s / 2 min 06 s   | 3,67 $ |
+
+**Défauts du 2026-10-18** : `claude-sonnet-5-5` en qualité, sans discussion ;
+`claude-haiku-5-5`, réflexion adaptative, en `--eco` à la place de
+`claude-haiku-4-5`. Les deux Haiku butent sur le même passage de l'article, la
+brève « Réouverture des inscriptions Business et Enterprise » : Haiku 4.5 passe
+son titre `###` au niveau 1 dans 7 langues — en japonais, il le laisse même en
+français, ce qu'aucune garde ne voit —, Haiku 5.5 le change de niveau ou le
+dédouble dans 3. Haiku 5.5 écrit moins de fichiers (26 contre 28 : deux README
+refusés en arabe et en hindi, jetons de code perdus, que les gardes ont
+arrêtés), mais plus sans écart (23 contre 21), deux fois plus vite, pour 6,4
+fois moins cher ; Haiku 4.5 est « legacy ». Un refus se relance ; un titre
+déplacé passe en silence.
+
+Sonnet 5.5 n'a repassé aucun segment — 98 appels pour l'article, six segments
+et la note de traduction par langue — et a gardé les liens internes des quatorze
+README. En anglais, il a retiré lui-même les lignes `> 🇫🇷 _…_`, sans inventer
+de drapeau ni laisser travailler le nettoyage de repli, et les trois citations
+anglaises sont recopiées telles quelles dans les quatorze langues.
+
 ## Key Constants
 
 - `EXCLUDE_PATTERNS`: Paths containing these strings are skipped (`traductions_`, `venv`, `PRIVACY.md`)
@@ -1732,7 +1804,7 @@ ligne ou URL perdus —, aucun n'est dû à l'infrastructure.
 | Provider    | Quality (default)                     | Economic (`--eco`)      |
 | ----------- | ------------------------------------- | ----------------------- |
 | OpenAI      | `gpt-5.6-terra`                       | `gpt-5.6-luna`          |
-| Claude      | `claude-sonnet-5`                     | `claude-haiku-4-5`      |
+| Claude      | `claude-sonnet-5-5`                   | `claude-haiku-5-5`      |
 | Mistral     | `mistral-large-latest`                | `mistral-small-latest`  |
 | Gemini      | `gemini-3.7-flash`                    | `gemini-3.1-flash-lite` |
 | Codex       | `gpt-5.6-sol`                         | `gpt-5.6-luna`          |
@@ -1742,11 +1814,12 @@ ligne ou URL perdus —, aucun n'est dû à l'infrastructure.
 | Claude Code | `sonnet` (effort `low`)               | `sonnet` (sans effet)   |
 | OpenCode    | `--model provider/modèle` obligatoire | idem                    |
 
-### Model lifecycle — dates to watch (audited 2026-08-29)
+### Model lifecycle — dates to watch (audited 2026-08-29, Claude re-audited 2026-10-18)
 
 | Échéance       | Impact                                                                                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **2026-10-15** | `claude-haiku-4-5` : date-plancher de retrait annoncée par Anthropic — la plus proche de tout le catalogue utilisé ici.                          |
+| ~~2026-10-15~~ | `claude-haiku-4-5` : date-plancher **passée sans retrait** — toujours « Active » le 2026-10-18, préavis d'au moins 60 jours avant tout retrait.  |
+| **2027-06-30** | `claude-sonnet-5` : date-plancher de retrait (« not sooner than »). Comme Haiku 4.5, rangé parmi les « legacy models » depuis Claude 5.5.        |
 | **2027-01-01** | Gemini 3.6/3.7 Flash : fin de la promo, prix **doublé** ($0.75/$3.75 → $1.50/$7.50).                                                             |
 | —              | `claude-sonnet-5` : le tarif d'intro $2/$10 **est devenu** le prix standard ; la hausse prévue au 2026-09-01 n'aura pas lieu.                    |
 | —              | Gemini 3.5 Pro **ne sortira jamais** (remplacé par Gemini 4) : `gemini-3.1-pro-preview` reste le seul Pro, et il est en preview depuis toujours. |
@@ -1754,5 +1827,11 @@ ligne ou URL perdus —, aucun n'est dû à l'infrastructure.
 Audit du 2026-08-29 : les modèles par défaut des 7 providers sont les plus récents
 disponibles chez chaque fournisseur. Aucune génération postérieure n'est GA
 (GPT-5.7/6, Gemini 3.8/4, Sonnet 5.x, Haiku 5 = rumeurs ou pré-entraînement).
+Dépassé depuis pour Gemini 3.8 (servi par Antigravity, cf. § Provider
+Antigravity) et pour Claude : réaudit Claude du 2026-10-18 par `GET /v1/models`
+et la page des dépréciations — Opus 5.5 (2026-09-21), Sonnet 5.5 (2026-09-28)
+et Haiku 5.5 (2026-10-07) sont servis, Sonnet 5 et Haiku 4.5 restent
+« Active » mais passent « legacy » (cf. § Provider Claude). Les autres
+fournisseurs n'ont pas été réaudités.
 
 > **Recommendation for long-form translations** : `--use_gemini` (default = `gemini-3.7-flash`) preserves markdown structure reliably on non-Latin scripts (PL, JA, ZH, AR, HI), including `--news` mode where placeholder fidelity matters. Measured on this README translated to Japanese: structure identical to `gemini-3.1-pro-preview` (21 lists, 18 code fences, 13 HTML links, 13 images, all URLs preserved) at ~6x lower latency. OpenAI remains the default for backward compatibility.
