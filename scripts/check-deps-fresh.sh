@@ -45,10 +45,12 @@ set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
 # Délai d'absorption, en jours : refroidissement de Dependabot (3 j,
-# `cooldown.default-days`) + cadence de ses passages (1 j, `interval: daily`)
-# + 1 j de marge. Une version publiée depuis moins longtemps n'est pas en
-# retard : l'automatisation a encore le temps de l'absorber. L'égalité avec
-# `.github/dependabot.yml` est vérifiée par scripts/tests/test_pypi_versions.py.
+# `cooldown.default-days`) + cadence de ses passages (1 j : un passage chaque
+# jour, week-end compris, par `cronjob: "0 6 * * *"` — `interval: daily` ne
+# passe que du lundi au vendredi) + 1 j de marge. Une version publiée depuis
+# moins longtemps n'est pas en retard : l'automatisation a encore le temps de
+# l'absorber. L'égalité avec `.github/dependabot.yml` est vérifiée par
+# scripts/tests/test_pypi_versions.py.
 GRACE_DAYS=5
 STRICT=false
 

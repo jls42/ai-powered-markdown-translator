@@ -12,13 +12,21 @@ version: 2
 updates:
   - package-ecosystem: pip
     directory: "/"
-    # Quotidien, parce que les mineures et correctifs se fusionnent seuls
-    # (.github/workflows/dependabot-auto-merge.yml) : le coût d'une PR n'est
-    # plus une revue humaine, et une version absorbée en quatre jours au plus
-    # ne laisse pas au retard le temps de s'installer.
+    # Tous les jours, week-end compris, parce que les mineures et correctifs se
+    # fusionnent seuls (.github/workflows/dependabot-auto-merge.yml) : le coût
+    # d'une PR n'est plus une revue humaine, et une version absorbée en quatre
+    # jours au plus ne laisse pas au retard le temps de s'installer.
+    #
+    # `interval: cron` et non `daily` : `daily` ne passe que du lundi au
+    # vendredi (référence des options de Dependabot, et mesuré ici : aucun
+    # passage un samedi ni un dimanche depuis l'ajout de ce fichier). Une
+    # version sortie du refroidissement un vendredi après le passage du matin
+    # attendait le lundi, et le contrôle quotidien de fraîcheur, calé sur un
+    # passage par jour, la déclarait en retard le dimanche. Le 2026-10-18,
+    # google-genai 2.30.1 est passée à 1 h 35 près.
     schedule:
-      interval: daily
-      time: "06:00"
+      interval: cron
+      cronjob: "0 6 * * *"
       timezone: Europe/Paris
     # Une version n'est proposée que trois jours après sa publication. C'est le
     # défaut de GitHub depuis le 2026-07-14, écrit ici parce que le délai du gate
