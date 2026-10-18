@@ -1,23 +1,23 @@
-# AI-Powered Markdown अनुवादक
+# AI-संचालित Markdown अनुवादक
 
-🌍 [Français](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [English](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Español](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [中文](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [Deutsch](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [日本語](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [한국어](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [العربية](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [हिन्दी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italiano](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Nederlands](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Português](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Română](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Svenska](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
+🌍 [फ़्रेंच](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [अंग्रेज़ी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [स्पेनी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [चीनी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [जर्मन](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [जापानी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [कोरियाई](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [अरबी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [हिन्दी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [इतालवी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [डच](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [पोलिश](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [पुर्तगाली](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [रोमानियाई](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [स्वीडिश](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
 
-<h4 align="center">📊 कोड गुणवत्ता</h4>
+<h4 align="center">📊 कोड की गुणवत्ता</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="क्वालिटी गेट स्थिति"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="गुणवत्ता गेट की स्थिति"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="सुरक्षा रेटिंग"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="विश्वसनीयता रेटिंग"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="रखरखाव योग्यता रेटिंग"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="रखरखाव-योग्यता रेटिंग"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="कवरेज"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="कमजोरियां"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="कमज़ोरियाँ"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="बग"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="कोड स्मेल"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="कोड संबंधी समस्याएँ"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="डुप्लिकेट पंक्तियाँ (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="दोहराई गई पंक्तियाँ (%)"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="तकनीकी ऋण"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="कोड की पंक्तियाँ"></a>
 </p>
@@ -26,16 +26,26 @@
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-संरचना को सुरक्षित रखते हुए Markdown फ़ाइलों का एक भाषा से दूसरी भाषा में अनुवाद करता है: कोड ब्लॉक, इनलाइन कोड, URL, एंकर, तालिकाएँ और front matter। किसी मॉडल को कॉल करने के ग्यारह तरीके — पाँच API, चार बिना उपयोग-आधारित बिलिंग वाले सब्सक्रिप्शन, दो राऊटर — और प्रत्येक मॉडल वास्तव में क्या सुरक्षित रखता है, इसका एक प्रकाशित माप।
+यह संरचना को सुरक्षित रखते हुए Markdown फ़ाइलों का एक भाषा से दूसरी भाषा में
+अनुवाद करता है: कोड ब्लॉक, इनलाइन कोड, URL, एंकर, तालिकाएँ और front
+matter। किसी मॉडल को कॉल करने के ग्यारह तरीके—पाँच API, उपयोग के अनुसार
+बिलिंग के बिना चार सदस्यताएँ, दो राउटर—और प्रत्येक मॉडल वास्तव में क्या
+सुरक्षित रखता है, इसका प्रकाशित माप।
 
 ## संक्षेप में
 
-- **ग्यारह प्रोवाइडर विकल्प**: OpenAI, Mistral, Claude, Gemini और Grok API; बिना उपयोग-आधारित बिलिंग वाले ChatGPT (Codex), Grok, Google (Antigravity) और Claude (Claude Code) सब्सक्रिप्शन; OpenCode (ओपन सोर्स, मुफ़्त या स्थानीय) और OpenRouter (400 से अधिक मॉडल) राऊटर।
-- **खोए हुए टोकन के कारण कुछ भी गलत नहीं**: कोड ब्लॉक, इनलाइन कोड, URL, एंकर और उद्धरणों को कॉल से पहले टोकन से बदल दिया जाता है और वापसी पर सत्यापित किया जाता है। यदि कोई एक भी अनुपलब्ध है, तो फ़ाइल नहीं लिखी जाती है।
-- **लंबे दस्तावेज़**: मॉडल के संदर्भ विंडो के अनुसार विभाजन (segmentation)।
-- **`--news` मोड**: तकनीकी निगरानी लेखों के लिए, अंग्रेजी उद्धरण सुरक्षित और भाषा के अनुसार फ़्लैग प्रबंधित।
-- **`--eco` मोड**: तेज़ और अधिक किफ़ायती मॉडल।
-- **वैकल्पिक अनुवाद नोट**, ऊपर, नीचे या दोनों जगह।
+- **provider के ग्यारह मार्ग**: OpenAI, Mistral, Claude, Gemini और Grok API;
+  उपयोग के अनुसार बिलिंग के बिना ChatGPT (Codex), Grok, Google (Antigravity)
+  और Claude (Claude Code) सदस्यताएँ; OpenCode राउटर (ओपन सोर्स, मुफ़्त या
+  स्थानीय) और OpenRouter (400 से अधिक मॉडल)।
+- **किसी खोए हुए टोकन के कारण कोई गलत परिणाम नहीं**: कोड ब्लॉक, इनलाइन कोड,
+  URL, एंकर और उद्धरणों को कॉल से पहले टोकन से बदल दिया जाता है और लौटने पर
+  सत्यापित किया जाता है। यदि कोई टोकन गायब हो, तो फ़ाइल नहीं लिखी जाती।
+- **लंबे दस्तावेज़**: मॉडल की विंडो के अनुसार विभाजन।
+- **`--news` मोड**: निगरानी लेखों के लिए अंग्रेज़ी उद्धरण सुरक्षित और
+  भाषा के अनुसार फ़्लैग प्रबंधित।
+- **`--eco` मोड**: तेज़ और कम महँगे मॉडल।
+- वैकल्पिक **अनुवाद टिप्पणी**, ऊपर, नीचे या दोनों जगह।
 
 ## इंस्टॉलेशन
 
@@ -44,17 +54,19 @@ pip install ai-powered-markdown-translator     # ou : pipx install ai-powered-ma
 aipmt --help                                   # ou : python -m aipmt --help
 ```
 
-Python 3.10 या नया संस्करण। रिपॉजिटरी से इंस्टॉल करने के लिए, [योगदान दें](#योगदान-देना) देखें।
+Python 3.10 या उससे नया। रिपॉज़िटरी से इंस्टॉल करने के लिए,
+[योगदान करें](#योगदान-देना) देखें।
 
 ## कॉन्फ़िगरेशन
 
-कुंजियाँ (keys) तीन स्थानों से पढ़ी जाती हैं, उच्चतम प्राथमिकता से निम्नतम तक; प्रत्येक केवल वही भरती है जो पिछला खाली छोड़ देता है।
+कुंजियाँ तीन स्थानों से, उच्चतम से न्यूनतम प्राथमिकता के क्रम में पढ़ी जाती
+हैं; प्रत्येक केवल वही रिक्तियाँ भरता है जिन्हें पिछला स्थान खाली छोड़ता है।
 
-|     | कहाँ                                          | किसके लिए                             |
+|     | कहाँ                                            | किसलिए                             |
 | --- | --------------------------------------------- | ------------------------------------- |
-| 1   | पर्यावरण चर (Environment variables)          | CI, कंटेनर, अस्थायी अपवाद             |
-| 2   | वर्तमान (या पैरेंट) डायरेक्टरी की `.env` | किसी प्रोजेक्ट के लिए विशिष्ट कुंजी   |
-| 3   | `~/.config/aipmt/.env`                                 | एक बार इंस्टॉल किया गया, हर जगह मान्य |
+| 1   | पर्यावरण चर                     | CI, कंटेनर, अस्थायी अपवाद |
+| 2   | वर्तमान डायरेक्टरी (या किसी parent) की `.env` | किसी प्रोजेक्ट की अपनी कुंजी            |
+| 3   | `~/.config/aipmt/.env`                        | एक बार इंस्टॉल, हर जगह मान्य       |
 
 ```bash
 mkdir -p ~/.config/aipmt
@@ -69,11 +81,31 @@ EOF
 chmod 600 ~/.config/aipmt/.env
 ```
 
-`GOOGLE_API_KEY` के स्थान पर `GEMINI_API_KEY` स्वीकार किया जाता है। उपयोगकर्ता फ़ाइल Windows पर `XDG_CONFIG_HOME` (केवल निरपेक्ष पथ) और `%APPDATA%` का अनुसरण करती है। बिना कुंजी के, कमांड तीनों स्थानों की सूची प्रदर्शित करता है।
+`GOOGLE_API_KEY` के स्थान पर `GEMINI_API_KEY` स्वीकार किया जाता है। उपयोगकर्ता
+फ़ाइल `XDG_CONFIG_HOME` (केवल निरपेक्ष पथ) और Windows पर `%APPDATA%` का
+अनुसरण करती है। कुंजी न होने पर कमांड तीनों स्थानों को सूचीबद्ध करती है।
 
-**किसी प्रोजेक्ट का `.env` न तो कॉल्स को पुनर्निर्देशित कर सकता है और न ही निष्पादित प्रोग्राम का चयन कर सकता है।** यह केवल कुंजियाँ प्रदान करता है, कभी भी कोई गंतव्य या बाइनरी नहीं: `_BASE_URL`, `_API_BASE`, `_ENDPOINT` या `_BIN` (`CODEX_BIN`, `GROK_BIN`, `OPENCODE_BIN`, `AGY_BIN`), `GROK_HOME` में कोई भी चर, प्रॉक्सी (`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`), प्रमाणपत्र स्टोर (`SSL_CERT_FILE`, `SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`) और `XDG_CONFIG_HOME` / `APPDATA` को एक चेतावनी के साथ अनदेखा कर दिया जाता है। एक क्लोन किए गए रिपॉजिटरी को आपकी कुंजी को हाईजैक करने या पहले अनुवाद पर आपको उसका अपना प्रोग्राम चलाने के लिए मजबूर करने में सक्षम नहीं होना चाहिए। यह फ़ाइल बिना इंटरपोलेशन के भी पढ़ी जाती है: `NOM=${OPENAI_API_KEY}` वहाँ कुंजी को कॉपी नहीं करता है। इन चरों को पर्यावरण में या `~/.config/aipmt/.env` में सेट करें।
+**किसी प्रोजेक्ट का `.env` न तो कॉल को दूसरी ओर भेज सकता है, न ही
+चलाए जाने वाले प्रोग्राम को चुन सकता है।** वह कुंजियाँ देता है, कभी कोई
+गंतव्य या बाइनरी नहीं: `_BASE_URL`, `_API_BASE`, `_ENDPOINT` या
+`_BIN` (`CODEX_BIN`, `GROK_BIN`, `OPENCODE_BIN`,
+`AGY_BIN`) में मौजूद हर चर, `GROK_HOME`, प्रॉक्सी (`HTTP_PROXY`,
+`HTTPS_PROXY`, `ALL_PROXY`), प्रमाणपत्र भंडार (`SSL_CERT_FILE`,
+`SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`) और `XDG_CONFIG_HOME` /
+`APPDATA` को चेतावनी के साथ अनदेखा किया जाता है। क्लोन किया गया
+रिपॉज़िटरी आपकी कुंजी को दूसरी ओर नहीं भेज सके और न ही पहले अनुवाद पर आपसे
+अपना प्रोग्राम चलवा सके। यह फ़ाइल interpolation के बिना भी पढ़ी जाती है:
+`NOM=${OPENAI_API_KEY}` उसमें कुंजी की प्रतिलिपि नहीं बनाता। इन चरों को पर्यावरण या
+`~/.config/aipmt/.env` में रखें।
 
-वैकल्पिक चर: `XAI_BASE_URL` (डिफ़ॉल्ट `https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (प्रति कॉल सेकंड, डिफ़ॉल्ट 900), `CODEX_BIN`, `CODEX_TIMEOUT` (डिफ़ॉल्ट 600), `GROK_BIN`, `GROK_HOME` (डिफ़ॉल्ट `~/.grok`), `GROK_TIMEOUT` (डिफ़ॉल्ट 900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT` (डिफ़ॉल्ट 900), `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (डिफ़ॉल्ट 600), `OPENROUTER_BASE_URL` (`https://` आवश्यक), `OPENROUTER_TIMEOUT` (डिफ़ॉल्ट 900), `OPENROUTER_PREFLIGHT_TIMEOUT` (डिफ़ॉल्ट 30)। प्रत्येक का विवरण उसके प्रोवाइडर अनुभाग में दिया गया है।
+वैकल्पिक चर: `XAI_BASE_URL` (डिफ़ॉल्ट `https://api.x.ai/v1`),
+`CLAUDE_TIMEOUT` (प्रति कॉल सेकंड, डिफ़ॉल्ट 900), `CODEX_BIN`, `CODEX_TIMEOUT`
+(डिफ़ॉल्ट 600), `GROK_BIN`, `GROK_HOME` (डिफ़ॉल्ट `~/.grok`), `GROK_TIMEOUT`
+(डिफ़ॉल्ट 900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT` (डिफ़ॉल्ट 900),
+`OPENCODE_BIN`, `OPENCODE_TIMEOUT` (डिफ़ॉल्ट 600), `OPENROUTER_BASE_URL`
+(`https://` आवश्यक), `OPENROUTER_TIMEOUT` (डिफ़ॉल्ट 900),
+`OPENROUTER_PREFLIGHT_TIMEOUT` (डिफ़ॉल्ट 30)। प्रत्येक का विवरण उसके
+provider के अनुभाग में दिया गया है।
 
 ## शुरुआत करना
 
@@ -88,96 +120,120 @@ aipmt --source_dir content/fr --target_dir content/en --source_lang fr --target_
 aipmt --use_gemini --file document.md --target_dir out/ --target_lang ja
 ```
 
-स्पैनिश में अनुवादित `document.md`, `--target_dir` में `document-es.md` देता है; `--include_model` के साथ, `document-es-gpt-5.6-terra.md` देता है। एक्सटेंशन हमेशा `.md` बन जाता है — `article.mdx` से `article-en.md` बनता है — सिवाय `--keep_filename` के, जो मूल नाम को बनाए रखता है। पहले से मौजूद अनुवाद को `--force` के बिना छोड़ दिया जाता है।
+स्पेनी में अनुवाद करने पर `document.md`, `--target_dir` में
+`document-es.md` देता है; `--include_model` के साथ, `document-es-gpt-5.6-terra.md`। एक्सटेंशन
+हमेशा `.md` बन जाता है—`article.mdx`, `article-en.md` देता है—
+सिवाय `--keep_filename` के साथ, जो मूल नाम बनाए रखता है। पहले से मौजूद अनुवाद
+को `--force` के बिना छोड़ दिया जाता है।
 
-एग्जिट कोड: यदि सब कुछ सफल रहा या छोड़ दिया गया तो `0`, यदि कोई फ़ाइल विफल रही तो `1` (मानक त्रुटि आउटपुट पर सूची), यदि कॉन्फ़िगरेशन में कोई समस्या है तो `2`। एक विफल फ़ाइल कभी नहीं लिखी जाती है, भले ही लेखन प्रक्रिया स्वयं विफल हो जाए: सामग्री को पास में लिखा जाता है और फिर नाम बदला जाता है। बस पुनः चलाना ही पर्याप्त है।
+निकास कोड: यदि सब कुछ सफल हुआ या छोड़ दिया गया तो `0`, यदि कोई
+फ़ाइल विफल रह गई तो `1` (सूची त्रुटि आउटपुट पर), और यदि समस्या
+कॉन्फ़िगरेशन की हो तो `2`। विफल फ़ाइल कभी नहीं लिखी जाती, भले ही
+लेखन स्वयं विफल हो जाए: सामग्री को पास में लिखकर फिर उसका नाम बदला जाता है।
+बस दोबारा चलाना पर्याप्त है।
 
-## कौन सा मॉडल चुनें
+## कौन-सा मॉडल चुनें
 
-प्रत्येक मॉडल द्वारा चौदह समान भाषाओं में अनुवादित, दो वास्तविक दस्तावेज़ों पर मापा गया। **यह संख्या चौदह में से उन भाषाओं की संख्या है जहाँ अनुवाद लिखा गया है और स्रोत से कुछ भी भिन्न नहीं है।**
+दो वास्तविक दस्तावेज़ों पर मापा गया, जिनका प्रत्येक मॉडल द्वारा समान चौदह
+भाषाओं में अनुवाद किया गया। **यह संख्या चौदह में से उन भाषाओं की संख्या है
+जिनमें अनुवाद लिखा गया और स्रोत से कुछ भी अलग नहीं था।**
 
-| मॉडल                 | इस तक कैसे पहुँचें                | सघन तकनीकी निगरानी लेख | यह README    | क्या भिन्न है, और कितनी भाषाओं पर                                                                                                                                  |
-| -------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Gemini 3.8 Flash** | Google सब्सक्रिप्शन (Antigravity) | ✅ 14/14                | ✅ 14/14     | दोनों में से किसी भी दस्तावेज़ पर कुछ भी नहीं                                                                                                                     |
-| **Gemini 3.7 Flash** | Google API कुंजी                  | ✅ 14/14                | ⚠️ 13/14     | 14 में से 1 भाषा: एक अतिरिक्त बोल्ड शब्द (ja)                                                                                                                      |
-| **Gemini 3.7 Flash** | Google सब्सक्रिप्शन (Antigravity) | ✅ 14/14                | ⚠️ 13/14     | 14 में से 1 भाषा: एक कम बोल्ड शब्द (ko)                                                                                                                             |
-| **GPT-5.6 Sol**      | ChatGPT सब्सक्रिप्शन, या OpenAI कुंजी | ✅ 14/14            | ⚠️ 12/14     | 14 में से 2 भाषाएँ: एक कम बोल्ड शब्द (ar, ja)                                                                                                                      |
-| **GLM-5.2**          | OpenRouter कुंजी                  | ✅ 14/14                | ⚠️ 11/14     | 14 में से 3 भाषाएँ: एक कम बोल्ड शब्द (hi, ja, ko)                                                                                                                  |
-| Claude Sonnet 5      | Claude सब्सक्रिप्शन (Claude Code) | ⚠️ 13/14                | ⚠️ 13/14     | लेख पर 14 में से 1 भाषा: एक अतिरिक्त बोल्ड शब्द (zh); इस README पर 1: पिछली पंक्ति से जुड़ी एक तालिका पंक्ति, जो डिस्प्ले में छिपी हुई है (ar)                    |
-| Claude Haiku 4.5     | Claude सब्सक्रिप्शन (Claude Code) | ⚠️ 11/14                | ✅ 14/14     | लेख पर 14 में से 3 भाषाएँ: एक अनुभाग शीर्षक स्तर 1 पर चला गया (en, pl, ro); इस README पर, तुलनात्मक रूप से कुछ नहीं, लेकिन आंतरिक लिंक अंग्रेजी में डुप्लिकेट हुए |
-| Claude Sonnet 5      | Anthropic API कुंजी               | ⚠️ 11/14                | ⚠️ 12/14     | लेख पर 14 में से 3 भाषाएँ: एक अतिरिक्त कोड ब्लॉक दिखाई दिया (es, de, hi); इस README पर 2: बिना मार्कअप वाला एक लिंक (sv), एक बोल्ड शब्द (zh)                     |
-| Qwen 3.7 Flash       | OpenRouter कुंजी                  | ❌ 8/14                 | ⚠️ 10/14     | लेख पर 1 भाषा अस्वीकृत, 5 अन्य भिन्न हैं; इस README पर, लगभग चालीस शब्दों को `code` में रखा गया (ar)                                                       |
-| Grok 4.6             | Grok सब्सक्रिप्शन                 | ❌ 8/14                 | रेट नहीं किया गया | 14 में से 5 भाषाएँ अस्वीकृत, क्योंकि इनलाइन कोड और URL रेंडर नहीं हुए; डच भाषा में सब कुछ भिन्न था                                                                |
-| GPT-OSS 20B          | स्थानीय मॉडल (Ollama)             | ❌ 7/14                 | पुनः नहीं मापा गया | 14 में से 4 भाषाएँ अस्वीकृत: मॉडल ने वहाँ फ्रेंच अंश छोड़ दिए थे, सुरक्षा जांच ने उन्हें रोक दिया                                                                  |
-| MiMo v2.5 (मुफ़्त)   | OpenCode Zen, बिना खाते के        | ❌ 11/14                | पुनः नहीं मापा गया | 1 भाषा अस्वीकृत; पोलिश में एक अनुभाग खो गया                                                                                                                        |
-| Mistral Large        | Mistral API कुंजी                 | ❌ 5/14                 | ❌ 1/14      | **एक पूरा अनुभाग गायब हो जाता है**: लेख पर 14 में से 1 भाषा (hi), इस README पर 3 (ar, hi, ko) — और लेख पर 3 भाषाएँ अस्वीकृत                                       |
-| DeepSeek V4 Flash    | OpenRouter कुंजी                  | ❌ 3/14                 | पुनः नहीं मापा गया | 14 में से 10 भाषाएँ अस्वीकृत; प्रति भाषा 37 मिनट                                                                                                                   |
-| Claude Opus 5.5      | Claude सब्सक्रिप्शन (Claude Code) | ❌ 0/14                 | ✅ 14/14     | जीव विज्ञान की एक संक्षिप्त खबर के कारण Opus के सुरक्षा उपायों द्वारा सभी 14 भाषाओं में लेख अस्वीकृत; इस README पर कुछ भी नहीं                                    |
+| मॉडल                | उस तक कैसे पहुँचें                 | सघन निगरानी लेख | यह README    | क्या अलग है और कितनी भाषाओं में                                                                                                                          |
+| --------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Gemini 3.8 Flash**  | Google सदस्यता (Antigravity)   | ✅ 14/14                | ✅ 14/14     | दोनों दस्तावेज़ों में कुछ भी नहीं                                                                                                                                 |
+| **Claude Sonnet 5.5** | Anthropic API कुंजी                 | ✅ 14/14                | ✅ 14/14     | दोनों दस्तावेज़ों में कुछ भी नहीं                                                                                                                                 |
+| **Gemini 3.7 Flash**  | Google API कुंजी                    | ✅ 14/14                | ⚠️ 13/14     | 14 में से 1 भाषा: एक अतिरिक्त शब्द बोल्ड में (ja)                                                                                                                      |
+| **Gemini 3.7 Flash**  | Google सदस्यता (Antigravity)   | ✅ 14/14                | ⚠️ 13/14     | 14 में से 1 भाषा: बोल्ड में एक शब्द कम (ko)                                                                                                                     |
+| **GPT-5.6 Sol**       | ChatGPT सदस्यता या OpenAI कुंजी | ✅ 14/14                | ⚠️ 12/14     | 14 में से 2 भाषाएँ: बोल्ड में एक शब्द कम (ar, ja)                                                                                                                |
+| **GLM-5.2**           | OpenRouter कुंजी                    | ✅ 14/14                | ⚠️ 11/14     | 14 में से 3 भाषाएँ: बोल्ड में एक शब्द कम (hi, ja, ko)                                                                                                            |
+| Claude Sonnet 5       | Claude सदस्यता (Claude Code)   | ⚠️ 13/14                | ⚠️ 13/14     | लेख में 14 में से 1 भाषा: एक अतिरिक्त शब्द बोल्ड में (zh); इस README में 1: तालिका की एक पंक्ति पिछली से जुड़ी, प्रदर्शन में छिपी हुई (ar)            |
+| Claude Haiku 4.5      | Claude सदस्यता (Claude Code)   | ⚠️ 11/14                | ✅ 14/14     | लेख में 3 भाषाएँ: अनुभाग का एक शीर्षक स्तर 1 पर चला गया (en, pl, ro); इस README में तुलनाकर्ता के लिए कुछ नहीं, लेकिन अंग्रेज़ी में आंतरिक लिंक दोहरे हुए |
+| Claude Sonnet 5       | Anthropic API कुंजी                 | ⚠️ 11/14                | ⚠️ 12/14     | लेख में 3 भाषाएँ: एक कोड ब्लॉक दिखाई दिया (es, de, hi); इस README में 2: मार्कअप के बिना एक लिंक (sv), बोल्ड में एक शब्द (zh)                              |
+| Claude Haiku 4.5      | Anthropic API कुंजी                 | ⚠️ 7/14                 | ✅ 14/14     | लेख में 7 भाषाएँ: अनुभाग का एक शीर्षक स्तर 1 पर चला गया—जापानी में फ़्रेंच ही रहा; इस README में कुछ नहीं                                              |
+| Claude Haiku 5.5      | Anthropic API कुंजी                 | ⚠️ 11/14                | ❌ 12/14     | लेख में 3 भाषाएँ: अनुभाग के शीर्षक का स्तर बदला या वह दोहरा हुआ (ja, ko, zh); इस README में 2 भाषाएँ अस्वीकृत, इनलाइन कोड खो गए (ar, hi)    |
+| Qwen 3.7 Flash        | OpenRouter कुंजी                    | ❌ 8/14                 | ⚠️ 10/14     | लेख में 1 भाषा अस्वीकृत, 5 अन्य अलग; इस README में लगभग चालीस शब्द `code` में डाले गए (ar)                                                    |
+| Grok 4.6              | Grok सदस्यता                   | ❌ 8/14                 | अंकित नहीं     | 14 में से 5 भाषाएँ अस्वीकृत, क्योंकि लौटाए गए परिणाम में इनलाइन कोड और URL नहीं थे; डच पूरी तरह अलग है                                                               |
+| GPT-OSS 20B           | स्थानीय मॉडल (Ollama)             | ❌ 7/14                 | फिर से नहीं मापा गया | 14 में से 4 भाषाएँ अस्वीकृत: मॉडल ने उनमें फ़्रेंच अंश छोड़े थे, सुरक्षा जाँच ने उन्हें रोक दिया                                                                  |
+| MiMo v2.5 (मुफ़्त)   | OpenCode Zen, बिना खाते के         | ❌ 11/14                | फिर से नहीं मापा गया | 1 भाषा अस्वीकृत; पोलिश में एक अनुभाग खो गया                                                                                                                  |
+| Mistral Large         | Mistral API कुंजी                   | ❌ 5/14                 | ❌ 1/14      | **एक पूरा अनुभाग गायब हो जाता है**: लेख में 1 भाषा (hi), इस README में 3 (ar, hi, ko)—और लेख में 3 भाषाएँ अस्वीकृत                                |
+| DeepSeek V4 Flash     | OpenRouter कुंजी                    | ❌ 3/14                 | फिर से नहीं मापा गया | 14 में से 10 भाषाएँ अस्वीकृत; प्रति भाषा 37 मिनट                                                                                                                 |
+| Claude Opus 5.5       | Claude सदस्यता (Claude Code)   | ❌ 0/14                 | ✅ 14/14     | जीवविज्ञान की एक संक्षिप्त ख़बर के कारण Opus की सुरक्षा जाँचों ने लेख को सभी 14 भाषाओं में अस्वीकार किया; इस README में कुछ नहीं                                               |
 
-|     | प्रतीक का अर्थ                                                                                                                                                        |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✅  | सभी चौदह भाषाओं का अनुवाद किया गया, और स्रोत से कुछ भी भिन्न नहीं है                                                                                                 |
-| ⚠️  | सभी चौदह भाषाओं का अनुवाद किया गया; जो भिन्न है वह **मार्कअप** है — एक बोल्ड शब्द, एक `code`, कोष्ठक खोने वाला एक लिंक। कोई टेक्स्ट, कोई URL, कोई कोड ब्लॉक, कोई अनुभाग गायब नहीं है |
-| ❌  | कम से कम एक भाषा का अनुवाद नहीं किया जा सका — फ़ाइल अस्वीकृत है, लिखी नहीं गई — **या** लिखी गई फ़ाइल में से सामग्री गायब है                                          |
+|     | प्रतीक का अर्थ                                                                                                                                                                                 |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅  | सभी चौदह भाषाओं में अनुवाद हुआ और स्रोत से कुछ भी अलग नहीं                                                                                                                                       |
+| ⚠️  | सभी चौदह भाषाओं में अनुवाद हुआ; जो अलग है वह **मार्कअप** है—बोल्ड में एक शब्द, एक `code`, या ऐसा लिंक जिसके कोष्ठक खो गए। कोई पाठ, URL, कोड ब्लॉक या अनुभाग गायब नहीं है |
+| ❌  | कम-से-कम एक भाषा का अनुवाद नहीं हो सका—फ़ाइल अस्वीकृत हुई, लिखी नहीं गई—**या** लिखी गई फ़ाइल से सामग्री गायब है                                                                      |
 
-मुख्य निष्कर्ष:
+इससे ध्यान रखने योग्य बातें:
 
-- **अस्वीकृत अनुवाद कोई ख़राब अनुवाद नहीं होता।** जब वापसी पर कोई टोकन गायब
-  होता है, तो फ़ाइल नहीं लिखी जाती है और भाषा को अस्वीकृत माना जाता है। लेख पर
-  Grok के साथ यही होता है: पाँच गैर-लैटिन लिपियों में, पहले ही सेगमेंट से चार
-  इनलाइन कोड और तीन URL गायब हो गए।
-- **एक मॉडल केवल एक वाक्य के कारण पूरे दस्तावेज़ को अस्वीकार कर सकता है।** Opus 5.5
-  इस README का बिना किसी अंतर के अनुवाद करता है, लेकिन किसी भी निगरानी लेख का
-  नहीं: इसके सुरक्षा उपाय जीव विज्ञान की एक संक्षिप्त खबर पर प्रतिक्रिया को रोक
-  देते हैं। फ़ाइल नहीं लिखी जाती है, और aipmt इसका कारण बताता है।
-- **यह सुरक्षा जाल शीर्षकों, तालिकाओं, front matter या टेक्स्ट को कवर नहीं करता है।**
-  एक मॉडल जो किसी अनुभाग को हटा देता है, वह ऐसी फ़ाइल लौटाता है जिसे टूल बिना किसी
-  झिझक के लिख देता है — Mistral का यही मामला है। ये तत्व टोकन द्वारा प्रतिस्थापन
-  योग्य नहीं हैं, और वर्तमान सुरक्षा जाँचें इन्हें नियंत्रित नहीं करती हैं;
-  `scripts/compare_structure.py` खोए हुए अनुभाग का पता लगाता है, लेकिन घटना के बाद।
-- **इस README पर Grok के लिए कोई रेटिंग नहीं है**: बारह भाषाओं के बाद इसका CLI
-  सत्र समाप्त हो गया, जिनमें से ग्यारह बिना किसी अंतर के थीं। बीच में रुके हुए
-  अभियान को रेट नहीं किया जाता है।
-- **दस्तावेज़ का घनत्व भाषा से अधिक मायने रखता है।** Grok साधारण README पर सही
-  काम करता है और लिंक से भरे लेख पर लड़खड़ा जाता है, जिसमें डच भाषा भी शामिल है।
+- **अस्वीकृत अनुवाद क्षतिग्रस्त अनुवाद नहीं होता।** लौटने पर कोई टोकन गायब
+  होने पर फ़ाइल नहीं लिखी जाती और भाषा को अस्वीकृत माना जाता है। लेख पर Grok
+  के साथ यही होता है: पाँच गैर-Latin लिपियों में पहले ही खंड से चार इनलाइन
+  कोड और तीन URL खो जाते हैं।
+- **कोई मॉडल एक वाक्य के कारण पूरा दस्तावेज़ अस्वीकार कर सकता है।** Opus 5.5
+  इस README का बिना किसी अंतर के अनुवाद करता है, लेकिन किसी निगरानी लेख का
+  नहीं: उसकी सुरक्षा जाँचें जीवविज्ञान की एक संक्षिप्त ख़बर पर उत्तर रोक देती
+  हैं। फ़ाइल नहीं लिखी जाती और aipmt इसका कारण बताता है।
+- **यह सुरक्षा जाल शीर्षकों, तालिकाओं, front matter या पाठ को शामिल नहीं करता।**
+  किसी अनुभाग को हटाने वाला मॉडल ऐसी फ़ाइल लौटाता है जिसे टूल बिना आपत्ति
+  लिख देता है—Mistral के साथ यही होता है। इन तत्वों को टोकन से बदला नहीं जा
+  सकता और वर्तमान जाँचें इन्हें नियंत्रित नहीं करतीं; `scripts/compare_structure.py` खोए हुए
+  अनुभाग का पता लगाता है, लेकिन बाद में।
+- **इस README के लिए Grok का कोई अंक नहीं है**: उसका CLI सत्र बारह भाषाओं के
+  बाद समाप्त हो गया, जिनमें से ग्यारह में कोई अंतर नहीं था। बाधित परीक्षण
+  अभियान को अंक नहीं दिया जाता।
+- **दस्तावेज़ का घनत्व भाषा से अधिक मायने रखता है।** Grok सामान्य README पर
+  ठीक चलता है और लिंक से भरे लेख पर विफल हो जाता है, डच में भी।
 
-तिथियाँ और दस्तावेज़: "यह README" कॉलम को 9 सितंबर 2026 को इस फ़ाइल के एक स्थिर संशोधन (785 पंक्तियाँ, 285 इनलाइन कोड, 89 तालिका पंक्तियाँ) पर मापा गया था, जिसमें बाद में बदलाव किए गए — Antigravity और Claude Code पंक्तियों को छोड़कर, जिन्हें 26 सितंबर को 1.14.0 के साथ प्रकाशित छोटे संशोधन (600 पंक्तियाँ, 257 इनलाइन कोड, 85 तालिका पंक्तियाँ) पर मापा गया था। "सघन तकनीकी निगरानी लेख" कॉलम 589 पंक्तियों के एक लेख पर 4 और 5 सितंबर के अभियान से आता है, Grok पंक्ति को छोड़कर, जिसे 9 सितंबर को उसी निगरानी के दूसरे संस्करण पर फिर से मापा गया था, और Antigravity तथा Claude Code पंक्तियाँ, जिन्हें 26 सितंबर को उसी लेख पर मापा गया था। पूरी तालिकाएँ, समय और प्रोटोकॉल [विस्तृत माप](#विस्तृत-माप) में उपलब्ध हैं।
-
+तिथियाँ और दस्तावेज़: “यह README” कॉलम को 9 सितंबर 2026 को इस फ़ाइल के एक
+स्थिर संशोधन (785 पंक्तियाँ, 285 इनलाइन कोड, तालिका की 89 पंक्तियाँ) पर मापा
+गया था, जिसे बाद में संशोधित किया गया—Antigravity और Claude Code पंक्तियों
+को छोड़कर, जिन्हें 26 सितंबर को 1.14.0 के साथ प्रकाशित, छोटे संशोधन
+(600 पंक्तियाँ, 257 इनलाइन कोड, तालिका की 85 पंक्तियाँ) पर मापा गया, और
+Claude Sonnet 5.5, Haiku 5.5 तथा API के माध्यम से Haiku 4.5 की पंक्तियों को,
+जिन्हें 18 अक्टूबर को उसी संशोधन पर मापा गया। “सघन निगरानी लेख” कॉलम 4 और
+5 सितंबर के परीक्षण अभियान से आया है, जो 589 पंक्तियों वाले लेख पर किया गया,
+Grok पंक्ति को छोड़कर, जिसे 9 सितंबर को उसी निगरानी के दूसरे संस्करण पर फिर
+से मापा गया; Antigravity और Claude Code पंक्तियों को 26 सितंबर को उसी लेख पर
+मापा गया; और इन तीन Claude पंक्तियों को 18 अक्टूबर को मापा गया। पूरी तालिकाएँ,
+अवधियाँ और प्रोटोकॉल [विस्तृत माप](#विस्तृत-माप) में हैं।
 ## सभी विकल्प
 
-| विकल्प                   | विवरण                                                                                                         |
+| विकल्प                   | विवरण                                                                                                   |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `--file`                 | अनुवाद के लिए एकल Markdown फ़ाइल (`--source_dir` का विकल्प)                                                   |
-| `--source_dir`           | Markdown फ़ाइलों वाली स्रोत डायरेक्टरी (डिफ़ॉल्ट: `content/posts`)                                             |
-| `--target_dir`           | अनुवादित फ़ाइलों के लिए आउटपुट डायरेक्टरी (डिफ़ॉल्ट: `traductions_en`)                                          |
-| `--source_lang`          | स्रोत भाषा (डिफ़ॉल्ट: `fr`)                                                                         |
-| `--target_lang`          | लक्षित भाषा (डिफ़ॉल्ट: `en`)                                                                        |
-| `--model`                | उपयोग करने के लिए विशिष्ट मॉडल                                                                                |
-| `--eco`                  | किफायती मॉडलों का उपयोग करें                                                                                  |
-| `--use_mistral`          | Mistral AI API का उपयोग करें                                                                                  |
-| `--use_claude`           | Claude API का उपयोग करें                                                                                      |
-| `--use_gemini`           | Gemini API का उपयोग करें                                                                                      |
-| `--use_grok`             | xAI (Grok) API का उपयोग करें — `XAI_API_KEY` आवश्यक है                                                        |
-| `--use_codex`            | ChatGPT सब्सक्रिप्शन कोटा पर Codex CLI का उपयोग करें                                                          |
-| `--use_grok_cli`         | Grok सब्सक्रिप्शन कोटा पर Grok CLI का उपयोग करें                                                              |
-| `--use_antigravity`      | Google AI Pro या Ultra सब्सक्रिप्शन कोटा पर Antigravity CLI (`agy`) का उपयोग करें                     |
-| `--use_claude_code`      | Claude Pro या Max सब्सक्रिप्शन कोटा पर Claude Code CLI (`claude -p`) का उपयोग करें                          |
-| `--use_opencode`         | OpenCode में कॉन्फ़िगर किए गए प्रदाता के लिए OpenCode (ओपन सोर्स) का उपयोग करें; `--model provider/modèle` आवश्यक है     |
-| `--use_openrouter`       | OpenRouter का उपयोग करें — `OPENROUTER_API_KEY` और `--model fournisseur/modèle` आवश्यक हैं                                        |
-| `--force`                | पुन: अनुवाद के लिए बाध्य करें                                                                                 |
-| `--keep_filename`        | मूल फ़ाइल नाम बनाए रखें                                                                                        |
-| `--news`                 | समाचार मोड: EN उद्धरणों को सुरक्षित रखता है, प्रति भाषा फ़्लैग प्रबंधित करता है                                |
-| `--add_translation_note` | अनुवाद नोट जोड़ें                                                                                             |
-| `--note_position`        | नोट की स्थिति: `top`, `bottom` (डिफ़ॉल्ट), या `both`                                   |
-| `--note_format`          | नोट का प्रारूप: `legacy` (डिफ़ॉल्ट, बोल्ड पैराग्राफ) या `marker`                                  |
-| `--include_model`        | आउटपुट फ़ाइल में मॉडल का नाम शामिल करें                                                                       |
-| `--reasoning_effort`     | GPT-5.x तर्क प्रयास: `none`/`low`/`medium`/`high`/`xhigh`          |
+| `--file`                 | अनुवाद के लिए एकल Markdown फ़ाइल (`--source_dir` का विकल्प)                                             |
+| `--source_dir`           | Markdown फ़ाइलों वाली स्रोत डायरेक्टरी (डिफ़ॉल्ट: `content/posts`)                                   |
+| `--target_dir`           | अनूदित फ़ाइलों के लिए आउटपुट डायरेक्टरी (डिफ़ॉल्ट: `traductions_en`)                                    |
+| `--source_lang`          | स्रोत भाषा (डिफ़ॉल्ट: `fr`)                                                                                  |
+| `--target_lang`          | लक्ष्य भाषा (डिफ़ॉल्ट: `en`)                                                                                   |
+| `--model`                | उपयोग किया जाने वाला विशिष्ट मॉडल                                                                                  |
+| `--eco`                  | किफ़ायती मॉडल का उपयोग करें                                                                              |
+| `--use_mistral`          | Mistral AI API का उपयोग करें                                                                                     |
+| `--use_claude`           | Claude API का उपयोग करें                                                                                         |
+| `--use_gemini`           | Gemini API का उपयोग करें                                                                                         |
+| `--use_grok`             | xAI (Grok) API का उपयोग करें — `XAI_API_KEY` आवश्यक है                                                           |
+| `--use_codex`            | ChatGPT सदस्यता कोटा पर Codex CLI का उपयोग करें                                                    |
+| `--use_grok_cli`         | Grok सदस्यता कोटा पर Grok CLI का उपयोग करें                                                        |
+| `--use_antigravity`      | Google AI Pro या Ultra सदस्यता कोटा पर Antigravity CLI (`agy`) का उपयोग करें                       |
+| `--use_claude_code`      | Claude Pro या Max सदस्यता कोटा पर Claude Code CLI (`claude -p`) का उपयोग करें                      |
+| `--use_opencode`         | OpenCode में कॉन्फ़िगर किए गए प्रदाता के साथ OpenCode (ओपन सोर्स) का उपयोग करें; `--model provider/modèle` आवश्यक है |
+| `--use_openrouter`       | OpenRouter का उपयोग करें — `OPENROUTER_API_KEY` और `--model fournisseur/modèle` आवश्यक हैं                          |
+| `--force`                | पुनः अनुवाद को बाध्य करें                                                                                       |
+| `--keep_filename`        | मूल फ़ाइल नाम बनाए रखें                                                                          |
+| `--news`                 | समाचार मोड: अंग्रेज़ी उद्धरणों को सुरक्षित रखता है, भाषा के अनुसार फ़्लैग संभालता है                                      |
+| `--add_translation_note` | अनुवाद संबंधी टिप्पणी जोड़ें                                                                                |
+| `--note_position`        | टिप्पणी की स्थिति: `top`, `bottom` (डिफ़ॉल्ट), या `both`                                                     |
+| `--note_format`          | टिप्पणी का प्रारूप: `legacy` (डिफ़ॉल्ट, मोटा अनुच्छेद) या `marker`                                            |
+| `--include_model`        | आउटपुट फ़ाइल में मॉडल का नाम शामिल करें                                                            |
+| `--reasoning_effort`     | GPT-5.x तर्क प्रयास: `none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-नौ `--use_*` फ़्लैग परस्पर अपवर्जित हैं: किन्हीं दो को संयोजित करना अस्वीकार कर दिया जाता है।
+ये नौ `--use_*` फ़्लैग परस्पर अपवर्जी हैं: किन्हीं दो को एक साथ उपयोग
+करना अस्वीकार कर दिया जाता है।
 
-## प्रोवाइडर्स
+## प्रदाता
 
-### API द्वारा: OpenAI, Mistral, Claude, Gemini, Grok
+### API के माध्यम से: OpenAI, Mistral, Claude, Gemini, Grok
 
 ```bash
 aipmt --source_dir content/fr --target_dir content/en --target_lang en             # OpenAI, défaut
@@ -187,25 +243,26 @@ aipmt --use_gemini  --source_dir content/fr --target_dir content/ja --target_lan
 aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lang pt
 ```
 
-`--eco` प्रत्येक प्रदाता के किफायती स्तर पर स्विच करता है।
+`--eco` प्रत्येक प्रदाता के किफ़ायती स्तर पर स्विच करता है।
 
-| प्रोवाइडर   | गुणवत्ता (डिफ़ॉल्ट)                                    | किफायती (`--eco`)          |
+| प्रदाता    | गुणवत्ता (डिफ़ॉल्ट)                                      | किफ़ायती (`--eco`)      |
 | ----------- | ----------------------------------------------------- | ------------------------- |
 | OpenAI      | `gpt-5.6-terra`                                       | `gpt-5.6-luna`            |
-| Claude      | `claude-sonnet-5`                                     | `claude-haiku-4-5`        |
+| Claude      | `claude-sonnet-5-5`                                   | `claude-haiku-5-5`        |
 | Mistral     | `mistral-large-latest`                                | `mistral-small-latest`    |
 | Gemini      | `gemini-3.7-flash`                                    | `gemini-3.1-flash-lite`   |
-| Codex       | `gpt-5.6-sol` (`--model` द्वारा `terra` और `luna` भी) | `gpt-5.6-luna`            |
+| Codex       | `gpt-5.6-sol` (`--model` के माध्यम से `terra` और `luna` भी) | `gpt-5.6-luna`            |
 | Grok API    | `grok-4.6`                                            | `grok-4.3`                |
 | Grok CLI    | `grok-4.6`                                            | `grok-4.5`                |
 | Antigravity | `gemini-3.8-flash-medium`                             | `gemini-3.7-flash-low`    |
-| Claude Code | `sonnet`, प्रयास `low`                                | वही — `--eco` निष्प्रभावी |
-| OpenCode    | `--model provider/modèle` अनिवार्य                 | वही — `--eco` निष्प्रभावी |
-| OpenRouter  | `--model fournisseur/modèle` अनिवार्य              | वही — `--eco` निष्प्रभावी |
+| Claude Code | `sonnet`, प्रयास `low`                                | समान — `--eco` का कोई प्रभाव नहीं |
+| OpenCode    | `--model provider/modèle` अनिवार्य                 | समान — `--eco` का कोई प्रभाव नहीं |
+| OpenRouter  | `--model fournisseur/modèle` अनिवार्य              | समान — `--eco` का कोई प्रभाव नहीं |
 
-### ChatGPT सब्सक्रिप्शन पर: `--use_codex`
+### ChatGPT सदस्यता पर: `--use_codex`
 
-आधिकारिक Codex CLI को संचालित करता है: अनुवाद ChatGPT सब्सक्रिप्शन कोटा से काटा जाता है, बिना किसी API कुंजी या उपयोग-आधारित बिलिंग के।
+आधिकारिक Codex CLI को संचालित करता है: अनुवाद की गणना ChatGPT सदस्यता
+कोटा में होती है, बिना API कुंजी या उपयोग-आधारित बिलिंग के।
 
 ```bash
 pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo), ou : npm install -g @openai/codex
@@ -213,17 +270,29 @@ codex login
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 ```
 
-- बाइनरी को `CODEX_BIN` में, फिर `PATH` में, फिर पैकेज `openai-codex-cli-bin` में खोजा जाता है। `~/.codex/auth.json` को कभी पढ़ा नहीं जाता है।
-- `OPENAI_API_KEY` और `CODEX_API_KEY` को सबप्रोसेस के परिवेश से हटा दिया जाता है: मौजूद कोई कुंजी कभी भी API पर स्विच नहीं कराती है।
-- प्रत्येक सेगमेंट की लागत 5 घंटे की विंडो के कम से कम एक "मैसेज" के बराबर होती है — यदि इसका सत्यापन विफल हो जाता है और इसे पुनः प्रयास किया जाता है, तो दो। OpenAI एक Plus प्लान पर, अनुमान के रूप में, `gpt-5.6-luna` (`--eco`) के लिए 250–2,000 मैसेज/5 घंटे और `gpt-5.6-sol` के लिए 10–100 की घोषणा करता है।
-- `--model gpt-5.6-terra` और `--model gpt-5.6-luna` भी सब्सक्रिप्शन से होकर गुजरते हैं। ऐसा मॉडल जिसके लिए खाता योग्य नहीं है, वह 400 "model is not supported when using Codex with a ChatGPT account" लौटाता है।
-- API की तुलना में धीमा, और दस्तावेज़ के साथ यह अंतर बढ़ता जाता है: इस README पर, `gpt-5.6-sol` के साथ प्रति भाषा 6 मिनट 46 सेकंड का मध्यमान, जबकि `gemini-3.7-flash` के लिए 36 सेकंड।
-- CI में अस्वीकृत (`CI` या `GITHUB_ACTIONS` परिभाषित होने पर): सब्सक्रिप्शन एक व्यक्तिगत सत्र फ़ाइल द्वारा प्रमाणित होता है, जिसका साझा रनर पर कोई काम नहीं है।
-- चर: `CODEX_BIN`, `CODEX_TIMEOUT` (प्रति सेगमेंट सेकंड, डिफ़ॉल्ट 600)।
+- बाइनरी को पहले `CODEX_BIN`, फिर `PATH`, और फिर
+  `openai-codex-cli-bin` पैकेज में खोजा जाता है। `~/.codex/auth.json` को कभी नहीं पढ़ा जाता।
+- उप-प्रक्रिया के परिवेश से `OPENAI_API_KEY` और `CODEX_API_KEY` हटा दिए जाते
+  हैं: मौजूद कुंजी कभी भी API पर स्विच नहीं कराती।
+- प्रत्येक खंड की लागत 5 घंटे की विंडो के कम-से-कम एक « संदेश » के बराबर होती है —
+  यदि उसका सत्यापन विफल हो और उसे दोबारा आज़माया जाए, तो दो संदेश। OpenAI के
+  अनुमान के अनुसार, Plus योजना पर `gpt-5.6-luna` (`--eco`) के लिए
+  250-2 000 संदेश/5 घंटे और `gpt-5.6-sol` के लिए 10-100 संदेश मिलते हैं।
+- `--model gpt-5.6-terra` और `--model gpt-5.6-luna` भी
+  सदस्यता के माध्यम से चलते हैं। जिस मॉडल की अनुमति खाते को नहीं है, वह 400 « model is
+  not supported when using Codex with a ChatGPT account » लौटाता है।
+- API से धीमा है, और दस्तावेज़ के साथ अंतर बढ़ता जाता है: इस README पर,
+  `gpt-5.6-sol` के साथ प्रति भाषा माध्यिका 6 मिनट 46 सेकंड, जबकि
+  `gemini-3.7-flash` के साथ 36 सेकंड।
+- CI में अस्वीकृत (`CI` या `GITHUB_ACTIONS` परिभाषित होने पर): सदस्यता
+  व्यक्तिगत सत्र फ़ाइल के माध्यम से प्रमाणित होती है, जिसे साझा रनर पर नहीं
+  होना चाहिए।
+- वेरिएबल: `CODEX_BIN`, `CODEX_TIMEOUT` (प्रति खंड सेकंड, डिफ़ॉल्ट 600)।
 
-### Grok सब्सक्रिप्शन पर: `--use_grok_cli`
+### Grok सदस्यता पर: `--use_grok_cli`
 
-SuperGrok या X Premium+ सब्सक्रिप्शन पर, आधिकारिक Grok Build CLI के साथ समान सिद्धांत।
+आधिकारिक Grok Build CLI के साथ यही सिद्धांत SuperGrok या
+X Premium+ सदस्यता पर लागू होता है।
 
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash
@@ -231,13 +300,28 @@ grok login                                      # ou : grok login --device-code
 aipmt --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
 ```
 
-- **Codex की तुलना में कमजोर नियंत्रण (confinement)।** Grok का OS सैंडबॉक्स कई आधुनिक Linux वर्कस्टेशनों (AppArmor, कंटेनर रनटाइम सॉकेट्स) पर लागू नहीं होता है, और जो प्रोफ़ाइल लागू नहीं हो सकती वह बिना किसी सूचना के अनियंत्रित रूप से शुरू हो जाती है। इसलिए स्क्रिप्ट डिफ़ॉल्ट रूप से किसी प्रोफ़ाइल का अनुरोध नहीं करती है, इसकी घोषणा करती है, और CLI के `--deny` नियमों पर निर्भर करती है, जिसमें कैच-ऑल `*` शामिल है — एकमात्र ऐसी परत जो बिना बताए सुरक्षा हटाने के बजाय शुरू होने से इनकार कर देती है। `GROK_TRANSLATE_SANDBOX=read-only` के लिए OS सैंडबॉक्स की आवश्यकता होती है, और यदि मशीन इसे पूरा नहीं कर सकती है तो शुरुआत विफल हो जाती है।
-- कोटा साप्ताहिक है, जो Chat, Imagine और Voice के साथ साझा किया जाता है, और कोई भी कमांड इसे पढ़ने की अनुमति नहीं देती है: एक बैच बिना किसी संकेत के बातचीत संबंधी उपयोग को प्रभावित कर सकता है।
-- चर: `GROK_BIN`, `GROK_HOME` (CLI डायरेक्टरी, डिफ़ॉल्ट `~/.grok`), `GROK_TIMEOUT` (डिफ़ॉल्ट 900), `GROK_TRANSLATE_SANDBOX`।
+- **Codex की तुलना में कमज़ोर परिसीमन।** Grok का OS सैंडबॉक्स कई हालिया
+  Linux मशीनों पर लागू नहीं होता (AppArmor, कंटेनर रनटाइम सॉकेट), और जो
+  प्रोफ़ाइल लागू नहीं हो पाती, वह बिना किसी सूचना के अपरिसीमित रूप में शुरू
+  हो जाती है। इसलिए स्क्रिप्ट डिफ़ॉल्ट रूप से किसी प्रोफ़ाइल का अनुरोध नहीं
+  करती, इसकी सूचना देती है, और CLI के `--deny` नियमों पर निर्भर रहती है,
+  जिनमें सर्वसमावेशी `*` भी है — यही एकमात्र परत है जो बिना बताए
+  सुरक्षा हटाने के बजाय शुरू होने से इनकार करती है। `GROK_TRANSLATE_SANDBOX=read-only` OS सैंडबॉक्स
+  को अनिवार्य बनाता है, और यदि मशीन इसका पालन न कर सके तो शुरुआत विफल हो जाती है।
+- कोटा साप्ताहिक है और Chat, Imagine तथा Voice के साथ साझा होता है; इसे पढ़ने
+  के लिए कोई कमांड उपलब्ध नहीं है: कोई बैच बिना संकेत दिए संवाद संबंधी उपयोग
+  को कम कर सकता है।
+- वेरिएबल: `GROK_BIN`, `GROK_HOME` (CLI डायरेक्टरी, डिफ़ॉल्ट `~/.grok`),
+  `GROK_TIMEOUT` (डिफ़ॉल्ट 900), `GROK_TRANSLATE_SANDBOX`।
 
-### Google सब्सक्रिप्शन पर: `--use_antigravity`
+### Google सदस्यता पर: `--use_antigravity`
 
-Antigravity के आधिकारिक CLI, `agy` के साथ समान सिद्धांत: Google AI Pro या Ultra के लिए भुगतान करने वालों के लिए, अनुवाद टोकन-आधारित बिलिंग के बजाय सब्सक्रिप्शन कोटा से काटा जाता है। इस कोटा तक पहुँचने का यह एकमात्र मार्ग है: Gemini CLI 18 जून 2026 से इन खातों की सेवा नहीं देता है ([घोषणा](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)), और Antigravity SDK केवल API कुंजी या Google Cloud प्रोजेक्ट स्वीकार करता है।
+`agy`, आधिकारिक Antigravity CLI, के साथ भी यही सिद्धांत लागू होता है:
+Google AI Pro या Ultra के भुगतानकर्ता के लिए अनुवाद की गणना टोकन के आधार पर
+बिल किए जाने के बजाय सदस्यता कोटा में होती है। इस कोटा तक पहुँचने का यही
+एकमात्र रास्ता है: Gemini CLI 18 जून 2026 से इन खातों को सेवा नहीं देता
+([घोषणा](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)),
+और Antigravity SDK केवल API कुंजी या Google Cloud प्रोजेक्ट स्वीकार करता है।
 
 ```bash
 # agy 1.2.11 ou plus récent : https://antigravity.google/docs/cli/install/
@@ -246,93 +330,103 @@ aipmt --use_antigravity --file README.md --target_dir . --target_lang en
 agy -p /usage --output-format json   # quota restant, sans en consommer
 ```
 
-- **कोई भी सशुल्क मार्ग खुला नहीं रहता।** agy आपके परिवेश से केवल चरों की एक सीमित सूची प्राप्त करता है — `PATH`, भाषा और समय क्षेत्र, टर्मिनल, पहचान, प्रॉक्सी और प्रमाणपत्र, सत्र बस — और कोई कुंजी नहीं: इसके कई चर बिना कुछ प्रदर्शित किए कॉल को स्विच कर देते हैं (परीक्षण किया गया: एक दस्तावेज़ को तीसरे पक्ष के गेटवे पर भेजता है, दूसरा बिल किए गए Google Cloud प्रोजेक्ट पर), और एक ब्लैकलिस्ट में हर बार समीक्षा करने पर कुछ न कुछ छूट जाता था। किसी भी सेगमेंट से पहले, `agy -p /config`, जिसमें कोई कोटा खर्च नहीं होता, को सशुल्क AI क्रेडिट निष्क्रिय दिखाना चाहिए, जिसमें कोई API कुंजी या Google Cloud प्रोजेक्ट न हो — किसी सेटिंग की अनुपस्थिति का अर्थ अस्वीकृति है —, अन्यथा कुछ भी अनुवादित नहीं किया जाता है; प्रत्येक कॉल के लॉग को फिर सब्सक्रिप्शन (`authMethod=consumer`) प्रमाणित करना चाहिए, अन्यथा प्रतिक्रिया अस्वीकार कर दी जाती है।
-- **कन्फ़ाइनमेंट।** प्रत्येक कॉल एक निजी और डिस्पोजेबल व्यक्तिगत डायरेक्टरी में चलती है, जिसमें बिना टूल वाला एक ट्रांसलेशन एजेंट होता है: आपकी सेटिंग्स, नियम, प्लगइन्स, MCP सर्वर और agy हुक इसमें प्रवेश नहीं करते हैं, आपके इतिहास में कुछ भी नहीं जुड़ता है, और लॉगिन कीचेन में रहता है, जिसे aipmt कभी नहीं पढ़ता है। यदि एजेंट नहीं मिलता है, तो agy चुपचाप अपने कोडिंग एजेंट और उसके टूल पर वापस लौट जाता है: लॉग की एक पूरी पंक्ति द्वारा सही एजेंट की पुष्टि की जानी चाहिए — इस संदेश को उद्धृत करने वाला दस्तावेज़ इसे प्रतिस्थापित नहीं करता है —, अन्यथा अस्वीकृति होती है।
-- **प्लेटफ़ॉर्म**: Linux, ऐसे सत्र में जिसमें कीचेन हो (D-Bus सत्र बस, Secret Service); macOS स्वीकृत है, लेकिन वहाँ परीक्षण नहीं किया गया है। Windows पर अस्वीकृत, जहाँ agy उन चरों को नहीं पढ़ता है जो प्रत्येक कॉल को अलग करते हैं, और सत्र बस के बिना Linux पर — SSH सत्र, कंटेनर, सर्वर: agy वहाँ अपने टोकन को `~/.gemini` की एक फ़ाइल में संग्रहीत करता है, जिसे आइसोलेशन छिपा देता है। कनेक्शन कोड के लिए एक मिनट की प्रतीक्षा के बजाय, अस्वीकृति किसी भी लॉन्च से पहले उसके कारण के साथ आ जाती है।
-- **मॉडल**: `agy models` वाले। Gemini मॉडल अपने नाम में प्रयास दर्शाते हैं (`gemini-3.8-flash-medium`…): बिना प्रत्यय वाला नाम कॉल से पहले ही अस्वीकार कर दिया जाता है, और `--reasoning_effort` निष्प्रभावी रहता है। डिफ़ॉल्ट रूप से `gemini-3.8-flash-medium`, और `--eco` में `gemini-3.7-flash-low`; इन्हें निर्धारित करने वाले अभियानों का वर्णन [विस्तृत माप](#विस्तृत-माप) में किया गया है। Claude और GPT-OSS का अपना कोटा है, जो काफी छोटा है: Flash में 0.05% की तुलना में प्रति मापी गई कॉल पर 5 घंटे की विंडो का लगभग 1%।
-- **कोटा**: प्रति समूह, एक 5 घंटे की और एक साप्ताहिक विंडो, टोकन लागत के अनुपात में। लेखक के खाते पर मापा गया: `gemini-3.8-flash-medium` में प्रति दस लाख स्रोत वर्णों पर 5 घंटे की विंडो के लगभग 16 अंक, `gemini-3.7-flash-medium` में 14 और कम प्रयास पर 7 से 8 — 40,000 वर्णों वाले README की लागत इसलिए आधे अंक से थोड़ी अधिक होती है। साप्ताहिक सीमा स्तर पर निर्भर करती है। पुनः प्रयास उस पर आधारित होता है जिसे agy पुनः प्रयास योग्य घोषित करता है; अन्यथा, समाप्त हो चुकी विंडो पर कभी पुनः प्रयास नहीं किया जाता है: यह `/usage` द्वारा प्रदर्शित रीसेट होने तक प्रत्येक फ़ाइल को विफल कर देता है।
-- **API से धीमा**: विस्तृत माप वाले लेख पर, API के माध्यम से Gemini 3.7 Flash के लिए 1 मिनट 18 सेकंड के मुकाबले, `gemini-3.8-flash-medium` में प्रति भाषा 3 मिनट 59 सेकंड का मध्यमान और `gemini-3.7-flash-medium` में 3 मिनट 14 सेकंड।
-- **रुकावट**: Ctrl-C, या टर्मिनल बंद होने पर, आपके कोटे पर अपनी बारी समाप्त करने देने के बजाय कमांड के साथ agy को रोक दिया जाता है; यही बात Codex, Grok CLI और OpenCode पर भी लागू होती है। `nohup` के अंतर्गत, अनुवाद जारी रहता है।
-- CI में अस्वीकृत (`CI` या `GITHUB_ACTIONS` परिभाषित होने पर): लॉगिन व्यक्तिगत कीचेन में रहता है। रनर पर, `GOOGLE_API_KEY` के साथ `--use_gemini`।
-- चर: `AGY_BIN` (अन्यथा `PATH`, फिर `~/.local/bin/agy`), `AGY_TIMEOUT` (स्टार्टअप सहित प्रति सेगमेंट सेकंड, डिफ़ॉल्ट 900)।
+- **कोई सशुल्क मार्ग खुला नहीं रहता।** agy को आपके परिवेश से केवल वेरिएबल
+  की एक बंद सूची मिलती है — `PATH`, भाषा और समय क्षेत्र, टर्मिनल,
+  पहचान, प्रॉक्सी और प्रमाणपत्र, सत्र बस — और कोई कुंजी नहीं: इसके कई वेरिएबल
+  बिना कुछ दिखाए कॉल को दूसरे मार्ग पर भेज देते हैं (मापन में: एक दस्तावेज़
+  को तृतीय-पक्ष गेटवे पर भेजता है, दूसरा बिल किए गए Google Cloud प्रोजेक्ट
+  पर), और हर पुनरीक्षण में निषेध सूची से कोई न कोई छूट जाता था। किसी भी खंड
+  से पहले, `agy -p /config`, जिसमें कोई कोटा खर्च नहीं होता, को यह दिखाना
+  आवश्यक है कि सशुल्क AI क्रेडिट अक्षम हैं और कोई API कुंजी या Google Cloud
+  प्रोजेक्ट नहीं है — सेटिंग का अनुपस्थित होना अस्वीकृति माना जाता है —,
+  अन्यथा कुछ भी अनूदित नहीं होता; इसके बाद प्रत्येक कॉल के लॉग को सदस्यता
+  (`authMethod=consumer`) प्रमाणित करनी होती है, अन्यथा उत्तर अस्वीकार कर दिया जाता है।
+- **परिसीमन।** प्रत्येक कॉल एक निजी और अस्थायी होम डायरेक्टरी में, बिना किसी
+  टूल वाले अनुवाद एजेंट के साथ चलती है: आपकी सेटिंग, नियम, प्लगइन, MCP सर्वर
+  और agy हुक उसमें प्रवेश नहीं करते, आपके इतिहास में कुछ नहीं जुड़ता, और
+  कनेक्शन कीरिंग में ही रहता है, जिसे aipmt कभी नहीं पढ़ता। एजेंट न मिलने पर
+  agy बिना सूचना दिए अपने कोडिंग एजेंट और उसके टूल पर लौट जाता है: लॉग की
+  एक पूरी पंक्ति को सही एजेंट की पुष्टि करनी होती है — उस संदेश को उद्धृत
+  करने वाला दस्तावेज़ उसका स्थान नहीं ले सकता —, अन्यथा अस्वीकृति होती है।
+- **प्लेटफ़ॉर्म**: Linux, ऐसे सत्र में जिसमें कीरिंग हो (D-Bus सत्र बस,
+  Secret Service); macOS स्वीकार्य है, हालाँकि उस पर मापन नहीं किया गया है।
+  Windows पर अस्वीकृत, जहाँ agy प्रत्येक कॉल को अलग करने वाले वेरिएबल नहीं
+  पढ़ता, और सत्र बस रहित Linux पर भी — SSH सत्र, कंटेनर, सर्वर: वहाँ agy
+  अपना टोकन `~/.gemini` की फ़ाइल में रखता है, जिसे पृथक्करण छिपा देता है।
+  अस्वीकृति किसी भी शुरुआत से पहले कारण सहित होती है, ताकि कनेक्शन कोड के
+  लिए एक मिनट प्रतीक्षा न करनी पड़े।
+- **मॉडल**: `agy models` के मॉडल। Gemini मॉडल अपने नाम में प्रयास स्तर
+  रखते हैं (`gemini-3.8-flash-medium`…): प्रत्यय रहित नाम कॉल से पहले अस्वीकार कर दिया
+  जाता है, और `--reasoning_effort` का कोई प्रभाव नहीं होता। डिफ़ॉल्ट रूप से
+  `gemini-3.8-flash-medium`, और `--eco` में `gemini-3.7-flash-low`; जिन अभियानों ने
+  इन्हें निर्धारित किया, उनका वर्णन [विस्तृत माप](#विस्तृत-माप) में है। Claude
+  और GPT-OSS का अपना, बहुत छोटा कोटा है: मापी गई प्रत्येक कॉल पर 5 घंटे की
+  विंडो का लगभग 1 %, जबकि Flash में 0.05 %।
+- **कोटा**: प्रत्येक समूह के लिए 5 घंटे की और एक साप्ताहिक विंडो, टोकन लागत
+  के अनुपात में। लेखक के खाते पर मापा गया: प्रति दस लाख स्रोत वर्णों पर
+  5 घंटे की विंडो के लगभग 16 अंक `gemini-3.8-flash-medium` में, 14 `gemini-3.7-flash-medium` में,
+  और कम प्रयास पर 7 से 8 — इसलिए 40 000 वर्णों वाले README की लागत आधे अंक
+  से थोड़ी अधिक होती है। साप्ताहिक सीमा स्तर पर निर्भर करती है। पुनः प्रयास
+  agy द्वारा पुनः प्रयास योग्य घोषित स्थितियों का अनुसरण करता है; अन्यथा
+  समाप्त हुई विंडो पर कभी पुनः प्रयास नहीं होता: वह `/usage` में
+  दिखाई गई रीसेट अवधि तक प्रत्येक फ़ाइल को विफल करती है।
+- **API से धीमा**: मापों वाले सघन लेख पर, `gemini-3.8-flash-medium` में प्रति भाषा
+  माध्यिका 3 मिनट 59 सेकंड और `gemini-3.7-flash-medium` में 3 मिनट 14 सेकंड, जबकि
+  API के माध्यम से Gemini 3.7 Flash के लिए 1 मिनट 18 सेकंड।
+- **व्यवधान**: Ctrl-C, या बंद किया गया टर्मिनल, agy को आपके कोटा पर अपना
+  कार्य पूरा करते रहने देने के बजाय कमांड के साथ रोक देते हैं; Codex,
+  Grok CLI और OpenCode के लिए भी यही लागू होता है। `nohup` के अंतर्गत,
+  अनुवाद जारी रहता है।
+- CI में अस्वीकृत (`CI` या `GITHUB_ACTIONS` परिभाषित होने पर):
+  कनेक्शन व्यक्तिगत कीरिंग में रहता है। रनर पर, `--use_gemini` के साथ
+  `GOOGLE_API_KEY`।
+- वेरिएबल: `AGY_BIN` (अन्यथा `PATH`, फिर `~/.local/bin/agy`),
+  `AGY_TIMEOUT` (प्रति खंड सेकंड, शुरुआत सहित, डिफ़ॉल्ट 900)।
 
-**उपयोग की शर्तें: यह आपका खाता है जो इसमें शामिल है।** [Antigravity की शर्तें](https://antigravity.google/terms) (धारा 6) और इसके [FAQ](https://antigravity.google/docs/faq/) खाता निलंबन के जोखिम के तहत, Antigravity लॉगिन का उपयोग करके किसी तीसरे पक्ष के सॉफ़्टवेयर के माध्यम से सेवा तक पहुँचने पर रोक लगाते हैं — Claude Code, OpenClaw और OpenCode का वहाँ उल्लेख किया गया है। aipmt न तो टोकन को पढ़ता है और न ही उसका पुनः उपयोग करता है: यह आधिकारिक बाइनरी को उस [हेडलेस मोड](https://antigravity.google/docs/cli/headless/) में लॉन्च करता है जिसे Google स्क्रिप्ट और CI के लिए प्रलेखित करता है। Google के एक सदस्य ने अपने स्वयं के काम के लिए स्थानीय स्क्रिप्ट से `agy -p` लॉन्च करने को "मानक" माना है ([आधिकारिक फ़ोरम, 25 सितंबर 2026, गैर-बाध्यकारी उत्तर](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829)); कोई भी दस्तावेज़ इस प्रकार के वितरित टूल के मामले का अंतिम निर्णय नहीं करता है।
+**उपयोग की शर्तें: उत्तरदायित्व आपके खाते का है।** [Antigravity की
+शर्तें](https://antigravity.google/terms) (खंड 6) और उसके
+[अक्सर पूछे जाने वाले प्रश्न](https://antigravity.google/docs/faq/), खाते के निलंबन के दंड के साथ,
+Antigravity कनेक्शन का उपयोग करके तृतीय-पक्ष सॉफ़्टवेयर से सेवा तक पहुँचने
+को प्रतिबंधित करते हैं — इनमें Claude Code, OpenClaw और OpenCode का उल्लेख
+है। aipmt टोकन को न तो पढ़ता है, न दोबारा उपयोग करता है: यह आधिकारिक बाइनरी
+को उस [हेडलेस मोड](https://antigravity.google/docs/cli/headless/) में चलाता है जिसे Google
+स्क्रिप्ट और CI के लिए प्रलेखित करता है। Google के एक सदस्य ने अपने काम के
+लिए स्थानीय स्क्रिप्ट से `agy -p` चलाने को « मानक » माना
+([आधिकारिक फ़ोरम, 25 सितंबर 2026, गैर-अनुबंधात्मक उत्तर](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829));
+इस तरह वितरित किए गए किसी टूल के मामले पर कोई पाठ निर्णायक उत्तर नहीं देता।
 
-**केवल सार्वजनिक दस्तावेज़।** उन्हीं शर्तों की धारा 5 के अनुसार, बातचीत — प्रॉम्प्ट, प्रतिक्रियाएं, मेटाडेटा — Google के उत्पादों और मशीन लर्निंग को बेहतर बनाने के लिए उपयोग की जा सकती हैं और मनुष्यों द्वारा उनकी समीक्षा की जा सकती है, जिसमें सशुल्क सब्सक्रिप्शन भी शामिल हैं। ऑप्ट-आउट `enableTelemetry` सेटिंग के माध्यम से होता है, जिसके प्रभाव का दस्तावेज़ीकरण नहीं है, जिसे aipmt सेट नहीं करता है; आपकी agy सेटिंग्स इसके आइसोलेशन में स्थानांतरित नहीं होती हैं। इसके माध्यम से कुछ भी गोपनीय न भेजें।
-
+**केवल सार्वजनिक दस्तावेज़।** उन्हीं शर्तों के खंड 5 के अनुसार, आदान-प्रदान —
+प्रॉम्प्ट, उत्तर, मेटाडेटा — का उपयोग Google के उत्पादों और मशीन लर्निंग को
+बेहतर बनाने के लिए किया जा सकता है और भुगतान वाली सदस्यता सहित मनुष्यों
+द्वारा उनकी समीक्षा की जा सकती है। इससे बाहर निकलना `enableTelemetry` सेटिंग
+के माध्यम से होता है, जिसका प्रभाव प्रलेखित नहीं है और जिसे aipmt निर्धारित
+नहीं करता; आपकी agy सेटिंग उसके पृथक्करण में साथ नहीं आतीं। इसके माध्यम से
+कोई भी गोपनीय सामग्री न भेजें।
 ### Claude सदस्यता पर: `--use_claude_code`
 
-यही सिद्धांत `claude` के साथ भी लागू होता है, जो `-p` मोड में Claude Code का आधिकारिक CLI है: जो उपयोगकर्ता Claude Pro या Max का भुगतान करते हैं, उनके लिए अनुवाद टोकन के आधार पर बिल किए जाने के बजाय सदस्यता कोटा से घटाया जाता है। इसे `--use_claude` के साथ भ्रमित न करें, जो Anthropic का API है और उपयोग के आधार पर बिल किया जाता है।
+यही सिद्धांत Claude Code के आधिकारिक CLI `claude` के साथ, `-p` मोड में भी लागू होता है: Claude Pro या Max के लिए भुगतान करने वालों हेतु अनुवाद की गणना प्रति token शुल्क के बजाय सदस्यता के quota से की जाती है। इसे उपयोग के अनुसार शुल्क लेने वाले Anthropic API `--use_claude` से भ्रमित न करें।
 
 ```bash
 claude                                   # une fois : /login avec le compte de l'abonnement
 aipmt --use_claude_code --file README.md --target_dir . --target_lang en
 ```
 
-- **कोई भी सशुल्क मार्ग खुला नहीं रहता है, और प्रत्येक कॉल इसे सिद्ध करती है।** Claude
-  Code आपके वातावरण से केवल चरों की एक सीमित सूची प्राप्त करता है — न
-  कोई API कुंजी, न टोकन, न कोई क्लाउड प्रदाता, और न ही उस Claude Code सत्र
-  का कोई मार्कर जहाँ से aipmt लॉन्च किया गया हो। पहले खंड से पहले, `claude auth status` को
-  बिना किसी Console कुंजी के सदस्यता कनेक्शन दिखाना चाहिए, और `/usage`, जिसकी
-  कोई कोटा लागत नहीं होती, को इसे प्रमाणित करना चाहिए; प्रत्येक कॉल अपने
-  इनिशियलाइज़ेशन इवेंट में इसे बारी-बारी से प्रमाणित करती है, अन्यथा प्रतिक्रिया अस्वीकार कर दी जाती है।
-- **"अतिरिक्त उपयोग" (extra usage) को अक्षम करें** (claude.ai, सेटिंग्स → उपयोग)
-  ताकि शून्य यूरो का नियम बना रहे: सक्षम होने पर, यह समाप्त हो चुकी विंडो का कार्यभार संभाल लेता है और
-  बिना कोई त्रुटि दिखाए बिलिंग शुरू कर देता है। aipmt अनुवाद को तुरंत रोक देता है जैसे ही किसी
-  कॉल की कोटा रिपोर्ट इसका संकेत देती है, लेकिन वह कॉल पहले ही गिनी जा चुकी होती है।
-- **आपके Claude Code सत्रों के साथ साझा कोटा।** प्रत्येक कॉल 5-घंटे और
-  साप्ताहिक विंडो के उपयोग की रिपोर्ट करती है; 80%
-  (`AIPMT_CLAUDE_MAX_UTILIZATION`) से अधिक होने पर, आपके कार्य के लिए आवश्यक कोटा
-  समाप्त न हो, इसलिए कोई अतिरिक्त खंड लॉन्च नहीं किया जाता है।
-- **कन्फ़ाइनमेंट।** प्रत्येक कॉल बिना किसी टूल के, एक निजी और प्रयोज्य (disposable) डायरेक्टरी में,
-  बिना किसी कस्टमाइज़ेशन वाले मोड में चलती है: न तो आपके `CLAUDE.md`, न आपके प्लगइन्स,
-  हुक्स, MCP सर्वर या सेटिंग्स लोड होते हैं, और सत्र से कुछ भी सहेजा नहीं जाता है। अटैचमेंट
-  काट दिए जाते हैं: आपके दस्तावेज़ में `@chemin` केवल टेक्स्ट बना रहता है
-  और कोई फ़ाइल नहीं खोलता है (परीक्षित)।
-- **मॉडल**: डिफ़ॉल्ट रूप से `sonnet`, `low` प्रयास पर, और `--eco` में भी:
-  `--eco` इस पथ पर कुछ नहीं बदलता। उन्हीं दस्तावेज़ों पर मापे जाने पर, `haiku`
-  दोगुना धीमा है — यह बिना रोके विचार करता है — लगभग
-  नगण्य कम लागत के लिए, और `opus` जीव विज्ञान की सामग्री को अस्वीकार कर देता है (अगला
-  बिंदु)। दोनों `--model` के माध्यम से सुलभ रहते हैं; ये उपनाम अपने
-  परिवार के नवीनतम मॉडल का अनुसरण करते हैं। `fable` और `[1m]` वेरिएंट अस्वीकार कर दिए जाते हैं,
-  क्योंकि वे सशुल्क क्रेडिट में चले जाते हैं। `--reasoning_effort` प्रयास को समायोजित करता है,
-  जिससे अनुवाद को कोई लाभ नहीं होता: मापा गया तर्क शून्य या लगभग नगण्य है।
-- **Opus जीव विज्ञान की कुछ सामग्रियों को अस्वीकार कर देता है।** इसके गार्डरेल्स
-  Sonnet की तुलना में अधिक सख्त हैं, और Anthropic का त्रुटि संदेश चेतावनी देता है कि वे
-  « can sometimes flag biology-research-adjacent work »। परीक्षित: 279 उत्पन्न
-  अणुओं पर एक संक्षिप्त मॉनिटरिंग नोट के कारण चौदह भाषाओं में लेख
-  अस्वीकार कर दिया गया। कुछ भी नहीं लिखा गया: aipmt कटी हुई प्रतिक्रिया को अस्वीकार करता है,
-  गार्डरेल्स का उल्लेख करता है और `--model sonnet` की सलाह देता है।
-- CI में (`CI` या `GITHUB_ACTIONS` परिभाषित होने पर) और Windows के तहत (परीक्षित नहीं) अस्वीकृत।
-- चर: `AIPMT_CLAUDE_BIN` (अन्यथा `PATH`, फिर `~/.local/bin/claude`),
-  `AIPMT_CLAUDE_TIMEOUT` (प्रति खंड सेकंड, डिफ़ॉल्ट 900),
-  `AIPMT_CLAUDE_MAX_UTILIZATION` (दिफ़ॉल्ट 0.8), `CLAUDE_CONFIG_DIR` (Claude
-  Code का खाता, कभी भी किसी प्रोजेक्ट के `.env` से नहीं लिया जाता); कार्यशील डायरेक्टरी
-  `XDG_CACHE_HOME/aipmt/claude-code` के अंतर्गत (दिफ़ॉल्ट `~/.cache`)।
+- **भुगतान वाला कोई मार्ग खुला नहीं रहता, और हर call इसे प्रमाणित करता है।** Claude Code को आपके environment से केवल variables की एक सीमित सूची मिलती है—न API key, न token, न cloud provider, न उस Claude Code session का कोई marker जहाँ से aipmt चलाया गया हो। पहले segment से पहले, `claude auth status` को Console key के बिना सदस्यता वाला connection दिखाना होगा और बिना quota खर्च किए `/usage` को इसकी पुष्टि करनी होगी; प्रत्येक call अपने initialization event में फिर इसकी पुष्टि करता है, अन्यथा response अस्वीकार कर दिया जाता है।
+- **« extra usage » को अक्षम करें** (claude.ai, Settings → Usage), ताकि शून्य euro का दावा कायम रहे: सक्षम होने पर, quota window समाप्त होते ही यह उसकी जगह ले लेता है और कोई error दिखाए बिना शुल्क लगाता है। जैसे ही किसी call की quota report इसका संकेत देती है, aipmt अनुवाद रोक देता है, लेकिन वह call तब तक गिना जा चुका होता है।
+- **आपके Claude Code sessions के साथ साझा quota।** हर call 5 घंटे और सप्ताह वाली windows का उपयोग बताता है; 80% से अधिक होने पर (`AIPMT_CLAUDE_MAX_UTILIZATION`) कोई अतिरिक्त segment शुरू नहीं किया जाता, ताकि आपके काम के लिए उपलब्ध quota समाप्त न हो।
+- **अलगाव।** प्रत्येक call बिना किसी tool के, एक निजी और अस्थायी directory में, customization-रहित mode में चलता है: न आपके `CLAUDE.md`, न plugins, hooks, MCP servers या settings load होते हैं, और session से कुछ भी सहेजा नहीं जाता। Attachments बंद रहते हैं: आपके document में मौजूद `@chemin` केवल text बना रहता है और कोई file नहीं खोलता (मापा गया)।
+- **Models**: default रूप से `sonnet`, `low` effort पर, और `--eco` में भी: इस मार्ग पर `--eco` से कोई अंतर नहीं पड़ता। उन्हीं documents पर मापने पर, `haiku` दोगुना धीमा है—यह ऐसा reasoning करता है जिसे रोका नहीं जा सकता—जबकि लागत केवल थोड़ी कम है, और `opus` biology की सामग्री अस्वीकार करता है (अगला बिंदु)। दोनों `--model` के माध्यम से उपलब्ध रहते हैं; ये aliases अपने परिवार के नवीनतम model का अनुसरण करते हैं। `fable` और `[1m]` variants अस्वीकार किए जाते हैं, क्योंकि वे भुगतान वाले credits का उपयोग करते हैं। `--reasoning_effort` effort निर्धारित करता है, जिससे अनुवाद को कोई लाभ नहीं मिलता: मापा गया reasoning शून्य या लगभग शून्य है।
+- **Opus biology की कुछ सामग्री अस्वीकार करता है।** इसके safeguards, Sonnet की तुलना में अधिक कठोर हैं, और Anthropic का error message चेतावनी देता है कि वे « कभी-कभी biology research से जुड़े काम को चिह्नित कर सकते हैं »। मापन में: उत्पन्न किए गए 279 molecules पर एक संक्षिप्त निगरानी समाचार के कारण चौदहों भाषाओं में पूरा लेख अस्वीकार हो गया। कुछ भी नहीं लिखा जाता: aipmt अधूरा response अस्वीकार करता है, safeguards का उल्लेख करता है और `--model sonnet` की सलाह देता है।
+- CI में (`CI` या `GITHUB_ACTIONS` परिभाषित होने पर) और Windows पर अस्वीकार किया जाता है (मापा नहीं गया)।
+- Variables: `AIPMT_CLAUDE_BIN` (अन्यथा `PATH`, फिर `~/.local/bin/claude`), `AIPMT_CLAUDE_TIMEOUT` (प्रति segment seconds, default 900), `AIPMT_CLAUDE_MAX_UTILIZATION` (default 0.8), `CLAUDE_CONFIG_DIR` (Claude Code account, project के `.env` से कभी नहीं लिया जाता); working directories `XDG_CACHE_HOME/aipmt/claude-code` के अंतर्गत (default `~/.cache`)।
 
-**उपयोग की शर्तें: यह आपका खाता है जो इसमें शामिल है।** [Claude Code का कानूनी पृष्ठ](https://code.claude.com/docs/en/legal-and-compliance)
-« an end user from signing in to the unmodified Claude Code binary
-with their own Claude subscription » से नहीं रोकता है: aipmt यही करता है, जो
-आधिकारिक बाइनरी लॉन्च करता है और टोकन को कभी नहीं पढ़ता है। लेकिन Anthropic « does not permit
-third-party developers […] to route requests through Free, Pro, or Max plan
-credentials on behalf of their users », तीसरे पक्ष के उपकरणों के लिए API कुंजी
-को प्राथमिकता देता है, « including open-source projects », और उनके उपयोग को सशुल्क
-क्रेडिट से काटने का अधिकार सुरक्षित रखता है
-([Claude सहायता](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account))।
-कोई भी दस्तावेज़ ऐसे वितरित टूल के मामले पर स्पष्ट निर्णय नहीं देता है जो बाइनरी लॉन्च करता है।
+**उपयोग की शर्तें: उत्तरदायित्व आपके account का है।** [Claude Code का कानूनी पृष्ठ](https://code.claude.com/docs/en/legal-and-compliance) « किसी अंतिम उपयोगकर्ता को अपनी Claude सदस्यता के साथ अपरिवर्तित Claude Code binary में sign in करने » से नहीं रोकता: aipmt यही करता है, जो आधिकारिक binary चलाता है और token कभी नहीं पढ़ता। लेकिन Anthropic « third-party developers को अपने users की ओर से Free, Pro या Max plan credentials के माध्यम से requests भेजने की अनुमति नहीं देता », third-party tools के लिए API key को प्राथमिकता देता है, « जिनमें open-source projects भी शामिल हैं », और उनके उपयोग को भुगतान वाले credits में गिनने का अधिकार सुरक्षित रखता है ([Claude सहायता](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account))। वितरित किए गए ऐसे tool के मामले में, जो binary चलाता है, कोई text निर्णायक उत्तर नहीं देता।
 
-**डेटा**: Free, Pro और Max खातों पर, मॉडल प्रशिक्षण
-Claude Code पर भी लागू होता है जब गोपनीयता सेटिंग इसकी अनुमति देती है
-([डेटा पृष्ठ](https://code.claude.com/docs/en/data-usage))। aipmt कोई
-स्थानीय प्रतिलेखन नहीं रखता है (`--no-session-persistence`)। इसके माध्यम से
-कुछ भी गोपनीय न भेजें।
+**Data**: Free, Pro और Max accounts पर, privacy setting की अनुमति होने पर model training Claude Code पर भी लागू होती है ([data पृष्ठ](https://code.claude.com/docs/en/data-usage))। aipmt कोई local transcript नहीं रखता (`--no-session-persistence`)। इसके माध्यम से कोई गोपनीय सामग्री न भेजें।
 
-### अपनी पसंद के प्रदाता की ओर: `--use_opencode`
+### अपनी पसंद के provider तक: `--use_opencode`
 
-[OpenCode](https://opencode.ai) एक ओपन सोर्स (MIT) कोड एजेंट है जो
-अपने भीतर कॉन्फ़िगर किए गए प्रदाताओं पर रूट करता है: API कुंजी, सदस्यता,
-OpenCode Zen गेटवे (निःशुल्क मॉडल, बिना खाते के) या स्थानीय मॉडल। यहाँ दो
-मार्गों का शुरू से अंत तक परीक्षण किया गया: Zen और Ollama।
+[OpenCode](https://opencode.ai) एक open-source (MIT) coding agent है, जो अपने भीतर configure किए गए providers तक route करता है: API key, subscription, OpenCode Zen gateway (निःशुल्क models, account के बिना) या local model। यहाँ दो मार्गों, Zen और Ollama, को शुरू से अंत तक मापा गया है।
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash   # ou : npm install -g opencode-ai
@@ -347,44 +441,24 @@ aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . -
 aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir . --target_lang ja
 ```
 
-`--model` अनिवार्य है: इसके बिना, OpenCode एक ऐसे मुफ़्त मॉडल पर वापस चला जाएगा
-जिसके संवादों का उपयोग प्रशिक्षण के लिए किया जा सकता है, और यह निर्णय आपकी
-सहमति के बिना नहीं लिया जाता।
+`--model` अनिवार्य है: इसके बिना OpenCode किसी free model पर लौट जाएगा, जिसकी बातचीत training के लिए उपयोग हो सकती है, और यह चुनाव आपकी ओर से नहीं किया जाता।
 
-प्रत्येक कॉल पर कन्फ़ाइनमेंट:
+प्रत्येक call में अलगाव:
 
-- एक इनलाइन कॉन्फ़िगरेशन, जो आपके कॉन्फ़िगरेशन पर प्राथमिकता रखती है, एक `aipmt` एजेंट
-  को परिभाषित करती है जिसके सभी उपकरण अस्वीकृत होते हैं (`permission: { "*": "deny" }`), सत्र
-  साझाकरण अक्षम होता है, `--pure`, कभी भी `--auto` नहीं;
-- प्रयोज्य और खाली कार्यशील डायरेक्टरी, `OPENCODE_DISABLE_PROJECT_CONFIG` और
-  `OPENCODE_DISABLE_CLAUDE_CODE` मौजूद — इनके बिना, OpenCode प्रॉम्प्ट में
-  वर्तमान डायरेक्टरी का `AGENTS.md` और `~/.claude/CLAUDE.md` इंजेक्ट कर देता है। वैश्विक
-  `~/.config/opencode/AGENTS.md` अभी भी इंजेक्ट रहता है, OpenCode इसे हटाने की
-  अनुमति नहीं देता है;
-- आउटपुट अनुबंध: रिटर्न कोड 0, कोई `error` इवेंट नहीं, कोई टूल
-  कॉल नहीं, अंतिम चरण `stop` में, गैर-रिक्त टेक्स्ट, और `aipmt` एजेंट
-  वास्तव में लोड किया गया — एक अज्ञात `--agent` OpenCode को विफल नहीं करता, वह
-  चुपचाप कोडिंग एजेंट पर वापस आ जाता है;
-- `aipmt` की कोई भी कुंजी पास नहीं की जाती है, सिवाय `OPENCODE_API_KEY` के, जो
-  स्वयं OpenCode की कुंजी है। प्रदाताओं को OpenCode में कॉन्फ़िगर किया जाता है,
-  `aipmt` के `.env` में नहीं।
+- आपकी configuration पर प्राथमिकता रखने वाली inline configuration एक `aipmt` agent परिभाषित करती है, जिसमें सभी tools अस्वीकार किए जाते हैं (`permission: { "*": "deny" }`), session sharing अक्षम रहता है, `--pure`, और कभी `--auto` नहीं;
+- अस्थायी और खाली working directory, जिसमें `OPENCODE_DISABLE_PROJECT_CONFIG` और `OPENCODE_DISABLE_CLAUDE_CODE` निर्धारित हैं—इनके बिना OpenCode prompt में current directory का `AGENTS.md` और `~/.claude/CLAUDE.md` inject करता है। Global `~/.config/opencode/AGENTS.md` फिर भी inject होता है; OpenCode इसे हटाने की अनुमति नहीं देता;
+- output contract: return code 0, कोई `error` event नहीं, कोई tool call नहीं, अंतिम step `stop` में, text खाली नहीं, और `aipmt` agent वास्तव में load हुआ हो—किसी अज्ञात `--agent` पर OpenCode विफल नहीं होता, बल्कि चुपचाप coding agent पर लौट जाता है;
+- `aipmt` की कोई key pass नहीं की जाती, सिवाय `OPENCODE_API_KEY` के, जो स्वयं OpenCode की key है। Providers को OpenCode में configure किया जाता है, `aipmt` के `.env` में नहीं।
 
 ध्यान देने योग्य बातें:
 
-- Zen के मुफ़्त मॉडल परिवर्तनशील हैं, जिनकी सीमाएं अप्रलेखित हैं, और
-  उनके संवादों का उपयोग प्रशिक्षण के लिए किया जा सकता है: सार्वजनिक दस्तावेज़ीकरण
-  के लिए उपयुक्त हैं, निजी सामग्री के लिए नहीं।
-- एक स्थानीय मॉडल को कम से कम 16k टोकन का संदर्भ प्रदान करना चाहिए, क्योंकि खंड
-  16,000 वर्णों तक के होते हैं। Ollama अक्सर 4,096 को कॉन्फ़िगर करता है: `PARAMETER num_ctx 32768`
-  के साथ `Modelfile` का उपयोग करें।
-- `--eco` निष्प्रभावी है; `--reasoning_effort` को OpenCode के
-  `--variant` के रूप में ज्यों का त्यों पास किया जाता है।
-- OpenCode प्रत्येक सत्र को `~/.local/share/opencode/` में लॉग करता है।
-- चर: `OPENCODE_BIN` (अन्यथा `PATH`, फिर `~/.opencode/bin/opencode`),
-  `OPENCODE_TIMEOUT` (प्रति खंड सेकंड, डिफ़ॉल्ट 600)। `OPENCODE_CONFIG`
-  OpenCode को ज्यों का त्यों पास होता है।
+- Zen के free models बदलते रहते हैं, उनकी limits documented नहीं हैं, और उनकी बातचीत training के लिए उपयोग हो सकती है: public documentation के लिए उपयुक्त, private सामग्री के लिए नहीं।
+- Local model को कम-से-कम 16 k tokens का context देना चाहिए, क्योंकि segments की लंबाई 16,000 characters तक होती है। Ollama अक्सर इसे 4,096 पर configure करता है: `PARAMETER num_ctx 32768` वाले `Modelfile` का उपयोग करें।
+- `--eco` का कोई प्रभाव नहीं पड़ता; `--reasoning_effort` को OpenCode के `--variant` के रूप में ज्यों का त्यों pass किया जाता है।
+- OpenCode प्रत्येक session को `~/.local/share/opencode/` में log करता है।
+- Variables: `OPENCODE_BIN` (अन्यथा `PATH`, फिर `~/.opencode/bin/opencode`), `OPENCODE_TIMEOUT` (प्रति segment seconds, default 600)। `OPENCODE_CONFIG` को ज्यों का त्यों OpenCode को pass किया जाता है।
 
-`~/.config/opencode/opencode.json` में Ollama के माध्यम से एक स्थानीय मॉडल का उदाहरण:
+Ollama के माध्यम से local model का उदाहरण, `~/.config/opencode/opencode.json` में:
 
 ```bash
 ollama pull gpt-oss:20b
@@ -412,59 +486,35 @@ ollama create gpt-oss-20b-32k -f gpt-oss-20b-32k.Modelfile
 }
 ```
 
-`reasoningEffort: "none"` उस चिंतन को बंद कर देता है जिसे Ollama इन मॉडलों पर
-डिफ़ॉल्ट रूप से सक्रिय करता है, और जिसे एक Modelfile अक्षम नहीं कर सकती। छह शब्दों के एक
-वाक्य पर परीक्षण किया गया: इस विकल्प के बिना 919 चिंतन टोकन और 68 सेकंड, इसके साथ केवल 9 टोकन।
+`reasoningEffort: "none"` उस reasoning को बंद करता है जिसे Ollama इन models पर default रूप से सक्रिय करता है और जिसे Modelfile अक्षम नहीं कर सकता। छह शब्दों के एक वाक्य पर मापन: option के बिना reasoning के 919 tokens और 68 seconds, इसके साथ 9 tokens।
 
-### 400 से अधिक मॉडलों की ओर: `--use_openrouter`
+### 400 से अधिक models तक: `--use_openrouter`
 
-OpenRouter एक राउटर है जो तीसरे पक्ष द्वारा होस्ट किए गए मॉडलों के सामने एकल क्रेडिट पर
-उपयोग के आधार पर बिल किया जाता है — जिसमें चीनी ओपन मॉडल भी शामिल हैं
-जिन्हें कोई अन्य प्रदाता यहाँ प्रदर्शित नहीं करता है।
+OpenRouter उपयोग के अनुसार शुल्क लेने वाला router है, जो एक ही credit से third parties द्वारा host किए गए models तक पहुँच देता है—इनमें वे खुले Chinese models भी शामिल हैं जिन्हें यहाँ कोई अन्य provider उपलब्ध नहीं कराता।
 
 ```bash
 aipmt --use_openrouter --model z-ai/glm-5.2 --file README.md --target_dir . --target_lang en
 ```
 
-`--model` अनिवार्य है। किसी भी बिलिंग से पहले निष्पादित एक प्रीफ़्लाइट, रूटिंग की
-दो विशेषताओं को प्रबंधित करता है:
+`--model` अनिवार्य है। किसी भी शुल्क से पहले चलाया गया preflight routing की दो विशेषताओं को संभालता है:
 
-- **एक ही मॉडल को अलग-अलग सीमाओं वाले दर्जनों होस्टों द्वारा परोसा जाता है** — `z-ai/glm-5.3-flash`
-  पर, 23 होस्ट हैं जिनमें से एक 2,048 आउटपुट टोकन तक सीमित है। प्रीफ़्लाइट `/api/v1/models/{modèle}/endpoints`
-  को पढ़ता है, 8,000 आउटपुट टोकन से कम या ख़राब स्थिति वाले होस्टों को हटा देता है,
-  और दूसरों को `allow_fallbacks: false` के साथ पिन करता है।
-- **तर्क के लिए आउटपुट दर पर बिल किया जाता है** — `z-ai/glm-5.2` से « OK » प्रतिक्रिया पर
-  2 के मुकाबले 107 टोकन। इसे डिफ़ॉल्ट रूप से बंद कर दिया जाता है; जो मॉडल इसे अनिवार्य करते हैं
-  उन्हें वह न्यूनतम प्रयास दिया जाता है जिसे वे स्वीकार करते हैं, क्योंकि कैटलॉग का डिफ़ॉल्ट मान
-  अनुवाद समाप्त होने से पहले आउटपुट को समाप्त कर सकता है।
-  `--reasoning_effort` प्राथमिकता पर रहता है।
+- **एक ही model को अलग-अलग limits वाले दर्जनों hosts उपलब्ध कराते हैं**—`z-ai/glm-5.3-flash` पर 23 hosts हैं, जिनमें एक की output limit 2,048 tokens है। Preflight `/api/v1/models/{modèle}/endpoints` पढ़ता है, 8,000 से कम output tokens या degraded status वाले hosts को हटाता है और शेष को `allow_fallbacks: false` से pin करता है।
+- **Reasoning पर output rate के अनुसार शुल्क लगता है**—`z-ai/glm-5.2` के « OK » response पर 2 के मुकाबले 107 tokens। इसे default रूप से बंद रखा जाता है; जिन models में यह अनिवार्य है, उन्हें उनके द्वारा स्वीकार किया जाने वाला न्यूनतम effort मिलता है, क्योंकि catalog का default अनुवाद पूरा होने से पहले output को भर सकता है। `--reasoning_effort` की प्राथमिकता बनी रहती है।
 
 ```
 → OpenRouter : 30 hébergeur(s) épinglé(s) sur 33, contexte 1048576 tokens,
   sortie plafonnée à 32768, raisonnement coupé
 ```
 
-- संदर्भ विंडो कैटलॉग से आती है। किसी भी कॉल से पहले 16,400 टोकन से कम वाले मॉडल को
-  अस्वीकार कर दिया जाता है: प्रॉम्प्ट और सेगमेंट के लिए 8,400, कम से कम 8,000
-  आउटपुट के लिए।
-- कैटलॉग से अनुपस्थित स्लग, अनुपलब्ध कैटलॉग या सीमा को बनाए रखने वाले
-  किसी होस्ट का अभाव कमांड को रोक देता है।
-- खाली आउटपुट के साथ `finish_reason=length` तर्क द्वारा खपत किया गया बजट है,
-  न कि ट्रंकेशन: संदेश इसमें अंतर करता है।
-- `--eco` निष्प्रभावी है।
-- चर: `OPENROUTER_API_KEY` (<https://openrouter.ai/keys>),
-  `OPENROUTER_BASE_URL` (दिफ़ॉल्ट `https://openrouter.ai/api/v1`, `https://`
-  आवश्यक), `OPENROUTER_TIMEOUT` (दिफ़ॉल्ट 900), `OPENROUTER_PREFLIGHT_TIMEOUT`
-  (दिफ़ॉल्ट 30)।
+- Context window catalog से आती है। 16,400 tokens से कम वाला model किसी भी call से पहले अस्वीकार कर दिया जाता है: prompt और segment के लिए 8,400 तथा output के लिए न्यूनतम 8,000।
+- Catalog में slug का न होना, catalog तक न पहुँच पाना या limit पूरी करने वाले host का अभाव command को रोक देता है।
+- खाली output वाला `finish_reason=length` reasoning द्वारा खर्च किया गया budget है, truncation नहीं: message दोनों में अंतर स्पष्ट करता है।
+- `--eco` का कोई प्रभाव नहीं पड़ता।
+- Variables: `OPENROUTER_API_KEY` (<https://openrouter.ai/keys>), `OPENROUTER_BASE_URL` (default `https://openrouter.ai/api/v1`, `https://` आवश्यक), `OPENROUTER_TIMEOUT` (default 900), `OPENROUTER_PREFLIGHT_TIMEOUT` (default 30)।
 
 ### अनुवाद संबंधी टिप्पणी
 
-`--add_translation_note` एक टिप्पणी जोड़ता है, `bottom` (दिफ़ॉल्ट), `top` (फ़्रंट
-मैटर के बाद) या `both` (`--note_position`) में, `legacy` (बोल्ड पैराग्राफ, डिफ़ॉल्ट) या
-`marker` (`--note_format`) प्रारूप में। प्रारूप `marker` एक अदृश्य Markdown
-संदर्भ परिभाषा है,
-`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`,
-जिसके बाद एक बोल्ड उद्धरण होता है: GitHub पर पठनीय, एक remark प्लगइन द्वारा बिल्ड के समय उपयोग योग्य।
+`--add_translation_note` एक टिप्पणी जोड़ता है—`bottom` (default), `top` (front matter के बाद) या `both` (`--note_position`) में—और इसका format `legacy` (bold paragraph, default) या `marker` (`--note_format`) होता है। `marker` format एक अदृश्य Markdown reference definition, `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`, और उसके बाद एक bold quotation है: GitHub पर पढ़ने योग्य और build के समय remark plugin द्वारा उपयोग योग्य।
 
 ```bash
 aipmt --file article.mdx --target_lang en --add_translation_note --note_format marker --note_position top
@@ -472,120 +522,108 @@ aipmt --file article.mdx --target_lang en --add_translation_note --note_format m
 
 ## विस्तृत माप
 
-सभी माप वास्तव में `aipmt` के साथ निष्पादित अनुवाद हैं, चौदह
-भाषाओं में: en, es, de, it, pt, nl, pl, sv, ro, ja, ko, zh, ar, hi।
-**लिखित** उन फ़ाइलों की गणना करता है जिन्हें गार्ड्स ने पास होने दिया; **बिना
-अंतर** वे हैं जहाँ `scripts/compare_structure.py` कुछ भी विसंगति नहीं पाता है — अनुभागों, उपशीर्षकों, लिंकों,
-विशिष्ट URL, कोड ब्लॉक, इनलाइन कोड, तालिका पंक्तियों, ब्लॉककोट और बोल्ड शब्दों की समान संख्या।
+सभी माप `aipmt` के साथ वास्तव में किए गए अनुवादों के हैं, चौदह भाषाओं में: en, es, de, it, pt, nl, pl, sv, ro, ja, ko, zh, ar, hi। **लिखी गईं** उन files की संख्या है जिन्हें guards ने pass होने दिया; **कोई अंतर नहीं** उन files की संख्या है जिनमें `scripts/compare_structure.py` ने कुछ नहीं पाया—sections, subtitles, links, अलग-अलग URLs, code blocks, inline codes, table rows, blockquotes और bold शब्दों की समान संख्या।
 
-"बिना अंतर" का अर्थ है "कुछ भी पता नहीं चला", न कि "समान": तुलनित्र
-उनकी सामग्री को पढ़े बिना तत्वों की गणना करता है। यह न तो किसी हटाए गए
-स्तर 4 के शीर्षक की रिपोर्ट करता है, न ही बदले गए इनलाइन कोड टेक्स्ट की, न ही किसी बदले हुए
-फ़्लैग की, और न ही एक अतिरिक्त कोष्ठक के साथ दिए गए किसी आंतरिक लिंक की,
-`[texte]((#ancre))`, जो अब कहीं नहीं जाता — और यह भाषा का मूल्यांकन
-नहीं करता है।
+« कोई अंतर नहीं » का अर्थ « कुछ भी detect नहीं हुआ » है, « समान » नहीं: comparator elements की सामग्री पढ़े बिना उनकी संख्या गिनता है। यह न हटाए गए level 4 heading की सूचना देता है, न बदले गए inline code text की, न बदले गए flag की, न एक अतिरिक्त parenthesis के साथ render हुए internal link, `[texte]((#ancre))`, की, जो अब कहीं नहीं ले जाता—और यह भाषा का आकलन भी नहीं करता।
 
-### सघन मॉनिटरिंग लेख, `--news` मोड
+### सघन निगरानी लेख, `--news` mode
 
-[jls42.org का AI मॉनिटरिंग](https://jls42.org/fr/news) का एक संस्करण:
-589 पंक्तियाँ, 140 लिंक, 21 अनुभाग, 3 संरक्षित अंग्रेज़ी उद्धरण। 4 और
-5 सितंबर 2026 का अभियान।
+[jls42.org की AI निगरानी](https://jls42.org/fr/news) का एक संस्करण: 589 lines, 140 links, 21 sections, 3 सुरक्षित English quotations। अभियान 4 और 5 सितंबर 2026 को चला।
 
-| मॉडल                                          | एक्सेस              | लिखित | बिना अंतर   | माध्यिका/भाषा |
+| Model                                          | पहुँच              | लिखी गईं | कोई अंतर नहीं   | माध्यिका/भाषा |
 | ----------------------------------------------- | ------------------ | ------- | ------------ | -------------- |
 | `gemini-3.7-flash`                              | Google API         | 14/14   | ✅ **14/14** | 1 min 18 s     |
 | `gemini-3.8-flash-medium` (`--use_antigravity`) | Google सदस्यता  | 14/14   | ✅ **14/14** | 3 min 59 s     |
 | `gemini-3.7-flash-medium` (`--use_antigravity`) | Google सदस्यता  | 14/14   | ✅ **14/14** | 3 min 14 s     |
+| `claude-sonnet-5-5`                             | Anthropic API      | 14/14   | ✅ **14/14** | 3 min 37 s     |
 | `gpt-5.6-sol` (`--use_codex`)                   | ChatGPT सदस्यता | 14/14   | ✅ **14/14** | 11 min 28 s    |
 | `z-ai/glm-5.2`                                  | OpenRouter         | 14/14   | ✅ **14/14** | 5 min 37 s     |
 | `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14   | ✅ **14/14** | 26 min 23 s    |
 | `sonnet` (`--use_claude_code`)                  | Claude सदस्यता  | 14/14   | ⚠️ 13/14     | 6 min 49 s     |
 | `claude-sonnet-5`                               | Anthropic API      | 14/14   | ⚠️ 11/14     | 6 min 31 s     |
 | `haiku` (`--use_claude_code`)                   | Claude सदस्यता  | 14/14   | ⚠️ 11/14     | 15 min 54 s    |
+| `claude-haiku-5-5`                              | Anthropic API      | 14/14   | ⚠️ 11/14     | 2 min 54 s     |
+| `claude-haiku-4-5`                              | Anthropic API      | 14/14   | ⚠️ 7/14      | 6 min 00 s     |
 | `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14   | ❌ 11/14     | 9 min 27 s     |
 | `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14   | ❌ 8/14      | 10 min 09 s    |
-| `ollama/gpt-oss-20b-32k`                        | स्थानीय              | 10/14   | ❌ 7/14      | 12 min 39 s    |
+| `ollama/gpt-oss-20b-32k`                        | local              | 10/14   | ❌ 7/14      | 12 min 39 s    |
 | `mistral-large-latest`                          | Mistral API        | 11/14   | ❌ 5/14      | 5 min 32 s     |
 | `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14    | ❌ 3/14      | 37 min 27 s    |
 | `grok-4.6` (`--use_grok_cli`)                   | Grok सदस्यता    | 1/14    | ❌ 1/14      | 23 min 11 s    |
 | `opus` (`--use_claude_code`)                    | Claude सदस्यता  | 0/14    | ❌ 0/14      | —              |
 
-Grok को 9 सितंबर को उसी मॉनिटरिंग के दूसरे संस्करण
-(356 पंक्तियाँ) पर पुनः मापा गया: 14 में से 9 भाषाएँ लिखी गईं, 8 बिना अंतर के। यही आंकड़ा
-शीर्ष तालिका में दिखाई देता है। तीन बाधित अभियानों को नोट
-नहीं किया गया है: क्रेडिट की कमी के कारण `qwen3.5-27b` (9 भाषाएँ) और `kimi-k2.6` (4),
-`z-ai/glm-5.3-flash` जिसकी दो विफलताएँ तर्क सेटिंग के कारण थीं
-जिसे प्रदाता ने बाद में ठीक कर दिया है। OpenRouter पंक्तियों को `--use_openrouter` से
-पहले, राउटर की डिफ़ॉल्ट सेटिंग्स पर मापा गया था; `z-ai/glm-5.2`,
-दिए गए प्रदाता के साथ पुनः मापे जाने पर, वही 14/14 परिणाम देता है। वर्तमान
-तुलनित्र के साथ 10 सितंबर को आंकड़ों की पुनर्गणना की गई: `qwen3.8-flash` और
-`qwen3.7-flash` प्रत्येक को पहली रिलीज़ की तुलना में एक भाषा का लाभ होता है,
-अन्य अपरिवर्तित हैं।
+Grok को 9 सितंबर को उसी निगरानी के दूसरे संस्करण (356 lines) पर फिर मापा गया: 14 में से 9 भाषाएँ लिखी गईं, 8 में कोई अंतर नहीं। शीर्ष table में यही आँकड़ा दिया गया है। तीन बाधित अभियान दर्ज नहीं किए गए: credit की कमी के कारण `qwen3.5-27b` (9 भाषाएँ) और `kimi-k2.6` (4), तथा `z-ai/glm-5.3-flash`, जिसकी दोनों विफलताएँ reasoning setting के कारण हुईं, जिसे provider अब सुधार रहा है। OpenRouter rows को `--use_openrouter` से पहले router की default settings पर मापा गया था; उपलब्ध कराए गए provider के साथ फिर मापा गया `z-ai/glm-5.2` वही 14/14 परिणाम देता है। मौजूदा comparator से 10 सितंबर को आँकड़ों की फिर गणना की गई: पहली publication की तुलना में `qwen3.8-flash` और `qwen3.7-flash` प्रत्येक को एक अतिरिक्त भाषा मिली, बाकी अपरिवर्तित हैं।
 
-`--use_antigravity` पंक्तियों को 26 सितंबर को उसी लेख पर मापा गया,
-समानांतर में चार अनुवाद: सुबह `gemini-3.7-flash-medium`,
-दोपहर में `gemini-3.8-flash-medium`। अंग्रेज़ी में, प्रत्येक ने बिना कोई नया फ़्लैग
-जोड़े उद्धरणों के नीचे फ़्रेंच अनुवाद की तीन पंक्तियों को स्वयं हटा दिया,
-और अंग्रेज़ी उद्धरण बरकरार हैं: फ़ॉलबैक सफ़ाई को कुछ भी करने की
-आवश्यकता नहीं पड़ी। `--eco` (`gemini-3.7-flash-low`) में, केवल चार भाषाओं
-पर (en, ja, ar, hi): 4 में से 4 लिखी गईं, सभी बिना किसी अंतर के, 1 मिनट 52 सेकंड की
-माध्यिका। उसी दिन मॉनिटरिंग के अधिक हालिया संस्करण (25 सितंबर,
-438 पंक्तियाँ, 2 अंग्रेज़ी उद्धरण) पर प्रतिपरीक्षण, जिसका अनुवाद ब्लॉग के बाहर
-`gemini-3.7-flash-medium` द्वारा किया गया: 14 में से 14 लिखी गईं, सभी बिना किसी अंतर के, प्रति भाषा
-87 से 128 सेकंड।
+`--use_antigravity` rows को 26 सितंबर को उसी लेख पर, चार समानांतर अनुवादों के साथ मापा गया: सुबह `gemini-3.7-flash-medium`, दोपहर में `gemini-3.8-flash-medium`। English में, दोनों ने quotations के नीचे की तीन French translation lines स्वयं हटा दीं, कोई flag नहीं गढ़ा, और English quotations अक्षुण्ण रहीं: fallback cleanup को कुछ नहीं करना पड़ा। `--eco` (`gemini-3.7-flash-low`) में, केवल चार भाषाओं (en, ja, ar, hi) पर: 4 में से 4 लिखी गईं, सभी में कोई अंतर नहीं, माध्यिका 1 min 52 s। उसी दिन निगरानी के अधिक नए संस्करण, 25 सितंबर वाले संस्करण (438 lines, 2 English quotations), पर प्रतिपरीक्षण किया गया, जिसे blog से बाहर `gemini-3.7-flash-medium` ने अनुवादित किया: 14 में से 14 लिखी गईं, सभी में कोई अंतर नहीं, प्रति भाषा 87 से 128 s।
 
-`--use_claude_code` पंक्तियों को 26 सितंबर को उसी लेख पर मापा गया,
-चार अनुवाद समानांतर में, `low` प्रयास पर। `sonnet` के साथ,
-अंग्रेज़ी उद्धरण चौदह भाषाओं में बरकरार हैं और, अंग्रेज़ी में, मॉडल ने
-बिना कोई नया फ़्लैग बनाए, फ़्रेंच अनुवाद की पंक्तियों को स्वयं हटा दिया।
-`opus` ने किसी भी भाषा में नहीं लिखा: प्रत्येक में, इसके गार्डरेल्स ने बाइंडिंग
-साइट के लिए उत्पन्न 279 अणुओं पर एक संक्षिप्त नोट के कारण अंतिम खंड पर
-प्रतिक्रिया रोक दी। अकेले भेजे जाने पर, इस संक्षिप्त नोट को « bio » श्रेणी के
-अंतर्गत अस्वीकार कर दिया जाता है; `sonnet` ने इसका हर जगह अनुवाद किया। `haiku` चौदह
-भाषाएँ लिखता है; तीन (en, pl, ro) में, एक अनुभाग शीर्षक स्तर 2 से स्तर 1 में बदल जाता है।
-यह बिना रोके विचार करता है — इसके आउटपुट टोकन का 61% —,
-जिसके परिणामस्वरूप `sonnet` की तुलना में दोगुने से अधिक समय लगता है।
+`--use_claude_code` rows को 26 सितंबर को उसी लेख पर, चार समानांतर अनुवादों के साथ, `low` effort पर मापा गया। `sonnet` के साथ, चौदहों भाषाओं में English quotations अक्षुण्ण हैं और English में model ने French translation lines स्वयं हटा दीं, कोई flag नहीं गढ़ा। `opus` ने कोई भाषा नहीं लिखी: प्रत्येक में, एक binding site के लिए उत्पन्न किए गए 279 molecules पर संक्षिप्त समाचार के कारण उसके safeguards ने अंतिम segment पर response रोक दिया। अकेले भेजे जाने पर यह संक्षिप्त समाचार « bio » category के अंतर्गत अस्वीकार हो जाता है; `sonnet` ने इसे हर भाषा में अनुवादित किया। `haiku` चौदहों भाषाएँ लिखता है; तीन में (en, pl, ro), एक section heading level 2 से level 1 हो जाता है। यह ऐसा reasoning करता है जिसे रोका नहीं जा सकता—इसके output tokens का 61%—इसलिए इसमें `sonnet` से दोगुने से अधिक समय लगता है।
 
-### इस प्रोजेक्ट का README, मानक Markdown
+`claude-sonnet-5-5`, `claude-haiku-5-5` और `claude-haiku-4-5` rows को 18 अक्टूबर को Anthropic API के माध्यम से, उसी लेख पर, प्रति model चार समानांतर अनुवादों के साथ मापा गया। Sonnet 5.5 reasoning बंद करने से इनकार करता है: aipmt उसे उसके द्वारा स्वीकार की जाने वाली न्यूनतम setting भेजता है, और उसके responses में reasoning नहीं होती। यह बिना किसी अंतर और किसी segment को दोबारा pass किए चौदहों भाषाएँ लिखता है; English में, इसने French translation lines स्वयं हटा दीं, कोई flag नहीं गढ़ा, और English quotations हर जगह अक्षुण्ण हैं। Haiku 5.5 को उसके adaptive reasoning के साथ मापा गया: reasoning बंद करने पर यह पूरे paragraphs French में छोड़ देता था, जिन्हें guard अस्वीकार कर देता है—14 में से 3 भाषाएँ लिखी गईं। दोनों Haiku उसी संक्षिप्त समाचार पर अटकते हैं: Haiku 5.5 Japanese, Korean और Chinese में उसके heading का level बदलता है या उसे दोहरा देता है, Haiku 4.5 सात भाषाओं में उसे level 1 कर देता है और Japanese में French में ही छोड़ देता है। चौदह भाषाओं में दोनों documents के लिए Haiku 4.5 की लागत 3.67 $, Haiku 5.5 की 0.57 $, और Sonnet 5.5 की 9.21 $ है।
+### इस परियोजना का README, मानक Markdown
 
-9 सितंबर 2026 को स्थिर किया गया संशोधन: 785 पंक्तियाँ, 285 इनलाइन कोड, 40 ब्लॉक फेंस, 89 तालिका पंक्तियाँ। समानांतर में चार अनुवाद।
+9 सितंबर 2026 को स्थिर किया गया संस्करण: 785 पंक्तियाँ, 285 inline code, 40
+ब्लॉक-समापन, 89 तालिका-पंक्तियाँ। चार अनुवाद समानांतर रूप से।
 
-| मॉडल                                          | लिखित   | बिना अंतर  | माध्यिका/भाषा | क्या भिन्न है                                                           |
+| मॉडल                                          | लिखे गए | बिना अंतर | माध्यिका/भाषा | अंतर                                                           |
 | ----------------------------------------------- | ------- | ---------- | -------------- | ------------------------------------------------------------------------ |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14   | 1 मिनट 43 सेकंड     | कुछ नहीं                                                                     |
-| `opus` (`--use_claude_code`)                    | 14/14   | ✅ 14/14   | 1 मिनट 48 सेकंड     | कुछ नहीं                                                                     |
-| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14   | 4 मिनट 02 सेकंड     | तुलनित्र के लिए कुछ नहीं; आंतरिक लिंक डुप्लिकेट हुए (en)                   |
-| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36 सेकंड           | एक शब्द बोल्ड में (ja)                                                      |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1 मिनट 22 सेकंड     | एक शब्द बोल्ड में (ko)                                                      |
-| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14   | 2 मिनट 20 सेकंड     | तालिका की एक पंक्ति पिछली पंक्ति से जुड़ गई (ar)                         |
-| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | 2 मिनट 56 सेकंड     | एक लिंक (sv), एक शब्द बोल्ड में (zh)                                        |
-| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6 मिनट 46 सेकंड     | एक शब्द बोल्ड में (ar, ja)                                                  |
-| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | 2 मिनट 34 सेकंड     | एक शब्द बोल्ड में (hi, ja, ko)                                              |
-| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14   | 2 मिनट 17 सेकंड     | अरबी में 40 इनलाइन कोड जोड़े गए; बोल्ड (hi, ja, ko)                   |
-| `mistral-large-latest`                          | 14/14   | ❌ 1/14    | 2 मिनट 44 सेकंड     | एक अनुभाग गायब (ar, hi, ko); कोड ब्लॉक जोड़े गए (ja, ko, ro, zh) |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14   | 1 min 43 s     | कुछ नहीं                                                                     |
+| `opus` (`--use_claude_code`)                    | 14/14   | ✅ 14/14   | 1 min 48 s     | कुछ नहीं                                                                     |
+| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14   | 4 min 02 s     | तुलनाकर्ता के लिए कुछ नहीं; आंतरिक links दोगुने हुए (en)                   |
+| `claude-sonnet-5-5`                             | 14/14   | ✅ 14/14   | 1 min 18 s     | कुछ नहीं                                                                     |
+| `claude-haiku-4-5`                              | 14/14   | ✅ 14/14   | 2 min 06 s     | कुछ नहीं                                                                     |
+| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36 s           | एक शब्द bold हुआ (ja)                                                      |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1 min 22 s     | एक शब्द bold हुआ (ko)                                                      |
+| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14   | 2 min 20 s     | एक तालिका-पंक्ति पिछली पंक्ति से जुड़ गई (ar)                         |
+| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | 2 min 56 s     | एक link (sv), एक शब्द bold हुआ (zh)                                        |
+| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6 min 46 s     | एक शब्द bold हुआ (ar, ja)                                                  |
+| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | 2 min 34 s     | एक शब्द bold हुआ (hi, ja, ko)                                              |
+| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14   | 2 min 17 s     | अरबी में 40 inline code जोड़े गए; bold (hi, ja, ko)                   |
+| `claude-haiku-5-5`                              | 12/14   | ❌ 12/14   | 1 min 14 s     | 2 भाषाएँ अस्वीकृत (ar, hi): लौटने पर inline code खो गए        |
+| `mistral-large-latest`                          | 14/14   | ❌ 1/14    | 2 min 44 s     | एक अनुभाग खो गया (ar, hi, ko); code blocks जोड़े गए (ja, ko, ro, zh) |
 
-दो बाधित अभियानों को नोट नहीं किया गया है: Grok, बारह भाषाओं (ग्यारह बिना अंतर के) के बाद CLI सत्र समाप्त हो गया, और `qwen3.8-flash`, दो के बाद इसके होस्ट से HTTP 429। `opencode/mimo-v2.5-free` और `ollama/gpt-oss-20b-32k` को इस संशोधन पर दोबारा नहीं मापा गया; 4 और 5 सितंबर के संशोधन पर, जो 277 पंक्तियाँ छोटा था, उन्होंने 14 में से 9 अनुवाद लिखे, जिनमें क्रमशः 7 और 1 बिना अंतर के थे।
+बीच में रोके गए दो अभियानों को अंक नहीं दिए गए: Grok का CLI session
+बारह भाषाओं के बाद समाप्त हो गया (ग्यारह बिना अंतर के), और `qwen3.8-flash` को उसके
+होस्ट से दो भाषाओं के बाद HTTP 429 मिला। `opencode/mimo-v2.5-free` और `ollama/gpt-oss-20b-32k`
+को इस संस्करण पर दोबारा नहीं मापा गया; 4 और 5 सितंबर वाले संस्करण पर,
+जो 277 पंक्तियाँ छोटा था, दोनों ने 14 में से 9 अनुवाद लिखे थे, जिनमें क्रमशः 7
+और 1 बिना अंतर के थे।
 
-पंक्तियाँ `--use_antigravity` और `--use_claude_code` को स्थिर किए गए संशोधन पर नहीं मापा गया था, बल्कि 26 सितंबर को 1.14.0 के साथ प्रकाशित संशोधन पर मापा गया था: 600 पंक्तियाँ, 257 इनलाइन कोड, 30 ब्लॉक फेंस, 85 तालिका पंक्तियाँ। 185 पंक्तियाँ छोटी होने के कारण, इसकी अन्य पंक्तियों से सीधे तुलना नहीं की जा सकती; लेकिन इन पंक्तियों की आपस में तुलना की जा सकती है। आंतरिक लिंकों के संबंध में, जिनकी तुलनित्र जाँच नहीं करता, `gemini-3.8-flash-medium` ने उन्हें चौदह भाषाओं में अक्षुण्ण रखा, `gemini-3.7-flash-medium` ने उन्हें इतालवी में तोड़ दिया; `sonnet` और `opus` ने उन्हें हर जगह अक्षुण्ण रखा, `haiku` ने उन्हें अंग्रेजी में दोहरा दिया।
+`--use_antigravity` और `--use_claude_code` पंक्तियों को स्थिर किए गए
+संस्करण पर नहीं मापा गया, बल्कि 26 सितंबर को 1.14.0 के साथ प्रकाशित संस्करण पर मापा गया — और
+`claude-sonnet-5-5`, `claude-haiku-5-5` तथा `claude-haiku-4-5` पंक्तियों को 18
+अक्तूबर को उसी संस्करण पर मापा गया: 600 पंक्तियाँ, 257 inline code, 30 ब्लॉक-समापन, 85
+तालिका-पंक्तियाँ। 185 पंक्तियाँ
+छोटी होने के कारण इसकी अन्य पंक्तियों से सीधे तुलना नहीं की जा सकती;
+हालाँकि ये पंक्तियाँ आपस में तुलनीय हैं। जिन आंतरिक links की जाँच
+तुलनाकर्ता नहीं करता, उन्हें `gemini-3.8-flash-medium` ने
+सभी चौदह भाषाओं में अक्षुण्ण रखा, जबकि `gemini-3.7-flash-medium` ने उन्हें इतालवी में तोड़ दिया;
+`sonnet` और `opus` ने उन्हें हर जगह अक्षुण्ण रखा, जबकि `haiku` ने उन्हें
+अंग्रेज़ी में दोगुना कर दिया; `claude-sonnet-5-5` और `claude-haiku-4-5` ने उन्हें
+सभी चौदह भाषाओं में अक्षुण्ण रखा, और `claude-haiku-5-5` ने अपनी लिखी बारह भाषाओं में।
 
-### प्रसिद्ध प्रोजेक्ट्स के चार README
+### प्रसिद्ध परियोजनाओं के चार README
 
-FastAPI, Ollama, tldr-pages और Vue.js, GitHub से यथावत लिए गए — पिछले दो की तुलना में आसान दस्तावेज़। यह अभियान कठिनाई का सामना करने वाले मॉडलों पर केंद्रित था; Gemini यहाँ तुलना के बिंदु के रूप में कार्य करता है।
+FastAPI, Ollama, tldr-pages और Vue.js, GitHub से ज्यों के त्यों लिए गए — ये
+पिछले दो दस्तावेज़ों से आसान हैं। यह अभियान कठिनाई झेल रहे
+मॉडलों पर केंद्रित था; इसमें Gemini तुलना-बिंदु के रूप में है।
 
-| मॉडल                    | दायरा                  | लिखित | बिना अंतर   |
+| मॉडल                    | दायरा                  | लिखे गए | बिना अंतर   |
 | ------------------------- | -------------------------- | ------- | ------------ |
-| `gemini-3.7-flash`        | 4 प्रोजेक्ट × 14 भाषाएँ     | 56/56   | ✅ **55/56** |
-| `opencode/mimo-v2.5-free` | 4 प्रोजेक्ट × 14 भाषाएँ     | 55/56   | ❌ 47/56     |
-| `grok-4.6` (सदस्यता)   | 4 प्रोजेक्ट × ar, hi, ja, zh | 16/16   | ❌ 14/16     |
-| `ollama/gpt-oss-20b-32k`  | 4 प्रोजेक्ट × ar, hi, ja, zh | 15/16   | ❌ 9/16      |
+| `gemini-3.7-flash`        | 4 परियोजनाएँ × 14 भाषाएँ     | 56/56   | ✅ **55/56** |
+| `opencode/mimo-v2.5-free` | 4 परियोजनाएँ × 14 भाषाएँ     | 55/56   | ❌ 47/56     |
+| `grok-4.6` (सदस्यता)   | 4 परियोजनाएँ × ar, hi, ja, zh | 16/16   | ❌ 14/16     |
+| `ollama/gpt-oss-20b-32k`  | 4 परियोजनाएँ × ar, hi, ja, zh | 15/16   | ❌ 9/16      |
 
 ### ये माप क्या नहीं हैं
 
-- **कोई संपूर्ण रैंकिंग नहीं**: केवल OpenRouter ही चार सौ से अधिक मॉडल पेश करता है, जिनमें से लगभग पंद्रह को मापा गया था।
-- **संकेतात्मक अवधियाँ**: अभियानों के आधार पर समानांतर में तीन से छह अनुवाद, और प्रदाता का थ्रूपुट दिन भर में बदलता रहता है।
-- **दिनांकित अवलोकन**: मॉडल उसी नाम के तहत बदलते रहते हैं, और आपके दस्तावेज़ हमारे दस्तावेज़ों जैसे नहीं हैं।
+- **संपूर्ण ranking नहीं**: केवल OpenRouter ही चार सौ से अधिक
+  मॉडल उपलब्ध कराता है, जबकि लगभग पंद्रह को मापा गया है।
+- **समय केवल संकेतात्मक हैं**: अभियान के अनुसार तीन से छह अनुवाद समानांतर चले,
+  और किसी प्रदाता का throughput दिन भर बदलता रहता है।
+- **समय-विशिष्ट अवलोकन हैं**: एक ही नाम के अंतर्गत मॉडल बदलते रहते हैं, और आपके
+  दस्तावेज़ हमारे दस्तावेज़ नहीं हैं।
 
-फ़ाइल की एक स्थिर प्रति पर, अपने दस्तावेज़ों के लिए इस माप को दोहराने हेतु:
+अपने दस्तावेज़ों पर माप दोहराने के लिए, फ़ाइल की स्थिर की गई प्रति पर:
 
 ```bash
 aipmt --file reference.md --target_dir out/ --source_lang fr --target_lang ja --use_gemini --force
@@ -604,9 +642,10 @@ pip install -r requirements.txt   # les dépendances, lock entièrement épingl�
 pip install -e .                  # le paquet lui-même, en mode éditable
 ```
 
-दोनों पंक्तियाँ आवश्यक हैं: `pip install -e .` के बिना, `python -m aipmt` उत्तर देता है `No module named aipmt`।
+दोनों पंक्तियाँ आवश्यक हैं: `pip install -e .` के बिना, `python -m aipmt`
+`No module named aipmt` उत्तर देता है।
 
-गुणवत्ता टूलिंग, वैकल्पिक लेकिन अनुशंसित:
+गुणवत्ता tooling वैकल्पिक है, पर अनुशंसित है:
 
 ```bash
 pipx install pre-commit               # hors venv — absent des requirements
@@ -615,30 +654,53 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # mypy, SAST, pip-audit, tests avant chaque push
 ```
 
-रिपॉजिटरी के 28 अनुवाद (README और CHANGELOG, चौदह भाषाएँ) `./regen_translations.sh --force` के साथ पुनरुत्पादित होते हैं — डिफ़ॉल्ट रूप से ChatGPT सदस्यता पर Codex और `gpt-5.6-sol`, समानांतर में चार। `REGEN_PROVIDER` और `REGEN_MODEL` पथ बदलते हैं: `antigravity` एक सदस्यता (Google की) पर रहता है और बिना किसी छूट के पास हो जाता है; एक बिल योग्य API (`openai`, `gemini`, `grok`, `openrouter`) को `REGEN_ALLOW_PAID_API=1` के बिना अस्वीकार कर दिया जाता है; `REGEN_JOB_TIMEOUT` प्रत्येक जॉब को सीमित करता है (Codex और Antigravity पर 600 सेकंड, 1,800 सेकंड)। टूलिंग का विवरण `CLAUDE.md` में है।
+repository के 28 अनुवाद (README और CHANGELOG, चौदह भाषाएँ)
+`./regen_translations.sh --force` से दोबारा बनाए जाते हैं — डिफ़ॉल्ट ChatGPT सदस्यता पर Codex और `gpt-5.6-sol`,
+चार समानांतर रूप से। `REGEN_PROVIDER` और
+`REGEN_MODEL` मार्ग बदलते हैं: `antigravity` एक सदस्यता, यानी
+Google की सदस्यता पर रहता है और बिना अपवाद के चलता है; सशुल्क API (`openai`, `gemini`,
+`grok`, `openrouter`) को `REGEN_ALLOW_PAID_API=1` के बिना अस्वीकार किया जाता है;
+`REGEN_JOB_TIMEOUT` प्रत्येक job को सीमित करता है (600 s, Codex और
+Antigravity पर 1 800 s)। tooling का विवरण `CLAUDE.md` में है।
 
-## इस स्क्रिप्ट का उपयोग करने वाले प्रोजेक्ट
+## इस script का उपयोग करने वाली परियोजनाएँ
 
-- **[jls42.org](https://jls42.org)** — 15 भाषाओं में प्रकाशित व्यक्तिगत ब्लॉग। इसकी [दैनिक AI निगरानी](https://jls42.org/fr/news) का अनुवाद इस टूल द्वारा प्रतिदिन किया जाता है, और यह उपरोक्त मापों के लिए संदर्भ दस्तावेज़ के रूप में कार्य करता है।
+- **[jls42.org](https://jls42.org)** — 15 भाषाओं में प्रकाशित निजी blog। इसकी
+  [दैनिक AI निगरानी](https://jls42.org/fr/news) का इस tool द्वारा प्रतिदिन अनुवाद किया जाता है,
+  और यह ऊपर दिए गए मापों के लिए संदर्भ दस्तावेज़ का काम करती है।
 
 ## लेखक
 
 Julien LE SAUX
-ईमेल : contact@jls42.org
+ईमेल: contact@jls42.org
 
 ## लाइसेंस
 
-GNU GENERAL PUBLIC LICENSE Version 3. [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE) देखें।
+GNU GENERAL PUBLIC LICENSE Version 3। [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE) देखें।
 
-## अस्वीकरण
+## चेतावनी
 
-यह प्रोग्राम GPL v3 की धारा 15 और 16 की शर्तों के तहत **बिना किसी वारंटी के** वितरित किया जाता है: यह "जैसा है" प्रदान किया जाता है, किसी विशेष उद्देश्य के लिए व्यापारिकता या उपयुक्तता की किसी भी वारंटी के बिना, और इसके लेखक को इसके उपयोग से होने वाले किसी भी नुकसान के लिए उत्तरदायी नहीं ठहराया जा सकता है। लाइसेंस का मूल पाठ इस सारांश से अधिक प्रभावी है।
+यह program GPL v3 के अनुभाग 15 और 16 की शर्तों के अनुसार **बिना किसी warranty के**
+वितरित किया जाता है: इसे « जैसा है » वैसा ही उपलब्ध कराया गया है, व्यापारिक गुणवत्ता
+या किसी विशेष उपयोग के लिए उपयुक्तता की कोई warranty नहीं है, और इसके उपयोग से
+होने वाली किसी क्षति के लिए इसके लेखक को उत्तरदायी नहीं ठहराया जा सकता। इस सारांश पर
+लाइसेंस का मूल पाठ प्रभावी होगा।
 
-- **प्रकाशित करने से पहले दोबारा पढ़ें।** सुरक्षा उपाय कोड ब्लॉक, इनलाइन कोड, URL, एंकर और `--news` मोड के उद्धरणों को कवर करते हैं — न कि शीर्षकों, तालिकाओं, फ्रंट मैटर, या आपके वाक्यों के अर्थ को।
-- **आपके दस्तावेज़ चुने गए प्रदाता के पास जाते हैं**, उसकी उपयोग की शर्तों और डेटा नीति के तहत। कुछ मुफ़्त मॉडल प्रशिक्षण के लिए आपके संवादों का पुन: उपयोग कर सकते हैं, और Antigravity की शर्तें Google को उनका पुन: उपयोग करने और मनुष्यों द्वारा उनकी समीक्षा कराने की अनुमति देती हैं, जिसमें सशुल्क सदस्यता भी शामिल है; एक स्थानीय मॉडल ही एकमात्र ऐसा तरीका है जिससे कोई भी डेटा आपकी मशीन से बाहर नहीं जाता है।
-- **API कॉल का शुल्क आपसे लिया जाता है।** यह प्रोग्राम खर्च की कोई सीमा तय नहीं करता: एक लंबा दस्तावेज़, विफलता के बाद पुनः प्रयास, या अधिक तर्क करने वाला मॉडल अधिक लागत उत्पन्न करता है।
-- **प्रकाशित माप दिनांकित अवलोकन हैं**, कोई गारंटी नहीं।
+- **प्रकाशित करने से पहले दोबारा पढ़ें।** सुरक्षा-व्यवस्थाएँ code blocks,
+  inline code, URL, anchors और `--news` mode के उद्धरणों को सुरक्षित रखती हैं — लेकिन
+  headings, tables, front matter या आपके वाक्यों के अर्थ को नहीं।
+- **आपके दस्तावेज़ चुने गए प्रदाता के पास जाते हैं**, उसकी उपयोग-शर्तों
+  और data policy के अधीन। कुछ निःशुल्क मॉडल आपके संवादों को
+  प्रशिक्षण के लिए दोबारा इस्तेमाल कर सकते हैं, और Antigravity की शर्तें
+  Google को उन्हें दोबारा इस्तेमाल करने और मनुष्यों से उनकी समीक्षा करवाने की अनुमति देती हैं,
+  जिसमें सशुल्क सदस्यता भी शामिल है; केवल local model ही ऐसा मार्ग है जिसमें
+  आपकी मशीन से कोई data बाहर नहीं जाता।
+- **API calls के लिए आपसे शुल्क लिया जाता है।** यह program
+  खर्च को सीमित नहीं करता: लंबा दस्तावेज़, विफलता के बाद पुनः प्रयास या बहुत अधिक reasoning करने वाला मॉडल
+  अधिक महँगा पड़ता है।
+- **प्रकाशित माप समय-विशिष्ट अवलोकन हैं**, warranties नहीं।
 
-उल्लिखित उत्पाद और कंपनी के नाम उनके संबंधित स्वामियों के हैं। यह प्रोजेक्ट इनमें से किसी से भी संबद्ध नहीं है।
+उल्लिखित उत्पादों और कंपनियों के नाम उनके संबंधित स्वामियों की
+संपत्ति हैं। यह परियोजना उनमें से किसी से संबद्ध नहीं है।
 
-**gemini-3.8-flash-medium द्वारा फ्रेंच से हिंदी में अनुवादित लेख।**
+**लेख का अनुवाद gpt-5.6-sol के साथ fr से hi में किया गया।**

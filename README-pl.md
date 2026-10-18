@@ -1,11 +1,11 @@
-# Tłumacz Markdown AI-Powered
+# Translator Markdown oparty na AI
 
-🌍 [Français](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [English](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Español](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [中文](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [Deutsch](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [日本語](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [한국어](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [العربية](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [हिन्दी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italiano](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Nederlands](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Português](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Română](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Svenska](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
+🌍 [Francuski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [Angielski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Hiszpański](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [Chiński](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [Niemiecki](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [Japoński](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [Koreański](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [Arabski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [Hindi](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Włoski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Niderlandzki](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Portugalski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Rumuński](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Szwedzki](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
 
 <h4 align="center">📊 Jakość kodu</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Status Quality Gate"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Stan bramki jakości"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Ocena bezpieczeństwa"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Ocena niezawodności"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Ocena łatwości utrzymania"></a>
@@ -14,38 +14,38 @@
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Pokrycie"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Podatności"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Błędy"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Problemy jakości kodu"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Powielone linie (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Zduplikowane wiersze (%)"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Dług techniczny"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Linie kodu"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Liczba wierszy kodu"></a>
 </p>
 <p align="center">
   <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="Odznaka Codacy"></a>
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-Tłumaczy pliki Markdown z jednego języka na inny, zachowując strukturę:
-bloki kodu, kod w tekście, adresy URL, kotwice, tabele i front matter.
-Jedenaście sposobów wywołania modelu — pięć API, cztery subskrypcje bez
-rozliczania według zużycia, dwa routery — oraz opublikowany pomiar tego, co
-każdy model rzeczywiście zachowuje.
+Tłumaczy pliki Markdown z jednego języka na inny, zachowując ich
+strukturę: bloki kodu, kod w tekście, URL-e, kotwice, tabele i front
+matter. Jedenaście sposobów wywoływania modelu — pięć API, cztery subskrypcje bez
+opłat za użycie oraz dwa routery — wraz z opublikowanym pomiarem tego, co każdy
+model rzeczywiście zachowuje.
 
 ## W skrócie
 
 - **Jedenaście ścieżek dostawców**: API OpenAI, Mistral, Claude, Gemini i Grok;
   subskrypcje ChatGPT (Codex), Grok, Google (Antigravity) i Claude (Claude
-  Code) bez rozliczania według zużycia; routery OpenCode (open source, darmowy lub lokalny) i OpenRouter
+  Code) bez opłat za użycie; routery OpenCode (open source, bezpłatny lub lokalny) i OpenRouter
   (ponad 400 modeli).
-- **Żadnych błędów z powodu utraconego tokena**: bloki kodu, kod w tekście,
-  adresy URL, kotwice i cytaty są zastępowane tokenami przed wywołaniem i
-  weryfikowane po powrocie. Jeśli któregoś brakuje, plik nie zostaje zapisany.
-- **Długie dokumenty**: segmentacja według okna kontekstowego modelu.
-- **Tryb `--news`**: chronione angielskie cytaty i flagi zarządzane według
-  języka, dla artykułów przeglądowych.
-- **Tryb `--eco`**: szybkie i tańsze modele.
-- Opcjonalna **nota o tłumaczeniu**, na górze, na dole lub w obu miejscach.
+- **Żadnych fałszywych wyników wskutek utraty tokenu**: bloki kodu, kod w tekście,
+  URL-e, kotwice i cytaty są zastępowane tokenami przed wywołaniem modelu i
+  sprawdzane po otrzymaniu odpowiedzi. Jeśli któregoś brakuje, plik nie jest zapisywany.
+- **Długie dokumenty**: segmentacja zgodnie z oknem kontekstowym modelu.
+- **Tryb `--news`**: chronione angielskie cytaty i flagi obsługiwane według
+  języka na potrzeby artykułów przeglądowych.
+- **Tryb `--eco`**: szybsze i tańsze modele.
+- Opcjonalna **nota o tłumaczeniu** u góry, u dołu lub w obu miejscach.
 
 ## Instalacja
 
@@ -54,19 +54,19 @@ pip install ai-powered-markdown-translator     # ou : pipx install ai-powered-ma
 aipmt --help                                   # ou : python -m aipmt --help
 ```
 
-Python 3.10 lub nowszy. Aby zainstalować z repozytorium, zobacz
-[Współtworzenie](#współpraca).
+Python 3.10 lub nowszy. Instrukcje instalacji z repozytorium znajdują się w sekcji
+[Współtworzenie](#współtworzenie).
 
 ## Konfiguracja
 
-Klucze są odczytywane z trzech miejsc, od najwyższego priorytetu do najniższego;
-każde kolejne uzupełnia tylko to, co poprzednie pozostawiło puste.
+Klucze są odczytywane z trzech miejsc, od najwyższego do najniższego priorytetu;
+każde z nich uzupełnia wyłącznie wartości pozostawione puste przez poprzednie.
 
-|     | Gdzie                                                | Do czego                              |
-| --- | ---------------------------------------------------- | ------------------------------------- |
-| 1   | Zmienne środowiskowe                                 | CI, kontenery, jednorazowe nadpisanie |
-| 2   | `.env` w bieżącym katalogu (lub nadrzędnym)   | klucz specyficzny dla projektu        |
-| 3   | `~/.config/aipmt/.env`                                        | zainstalowany raz, działa wszędzie    |
+|     | Gdzie                                            | Zastosowanie                                  |
+| --- | ----------------------------------------------- | --------------------------------------------- |
+| 1   | Zmienne środowiskowe                            | CI, kontenery, jednorazowe nadpisanie         |
+| 2   | `.env` w bieżącym katalogu (lub nadrzędnym) | klucz właściwy dla danego projektu            |
+| 3   | `~/.config/aipmt/.env`                                  | instalowany raz, obowiązuje wszędzie          |
 
 ```bash
 mkdir -p ~/.config/aipmt
@@ -82,29 +82,29 @@ chmod 600 ~/.config/aipmt/.env
 ```
 
 `GEMINI_API_KEY` jest akceptowany zamiast `GOOGLE_API_KEY`. Plik
-użytkownika jest zgodny z `XDG_CONFIG_HOME` (tylko ścieżka bezwzględna) oraz `%APPDATA%`
-w systemie Windows. Bez klucza polecenie wymienia wszystkie trzy lokalizacje.
+użytkownika korzysta z `XDG_CONFIG_HOME` (wyłącznie ścieżka bezwzględna) oraz `%APPDATA%`
+w systemie Windows. W razie braku klucza polecenie wyświetla wszystkie trzy lokalizacje.
 
-**Plik `.env` projektu nie może ani przekierowywać wywołań, ani wybierać uruchamianego
-programu.** Dostarcza klucze, nigdy cel ani plik binarny: każda
-zmienna w `_BASE_URL`, `_API_BASE`, `_ENDPOINT` lub `_BIN` (`CODEX_BIN`,
+**Plik `.env` projektu nie może ani przekierowywać wywołań, ani wybierać
+uruchamianego programu.** Udostępnia klucze, nigdy miejsce docelowe ani plik wykonywalny:
+wszystkie zmienne w `_BASE_URL`, `_API_BASE`, `_ENDPOINT` lub `_BIN` (`CODEX_BIN`,
 `GROK_BIN`, `OPENCODE_BIN`, `AGY_BIN`), `GROK_HOME`, proxy (`HTTP_PROXY`,
 `HTTPS_PROXY`, `ALL_PROXY`), magazyny certyfikatów (`SSL_CERT_FILE`,
 `SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`) oraz `XDG_CONFIG_HOME` /
-`APPDATA` są w nim ignorowane z ostrzeżeniem. Sklonowane repozytorium nie powinno
-mieć możliwości przejęcia Twojego klucza ani zmuszenia Cię do uruchomienia własnego programu
-przy pierwszym tłumaczeniu. Plik ten jest również odczytywany bez interpolacji:
-`NOM=${OPENAI_API_KEY}` nie kopiuje w nim klucza. Umieść te zmienne w
+`APPDATA` są w nim ignorowane, czemu towarzyszy ostrzeżenie. Sklonowane repozytorium nie może
+przechwycić klucza ani spowodować uruchomienia własnego programu podczas
+pierwszego tłumaczenia. Plik ten jest również odczytywany bez interpolacji:
+`NOM=${OPENAI_API_KEY}` nie kopiuje do niego klucza. Ustaw te zmienne w
 środowisku lub w `~/.config/aipmt/.env`.
 
-Opcjonalne zmienne: `XAI_BASE_URL` (domyślnie `https://api.x.ai/v1`),
+Zmienne opcjonalne: `XAI_BASE_URL` (domyślnie `https://api.x.ai/v1`),
 `CLAUDE_TIMEOUT` (sekundy na wywołanie, domyślnie 900), `CODEX_BIN`, `CODEX_TIMEOUT`
 (domyślnie 600), `GROK_BIN`, `GROK_HOME` (domyślnie `~/.grok`), `GROK_TIMEOUT`
 (domyślnie 900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT` (domyślnie 900),
 `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (domyślnie 600), `OPENROUTER_BASE_URL`
 (wymagany `https://`), `OPENROUTER_TIMEOUT` (domyślnie 900),
-`OPENROUTER_PREFLIGHT_TIMEOUT` (domyślnie 30). Każda z nich jest szczegółowo opisana w
-sekcji swojego dostawcy.
+`OPENROUTER_PREFLIGHT_TIMEOUT` (domyślnie 30). Każdą z nich szczegółowo opisano w
+sekcji odpowiedniego dostawcy.
 
 ## Pierwsze kroki
 
@@ -119,111 +119,115 @@ aipmt --source_dir content/fr --target_dir content/en --source_lang fr --target_
 aipmt --use_gemini --file document.md --target_dir out/ --target_lang ja
 ```
 
-`document.md` przetłumaczony na język hiszpański daje `document-es.md` w `--target_dir`;
-z `--include_model`, `document-es-gpt-5.6-terra.md`. Rozszerzenie zawsze
-staje się `.md` — `article.mdx` daje `article-en.md` — z wyjątkiem
-`--keep_filename`, który zachowuje pierwotną nazwę. Istniejące już tłumaczenie
-jest pomijane bez flagi `--force`.
+`document.md` tłumaczy na język hiszpański, tworząc `document-es.md` w `--target_dir`;
+z `--include_model` powstaje `document-es-gpt-5.6-terra.md`. Rozszerzeniem jest
+zawsze `.md` — `article.mdx` daje `article-en.md` — z wyjątkiem użycia
+`--keep_filename`, które zachowuje oryginalną nazwę. Istniejące już tłumaczenie
+jest pomijane bez `--force`.
 
-Kody wyjścia: `0`, jeśli wszystko się powiodło lub zostało pominięte, `1`, jeśli pozostał plik
-z błędem (lista na standardowym wyjściu błędów), `2`, jeśli problem dotyczy konfiguracji.
-Plik z błędem nigdy nie jest zapisywany, nawet jeśli sam zapis się nie powiedzie:
-zawartość jest zapisywana obok, a następnie zmieniana jest jej nazwa. Wystarczy uruchomić ponownie.
+Kody wyjścia: `0`, jeśli wszystko się powiodło lub zostało pominięte, `1`, jeśli pozostał plik,
+którego przetwarzanie się nie powiodło (lista na standardowym wyjściu błędów), `2`, jeśli przyczyną jest konfiguracja.
+Plik, którego przetwarzanie się nie powiodło, nigdy nie zostaje zapisany, nawet jeśli zawiedzie sam zapis:
+treść jest zapisywana obok, a następnie zmieniana jest nazwa pliku. Wystarczy uruchomić polecenie ponownie.
 
-## Jaki model wybrać
+## Który model wybrać
 
-Zmierzone na dwóch rzeczywistych dokumentach, przetłumaczonych na te same
-czternaście języków przez każdy model. **Liczba oznacza liczbę języków (na
-czternaście), w których tłumaczenie zostało zapisane i w których nic nie różni się od źródła.**
+Pomiary przeprowadzono na dwóch rzeczywistych dokumentach tłumaczonych przez
+każdy model na tych samych czternaście języków. **Liczba oznacza, w ilu spośród
+czternastu języków tłumaczenie zostało zapisane i nic nie różniło się od źródła.**
 
-| Model                | Jak uzyskać dostęp                | Gęsty artykuł przeglądowy | To README   | Co się różni i w ilu językach                                                                                                                                      |
-| -------------------- | --------------------------------- | ------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Gemini 3.8 Flash** | subskrypcja Google (Antigravity)  | ✅ 14/14                  | ✅ 14/14    | nic, w żadnym z dwóch dokumentów                                                                                                                                   |
-| **Gemini 3.7 Flash** | klucz API Google                  | ✅ 14/14                  | ⚠️ 13/14    | 1 język na 14: o jedno pogrubione słowo więcej (ja)                                                                                                                |
-| **Gemini 3.7 Flash** | subskrypcja Google (Antigravity)  | ✅ 14/14                  | ⚠️ 13/14    | 1 język na 14: o jedno pogrubione słowo mniej (ko)                                                                                                                 |
-| **GPT-5.6 Sol**      | subskrypcja ChatGPT lub klucz OpenAI | ✅ 14/14               | ⚠️ 12/14    | 2 języki na 14: o jedno pogrubione słowo mniej (ar, ja)                                                                                                            |
-| **GLM-5.2**          | klucz OpenRouter                  | ✅ 14/14                  | ⚠️ 11/14    | 3 języki na 14: o jedno pogrubione słowo mniej (hi, ja, ko)                                                                                                        |
-| Claude Sonnet 5      | subskrypcja Claude (Claude Code)  | ⚠️ 13/14                  | ⚠️ 13/14    | 1 język na 14 w artykule: o jedno pogrubione słowo więcej (zh); 1 w tym README: wiersz tabeli połączony z poprzednim, ukryty podczas wyświetlania (ar)            |
-| Claude Haiku 4.5     | subskrypcja Claude (Claude Code)  | ⚠️ 11/14                  | ✅ 14/14    | 3 języki w artykule: nagłówek sekcji zmieniony na poziom 1 (en, pl, ro); w tym README nic dla narzędzia porównującego, ale linki wewnętrzne powielone po angielsku |
-| Claude Sonnet 5      | klucz API Anthropic               | ⚠️ 11/14                  | ⚠️ 12/14    | 3 języki w artykule: dodany blok kodu (es, de, hi); 2 w tym README: link bez znaczników formatowania (sv), pogrubione słowo (zh)                                   |
-| Qwen 3.7 Flash       | klucz OpenRouter                  | ❌ 8/14                   | ⚠️ 10/14    | 1 język odrzucony w artykule, 5 innych odbiega od normy; w tym README około czterdziestu słów umieszczonych w `code` (ar)                                  |
-| Grok 4.6             | subskrypcja Grok                  | ❌ 8/14                   | nieoceniony | 5 języków na 14 odrzuconych z powodu braku zwróconego kodu w tekście i adresów URL; holenderski różni się we wszystkim                                             |
-| GPT-OSS 20B          | model lokalny (Ollama)            | ❌ 7/14                   | nieponowiony| 4 języki na 14 odrzucone: model pozostawił w nich fragmenty po francusku, strażnik je zatrzymał                                                                     |
-| MiMo v2.5 (darmowy)  | OpenCode Zen, bez konta           | ❌ 11/14                  | nieponowiony| 1 język odrzucony; utracona sekcja w języku polskim                                                                                                                |
-| Mistral Large        | klucz API Mistral                 | ❌ 5/14                   | ❌ 1/14     | **cała sekcja znika**: 1 język w artykule (hi), 3 w tym README (ar, hi, ko) — oraz 3 języki odrzucone w artykule                                                   |
-| DeepSeek V4 Flash    | klucz OpenRouter                  | ❌ 3/14                   | nieponowiony| 10 języków na 14 odrzuconych; 37 minut na język                                                                                                                    |
-| Claude Opus 5.5      | subskrypcja Claude (Claude Code)  | ❌ 0/14                   | ✅ 14/14    | artykuł odrzucony we wszystkich 14 językach przez mechanizmy zabezpieczające Opusa z powodu wzmianki o biologii; nic w tym README                                 |
+| Model                 | Sposób dostępu                    | Gęsty artykuł przeglądowy | Ten plik README | Co się różni i w ilu językach                                                                                                                                      |
+| --------------------- | --------------------------------- | ------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Gemini 3.8 Flash**  | subskrypcja Google (Antigravity)  | ✅ 14/14                  | ✅ 14/14        | nic w żadnym z dwóch dokumentów                                                                                                                                    |
+| **Claude Sonnet 5.5** | klucz API Anthropic               | ✅ 14/14                  | ✅ 14/14        | nic w żadnym z dwóch dokumentów                                                                                                                                    |
+| **Gemini 3.7 Flash**  | klucz API Google                  | ✅ 14/14                  | ⚠️ 13/14        | 1 język z 14: jedno dodatkowe pogrubione słowo (ja)                                                                                                                |
+| **Gemini 3.7 Flash**  | subskrypcja Google (Antigravity)  | ✅ 14/14                  | ⚠️ 13/14        | 1 język z 14: o jedno pogrubione słowo mniej (ko)                                                                                                                  |
+| **GPT-5.6 Sol**       | subskrypcja ChatGPT lub klucz OpenAI | ✅ 14/14               | ⚠️ 12/14        | 2 języki z 14: o jedno pogrubione słowo mniej (ar, ja)                                                                                                             |
+| **GLM-5.2**           | klucz OpenRouter                  | ✅ 14/14                  | ⚠️ 11/14        | 3 języki z 14: o jedno pogrubione słowo mniej (hi, ja, ko)                                                                                                         |
+| Claude Sonnet 5       | subskrypcja Claude (Claude Code)  | ⚠️ 13/14                  | ⚠️ 13/14        | 1 język z 14 w artykule: jedno dodatkowe pogrubione słowo (zh); 1 w tym README: wiersz tabeli sklejony z poprzednim i niewidoczny podczas wyświetlania (ar)         |
+| Claude Haiku 4.5      | subskrypcja Claude (Claude Code)  | ⚠️ 11/14                  | ✅ 14/14        | 3 języki w artykule: nagłówek sekcji zmieniony na poziom 1 (en, pl, ro); w tym README nic według narzędzia porównującego, ale linki wewnętrzne po angielsku zdublowane |
+| Claude Sonnet 5       | klucz API Anthropic               | ⚠️ 11/14                  | ⚠️ 12/14        | 3 języki w artykule: pojawił się blok kodu (es, de, hi); 2 w tym README: link bez znaczników (sv), pogrubione słowo (zh)                                           |
+| Claude Haiku 4.5      | klucz API Anthropic               | ⚠️ 7/14                   | ✅ 14/14        | 7 języków w artykule: nagłówek sekcji zmieniony na poziom 1 — w wersji japońskiej pozostał po francusku; nic w tym README                                          |
+| Claude Haiku 5.5      | klucz API Anthropic               | ⚠️ 11/14                  | ❌ 12/14        | 3 języki w artykule: zmieniono poziom nagłówka sekcji lub go zdublowano (ja, ko, zh); w tym README odrzucono 2 języki z powodu utraty kodu w tekście (ar, hi)       |
+| Qwen 3.7 Flash        | klucz OpenRouter                  | ❌ 8/14                   | ⚠️ 10/14        | 1 język odrzucony w artykule, 5 innych wykazuje różnice; w tym README około czterdziestu słów umieszczono w `code` (ar)                                    |
+| Grok 4.6              | subskrypcja Grok                  | ❌ 8/14                   | bez oceny       | 5 języków z 14 odrzucono z powodu niezwrócenia kodu w tekście i URL-i; wersja niderlandzka różni się w całości                                                     |
+| GPT-OSS 20B           | model lokalny (Ollama)            | ❌ 7/14                   | bez ponownego pomiaru | 4 języki z 14 odrzucono: model pozostawiał w nich fragmenty po francusku, więc mechanizm ochronny je zatrzymał                                               |
+| MiMo v2.5 (bezpłatny) | OpenCode Zen, bez konta           | ❌ 11/14                  | bez ponownego pomiaru | 1 język odrzucony; w polskiej wersji utracono sekcję                                                                                                        |
+| Mistral Large         | klucz API Mistral                 | ❌ 5/14                   | ❌ 1/14         | **znika cała sekcja**: w 1 języku artykułu (hi), w 3 językach tego README (ar, hi, ko) — ponadto w artykule odrzucono 3 języki                                    |
+| DeepSeek V4 Flash     | klucz OpenRouter                  | ❌ 3/14                   | bez ponownego pomiaru | 10 języków z 14 odrzucono; 37 minut na język                                                                                                                |
+| Claude Opus 5.5       | subskrypcja Claude (Claude Code)  | ❌ 0/14                   | ✅ 14/14        | artykuł odrzucony we wszystkich 14 językach przez mechanizmy ochronne Opus z powodu krótkiej wiadomości biologicznej; nic w tym README                            |
 
-|     | Co oznacza symbol                                                                                                                                                                                     |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✅  | wszystkie czternaście języków przetłumaczonych i nic nie różni się od źródła                                                                                                                          |
-| ⚠️  | wszystkie czternaście języków przetłumaczonych; to, co się różni, to **formatowanie** — pogrubione słowo, `code`, link tracący nawiasy kwadratowe. Nie brakuje żadnego tekstu, adresu URL, bloku kodu ani sekcji |
-| ❌  | co najmniej jeden język nie mógł zostać przetłumaczony — plik został odrzucony, niezapisany — **lub** w zapisanym pliku brakuje zawartości                                                            |
+|     | Znaczenie symbolu                                                                                                                                                                                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅  | przetłumaczono wszystkie czternaście języków i nic nie różni się od źródła                                                                                                                              |
+| ⚠️  | przetłumaczono wszystkie czternaście języków; różnice dotyczą **znaczników** — pogrubionego słowa, `code`, linku tracącego nawiasy kwadratowe. Nie brakuje żadnego tekstu, URL-a, bloku kodu ani sekcji |
+| ❌  | co najmniej jednego języka nie udało się przetłumaczyć — plik został odrzucony i niezapisany — **lub** w zapisanym pliku brakuje treści                                                                  |
 
 Najważniejsze wnioski:
 
-- **Odrzucone tłumaczenie to nie to samo co uszkodzone tłumaczenie.** Kiedy po powrocie
-  brakuje tokena, plik nie jest zapisywany, a język liczy się jako
-  odrzucony. To właśnie przydarzyło się Grokowi w artykule: cztery fragmenty kodu w tekście i
-  trzy adresy URL utracone już w pierwszym segmencie w pięciu pismach nielacińskich.
+- **Odrzucone tłumaczenie nie jest uszkodzonym tłumaczeniem.** Jeśli po otrzymaniu
+  odpowiedzi brakuje tokenu, plik nie zostaje zapisany, a język jest liczony jako
+  odrzucony. Tak dzieje się w przypadku Grok w artykule: cztery fragmenty kodu w tekście i
+  trzy URL-e zostają utracone już w pierwszym segmencie w pięciu systemach pisma niełacińskiego.
 - **Model może odrzucić cały dokument z powodu jednego zdania.** Opus 5.5
-  tłumaczy to README bez żadnych odchyleń, ale ani jednego artykułu przeglądowego: jego
-  mechanizmy zabezpieczające zatrzymują odpowiedź na krótkiej notatce biologicznej. Plik nie zostaje
-  zapisany, a aipmt wyjaśnia dlaczego.
-- **Ta siatka ochronna nie obejmuje nagłówków, tabel, front matter ani
-  tekstu.** Model, który usuwa sekcję, zwraca plik, który narzędzie zapisuje
-  bez problemu — tak jest w przypadku Mistrala. Elementy te nie mogą zostać
-  zastąpione tokenem, a obecne zabezpieczenia ich nie kontrolują;
+  tłumaczy ten plik README bez żadnych różnic, ale nie tłumaczy żadnego artykułu przeglądowego: jego
+  mechanizmy ochronne zatrzymują odpowiedź na krótkiej wiadomości biologicznej. Plik nie zostaje
+  zapisany, a aipmt podaje przyczynę.
+- **Ta siatka bezpieczeństwa nie obejmuje nagłówków, tabel, front matter ani
+  tekstu.** Model, który usuwa sekcję, zwraca plik zapisywany przez narzędzie
+  bez sprzeciwu — tak dzieje się w przypadku Mistral. Tych elementów nie można
+  zastąpić tokenem, a obecne mechanizmy ochronne ich nie sprawdzają;
   `scripts/compare_structure.py` wykrywa utraconą sekcję, ale dopiero po fakcie.
 - **Grok nie ma oceny dla tego README**: jego sesja CLI wygasła po dwunastu
-  językach, z czego jedenaście było bez odchyleń. Przerwany przebieg testów nie podlega ocenie.
+  językach, z których jedenaście nie wykazywało różnic. Przerwanej kampanii nie ocenia się.
 - **Gęstość dokumentu ma większe znaczenie niż język.** Grok radzi sobie ze
-  zwykłymi plikami README i gubi się przy artykule przeładowanym linkami, w tym w
-  języku niderlandzkim.
+  zwykłymi plikami README, ale zawodzi w artykule pełnym linków, także w języku
+  niderlandzkim.
 
-Daty i dokumenty: kolumna „To README” została zmierzona 9 września 2026 r.
-na zamrożonej rewizji tego pliku (785 wierszy, 285 fragmentów kodu w tekście, 89 wierszy
-tabeli), modyfikowanej od tego czasu — z wyjątkiem wierszy Antigravity i Claude Code,
-zmierzonych 26 września na rewizji opublikowanej z wersją 1.14.0, krótszej
-(600 wierszy, 257 fragmentów kodu w tekście, 85 wierszy tabeli). Kolumna „Gęsty artykuł
-przeglądowy” pochodzi z testów z 4 i 5 września na artykule liczącym 589
-wierszy, z wyjątkiem wiersza Grok, zmierzonego ponownie 9 września na innym wydaniu tego
-samego przeglądu, oraz wierszy Antigravity i Claude Code, zmierzonych 26 września
-na tym samym artykule. Pełne tabele, czasy trwania i protokół znajdują się w
-[Szczegółowych pomiarach](#szczegółowe-pomiary).
-
+Daty i dokumenty: kolumnę „Ten plik README” zmierzono 9 września 2026 r.
+na ustalonej rewizji tego pliku (785 wierszy, 285 fragmentów kodu w tekście, 89 wierszy
+tabel), od tamtej pory zmodyfikowanej — z wyjątkiem wierszy Antigravity i Claude Code,
+zmierzonych 26 września na rewizji opublikowanej z wersją 1.14.0, która jest krótsza
+(600 wierszy, 257 fragmentów kodu w tekście, 85 wierszy tabel), oraz wierszy Claude
+Sonnet 5.5, Haiku 5.5 i Haiku 4.5 przez API, zmierzonych 18 października na
+tej samej rewizji. Kolumna „Gęsty artykuł przeglądowy” pochodzi z kampanii z
+4 i 5 września przeprowadzonej na artykule liczącym 589 wierszy, z wyjątkiem wiersza Grok, zmierzonego ponownie
+9 września na innym wydaniu tego samego przeglądu, wierszy Antigravity i
+Claude Code, zmierzonych 26 września na tym samym artykule, oraz tych trzech wierszy
+Claude, zmierzonych 18 października. Pełne tabele, czasy trwania i protokół znajdują się
+w sekcji [Szczegółowe pomiary](#szczegółowe-pomiary).
 ## Wszystkie opcje
 
-| Opcja                    | Opis                                                                                                          |
+| Opcja                   | Opis                                                                                                   |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `--file`                 | Pojedynczy plik Markdown do przetłumaczenia (alternatywa dla `--source_dir`)                                 |
-| `--source_dir`           | Katalog źródłowy zawierający pliki Markdown (domyślnie: `content/posts`)                                       |
+| `--file`                 | Pojedynczy plik Markdown do przetłumaczenia (alternatywa dla `--source_dir`)                                             |
+| `--source_dir`           | Katalog źródłowy zawierający pliki Markdown (domyślnie: `content/posts`)                                   |
 | `--target_dir`           | Katalog wyjściowy dla przetłumaczonych plików (domyślnie: `traductions_en`)                                    |
-| `--source_lang`          | Język źródłowy (domyślnie: `fr`)                                                                    |
-| `--target_lang`          | Język docelowy (domyślnie: `en`)                                                                   |
-| `--model`                | Konkretny model do użycia                                                                                     |
-| `--eco`                  | Użyj modeli ekonomicznych                                                                                     |
-| `--use_mistral`          | Użyj API Mistral AI                                                                                           |
-| `--use_claude`           | Użyj API Claude                                                                                               |
-| `--use_gemini`           | Użyj API Gemini                                                                                               |
-| `--use_grok`             | Użyj API xAI (Grok) — wymaga `XAI_API_KEY`                                                                   |
-| `--use_codex`            | Użyj CLI Codex w ramach limitu subskrypcji ChatGPT                                                            |
-| `--use_grok_cli`         | Użyj CLI Grok w ramach limitu subskrypcji Grok                                                                |
-| `--use_antigravity`      | Użyj CLI Antigravity (`agy`) w ramach limitu subskrypcji Google AI Pro lub Ultra                     |
-| `--use_claude_code`      | Użyj CLI Claude Code (`claude -p`) w ramach limitu subskrypcji Claude Pro lub Max                          |
-| `--use_opencode`         | Użyj OpenCode (open source) z dostawcą skonfigurowanym w OpenCode; wymaga `--model provider/modèle`                      |
-| `--use_openrouter`       | Użyj OpenRouter — wymaga `OPENROUTER_API_KEY` i `--model fournisseur/modèle`                                                      |
-| `--force`                | Wymuś ponowne tłumaczenie                                                                                     |
-| `--keep_filename`        | Zachowaj oryginalną nazwę pliku                                                                                |
-| `--news`                 | Tryb aktualności: chroni cytaty w EN, obsługuje flagi według języka                                           |
-| `--add_translation_note` | Dodaj notatkę o tłumaczeniu                                                                                   |
-| `--note_position`        | Pozycja notatki: `top`, `bottom` (domyślnie) lub `both`                                |
-| `--note_format`          | Format notatki: `legacy` (domyślnie, pogrubiony akapit) lub `marker`                           |
-| `--include_model`        | Dołącz nazwę modelu w pliku wyjściowym                                                                        |
-| `--reasoning_effort`     | Poziom rozumowania GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`  |
+| `--source_lang`          | Język źródłowy (domyślnie: `fr`)                                                                                  |
+| `--target_lang`          | Język docelowy (domyślnie: `en`)                                                                                   |
+| `--model`                | Konkretny model do użycia                                                                                  |
+| `--eco`                  | Użyj modeli ekonomicznych                                                                              |
+| `--use_mistral`          | Użyj API Mistral AI                                                                                     |
+| `--use_claude`           | Użyj API Claude                                                                                         |
+| `--use_gemini`           | Użyj API Gemini                                                                                         |
+| `--use_grok`             | Użyj API xAI (Grok) — wymaga `XAI_API_KEY`                                                           |
+| `--use_codex`            | Użyj CLI Codex w ramach limitu subskrypcji ChatGPT                                                    |
+| `--use_grok_cli`         | Użyj CLI Grok w ramach limitu subskrypcji Grok                                                        |
+| `--use_antigravity`      | Użyj CLI Antigravity (`agy`) w ramach limitu subskrypcji Google AI Pro lub Ultra                       |
+| `--use_claude_code`      | Użyj CLI Claude Code (`claude -p`) w ramach limitu subskrypcji Claude Pro lub Max                      |
+| `--use_opencode`         | Użyj OpenCode (open source) z dostawcą skonfigurowanym w OpenCode; wymaga `--model provider/modèle` |
+| `--use_openrouter`       | Użyj OpenRouter — wymaga `OPENROUTER_API_KEY` i `--model fournisseur/modèle`                          |
+| `--force`                | Wymuś ponowne tłumaczenie                                                                                       |
+| `--keep_filename`        | Zachowaj oryginalną nazwę pliku                                                                          |
+| `--news`                 | Tryb wiadomości: chroni cytaty w języku angielskim, obsługuje flagi według języka                                      |
+| `--add_translation_note` | Dodaj notę dotyczącą tłumaczenia                                                                                |
+| `--note_position`        | Pozycja noty: `top`, `bottom` (domyślnie) lub `both`                                                     |
+| `--note_format`          | Format noty: `legacy` (domyślnie, pogrubiony akapit) lub `marker`                                            |
+| `--include_model`        | Uwzględnij nazwę modelu w pliku wyjściowym                                                            |
+| `--reasoning_effort`     | Poziom rozumowania GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-Dziewięć flag `--use_*` wzajemnie się wyklucza: połączenie dwóch z nich zostanie
-odrzucone.
+Dziewięć flag `--use_*` wzajemnie się wyklucza: połączenie dwóch jest
+odrzucane.
 
 ## Dostawcy
 
@@ -237,26 +241,26 @@ aipmt --use_gemini  --source_dir content/fr --target_dir content/ja --target_lan
 aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lang pt
 ```
 
-`--eco` przełącza na poziom ekonomiczny każdego dostawcy.
+`--eco` przełącza na ekonomiczny poziom każdego dostawcy.
 
-| Dostawca    | Jakość (domyślnie)                                    | Ekonomiczny (`--eco`)     |
-| ----------- | ----------------------------------------------------- | --------------------------------- |
-| OpenAI      | `gpt-5.6-terra`                                       | `gpt-5.6-luna`                   |
-| Claude      | `claude-sonnet-5`                                     | `claude-haiku-4-5`                   |
-| Mistral     | `mistral-large-latest`                                | `mistral-small-latest`                   |
-| Gemini      | `gemini-3.7-flash`                                    | `gemini-3.1-flash-lite`                  |
-| Codex       | `gpt-5.6-sol` (również `terra` i `luna` przez `--model`) | `gpt-5.6-luna`                   |
-| Grok API    | `grok-4.6`                                            | `grok-4.3`                   |
-| Grok CLI    | `grok-4.6`                                            | `grok-4.5`                   |
-| Antigravity | `gemini-3.8-flash-medium`                             | `gemini-3.7-flash-low`                   |
-| Claude Code | `sonnet`, effort `low`                                | to samo — `--eco` bez wpływu |
-| OpenCode    | `--model provider/modèle` wymagany                    | to samo — `--eco` bez wpływu |
-| OpenRouter  | `--model fournisseur/modèle` wymagany                 | to samo — `--eco` bez wpływu |
+| Dostawca    | Jakość (domyślnie)                                      | Ekonomiczny (`--eco`)      |
+| ----------- | ----------------------------------------------------- | ------------------------- |
+| OpenAI      | `gpt-5.6-terra`                                       | `gpt-5.6-luna`            |
+| Claude      | `claude-sonnet-5-5`                                   | `claude-haiku-5-5`        |
+| Mistral     | `mistral-large-latest`                                | `mistral-small-latest`    |
+| Gemini      | `gemini-3.7-flash`                                    | `gemini-3.1-flash-lite`   |
+| Codex       | `gpt-5.6-sol` (także `terra` i `luna` przez `--model`) | `gpt-5.6-luna`            |
+| Grok API    | `grok-4.6`                                            | `grok-4.3`                |
+| Grok CLI    | `grok-4.6`                                            | `grok-4.5`                |
+| Antigravity | `gemini-3.8-flash-medium`                             | `gemini-3.7-flash-low`    |
+| Claude Code | `sonnet`, poziom `low`                                | bez zmian — `--eco` bez efektu |
+| OpenCode    | `--model provider/modèle` wymagane                 | bez zmian — `--eco` bez efektu |
+| OpenRouter  | `--model fournisseur/modèle` wymagane              | bez zmian — `--eco` bez efektu |
 
 ### W ramach subskrypcji ChatGPT: `--use_codex`
 
-Steruje oficjalnym CLI Codex: tłumaczenie jest rozliczane z limitu
-subskrypcji ChatGPT, bez klucza API i opłat za użycie.
+Steruje oficjalnym CLI Codex: tłumaczenie jest odliczane od limitu
+subskrypcji ChatGPT, bez klucza API ani rozliczeń za użycie.
 
 ```bash
 pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo), ou : npm install -g @openai/codex
@@ -269,23 +273,23 @@ aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 - `OPENAI_API_KEY` i `CODEX_API_KEY` są usuwane ze środowiska
   podprocesu: obecność klucza nigdy nie powoduje przełączenia na API.
 - Każdy segment kosztuje co najmniej jedną „wiadomość” z 5-godzinnego okna — dwie,
-  jeśli jego walidacja się nie powiedzie i nastąpi ponowna próba. OpenAI szacunkowo podaje
-  250–2000 wiadomości/5 godz. dla `gpt-5.6-luna` (`--eco`) oraz
+  jeśli jego walidacja zakończy się niepowodzeniem i zostanie ponowiona. OpenAI podaje szacunkowo
+  250–2 000 wiadomości/5 godz. dla `gpt-5.6-luna` (`--eco`) oraz
   10–100 dla `gpt-5.6-sol` w planie Plus.
-- `--model gpt-5.6-terra` i `--model gpt-5.6-luna` również przechodzą przez
-  subskrypcję. Model, do którego konto nie ma uprawnień, zwraca błąd 400 „model is
+- `--model gpt-5.6-terra` i `--model gpt-5.6-luna` również korzystają z
+  subskrypcji. Model, do którego konto nie ma dostępu, zwraca błąd 400 „model is
   not supported when using Codex with a ChatGPT account”.
-- Wolniejsze niż API, a różnica rośnie wraz z rozmiarem dokumentu: dla tego README
-  mediana wynosi 6 min 46 s na język przy użyciu `gpt-5.6-sol`, w porównaniu z 36 s dla
+- Wolniejsze niż API, a różnica rośnie wraz z długością dokumentu: dla tego README
+  mediana wynosi 6 min 46 s na język z `gpt-5.6-sol`, wobec 36 s dla
   `gemini-3.7-flash`.
-- Odrzucane w środowisku CI (gdy zdefiniowano `CI` lub `GITHUB_ACTIONS`): subskrypcja uwierzytelnia się
-  za pomocą osobistego pliku sesji, który nie powinien znajdować się na współdzielonym
+- Odrzucane w CI (gdy zdefiniowano `CI` lub `GITHUB_ACTIONS`): subskrypcja uwierzytelnia się
+  przy użyciu osobistego pliku sesji, który nie powinien znajdować się na współdzielonym
   runnerze.
 - Zmienne: `CODEX_BIN`, `CODEX_TIMEOUT` (sekundy na segment, domyślnie 600).
 
 ### W ramach subskrypcji Grok: `--use_grok_cli`
 
-Ta sama zasada w przypadku oficjalnego CLI Grok Build, w ramach subskrypcji SuperGrok lub
+Ta sama zasada obowiązuje w przypadku oficjalnego CLI Grok Build, w ramach subskrypcji SuperGrok lub
 X Premium+.
 
 ```bash
@@ -294,26 +298,26 @@ grok login                                      # ou : grok login --device-code
 aipmt --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
 ```
 
-- **Słabsza izolacja niż w Codex.** Piaskownica systemowa (sandbox OS) Groka nie działa
-  na wielu współczesnych maszynach z systemem Linux (AppArmor, gniazda runtime
+- **Słabsza izolacja niż w Codex.** Sandbox systemu operacyjnego Grok nie działa
+  na wielu nowszych stanowiskach z Linuxem (AppArmor, sockety środowiska uruchomieniowego
   kontenerów), a profil, którego nie można zastosować, uruchamia się po cichu bez
-  izolacji. Skrypt nie wymaga więc domyślnie żadnego profilu, informuje o tym i
-  opiera się na regułach `--deny` narzędzia CLI, w tym regule typu catch-all `*` — jedynej
-  warstwie, która odmawia uruchomienia, zamiast po cichu usuwać ochronę.
-  `GROK_TRANSLATE_SANDBOX=read-only` wymaga piaskownicy systemowej, a uruchomienie
-  kończy się niepowodzeniem, jeśli maszyna nie może jej zapewnić.
-- Limit jest tygodniowy, współdzielony z Chat, Imagine i Voice, i żadne
-  polecenie nie pozwala go odczytać: partia zadań może wyczerpać limit na konwersacje
+  izolacji. Dlatego skrypt domyślnie nie wymaga żadnego profilu, informuje o tym i
+  opiera się na regułach `--deny` CLI, w tym regule catch-all `*` — jedynej
+  warstwie, która odmawia uruchomienia, zamiast bez ostrzeżenia usuwać ochronę.
+  `GROK_TRANSLATE_SANDBOX=read-only` wymaga sandboxa systemu operacyjnego, a uruchomienie
+  kończy się niepowodzeniem, jeśli maszyna nie może go zapewnić.
+- Limit jest tygodniowy, współdzielony z Chat, Imagine i Voice, a żadna
+  komenda nie pozwala go odczytać: zadanie wsadowe może zużyć część limitu przeznaczonego na rozmowy
   bez żadnego ostrzeżenia.
 - Zmienne: `GROK_BIN`, `GROK_HOME` (katalog CLI, domyślnie `~/.grok`),
   `GROK_TIMEOUT` (domyślnie 900), `GROK_TRANSLATE_SANDBOX`.
 
 ### W ramach subskrypcji Google: `--use_antigravity`
 
-Ta sama zasada w przypadku `agy`, oficjalnego CLI Antigravity: dla osób opłacających Google
-AI Pro lub Ultra tłumaczenie jest rozliczane z limitu subskrypcji zamiast
-naliczania opłat za tokeny. To jedyna droga do tego limitu: Gemini CLI nie
-obsługuje już tych kont od 18 czerwca 2026 roku
+Ta sama zasada obowiązuje w przypadku `agy`, oficjalnego CLI Antigravity: dla osób opłacających Google
+AI Pro lub Ultra tłumaczenie jest odliczane od limitu subskrypcji zamiast
+rozliczania za tokeny. To jedyny sposób korzystania z tego limitu: Gemini CLI
+nie obsługuje już tych kont od 18 czerwca 2026 r.
 ([ogłoszenie](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)),
 a SDK Antigravity akceptuje wyłącznie klucz API lub projekt Google Cloud.
 
@@ -324,154 +328,153 @@ aipmt --use_antigravity --file README.md --target_dir . --target_lang en
 agy -p /usage --output-format json   # quota restant, sans en consommer
 ```
 
-- **Żadna płatna ścieżka nie pozostaje otwarta.** agy otrzymuje z Twojego
-  środowiska jedynie zamkniętą listę zmiennych — `PATH`, język i strefę czasową,
-  terminal, tożsamość, proxy i certyfikaty, magistralę sesji — i żadnych kluczy:
-  kilka z jego zmiennych potrafi przełączyć wywołanie bez wyświetlania czegokolwiek (zmierzone:
-  jedna wysyła dokument do zewnętrznej bramy, inna do płatnego projektu
-  Google Cloud), a w liście blokowanych zmiennych przy każdym przeglądzie czegoś brakowało.
-  Przed jakimkolwiek segmentem polecenie `agy -p /config`, które nie zużywa limitu, musi wykazać,
-  że płatne kredyty AI są wyłączone, bez klucza API ani projektu Google Cloud — brakujące
-  ustawienie oznacza odmowę —, w przeciwnym razie nic nie zostanie przetłumaczone; log każdego
-  wywołania musi następnie potwierdzać subskrypcję (`authMethod=consumer`), w przeciwnym razie
-  odpowiedź zostanie odrzucona.
-- **Izolacja.** Każde wywołanie działa w prywatnym i tymczasowym katalogu
-  domowym z agentem tłumaczącym pozbawionym narzędzi: Twoje ustawienia, reguły,
-  wtyczki, serwery MCP i hooki agy nie mają do niego dostępu, nic nie jest dodawane do Twojej
-  historii, a dane logowania pozostają w pęku kluczy, którego aipmt nigdy nie czyta.
-  W przypadku nieznalezienia agenta agy po cichu wraca do swojego agenta programistycznego
-  i jego narzędzi: pełna linia w logu musi potwierdzić prawidłowego agenta — dokument
-  cytujący ten komunikat jej nie zastępuje —, w przeciwnym razie następuje odmowa.
-- **Platformy**: Linux, w sesji posiadającej pęk kluczy (magistrala sesji
-  D-Bus, Secret Service); macOS jest akceptowany, choć nie był tam mierzony. Odrzucane
-  w systemie Windows, gdzie agy nie czyta zmiennych izolujących każde wywołanie, oraz
-  w systemie Linux bez magistrali sesyjnej — sesja SSH, kontener, serwer: agy przechowuje
-  tam swój token w pliku w katalogu `~/.gemini`, co izolacja maskuje. Odmowa
-  następuje przed jakimkolwiek uruchomieniem, wraz z podaniem przyczyny, zamiast minutowego
+- **Żadna płatna droga nie pozostaje otwarta.** agy otrzymuje z Twojego
+  środowiska wyłącznie zamkniętą listę zmiennych — `PATH`, język i strefę czasową,
+  terminal, tożsamość, proxy i certyfikaty, magistralę sesji — oraz żadnych kluczy:
+  kilka jego zmiennych przełącza wywołanie bez wyświetlania jakiejkolwiek informacji (zmierzono:
+  jedna wysyła dokument do bramy podmiotu trzeciego, inna do płatnego projektu
+  Google Cloud), a lista odmów za każdym przeglądem pomijała kolejne przypadki.
+  Przed każdym segmentem `agy -p /config`, które nie zużywa żadnego limitu, musi wskazać,
+  że płatne kredyty AI są wyłączone, bez klucza API ani projektu Google Cloud —
+  brak ustawienia oznacza odmowę — w przeciwnym razie nic nie zostanie przetłumaczone;
+  dziennik każdego wywołania musi następnie potwierdzić użycie subskrypcji
+  (`authMethod=consumer`), inaczej odpowiedź zostanie odrzucona.
+- **Izolacja.** Każde wywołanie działa w prywatnym, jednorazowym katalogu domowym,
+  z agentem tłumaczącym bez narzędzi: Twoje ustawienia, reguły,
+  pluginy, serwery MCP i hooki agy nie trafiają do niego, nic nie jest dodawane do Twojej
+  historii, a dane logowania pozostają w pęku kluczy, którego aipmt nigdy nie odczytuje.
+  Jeśli agent nie zostanie znaleziony, agy po cichu przełącza się na swojego agenta kodującego
+  i jego narzędzia: cały wiersz dziennika musi potwierdzać właściwego agenta — dokument,
+  który cytuje ten komunikat, nie może go zastąpić — w przeciwnym razie następuje odmowa.
+- **Platformy**: Linux w sesji z pękiem kluczy (magistrala sesji
+  D-Bus, Secret Service); macOS jest obsługiwany, choć nie został na nim przetestowany.
+  Odrzucane w systemie Windows, gdzie agy nie odczytuje zmiennych izolujących każde wywołanie,
+  oraz w Linuxie bez magistrali sesji — sesja SSH, kontener, serwer: agy
+  zapisuje tam swój token w pliku w `~/.gemini`, który zostaje ukryty przez izolację.
+  Odmowa następuje przed uruchomieniem czegokolwiek i podaje przyczynę, zamiast powodować minutę
   oczekiwania na kod logowania.
-- **Modele**: modele z `agy models`. Modele Gemini mają poziom rozumowania w nazwie
+- **Modele**: modele z `agy models`. Modele Gemini zawierają poziom rozumowania w nazwie
   (`gemini-3.8-flash-medium`…): nazwa bez sufiksu jest odrzucana przed wywołaniem,
-  a `--reasoning_effort` nie ma wpływu. Domyślnie `gemini-3.8-flash-medium`,
-  a `gemini-3.7-flash-low` w `--eco`; serie testowe, w których je ustalono,
-  opisano w sekcji [Mesures détaillées](#szczegółowe-pomiary). Claude i GPT-OSS
-  mają własny, znacznie mniejszy limit: około 1% 5-godzinnego okna na
-  zmierzone wywołanie, w porównaniu z 0,05% w przypadku Flash.
-- **Limit**: według grupy, jedno 5-godzinne okno i jedno tygodniowe, proporcjonalnie
-  do kosztu w tokenach. Zmierzone na koncie autora: około
-  16 punktów z 5-godzinnego okna na milion znaków źródłowych w
-  `gemini-3.8-flash-medium`, 14 w `gemini-3.7-flash-medium` i 7 do 8 przy
-  niskim poziomie rozumowania — README o objętości 40 000 znaków kosztuje więc nieco ponad
-  pół punktu. Tygodniowy limit zależy natomiast od planu. Ponawianie prób odbywa się zgodnie
-  z tym, co agy zgłasza jako możliwe do ponowienia; w przeciwnym razie wyczerpane okno nigdy nie
-  jest ponawiane: powoduje błąd każdego pliku aż do zresetowania,
-  które wyświetla `/usage`.
-- **Wolniejsze niż API**: w przypadku gęstego artykułu z pomiarami mediana wynosi 3 min 59 s na
-  język w `gemini-3.8-flash-medium` i 3 min 14 s w
-  `gemini-3.7-flash-medium`, w porównaniu z 1 min 18 s dla Gemini 3.7 Flash przez API.
-- **Przerwanie**: Ctrl-C lub zamknięcie terminala zatrzymuje agy wraz z
-  poleceniem, zamiast pozwalać mu dokończyć działanie na Twoim limicie; to samo
-  dotyczy Codex, Grok CLI i OpenCode. W przypadku `nohup` tłumaczenie jest kontynuowane.
-- Odrzucane w środowisku CI (gdy zdefiniowano `CI` lub `GITHUB_ACTIONS`): sesja logowania znajduje się
-  w osobistym pęku kluczy. Na runnerze należy użyć `--use_gemini` z `GOOGLE_API_KEY`.
-- Zmienne: `AGY_BIN` (w przeciwnym razie `PATH`, następnie `~/.local/bin/agy`),
+  a `--reasoning_effort` nie ma efektu. Domyślnie używany jest `gemini-3.8-flash-medium`,
+  a w `--eco` — `gemini-3.7-flash-low`; kampanie, w których je ustalono, opisano
+  w sekcji [Szczegółowe pomiary](#szczegółowe-pomiary). Claude i GPT-OSS
+  mają własny, znacznie mniejszy limit: około 1% 5-godzinnego okna
+  na zmierzone wywołanie, wobec 0,05% w przypadku Flash.
+- **Limit**: dla każdej grupy obowiązuje okno 5-godzinne oraz tygodniowe,
+  proporcjonalnie do kosztu w tokenach. Pomiar na koncie autora: około
+  16 punktów 5-godzinnego okna na milion znaków źródłowych dla
+  `gemini-3.8-flash-medium`, 14 dla `gemini-3.7-flash-medium` oraz od 7 do 8 przy
+  niskim poziomie — README zawierający 40 000 znaków kosztuje więc nieco ponad
+  pół punktu. Limit tygodniowy zależy natomiast od poziomu subskrypcji. Ponowienie następuje
+  zgodnie z tym, co agy określa jako możliwe do ponowienia; jeśli brak takiej informacji,
+  wyczerpane okno nigdy nie jest ponawiane: powoduje niepowodzenie każdego pliku aż do
+  resetu wskazywanego przez `/usage`.
+- **Wolniejsze niż API**: dla obszernego artykułu z pomiarami mediana wynosi 3 min 59 s na
+  język z `gemini-3.8-flash-medium` i 3 min 14 s z
+  `gemini-3.7-flash-medium`, wobec 1 min 18 s dla Gemini 3.7 Flash przez API.
+- **Przerwanie**: Ctrl-C lub zamknięcie terminala zatrzymują agy wraz z
+  komendą, zamiast pozwalać mu dokończyć działanie kosztem Twojego limitu; tak samo jest w
+  przypadku Codex, Grok CLI i OpenCode. W `nohup` tłumaczenie jest kontynuowane.
+- Odrzucane w CI (gdy zdefiniowano `CI` lub `GITHUB_ACTIONS`): dane logowania znajdują się w
+  osobistym pęku kluczy. Na runnerze użyj `--use_gemini` z `GOOGLE_API_KEY`.
+- Zmienne: `AGY_BIN` (w przeciwnym razie `PATH`, a następnie `~/.local/bin/agy`),
   `AGY_TIMEOUT` (sekundy na segment, łącznie z uruchomieniem, domyślnie 900).
 
-**Warunki korzystania: ponosisz odpowiedzialność za swoje konto.**
-[Warunki korzystania z Antigravity](https://antigravity.google/terms) (sekcja 6) oraz
-[FAQ](https://antigravity.google/docs/faq/) zabraniają dostępu do usługi
-za pomocą oprogramowania innych firm z użyciem logowania Antigravity — wymieniono tam
-Claude Code, OpenClaw i OpenCode — pod rygorem zawieszenia konta. aipmt
-nie odczytuje ani nie wykorzystuje ponownie tokena: uruchamia oficjalny plik binarny w
+**Warunki korzystania: odpowiedzialność spoczywa na właścicielu konta.**
+[Warunki Antigravity](https://antigravity.google/terms) (sekcja 6) oraz jego
+[FAQ](https://antigravity.google/docs/faq/) zabraniają uzyskiwania dostępu do usługi
+za pomocą oprogramowania podmiotu trzeciego przy użyciu danych logowania Antigravity — wymieniono tam
+Claude Code, OpenClaw i OpenCode — pod groźbą zawieszenia konta. aipmt
+nie odczytuje ani nie wykorzystuje ponownie tokenu: uruchamia oficjalny plik wykonywalny w
 [trybie headless](https://antigravity.google/docs/cli/headless/), który Google
-dokumentuje dla skryptów i CI. Przedstawiciel Google uznał za „standardowe”
-uruchamianie `agy -p` z lokalnego skryptu na własne potrzeby
+dokumentuje na potrzeby skryptów i CI. Pracownik Google uznał uruchamianie
+`agy -p` z lokalnego skryptu na potrzeby własnej pracy za „standardową” praktykę
 ([oficjalne forum, 25 września 2026 r., odpowiedź niewiążąca](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829));
-żaden oficjalny dokument nie rozstrzyga jednoznacznie kwestii narzędzia dystrybuowanego w taki sposób jak to.
+żaden dokument nie rozstrzyga przypadku dystrybuowanego narzędzia takiego jak to.
 
-**Tylko dokumenty publiczne.** Zgodnie z sekcją 5 tych samych warunków cała
-wymiana danych — prompty, odpowiedzi, metadane — może służyć do ulepszania
-produktów oraz uczenia maszynowego Google i może być przeglądana przez
-ludzi, również w przypadku płatnej subskrypcji. Rezygnacja wymaga ustawienia
-`enableTelemetry` o nieudokumentowanym działaniu, którego aipmt nie konfiguruje; Twoje ustawienia
-agy nie przenoszą się do jego izolowanego środowiska. Nie przesyłaj tą drogą żadnych poufnych informacji.
-
+**Tylko dokumenty publiczne.** Zgodnie z sekcją 5 tych samych warunków
+interakcje — prompty, odpowiedzi, metadane — mogą służyć do ulepszania
+produktów Google i uczenia maszynowego oraz być przeglądane przez
+ludzi, także w ramach płatnej subskrypcji. Rezygnacja odbywa się za pomocą ustawienia
+`enableTelemetry`, którego działanie nie jest udokumentowane i którego aipmt nie ustawia; Twoje ustawienia
+agy nie są przenoszone do jego odizolowanego środowiska. Nie przesyłaj w ten sposób żadnych poufnych danych.
 ### W ramach subskrypcji Claude: `--use_claude_code`
 
-Ta sama zasada dotyczy `claude`, oficjalnego CLI Claude Code, w trybie `-p`: dla
-osób opłacających Claude Pro lub Max tłumaczenie jest odliczane z limitu
-subskrypcji, zamiast być rozliczane za tokeny. Nie należy mylić z
-`--use_claude`, API Anthropic, rozliczanym według użycia.
+Ta sama zasada obowiązuje w przypadku `claude`, oficjalnego CLI Claude Code, w trybie `-p`: dla osób
+opłacających Claude Pro lub Max tłumaczenie jest odliczane od limitu
+subskrypcji, zamiast być rozliczane za token. Nie należy tego mylić z
+`--use_claude`, API Anthropic rozliczanym według użycia.
 
 ```bash
 claude                                   # une fois : /login avec le compte de l'abonnement
 aipmt --use_claude_code --file README.md --target_dir . --target_lang en
 ```
 
-- **Żadna płatna ścieżka nie pozostaje otwarta, a każde wywołanie to potwierdza.** Claude
-  Code otrzymuje z Twojego środowiska wyłącznie zamkniętą listę zmiennych — ani
-  klucza API, ani tokena, ani dostawcy chmurowego, ani znacznika sesji Claude Code,
-  z której aipmt zostałby uruchomiony. Przed pierwszym segmentem `claude auth status` musi
-  wykazać połączenie w ramach subskrypcji, bez klucza Console, a `/usage`, które nie zużywa
-  żadnego limitu, musi to poświadczyć; każde wywołanie poświadcza to z kolei w swoim
-  zdarzeniu inicjalizacyjnym, w przeciwnym razie odpowiedź jest odrzucana.
-- **Wyłącz „extra usage”** (claude.ai, Ustawienia → Użycie), aby
-  utrzymać koszt zero euro: gdy jest włączone, przejmuje obsługę po wyczerpaniu okna i
-  nalicza opłaty bez wyświetlania błędu. aipmt przerywa tłumaczenie, gdy tylko odczyt
-  limitu wywołania to zasygnalizuje, ale to konkretne wywołanie jest już naliczone.
+- **Żadna płatna ścieżka nie pozostaje otwarta, a każde wywołanie tego dowodzi.** Claude
+  Code otrzymuje ze środowiska wyłącznie zamkniętą listę zmiennych — bez
+  klucza API, tokenu, dostawcy chmurowego ani znacznika sesji Claude Code,
+  z której uruchomiono by aipmt. Przed pierwszym segmentem `claude auth status` musi
+  pokazać połączenie w ramach subskrypcji, bez klucza Console, a `/usage`, które nie zużywa
+  żadnego limitu, musi to potwierdzić; każde wywołanie potwierdza to również w swoim
+  zdarzeniu inicjalizacyjnym, w przeciwnym razie odpowiedź zostaje odrzucona.
+- **Wyłącz „dodatkowe użycie”** (claude.ai, Ustawienia → Użycie), aby
+  koszt rzeczywiście pozostał zerowy: gdy ta opcja jest włączona, przejmuje obsługę po wyczerpaniu okna i
+  nalicza opłaty bez wyświetlania błędu. aipmt zatrzymuje tłumaczenie, gdy tylko raport
+  limitu wywołania to zasygnalizuje, ale samo to wywołanie jest już rozliczone.
 - **Limit współdzielony z sesjami Claude Code.** Każde wywołanie raportuje
-  wykorzystanie okien 5-godzinnych i tygodniowych; powyżej 80%
-  (`AIPMT_CLAUDE_MAX_UTILIZATION`) żaden kolejny segment nie jest uruchamiany, aby
-  nie wyczerpać zasobów potrzebnych do Twojej pracy.
+  wykorzystanie okien 5-godzinnych i tygodniowych; po przekroczeniu 80%
+  (`AIPMT_CLAUDE_MAX_UTILIZATION`) nie jest uruchamiany żaden kolejny segment, aby
+  nie wyczerpać zasobów potrzebnych do pracy.
 - **Izolacja.** Każde wywołanie działa bez narzędzi, w prywatnym,
-  tymczasowym katalogu, w trybie bez personalizacji: ani Twoje `CLAUDE.md`, ani Twoje wtyczki,
-  hooki, serwery MCP czy ustawienia nie są ładowane, a z sesji nic nie jest
-  zachowywane. Załączniki są wyłączone: `@chemin` w Twoim dokumencie
+  jednorazowym katalogu, w trybie bez personalizacji: nie są ładowane ani `CLAUDE.md`, ani pluginy,
+  hooki, serwery MCP czy ustawienia, a z sesji nic nie jest zachowywane.
+  Załączniki są odcięte: `@chemin` w dokumencie
   pozostaje tekstem i nie otwiera żadnego pliku (zmierzone).
-- **Modele**: domyślnie `sonnet`, z nakładem `low`, oraz w `--eco` również:
-  `--eco` nic nie zmienia na tej ścieżce. Zmierzone na tych samych dokumentach: `haiku`
-  jest dwukrotnie wolniejszy — rozumuje bez możliwości wyłączenia tego — przy
-  koszcie zaledwie nieznacznie niższym, a `opus` odrzuca treści biologiczne (kolejny
-  punkt). Oba pozostają dostępne przez `--model`; te aliasy podążają za
-  najnowszym modelem ze swojej rodziny. `fable` i warianty `[1m]` są odrzucane,
-  ponieważ przechodzą na płatne środki. `--reasoning_effort` reguluje nakład,
-  z którego tłumaczenie nic nie zyskuje: zmierzone rozumowanie jest zerowe lub niemal zerowe.
+- **Modele**: domyślnie `sonnet`, z poziomem wysiłku `low`, także w `--eco`:
+  `--eco` niczego na tej ścieżce nie zmienia. W pomiarach na tych samych dokumentach `haiku`
+  jest dwukrotnie wolniejszy — rozumuje, choć nie można mu tego uniemożliwić — przy
+  zaledwie nieco niższym koszcie, a `opus` odrzuca treści biologiczne (patrz
+  następny punkt). Oba są nadal dostępne przez `--model`; te aliasy wskazują
+  najnowszy model z danej rodziny. `fable` i warianty `[1m]` są odrzucane,
+  ponieważ wykorzystują płatne środki. `--reasoning_effort` ustawia poziom wysiłku,
+  z którego tłumaczenie nie czerpie żadnych korzyści: zmierzony zakres rozumowania jest zerowy lub niemal zerowy.
 - **Opus odrzuca niektóre treści biologiczne.** Jego zabezpieczenia są
-  bardziej rygorystyczne niż w przypadku Sonnet, a komunikat o błędzie Anthropic ostrzega, że
-  „can sometimes flag biology-research-adjacent work”. Zmierzone: krótka notatka
-  prasowa o 279 wygenerowanych cząsteczkach spowodowała odrzucenie artykułu we wszystkich czternastu
-  językach. Nic nie zostaje zapisane: aipmt odrzuca uciętą odpowiedź, wskazuje
+  bardziej rygorystyczne niż w Sonnet, a komunikat błędu Anthropic ostrzega, że mogą one
+  „czasami oznaczać jako podejrzane prace zbliżone do badań biologicznych”. Pomiar: krótka wiadomość
+  przeglądowa o 279 wygenerowanych cząsteczkach spowodowała odrzucenie artykułu we wszystkich czternastu
+  językach. Nic nie jest zapisywane: aipmt odrzuca uciętą odpowiedź, wskazuje
   zabezpieczenia i zaleca `--model sonnet`.
-- Odrzucane w środowisku CI (`CI` lub `GITHUB_ACTIONS` zdefiniowane) oraz pod Windows (niezmierzone).
-- Zmienne: `AIPMT_CLAUDE_BIN` (w przeciwnym razie `PATH`, następnie `~/.local/bin/claude`),
+- Odrzucane w CI (gdy zdefiniowano `CI` lub `GITHUB_ACTIONS`) oraz w systemie Windows (niezmierzone).
+- Zmienne: `AIPMT_CLAUDE_BIN` (w przeciwnym razie `PATH`, a następnie `~/.local/bin/claude`),
   `AIPMT_CLAUDE_TIMEOUT` (sekundy na segment, domyślnie 900),
   `AIPMT_CLAUDE_MAX_UTILIZATION` (domyślnie 0.8), `CLAUDE_CONFIG_DIR` (konto
-  Claude Code, nigdy nie pobierane z `.env` projektu); katalogi robocze w
+  Claude Code, nigdy niepobierane z projektowego `.env`); katalogi robocze w
   `XDG_CACHE_HOME/aipmt/claude-code` (domyślnie `~/.cache`).
 
-**Warunki korzystania: to Twoje konto ponosi odpowiedzialność.** Strona
-[prawna Claude Code](https://code.claude.com/docs/en/legal-and-compliance)
-nie zabrania „an end user from signing in to the unmodified Claude Code binary
-with their own Claude subscription”: to właśnie robi aipmt, który uruchamia
-oficjalny plik binarny i nigdy nie odczytuje tokena. Jednak Anthropic „does not permit
-third-party developers […] to route requests through Free, Pro, or Max plan
-credentials on behalf of their users”, preferuje klucz API dla narzędzi
-zewnętrznych, „including open-source projects”, i zastrzega sobie prawo do rozliczania ich
-użycia z płatnych środków
+**Warunki użytkowania: odpowiedzialność ponosi Twoje konto.** 
+[strona prawna Claude Code](https://code.claude.com/docs/en/legal-and-compliance)
+nie zabrania „użytkownikowi końcowemu logowania się do niezmodyfikowanego pliku binarnego Claude Code
+za pomocą własnej subskrypcji Claude”: właśnie to robi aipmt, który uruchamia
+oficjalny plik binarny i nigdy nie odczytuje tokenu. Anthropic jednak „nie zezwala
+zewnętrznym deweloperom […] na przekazywanie żądań przy użyciu danych uwierzytelniających planu Free, Pro lub Max
+w imieniu ich użytkowników”, preferuje klucz API dla narzędzi
+zewnętrznych, „w tym projektów open source”, i zastrzega sobie możliwość odliczania ich
+użycia od płatnych środków
 ([pomoc Claude](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)).
-Żaden zapis jednoznacznie nie rozstrzyga przypadku dystrybuowanego narzędzia uruchamiającego plik binarny.
+Żaden zapis nie rozstrzyga przypadku dystrybuowanego narzędzia, które uruchamia plik binarny.
 
 **Dane**: na kontach Free, Pro i Max trenowanie modeli
-dotyczy również Claude Code, gdy pozwala na to ustawienie prywatności
+obejmuje również Claude Code, gdy zezwala na to ustawienie prywatności
 ([strona o danych](https://code.claude.com/docs/en/data-usage)). aipmt nie przechowuje
-żadnej lokalnej transkrypcji (`--no-session-persistence`). Nie przesyłaj tam
-niczego poufnego.
+żadnej lokalnej transkrypcji (`--no-session-persistence`). Nie przesyłaj przez nie
+żadnych poufnych informacji.
 
 ### Do wybranego dostawcy: `--use_opencode`
 
-[OpenCode](https://opencode.ai) to otwartoźródłowy (MIT) agent kodujący, który
-kieruje zapytania do skonfigurowanych w nim dostawców: klucza API, subskrypcji,
-bramki OpenCode Zen (darmowe modele, bez konta) lub modelu lokalnego. Zmierzono
-tutaj kompleksowo dwie ścieżki: Zen oraz Ollama.
+[OpenCode](https://opencode.ai) to agent programistyczny open source (MIT), który
+kieruje żądania do skonfigurowanych w nim dostawców: przez klucz API, subskrypcję,
+bramę OpenCode Zen (bezpłatne modele bez konta) lub model lokalny. Dwie
+ścieżki zostały tutaj zmierzone od początku do końca: Zen i Ollama.
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash   # ou : npm install -g opencode-ai
@@ -486,44 +489,44 @@ aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . -
 aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir . --target_lang ja
 ```
 
-`--model` jest obowiązkowy: bez niego OpenCode powróciłby do darmowego modelu,
-którego wymiana danych może służyć do trenowania, a ten wybór nie powinien zapadać
+`--model` jest obowiązkowe: bez niego OpenCode przełączyłby się na bezpłatny model,
+którego konwersacje mogą służyć do trenowania, a ten wybór nie jest dokonywany
 za Ciebie.
 
 Izolacja przy każdym wywołaniu:
 
-- konfiguracja inline, mająca pierwszeństwo przed Twoją, definiuje agenta `aipmt`,
-  którego wszystkie narzędzia są odrzucane (`permission: { "*": "deny" }`), udostępnianie
-  sesji wyłączone, `--pure`, nigdy `--auto`;
-- tymczasowy i pusty katalog roboczy, z utworzonymi `OPENCODE_DISABLE_PROJECT_CONFIG` oraz
+- konfiguracja inline, nadrzędna wobec Twojej, definiuje agenta `aipmt`,
+  któremu odmówiono dostępu do wszystkich narzędzi (`permission: { "*": "deny" }`), z wyłączonym
+  udostępnianiem sesji, `--pure`, nigdy `--auto`;
+- jednorazowy, pusty katalog roboczy z ustawionymi `OPENCODE_DISABLE_PROJECT_CONFIG` i
   `OPENCODE_DISABLE_CLAUDE_CODE` — bez nich OpenCode wstrzykuje do
-  promptu `AGENTS.md` bieżącego katalogu oraz `~/.claude/CLAUDE.md`.
-  Globalny `~/.config/opencode/AGENTS.md` nadal jest wstrzykiwany, OpenCode nie pozwala
-  go pominąć;
-- kontrakt wyjściowy: kod wyjścia 0, brak zdarzenia `error`, brak wywołania
-  narzędzia, ostatni krok jako `stop`, niepusty tekst i rzeczywiście
-  załadowany agent `aipmt` — nieznany `--agent` nie powoduje błędu OpenCode, lecz
-  dyskretnie cofa się do agenta kodującego;
-- żaden klucz z `aipmt` nie jest przekazywany, z wyjątkiem `OPENCODE_API_KEY`, klucza
+  promptu `AGENTS.md` bieżącego katalogu oraz `~/.claude/CLAUDE.md`. Globalny
+  `~/.config/opencode/AGENTS.md` nadal jest wstrzykiwany, ponieważ OpenCode nie pozwala
+  go wyłączyć;
+- kontrakt wyjściowy: kod zakończenia 0, brak zdarzenia `error`, brak wywołania
+  narzędzia, ostatni krok w `stop`, niepusty tekst i faktycznie załadowany agent `aipmt`
+  — nieznany `--agent` nie powoduje błędu OpenCode, lecz
+  po cichu przełącza go na agenta programistycznego;
+- nie jest przekazywany żaden klucz `aipmt` poza `OPENCODE_API_KEY`, kluczem
   samego OpenCode. Dostawców konfiguruje się w OpenCode, a nie w
   `.env` narzędzia `aipmt`.
 
 Warto wiedzieć:
 
-- Darmowe modele Zen podlegają zmianom, mają nieudokumentowane limity, a
-  przesyłane do nich dane mogą służyć do trenowania: nadają się do publicznej
-  dokumentacji, nie do prywatnych treści.
-- Model lokalny musi oferować co najmniej 16k tokenów kontekstu, ponieważ segmenty
-  mają do 16 000 znaków. Ollama często konfiguruje 4096: należy użyć
+- Bezpłatne modele Zen zmieniają się, mają nieudokumentowane limity, a
+  ich konwersacje mogą służyć do trenowania: nadają się do publicznej dokumentacji,
+  lecz nie do prywatnych treści.
+- Model lokalny musi oferować co najmniej 16 tys. tokenów kontekstu, ponieważ segmenty
+  mogą mieć do 16 000 znaków. Ollama często ustawia 4096: należy użyć
   `Modelfile` z `PARAMETER num_ctx 32768`.
-- `--eco` nie przynosi efektu; `--reasoning_effort` jest przekazywany bez zmian jako
-  `--variant` w OpenCode.
-- OpenCode zapisuje każdą sesję w `~/.local/share/opencode/`.
-- Zmienne: `OPENCODE_BIN` (w przeciwnym razie `PATH`, następnie `~/.opencode/bin/opencode`),
+- `--eco` nie działa; `--reasoning_effort` jest przekazywane bez zmian jako
+  `--variant` OpenCode.
+- OpenCode zapisuje dziennik każdej sesji w `~/.local/share/opencode/`.
+- Zmienne: `OPENCODE_BIN` (w przeciwnym razie `PATH`, a następnie `~/.opencode/bin/opencode`),
   `OPENCODE_TIMEOUT` (sekundy na segment, domyślnie 600). `OPENCODE_CONFIG`
   jest przekazywane bez zmian do OpenCode.
 
-Przykład modelu lokalnego przez Ollama, w `~/.config/opencode/opencode.json`:
+Przykład lokalnego modelu przez Ollama, w `~/.config/opencode/opencode.json`:
 
 ```bash
 ollama pull gpt-oss:20b
@@ -551,32 +554,32 @@ ollama create gpt-oss-20b-32k -f gpt-oss-20b-32k.Modelfile
 }
 ```
 
-`reasoningEffort: "none"` wyłącza wnioskowanie, które Ollama domyślnie aktywuje na tych
-modelach i którego Modelfile nie może wyłączyć. Zmierzone na zdaniu złożonym
-z sześciu słów: 919 tokenów wnioskowania i 68 sekund bez tej opcji, 9 tokenów z nią.
+`reasoningEffort: "none"` wyłącza rozumowanie, które Ollama domyślnie aktywuje w tych
+modelach i którego nie można wyłączyć za pomocą Modelfile. Pomiar na zdaniu złożonym z
+sześciu słów: 919 tokenów rozumowania i 68 sekund bez tej opcji, 9 tokenów z nią.
 
 ### Do ponad 400 modeli: `--use_openrouter`
 
-OpenRouter to router rozliczany według użycia, z pojedynczego salda, zapewniający
-dostęp do modeli hostowanych przez podmioty trzecie — w tym otwartych modeli chińskich,
-których żaden inny dostawca tutaj nie udostępnia.
+OpenRouter to router rozliczany według użycia, korzystający z jednego salda środków i pośredniczący w dostępie do
+modeli hostowanych przez podmioty zewnętrzne — w tym otwartych modeli chińskich, których nie
+udostępnia tutaj żaden inny dostawca.
 
 ```bash
 aipmt --use_openrouter --model z-ai/glm-5.2 --file README.md --target_dir . --target_lang en
 ```
 
-`--model` jest obowiązkowy. Test wstępny (preflight), wykonywany przed jakimkolwiek naliczeniem opłat, obsługuje
-dwie specyfiki routingu:
+`--model` jest obowiązkowe. Preflight, wykonywany przed naliczeniem jakiejkolwiek opłaty, obsługuje
+dwie szczególne cechy routingu:
 
-- **Ten sam model jest obsługiwany przez dziesiątki hostów o różnych limitach** —
-  w przypadku `z-ai/glm-5.3-flash` to 23 hostów, w tym jeden ograniczony do
+- **Ten sam model jest obsługiwany przez dziesiątki hosterów o różnych
+  limitach** — w przypadku `z-ai/glm-5.3-flash` jest to 23 hosterów, w tym jeden z limitem
   2048 tokenów wyjściowych. Preflight odczytuje `/api/v1/models/{modèle}/endpoints`,
-  odrzuca hostów oferujących poniżej 8000 tokenów wyjściowych lub ze statusem obniżonej jakości, a
-  pozostałych przypina za pomocą `allow_fallbacks: false`.
-- **Rozumowanie jest rozliczane według stawki wyjściowej** — 107 tokenów w porównaniu do 2 przy
+  wyklucza hosterów oferujących mniej niż 8000 tokenów wyjściowych lub mających
+  obniżony status i przypina pozostałych za pomocą `allow_fallbacks: false`.
+- **Rozumowanie jest rozliczane według stawki za dane wyjściowe** — 107 tokenów wobec 2 przy
   odpowiedzi „OK” z `z-ai/glm-5.2`. Domyślnie jest wyłączone; modele,
-  które go wymagają, otrzymują najniższy akceptowany przez nie nakład, ponieważ domyślna wartość
-  z katalogu mogłaby nasycić wyjście przed zakończeniem tłumaczenia.
+  które go wymagają, otrzymują najniższy akceptowany poziom wysiłku, ponieważ ustawienie domyślne
+  katalogu może wyczerpać limit wyjściowy przed zakończeniem tłumaczenia.
   `--reasoning_effort` zachowuje pierwszeństwo.
 
 ```
@@ -584,28 +587,28 @@ dwie specyfiki routingu:
   sortie plafonnée à 32768, raisonnement coupé
 ```
 
-- Okno kontekstu pochodzi z katalogu. Model z oknem poniżej 16 400 tokenów jest
-  odrzucany przed jakimkolwiek wywołaniem: 8400 na prompt i segment, minimum 8000
-  na wyjściu.
-- Slug nieobecny w katalogu, niedostępny katalog lub brak
-  hosta spełniającego wymóg limitu zatrzymują polecenie.
-- `finish_reason=length` z pustym wyjściem oznacza budżet skonsumowany przez
-  rozumowanie, a nie ucięcie: komunikat wyraźnie to rozróżnia.
-- `--eco` nie przynosi efektu.
+- Okno kontekstu pochodzi z katalogu. Model oferujący mniej niż 16 400 tokenów jest
+  odrzucany przed jakimkolwiek wywołaniem: 8400 na prompt i segment oraz co najmniej
+  8000 na dane wyjściowe.
+- Brak sluga w katalogu, niedostępność katalogu lub brak
+  hostera spełniającego limit powodują zatrzymanie polecenia.
+- `finish_reason=length` z pustym wyjściem oznacza budżet zużyty przez
+  rozumowanie, a nie ucięcie: komunikat rozróżnia te przypadki.
+- `--eco` nie działa.
 - Zmienne: `OPENROUTER_API_KEY` (<https://openrouter.ai/keys>),
   `OPENROUTER_BASE_URL` (domyślnie `https://openrouter.ai/api/v1`, wymagane `https://`),
   `OPENROUTER_TIMEOUT` (domyślnie 900), `OPENROUTER_PREFLIGHT_TIMEOUT`
   (domyślnie 30).
 
-### Notatka o tłumaczeniu
+### Nota o tłumaczeniu
 
-`--add_translation_note` dodaje notatkę, w `bottom` (domyślnie), `top` (po
-front matterze) lub `both` (`--note_position`), w formacie `legacy` (akapit
-pogrubiony, domyślnie) lub `marker` (`--note_format`). Format `marker` to
-niewidoczna definicja referencyjna Markdown,
+`--add_translation_note` dodaje notę w `bottom` (domyślnie), `top` (po
+front matter) lub `both` (`--note_position`), w formacie `legacy` (pogrubiony
+akapit, domyślnie) albo `marker` (`--note_format`). Format `marker` to
+niewidoczna definicja odwołania Markdown,
 `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`,
-po której następuje pogrubiony cytat: czytelny na GitHubie, możliwy do przetworzenia w procesie budowania przez
-wtyczkę remark.
+po której następuje pogrubiony cytat: czytelny na GitHubie i możliwy do wykorzystania podczas buildu przez
+plugin remark.
 
 ```bash
 aipmt --file article.mdx --target_lang en --add_translation_note --note_format marker --note_position top
@@ -613,140 +616,163 @@ aipmt --file article.mdx --target_lang en --add_translation_note --note_format m
 
 ## Szczegółowe pomiary
 
-Wszystkie pomiary to rzeczywiste tłumaczenia wykonane za pomocą `aipmt` na
+Wszystkie pomiary pochodzą z tłumaczeń rzeczywiście wykonanych przy użyciu `aipmt` na
 czternaście języków: en, es, de, it, pt, nl, pl, sv, ro, ja, ko, zh, ar, hi.
-**Zapisane** zlicza pliki, które przepuściły mechanizmy ochronne; **Bez
-rozbieżności** te, w których `scripts/compare_structure.py` niczego nie wykrywa — identyczna liczba
-sekcji, podtytułów, linków, unikalnych adresów URL, bloków kodu,
-kodu inline, wierszy tabeli, bloków cytatów i pogrubionych słów.
+**Zapisane** oznacza pliki przepuszczone przez zabezpieczenia; **Bez
+rozbieżności** — te, w których `scripts/compare_structure.py` niczego nie wykrywa: tę samą liczbę
+sekcji, nagłówków, linków, odrębnych URL-i, bloków kodu,
+fragmentów kodu inline, wierszy tabeli, bloków cytatu i pogrubionych słów.
 
-„Bez rozbieżności” oznacza „nic nie wykryto”, a nie „identyczny”: komparator
-zlicza elementy bez analizowania ich treści. Nie sygnalizuje usuniętego nagłówka
-poziomu 4, zastąpionego tekstu w kodzie inline, zamienionej flagi
-ani linku wewnętrznego wygenerowanego ze zbędnym nawiasem,
-`[texte]((#ancre))`, który już nigdzie nie prowadzi — nie ocenia też
-poprawności językowej.
+„Bez rozbieżności” oznacza „niczego nie wykryto”, a nie „identyczne”: porównywarka
+zlicza elementy, nie odczytując ich treści. Nie wykrywa ani usuniętego nagłówka
+poziomu 4, ani zastąpionego tekstu kodu inline, ani zamienionej
+flagi, ani wewnętrznego linku wyrenderowanego z jednym nawiasem za dużo,
+`[texte]((#ancre))`, który już donikąd nie prowadzi — nie ocenia też
+języka.
 
 ### Gęsty artykuł przeglądowy, tryb `--news`
 
-Wydanie [przeglądu AI z jls42.org](https://jls42.org/fr/news):
-589 wierszy, 140 linków, 21 sekcji, 3 chronione angielskie cytaty. Testy z
-4 i 5 września 2026 r.
+Jedno wydanie [przeglądu AI na jls42.org](https://jls42.org/fr/news):
+589 wierszy, 140 linków, 21 sekcji, 3 chronione cytaty angielskie. Kampania
+z 4 i 5 września 2026 r.
 
 | Model                                           | Dostęp             | Zapisane | Bez rozbieżności | Mediana/język |
 | ----------------------------------------------- | ------------------ | -------- | ---------------- | ------------- |
-| `gemini-3.7-flash`                              | API Google         | 14/14    | ✅ **14/14**     | 1 min 18 s    |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | subskrypcja Google | 14/14    | ✅ **14/14**     | 3 min 59 s    |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | subskrypcja Google | 14/14    | ✅ **14/14**     | 3 min 14 s    |
-| `gpt-5.6-sol` (`--use_codex`)                   | subskrypcja ChatGPT| 14/14    | ✅ **14/14**     | 11 min 28 s   |
-| `z-ai/glm-5.2`                                  | OpenRouter         | 14/14    | ✅ **14/14**     | 5 min 37 s    |
-| `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14    | ✅ **14/14**     | 26 min 23 s   |
-| `sonnet` (`--use_claude_code`)                  | subskrypcja Claude | 14/14    | ⚠️ 13/14         | 6 min 49 s    |
-| `claude-sonnet-5`                               | API Anthropic      | 14/14    | ⚠️ 11/14         | 6 min 31 s    |
-| `haiku` (`--use_claude_code`)                   | subskrypcja Claude | 14/14    | ⚠️ 11/14         | 15 min 54 s   |
-| `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14    | ❌ 11/14         | 9 min 27 s    |
-| `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14    | ❌ 8/14          | 10 min 09 s   |
-| `ollama/gpt-oss-20b-32k`                        | lokalnie           | 10/14    | ❌ 7/14          | 12 min 39 s   |
-| `mistral-large-latest`                          | API Mistral        | 11/14    | ❌ 5/14          | 5 min 32 s    |
-| `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14     | ❌ 3/14          | 37 min 27 s   |
-| `grok-4.6` (`--use_grok_cli`)                   | subskrypcja Grok   | 1/14     | ❌ 1/14          | 23 min 11 s   |
-| `opus` (`--use_claude_code`)                    | subskrypcja Claude | 0/14     | ❌ 0/14          | —             |
+| `gemini-3.7-flash`                              | API Google         | 14/14    | ✅ **14/14**      | 1 min 18 s    |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | subskrypcja Google | 14/14    | ✅ **14/14**      | 3 min 59 s    |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | subskrypcja Google | 14/14    | ✅ **14/14**      | 3 min 14 s    |
+| `claude-sonnet-5-5`                             | API Anthropic      | 14/14    | ✅ **14/14**      | 3 min 37 s    |
+| `gpt-5.6-sol` (`--use_codex`)                   | subskrypcja ChatGPT | 14/14    | ✅ **14/14**      | 11 min 28 s   |
+| `z-ai/glm-5.2`                                  | OpenRouter         | 14/14    | ✅ **14/14**      | 5 min 37 s    |
+| `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14    | ✅ **14/14**      | 26 min 23 s   |
+| `sonnet` (`--use_claude_code`)                  | subskrypcja Claude | 14/14    | ⚠️ 13/14          | 6 min 49 s    |
+| `claude-sonnet-5`                               | API Anthropic      | 14/14    | ⚠️ 11/14          | 6 min 31 s    |
+| `haiku` (`--use_claude_code`)                   | subskrypcja Claude | 14/14    | ⚠️ 11/14          | 15 min 54 s   |
+| `claude-haiku-5-5`                              | API Anthropic      | 14/14    | ⚠️ 11/14          | 2 min 54 s    |
+| `claude-haiku-4-5`                              | API Anthropic      | 14/14    | ⚠️ 7/14           | 6 min 00 s    |
+| `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14    | ❌ 11/14          | 9 min 27 s    |
+| `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14    | ❌ 8/14           | 10 min 09 s   |
+| `ollama/gpt-oss-20b-32k`                        | lokalny            | 10/14    | ❌ 7/14           | 12 min 39 s   |
+| `mistral-large-latest`                          | API Mistral        | 11/14    | ❌ 5/14           | 5 min 32 s    |
+| `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14     | ❌ 3/14           | 37 min 27 s   |
+| `grok-4.6` (`--use_grok_cli`)                   | subskrypcja Grok   | 1/14     | ❌ 1/14           | 23 min 11 s   |
+| `opus` (`--use_claude_code`)                    | subskrypcja Claude | 0/14     | ❌ 0/14           | —             |
 
 Grok został ponownie zmierzony 9 września na innym wydaniu tego samego przeglądu
-(356 wierszy): 9 języków zapisanych z 14, 8 bez rozbieżności. To ta liczba
-widnieje w głównej tabeli. Trzy przerwane testy nie zostały
-uwzględnione: `qwen3.5-27b` (9 języków) i `kimi-k2.6` (4) z braku środków,
-`z-ai/glm-5.3-flash`, w którym dwa niepowodzenia wynikały z konfiguracji rozumowania,
-którą dostawca od tego czasu koryguje. Wiersze OpenRouter zostały zmierzone przy
+(356 wierszy): zapisano 9 z 14 języków, z czego 8 bez rozbieżności. To ta liczba
+widnieje w tabeli podsumowującej. Nie uwzględniono trzech przerwanych kampanii:
+`qwen3.5-27b` (9 języków) i `kimi-k2.6` (4) z powodu braku środków oraz
+`z-ai/glm-5.3-flash`, którego dwie awarie wynikały z ustawienia rozumowania
+korygowanego od tego czasu przez dostawcę. Wiersze OpenRouter zmierzono przy
 domyślnych ustawieniach routera, przed `--use_openrouter`; `z-ai/glm-5.2`,
-ponownie zmierzony z dostarczonym providerem, zwraca ten sam wynik 14/14. Liczby zostały
-przeliczone 10 września przy użyciu obecnego komparatora: `qwen3.8-flash` oraz
-`qwen3.7-flash` zyskują po jednym języku w stosunku do pierwszej
+zmierzony ponownie z dostarczonym providerem, daje ten sam wynik 14/14. Wyniki
+przeliczono 10 września za pomocą obecnej porównywarki: `qwen3.8-flash` i
+`qwen3.7-flash` zyskują po jednym języku względem pierwszej
 publikacji, pozostałe pozostają bez zmian.
 
-Wiersze `--use_antigravity` zostały zmierzone 26 września na tym samym
-artykule, przy czterech równoległych tłumaczeniach: `gemini-3.7-flash-medium` rano,
-`gemini-3.8-flash-medium` po południu. W języku angielskim każdy z nich sam usunął
+Wiersze `--use_antigravity` zmierzono 26 września na tym samym
+artykule, z czterema tłumaczeniami równolegle: `gemini-3.7-flash-medium` rano,
+`gemini-3.8-flash-medium` po południu. W wersji angielskiej każdy z nich samodzielnie usunął
 trzy wiersze francuskiego tłumaczenia pod cytatami, nie wymyślając
-flagi, a angielskie cytaty pozostały nienaruszone: zapasowe czyszczenie nie miało
-nic do roboty. W `--eco` (`gemini-3.7-flash-low`), tylko na czterech językach
-(en, ja, ar, hi): 4 zapisane z 4, wszystkie bez rozbieżności, mediana 1 min 52 s.
-Weryfikacja krzyżowa tego samego dnia na nowszym wydaniu przeglądu,
-z 25 września (438 wierszy, 2 angielskie cytaty), przetłumaczonym poza
-blogiem przez `gemini-3.7-flash-medium`: 14 zapisanych z 14, wszystkie bez rozbieżności, od 87 do
+flagi, a cytaty angielskie pozostały nienaruszone: awaryjne czyszczenie nie miało
+nic do zrobienia. W `--eco` (`gemini-3.7-flash-low`), tylko dla czterech języków
+(en, ja, ar, hi): zapisano 4 z 4, wszystkie bez rozbieżności, mediana 1 min 52 s.
+Próba kontrolna tego samego dnia na nowszym wydaniu przeglądu,
+z 25 września (438 wierszy, 2 cytaty angielskie), przetłumaczonym poza
+blogiem przez `gemini-3.7-flash-medium`: zapisano 14 z 14, wszystkie bez rozbieżności, od 87 do
 128 s na język.
 
-Wiersze `--use_claude_code` zostały zmierzone 26 września na tym samym
-artykule, cztery równoległe tłumaczenia, przy nakładzie `low`. W przypadku `sonnet`
-angielskie cytaty pozostały nienaruszone we wszystkich czternastu językach, a w języku angielskim
-model sam usunął wiersze francuskiego tłumaczenia, nie dodając żadnej
-flagi. `opus` nie zapisał żadnego języka: w każdym jego zabezpieczenia
-zatrzymały odpowiedź na ostatnim segmencie z powodu notatki o 279 cząsteczkach
-wygenerowanych dla miejsca wiązania. Wysłana osobno, notatka ta jest odrzucana
-w ramach kategorii „bio”; `sonnet` przetłumaczył ją wszędzie. `haiku` zapisuje
-wszystkie czternaście języków; w trzech (en, pl, ro) tytuł sekcji przechodzi z
-poziomu 2 na poziom 1. Rozumuje bez możliwości wyłączenia tego — 61%
+Wiersze `--use_claude_code` zmierzono 26 września na tym samym
+artykule, z czterema tłumaczeniami równolegle i poziomem wysiłku `low`. W przypadku `sonnet`
+cytaty angielskie pozostają nienaruszone we wszystkich czternastu językach, a w wersji angielskiej
+model samodzielnie usunął wiersze francuskiego tłumaczenia, nie wymyślając
+flagi. `opus` nie zapisał żadnego języka: w każdym z nich jego zabezpieczenia
+zatrzymały odpowiedź na ostatnim segmencie z powodu krótkiej wiadomości o 279
+cząsteczkach wygenerowanych dla miejsca wiązania. Wysłana osobno wiadomość ta jest odrzucana
+w kategorii „bio”; `sonnet` przetłumaczył ją wszędzie. `haiku` zapisuje
+wszystkie czternaście języków; w trzech z nich (en, pl, ro) nagłówek sekcji zmienia się z
+poziomu 2 na poziom 1. Model rozumuje, choć nie można mu tego uniemożliwić — odpowiada to 61%
 jego tokenów wyjściowych — stąd ponad dwukrotnie dłuższy czas niż w przypadku `sonnet`.
 
+Wiersze `claude-sonnet-5-5`, `claude-haiku-5-5` i `claude-haiku-4-5`
+zmierzono 18 października przez API Anthropic na tym samym artykule, z czterema
+równoległymi tłumaczeniami na model. Sonnet 5.5 nie pozwala wyłączyć
+rozumowania: aipmt wysyła mu najniższe akceptowane ustawienie, a jego
+odpowiedzi nie zawierają żadnych śladów rozumowania. Zapisuje wszystkie czternaście języków bez rozbieżności i bez
+ponownego przetwarzania segmentów; w wersji angielskiej samodzielnie usunął wiersze
+francuskiego tłumaczenia, nie wymyślając flagi, a cytaty angielskie pozostały
+wszędzie nienaruszone. Haiku 5.5 zmierzono z adaptacyjnym rozumowaniem: przy
+wyłączonym rozumowaniu pozostawiał całe akapity po francusku, co zabezpieczenie odrzucało —
+zapisano 3 z 14 języków. Oba modele Haiku potykają się na tej samej krótkiej wiadomości: Haiku 5.5
+zmienia poziom jej nagłówka albo go duplikuje w języku japońskim, koreańskim i
+chińskim, Haiku 4.5 zmienia go na poziom 1 w siedmiu językach, a w wersji
+japońskiej pozostawia go po francusku. Haiku 4.5 kosztuje 3,67 USD za oba dokumenty we
+wszystkich czternastu językach, Haiku 5.5 — 0,57 USD, a Sonnet 5.5 — 9,21 USD.
 ### README tego projektu, standardowy Markdown
 
 Wersja zamrożona 9 września 2026 r.: 785 wierszy, 285 fragmentów kodu w tekście, 40
-domknięć bloków, 89 wierszy tabeli. Cztery tłumaczenia równolegle.
+zamknięć bloków, 89 wierszy tabel. Cztery tłumaczenia równolegle.
 
-| Model                                           | Zapisane | Bez rozbieżności | Mediana/język | Co się różni                                                             |
-| ----------------------------------------------- | -------- | ---------------- | ------------- | ------------------------------------------------------------------------ |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14    | ✅ 14/14         | 1 min 43 s    | nic                                                                      |
-| `opus` (`--use_claude_code`)                    | 14/14    | ✅ 14/14         | 1 min 48 s    | nic                                                                      |
-| `haiku` (`--use_claude_code`)                   | 14/14    | ✅ 14/14         | 4 min 02 s    | nic według komparatora; podwojone linki wewnętrzne (en)                  |
-| `gemini-3.7-flash`                              | 14/14    | ⚠️ 13/14         | 36 s          | jedno pogrubione słowo (ja)                                              |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14    | ⚠️ 13/14         | 1 min 22 s    | jedno pogrubione słowo (ko)                                              |
-| `sonnet` (`--use_claude_code`)                  | 14/14    | ⚠️ 13/14         | 2 min 20 s    | wiersz tabeli połączony z poprzednim (ar)                                |
-| `claude-sonnet-5`                               | 14/14    | ⚠️ 12/14         | 2 min 56 s    | jeden link (sv), jedno pogrubione słowo (zh)                             |
-| `gpt-5.6-sol` (`--use_codex`)                   | 14/14    | ⚠️ 12/14         | 6 min 46 s    | jedno pogrubione słowo (ar, ja)                                         |
-| `z-ai/glm-5.2` (OpenRouter)                     | 14/14    | ⚠️ 11/14         | 2 min 34 s    | jedno pogrubione słowo (hi, ja, ko)                                      |
-| `qwen/qwen3.7-flash`                            | 14/14    | ⚠️ 10/14         | 2 min 17 s    | 40 fragmentów kodu w tekście dodanych w arabskim; pogrubienia (hi, ja, ko) |
-| `mistral-large-latest`                          | 14/14    | ❌ 1/14          | 2 min 44 s    | utracona sekcja (ar, hi, ko); dodane bloki kodu (ja, ko, ro, zh)        |
+| Model                                           | Wygenerowane | Bez różnic | Mediana/język | Różnice                                                                  |
+| ----------------------------------------------- | ------------ | ---------- | -------------- | ------------------------------------------------------------------------ |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14        | ✅ 14/14   | 1 min 43 s     | brak                                                                     |
+| `opus` (`--use_claude_code`)                    | 14/14        | ✅ 14/14   | 1 min 48 s     | brak                                                                     |
+| `haiku` (`--use_claude_code`)                   | 14/14        | ✅ 14/14   | 4 min 02 s     | brak według narzędzia porównującego; zduplikowane linki wewnętrzne (en)  |
+| `claude-sonnet-5-5`                             | 14/14        | ✅ 14/14   | 1 min 18 s     | brak                                                                     |
+| `claude-haiku-4-5`                              | 14/14        | ✅ 14/14   | 2 min 06 s     | brak                                                                     |
+| `gemini-3.7-flash`                              | 14/14        | ⚠️ 13/14   | 36 s           | jedno słowo zapisane pogrubieniem (ja)                                   |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14        | ⚠️ 13/14   | 1 min 22 s     | jedno słowo zapisane pogrubieniem (ko)                                   |
+| `sonnet` (`--use_claude_code`)                  | 14/14        | ⚠️ 13/14   | 2 min 20 s     | jeden wiersz tabeli sklejony z poprzednim (ar)                           |
+| `claude-sonnet-5`                               | 14/14        | ⚠️ 12/14   | 2 min 56 s     | jeden link (sv), jedno słowo zapisane pogrubieniem (zh)                  |
+| `gpt-5.6-sol` (`--use_codex`)                   | 14/14        | ⚠️ 12/14   | 6 min 46 s     | jedno słowo zapisane pogrubieniem (ar, ja)                               |
+| `z-ai/glm-5.2` (OpenRouter)                     | 14/14        | ⚠️ 11/14   | 2 min 34 s     | jedno słowo zapisane pogrubieniem (hi, ja, ko)                           |
+| `qwen/qwen3.7-flash`                            | 14/14        | ⚠️ 10/14   | 2 min 17 s     | dodano 40 fragmentów kodu w tekście po arabsku; pogrubienie (hi, ja, ko) |
+| `claude-haiku-5-5`                              | 12/14        | ❌ 12/14   | 1 min 14 s     | odmowa dla 2 języków (ar, hi): utrata fragmentów kodu w odpowiedzi       |
+| `mistral-large-latest`                          | 14/14        | ❌ 1/14    | 2 min 44 s     | utrata sekcji (ar, hi, ko); dodane bloki kodu (ja, ko, ro, zh)           |
 
-Dwie przerwane serie nie zostały uwzględnione: Grok, sesja CLI wygasła
-po dwunastu językach (jedenaście bez rozbieżności), oraz `qwen3.8-flash`, HTTP 429 od dostawcy
-po dwóch. `opencode/mimo-v2.5-free` i `ollama/gpt-oss-20b-32k`
-nie były ponownie mierzone na tej rewizji; w wersji z 4 i 5 września,
-krótszej o 277 wierszy, każdy z nich zapisał po 9 tłumaczeń na 14, w tym odpowiednio 7
-i 1 bez rozbieżności.
+Nie oceniono dwóch przerwanych kampanii: Grok, którego sesja CLI wygasła
+po dwunastu językach (jedenaście bez różnic), oraz `qwen3.8-flash`, którego
+dostawca zwrócił HTTP 429 po dwóch. `opencode/mimo-v2.5-free` i `ollama/gpt-oss-20b-32k`
+nie zostały ponownie zmierzone na tej wersji; w krótszej o 277 wierszy wersji
+z 4 i 5 września każdy z nich wygenerował 9 z 14 tłumaczeń, z czego odpowiednio
+7 i 1 bez różnic.
 
-Wiersze `--use_antigravity` i `--use_claude_code` nie były mierzone na
-zamrożonej rewizji, lecz 26 września na wersji opublikowanej z 1.14.0: 600
-wierszy, 257 fragmentów kodu w tekście, 30 domknięć bloków, 85 wierszy tabeli. Krótsza
-o 185 wierszy, nie porównuje się bezpośrednio z pozostałymi wierszami;
-te konkretne wiersze można jednak porównywać między sobą. W przypadku linków wewnętrznych, których
-komparator nie weryfikuje, `gemini-3.8-flash-medium` zachował je nienaruszone we
-wszystkich czternastu językach, `gemini-3.7-flash-medium` uszkodził je w języku włoskim;
-`sonnet` i `opus` zachowały je nienaruszone wszędzie, a `haiku` podwoił je w
-angielskim.
+Wierszy `--use_antigravity` i `--use_claude_code` nie zmierzono na
+zamrożonej wersji, lecz 26 września na wersji opublikowanej wraz z wydaniem 1.14.0 —
+natomiast wiersze `claude-sonnet-5-5`, `claude-haiku-5-5` i `claude-haiku-4-5` zmierzono 18
+października na tej samej wersji: 600 wierszy, 257 fragmentów kodu w tekście, 30 zamknięć bloków, 85
+wierszy tabel. Ponieważ jest ona
+krótsza o 185 wierszy, nie można jej porównywać element po elemencie z pozostałymi wierszami;
+te wiersze można jednak porównywać między sobą. Jeśli chodzi o linki wewnętrzne, których
+narzędzie porównujące nie sprawdza, `gemini-3.8-flash-medium` zachował je bez zmian
+we wszystkich czternastu językach, a `gemini-3.7-flash-medium` uszkodził je po włosku;
+`sonnet` i `opus` zachowały je bez zmian we wszystkich językach, a `haiku` zduplikował je
+po angielsku; `claude-sonnet-5-5` i `claude-haiku-4-5` zachowały je bez zmian we
+wszystkich czternastu językach, a `claude-haiku-5-5` w dwunastu, dla których wygenerował tłumaczenia.
 
 ### Cztery pliki README znanych projektów
 
-FastAPI, Ollama, tldr-pages i Vue.js, pobrane wprost z GitHuba — dokumenty
-łatwiejsze niż dwa poprzednie. Seria ta skupiała się na modelach
-mających trudności; Gemini służy tu jako punkt odniesienia.
+FastAPI, Ollama, tldr-pages i Vue.js, pobrane bez zmian z GitHub — dokumenty
+łatwiejsze niż dwa poprzednie. Kampania skupiała się na modelach
+mających trudności; Gemini służy w niej jako punkt odniesienia.
 
-| Model                    | Zakres                     | Zapisane | Bez rozbieżności |
-| ------------------------ | -------------------------- | -------- | ---------------- |
-| `gemini-3.7-flash`        | 4 projekty × 14 języków    | 56/56    | ✅ **55/56**     |
-| `opencode/mimo-v2.5-free` | 4 projekty × 14 języków    | 55/56    | ❌ 47/56         |
-| `grok-4.6` (subskrypcja)   | 4 projekty × ar, hi, ja, zh | 16/16    | ❌ 14/16         |
-| `ollama/gpt-oss-20b-32k`  | 4 projekty × ar, hi, ja, zh | 15/16    | ❌ 9/16          |
+| Model                     | Zakres                     | Wygenerowane | Bez różnic   |
+| ------------------------- | -------------------------- | ------------ | ------------ |
+| `gemini-3.7-flash`        | 4 projekty × 14 języków     | 56/56        | ✅ **55/56** |
+| `opencode/mimo-v2.5-free` | 4 projekty × 14 języków     | 55/56        | ❌ 47/56     |
+| `grok-4.6` (subskrypcja)   | 4 projekty × ar, hi, ja, zh | 16/16        | ❌ 14/16     |
+| `ollama/gpt-oss-20b-32k`  | 4 projekty × ar, hi, ja, zh | 15/16        | ❌ 9/16      |
 
-### Czym te pomiary nie są
+### Czym nie są te pomiary
 
-- **To nie jest wyczerpujący ranking**: sam OpenRouter oferuje ponad czterysta
-  modeli, z czego zmierzono około piętnastu.
-- **Czasy są orientacyjne**: od trzech do sześciu równoległych tłumaczeń w zależności
-  od serii testów, a przepustowość dostawcy zmienia się w ciągu dnia.
-- **Są to obserwacje powiązane z konkretną datą**: modele zmieniają się pod tą samą nazwą, a Państwa
+- **Nie są wyczerpującym rankingiem**: sam OpenRouter oferuje ponad czterysta
+  modeli, a zmierzono około piętnastu.
+- **Czasy są orientacyjne**: zależnie od kampanii wykonywano od trzech do sześciu
+  tłumaczeń równolegle, a przepustowość dostawcy zmienia się w ciągu dnia.
+- **Są to obserwacje z określonego momentu**: modele zmieniają się pod tą samą nazwą, a Wasze
   dokumenty różnią się od naszych.
 
-Aby powtórzyć pomiar na własnych dokumentach, na zamrożonej kopii pliku:
+Aby powtórzyć pomiar na swoich dokumentach, korzystając z zamrożonej kopii pliku:
 
 ```bash
 aipmt --file reference.md --target_dir out/ --source_lang fr --target_lang ja --use_gemini --force
@@ -755,7 +781,7 @@ python scripts/compare_structure.py reference.md out/reference-ja.md
 # « structure identique », ou la liste des écarts — sortie 0 si identique, 1 sinon
 ```
 
-## Współpraca
+## Współtworzenie
 
 ```bash
 git clone https://github.com/jls42/ai-powered-markdown-translator.git
@@ -765,10 +791,10 @@ pip install -r requirements.txt   # les dépendances, lock entièrement épingl�
 pip install -e .                  # le paquet lui-même, en mode éditable
 ```
 
-Oba wiersze są konieczne: bez `pip install -e .`, `python -m aipmt`
-odpowiada `No module named aipmt`.
+Oba wiersze są niezbędne: bez `pip install -e .` polecenie `python -m aipmt`
+zwraca `No module named aipmt`.
 
-Narzędzia jakościowe, opcjonalne, lecz zalecane:
+Opcjonalne, lecz zalecane narzędzia kontroli jakości:
 
 ```bash
 pipx install pre-commit               # hors venv — absent des requirements
@@ -777,19 +803,19 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # mypy, SAST, pip-audit, tests avant chaque push
 ```
 
-28 tłumaczeń w repozytorium (README i CHANGELOG, czternaście języków)
-regeneruje się za pomocą `./regen_translations.sh --force` — domyślnie Codex i `gpt-5.6-sol` w ramach
-subskrypcji ChatGPT, cztery równolegle. `REGEN_PROVIDER` oraz
+28 tłumaczeń repozytorium (README i CHANGELOG, czternaście języków) można
+wygenerować ponownie za pomocą `./regen_translations.sh --force` — Codex i `gpt-5.6-sol` w ramach
+domyślnej subskrypcji ChatGPT, cztery równolegle. `REGEN_PROVIDER` i
 `REGEN_MODEL` zmieniają ścieżkę: `antigravity` pozostaje w ramach subskrypcji, tym razem
-Google, i działa bez wyjątku; płatne API (`openai`, `gemini`,
+Google, i działa bez dodatkowego zezwolenia; płatne API (`openai`, `gemini`,
 `grok`, `openrouter`) jest odrzucane bez `REGEN_ALLOW_PAID_API=1`;
-`REGEN_JOB_TIMEOUT` ogranicza czas każdego zadania (600 s, 1800 s w przypadku Codex i
-Antigravity). Szczegółowe informacje o narzędziach znajdują się w `CLAUDE.md`.
+`REGEN_JOB_TIMEOUT` ogranicza czas każdego zadania (600 s, 1 800 s w przypadku Codex i
+Antigravity). Szczegóły dotyczące narzędzi znajdują się w `CLAUDE.md`.
 
 ## Projekty korzystające z tego skryptu
 
 - **[jls42.org](https://jls42.org)** — osobisty blog publikowany w 15 językach. Jego
-  [codzienny przegląd AI](https://jls42.org/fr/news) jest tłumaczony każdego dnia
+  [codzienny przegląd wiadomości o AI](https://jls42.org/fr/news) jest codziennie tłumaczony
   za pomocą tego narzędzia i służy jako dokument referencyjny dla powyższych pomiarów.
 
 ## Autor
@@ -801,29 +827,29 @@ E-mail: contact@jls42.org
 
 GNU GENERAL PUBLIC LICENSE Version 3. Zobacz [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
 
-## Zastrzeżenie prawne
+## Ostrzeżenie
 
-Ten program jest rozpowszechniany **bez jakiejkolwiek gwarancji**, zgodnie z warunkami
-sekcji 15 i 16 licencji GPL v3: dostarczany jest w stanie „takim, w jakim jest” (as is), bez gwarancji przydatności
-handlowej lub przydatności do określonego celu, a jego autor nie ponosi
-odpowiedzialności za jakiekolwiek szkody wynikające z jego użytkowania. Pełny tekst
+Ten program jest rozpowszechniany **bez jakiejkolwiek gwarancji**, zgodnie z
+sekcjami 15 i 16 GPL v3: jest dostarczany „w stanie, w jakim się znajduje”, bez gwarancji wartości
+handlowej ani przydatności do określonego celu, a jego autor nie może zostać
+pociągnięty do odpowiedzialności za szkody wynikające z jego używania. Tekst
 licencji ma pierwszeństwo przed niniejszym podsumowaniem.
 
-- **Przejrzyj tekst przed publikacją.** Zabezpieczenia obejmują bloki kodu,
-  fragmenty kodu w tekście, adresy URL, kotwice oraz cytaty w trybie `--news` — nie dotyczą
-  nagłówków, tabel, sekcji front matter ani sensu Twoich zdań.
-- **Twoje dokumenty są przesyłane do wybranego dostawcy**, zgodnie z jego warunkami
-  korzystania z usług i polityką prywatności. Niektóre darmowe modele mogą
-  wykorzystywać Twoje konwersacje do trenowania, a warunki Antigravity
-  zezwalają firmie Google na ich ponowne wykorzystanie oraz przekazywanie do weryfikacji przez ludzi,
-  również w przypadku płatnej subskrypcji; model lokalny to jedyny sposób, który gwarantuje,
-  że żadne dane nie opuszczą Twojej maszyny.
-- **Wywołania API są płatne.** Ten program nie nakłada limitu
-  wydatków: długi dokument, ponawianie prób po błędzie lub model wymagający intensywnego
-  wnioskowania wiążą się z wyższymi kosztami.
-- **Opublikowane pomiary to obserwacje powiązane z konkretną datą**, a nie gwarancje.
+- **Przeczytajcie ponownie przed publikacją.** Zabezpieczenia obejmują bloki kodu,
+  kod w tekście, adresy URL, kotwice i cytaty trybu `--news` — nie obejmują
+  nagłówków, tabel, front matter ani znaczenia zdań.
+- **Wasze dokumenty są przesyłane do wybranego dostawcy** i podlegają jego warunkom
+  użytkowania oraz polityce dotyczącej danych. Niektóre bezpłatne modele mogą
+  ponownie wykorzystywać Wasze konwersacje do trenowania, a warunki Antigravity
+  pozwalają Google wykorzystywać je ponownie i przekazywać do weryfikacji przez ludzi,
+  również w ramach płatnej subskrypcji; model lokalny jest jedynym rozwiązaniem,
+  dzięki któremu żadne dane nie opuszczają Waszego komputera.
+- **Opłaty za wywołania API ponosicie Wy.** Ten program nie ogranicza
+  wydatków: długi dokument, wznowienie po błędzie lub model wykonujący dużo rozumowania
+  kosztują więcej.
+- **Opublikowane pomiary są obserwacjami z określonego momentu**, a nie gwarancjami.
 
-Wymienione nazwy produktów i firm należą do ich odpowiednich właścicieli.
+Nazwy wymienionych produktów i firm należą do ich odpowiednich właścicieli.
 Ten projekt nie jest powiązany z żadnym z nich.
 
-**Artykuł przetłumaczony z fr na pl za pomocą gemini-3.8-flash-medium.**
+**Artykuł przetłumaczony z fr na pl za pomocą gpt-5.6-sol.**
