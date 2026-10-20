@@ -232,11 +232,13 @@ class TestCodexCall(unittest.TestCase):
             {"type": "error", "message": "stream disconnected before completion"},
         )
         fake = _FakePopen(stdout=stdout)
+        client = _client()
+        args = _args()
         with (
             patch("subprocess.Popen", fake),
             self.assertRaises(RuntimeError) as ctx,
         ):
-            codex._call_codex(_client(), _args(), "PROMPT", "SEG")
+            codex._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("stream disconnected", str(ctx.exception))
 
     def test_nonzero_returncode_raises_with_stderr_tail(self):
