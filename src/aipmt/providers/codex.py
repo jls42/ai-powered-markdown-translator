@@ -24,7 +24,12 @@ from .base import (
 )
 from .openai import _resolve_reasoning_effort
 
-DEFAULT_MODEL_CODEX = "gpt-5.6-sol"
+# GPT-6.1-Sol, premier modèle du catalogue que Codex sert à un compte ChatGPT
+# (models_cache.json, 2026-10-19). Mesuré ce jour-là sur le CHANGELOG entier en
+# allemand, un job chacun et en même temps : 527 s, segments de 46 à 70 s ;
+# gpt-5.6-sol, l'ancien défaut, 906 s et jusqu'à 211 s pour un segment — et à
+# quatre jobs, les quatorze langues avaient échoué sur des 429.
+DEFAULT_MODEL_CODEX = "gpt-6.1-sol"
 
 
 # Luna = modèle "fast, high-volume" du plan ChatGPT : 250-2000 messages/5h sur
@@ -42,11 +47,12 @@ ECO_MODEL_CODEX = "gpt-5.6-luna"
 CODEX_TIMEOUT = int(os.getenv("CODEX_TIMEOUT", "600"))
 
 
-# La famille gpt-5.6 est commune au CLI Codex et à l'API Platform, mais côté
-# compte ChatGPT le serveur applique une allowlist plus étroite : un modèle
-# valide sur l'API peut être refusé ici par un 400 ("model is not supported
-# when using Codex with a ChatGPT account"), sans validation locale préalable.
-CODEX_MODEL_PREFIXES = ("gpt-5.6-",)
+# Les familles gpt-5.6 et gpt-6 sont communes au CLI Codex et à l'API Platform,
+# mais côté compte ChatGPT le serveur applique une allowlist plus étroite : un
+# modèle valide sur l'API peut être refusé ici par un 400 ("model is not
+# supported when using Codex with a ChatGPT account"), sans validation locale
+# préalable. Préfixes au point près : `gpt-6-sol` comme `gpt-6.1-sol`.
+CODEX_MODEL_PREFIXES = ("gpt-5.6-", "gpt-6-", "gpt-6.")
 
 # Seul endroit où un 429 survit aux relances du CLI : le texte de
 # `RetryLimitReachedError` (« exceeded retry limit, last status: 429 Too Many

@@ -15,7 +15,13 @@ DEFAULT_TOKEN_LIMIT = 128000
 
 
 MODEL_TOKEN_LIMITS = {
-    # OpenAI GPT-5.6 (génération courante). Contexte 1.05M, mais palier
+    # OpenAI GPT-6, servis par Codex sur un compte ChatGPT : fenêtres lues dans
+    # le catalogue du CLI (models_cache.json, 2026-10-19).
+    "gpt-6.1-sol": 500000,
+    "gpt-6-sol": 272000,
+    "gpt-6-astra": 272000,
+    "gpt-6-luna": 272000,
+    # OpenAI GPT-5.6. Contexte 1.05M, mais palier
     # tarifaire à 272K tokens d'input : au-delà, 2x input / 1.5x output sur
     # la requête entière.
     "gpt-5.6": 1050000,

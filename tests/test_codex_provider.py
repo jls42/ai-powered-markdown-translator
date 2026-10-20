@@ -368,6 +368,17 @@ class TestCodexInit(unittest.TestCase):
         # `codex login status` pour de vrai, vert ici, rouge sur une CI.
         self.assertEqual(fake_preflight.call_count, 2)
 
+    def test_gpt6_family_is_not_flagged_as_unexpected(self):
+        """Le défaut, gpt-6.1-sol, et ses voisins du catalogue de Codex ne
+        déclenchent pas l'avertissement réservé aux slugs d'API."""
+        for model in (codex.DEFAULT_MODEL_CODEX, "gpt-6-sol", "gpt-6-luna", "gpt-5.6-sol"):
+            with patch("sys.stderr", new_callable=io.StringIO) as err:
+                codex._codex_warn_unexpected_model(model)
+            self.assertEqual(err.getvalue(), "", model)
+        with patch("sys.stderr", new_callable=io.StringIO) as err:
+            codex._codex_warn_unexpected_model("gpt-5.4-mini")
+        self.assertIn("inhabituel", err.getvalue())
+
     def test_refuses_ci_environment(self):
         args = _args(model=None)
         with (

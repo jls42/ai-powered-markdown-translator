@@ -2195,8 +2195,8 @@ def _detecter(exporte=None, contenu_env=None):
 class TestRegenAntigravity(unittest.TestCase):
     """detect_provider() de regen_translations.sh : Antigravity est un chemin
     d'abonnement, autorisé sans REGEN_ALLOW_PAID_API comme Codex et Grok CLI —
-    sur demande seulement : le défaut reste Codex et gpt-5.6-sol, décision du
-    propriétaire."""
+    sur demande seulement : le défaut reste Codex et son modèle qualité,
+    décision du propriétaire."""
 
     # Aucune n'est une vraie clé : elles prouvent que leur présence ne change rien.
     _FAUSSE_CLE = "fixture-fausse-cle-google-ne-pas-utiliser"

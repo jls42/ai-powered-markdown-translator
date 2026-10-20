@@ -1077,12 +1077,13 @@ class TestDetectProvider(unittest.TestCase):
     _FAKE_GEMINI_KEY = "fixture-fake-gemini-key-do-not-use-bbbbbbbbbbbbbbbb"
 
     def test_default_is_codex_subscription_without_any_key(self):
-        """Pas de .env, rien d'exporté → Codex, sans --eco : gpt-5.6-sol."""
+        """Pas de .env, rien d'exporté → Codex, sans --eco : gpt-6.1-sol, nom lu
+        dans le module (l'ancien défaut, gpt-5.6-sol, était recopié en dur)."""
         stdout, stderr, rc = self._run_detect(env_content=None)
         self.assertEqual(rc, 0)
         self.assertEqual(stdout, "--use_codex")
         self.assertIn("Codex", stderr)
-        self.assertIn("gpt-5.6-sol", stderr)
+        self.assertIn("gpt-6.1-sol par défaut", stderr)
 
     def test_empty_regen_provider_is_the_default(self):
         stdout, _stderr, rc = self._run_detect(exported_env={"REGEN_PROVIDER": ""})

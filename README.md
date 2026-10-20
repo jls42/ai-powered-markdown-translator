@@ -244,19 +244,19 @@ aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lan
 
 `--eco` bascule sur le palier économique de chaque fournisseur.
 
-| Provider    | Qualité (défaut)                                      | Économique (`--eco`)      |
-| ----------- | ----------------------------------------------------- | ------------------------- |
-| OpenAI      | `gpt-5.6-terra`                                       | `gpt-5.6-luna`            |
-| Claude      | `claude-sonnet-5-5`                                   | `claude-haiku-5-5`        |
-| Mistral     | `mistral-large-latest`                                | `mistral-small-latest`    |
-| Gemini      | `gemini-3.7-flash`                                    | `gemini-3.1-flash-lite`   |
-| Codex       | `gpt-5.6-sol` (aussi `terra` et `luna` par `--model`) | `gpt-5.6-luna`            |
-| Grok API    | `grok-4.6`                                            | `grok-4.3`                |
-| Grok CLI    | `grok-4.6`                                            | `grok-4.5`                |
-| Antigravity | `gemini-3.8-flash-medium`                             | `gemini-3.7-flash-low`    |
-| Claude Code | `sonnet`, effort `low`                                | idem — `--eco` sans effet |
-| OpenCode    | `--model provider/modèle` obligatoire                 | idem — `--eco` sans effet |
-| OpenRouter  | `--model fournisseur/modèle` obligatoire              | idem — `--eco` sans effet |
+| Provider    | Qualité (défaut)                                                     | Économique (`--eco`)      |
+| ----------- | -------------------------------------------------------------------- | ------------------------- |
+| OpenAI      | `gpt-5.6-terra`                                                      | `gpt-5.6-luna`            |
+| Claude      | `claude-sonnet-5-5`                                                  | `claude-haiku-5-5`        |
+| Mistral     | `mistral-large-latest`                                               | `mistral-small-latest`    |
+| Gemini      | `gemini-3.7-flash`                                                   | `gemini-3.1-flash-lite`   |
+| Codex       | `gpt-6.1-sol` (aussi `gpt-5.6-sol`, `terra` et `luna` par `--model`) | `gpt-5.6-luna`            |
+| Grok API    | `grok-4.6`                                                           | `grok-4.3`                |
+| Grok CLI    | `grok-4.6`                                                           | `grok-4.5`                |
+| Antigravity | `gemini-3.8-flash-medium`                                            | `gemini-3.7-flash-low`    |
+| Claude Code | `sonnet`, effort `low`                                               | idem — `--eco` sans effet |
+| OpenCode    | `--model provider/modèle` obligatoire                                | idem — `--eco` sans effet |
+| OpenRouter  | `--model fournisseur/modèle` obligatoire                             | idem — `--eco` sans effet |
 
 ### Sur l'abonnement ChatGPT : `--use_codex`
 
@@ -277,8 +277,11 @@ aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
   si sa validation échoue et qu'il est retenté. OpenAI annonce, à titre
   d'estimation, 250-2 000 messages/5 h pour `gpt-5.6-luna` (`--eco`) et
   10-100 pour `gpt-5.6-sol` sur un plan Plus.
-- `--model gpt-5.6-terra` et `--model gpt-5.6-luna` passent aussi par
-  l'abonnement. Un modèle auquel le compte n'a pas droit rend un 400 « model is
+- `--model gpt-5.6-sol`, le défaut jusqu'à la 1.16.3, `--model gpt-5.6-terra`
+  et `--model gpt-5.6-luna` passent aussi par l'abonnement.
+- Un 429 du serveur ne fait pas perdre le fichier : Codex se reconnecte seul,
+  aipmt attend la fin du tour, et si le 429 a le dernier mot, le segment
+  repart après 30 puis 60 secondes. Un modèle auquel le compte n'a pas droit rend un 400 « model is
   not supported when using Codex with a ChatGPT account ».
 - Plus lent qu'une API, et l'écart grandit avec le document : sur ce README,
   6 min 46 s par langue en médiane avec `gpt-5.6-sol`, contre 36 s pour
@@ -807,7 +810,7 @@ pre-commit install --hook-type pre-push  # mypy, SAST, pip-audit, tests avant ch
 ```
 
 Les 28 traductions du dépôt (README et CHANGELOG, quatorze langues) se
-régénèrent avec `./regen_translations.sh --force` — Codex et `gpt-5.6-sol` sur
+régénèrent avec `./regen_translations.sh --force` — Codex et `gpt-6.1-sol` sur
 l'abonnement ChatGPT par défaut, quatre en parallèle. `REGEN_PROVIDER` et
 `REGEN_MODEL` changent le chemin : `antigravity` reste sur un abonnement, celui
 de Google, et passe sans dérogation ; une API facturée (`openai`, `gemini`,
