@@ -6,19 +6,19 @@
 
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="حالة بوابة الجودة"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="تصنيف الأمان"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="تصنيف الموثوقية"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="تصنيف قابلية الصيانة"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="تقييم الأمان"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="تقييم الموثوقية"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="تقييم قابلية الصيانة"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="التغطية"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="الثغرات الأمنية"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="الأخطاء"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="روائح الشيفرة"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="مؤشرات رداءة الشيفرة"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="الأسطر المكررة (%)"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="الدين التقني"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="الدَّين التقني"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="أسطر الشيفرة"></a>
 </p>
 <p align="center">
@@ -27,24 +27,24 @@
 </p>
 
 يترجم ملفات Markdown من لغة إلى أخرى مع الحفاظ على
-البنية: كتل الشيفرة، والشيفرة المضمنة، وعناوين URL، والمراسي، والجداول، وبيانات
-front matter. إحدى عشرة طريقة لاستدعاء نموذج — خمس واجهات API، وأربعة اشتراكات بلا
-فوترة حسب الاستخدام، وموجّهان — مع قياس منشور لما يحافظ عليه كل
+البنية: كتل الشيفرة، والشيفرة المضمّنة، وعناوين URL، والمراسي، والجداول، والبيانات
+الوصفية الافتتاحية. إحدى عشرة طريقة لاستدعاء نموذج — خمس واجهات API، وأربعة اشتراكات دون
+فوترة حسب الاستخدام، وموجّهان — مع قياسات منشورة لما يحافظ عليه كل
 نموذج فعليًا.
 
-## باختصار
+## لمحة سريعة
 
-- **أحد عشر مسارًا للموفّرين**: واجهات API الخاصة بـ OpenAI وMistral وClaude وGemini وGrok؛
-  واشتراكات ChatGPT (Codex) وGrok وGoogle (Antigravity) وClaude (Claude
-  Code) بلا فوترة حسب الاستخدام؛ وموجّها OpenCode (مفتوح المصدر، مجاني أو محلي) وOpenRouter
+- **أحد عشر مسارًا لمزوّدي الخدمة**: واجهات API من OpenAI وMistral وClaude وGemini وGrok؛
+  واشتراكات ChatGPT ‏(Codex) وGrok وGoogle ‏(Antigravity) وClaude ‏(Claude
+  Code) دون فوترة حسب الاستخدام؛ وموجّها OpenCode (مفتوح المصدر، مجاني أو محلي) وOpenRouter
   (أكثر من 400 نموذج).
-- **لا أخطاء بسبب رمز مفقود**: تُستبدل كتل الشيفرة، والشيفرة المضمنة،
-  وعناوين URL، والمراسي، والاقتباسات برموز قبل الاستدعاء،
-  ثم يجري التحقق منها عند الإرجاع. إذا فُقد أحدها، فلا يُكتب الملف.
-- **المستندات الطويلة**: تقسيم وفق نافذة النموذج.
-- **وضع `--news`**: اقتباسات إنجليزية محمية وخيارات تُدار حسب
+- **لا أخطاء بسبب فقدان رمز**: تُستبدل كتل الشيفرة، والشيفرة المضمّنة،
+  وعناوين URL، والمراسي، والاقتباسات برموز قبل الاستدعاء، ثم
+  يُتحقق منها عند عودة النتيجة. إذا فُقد أي رمز، فلا يُكتب الملف.
+- **المستندات الطويلة**: تقسيم إلى مقاطع بحسب نافذة سياق النموذج.
+- **وضع `--news`**: حماية الاقتباسات الإنجليزية وإدارة الخيارات بحسب
   اللغة، لمقالات الرصد.
-- **وضع `--eco`**: نماذج أسرع وأقل تكلفة.
+- **وضع `--eco`**: نماذج سريعة وأقل تكلفة.
 - **ملاحظة ترجمة** اختيارية، في الأعلى أو الأسفل أو كليهما.
 
 ## التثبيت
@@ -54,19 +54,19 @@ pip install ai-powered-markdown-translator     # ou : pipx install ai-powered-ma
 aipmt --help                                   # ou : python -m aipmt --help
 ```
 
-يتطلب Python 3.10 أو إصدارًا أحدث. للتثبيت من المستودع، راجع
+Python 3.10 أو أحدث. للتثبيت من المستودع، راجع
 [المساهمة](#المساهمة).
 
 ## الإعداد
 
-تُقرأ المفاتيح من ثلاثة مواضع، من الأعلى إلى الأقل أولوية؛ ولا يملأ كل موضع
+تُقرأ المفاتيح من ثلاثة مواضع، بترتيب تنازلي للأولوية؛ ولا يملأ كل موضع
 إلا ما تركه الموضع السابق فارغًا.
 
-|     | الموضع                                            | الغرض                             |
+|     | أين                                            | الغرض                             |
 | --- | --------------------------------------------- | ------------------------------------- |
-| 1   | متغيرات البيئة                     | التكامل المستمر، والحاويات، والتجاوز المؤقت |
-| 2   | `.env` في المجلد الحالي (أو أحد المجلدات الأب) | مفتاح خاص بمشروع            |
-| 3   | `~/.config/aipmt/.env`                        | يُثبّت مرة واحدة ويسري في كل مكان       |
+| 1   | متغيرات البيئة                     | CI، والحاويات، والتجاوز المؤقت |
+| 2   | `.env` في المجلد الحالي (أو أحد المجلدات الأصلية) | مفتاح خاص بمشروع            |
+| 3   | `~/.config/aipmt/.env`                        | يُعدّ مرة واحدة ويسري في كل مكان       |
 
 ```bash
 mkdir -p ~/.config/aipmt
@@ -83,29 +83,30 @@ chmod 600 ~/.config/aipmt/.env
 
 يُقبل `GEMINI_API_KEY` بدلًا من `GOOGLE_API_KEY`. يتبع ملف
 المستخدم `XDG_CONFIG_HOME` (مسار مطلق فقط) و`%APPDATA%`
-على Windows. من دون مفتاح، يسرد الأمر المواضع الثلاثة.
+على Windows. عند غياب المفتاح، يسرد الأمر المواضع الثلاثة.
 
-**لا يمكن لملف `.env` الخاص بمشروع أن يعيد توجيه الاستدعاءات أو يختار البرنامج
-الذي سيُنفّذ.** فهو يوفّر المفاتيح فقط، ولا يوفّر مطلقًا وجهة أو ملفًا تنفيذيًا: يُتجاهل فيه، مع تحذير،
-أي متغير ضمن `_BASE_URL` أو `_API_BASE` أو `_ENDPOINT` أو `_BIN` (`CODEX_BIN`،
-`GROK_BIN`، `OPENCODE_BIN`، `AGY_BIN`)، وكذلك `GROK_HOME`، والخوادم الوكيلة (`HTTP_PROXY`،
+**لا يمكن لملف `.env` الخاص بمشروع إعادة توجيه الاستدعاءات أو اختيار البرنامج
+الذي يُنفَّذ.** فهو يوفّر مفاتيح فقط، ولا يحدّد وجهة أو ملفًا تنفيذيًا: تُتجاهل فيه جميع
+المتغيرات بصيغة `_BASE_URL` أو `_API_BASE` أو `_ENDPOINT` أو `_BIN` ‏(`CODEX_BIN`،
+`GROK_BIN`، `OPENCODE_BIN`، `AGY_BIN`)، و`GROK_HOME`، والوكلاء (`HTTP_PROXY`،
 `HTTPS_PROXY`، `ALL_PROXY`)، ومخازن الشهادات (`SSL_CERT_FILE`،
 `SSL_CERT_DIR`، `REQUESTS_CA_BUNDLE`، `CURL_CA_BUNDLE`)، و`XDG_CONFIG_HOME` /
-`APPDATA`. يجب ألا يتمكن مستودع مستنسخ من اختطاف مفتاحك، ولا من دفعك إلى تشغيل برنامجه
-الخاص عند أول ترجمة. كما يُقرأ هذا الملف بلا استيفاء:
-فلا ينسخ `NOM=${OPENAI_API_KEY}` المفتاح إليه. ضع هذه المتغيرات في
+`APPDATA`، مع إظهار تحذير. يجب ألا يتمكن مستودع مستنسخ من
+تحويل مفتاحك إلى وجهة أخرى، أو جعلك تشغّل برنامجه الخاص عند
+أول ترجمة. يُقرأ هذا الملف أيضًا دون استيفاء المتغيرات:
+لا ينسخ `NOM=${OPENAI_API_KEY}` المفتاح داخله. ضع هذه المتغيرات في
 البيئة أو في `~/.config/aipmt/.env`.
 
-المتغيرات الاختيارية: `XAI_BASE_URL` (القيمة الافتراضية `https://api.x.ai/v1`)،
-`CLAUDE_TIMEOUT` (بالثواني لكل استدعاء، القيمة الافتراضية 900)، `CODEX_BIN`، `CODEX_TIMEOUT`
-(القيمة الافتراضية 600)، `GROK_BIN`، `GROK_HOME` (القيمة الافتراضية `~/.grok`)، `GROK_TIMEOUT`
-(القيمة الافتراضية 900)، `GROK_TRANSLATE_SANDBOX`، `AGY_BIN`، `AGY_TIMEOUT` (القيمة الافتراضية 900)،
-`OPENCODE_BIN`، `OPENCODE_TIMEOUT` (القيمة الافتراضية 600)، `OPENROUTER_BASE_URL`
-(يتطلب `https://`)، `OPENROUTER_TIMEOUT` (القيمة الافتراضية 900)،
-`OPENROUTER_PREFLIGHT_TIMEOUT` (القيمة الافتراضية 30). يُشرح كل منها بالتفصيل في
-قسم الموفّر الخاص به.
+المتغيرات الاختيارية: `XAI_BASE_URL` (الافتراضي `https://api.x.ai/v1`)،
+`CLAUDE_TIMEOUT` (بالثواني لكل استدعاء، الافتراضي 900)، `CODEX_BIN`، `CODEX_TIMEOUT`
+(الافتراضي 600)، `GROK_BIN`، `GROK_HOME` (الافتراضي `~/.grok`)، `GROK_TIMEOUT`
+(الافتراضي 900)، `GROK_TRANSLATE_SANDBOX`، `AGY_BIN`، `AGY_TIMEOUT` (الافتراضي 900)،
+`OPENCODE_BIN`، `OPENCODE_TIMEOUT` (الافتراضي 600)، `OPENROUTER_BASE_URL`
+(يتطلب `https://`)، `OPENROUTER_TIMEOUT` (الافتراضي 900)،
+`OPENROUTER_PREFLIGHT_TIMEOUT` (الافتراضي 30). ترد تفاصيل كل منها في
+قسم مزوّد الخدمة المعني.
 
-## البدء
+## الخطوات الأولى
 
 ```bash
 # un fichier
@@ -118,118 +119,119 @@ aipmt --source_dir content/fr --target_dir content/en --source_lang fr --target_
 aipmt --use_gemini --file document.md --target_dir out/ --target_lang ja
 ```
 
-تؤدي ترجمة `document.md` إلى الإسبانية إلى إنشاء `document-es.md` داخل `--target_dir`؛
-ومع `--include_model`، تُنشئ `document-es-gpt-5.6-terra.md`. ويصبح الامتداد
-دائمًا `.md` — إذ يعطي `article.mdx` الملف `article-en.md` — إلا مع
-`--keep_filename`، الذي يحتفظ بالاسم الأصلي. ويجري تخطي ترجمة موجودة مسبقًا
-من دون `--force`.
+ينتج عن ترجمة `document.md` إلى الإسبانية الملف `document-es.md` في `--target_dir`؛
+ومع `--include_model`، ينتج `document-es-gpt-5.6-terra.md`. يصبح الامتداد
+دائمًا `.md` — فينتج عن `article.mdx` الملف `article-en.md` — إلا مع
+`--keep_filename`، الذي يحافظ على الاسم الأصلي. تُتخطّى الترجمة الموجودة
+مسبقًا ما لم يُستخدم `--force`.
 
-رموز الخروج: `0` إذا نجح كل شيء أو جرى تخطيه، و`1` إذا بقي ملف
-فاشل (تظهر قائمته في مخرجات الخطأ)، و`2` إذا كان السبب في الإعداد.
-لا يُكتب الملف الفاشل أبدًا، حتى إذا فشلت عملية الكتابة نفسها:
-يُكتب المحتوى بجواره ثم يُعاد تسميته. يكفي إعادة التشغيل.
+رموز الخروج: `0` إذا نجح كل شيء أو جرى تخطّيه، و`1` إذا بقي ملف
+فاشل (تظهر القائمة في مخرج الخطأ)، و`2` إذا كان السبب في الإعداد.
+لا يُكتب ملف فاشل أبدًا، حتى لو فشلت عملية الكتابة نفسها:
+يُكتب المحتوى في ملف مجاور ثم يُعاد تسميته. تكفي إعادة التشغيل.
 
 ## أي نموذج تختار
 
-جرى القياس على مستندين حقيقيين، ترجمهما كل نموذج إلى اللغات الأربع عشرة
-نفسها. **الرقم هو عدد اللغات، من أصل أربع عشرة، التي تُكتب فيها
-الترجمة ولا يختلف فيها شيء عن المصدر.**
+أُجريت القياسات على مستندين حقيقيين، ترجمهما كل نموذج إلى
+اللغات الأربع عشرة نفسها. **يمثّل الرقم عدد اللغات، من أصل أربع عشرة، التي
+كُتبت ترجمتها دون أي اختلاف عن المصدر.**
 
-| النموذج                | كيفية الوصول إليه                 | مقال رصد كثيف | ملف README هذا    | ما الذي يختلف، وفي كم لغة                                                                                                                          |
+| النموذج                | طريقة الوصول إليه                 | مقال رصد كثيف | ملف README هذا    | ما يختلف، وفي كم لغة                                                                                                                          |
 | --------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Gemini 3.8 Flash**  | اشتراك Google (Antigravity)   | ✅ 14/14                | ✅ 14/14     | لا شيء، في كلا المستندين                                                                                                                                 |
-| **Claude Sonnet 5.5** | مفتاح API من Anthropic                 | ✅ 14/14                | ✅ 14/14     | لا شيء، في كلا المستندين                                                                                                                                 |
-| **Gemini 3.7 Flash**  | مفتاح API من Google                    | ✅ 14/14                | ⚠️ 13/14     | لغة واحدة من 14: كلمة إضافية بالخط العريض (ja)                                                                                                                      |
-| **Gemini 3.7 Flash**  | اشتراك Google (Antigravity)   | ✅ 14/14                | ⚠️ 13/14     | لغة واحدة من 14: كلمة أقل بالخط العريض (ko)                                                                                                                     |
-| **GPT-5.6 Sol**       | اشتراك ChatGPT، أو مفتاح OpenAI | ✅ 14/14                | ⚠️ 12/14     | لغتان من 14: كلمة أقل بالخط العريض (ar, ja)                                                                                                                |
-| **GLM-5.2**           | مفتاح OpenRouter                    | ✅ 14/14                | ⚠️ 11/14     | 3 لغات من 14: كلمة أقل بالخط العريض (hi, ja, ko)                                                                                                            |
-| Claude Sonnet 5       | اشتراك Claude (Claude Code)   | ⚠️ 13/14                | ⚠️ 13/14     | لغة واحدة من 14 في المقال: كلمة إضافية بالخط العريض (zh)؛ ولغة واحدة في ملف README هذا: سطر جدول ملتصق بالسطر السابق، ومخفي عند العرض (ar)            |
-| Claude Haiku 4.5      | اشتراك Claude (Claude Code)   | ⚠️ 11/14                | ✅ 14/14     | 3 لغات في المقال: عنوان قسم انتقل إلى المستوى 1 (en, pl, ro)؛ وفي ملف README هذا، لا شيء في المقارن، لكن الروابط الداخلية مكررة بالإنجليزية |
-| Claude Sonnet 5       | مفتاح API من Anthropic                 | ⚠️ 11/14                | ⚠️ 12/14     | 3 لغات في المقال: ظهور كتلة شيفرة (es, de, hi)؛ ولغتان في ملف README هذا: رابط بلا ترميزه (sv)، وكلمة بالخط العريض (zh)                              |
-| Claude Haiku 4.5      | مفتاح API من Anthropic                 | ⚠️ 7/14                 | ✅ 14/14     | 7 لغات في المقال: عنوان قسم انتقل إلى المستوى 1 — وبقي بالفرنسية في اليابانية؛ لا شيء في ملف README هذا                                              |
-| Claude Haiku 5.5      | مفتاح API من Anthropic                 | ⚠️ 11/14                | ❌ 12/14     | 3 لغات في المقال: عنوان قسم تغيّر مستواه أو تكرر (ja, ko, zh)؛ وفي ملف README هذا، رُفضت لغتان، وفُقدت شيفرات مضمنة (ar, hi)    |
-| Qwen 3.7 Flash        | مفتاح OpenRouter                    | ❌ 8/14                 | ⚠️ 10/14     | رُفضت لغة واحدة في المقال، وانحرفت 5 لغات أخرى؛ وفي ملف README هذا، وُضعت نحو أربعين كلمة داخل `code` (ar)                                                    |
-| Grok 4.6              | اشتراك Grok                   | ❌ 8/14                 | غير مقيّم     | رُفضت 5 لغات من 14 بسبب عدم إرجاع الشيفرات المضمنة وعناوين URL؛ وتختلف الهولندية في كل شيء                                                               |
-| GPT-OSS 20B           | نموذج محلي (Ollama)             | ❌ 7/14                 | لم يُعَد قياسه | رُفضت 4 لغات من 14: كان النموذج يترك فيها مقاطع بالفرنسية، فأوقفتها آلية الحماية                                                                  |
-| MiMo v2.5 (مجاني)   | OpenCode Zen، بلا حساب         | ❌ 11/14                | لم يُعَد قياسه | رُفضت لغة واحدة؛ وفُقد قسم باللغة البولندية                                                                                                                  |
-| Mistral Large         | مفتاح API من Mistral                   | ❌ 5/14                 | ❌ 1/14      | **يختفي قسم كامل**: لغة واحدة في المقال (hi)، و3 في ملف README هذا (ar, hi, ko) — كما رُفضت 3 لغات في المقال                                |
-| DeepSeek V4 Flash     | مفتاح OpenRouter                    | ❌ 3/14                 | لم يُعَد قياسه | رُفضت 10 لغات من 14؛ 37 دقيقة لكل لغة                                                                                                                 |
-| Claude Opus 5.5       | اشتراك Claude (Claude Code)   | ❌ 0/14                 | ✅ 14/14     | رفضت آليات حماية Opus المقال باللغات الأربع عشرة بسبب خبر موجز عن الأحياء؛ ولا شيء في ملف README هذا                                               |
+| **Gemini 3.8 Flash**  | اشتراك Google ‏(Antigravity)   | ✅ 14/14                | ✅ 14/14     | لا شيء في أيٍّ من المستندين                                                                                                                                 |
+| **Claude Sonnet 5.5** | مفتاح API من Anthropic                 | ✅ 14/14                | ✅ 14/14     | لا شيء في أيٍّ من المستندين                                                                                                                                 |
+| **Gemini 3.7 Flash**  | مفتاح API من Google                    | ✅ 14/14                | ⚠️ 13/14     | لغة واحدة من أصل 14: كلمة إضافية بخط عريض (ja)                                                                                                                      |
+| **Gemini 3.7 Flash**  | اشتراك Google ‏(Antigravity)   | ✅ 14/14                | ⚠️ 13/14     | لغة واحدة من أصل 14: كلمة أقل بخط عريض (ko)                                                                                                                     |
+| **GPT-5.6 Sol**       | اشتراك ChatGPT، أو مفتاح OpenAI | ✅ 14/14                | ⚠️ 12/14     | لغتان من أصل 14: كلمة أقل بخط عريض (ar, ja)                                                                                                                |
+| **GLM-5.2**           | مفتاح OpenRouter                    | ✅ 14/14                | ⚠️ 11/14     | 3 لغات من أصل 14: كلمة أقل بخط عريض (hi, ja, ko)                                                                                                            |
+| Claude Sonnet 5       | اشتراك Claude ‏(Claude Code)   | ⚠️ 13/14                | ⚠️ 13/14     | لغة واحدة من أصل 14 في المقال: كلمة إضافية بخط عريض (zh)؛ ولغة واحدة في ملف README هذا: صف جدول ملتصق بالسابق، مخفي عند العرض (ar)            |
+| Claude Haiku 4.5      | اشتراك Claude ‏(Claude Code)   | ⚠️ 11/14                | ✅ 14/14     | 3 لغات في المقال: عنوان قسم انتقل إلى المستوى 1 ‏(en, pl, ro)؛ وفي ملف README هذا، لا اختلاف وفق أداة المقارنة، لكن الروابط الداخلية مكررة بالإنجليزية |
+| Claude Sonnet 5       | مفتاح API من Anthropic                 | ⚠️ 11/14                | ⚠️ 12/14     | 3 لغات في المقال: ظهور كتلة شيفرة (es, de, hi)؛ ولغتان في ملف README هذا: رابط دون ترميزه (sv)، وكلمة بخط عريض (zh)                              |
+| Claude Haiku 4.5      | مفتاح API من Anthropic                 | ⚠️ 7/14                 | ✅ 14/14     | 7 لغات في المقال: عنوان قسم انتقل إلى المستوى 1 — وبقي بالفرنسية في الترجمة اليابانية؛ ولا شيء في ملف README هذا                                              |
+| Claude Haiku 5.5      | مفتاح API من Anthropic                 | ⚠️ 11/14                | ❌ 12/14     | 3 لغات في المقال: عنوان قسم تغيّر مستواه أو تكرر (ja, ko, zh)؛ وفي ملف README هذا، رُفضت لغتان بسبب فقدان شيفرات مضمّنة (ar, hi)    |
+| Qwen 3.7 Flash        | مفتاح OpenRouter                    | ❌ 8/14                 | ⚠️ 10/14     | رُفضت لغة واحدة في المقال، واختلفت 5 لغات أخرى؛ وفي ملف README هذا، وُضعت نحو أربعين كلمة داخل `code` ‏(ar)                                                    |
+| Grok 4.6              | اشتراك Grok                   | ❌ 8/14                 | لم يُقيَّم     | رُفضت 5 لغات من أصل 14 بسبب عدم إعادة الشيفرات المضمّنة وعناوين URL؛ واختلفت الهولندية في كل شيء                                                               |
+| GPT-OSS 20B           | نموذج محلي (Ollama)             | ❌ 7/14                 | لم يُعَد قياسه | رُفضت 4 لغات من أصل 14: أبقى النموذج فيها مقاطع بالفرنسية، فمنعتها آلية الحماية                                                                  |
+| MiMo v2.5 (مجاني)   | OpenCode Zen، دون حساب         | ❌ 11/14                | لم يُعَد قياسه | رُفضت لغة واحدة؛ وفُقد قسم في البولندية                                                                                                                  |
+| Mistral Large         | مفتاح API من Mistral                   | ❌ 5/14                 | ❌ 1/14      | **اختفاء قسم كامل**: لغة واحدة في المقال (hi)، و3 لغات في ملف README هذا (ar, hi, ko) — إضافةً إلى رفض 3 لغات في المقال                                |
+| DeepSeek V4 Flash     | مفتاح OpenRouter                    | ❌ 3/14                 | لم يُعَد قياسه | رُفضت 10 لغات من أصل 14؛ و37 دقيقة لكل لغة                                                                                                                 |
+| Claude Opus 5.5       | اشتراك Claude ‏(Claude Code)   | ❌ 0/14                 | ✅ 14/14     | رفضت آليات الحماية في Opus المقال باللغات الأربع عشرة بسبب خبر موجز في علم الأحياء؛ ولا شيء في ملف README هذا                                               |
 
-|     | معنى الرمز                                                                                                                                                                                 |
+|     | دلالة الرمز                                                                                                                                                                                 |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✅  | تُرجمت اللغات الأربع عشرة، ولا يختلف شيء عن المصدر                                                                                                                                       |
-| ⚠️  | تُرجمت اللغات الأربع عشرة؛ وما يختلف هو **الترميز** — كلمة بالخط العريض، أو `code`، أو رابط يفقد أقواسه المربعة. لا ينقص أي نص، أو عنوان URL، أو كتلة شيفرة، أو قسم |
-| ❌  | تعذرت ترجمة لغة واحدة على الأقل — فيُرفض الملف ولا يُكتب — **أو** ينقص محتوى من ملف مكتوب                                                                      |
+| ✅  | تُرجمت اللغات الأربع عشرة، دون أي اختلاف عن المصدر                                                                                                                                       |
+| ⚠️  | تُرجمت اللغات الأربع عشرة؛ والاختلاف في **الترميز** — كلمة بخط عريض، أو `code`، أو رابط يفقد أقواسه. لا يوجد نص أو عنوان URL أو كتلة شيفرة أو قسم مفقود |
+| ❌  | تعذّرت ترجمة لغة واحدة على الأقل — فيُرفض الملف ولا يُكتب — **أو** يوجد محتوى مفقود في ملف مكتوب                                                                      |
 
 ما ينبغي استخلاصه:
 
 - **الترجمة المرفوضة ليست ترجمة تالفة.** عندما يُفقد رمز
-  عند الإرجاع، لا يُكتب الملف وتُحتسب اللغة على أنها
-  مرفوضة. وهذا ما يحدث لـ Grok في المقال: تُفقد أربع شيفرات مضمنة
-  وثلاثة عناوين URL منذ المقطع الأول، في أنظمة الكتابة الخمسة غير اللاتينية.
-- **يمكن لنموذج أن يرفض مستندًا كاملًا بسبب جملة واحدة.** يترجم Opus 5.5
-  ملف README هذا بلا أي اختلاف، لكنه لا يترجم أي مقال رصد: توقف
-  آليات حمايته الاستجابة عند خبر موجز عن الأحياء. لا يُكتب
+  في النتيجة، لا يُكتب الملف وتُحتسب اللغة
+  مرفوضة. هذا ما يحدث مع Grok في المقال: أربع شيفرات مضمّنة
+  وثلاثة عناوين URL مفقودة منذ المقطع الأول، في أنظمة الكتابة الخمسة غير اللاتينية.
+- **قد يرفض نموذج مستندًا كاملًا بسبب جملة واحدة.** يترجم Opus 5.5
+  ملف README هذا دون أي اختلاف، لكنه لا يترجم أي مقال رصد:
+  توقف آليات الحماية فيه الإجابة عند خبر موجز في علم الأحياء. لا يُكتب
   الملف، ويوضح aipmt السبب.
-- **لا تشمل شبكة الأمان هذه العناوين، أو الجداول، أو بيانات front matter، أو
-  النص.** فالنموذج الذي يحذف قسمًا يعيد ملفًا يكتبه البرنامج
-  بلا اعتراض — كما يحدث مع Mistral. لا يمكن استبدال هذه العناصر
-  برمز، ولا تتحقق منها آليات الحماية الحالية؛
-  يكتشف `scripts/compare_structure.py` القسم المفقود، ولكن بعد وقوع الأمر.
-- **لا توجد درجة لـ Grok في ملف README هذا**: انتهت صلاحية جلسة CLI الخاصة به بعد اثنتي عشرة
-  لغة، منها إحدى عشرة بلا اختلاف. ولا تُقيّم حملة متوقفة.
-- **كثافة المستند أهم من اللغة.** يصمد Grok مع ملفات
-  README العادية ويتعثر في مقال محمّل بالروابط، بما في ذلك
-  باللغة الهولندية.
+- **شبكة الحماية هذه لا تشمل العناوين أو الجداول أو البيانات
+  الوصفية الافتتاحية أو النص.** قد يحذف نموذج قسمًا ويعيد ملفًا تكتبه الأداة
+  دون اعتراض — وهذا ما يحدث مع Mistral. لا يمكن
+  استبدال هذه العناصر برمز، ولا تفحصها آليات الحماية الحالية؛
+  يكتشف `scripts/compare_structure.py` القسم المفقود، لكن بعد وقوع الأمر.
+- **لا يوجد تقييم لـGrok على ملف README هذا**: انتهت صلاحية جلسته في CLI بعد اثنتي عشرة
+  لغة، منها إحدى عشرة دون اختلاف. لا تُقيَّم حملة قياس انقطعت.
+- **كثافة المستند أهم من اللغة.** ينجح Grok مع
+  ملفات README العادية، ويتعثر مع مقال مليء بالروابط، حتى
+  بالهولندية.
 
-التواريخ والمستندات: جرى قياس عمود «ملف README هذا» في 9 سبتمبر 2026
-على مراجعة ثابتة من هذا الملف (785 سطرًا، و285 شيفرة مضمنة، و89 سطرًا
-من الجداول)، عُدّلت منذ ذلك الحين — باستثناء أسطر Antigravity وClaude Code،
-التي قِيست في 26 سبتمبر على المراجعة المنشورة مع الإصدار 1.14.0، وهي أقصر
-(600 سطر، و257 شيفرة مضمنة، و85 سطرًا من الجداول)، وأسطر Claude
-Sonnet 5.5 وHaiku 5.5 وHaiku 4.5 عبر API، التي قِيست في 18 أكتوبر على
-المراجعة نفسها. يأتي عمود «مقال رصد كثيف» من حملة
-4 و5 سبتمبر على مقال من 589 سطرًا، باستثناء سطر Grok، الذي أُعيد قياسه في
-9 سبتمبر على نسخة أخرى من الرصد نفسه، وأسطر Antigravity وClaude
-Code، التي قِيست في 26 سبتمبر على المقال نفسه، وأسطر Claude الثلاثة هذه،
-في 18 أكتوبر. توجد الجداول الكاملة، والمدد، والمنهجية
-في [القياسات التفصيلية](#قياسات-مفصلة).
+التواريخ والمستندات: قيس عمود «ملف README هذا» في 9 سبتمبر 2026
+على مراجعة ثابتة من هذا الملف (785 سطرًا، و285 شيفرة مضمّنة، و89 صفًا
+في الجداول)، ثم عُدّل الملف لاحقًا — باستثناء صفوف Antigravity وClaude Code،
+التي قيسَت في 26 سبتمبر على المراجعة المنشورة مع الإصدار 1.14.0، وهي أقصر
+(600 سطر، و257 شيفرة مضمّنة، و85 صفًا في الجداول)، وصفوف Claude
+Sonnet 5.5 وHaiku 5.5 وHaiku 4.5 عبر API، التي قيسَت في 18 أكتوبر على
+المراجعة نفسها. يأتي عمود «مقال رصد كثيف» من حملة القياس في
+4 و5 سبتمبر على مقال من 589 سطرًا، باستثناء صف Grok، الذي أُعيد قياسه في
+9 سبتمبر على إصدار آخر من نشرة الرصد نفسها، وصفوف Antigravity وClaude
+Code، التي قيسَت في 26 سبتمبر على المقال نفسه، وصفوف Claude الثلاثة
+هذه، التي قيسَت في 18 أكتوبر. تتوفر الجداول الكاملة والمدد وبروتوكول القياس
+في [القياسات التفصيلية](#القياسات-التفصيلية).
 ## جميع الخيارات
 
 | الخيار                   | الوصف                                                                                                   |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `--file`                 | ملف Markdown واحد للترجمة (بديل لـ `--source_dir`)                                             |
-| `--source_dir`           | مجلد المصدر الذي يحتوي على ملفات Markdown (الافتراضي: `content/posts`)                                   |
+| `--file`                 | ملف Markdown واحد لترجمته (بديل عن `--source_dir`)                                             |
+| `--source_dir`           | المجلد المصدر الذي يحتوي على ملفات Markdown (الافتراضي: `content/posts`)                                   |
 | `--target_dir`           | مجلد الإخراج للملفات المترجمة (الافتراضي: `traductions_en`)                                    |
 | `--source_lang`          | لغة المصدر (الافتراضي: `fr`)                                                                                  |
-| `--target_lang`          | اللغة المستهدفة (الافتراضي: `en`)                                                                                   |
+| `--target_lang`          | اللغة الهدف (الافتراضي: `en`)                                                                                   |
 | `--model`                | نموذج محدد لاستخدامه                                                                                  |
 | `--eco`                  | استخدام النماذج الاقتصادية                                                                              |
-| `--use_mistral`          | استخدام API الخاص بـ Mistral AI                                                                                     |
-| `--use_claude`           | استخدام API الخاص بـ Claude                                                                                         |
-| `--use_gemini`           | استخدام API الخاص بـ Gemini                                                                                         |
-| `--use_grok`             | استخدام API الخاص بـ xAI (Grok) — يتطلب `XAI_API_KEY`                                                           |
-| `--use_codex`            | استخدام CLI الخاص بـ Codex ضمن حصة اشتراك ChatGPT                                                    |
-| `--use_grok_cli`         | استخدام CLI الخاص بـ Grok ضمن حصة اشتراك Grok                                                        |
-| `--use_antigravity`      | استخدام CLI الخاص بـ Antigravity ‏(`agy`) ضمن حصة اشتراك Google AI Pro أو Ultra                       |
-| `--use_claude_code`      | استخدام CLI الخاص بـ Claude Code ‏(`claude -p`) ضمن حصة اشتراك Claude Pro أو Max                      |
-| `--use_opencode`         | استخدام OpenCode ‏(مفتوح المصدر) مع مزوّد الخدمة المضبوط في OpenCode؛ يتطلب `--model provider/modèle` |
+| `--use_mistral`          | استخدام API الخاصة بـ Mistral AI                                                                                     |
+| `--use_claude`           | استخدام API الخاصة بـ Claude                                                                                         |
+| `--use_gemini`           | استخدام API الخاصة بـ Gemini                                                                                         |
+| `--use_grok`             | استخدام API الخاصة بـ xAI (Grok) — يتطلب `XAI_API_KEY`                                                           |
+| `--use_codex`            | استخدام CLI الخاصة بـ Codex ضمن حصة اشتراك ChatGPT                                                    |
+| `--use_grok_cli`         | استخدام CLI الخاصة بـ Grok ضمن حصة اشتراك Grok                                                        |
+| `--use_antigravity`      | استخدام CLI الخاصة بـ Antigravity (`agy`) ضمن حصة اشتراك Google AI Pro أو Ultra                       |
+| `--use_claude_code`      | استخدام CLI الخاصة بـ Claude Code (`claude -p`) ضمن حصة اشتراك Claude Pro أو Max                      |
+| `--use_opencode`         | استخدام OpenCode (مفتوح المصدر) مع المزوّد المضبوط في OpenCode؛ يتطلب `--model provider/modèle` |
 | `--use_openrouter`       | استخدام OpenRouter — يتطلب `OPENROUTER_API_KEY` و`--model fournisseur/modèle`                          |
 | `--force`                | فرض إعادة الترجمة                                                                                       |
 | `--keep_filename`        | الاحتفاظ باسم الملف الأصلي                                                                          |
-| `--news`                 | وضع الأخبار: يحمي الاقتباسات الإنجليزية ويتعامل مع العلامات وفقًا للغة                                      |
+| `--news`                 | وضع الأخبار: يحمي الاقتباسات الإنجليزية، ويدير الأعلام بحسب اللغة                                      |
 | `--add_translation_note` | إضافة ملاحظة ترجمة                                                                                |
 | `--note_position`        | موضع الملاحظة: `top` أو `bottom` (الافتراضي) أو `both`                                                     |
-| `--note_format`          | تنسيق الملاحظة: `legacy` (الافتراضي، فقرة عريضة) أو `marker`                                            |
+| `--note_format`          | تنسيق الملاحظة: `legacy` (الافتراضي، فقرة بخط عريض) أو `marker`                                            |
 | `--include_model`        | تضمين اسم النموذج في ملف الإخراج                                                            |
-| `--reasoning_effort`     | جهد الاستدلال في GPT-5.x: ‏`none`/`low`/`medium`/`high`/`xhigh`                                         |
+| `--reasoning_effort`     | جهد الاستدلال في GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-علامات `--use_*` التسع متنافية: يُرفض الجمع بين اثنتين منها.
+الأعلام التسعة `--use_*` متنافية فيما بينها: يُرفض الجمع بين اثنين
+منها.
 
-## مزوّدو الخدمة
+## المزوّدون
 
-### عبر API: ‏OpenAI وMistral وClaude وGemini وGrok
+### عبر API: OpenAI وMistral وClaude وGemini وGrok
 
 ```bash
 aipmt --source_dir content/fr --target_dir content/en --target_lang en             # OpenAI, défaut
@@ -239,25 +241,26 @@ aipmt --use_gemini  --source_dir content/fr --target_dir content/ja --target_lan
 aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lang pt
 ```
 
-ينقل `--eco` الاستخدام إلى الفئة الاقتصادية لدى كل مزوّد خدمة.
+ينقل `--eco` إلى الفئة الاقتصادية لدى كل مزوّد.
 
-| مزوّد الخدمة    | الجودة (الافتراضي)                                      | الاقتصادي (`--eco`)      |
-| ----------- | ----------------------------------------------------- | ------------------------- |
-| OpenAI      | `gpt-5.6-terra`                                       | `gpt-5.6-luna`            |
-| Claude      | `claude-sonnet-5-5`                                   | `claude-haiku-5-5`        |
-| Mistral     | `mistral-large-latest`                                | `mistral-small-latest`    |
-| Gemini      | `gemini-3.7-flash`                                    | `gemini-3.1-flash-lite`   |
-| Codex       | `gpt-5.6-sol` (وكذلك `terra` و`luna` عبر `--model`) | `gpt-5.6-luna`            |
-| Grok API    | `grok-4.6`                                            | `grok-4.3`                |
-| Grok CLI    | `grok-4.6`                                            | `grok-4.5`                |
-| Antigravity | `gemini-3.8-flash-medium`                             | `gemini-3.7-flash-low`    |
-| Claude Code | `sonnet`، بجهد `low`                                | مماثل — لا تأثير لـ `--eco` |
-| OpenCode    | `--model provider/modèle` إلزامي                 | مماثل — لا تأثير لـ `--eco` |
-| OpenRouter  | `--model fournisseur/modèle` إلزامي              | مماثل — لا تأثير لـ `--eco` |
+| المزوّد    | الجودة (الافتراضي)                                                     | الاقتصادي (`--eco`)      |
+| ----------- | -------------------------------------------------------------------- | ------------------------- |
+| OpenAI      | `gpt-5.6-terra`                                                      | `gpt-5.6-luna`            |
+| Claude      | `claude-sonnet-5-5`                                                  | `claude-haiku-5-5`        |
+| Mistral     | `mistral-large-latest`                                               | `mistral-small-latest`    |
+| Gemini      | `gemini-3.7-flash`                                                   | `gemini-3.1-flash-lite`   |
+| Codex       | `gpt-6.1-sol` (وأيضًا `gpt-5.6-sol` و`terra` و`luna` عبر `--model`) | `gpt-5.6-luna`            |
+| Grok API    | `grok-4.6`                                                           | `grok-4.3`                |
+| Grok CLI    | `grok-4.6`                                                           | `grok-4.5`                |
+| Antigravity | `gemini-3.8-flash-medium`                                            | `gemini-3.7-flash-low`    |
+| Claude Code | `sonnet`، الجهد `low`                                               | نفسه — لا تأثير لـ `--eco` |
+| OpenCode    | `--model provider/modèle` إلزامي                                | نفسه — لا تأثير لـ `--eco` |
+| OpenRouter  | `--model fournisseur/modèle` إلزامي                             | نفسه — لا تأثير لـ `--eco` |
 
-### ضمن اشتراك ChatGPT: ‏`--use_codex`
+### ضمن اشتراك ChatGPT: `--use_codex`
 
-يشغّل CLI الرسمي لـ Codex: تُحتسب الترجمة من حصة اشتراك ChatGPT، من دون مفتاح API أو فوترة حسب الاستخدام.
+يشغّل CLI الرسمية الخاصة بـ Codex: تُخصم الترجمة من حصة
+اشتراك ChatGPT، دون مفتاح API أو فوترة بحسب الاستخدام.
 
 ```bash
 pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo), ou : npm install -g @openai/codex
@@ -266,27 +269,30 @@ aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 ```
 
 - يُبحث عن الملف التنفيذي في `CODEX_BIN`، ثم في `PATH`، ثم في الحزمة
-  `openai-codex-cli-bin`. ولا تتم قراءة `~/.codex/auth.json` مطلقًا.
-- تُزال `OPENAI_API_KEY` و`CODEX_API_KEY` من بيئة العملية
-  الفرعية: وجود مفتاح لا يؤدي مطلقًا إلى التحويل نحو API.
-- يستهلك كل مقطع «رسالة» واحدة على الأقل من نافذة الخمس ساعات — ورسالتين
+  `openai-codex-cli-bin`. ولا يُقرأ `~/.codex/auth.json` مطلقًا.
+- تُزال `OPENAI_API_KEY` و`CODEX_API_KEY` من بيئة
+  العملية الفرعية: وجود مفتاح لا يؤدي مطلقًا إلى التحويل نحو API.
+- يكلّف كل مقطع «رسالة» واحدة على الأقل من نافذة الساعات الخمس — ورسالتين
   إذا فشل التحقق منه وأُعيدت محاولته. تعلن OpenAI، على سبيل
-  التقدير، عن 250-2 000 رسالة/5 ساعات لـ `gpt-5.6-luna` ‏(`--eco`)، وعن
-  10-100 لـ `gpt-5.6-sol` ضمن خطة Plus.
-- يمر `--model gpt-5.6-terra` و`--model gpt-5.6-luna` أيضًا عبر
-  الاشتراك. ويؤدي اختيار نموذج غير متاح للحساب إلى خطأ 400 بالنص «model is
-  not supported when using Codex with a ChatGPT account».
-- هو أبطأ من API، ويتسع الفارق مع حجم المستند: في ملف README هذا،
-  يبلغ الوسيط 6 دقائق و46 ثانية لكل لغة باستخدام `gpt-5.6-sol`، مقابل 36 ثانية
-  باستخدام `gemini-3.7-flash`.
-- يُرفض في CI (إذا كانت `CI` أو `GITHUB_ACTIONS` معرّفة): تتم مصادقة الاشتراك
-  بواسطة ملف جلسة شخصي لا مكان له على مشغّل
-  مشترك.
-- المتغيرات: `CODEX_BIN` و`CODEX_TIMEOUT` (بالثواني لكل مقطع، الافتراضي 600).
+  التقدير، عن 250-2 000 رسالة/5 ساعات لـ `gpt-5.6-luna` (`--eco`)،
+  و10-100 لـ `gpt-5.6-sol` ضمن خطة Plus.
+- تعمل `--model gpt-5.6-sol`، التي كانت الافتراضية حتى الإصدار 1.16.3، و`--model gpt-5.6-terra`
+  و`--model gpt-5.6-luna` أيضًا عبر الاشتراك.
+- لا يؤدي ردّ 429 من الخادم إلى ضياع الملف: يعيد Codex الاتصال تلقائيًا،
+  وينتظر aipmt انتهاء الدور، وإذا استمر ردّ 429 حتى النهاية، تُعاد محاولة
+  المقطع بعد 30 ثم 60 ثانية. أما النموذج الذي لا يحق للحساب استخدامه فيُرجع خطأ 400 «النموذج
+  غير مدعوم عند استخدام Codex بحساب ChatGPT».
+- أبطأ من API، ويتسع الفارق مع حجم المستند: في ملف README هذا،
+  بلغ الزمن الوسيط لكل لغة 6 دقائق و46 ثانية باستخدام `gpt-5.6-sol`، مقابل 36 ثانية باستخدام
+  `gemini-3.7-flash`.
+- يُرفض في CI (عند تعيين `CI` أو `GITHUB_ACTIONS`): تتم مصادقة الاشتراك
+  عبر ملف جلسة شخصي، ولا مكان له على بيئة تشغيل
+  مشتركة.
+- المتغيرات: `CODEX_BIN`، و`CODEX_TIMEOUT` (الثواني لكل مقطع، الافتراضي 600).
 
-### ضمن اشتراك Grok: ‏`--use_grok_cli`
+### ضمن اشتراك Grok: `--use_grok_cli`
 
-المبدأ نفسه مع CLI الرسمي لـ Grok Build، ضمن اشتراك SuperGrok أو
+المبدأ نفسه مع CLI الرسمية Grok Build، ضمن اشتراك SuperGrok أو
 X Premium+.
 
 ```bash
@@ -295,28 +301,28 @@ grok login                                      # ou : grok login --device-code
 aipmt --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
 ```
 
-- **عزل أضعف من Codex.** لا ينطبق sandbox الخاص بنظام التشغيل في Grok
-  على كثير من أجهزة Linux الحديثة (AppArmor ومقابس بيئة تشغيل
-  الحاويات)، كما أن ملف التعريف الذي يتعذر تطبيقه يبدأ من دون عزل
-  بصمت. لذلك لا يطلب البرنامج النصي أي ملف تعريف افتراضيًا، ويعلن ذلك،
-  ويعتمد على قواعد `--deny` في CLI، ومنها قاعدة الالتقاط الشامل `*` — وهي الطبقة
-  الوحيدة التي ترفض بدء التشغيل بدلًا من إزالة الحماية من دون
-  الإفصاح عن ذلك. يفرض `GROK_TRANSLATE_SANDBOX=read-only` استخدام sandbox الخاص بنظام التشغيل،
-  ويفشل بدء التشغيل إذا تعذر على الجهاز توفيره.
-- الحصة أسبوعية ومشتركة مع Chat وImagine وVoice، ولا يوجد أي
-  أمر يسمح بقراءتها: قد تستهلك دفعة من الاستخدام الحواري
-  من دون تنبيه.
-- المتغيرات: `GROK_BIN` و`GROK_HOME` (مجلد CLI، الافتراضي `~/.grok`)،
+- **عزل أضعف من Codex.** لا تُطبَّق بيئة العزل على مستوى نظام التشغيل الخاصة بـ Grok
+  على كثير من أجهزة Linux الحديثة (AppArmor، ومقابس بيئة تشغيل
+  الحاويات)، وعندما يتعذر تطبيق ملف تعريف، يبدأ التشغيل دون عزل
+  بصمت. لذلك لا يطلب السكربت أي ملف تعريف افتراضيًا، ويعلن ذلك،
+  ويعتمد على قواعد `--deny` في CLI، ومنها القاعدة الشاملة `*` — وهي
+  الطبقة الوحيدة التي ترفض بدء التشغيل بدلًا من إزالة الحماية دون
+  إبلاغ. يفرض `GROK_TRANSLATE_SANDBOX=read-only` بيئة العزل على مستوى نظام التشغيل، ويفشل بدء التشغيل
+  إذا لم يستطع الجهاز توفيرها.
+- الحصة أسبوعية، ومشتركة مع Chat وImagine وVoice، ولا يوجد
+  أمر يتيح قراءتها: قد تستهلك دفعة ترجمة من حصة المحادثات
+  دون تنبيه.
+- المتغيرات: `GROK_BIN`، و`GROK_HOME` (مجلد CLI، الافتراضي `~/.grok`)،
   و`GROK_TIMEOUT` (الافتراضي 900)، و`GROK_TRANSLATE_SANDBOX`.
 
-### ضمن اشتراك Google: ‏`--use_antigravity`
+### ضمن اشتراك Google: `--use_antigravity`
 
-المبدأ نفسه مع `agy`، وهو CLI الرسمي لـ Antigravity: بالنسبة إلى من يدفع مقابل Google
-AI Pro أو Ultra، تُحتسب الترجمة من حصة الاشتراك بدلًا
-من احتساب تكلفتها حسب الرموز. وهذا هو المسار الوحيد إلى هذه الحصة: لم يعد Gemini CLI
-يخدم هذه الحسابات منذ 18 يونيو 2026
+المبدأ نفسه مع `agy`، وهي CLI الرسمية الخاصة بـ Antigravity: لمن يدفع مقابل Google
+AI Pro أو Ultra، تُخصم الترجمة من حصة الاشتراك بدلًا
+من فوترتها بحسب الرموز. هذا هو المسار الوحيد للوصول إلى تلك الحصة: لم تعد Gemini CLI
+تخدم هذه الحسابات منذ 18 يونيو 2026
 ([الإعلان](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/))،
-ولا تقبل حزمة SDK الخاصة بـ Antigravity سوى مفتاح API أو مشروع Google Cloud.
+ولا تقبل SDK الخاصة بـ Antigravity سوى مفتاح API أو مشروع Google Cloud.
 
 ```bash
 # agy 1.2.11 ou plus récent : https://antigravity.google/docs/cli/install/
@@ -325,152 +331,152 @@ aipmt --use_antigravity --file README.md --target_dir . --target_lang en
 agy -p /usage --output-format json   # quota restant, sans en consommer
 ```
 
-- **لا يبقى أي مسار مدفوع مفتوحًا.** لا يتلقى agy من
-  بيئتكم سوى قائمة مغلقة من المتغيرات — `PATH`، واللغة والمنطقة الزمنية،
-  والطرفية، والهوية، والوكلاء والشهادات، وناقل الجلسة — ولا يتلقى أي مفتاح:
-  إذ تتسبب عدة متغيرات خاصة به في تحويل المكالمة من دون عرض أي شيء (وفق القياس:
+- **لا يبقى أي مسار مدفوع متاحًا.** لا تتلقى agy من
+  بيئتك سوى قائمة مغلقة من المتغيرات — `PATH`، واللغة والمنطقة الزمنية،
+  والطرفية، والهوية، والوكلاء والشهادات، وناقل الجلسة — دون أي مفتاح:
+  إذ تحوّل عدة متغيرات فيها مسار الاستدعاء دون إظهار أي شيء (وفق القياس:
   يرسل أحدها المستند إلى بوابة تابعة لجهة خارجية، ويرسله آخر إلى مشروع
-  Google Cloud خاضع للفوترة)، وكانت قائمة الحظر تغفل متغيرات في كل مراجعة.
-  قبل كل مقطع، يجب أن يُظهر `agy -p /config`، الذي لا يستهلك أي حصة،
-  أن أرصدة الذكاء الاصطناعي المدفوعة معطّلة، من دون مفتاح API أو مشروع Google Cloud — ويُعد
-  غياب الإعداد سببًا للرفض — وإلا فلن يُترجم شيء؛ ثم يجب أن يثبت سجل كل
-  مكالمة استخدام الاشتراك (`authMethod=consumer`)، وإلا تُرفض
-  الاستجابة.
-- **العزل.** تعمل كل مكالمة داخل مجلد شخصي خاص
-  ومؤقت، مع وكيل ترجمة بلا أدوات: لا تدخل إليه إعداداتكم أو قواعدكم أو
-  إضافاتكم أو خوادم MCP أو hooks الخاصة بـ agy، ولا يُضاف شيء إلى
-  سجلكم، ويبقى تسجيل الدخول في مخزن المفاتيح الذي لا يقرأه aipmt مطلقًا.
-  إذا تعذر العثور على الوكيل، يعود agy بصمت إلى وكيل البرمجة
+  Google Cloud مدفوع)، وكانت قائمة المنع تُغفل بعضها في كل مراجعة.
+  قبل أي مقطع، يجب أن يُظهر `agy -p /config`، الذي لا يستهلك أي حصة،
+  أن أرصدة الذكاء الاصطناعي المدفوعة معطّلة، دون مفتاح API أو مشروع Google Cloud — ويعني
+  غياب أحد الإعدادات الرفض — وإلا فلن يُترجَم شيء؛ ثم يجب أن يثبت سجل كل
+  استدعاء استخدام الاشتراك (`authMethod=consumer`)، وإلا
+  تُرفض الإجابة.
+- **العزل.** يعمل كل استدعاء في مجلد منزلي خاص
+  ومؤقت، مع وكيل ترجمة بلا أدوات: لا تدخل إليه إعداداتك ولا قواعدك
+  ولا إضافاتك ولا خوادم MCP ولا خطافات agy، ولا يُضاف شيء إلى
+  سجلك، وتبقى بيانات تسجيل الدخول في مخزن المفاتيح الذي لا يقرأه aipmt مطلقًا.
+  إذا تعذر العثور على الوكيل، تعود agy بصمت إلى وكيل البرمجة
   وأدواته: يجب أن يؤكد سطر كامل من السجل استخدام الوكيل الصحيح — ولا
-  يحل مستند يقتبس هذه الرسالة محل ذلك — وإلا يُرفض.
-- **المنصات**: ‏Linux، ضمن جلسة تحتوي على مخزن مفاتيح (ناقل جلسة
-  D-Bus وSecret Service)؛ ويُقبل macOS من دون أن يكون قد خضع للقياس. يُرفض
-  على Windows، حيث لا يقرأ agy المتغيرات التي تعزل كل مكالمة، وكذلك
-  على Linux من دون ناقل جلسة — جلسة SSH أو حاوية أو خادم: إذ يخزن agy
-  رمزه المميز هناك في ملف داخل `~/.gemini` تحجبه عملية العزل. يحدث
-  الرفض قبل أي تشغيل، مع ذكر سببه، بدلًا من انتظار
-  رمز تسجيل الدخول لمدة دقيقة.
-- **النماذج**: نماذج `agy models`. تحمل نماذج Gemini مستوى الجهد في أسمائها
-  (`gemini-3.8-flash-medium`…): يُرفض الاسم الذي لا يحتوي على لاحقة قبل المكالمة،
+  يُغني عنه مستند يقتبس هذه الرسالة — وإلا يُرفض الاستدعاء.
+- **المنصات**: Linux، ضمن جلسة تحتوي على مخزن مفاتيح (ناقل جلسة
+  D-Bus، وSecret Service)؛ ويُقبل macOS دون إجراء قياسات عليه. يُرفض
+  في Windows، حيث لا تقرأ agy المتغيرات التي تعزل كل استدعاء، وكذلك
+  في Linux دون ناقل جلسة — جلسة SSH أو حاوية أو خادم: إذ تحفظ agy
+  رمزها المميز هناك في ملف داخل `~/.gemini`، يحجبه العزل. يحدث
+  الرفض قبل أي تشغيل، مع توضيح سببه، بدلًا من الانتظار دقيقة
+  للحصول على رمز تسجيل دخول.
+- **النماذج**: النماذج الموجودة في `agy models`. تتضمن أسماء نماذج Gemini مستوى الجهد
+  (`gemini-3.8-flash-medium`…): يُرفض أي اسم بلا لاحقة قبل الاستدعاء،
   ولا تأثير لـ `--reasoning_effort`. الافتراضي هو `gemini-3.8-flash-medium`،
-  و`gemini-3.7-flash-low` عند استخدام `--eco`؛ وترد الحملات التي اعتمدت هذه النماذج
-  في [القياسات المفصلة](#قياسات-مفصلة). لدى Claude وGPT-OSS
-  حصة خاصة بهما أصغر بكثير: نحو 1٪ من نافذة
-  الخمس ساعات لكل مكالمة مقاسة، مقابل 0.05٪ في Flash.
-- **الحصة**: لكل مجموعة نافذة من خمس ساعات وأخرى أسبوعية،
-  بما يتناسب مع تكلفة الرموز. وفق القياس على حساب المؤلف: نحو
-  16 نقطة من نافذة الخمس ساعات لكل مليون محرف من المصدر عند استخدام
-  `gemini-3.8-flash-medium`، و14 عند استخدام `gemini-3.7-flash-medium`، ومن 7 إلى 8 عند
-  الجهد المنخفض — ومن ثم يستهلك ملف README من 40 000 محرف أكثر بقليل من
+  و`gemini-3.7-flash-low` عند استخدام `--eco`؛ وحملات القياس التي استُند إليها في تحديدهما
+  موضحة في [القياسات التفصيلية](#القياسات-التفصيلية). لدى Claude وGPT-OSS
+  حصة خاصة بهما، أصغر بكثير: نحو 1 % من نافذة
+  الساعات الخمس لكل استدعاء مقاس، مقابل 0,05 % مع Flash.
+- **الحصة**: لكل مجموعة نافذة من 5 ساعات وأخرى أسبوعية،
+  بما يتناسب مع تكلفة الرموز. وفق القياسات على حساب المؤلف: نحو
+  16 نقطة من نافذة الساعات الخمس لكل مليون محرف مصدر عند استخدام
+  `gemini-3.8-flash-medium`، و14 عند استخدام `gemini-3.7-flash-medium`، و7 إلى 8 عند
+  الجهد المنخفض — لذا يكلّف ملف README من 40 000 محرف أكثر بقليل من
   نصف نقطة. أما الحد الأسبوعي فيعتمد على الفئة. تتبع إعادة المحاولة
-  ما يعلنه agy قابلًا لإعادة المحاولة؛ وفي غياب ذلك، لا تُعاد مطلقًا
-  محاولة نافذة مستنفدة: بل تتسبب في فشل كل ملف حتى وقت إعادة الضبط
+  ما تصرّح agy بإمكانية إعادة محاولته؛ وإلا فلا تُعاد المحاولة مطلقًا عند نفاد
+  النافذة: إذ يؤدي ذلك إلى فشل كل ملف حتى موعد إعادة الضبط
   الذي يعرضه `/usage`.
-- **أبطأ من API**: في مقالة القياسات الكثيفة، يبلغ الوسيط 3 دقائق و59 ثانية لكل
-  لغة باستخدام `gemini-3.8-flash-medium`، و3 دقائق و14 ثانية باستخدام
+- **أبطأ من API**: في مقالة القياسات الكثيفة، بلغ الزمن الوسيط لكل
+  لغة 3 دقائق و59 ثانية باستخدام `gemini-3.8-flash-medium`، و3 دقائق و14 ثانية باستخدام
   `gemini-3.7-flash-medium`، مقابل دقيقة و18 ثانية لـ Gemini 3.7 Flash عبر API.
-- **المقاطعة**: يؤدي Ctrl-C أو إغلاق الطرفية إلى إيقاف agy مع
-  الأمر بدلًا من تركه يُكمل دورته مستهلكًا حصتكم؛ وينطبق
-  الأمر نفسه على Codex وGrok CLI وOpenCode. عند استخدام `nohup`، تستمر الترجمة.
-- يُرفض في CI (إذا كانت `CI` أو `GITHUB_ACTIONS` معرّفة): يعيش تسجيل الدخول داخل
-  مخزن مفاتيح شخصي. على المشغّل، استخدم `--use_gemini` مع `GOOGLE_API_KEY`.
+- **المقاطعة**: يؤدي الضغط على Ctrl-C، أو إغلاق الطرفية، إلى إيقاف agy مع
+  الأمر، بدلًا من تركه يُنهي دوره على حساب حصتك؛ وينطبق الأمر
+  نفسه على Codex وGrok CLI وOpenCode. عند استخدام `nohup`، تستمر الترجمة.
+- يُرفض في CI (عند تعيين `CI` أو `GITHUB_ACTIONS`): تُحفظ بيانات تسجيل الدخول في
+  مخزن مفاتيح شخصي. في بيئة تشغيل آلية، استخدم `--use_gemini` مع `GOOGLE_API_KEY`.
 - المتغيرات: `AGY_BIN` (وإلا `PATH`، ثم `~/.local/bin/agy`)،
-  و`AGY_TIMEOUT` (بالثواني لكل مقطع، بما في ذلك بدء التشغيل، الافتراضي 900).
+  و`AGY_TIMEOUT` (الثواني لكل مقطع، بما فيها بدء التشغيل، الافتراضي 900).
 
-**شروط الاستخدام: حسابكم هو الذي يتحمل المسؤولية.** تحظر
-[شروط Antigravity](https://antigravity.google/terms) (القسم 6) و[الأسئلة الشائعة](https://antigravity.google/docs/faq/)
-الوصول إلى الخدمة عبر برنامج تابع لجهة خارجية باستخدام تسجيل دخول Antigravity — وتذكر
-Claude Code وOpenClaw وOpenCode بالاسم — تحت طائلة تعليق الحساب. لا يقرأ aipmt
+**شروط الاستخدام: حسابك هو الذي يتحمل المسؤولية.** تحظر
+[شروط Antigravity](https://antigravity.google/terms) (القسم 6)
+و[الأسئلة الشائعة](https://antigravity.google/docs/faq/) الوصول إلى الخدمة
+من خلال برنامج تابع لجهة خارجية باستخدام بيانات تسجيل الدخول إلى Antigravity — وتذكر Claude Code
+وOpenClaw وOpenCode بالاسم — تحت طائلة تعليق الحساب. لا يقرأ aipmt
 الرمز المميز ولا يعيد استخدامه: بل يشغّل الملف التنفيذي الرسمي في
-[وضع headless](https://antigravity.google/docs/cli/headless/) الذي توثقه Google
-للبرامج النصية وCI. وقد رأى أحد أعضاء Google أن تشغيل `agy -p` من
-برنامج نصي محلي للعمل الشخصي أمر «اعتيادي»
+[وضع التشغيل دون واجهة](https://antigravity.google/docs/cli/headless/) الذي توثّقه Google
+للسكربتات وCI. وقد عدّ أحد أعضاء Google تشغيل `agy -p` من سكربت محلي لإنجاز عمله الخاص ممارسة «اعتيادية»
 ([المنتدى الرسمي، 25 سبتمبر 2026، إجابة غير تعاقدية](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829))؛
-ولا يوجد نص يحسم حالة أداة موزّعة مثل هذه.
+ولا يوجد نص يحسم حالة أداة موزعة مثل هذه.
 
-**المستندات العامة فقط.** وفقًا للقسم 5 من الشروط نفسها، قد
-تُستخدم المحادثات — المطالبات والاستجابات والبيانات الوصفية — لتحسين
-منتجات Google وتعلّمها الآلي، وقد يراجعها
-أشخاص، حتى مع الاشتراك المدفوع. يتم الانسحاب عبر الإعداد
-`enableTelemetry`، ذي التأثير غير الموثق، والذي لا يضبطه aipmt؛ ولا تنتقل إعدادات
-agy الخاصة بكم إلى بيئته المعزولة. لا تمرروا عبره أي معلومات سرية.
-### حول اشتراك Claude: `--use_claude_code`
+**المستندات العامة فقط.** وفق القسم 5 من الشروط نفسها، يمكن استخدام
+التبادلات — المطالبات والإجابات والبيانات الوصفية — لتحسين
+منتجات Google والتعلّم الآلي لديها، كما قد يراجعها
+بشر، حتى مع الاشتراك المدفوع. يتم الانسحاب عبر الإعداد
+`enableTelemetry`، الذي لم يُوثَّق تأثيره، ولا يضبطه aipmt؛ ولا تنتقل إعداداتك
+في agy إلى بيئته المعزولة. لا تمرّر عبره أي شيء سري.
+### عبر اشتراك Claude: `--use_claude_code`
 
-ينطبق المبدأ نفسه على `claude`، وهو CLI الرسمي لـ Claude Code، في وضع `-p`: بالنسبة إلى
-من يدفع مقابل Claude Pro أو Max، تُحتسب الترجمة من حصة
-الاشتراك بدلًا من احتساب تكلفتها بحسب عدد الرموز. يجب عدم الخلط بينه وبين
-`--use_claude`، وهي API الخاصة بـ Anthropic، التي تُحاسب بحسب الاستخدام.
+المبدأ نفسه مع `claude`، أداة CLI الرسمية لـ Claude Code، في وضع `-p`: لمن
+يدفع اشتراك Claude Pro أو Max، تُخصم الترجمة من حصة
+الاشتراك بدلًا من احتساب تكلفتها بحسب الرموز. ويجب عدم الخلط بينها وبين
+`--use_claude`، واجهة API الخاصة بـ Anthropic، التي تُحاسَب بحسب الاستخدام.
 
 ```bash
 claude                                   # une fois : /login avec le compte de l'abonnement
 aipmt --use_claude_code --file README.md --target_dir . --target_lang en
 ```
 
-- **لا يبقى أي مسار مدفوع مفتوحًا، وكل استدعاء يثبت ذلك.** لا يتلقى Claude
-  Code من بيئتكم سوى قائمة مغلقة من المتغيرات — لا
-  مفتاح API، ولا رمز وصول، ولا مزود سحابي، ولا علامة لجلسة Claude Code
-  التي سيُشغَّل منها aipmt. قبل المقطع الأول، يجب أن يعرض `claude auth status`
-  اتصال الاشتراك، من دون مفتاح Console، ويجب أن يؤكد ذلك `/usage`، الذي لا يستهلك
-  أي حصة؛ ويؤكده كل استدعاء بدوره في حدث
-  التهيئة الخاص به، وإلا تُرفض الاستجابة.
-- **عطّلوا «الاستخدام الإضافي»** (claude.ai، الإعدادات ← الاستخدام) لكي
-  يظل المبلغ صفر يورو: إذا كان مفعّلًا، فإنه يتولى المتابعة عند استنفاد نافذة
-  الاستخدام ويحتسب رسومًا من دون عرض خطأ. يوقف aipmt الترجمة بمجرد أن يشير
-  بيان حصة أحد الاستدعاءات إلى ذلك، لكن ذلك الاستدعاء يكون قد احتُسب بالفعل.
-- **حصة مشتركة مع جلسات Claude Code الخاصة بكم.** يبلّغ كل استدعاء عن
-  استخدام نافذة الخمس ساعات والنافذة الأسبوعية؛ وعند تجاوز 80%
-  (`AIPMT_CLAUDE_MAX_UTILIZATION`)، لا يُشغَّل أي مقطع إضافي، حتى لا
-  تُستنفد الحصة التي تستخدمونها في عملكم.
-- **العزل.** يعمل كل استدعاء من دون أدوات، داخل مجلد خاص
-  ومؤقت، وفي وضع بلا تخصيص: لا تُحمَّل ملفات `CLAUDE.md` الخاصة بكم، ولا plugins،
-  ولا hooks، ولا خوادم MCP، ولا الإعدادات، ولا يُحتفظ بأي شيء من
-  الجلسة. تُعطَّل المرفقات: يظل `@chemin` في مستندكم
-  نصًا ولا يفتح أي ملف (وفق القياس).
-- **النماذج**: `sonnet` افتراضيًا، بجهد `low`، وكذلك في `--eco`:
-  لا يغيّر `--eco` شيئًا في هذا المسار. عند قياسهما على المستندات نفسها، كان `haiku`
-  أبطأ بمرتين — فهو يستدل من دون إمكان منعه من ذلك — مقابل
-  تكلفة أقل بقليل، بينما يرفض `opus` محتويات متعلقة بعلم الأحياء (النقطة
+- **لا يبقى أي مسار مدفوع متاحًا، وكل استدعاء يثبت ذلك.** لا يتلقى Claude
+  Code من بيئتك سوى قائمة مغلقة من المتغيرات — لا
+  مفتاح API، ولا رمز وصول، ولا مزوّد سحابي، ولا علامة لجلسة Claude Code
+  التي قد يُشغَّل منها aipmt. قبل المقطع الأول، يجب أن يُظهر `claude auth status`
+  الاتصال بالاشتراك، دون مفتاح Console، وأن يؤكد ذلك `/usage`، الذي لا يستهلك
+  أي حصة؛ ويؤكد كل استدعاء ذلك بدوره في
+  حدث تهيئته، وإلا تُرفض الاستجابة.
+- **عطّل «الاستخدام الإضافي»** (claude.ai، الإعدادات ← الاستخدام) حتى
+  تبقى التكلفة صفر يورو: عند تفعيله، يتولى الاستمرار بعد استنفاد حصة النافذة الزمنية،
+  ويحتسب رسومًا دون إظهار خطأ. يوقف aipmt الترجمة بمجرد أن يشير تقرير
+  حصة أحد الاستدعاءات إلى ذلك، لكن هذا الاستدعاء يكون قد احتُسب بالفعل.
+- **الحصة مشتركة مع جلسات Claude Code الخاصة بك.** يبلغ كل استدعاء
+  عن استخدام نافذة الساعات الـ 5 والنافذة الأسبوعية؛ وعند تجاوز 80 %
+  (`AIPMT_CLAUDE_MAX_UTILIZATION`)، لا يُطلَق أي مقطع إضافي، حتى لا
+  تُستنفد الحصة اللازمة لعملك.
+- **العزل.** يعمل كل استدعاء دون أدوات، داخل مجلد خاص
+  ومؤقت، وفي وضع بلا تخصيص: لا تُحمَّل ملفات `CLAUDE.md` الخاصة بك، ولا إضافاتك،
+  ولا الخطافات، ولا خوادم MCP، ولا إعداداتك، ولا يُحتفَظ بأي شيء من
+  الجلسة. المرفقات معطلة: يظل `@chemin` داخل مستندك
+  نصًا ولا يفتح أي ملف (تم التحقق بالقياس).
+- **النماذج**: `sonnet` افتراضيًا، بمستوى الجهد `low`، وكذلك في `--eco`:
+  لا يغيّر `--eco` شيئًا في هذا المسار. عند القياس على المستندات نفسها، كان `haiku`
+  أبطأ بمرتين — فهو يستدل دون إمكانية منعه — مقابل
+  تكلفة أقل بقليل، بينما يرفض `opus` محتويات في علم الأحياء (النقطة
   التالية). يظل كلاهما متاحًا عبر `--model`؛ وتتبع هذه الأسماء المستعارة
   أحدث نموذج في عائلتها. يُرفض `fable` ومتغيرات `[1m]`،
-  لأنها تستخدم أرصدة مدفوعة. يضبط `--reasoning_effort` مقدار الجهد،
-  ولا تستفيد الترجمة منه بشيء: مقدار الاستدلال المقاس معدوم أو شبه معدوم.
-- **يرفض Opus بعض محتويات علم الأحياء.** ضوابط الحماية فيه أكثر
-  صرامة من ضوابط Sonnet، وتحذر رسالة الخطأ من Anthropic من أنها
-  «قد تصنّف أحيانًا الأعمال القريبة من أبحاث علم الأحياء». وفق القياس: أدت نبذة
-  رصد عن 279 جزيئًا مولّدًا إلى رفض المقال باللغات الأربع عشرة.
-  لا يُكتب أي شيء: يرفض aipmt الاستجابة المقطوعة، ويسمّي
-  ضوابط الحماية، ويوصي بـ `--model sonnet`.
-- يُرفض في CI (عند تعريف `CI` أو `GITHUB_ACTIONS`) وتحت Windows (غير مقاس).
+  لأنها تستخدم الأرصدة المدفوعة. يضبط `--reasoning_effort` مستوى الجهد،
+  الذي لا تستفيد منه الترجمة: الاستدلال المقاس معدوم أو شبه معدوم.
+- **يرفض Opus بعض محتويات علم الأحياء.** ضوابطه الوقائية
+  أشد من ضوابط Sonnet، وتحذّر رسالة الخطأ من Anthropic بأنها
+  «قد تُصنّف أحيانًا أعمالًا قريبة من أبحاث علم الأحياء على أنها مخالفة». وفق القياس: تسبب خبر موجز
+  عن 279 جزيئًا مولّدًا في رفض المقال باللغات الأربع عشرة.
+  لا يُكتب أي شيء: يرفض aipmt الاستجابة المقطوعة، ويذكر
+  الضوابط الوقائية، ويوصي بـ `--model sonnet`.
+- يُرفض في CI (عند تعيين `CI` أو `GITHUB_ACTIONS`) وعلى Windows (لم يُقَس).
 - المتغيرات: `AIPMT_CLAUDE_BIN` (وإلا `PATH`، ثم `~/.local/bin/claude`)،
-  و`AIPMT_CLAUDE_TIMEOUT` (عدد الثواني لكل مقطع، الافتراضي 900)،
-  و`AIPMT_CLAUDE_MAX_UTILIZATION` (الافتراضي 0.8)، و`CLAUDE_CONFIG_DIR` (حساب
-  Claude Code، ولا يؤخذ أبدًا من ملف `.env` خاص بالمشروع)؛ ومجلدات العمل ضمن
+  `AIPMT_CLAUDE_TIMEOUT` (ثوانٍ لكل مقطع، الافتراضي 900)،
+  `AIPMT_CLAUDE_MAX_UTILIZATION` (الافتراضي 0.8)، `CLAUDE_CONFIG_DIR` (حساب
+  Claude Code، ولا يؤخذ مطلقًا من `.env` خاص بمشروع)؛ ومجلدات العمل تحت
   `XDG_CACHE_HOME/aipmt/claude-code` (الافتراضي `~/.cache`).
 
-**شروط الاستخدام: حسابكم هو الذي يتحمل المسؤولية.** لا تمنع
+**شروط الاستخدام: حسابك هو الذي يتحمل المسؤولية.** لا تمنع
 [الصفحة القانونية لـ Claude Code](https://code.claude.com/docs/en/legal-and-compliance)
-«مستخدمًا نهائيًا من تسجيل الدخول إلى نسخة Claude Code الثنائية غير المعدّلة
+«مستخدمًا نهائيًا من تسجيل الدخول إلى الملف التنفيذي غير المعدّل لـ Claude Code
 باستخدام اشتراك Claude الخاص به»: وهذا ما يفعله aipmt، إذ يشغّل
-النسخة الثنائية الرسمية ولا يقرأ الرمز مطلقًا. لكن Anthropic «لا تسمح
-لمطوري الجهات الخارجية […] بتوجيه الطلبات عبر بيانات اعتماد خطط Free أو Pro أو Max
+الملف التنفيذي الرسمي ولا يقرأ رمز الوصول مطلقًا. لكن Anthropic «لا تسمح
+لمطوّري الجهات الخارجية […] بتمرير الطلبات عبر بيانات اعتماد خطط Free أو Pro أو Max
 نيابةً عن مستخدميهم»، وتفضّل مفتاح API للأدوات
-الخارجية، «بما فيها المشاريع مفتوحة المصدر»، وتحتفظ بحق احتساب
+التابعة لجهات خارجية، «بما في ذلك المشاريع مفتوحة المصدر»، وتحتفظ بحق خصم
 استخدامها من الأرصدة المدفوعة
 ([مساعدة Claude](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)).
-لا يوجد نص يحسم حالة أداة موزعة تشغّل النسخة الثنائية.
+لا يوجد نص يحسم حالة أداة موزّعة تشغّل الملف التنفيذي.
 
 **البيانات**: في حسابات Free وPro وMax، ينطبق تدريب النماذج
 أيضًا على Claude Code عندما يسمح إعداد الخصوصية بذلك
 ([صفحة البيانات](https://code.claude.com/docs/en/data-usage)). لا يحتفظ aipmt
-بأي نص محادثة محلي (`--no-session-persistence`). لا تمرروا عبره
-أي محتوى سري.
+بأي سجل محلي للمحادثة (`--no-session-persistence`). لا تمرّر عبره
+أي معلومات سرية.
 
-### إلى المزوّد الذي تختارونه: `--use_opencode`
+### إلى المزوّد الذي تختاره: `--use_opencode`
 
-[OpenCode](https://opencode.ai) هو وكيل برمجي مفتوح المصدر (MIT)
-يوجّه الطلبات إلى المزوّدين المضبوطين داخله: مفتاح API، أو اشتراك،
-أو بوابة OpenCode Zen (نماذج مجانية بلا حساب)، أو نموذج محلي. وقد
-قيس هنا مساران من البداية إلى النهاية، هما Zen وOllama.
+[OpenCode](https://opencode.ai) وكيل برمجة مفتوح المصدر (MIT)
+يوجّه الطلبات إلى المزوّدين المُعَدّين داخله: مفتاح API، أو اشتراك،
+أو بوابة OpenCode Zen (نماذج مجانية، دون حساب)، أو نموذج محلي. جرى
+هنا قياس مسارين من البداية إلى النهاية، هما Zen وOllama.
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash   # ou : npm install -g opencode-ai
@@ -485,44 +491,44 @@ aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . -
 aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir . --target_lang ja
 ```
 
-`--model` إلزامي: من دونه، سيعود OpenCode إلى نموذج مجاني
-قد تُستخدم محادثاته في التدريب، وهذا الاختيار لا يُتخذ
-نيابةً عنكم.
+`--model` إلزامي: بدونه، سيعود OpenCode إلى نموذج مجاني
+قد تُستخدم محادثاته في التدريب، ولا يُتخذ هذا القرار
+نيابةً عنك.
 
 العزل في كل استدعاء:
 
-- يعرّف إعداد inline، له الأولوية على إعداداتكم، وكيلًا باسم `aipmt`
-  تُرفض فيه جميع الأدوات (`permission: { "*": "deny" }`)، مع تعطيل
-  مشاركة الجلسة، واستخدام `--pure`، وعدم استخدام `--auto` أبدًا؛
-- مجلد عمل مؤقت وفارغ، مع ضبط `OPENCODE_DISABLE_PROJECT_CONFIG` و
-  `OPENCODE_DISABLE_CLAUDE_CODE` — فمن دونهما، يحقن OpenCode في
-  الموجّه ملف `AGENTS.md` من المجلد الحالي و`~/.claude/CLAUDE.md`. ويظل
-  `~/.config/opencode/AGENTS.md` العام محقونًا، إذ لا يسمح OpenCode
-  باستبعاده؛
-- عقد للإخراج: رمز خروج 0، وعدم وجود أي حدث `error`، وعدم إجراء أي استدعاء
-  لأداة، وأن تكون الخطوة الأخيرة في `stop`، وأن يكون النص غير فارغ، وأن يكون الوكيل `aipmt`
-  قد حُمّل فعلًا — فوجود `--agent` غير معروف لا يتسبب في فشل OpenCode، بل
-  يعود بصمت إلى وكيل البرمجة؛
-- لا يُمرر أي مفتاح لـ `aipmt`، باستثناء `OPENCODE_API_KEY`، وهو مفتاح
-  OpenCode نفسه. يُضبط المزوّدون داخل OpenCode، لا في
-  ملف `.env` الخاص بـ `aipmt`.
+- يحدّد إعداد مضمّن، له الأولوية على إعدادك، وكيلًا `aipmt`
+  تُرفض جميع أدواته (`permission: { "*": "deny" }`)، مع تعطيل مشاركة
+  الجلسة، و`--pure`، ودون `--auto` مطلقًا؛
+- مجلد عمل مؤقت وفارغ، مع تعيين `OPENCODE_DISABLE_PROJECT_CONFIG` و
+  `OPENCODE_DISABLE_CLAUDE_CODE` — بدونهما، يُدرج OpenCode في
+  الموجّه `AGENTS.md` الخاص بالمجلد الحالي و`~/.claude/CLAUDE.md`. ويظل
+  `~/.config/opencode/AGENTS.md` العام مُدرَجًا، إذ لا يتيح OpenCode
+  استبعاده؛
+- شروط المخرجات: رمز الخروج 0، وعدم وجود أي حدث `error` أو أي استدعاء
+  لأداة، وأن تكون الخطوة الأخيرة في `stop`، والنص غير فارغ، والوكيل `aipmt`
+  محمّلًا بالفعل — لا يتسبب `--agent` غير المعروف في فشل OpenCode،
+  بل يعود بصمت إلى وكيل البرمجة؛
+- لا يُمرَّر أي مفتاح من `aipmt`، باستثناء `OPENCODE_API_KEY`، مفتاح
+  OpenCode نفسه. يُعَدّ المزوّدون داخل OpenCode، وليس داخل
+  `.env` الخاص بـ `aipmt`.
 
-ما ينبغي معرفته:
+معلومات ينبغي معرفتها:
 
-- نماذج Zen المجانية متغيرة، وحدودها غير موثقة، وقد
-  تُستخدم محادثاتها في التدريب: تصلح لوثائق
-  عامة، لا لمحتوى خاص.
-- يجب أن يوفر النموذج المحلي نافذة سياق لا تقل عن 16 ألف token، إذ يصل طول
-  المقاطع إلى 16,000 محرف. وغالبًا ما يضبط Ollama القيمة على 4,096: لذا يجب
-  استخدام `Modelfile` مع `PARAMETER num_ctx 32768`.
-- لا تأثير لـ `--eco`؛ ويُمرر `--reasoning_effort` كما هو بوصفه
-  `--variant` الخاص بـ OpenCode.
+- نماذج Zen المجانية متغيرة، وحدودها غير موثّقة،
+  وقد تُستخدم محادثاتها في التدريب: تصلح للوثائق
+  العامة، ولا تصلح للمحتوى الخاص.
+- يجب أن يوفّر النموذج المحلي سياقًا لا يقل عن 16 k من الرموز، إذ
+  تصل المقاطع إلى 16 000 حرف. غالبًا ما يضبط Ollama السياق على 4 096: استخدم
+  `Modelfile` مع `PARAMETER num_ctx 32768`.
+- لا تأثير لـ `--eco`؛ ويُمرَّر `--reasoning_effort` كما هو
+  بوصفه `--variant` لـ OpenCode.
 - يسجّل OpenCode كل جلسة في `~/.local/share/opencode/`.
 - المتغيرات: `OPENCODE_BIN` (وإلا `PATH`، ثم `~/.opencode/bin/opencode`)،
-  و`OPENCODE_TIMEOUT` (عدد الثواني لكل مقطع، الافتراضي 600). يُمرر `OPENCODE_CONFIG`
+  `OPENCODE_TIMEOUT` (ثوانٍ لكل مقطع، الافتراضي 600). يُمرَّر `OPENCODE_CONFIG`
   كما هو إلى OpenCode.
 
-مثال على نموذج محلي عبر Ollama، في `~/.config/opencode/opencode.json`:
+مثال لنموذج محلي عبر Ollama، في `~/.config/opencode/opencode.json`:
 
 ```bash
 ollama pull gpt-oss:20b
@@ -550,225 +556,225 @@ ollama create gpt-oss-20b-32k -f gpt-oss-20b-32k.Modelfile
 }
 ```
 
-يعطّل `reasoningEffort: "none"` الاستدلال الذي يفعّله Ollama افتراضيًا في هذه
+يعطّل `reasoningEffort: "none"` التفكير الذي يفعّله Ollama افتراضيًا في هذه
 النماذج، والذي لا يستطيع Modelfile تعطيله. وفق القياس على جملة من
-ست كلمات: 919 token للاستدلال و68 ثانية من دون الخيار، مقابل 9 tokens معه.
+ست كلمات: 919 رمز تفكير و68 ثانية دون الخيار، و9 رموز معه.
 
 ### إلى أكثر من 400 نموذج: `--use_openrouter`
 
-OpenRouter هو موجّه تُحسب تكلفته بحسب الاستخدام، من رصيد موحد، أمام
-نماذج تستضيفها جهات خارجية — ومنها النماذج الصينية المفتوحة التي لا
-يتيحها هنا أي مزوّد آخر.
+OpenRouter موجّه طلبات تُحتسب تكلفته بحسب الاستخدام، من رصيد واحد، إلى
+نماذج تستضيفها جهات خارجية — ومنها النماذج الصينية المفتوحة التي لا يتيحها
+أي مزوّد آخر هنا.
 
 ```bash
 aipmt --use_openrouter --model z-ai/glm-5.2 --file README.md --target_dir . --target_lang en
 ```
 
-`--model` إلزامي. يضبط فحص تمهيدي، يُنفَّذ قبل احتساب أي رسوم،
+`--model` إلزامي. يعالج فحص تمهيدي، يُنفَّذ قبل احتساب أي رسوم،
 خاصيتين للتوجيه:
 
-- **يُقدَّم النموذج نفسه عبر عشرات المستضيفين ذوي الحدود القصوى
-  المختلفة** — في `z-ai/glm-5.3-flash`، يوجد 23 مستضيفًا، أحدهم محدود عند
-  2,048 token للإخراج. يقرأ الفحص التمهيدي `/api/v1/models/{modèle}/endpoints`،
-  ويستبعد المستضيفين الذين يقل حد إخراجهم عن 8,000 token أو تكون حالتهم متدهورة، ثم
-  يثبّت الآخرين باستخدام `allow_fallbacks: false`.
-- **يُحاسب الاستدلال بسعر الإخراج** — 107 tokens مقابل 2 في
-  استجابة «حسنًا» من `z-ai/glm-5.2`. وهو معطّل افتراضيًا؛ أما النماذج
-  التي تفرضه فتتلقى أدنى جهد تقبله، إذ قد يؤدي الإعداد الافتراضي
-  للكتالوج إلى استنفاد الإخراج قبل نهاية الترجمة.
-  ويظل `--reasoning_effort` صاحب الأولوية.
+- **تستضيف النموذج نفسه عشرات الجهات بحدود قصوى
+  مختلفة** — في `z-ai/glm-5.3-flash`، يوجد 23 مضيفًا، أحدهم محدود بـ
+  2 048 رمزًا للمخرجات. يقرأ الفحص التمهيدي `/api/v1/models/{modèle}/endpoints`،
+  ويستبعد المضيفين الذين يتيحون أقل من 8 000 رمز للمخرجات أو يعانون تدهورًا في الحالة،
+  ويثبّت الباقين باستخدام `allow_fallbacks: false`.
+- **تُحتسب تكلفة الاستدلال بسعر المخرجات** — 107 رموز مقابل 2
+  لإجابة «حسنًا» من `z-ai/glm-5.2`. يُعطَّل افتراضيًا؛ أما النماذج
+  التي تفرضه فتتلقى أدنى مستوى جهد تقبله، لأن الإعداد الافتراضي في
+  الكتالوج قد يستنفد سعة المخرجات قبل انتهاء الترجمة.
+  وتظل الأولوية لـ `--reasoning_effort`.
 
 ```
 → OpenRouter : 30 hébergeur(s) épinglé(s) sur 33, contexte 1048576 tokens,
   sortie plafonnée à 32768, raisonnement coupé
 ```
 
-- تأتي نافذة السياق من الكتالوج. يُرفض أي نموذج تقل نافذته عن 16,400 token
-  قبل أي استدعاء: 8,400 للموجّه والمقطع، و8,000 للإخراج
-  كحد أدنى.
-- يؤدي غياب slug من الكتالوج، أو تعذر الوصول إلى الكتالوج، أو عدم وجود
-  مستضيف يستوفي الحد الأقصى، إلى إيقاف الأمر.
-- إن `finish_reason=length` المصحوب بإخراج فارغ يعني أن الاستدلال استهلك الميزانية،
-  لا أن النص اقتُطع: وتوضح الرسالة الفرق.
+- تأتي نافذة السياق من الكتالوج. يُرفض أي نموذج يقل سياقه عن 16 400 رمز
+  قبل أي استدعاء: 8 400 للموجّه والمقطع، و8 000 للمخرجات
+  على الأقل.
+- يتوقف الأمر إذا غاب المعرّف المختصر عن الكتالوج، أو تعذّر الوصول إلى الكتالوج،
+  أو لم يتوفر مضيف يفي بالحد المطلوب.
+- يشير `finish_reason=length` مع مخرجات فارغة إلى استهلاك الميزانية في
+  الاستدلال، وليس إلى اقتطاع النص: وتوضّح الرسالة هذا الفرق.
 - لا تأثير لـ `--eco`.
 - المتغيرات: `OPENROUTER_API_KEY` (<https://openrouter.ai/keys>)،
-  و`OPENROUTER_BASE_URL` (الافتراضي `https://openrouter.ai/api/v1`، مع اشتراط `https://`)،
-  و`OPENROUTER_TIMEOUT` (الافتراضي 900)، و`OPENROUTER_PREFLIGHT_TIMEOUT`
+  `OPENROUTER_BASE_URL` (الافتراضي `https://openrouter.ai/api/v1`، مع اشتراط `https://`)،
+  `OPENROUTER_TIMEOUT` (الافتراضي 900)، `OPENROUTER_PREFLIGHT_TIMEOUT`
   (الافتراضي 30).
 
 ### ملاحظة الترجمة
 
 يضيف `--add_translation_note` ملاحظة، في `bottom` (الافتراضي)، أو `top` (بعد
-front matter)، أو `both` (`--note_position`)، بالتنسيق `legacy` (فقرة
-بخط عريض، وهو الافتراضي) أو `marker` (`--note_format`). أما التنسيق `marker` فهو
+البيانات الوصفية الافتتاحية)، أو `both` (`--note_position`)، بتنسيق `legacy` (فقرة
+بخط عريض، وهو الافتراضي)، أو `marker` (`--note_format`). تنسيق `marker` هو
 تعريف مرجعي غير مرئي في Markdown،
 `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`،
-تتبعه عبارة مقتبسة بخط عريض: قابلة للقراءة على GitHub، ويمكن لـ plugin من نوع remark
-استغلالها أثناء البناء.
+يتبعه اقتباس بخط عريض: يمكن قراءته على GitHub، واستخدامه أثناء البناء عبر
+إضافة remark.
 
 ```bash
 aipmt --file article.mdx --target_lang en --add_translation_note --note_format marker --note_position top
 ```
 
-## قياسات مفصلة
+## القياسات التفصيلية
 
-جميع القياسات لترجمات نُفذت فعليًا باستخدام `aipmt` إلى
+جميع القياسات لترجمات نُفّذت فعلًا باستخدام `aipmt`، إلى
 أربع عشرة لغة: en، es، de، it، pt، nl، pl، sv، ro، ja، ko، zh، ar، hi.
-يحصي عمود **المكتوبة** الملفات التي سمحت ضوابط الحماية بتمريرها؛ ويحصي عمود **بلا
-اختلاف** الملفات التي لم يرصد فيها `scripts/compare_structure.py` شيئًا — أي العدد نفسه من
-الأقسام، والعناوين الفرعية، والروابط، وعناوين URL المميزة، وكتل الشيفرة،
-والشيفرات المضمّنة، وصفوف الجداول، وكتل الاقتباس، والكلمات المكتوبة بخط عريض.
+يُحصي **المكتوبة** الملفات التي سمحت آليات التحقق بمرورها؛ ويُحصي **دون
+اختلاف** تلك التي لم يرصد فيها `scripts/compare_structure.py` شيئًا — العدد نفسه من
+الأقسام والعناوين الفرعية والروابط وعناوين URL المتميزة وكتل الشيفرة
+والشيفرات المضمّنة وصفوف الجداول وكتل الاقتباس والكلمات المكتوبة بخط عريض.
 
-تعني عبارة «بلا اختلاف» أن «لا شيء رُصد»، لا أن المحتوى «متطابق»: فالمقارن
-يحصي العناصر من دون قراءة محتواها. ولا يرصد حذف عنوان من
-المستوى 4، ولا استبدال نص شيفرة مضمنة، ولا تبديل علم،
-ولا عرض رابط داخلي بقوس زائد،
-`[texte]((#ancre))`، يجعله لا يقود إلى أي مكان — كما أنه لا يقيّم
+«دون اختلاف» تعني «لم يُكتشف شيء»، وليس «مطابق»: فأداة المقارنة
+تعدّ العناصر دون قراءة محتواها. لا تُبلّغ عن حذف عنوان من
+المستوى 4، أو استبدال نص شيفرة مضمّنة، أو تبديل علم،
+أو إخراج رابط داخلي بقوس زائد،
+`[texte]((#ancre))`، بحيث لم يعد يؤدي إلى أي مكان — كما أنها لا تقيّم
 اللغة.
 
-### مقال رصد كثيف، بوضع `--news`
+### مقال رصد إخباري كثيف، بوضع `--news`
 
-إصدار من [نشرة رصد الذكاء الاصطناعي في jls42.org](https://jls42.org/fr/news):
+إصدار من [نشرة رصد الذكاء الاصطناعي على jls42.org](https://jls42.org/fr/news):
 589 سطرًا، و140 رابطًا، و21 قسمًا، و3 اقتباسات إنجليزية محمية. حملة
 يومي 4 و5 سبتمبر 2026.
 
-| النموذج                                          | الوصول              | المكتوبة | بلا اختلاف   | الوسيط/اللغة |
+| النموذج                                          | الوصول              | المكتوبة | دون اختلاف   | الوسيط لكل لغة |
 | ----------------------------------------------- | ------------------ | ------- | ------------ | -------------- |
-| `gemini-3.7-flash`                              | API من Google         | 14/14   | ✅ **14/14** | 1 دقيقة و18 ث     |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | اشتراك Google  | 14/14   | ✅ **14/14** | 3 دقائق و59 ث     |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | اشتراك Google  | 14/14   | ✅ **14/14** | 3 دقائق و14 ث     |
-| `claude-sonnet-5-5`                             | API من Anthropic      | 14/14   | ✅ **14/14** | 3 دقائق و37 ث     |
-| `gpt-5.6-sol` (`--use_codex`)                   | اشتراك ChatGPT | 14/14   | ✅ **14/14** | 11 دقيقة و28 ث    |
-| `z-ai/glm-5.2`                                  | OpenRouter         | 14/14   | ✅ **14/14** | 5 دقائق و37 ث     |
-| `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14   | ✅ **14/14** | 26 دقيقة و23 ث    |
-| `sonnet` (`--use_claude_code`)                  | اشتراك Claude  | 14/14   | ⚠️ 13/14     | 6 دقائق و49 ث     |
-| `claude-sonnet-5`                               | API من Anthropic      | 14/14   | ⚠️ 11/14     | 6 دقائق و31 ث     |
-| `haiku` (`--use_claude_code`)                   | اشتراك Claude  | 14/14   | ⚠️ 11/14     | 15 دقيقة و54 ث    |
-| `claude-haiku-5-5`                              | API من Anthropic      | 14/14   | ⚠️ 11/14     | 2 دقيقتان و54 ث     |
-| `claude-haiku-4-5`                              | API من Anthropic      | 14/14   | ⚠️ 7/14      | 6 دقائق و00 ث     |
-| `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14   | ❌ 11/14     | 9 دقائق و27 ث     |
-| `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14   | ❌ 8/14      | 10 دقائق و09 ث    |
-| `ollama/gpt-oss-20b-32k`                        | محلي              | 10/14   | ❌ 7/14      | 12 دقيقة و39 ث    |
-| `mistral-large-latest`                          | API من Mistral        | 11/14   | ❌ 5/14      | 5 دقائق و32 ث     |
-| `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14    | ❌ 3/14      | 37 دقيقة و27 ث    |
-| `grok-4.6` (`--use_grok_cli`)                   | اشتراك Grok    | 1/14    | ❌ 1/14      | 23 دقيقة و11 ث    |
+| `gemini-3.7-flash`                              | API Google         | 14/14   | ✅ **14/14** | 1 min 18 s     |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | اشتراك Google  | 14/14   | ✅ **14/14** | 3 min 59 s     |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | اشتراك Google  | 14/14   | ✅ **14/14** | 3 min 14 s     |
+| `claude-sonnet-5-5`                             | API Anthropic      | 14/14   | ✅ **14/14** | 3 min 37 s     |
+| `gpt-5.6-sol` (`--use_codex`)                   | اشتراك ChatGPT | 14/14   | ✅ **14/14** | 11 min 28 s    |
+| `z-ai/glm-5.2`                                  | OpenRouter         | 14/14   | ✅ **14/14** | 5 min 37 s     |
+| `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14   | ✅ **14/14** | 26 min 23 s    |
+| `sonnet` (`--use_claude_code`)                  | اشتراك Claude  | 14/14   | ⚠️ 13/14     | 6 min 49 s     |
+| `claude-sonnet-5`                               | API Anthropic      | 14/14   | ⚠️ 11/14     | 6 min 31 s     |
+| `haiku` (`--use_claude_code`)                   | اشتراك Claude  | 14/14   | ⚠️ 11/14     | 15 min 54 s    |
+| `claude-haiku-5-5`                              | API Anthropic      | 14/14   | ⚠️ 11/14     | 2 min 54 s     |
+| `claude-haiku-4-5`                              | API Anthropic      | 14/14   | ⚠️ 7/14      | 6 min 00 s     |
+| `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14   | ❌ 11/14     | 9 min 27 s     |
+| `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14   | ❌ 8/14      | 10 min 09 s    |
+| `ollama/gpt-oss-20b-32k`                        | محلي              | 10/14   | ❌ 7/14      | 12 min 39 s    |
+| `mistral-large-latest`                          | API Mistral        | 11/14   | ❌ 5/14      | 5 min 32 s     |
+| `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14    | ❌ 3/14      | 37 min 27 s    |
+| `grok-4.6` (`--use_grok_cli`)                   | اشتراك Grok    | 1/14    | ❌ 1/14      | 23 min 11 s    |
 | `opus` (`--use_claude_code`)                    | اشتراك Claude  | 0/14    | ❌ 0/14      | —              |
 
-أُعيد قياس Grok في 9 سبتمبر على إصدار آخر من نشرة الرصد نفسها
-(356 سطرًا): كُتبت 9 لغات من أصل 14، وكانت 8 منها بلا اختلاف. وهذا هو الرقم
-الوارد في الجدول الرئيسي. لم تُدرج ثلاث حملات متوقفة:
-`qwen3.5-27b` (9 لغات) و`kimi-k2.6` (4) بسبب نفاد الرصيد،
-و`z-ai/glm-5.3-flash`، الذي نتج إخفاقاه عن إعداد للاستدلال
-يعمل المزوّد على تصحيحه منذ ذلك الحين. قِيست صفوف OpenRouter باستخدام
-الإعدادات الافتراضية للموجّه، قبل `--use_openrouter`؛ أما `z-ai/glm-5.2`،
-الذي أُعيد قياسه باستخدام المزوّد المرفق، فيحقق النتيجة نفسها 14/14. وأُعيد
-حساب الأرقام في 10 سبتمبر باستخدام المقارن الحالي: كسب كل من `qwen3.8-flash`
-و`qwen3.7-flash` لغة إضافية مقارنة بالنشر
-الأول، بينما بقيت النتائج الأخرى بلا تغيير.
+أُعيد قياس Grok في 9 سبتمبر على إصدار آخر من النشرة نفسها
+(356 سطرًا): كُتبت 9 لغات من أصل 14، منها 8 دون اختلاف. وهذا هو الرقم
+الوارد في الجدول الافتتاحي. لم تُدرج ثلاث حملات توقفت قبل اكتمالها:
+`qwen3.5-27b` (9 لغات) و`kimi-k2.6` (4) لنفاد الرصيد،
+و`z-ai/glm-5.3-flash` الذي نجم إخفاقاه عن إعداد للاستدلال
+أصبح المزوّد يصححه منذ ذلك الحين. قِيست صفوف OpenRouter باستخدام
+إعدادات الموجّه الافتراضية، قبل `--use_openrouter`؛ وأعطى `z-ai/glm-5.2`،
+عند إعادة قياسه باستخدام المزوّد المُرفَق، النتيجة نفسها: 14/14. أُعيد حساب الأرقام
+في 10 سبتمبر باستخدام أداة المقارنة الحالية: كسب كل من `qwen3.8-flash` و
+`qwen3.7-flash` لغة واحدة مقارنة بالنشر الأول،
+وبقيت النتائج الأخرى كما هي.
 
-قِيست صفوف `--use_antigravity` في 26 سبتمبر على المقال
-نفسه، مع أربع ترجمات بالتوازي: `gemini-3.7-flash-medium` صباحًا،
-و`gemini-3.8-flash-medium` بعد الظهر. وفي الإنجليزية، حذف كل منهما بنفسه
-أسطر الترجمة الفرنسية الثلاثة الواقعة تحت الاقتباسات، من دون اختلاق
-علم، وظلت الاقتباسات الإنجليزية سليمة: لم يكن على التنظيف الاحتياطي
-فعل شيء. وفي `--eco` (`gemini-3.7-flash-low`)، وعلى أربع لغات
-فقط (en، ja، ar، hi): كُتبت 4 من أصل 4، وكلها بلا اختلاف، بوسيط قدره دقيقة و52 ث.
-وفي اختبار معاكس في اليوم نفسه على إصدار أحدث من نشرة الرصد،
-وهو إصدار 25 سبتمبر (438 سطرًا، واقتباسان إنجليزيان)، تُرجم خارج
-المدونة باستخدام `gemini-3.7-flash-medium`: كُتبت 14 من أصل 14، وكلها بلا اختلاف، خلال 87 إلى
-128 ث لكل لغة.
+قِيست صفوف `--use_antigravity` في 26 سبتمبر على
+المقال نفسه، بأربع ترجمات متوازية: `gemini-3.7-flash-medium` صباحًا،
+و`gemini-3.8-flash-medium` بعد الظهر. في الإنجليزية، حذف كل منهما بنفسه
+أسطر الترجمة الفرنسية الثلاثة أسفل الاقتباسات، دون اختراع
+علم، وبقيت الاقتباسات الإنجليزية سليمة: لم يحتج التنظيف الاحتياطي
+إلى فعل أي شيء. في `--eco` (`gemini-3.7-flash-low`)، وعلى أربع لغات
+فقط (en، ja، ar، hi): كُتبت 4 من أصل 4، كلها دون اختلاف، بوسيط زمني
+قدره 1 دقيقة و52 ثانية. وللتحقق المقابل في اليوم نفسه، استُخدم إصدار أحدث من النشرة،
+هو إصدار 25 سبتمبر (438 سطرًا، واقتباسان بالإنجليزية)، وتُرجم خارج
+المدونة بواسطة `gemini-3.7-flash-medium`: كُتبت 14 من أصل 14، كلها دون اختلاف، بزمن من 87 إلى
+128 ثانية لكل لغة.
 
-قِيست صفوف `--use_claude_code` في 26 سبتمبر على المقال
-نفسه، مع أربع ترجمات بالتوازي، وبجهد `low`. مع `sonnet`، ظلت
-الاقتباسات الإنجليزية سليمة في اللغات الأربع عشرة، وفي الإنجليزية حذف
-النموذج بنفسه أسطر الترجمة الفرنسية، من دون اختلاق علم.
-لم يكتب `opus` أي لغة: ففي كل واحدة منها، أوقفت ضوابط الحماية
-الاستجابة عند المقطع الأخير، بسبب نبذة عن 279 جزيئًا مولّدًا
-لموقع ارتباط. وعند إرسال هذه النبذة وحدها، رُفضت ضمن فئة «الأحياء»؛
-بينما ترجمها `sonnet` في كل اللغات. يكتب `haiku`
+قِيست صفوف `--use_claude_code` في 26 سبتمبر على
+المقال نفسه، بأربع ترجمات متوازية، عند مستوى الجهد `low`. مع `sonnet`،
+بقيت الاقتباسات الإنجليزية سليمة في اللغات الأربع عشرة، وفي الإنجليزية،
+حذف النموذج بنفسه أسطر الترجمة الفرنسية، دون اختراع
+علم. لم يكتب `opus` أي لغة: ففي كل لغة، أوقفت ضوابطه الوقائية
+الاستجابة عند المقطع الأخير، بسبب خبر موجز عن 279 جزيئًا
+مولّدًا لموقع ارتباط. عند إرسال هذا الخبر وحده، يُرفض
+ضمن فئة «علم الأحياء»؛ وقد ترجمه `sonnet` إلى جميع اللغات. يكتب `haiku`
 اللغات الأربع عشرة؛ وفي ثلاث منها (en، pl، ro)، ينتقل عنوان قسم من
-المستوى 2 إلى المستوى 1. وهو يستدل من دون إمكان منعه من ذلك — بنسبة 61% من
-tokens الإخراج الخاصة به —، ولذلك يستغرق أكثر من ضعف وقت `sonnet`.
+المستوى 2 إلى المستوى 1. وهو يستدل دون إمكانية منعه — 61 % من
+رموز مخرجاته —، لذلك يستغرق أكثر من ضعف زمن `sonnet`.
 
 قِيست صفوف `claude-sonnet-5-5` و`claude-haiku-5-5` و`claude-haiku-4-5`
-في 18 أكتوبر عبر API الخاصة بـ Anthropic، على المقال نفسه، مع أربع
-ترجمات بالتوازي لكل نموذج. يرفض Sonnet 5.5 تعطيل
-استدلاله: يرسل إليه aipmt أدنى إعداد يقبله، ولا تحمل
-استجاباته أي أثر له. يكتب اللغات الأربع عشرة بلا اختلاف ومن دون
-إعادة تمرير أي مقطع؛ وفي الإنجليزية، حذف بنفسه أسطر
-الترجمة الفرنسية من دون اختلاق علم، وظلت الاقتباسات الإنجليزية
-سليمة في كل اللغات. قِيس Haiku 5.5 باستخدام استدلاله التكيفي: عند
-تعطيل الاستدلال، كان يترك فقرات كاملة بالفرنسية، فترفضها ضوابط الحماية —
-وكُتبت 3 لغات من أصل 14. يتعثر كلا نموذجي Haiku عند النبذة نفسها: يغيّر Haiku 5.5
-مستوى عنوانها أو يكرره في اليابانية والكورية
-والصينية، بينما ينقله Haiku 4.5 إلى المستوى 1 في سبع لغات، ويتركه
-بالفرنسية في اليابانية. تبلغ تكلفة Haiku 4.5 مقدار 3.67 $ للمستندين باللغات
-الأربع عشرة، وتكلفة Haiku 5.5 مقدار 0.57 $، وتكلفة Sonnet 5.5 مقدار 9.21 $.
-### README لهذا المشروع، بصيغة Markdown القياسية
+في 18 أكتوبر عبر API الخاصة بـ Anthropic، على المقال نفسه، بأربع
+ترجمات متوازية لكل نموذج. يرفض Sonnet 5.5 تعطيل
+تفكيره: يرسل إليه aipmt أدنى إعداد يقبله، ولا تظهر في
+استجاباته أي آثار للتفكير. يكتب اللغات الأربع عشرة دون اختلاف ودون
+إعادة أي مقطع؛ وفي الإنجليزية، حذف بنفسه أسطر
+الترجمة الفرنسية، دون اختراع علم، وبقيت الاقتباسات الإنجليزية
+سليمة في كل اللغات. قِيس Haiku 5.5 مع تفكيره التكيفي: عند تعطيل
+التفكير، كان يترك فقرات كاملة بالفرنسية، وهو ما ترفضه آلية التحقق —
+فكُتبت 3 لغات من أصل 14. يتعثر نموذجا Haiku عند الخبر الموجز نفسه: يغيّر Haiku 5.5
+مستوى عنوانه أو يكرّره باليابانية والكورية
+والصينية، وينقله Haiku 4.5 إلى المستوى 1 في سبع لغات، ويتركه
+بالفرنسية في الترجمة اليابانية. تبلغ تكلفة Haiku 4.5 للمستندين باللغات
+الأربع عشرة 3,67 $، وHaiku 5.5 ‏0,57 $، وSonnet 5.5 ‏9,21 $.
+### ملف README لهذا المشروع، بتنسيق Markdown القياسي
 
-مراجعة مجمّدة في 9 سبتمبر 2026: 785 سطرًا، و285 شيفرة مضمنة، و40
-علامة إغلاق للكتل، و89 سطرًا في الجداول. أربع ترجمات بالتوازي.
+مراجعة ثُبّتت في 9 سبتمبر 2026: 785 سطرًا، و285 مقطع كود مضمنًا، و40
+علامة إغلاق لكتل، و89 سطرًا في الجداول. أربع ترجمات بالتوازي.
 
-| النموذج                                         | المكتملة | بلا اختلاف | الوسيط/اللغة | أوجه الاختلاف                                                            |
-| ----------------------------------------------- | -------- | ----------- | ------------ | ------------------------------------------------------------------------- |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14   | 1 دقيقة و43 ث | لا شيء                                                                     |
-| `opus` (`--use_claude_code`)                    | 14/14   | ✅ 14/14   | 1 دقيقة و48 ث | لا شيء                                                                     |
-| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14   | 4 دقائق و02 ث | لا شيء وفقًا لأداة المقارنة؛ روابط داخلية مكررة (en)                      |
-| `claude-sonnet-5-5`                             | 14/14   | ✅ 14/14   | 1 دقيقة و18 ث | لا شيء                                                                     |
-| `claude-haiku-4-5`                              | 14/14   | ✅ 14/14   | دقيقتان و06 ث | لا شيء                                                                     |
-| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36 ث           | كلمة واحدة بخط عريض (ja)                                                  |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1 دقيقة و22 ث | كلمة واحدة بخط عريض (ko)                                                  |
-| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14   | دقيقتان و20 ث | سطر جدول ملتصق بالسطر السابق (ar)                                         |
-| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | دقيقتان و56 ث | رابط واحد (sv)، وكلمة واحدة بخط عريض (zh)                                 |
-| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6 دقائق و46 ث | كلمة واحدة بخط عريض (ar، ja)                                              |
-| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | دقيقتان و34 ث | كلمة واحدة بخط عريض (hi، ja، ko)                                          |
-| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14   | دقيقتان و17 ث | إضافة 40 شيفرة مضمنة بالعربية؛ خط عريض (hi، ja، ko)                       |
-| `claude-haiku-5-5`                              | 12/14   | ❌ 12/14   | 1 دقيقة و14 ث | رُفضت لغتان (ar، hi): فُقدت شيفرات مضمنة عند الإرجاع                      |
-| `mistral-large-latest`                          | 14/14   | ❌ 1/14    | دقيقتان و44 ث | فُقد قسم (ar، hi، ko)؛ أُضيفت كتل شيفرة (ja، ko، ro، zh)                  |
+| النموذج                                          | المكتملة | بلا اختلاف | الوسيط لكل لغة | مواضع الاختلاف                                                           |
+| ----------------------------------------------- | ------- | ---------- | -------------- | ------------------------------------------------------------------------ |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14   | 1 min 43 s     | لا شيء                                                                     |
+| `opus` (`--use_claude_code`)                    | 14/14   | ✅ 14/14   | 1 min 48 s     | لا شيء                                                                     |
+| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14   | 4 min 02 s     | لا شيء بحسب أداة المقارنة؛ روابط داخلية مكررة (en)                   |
+| `claude-sonnet-5-5`                             | 14/14   | ✅ 14/14   | 1 min 18 s     | لا شيء                                                                     |
+| `claude-haiku-4-5`                              | 14/14   | ✅ 14/14   | 2 min 06 s     | لا شيء                                                                     |
+| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36 s           | كلمة واحدة بخط عريض (ja)                                                      |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1 min 22 s     | كلمة واحدة بخط عريض (ko)                                                      |
+| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14   | 2 min 20 s     | سطر جدول ملتصق بالسطر السابق (ar)                         |
+| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | 2 min 56 s     | رابط واحد (sv)، وكلمة واحدة بخط عريض (zh)                                        |
+| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6 min 46 s     | كلمة واحدة بخط عريض (ar, ja)                                                  |
+| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | 2 min 34 s     | كلمة واحدة بخط عريض (hi, ja, ko)                                              |
+| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14   | 2 min 17 s     | إضافة 40 مقطع كود مضمنًا بالعربية؛ خط عريض (hi, ja, ko)                   |
+| `claude-haiku-5-5`                              | 12/14   | ❌ 12/14   | 1 min 14 s     | رفض لغتين (ar, hi): فقدان مقاطع كود مضمنة في الناتج        |
+| `mistral-large-latest`                          | 14/14   | ❌ 1/14    | 2 min 44 s     | فقدان قسم (ar, hi, ko)؛ إضافة كتل كود (ja, ko, ro, zh) |
 
-لم تُقيَّم حملتان توقفتا: Grok، إذ انتهت صلاحية جلسة CLI
-بعد اثنتي عشرة لغة (إحدى عشرة منها بلا اختلاف)، و`qwen3.8-flash`، إذ أعاد
-مضيفه HTTP 429 بعد لغتين. لم يُعَد قياس `opencode/mimo-v2.5-free` و`ollama/gpt-oss-20b-32k`
-على هذه المراجعة؛ ففي مراجعة 4 و5 سبتمبر، التي كانت أقصر بـ277 سطرًا،
-كتب كل منهما 9 ترجمات من أصل 14، منها 7
-و1 بلا اختلاف، على التوالي.
+لم تُحتسب حملتان توقفتا قبل الاكتمال: Grok، إذ انتهت صلاحية جلسة CLI
+بعد اثنتي عشرة لغة (إحدى عشرة بلا اختلاف)، و`qwen3.8-flash`، إذ أعاد مزود
+استضافته HTTP 429 بعد لغتين. لم تُعَد قياسات `opencode/mimo-v2.5-free` و`ollama/gpt-oss-20b-32k`
+على هذه المراجعة؛ أما على مراجعة 4 و5 سبتمبر،
+التي كانت أقصر بمقدار 277 سطرًا، فقد أكمل كل منهما 9 ترجمات من أصل 14، منها 7
+و1 بلا اختلاف على التوالي.
 
-لم يُقَس السطران `--use_antigravity` و`--use_claude_code` على
-المراجعة المجمّدة، بل في 26 سبتمبر على المراجعة المنشورة مع الإصدار 1.14.0 —
-وقِيست الأسطر `claude-sonnet-5-5` و`claude-haiku-5-5` و`claude-haiku-4-5` في 18
-أكتوبر على المراجعة نفسها: 600 سطر، و257 شيفرة مضمنة، و30 علامة إغلاق للكتل، و85
+لم تُقَس نتائج الصفين `--use_antigravity` و`--use_claude_code` على
+المراجعة المثبتة، بل في 26 سبتمبر على المراجعة المنشورة مع الإصدار 1.14.0 — وقِيست
+نتائج الصفوف `claude-sonnet-5-5` و`claude-haiku-5-5` و`claude-haiku-4-5` في 18
+أكتوبر، على المراجعة نفسها: 600 سطر، و257 مقطع كود مضمنًا، و30 علامة إغلاق لكتل، و85
 سطرًا في الجداول. ولأنها
-أقصر بـ185 سطرًا، فلا يمكن مقارنتها بندًا ببند مع الأسطر الأخرى؛
-أما هذه الأسطر فيمكن مقارنتها بعضها ببعض. وفيما يخص الروابط الداخلية، التي لا
-تتحقق منها أداة المقارنة، أبقاها `gemini-3.8-flash-medium` سليمة في
-اللغات الأربع عشرة، بينما كسرها `gemini-3.7-flash-medium` بالإيطالية؛
-وأبقاها `sonnet` و`opus` سليمة في جميع اللغات، بينما كررها `haiku`
+أقصر بمقدار 185 سطرًا، فلا يمكن مقارنتها مباشرة بنتائج الصفوف الأخرى؛
+أما هذه الصفوف فيمكن مقارنتها بعضها ببعض. وبشأن الروابط الداخلية التي لا
+تفحصها أداة المقارنة، فقد أبقاها `gemini-3.8-flash-medium` سليمة في
+اللغات الأربع عشرة، بينما عطّلها `gemini-3.7-flash-medium` بالإيطالية؛
+وأبقاها `sonnet` و`opus` سليمة في جميع اللغات، وكررها `haiku`
 بالإنجليزية؛ وأبقاها `claude-sonnet-5-5` و`claude-haiku-4-5` سليمة في
-اللغات الأربع عشرة، وكذلك فعل `claude-haiku-5-5` في اللغات الاثنتي عشرة التي كتبها.
+اللغات الأربع عشرة، وكذلك `claude-haiku-5-5` في اللغات الاثنتي عشرة التي أكملها.
 
 ### أربعة ملفات README لمشاريع معروفة
 
-FastAPI وOllama وtldr-pages وVue.js، كما هي على GitHub — وهي
-مستندات أسهل من المستندين السابقين. استهدفت الحملة النماذج
-التي واجهت صعوبات؛ ويُستخدم Gemini فيها كنقطة للمقارنة.
+FastAPI وOllama وtldr-pages وVue.js، أُخذت كما هي من GitHub — وهي
+وثائق أسهل من الوثيقتين السابقتين. استهدفت الحملة النماذج
+التي واجهت صعوبات؛ ويُستخدم Gemini فيها مرجعًا للمقارنة.
 
-| النموذج                    | النطاق                     | المكتملة | بلا اختلاف   |
-| ------------------------- | -------------------------- | -------- | ------------ |
-| `gemini-3.7-flash`        | 4 مشاريع × 14 لغة          | 56/56   | ✅ **55/56** |
-| `opencode/mimo-v2.5-free` | 4 مشاريع × 14 لغة          | 55/56   | ❌ 47/56     |
-| `grok-4.6` (اشتراك)   | 4 مشاريع × ar، hi، ja، zh | 16/16   | ❌ 14/16     |
-| `ollama/gpt-oss-20b-32k`  | 4 مشاريع × ar، hi، ja، zh | 15/16   | ❌ 9/16      |
+| النموذج                    | النطاق                  | المكتملة | بلا اختلاف   |
+| ------------------------- | -------------------------- | ------- | ------------ |
+| `gemini-3.7-flash`        | 4 مشاريع × 14 لغة     | 56/56   | ✅ **55/56** |
+| `opencode/mimo-v2.5-free` | 4 مشاريع × 14 لغة     | 55/56   | ❌ 47/56     |
+| `grok-4.6` (اشتراك)   | 4 مشاريع × ar, hi, ja, zh | 16/16   | ❌ 14/16     |
+| `ollama/gpt-oss-20b-32k`  | 4 مشاريع × ar, hi, ja, zh | 15/16   | ❌ 9/16      |
 
 ### ما لا تمثله هذه القياسات
 
 - **ليست تصنيفًا شاملًا**: يتيح OpenRouter وحده أكثر من أربعمائة
-  نموذج، وقد قِيس نحو خمسة عشر منها.
-- **المدد إرشادية**: من ثلاث إلى ست ترجمات بالتوازي بحسب
-  الحملات، كما يتغير معدل نقل المزوّد خلال اليوم.
-- **ملاحظات مؤرخة**: تتغير النماذج مع احتفاظها بالاسم نفسه، كما أن
-  مستنداتكم ليست مستنداتنا.
+  نموذج، ولم يُقَس سوى نحو خمسة عشر منها.
+- **مدد استرشادية**: أُجريت من ثلاث إلى ست ترجمات بالتوازي بحسب
+  الحملة، كما يتفاوت معدل معالجة المزود خلال اليوم.
+- **ملاحظات مؤرخة**: تتغير النماذج مع احتفاظها بالاسم نفسه، ووثائقكم
+  تختلف عن وثائقنا.
 
-لإعادة القياس على مستنداتكم، باستخدام نسخة مجمّدة من الملف:
+لإعادة القياس على وثائقكم، باستخدام نسخة مثبتة من الملف:
 
 ```bash
 aipmt --file reference.md --target_dir out/ --source_lang fr --target_lang ja --use_gemini --force
@@ -787,10 +793,10 @@ pip install -r requirements.txt   # les dépendances, lock entièrement épingl�
 pip install -e .                  # le paquet lui-même, en mode éditable
 ```
 
-السطران ضروريان: من دون `pip install -e .`، يجيب `python -m aipmt`
-بـ`No module named aipmt`.
+السطران ضروريان: من دون `pip install -e .`، يرد `python -m aipmt`
+بـ `No module named aipmt`.
 
-أدوات الجودة اختيارية، لكنها موصى بها:
+أدوات الجودة، اختيارية لكن موصى بها:
 
 ```bash
 pipx install pre-commit               # hors venv — absent des requirements
@@ -799,53 +805,53 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # mypy, SAST, pip-audit, tests avant chaque push
 ```
 
-يمكن إعادة توليد الترجمات الـ28 في المستودع (README وCHANGELOG، بأربع عشرة لغة)
-باستخدام `./regen_translations.sh --force` — وCodex و`gpt-5.6-sol` ضمن
-اشتراك ChatGPT الافتراضي، مع أربع عمليات بالتوازي. يغيّر `REGEN_PROVIDER`
-و`REGEN_MODEL` المسار: يبقى `antigravity` ضمن اشتراك، وهو اشتراك
-Google، ويمر دون استثناء؛ أما API مدفوعة التكلفة (`openai`، و`gemini`،
-و`grok`، و`openrouter`) فتُرفض من دون `REGEN_ALLOW_PAID_API=1`؛
-ويضع `REGEN_JOB_TIMEOUT` حدًا أقصى لكل مهمة (600 ث، و1,800 ث على Codex
-وAntigravity). توجد تفاصيل الأدوات في `CLAUDE.md`.
+تُعاد توليد ترجمات المستودع الـ28 (README وCHANGELOG، بأربع عشرة لغة)
+باستخدام `./regen_translations.sh --force` — عبر Codex و`gpt-6.1-sol` ضمن
+اشتراك ChatGPT افتراضيًا، بأربع ترجمات بالتوازي. ويغيّر `REGEN_PROVIDER` و
+`REGEN_MODEL` المسار: يظل `antigravity` ضمن اشتراك،
+هو اشتراك Google، ويُسمح به من دون استثناء؛ أما API مدفوعة (`openai`، `gemini`،
+`grok`، `openrouter`) فتُرفض من دون `REGEN_ALLOW_PAID_API=1`؛
+ويحدد `REGEN_JOB_TIMEOUT` مهلة قصوى لكل مهمة (600 s، و1 800 s على Codex و
+Antigravity). تفاصيل الأدوات موجودة في `CLAUDE.md`.
 
-## المشاريع التي تستخدم هذا السكربت
+## مشاريع تستخدم هذا السكربت
 
-- **[jls42.org](https://jls42.org)** — مدونة شخصية منشورة بـ15 لغة. وتُترجم
+- **[jls42.org](https://jls42.org)** — مدونة شخصية منشورة بـ15 لغة. تُترجم
   [متابعتها اليومية للذكاء الاصطناعي](https://jls42.org/fr/news) كل يوم
-  بهذه الأداة، كما تُستخدم مستندًا مرجعيًا للقياسات أعلاه.
+  بهذه الأداة، وتُستخدم وثيقةً مرجعية للقياسات أعلاه.
 
 ## المؤلف
 
-Julien LE SAUX
+جوليان لو سو
 البريد الإلكتروني: contact@jls42.org
 
 ## الترخيص
 
-GNU GENERAL PUBLIC LICENSE Version 3. راجع [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
+رخصة GNU العمومية العامة، الإصدار 3. انظر [الترخيص](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
 
 ## تحذير
 
-يُوزَّع هذا البرنامج **من دون أي ضمان**، وفقًا لشروط
-القسمين 15 و16 من GPL v3: فهو مقدَّم «كما هو»، من دون ضمان لقابليته
-للتسويق أو ملاءمته لغرض معين، ولا يمكن تحميل مؤلفه
-مسؤولية أي ضرر ناتج عن استخدامه. ويعلو نص
-الترخيص على هذا الملخص.
+يُوزّع هذا البرنامج **من دون أي ضمان**، وفقًا لأحكام
+القسمين 15 و16 من GPL v3: يُقدَّم «كما هو»، من دون ضمان قابلية
+التسويق أو الملاءمة لغرض معين، ولا يمكن تحميل مؤلفه
+المسؤولية عن ضرر ناتج عن استخدامه. ويُعتد بنص
+الترخيص عند تعارضه مع هذا الملخص.
 
-- **راجعوا المحتوى قبل النشر.** تشمل الحماية كتل الشيفرة،
-  والشيفرة المضمنة، وعناوين URL، والمراسي، والاستشهادات في وضع `--news` — لكنها لا تشمل
-  العناوين، ولا الجداول، ولا front matter، ولا معنى عباراتكم.
-- **تُرسل مستنداتكم إلى المزوّد المختار**، وفقًا لشروط
+- **راجعوا قبل النشر.** تشمل وسائل الحماية كتل الكود،
+  والكود المضمن، وعناوين URL، والمراسي، والاقتباسات في وضع `--news` — ولا تشمل
+  العناوين أو الجداول أو البيانات الوصفية الافتتاحية أو معنى جملكم.
+- **تُرسل وثائقكم إلى المزود المختار**، وتخضع لشروط
   استخدامه وسياسة بياناته. قد تعيد بعض النماذج المجانية
-  استخدام محادثاتكم في التدريب، كما تسمح شروط Antigravity
-  لـGoogle بإعادة استخدامها وعرضها على مراجعين بشريين،
-  حتى مع الاشتراك المدفوع؛ والنموذج المحلي هو السبيل الوحيد الذي لا
-  يُخرج أي بيانات من جهازكم.
-- **تُحتسب عليكم تكلفة استدعاءات API.** لا يضع هذا البرنامج حدًا أقصى
-  للإنفاق: فالمستند الطويل، أو الاستئناف بعد فشل، أو النموذج الذي يجري
-  قدرًا كبيرًا من الاستدلال، كلها تكلف أكثر.
-- **القياسات المنشورة ملاحظات مؤرخة** وليست ضمانات.
+  استخدام محادثاتكم للتدريب، وتتيح شروط Antigravity
+  لـGoogle إعادة استخدامها وإخضاعها لمراجعة بشرية،
+  حتى مع الاشتراك المدفوع؛ والنموذج المحلي هو الخيار الوحيد الذي لا يُخرج
+  أي بيانات من جهازكم.
+- **تُحتسب عليكم تكاليف استدعاءات API.** لا يضع هذا البرنامج سقفًا
+  للإنفاق: فالوثيقة الطويلة، أو إعادة المحاولة بعد فشل، أو النموذج الذي يستغرق وقتًا طويلًا
+  في الاستدلال، تزيد التكلفة.
+- **القياسات المنشورة ملاحظات مؤرخة**، وليست ضمانات.
 
-تعود أسماء المنتجات والشركات المذكورة إلى مالكيها
+أسماء المنتجات والشركات المذكورة مملوكة لأصحابها
 المعنيين. ولا ينتمي هذا المشروع إلى أي منها.
 
-**مقال مترجم من الفرنسية إلى العربية باستخدام gpt-5.6-sol.**
+**مقال مترجم من الفرنسية إلى العربية باستخدام gpt-6.1-sol.**

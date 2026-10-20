@@ -1,19 +1,19 @@
-# AI 驱动的 Markdown 翻译器
+# 人工智能驱动的 Markdown 翻译器
 
-🌍 [Français](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [English](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Español](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [中文](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [Deutsch](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [日本語](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [한국어](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [العربية](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [हिन्दी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italiano](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Nederlands](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Português](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Română](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Svenska](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
+🌍 [法语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [英语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [西班牙语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [中文](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [德语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [日语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [韩语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [阿拉伯语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [印地语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [意大利语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [荷兰语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [波兰语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [葡萄牙语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [罗马尼亚语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [瑞典语](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
 
 <h4 align="center">📊 代码质量</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Quality Gate 状态"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="安全评级"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="质量门禁状态"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="安全性评级"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="可靠性评级"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="可维护性评级"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="覆盖率"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="漏洞"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Bug"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="缺陷"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="代码异味"></a>
 </p>
 <p align="center">
@@ -26,16 +26,26 @@
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-将 Markdown 文件从一种语言翻译为另一种语言，同时保留其结构：代码块、行内代码、URL、锚点、表格和 front matter。提供 11 种模型调用方式——5 个 API、4 种无按量计费的订阅服务、2 个路由器——并公开发布了每个模型实际保留情况的评测数据。
+将 Markdown 文件从一种语言翻译为另一种语言，同时保留
+结构：代码块、行内代码、URL、锚点、表格和前置元数据。
+提供十一种模型调用方式——五种 API、四种不按用量计费的
+订阅、两种路由服务——并公布测评结果，展示各个
+模型实际保留了哪些内容。
 
 ## 概览
 
-- **11 种 Provider 途径**：OpenAI、Mistral、Claude、Gemini 和 Grok API；无按量计费的 ChatGPT (Codex)、Grok、Google (Antigravity) 和 Claude (Claude Code) 订阅；OpenCode（开源、免费或本地）与 OpenRouter（400+ 个模型）路由器。
-- **绝无因 Token 丢失导致的损坏**：代码块、行内代码、URL、锚点和引用在调用前会被替换为 Token，并在返回时进行校验。如果丢失任何一个，则不会写入文件。
-- **长文档处理**：根据模型的上下文窗口自动分段。
-- **`--news` 模式**：保护英文引用并按语言处理国旗图标，专为资讯速递文章设计。
-- **`--eco` 模式**：调用速度更快且成本更低的模型。
-- **可选的翻译附注**：可添加在顶部、底部或两处兼有。
+- **十一种服务接入方式**：OpenAI、Mistral、Claude、Gemini 和 Grok API；
+  不按用量计费的 ChatGPT（Codex）、Grok、Google（Antigravity）和 Claude（Claude
+  Code）订阅；OpenCode（开源、免费或本地）和 OpenRouter
+  （超过 400 个模型）路由服务。
+- **不会因丢失占位符而写入错误内容**：调用前，代码块、行内代码、
+  URL、锚点和引文会替换为占位符，返回后
+  进行检查。只要缺少一个，就不会写入文件。
+- **长文档**：根据模型的上下文窗口分段。
+- **`--news` 模式**：保护英文引文并按语言管理
+  标记，适用于资讯文章。
+- **`--eco` 模式**：使用速度更快、费用更低的模型。
+- 可选的**翻译说明**，可放在顶部、底部或两处。
 
 ## 安装
 
@@ -44,17 +54,19 @@ pip install ai-powered-markdown-translator     # ou : pipx install ai-powered-ma
 aipmt --help                                   # ou : python -m aipmt --help
 ```
 
-Python 3.10 或更高版本。如需从仓库安装，请参阅[贡献指南](#贡献)。
+需要 Python 3.10 或更高版本。要从仓库安装，请参阅
+[参与贡献](#贡献)。
 
 ## 配置
 
-密钥从三个位置读取，按优先级从高到低排列；每个位置仅填充前一个位置未提供的值。
+按优先级从高到低，从三个位置读取密钥；每个位置只
+补充前一个位置未提供的值。
 
-|     | 位置                                          | 用途                                  |
+|     | 位置                                            | 用途                             |
 | --- | --------------------------------------------- | ------------------------------------- |
-| 1   | 环境变量                                      | CI、容器、临时覆盖                    |
-| 2   | 当前目录（或父目录）中的 `.env`        | 项目专属密钥                          |
-| 3   | `~/.config/aipmt/.env`                                 | 一次安装，全局生效                    |
+| 1   | 环境变量                     | CI、容器、临时覆盖 |
+| 2   | 当前目录（或父目录）中的 `.env` | 项目专用密钥            |
+| 3   | `~/.config/aipmt/.env`                        | 配置一次，全局生效       |
 
 ```bash
 mkdir -p ~/.config/aipmt
@@ -69,13 +81,32 @@ EOF
 chmod 600 ~/.config/aipmt/.env
 ```
 
-支持使用 `GEMINI_API_KEY` 代替 `GOOGLE_API_KEY`。用户配置文件在 Windows 下遵循 `XDG_CONFIG_HOME`（仅限绝对路径）和 `%APPDATA%`。如果未找到密钥，该命令会列出这三个位置。
+可用 `GEMINI_API_KEY` 代替 `GOOGLE_API_KEY`。用户
+配置文件遵循 `XDG_CONFIG_HOME`（仅限绝对路径），在 Windows 下遵循 `%APPDATA%`。
+如果没有密钥，命令会列出这三个位置。
 
-**项目中的 `.env` 既不能重定向调用，也不能指定执行的程序。** 它只提供密钥，绝不提供目标地址或二进制文件：任何以 `_BASE_URL`、`_API_BASE`、`_ENDPOINT` 或 `_BIN`（`CODEX_BIN`、`GROK_BIN`、`OPENCODE_BIN`、`AGY_BIN`）、`GROK_HOME` 命名的变量、代理（`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`）、证书存储（`SSL_CERT_FILE`、`SSL_CERT_DIR`、`REQUESTS_CA_BUNDLE`、`CURL_CA_BUNDLE`）以及 `XDG_CONFIG_HOME` / `APPDATA` 均会被忽略并发出警告。克隆的仓库不应在首次翻译时窃取您的密钥，也不应诱使您运行其自带的程序。该文件读取时也不进行变量插值：`NOM=${OPENAI_API_KEY}` 不会在其中复制密钥。请将这些变量设置在环境中或 `~/.config/aipmt/.env` 中。
+**项目中的 `.env` 既不能重定向调用，也不能选择
+执行的程序。** 它只提供密钥，绝不提供目标地址或可执行文件：所有属于
+`_BASE_URL`、`_API_BASE`、`_ENDPOINT` 或 `_BIN` 的变量（`CODEX_BIN`、
+`GROK_BIN`、`OPENCODE_BIN`、`AGY_BIN`）、`GROK_HOME`、代理变量（`HTTP_PROXY`、
+`HTTPS_PROXY`、`ALL_PROXY`）、证书存储变量（`SSL_CERT_FILE`、
+`SSL_CERT_DIR`、`REQUESTS_CA_BUNDLE`、`CURL_CA_BUNDLE`）以及 `XDG_CONFIG_HOME` /
+`APPDATA` 都会被忽略，并显示警告。克隆的仓库不应
+能够窃取您的密钥，也不应让您在首次翻译时
+运行它自己的程序。读取此文件时也不会进行变量插值：
+`NOM=${OPENAI_API_KEY}` 不会在其中复制密钥。请将这些变量设置在
+环境中或 `~/.config/aipmt/.env` 中。
 
-可选变量：`XAI_BASE_URL`（默认 `https://api.x.ai/v1`）、`CLAUDE_TIMEOUT`（每次调用的秒数，默认 900）、`CODEX_BIN`、`CODEX_TIMEOUT`（默认 600）、`GROK_BIN`、`GROK_HOME`（默认 `~/.grok`）、`GROK_TIMEOUT`（默认 900）、`GROK_TRANSLATE_SANDBOX`、`AGY_BIN`、`AGY_TIMEOUT`（默认 900）、`OPENCODE_BIN`、`OPENCODE_TIMEOUT`（默认 600）、`OPENROUTER_BASE_URL`（需要 `https://`）、`OPENROUTER_TIMEOUT`（默认 900）、`OPENROUTER_PREFLIGHT_TIMEOUT`（默认 30）。每个变量均在其对应的 Provider 章节中详细说明。
+可选变量：`XAI_BASE_URL`（默认值 `https://api.x.ai/v1`）、
+`CLAUDE_TIMEOUT`（每次调用的秒数，默认值 900）、`CODEX_BIN`、`CODEX_TIMEOUT`
+（默认值 600）、`GROK_BIN`、`GROK_HOME`（默认值 `~/.grok`）、`GROK_TIMEOUT`
+（默认值 900）、`GROK_TRANSLATE_SANDBOX`、`AGY_BIN`、`AGY_TIMEOUT`（默认值 900）、
+`OPENCODE_BIN`、`OPENCODE_TIMEOUT`（默认值 600）、`OPENROUTER_BASE_URL`
+（必须为 `https://`）、`OPENROUTER_TIMEOUT`（默认值 900）、
+`OPENROUTER_PREFLIGHT_TIMEOUT`（默认值 30）。每个变量都在相应
+服务提供商的章节中详细说明。
 
-## 快速上手
+## 快速入门
 
 ```bash
 # un fichier
@@ -88,82 +119,116 @@ aipmt --source_dir content/fr --target_dir content/en --source_lang fr --target_
 aipmt --use_gemini --file document.md --target_dir out/ --target_lang ja
 ```
 
-将 `document.md` 翻译为西班牙语会在 `--target_dir` 中生成 `document-es.md`；使用 `--include_model` 则生成 `document-es-gpt-5.6-terra.md`。扩展名始终变为 `.md`——`article.mdx` 会生成 `article-en.md`——除非使用 `--keep_filename` 保留原始名称。若未使用 `--force`，已存在的翻译将被跳过。
+将 `document.md` 翻译为西班牙语，会在 `--target_dir` 中生成 `document-es.md`；
+使用 `--include_model` 时则生成 `document-es-gpt-5.6-terra.md`。扩展名始终变为
+`.md`——`article.mdx` 会生成 `article-en.md`——除非使用
+`--keep_filename`，此时保留原始文件名。如果翻译已存在，
+未指定 `--force` 时会跳过。
 
-退出代码：若全部成功或跳过则为 `0`；若有文件失败则为 `1`（在标准错误输出中列出）；若由于配置问题则为 `2`。失败的文件绝不会被写入，即使写入过程本身出错也是如此：内容会先写入临时文件然后再重命名。只需重新运行即可。
+退出码：全部成功或跳过时为 `0`，仍有文件
+失败时为 `1`（列表输出到标准错误），配置有问题时为 `2`。
+失败的文件绝不会被写入，即使写入操作本身失败也是如此：
+内容先写入旁边的临时文件，再重命名。重新运行即可。
 
-## 模型选择建议
+## 如何选择模型
 
-在两篇真实文档上进行了评测，每个模型均翻译为相同的 14 种语言。**数字表示在 14 种语言中，翻译成功写入且与源结构完全一致的语言数量。**
+每个模型都使用两份真实文档进行测评，并翻译成相同的十四种语言。
+**数值表示在十四种语言中，有多少种语言的
+翻译成功写入，且与源文档相比没有任何结构差异。**
 
-| 模型                  | 获取方式                          | 密集资讯文章            | 本 README    | 差异内容及涉及的语言数                                                                                                                                             |
+| 模型                | 接入方式                 | 高密度资讯文章 | 本 README    | 差异内容及涉及的语言数量                                                                                                                          |
 | --------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Gemini 3.8 Flash**  | Google (Antigravity) 订阅         | ✅ 14/14                | ✅ 14/14     | 两篇文档均无任何差异                                                                                                                                               |
-| **Claude Sonnet 5.5** | Anthropic API 密钥                | ✅ 14/14                | ✅ 14/14     | 两篇文档均无任何差异                                                                                                                                               |
-| **Gemini 3.7 Flash**  | Google API 密钥                   | ✅ 14/14                | ⚠️ 13/14     | 14 种语言中有 1 种：多出一个粗体词 (ja)                                                                                                                           |
-| **Gemini 3.7 Flash**  | Google (Antigravity) 订阅         | ✅ 14/14                | ⚠️ 13/14     | 14 种语言中有 1 种：缺少一个粗体词 (ko)                                                                                                                           |
-| **GPT-5.6 Sol**       | ChatGPT 订阅或 OpenAI 密钥        | ✅ 14/14                | ⚠️ 12/14     | 14 种语言中有 2 种：缺少一个粗体词 (ar, ja)                                                                                                                       |
-| **GLM-5.2**           | OpenRouter 密钥                   | ✅ 14/14                | ⚠️ 11/14     | 14 种语言中有 3 种：缺少一个粗体词 (hi, ja, ko)                                                                                                                   |
-| Claude Sonnet 5       | Claude (Claude Code) 订阅         | ⚠️ 13/14                | ⚠️ 13/14     | 文章中有 1 种语言：多出一个粗体词 (zh)；本 README 中有 1 种语言：一行表格与上一行粘连，渲染时被隐藏 (ar)                                                           |
-| Claude Haiku 4.5      | Claude (Claude Code) 订阅         | ⚠️ 11/14                | ✅ 14/14     | 文章中有 3 种语言：某个小节标题变成了 1 级标题 (en, pl, ro)；本 README 在对比工具中无差异，但内部链接被重复了一遍英文                                              |
-| Claude Sonnet 5       | Anthropic API 密钥                | ⚠️ 11/14                | ⚠️ 12/14     | 文章中有 3 种语言：凭空出现了一个代码块 (es, de, hi)；本 README 中有 2 种语言：一个链接丢失了标记语法 (sv)，一个粗体词 (zh)                                       |
-| Claude Haiku 4.5      | Anthropic API 密钥                | ⚠️ 7/14                 | ✅ 14/14     | 文章中有 7 种语言：某个小节标题变成了 1 级标题——日语版中仍保留为法语；本 README 无差异                                                                             |
-| Claude Haiku 5.5      | Anthropic API 密钥                | ⚠️ 11/14                | ❌ 12/14     | 文章中有 3 种语言：小节标题层级改变或重复 (ja, ko, zh)；本 README 中有 2 种语言被拒，行内代码丢失 (ar, hi)                                                         |
-| Qwen 3.7 Flash        | OpenRouter 密钥                   | ❌ 8/14                 | ⚠️ 10/14     | 文章中有 1 种语言被拒，另有 5 种出现偏差；本 README 中约有 40 个词被加上了 `code` (ar)                                                                     |
-| Grok 4.6              | Grok 订阅                         | ❌ 8/14                 | 未评级       | 14 种语言中有 5 种被拒，原因是行内代码和 URL 未正确还原；荷兰语版本完全偏离                                                                                        |
-| GPT-OSS 20B           | 本地模型 (Ollama)                 | ❌ 7/14                 | 未重测       | 14 种语言中有 4 种被拒：模型残留了法语段落，被保护机制拦截                                                                                                         |
-| MiMo v2.5 (免费)      | OpenCode Zen，免账户              | ❌ 11/14                | 未重测       | 1 种语言被拒；波兰语版本丢失了一个小节                                                                                                                             |
-| Mistral Large         | Mistral API 密钥                  | ❌ 5/14                 | ❌ 1/14      | **整节内容丢失**：文章中有 1 种语言 (hi)，本 README 中有 3 种语言 (ar, hi, ko)——且文章中有 3 种语言被拒                                                           |
-| DeepSeek V4 Flash     | OpenRouter 密钥                   | ❌ 3/14                 | 未重测       | 14 种语言中有 10 种被拒；每种语言耗时 37 分钟                                                                                                                      |
-| Claude Opus 5.5       | Claude (Claude Code) 订阅         | ❌ 0/14                 | ✅ 14/14     | 由于一条生物学简讯触发了 Opus 的安全防护机制，文章在所有 14 种语言中均被拒绝；本 README 无差异                                                                    |
+| **Gemini 3.8 Flash**  | Google 订阅（Antigravity）   | ✅ 14/14                | ✅ 14/14     | 两份文档均无差异                                                                                                                                 |
+| **Claude Sonnet 5.5** | Anthropic API 密钥                 | ✅ 14/14                | ✅ 14/14     | 两份文档均无差异                                                                                                                                 |
+| **Gemini 3.7 Flash**  | Google API 密钥                    | ✅ 14/14                | ⚠️ 13/14     | 14 种语言中有 1 种：多加粗了一个词（ja）                                                                                                                      |
+| **Gemini 3.7 Flash**  | Google 订阅（Antigravity）   | ✅ 14/14                | ⚠️ 13/14     | 14 种语言中有 1 种：少加粗了一个词（ko）                                                                                                                     |
+| **GPT-5.6 Sol**       | ChatGPT 订阅或 OpenAI 密钥 | ✅ 14/14                | ⚠️ 12/14     | 14 种语言中有 2 种：少加粗了一个词（ar、ja）                                                                                                                |
+| **GLM-5.2**           | OpenRouter 密钥                    | ✅ 14/14                | ⚠️ 11/14     | 14 种语言中有 3 种：少加粗了一个词（hi、ja、ko）                                                                                                            |
+| Claude Sonnet 5       | Claude 订阅（Claude Code）   | ⚠️ 13/14                | ⚠️ 13/14     | 文章的 14 种语言中有 1 种：多加粗了一个词（zh）；本 README 中有 1 种：一行表格与上一行粘连，显示时被隐藏（ar）            |
+| Claude Haiku 4.5      | Claude 订阅（Claude Code）   | ⚠️ 11/14                | ✅ 14/14     | 文章中有 3 种语言：章节标题变成一级标题（en、pl、ro）；本 README 的比较工具未发现差异，但内部链接额外重复了一份英文版本 |
+| Claude Sonnet 5       | Anthropic API 密钥                 | ⚠️ 11/14                | ⚠️ 12/14     | 文章中有 3 种语言：出现了额外代码块（es、de、hi）；本 README 中有 2 种：一个链接丢失标记（sv）、一个词的加粗标记有差异（zh）                              |
+| Claude Haiku 4.5      | Anthropic API 密钥                 | ⚠️ 7/14                 | ✅ 14/14     | 文章中有 7 种语言：章节标题变成一级标题——日语版本的标题仍为法语；本 README 无差异                                              |
+| Claude Haiku 5.5      | Anthropic API 密钥                 | ⚠️ 11/14                | ❌ 12/14     | 文章中有 3 种语言：章节标题级别改变或重复（ja、ko、zh）；本 README 中有 2 种语言因行内代码丢失而被拒绝写入（ar、hi）    |
+| Qwen 3.7 Flash        | OpenRouter 密钥                    | ❌ 8/14                 | ⚠️ 10/14     | 文章中有 1 种语言被拒绝写入，另有 5 种存在差异；本 README 中约四十个词被放入 `code`（ar）                                                    |
+| Grok 4.6              | Grok 订阅                   | ❌ 8/14                 | 未评分     | 14 种语言中有 5 种因未返回行内代码和 URL 而被拒绝写入；荷兰语版本各处均有差异                                                               |
+| GPT-OSS 20B           | 本地模型（Ollama）             | ❌ 7/14                 | 未重新测评 | 14 种语言中有 4 种被拒绝写入：模型保留了法语段落，被检查机制拦截                                                                  |
+| MiMo v2.5（免费）   | OpenCode Zen，无需账户         | ❌ 11/14                | 未重新测评 | 1 种语言被拒绝写入；波兰语版本丢失一个章节                                                                                                                  |
+| Mistral Large         | Mistral API 密钥                   | ❌ 5/14                 | ❌ 1/14      | **整个章节消失**：文章中有 1 种语言（hi），本 README 中有 3 种（ar、hi、ko）——此外文章还有 3 种语言被拒绝写入                                |
+| DeepSeek V4 Flash     | OpenRouter 密钥                    | ❌ 3/14                 | 未重新测评 | 14 种语言中有 10 种被拒绝写入；每种语言耗时 37 分钟                                                                                                                 |
+| Claude Opus 5.5       | Claude 订阅（Claude Code）   | ❌ 0/14                 | ✅ 14/14     | 因一则生物学简讯，Opus 的防护机制拒绝翻译该文章的全部 14 种语言版本；本 README 无差异                                               |
 
-|     | 符号含义                                                                                                                                                                              |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✅  | 全部 14 种语言均已翻译，且与源结构完全无差异                                                                                                                                          |
-| ⚠️  | 全部 14 种语言均已翻译；差异仅限于**标记格式**——例如多出一个粗体词、一个 `code` 或某个链接丢失了方括号。文本、URL、代码块或章节均无任何遗漏                                   |
-| ❌  | 至少有一种语言无法翻译（文件被拒绝且未写入），**或者**已写入的文件中存在内容缺失                                                                                                       |
+|     | 符号含义                                                                                                                                                                                 |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅  | 十四种语言均已翻译，且与源文档没有任何结构差异                                                                                                                                       |
+| ⚠️  | 十四种语言均已翻译；差异仅涉及**标记**——一个加粗词、一个 `code`、一个丢失方括号的链接。没有缺少任何文本、URL、代码块或章节 |
+| ❌  | 至少一种语言未能完成翻译——文件被拒绝，未写入——**或者**已写入的文件中存在内容缺失                                                                      |
 
-要点总结：
+需要记住的要点：
 
-- **被拒绝的翻译不等于损坏的翻译。** 当返回结果缺少 Token 时，文件不会被写入，该语言会被计为被拒绝。Grok 在测试文章中就是这种情况：在 5 种非拉丁脚本语言中，第一段就丢失了 4 处行内代码和 3 个 URL。
-- **模型可能会因为一句话而拒绝整个文档。** Opus 5.5 翻译本 README 时分毫不差，但完全无法翻译技术资讯文章：其安全防护机制因一条生物学简讯而中断了响应。文件未被写入，且 aipmt 会给出具体原因。
-- **此防护网并不覆盖标题、表格、front matter 或正文文本。** 如果模型删除了某个小节，工具依然会照常写入该文件——Mistral 就是这种情况。这些元素无法用 Token 替换，目前的防护机制也不会检查它们；`scripts/compare_structure.py` 可以在事后检测出缺失的小节。
-- **Grok 在本 README 中未评级**：其 CLI 会话在处理完 12 种语言后超时过期，其中 11 种无任何差异。中断的评测不予评分。
-- **文档的信息密度比目标语言更关键。** Grok 在普通 README 上表现良好，但在链接密集的文章中会出现掉链子现象，即便是荷兰语也是如此。
+- **被拒绝写入的翻译不等于损坏的翻译。** 返回结果中缺少占位符时，
+  文件不会被写入，该语言会被计为
+  拒绝写入。Grok 在文章测评中就是如此：五种非拉丁文字的语言
+  在第一个分段中就丢失了四处行内代码和
+  三个 URL。
+- **模型可能因一句话而拒绝整份文档。** Opus 5.5
+  翻译本 README 时没有任何差异，却未能完成任何语言版本的资讯文章：
+  它的防护机制遇到一则生物学简讯就会终止响应。文件不会
+  被写入，aipmt 会说明原因。
+- **这层保护不覆盖标题、表格、前置元数据或
+  正文。** 如果模型删掉一个章节，工具仍会照常写入
+  文件——Mistral 就存在这种情况。这些元素无法
+  替换为占位符，现有检查机制也不会检查它们；
+  `scripts/compare_structure.py` 能检测章节丢失，但只能事后发现。
+- **本 README 没有 Grok 的评分**：它的 CLI 会话在完成十二种
+  语言后过期，其中十一种没有差异。中断的测评不予评分。
+- **文档密度比语言更重要。** Grok 能处理
+  普通 README，却无法应对链接密集的文章，即使是
+  荷兰语也不例外。
 
-测试日期与文档：“本 README”列于 2026 年 9 月 9 日基于本文件的固定版本（785 行，285 处行内代码，89 行表格）进行测试，此后有所修改——除 Antigravity 和 Claude Code 行于 9 月 26 日基于随 1.14.0 发布的较短版本（600 行，257 处行内代码，85 行表格）进行测试，以及通过 API 调用的 Claude Sonnet 5.5、Haiku 5.5 和 Haiku 4.5 于 10 月 18 日基于相同版本进行测试。“密集资讯文章”列来自 9 月 4 日至 5 日对一篇 589 行文章的测试，除 Grok 行于 9 月 9 日在同系列资讯的另一期上重新测试，Antigravity 和 Claude Code 行于 9 月 26 日在同一文章上测试，以及上述三行 Claude 于 10 月 18 日测试。完整表格、耗时和测试协议请参阅[详细评测数据](#详细评测数据)。
-
+测评日期与文档：“本 README”列于 2026 年 9 月 9 日
+使用本文件的固定修订版进行测评（785 行、285 处行内代码、89 行
+表格），此后文件有所修改——但 Antigravity 和 Claude Code 各行
+于 9 月 26 日使用随 1.14.0 发布的较短修订版
+（600 行、257 处行内代码、85 行表格）测评，而通过 API 调用的 Claude
+Sonnet 5.5、Haiku 5.5 和 Haiku 4.5 各行于 10 月 18 日使用
+同一修订版测评。“高密度资讯文章”列来自
+9 月 4 日和 5 日对一篇 589 行文章的测评，但 Grok 行于
+9 月 9 日使用同一资讯刊物的另一期重新测评，Antigravity 和
+Claude Code 各行于 9 月 26 日使用同一篇文章测评，上述三行
+Claude 则于 10 月 18 日测评。完整表格、耗时和测评方法见
+[详细测评](#详细测量结果)。
 ## 所有选项
 
-| 选项                     | 描述                                                                                                          |
+| 选项                   | 说明                                                                                                   |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `--file`           | 要翻译的单个 Markdown 文件（替代 `--source_dir`）                                                             |
-| `--source_dir`           | 包含 Markdown 文件的源目录（默认：`content/posts`）                                                            |
-| `--target_dir`           | 翻译文件的输出目录（默认：`traductions_en`）                                                                    |
-| `--source_lang`           | 源语言（默认：`fr`）                                                                                |
-| `--target_lang`           | 目标语言（默认：`en`）                                                                              |
-| `--model`           | 要使用的特定模型                                                                                              |
-| `--eco`           | 使用经济型模型                                                                                                |
-| `--use_mistral`           | 使用 Mistral AI API                                                                                           |
-| `--use_claude`           | 使用 Claude API                                                                                               |
-| `--use_gemini`           | 使用 Gemini API                                                                                               |
-| `--use_grok`           | 使用 xAI (Grok) API — 需要 `XAI_API_KEY`                                                                     |
-| `--use_codex`           | 在 ChatGPT 订阅配额上使用 Codex CLI                                                                           |
-| `--use_grok_cli`           | 在 Grok 订阅配额上使用 Grok CLI                                                                               |
-| `--use_antigravity`           | 在 Google AI Pro 或 Ultra 订阅配额上使用 Antigravity CLI（`agy`）                                    |
-| `--use_claude_code`           | 在 Claude Pro 或 Max 订阅配额上使用 Claude Code CLI（`claude -p`）                                         |
-| `--use_opencode`           | 使用 OpenCode（开源）连接到 OpenCode 中配置的提供商；需要 `--model provider/modèle`                                      |
-| `--use_openrouter`           | 使用 OpenRouter — 需要 `OPENROUTER_API_KEY` 和 `--model fournisseur/modèle`                                                       |
-| `--force`           | 强制重新翻译                                                                                                  |
-| `--keep_filename`           | 保留原始文件名                                                                                                |
-| `--news`           | 新闻模式：保护英文引用，管理各语言国旗图标                                                                    |
-| `--add_translation_note`           | 添加翻译说明                                                                                                  |
-| `--note_position`           | 说明位置：`top`、`bottom`（默认）或 `both`                                             |
-| `--note_format`           | 说明格式：`legacy`（默认，粗体段落）或 `marker`                                                 |
-| `--include_model`          | 在输出文件中包含模型名称                                                                                      |
-| `--reasoning_effort`          | GPT-5.x 推理力度：`none`/`low`/`medium`/`high`/`xhigh`             |
+| `--file`                 | 要翻译的单个 Markdown 文件（替代 `--source_dir`）                                             |
+| `--source_dir`           | 包含 Markdown 文件的源目录（默认：`content/posts`）                                   |
+| `--target_dir`           | 译文文件的输出目录（默认：`traductions_en`）                                    |
+| `--source_lang`          | 源语言（默认：`fr`）                                                                                  |
+| `--target_lang`          | 目标语言（默认：`en`）                                                                                   |
+| `--model`                | 指定使用的模型                                                                                  |
+| `--eco`                  | 使用经济型模型                                                                              |
+| `--use_mistral`          | 使用 Mistral AI API                                                                                     |
+| `--use_claude`           | 使用 Claude API                                                                                         |
+| `--use_gemini`           | 使用 Gemini API                                                                                         |
+| `--use_grok`             | 使用 xAI (Grok) API — 需要 `XAI_API_KEY`                                                           |
+| `--use_codex`            | 使用 Codex CLI，消耗 ChatGPT 订阅配额                                                    |
+| `--use_grok_cli`         | 使用 Grok CLI，消耗 Grok 订阅配额                                                        |
+| `--use_antigravity`      | 使用 Antigravity CLI（`agy`），消耗 Google AI Pro 或 Ultra 订阅配额                       |
+| `--use_claude_code`      | 使用 Claude Code CLI（`claude -p`），消耗 Claude Pro 或 Max 订阅配额                      |
+| `--use_opencode`         | 使用开源的 OpenCode，连接其配置的提供商；需要 `--model provider/modèle` |
+| `--use_openrouter`       | 使用 OpenRouter — 需要 `OPENROUTER_API_KEY` 和 `--model fournisseur/modèle`                          |
+| `--force`                | 强制重新翻译                                                                                       |
+| `--keep_filename`        | 保留原始文件名                                                                          |
+| `--news`                 | 新闻模式：保护英文引文，按语言处理标志                                      |
+| `--add_translation_note` | 添加翻译说明                                                                                |
+| `--note_position`        | 说明位置：`top`、`bottom`（默认）或 `both`                                                     |
+| `--note_format`          | 说明格式：`legacy`（默认，加粗段落）或 `marker`                                            |
+| `--include_model`        | 在输出文件名中包含模型名称                                                            |
+| `--reasoning_effort`     | GPT-5.x 推理强度：`none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-这九个 `--use_*` 标志互斥：组合其中任意两个将被拒绝。
+这九个 `--use_*` 标志互斥：同时使用其中两个会被
+拒绝。
 
 ## 提供商
 
@@ -177,25 +242,26 @@ aipmt --use_gemini  --source_dir content/fr --target_dir content/ja --target_lan
 aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lang pt
 ```
 
-`--eco` 会切换到每个提供商的经济档次。
+`--eco` 切换到各提供商的经济档位。
 
-| 提供商      | 质量优先（默认）                                      | 经济型（`--eco`） |
-| ----------- | ----------------------------------------------------- | ------------------------- |
-| OpenAI      | `gpt-5.6-terra`                                       | `gpt-5.6-luna`           |
-| Claude      | `claude-sonnet-5-5`                                       | `claude-haiku-5-5`           |
-| Mistral     | `mistral-large-latest`                                       | `mistral-small-latest`           |
-| Gemini      | `gemini-3.7-flash`                                       | `gemini-3.1-flash-lite`           |
-| Codex       | `gpt-5.6-sol`（也可通过 `--model` 使用 `terra` 和 `luna`） | `gpt-5.6-luna`           |
-| Grok API    | `grok-4.6`                                       | `grok-4.3`           |
-| Grok CLI    | `grok-4.6`                                       | `grok-4.5`           |
-| Antigravity | `gemini-3.8-flash-medium`                                       | `gemini-3.7-flash-low`           |
-| Claude Code | `sonnet`，思考力度 `low`             | 同上 — `--eco` 无效 |
-| OpenCode    | 必须指定 `--model provider/modèle`                              | 同上 — `--eco` 无效 |
-| OpenRouter  | 必须指定 `--model fournisseur/modèle`                              | 同上 — `--eco` 无效 |
+| 提供商    | 高质量（默认）                                                     | 经济型（`--eco`）      |
+| ----------- | -------------------------------------------------------------------- | ------------------------- |
+| OpenAI      | `gpt-5.6-terra`                                                      | `gpt-5.6-luna`            |
+| Claude      | `claude-sonnet-5-5`                                                  | `claude-haiku-5-5`        |
+| Mistral     | `mistral-large-latest`                                               | `mistral-small-latest`    |
+| Gemini      | `gemini-3.7-flash`                                                   | `gemini-3.1-flash-lite`   |
+| Codex       | `gpt-6.1-sol`（也可通过 `--model` 使用 `gpt-5.6-sol`、`terra` 和 `luna`） | `gpt-5.6-luna`            |
+| Grok API    | `grok-4.6`                                                           | `grok-4.3`                |
+| Grok CLI    | `grok-4.6`                                                           | `grok-4.5`                |
+| Antigravity | `gemini-3.8-flash-medium`                                            | `gemini-3.7-flash-low`    |
+| Claude Code | `sonnet`，推理强度为 `low`                                               | 相同 — `--eco` 无效 |
+| OpenCode    | 必须指定 `--model provider/modèle`                                | 相同 — `--eco` 无效 |
+| OpenRouter  | 必须指定 `--model fournisseur/modèle`                             | 相同 — `--eco` 无效 |
 
 ### 使用 ChatGPT 订阅：`--use_codex`
 
-调用官方 Codex CLI：翻译从 ChatGPT 订阅配额中扣除，无需 API 密钥或按量计费。
+调用官方 Codex CLI：翻译消耗
+ChatGPT 订阅配额，无需 API 密钥，也不按用量计费。
 
 ```bash
 pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo), ou : npm install -g @openai/codex
@@ -203,17 +269,32 @@ codex login
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 ```
 
-- 在 `CODEX_BIN` 中查找二进制文件，然后是 `PATH`，最后是 `openai-codex-cli-bin` 包。绝不会读取 `~/.codex/auth.json`。
-- `OPENAI_API_KEY` 和 `CODEX_API_KEY` 会从子进程环境中移除：即使存在密钥，也绝不会切换到 API。
-- 每个分段至少消耗 5 小时窗口中的一条“消息”——若验证失败并重试则消耗两条。据 OpenAI 估计，Plus 计划下 `gpt-5.6-luna`（`--eco`）约为 250–2,000 条消息/5 小时，而 `gpt-5.6-sol` 约为 10–100 条。
-- `--model gpt-5.6-terra` 和 `--model gpt-5.6-luna` 同样通过订阅执行。如果账户无权使用某个模型，将返回 400“model is not supported when using Codex with a ChatGPT account”。
-- 比 API 慢，且差距随文档变大而增加：对于本 README，使用 `gpt-5.6-sol` 每种语言的中位时间为 6 分 46 秒，而 `gemini-3.7-flash` 仅需 36 秒。
-- 在 CI 中被拒绝（已设置 `CI` 或 `GITHUB_ACTIONS`）：订阅通过个人会话文件进行身份验证，该文件不应出现在共享 runner 上。
-- 环境变量：`CODEX_BIN`、`CODEX_TIMEOUT`（每段秒数，默认 600）。
+- 依次在 `CODEX_BIN`、`PATH` 和软件包
+  `openai-codex-cli-bin` 中查找可执行文件。绝不读取 `~/.codex/auth.json`。
+- 从子进程环境中移除 `OPENAI_API_KEY` 和 `CODEX_API_KEY`：
+  即使存在密钥，也绝不会切换到 API。
+- 每个片段至少消耗 5 小时窗口内的一条“消息”——如果
+  校验失败并重试，则消耗两条。根据 OpenAI 公布的
+  估算，Plus 套餐中 `gpt-5.6-luna`（`--eco`）的配额为
+  250-2 000 条消息/5 h，`gpt-5.6-sol` 为 10-100 条。
+- 截至 1.16.3 版本的默认模型 `--model gpt-5.6-sol`，以及 `--model gpt-5.6-terra`
+  和 `--model gpt-5.6-luna`，也通过订阅使用。
+- 服务器返回 429 不会导致文件丢失：Codex 会自动重新连接，
+  aipmt 等待本轮结束；如果最终仍返回 429，该片段
+  会先后在 30 秒和 60 秒后重试。如果账户无权使用某个模型，则返回 400，提示“通过 ChatGPT 账户使用 Codex 时
+  不支持此模型”。
+- 比 API 更慢，而且文档越长，差距越大：对于这份 README，
+  使用 `gpt-5.6-sol` 时，每种语言耗时的中位数为 6 分 46 秒，而
+  `gemini-3.7-flash` 为 36 秒。
+- 在 CI 中拒绝运行（已设置 `CI` 或 `GITHUB_ACTIONS`）：订阅通过
+  个人会话文件进行身份验证，该文件不应放在共享
+  运行器上。
+- 变量：`CODEX_BIN`、`CODEX_TIMEOUT`（每个片段的秒数，默认 600）。
 
 ### 使用 Grok 订阅：`--use_grok_cli`
 
-使用官方 Grok Build CLI 时原理相同，基于 SuperGrok 或 X Premium+ 订阅。
+原理相同，使用官方 Grok Build CLI，消耗 SuperGrok 或
+X Premium+ 订阅配额。
 
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash
@@ -221,13 +302,27 @@ grok login                                      # ou : grok login --device-code
 aipmt --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
 ```
 
-- **隔离性弱于 Codex。** Grok 的操作系统沙箱在许多较新的 Linux 设备上无法生效（AppArmor、容器运行时套接字），且无法生效的配置文件会在静默状态下以未隔离模式启动。因此，该脚本默认不请求任何配置文件，进行提示，并依赖 CLI 的 `--deny` 规则，其中包括全捕获规则 `*` —— 这是唯一一层会拒绝启动而不是在未通知的情况下直接移除保护的机制。`GROK_TRANSLATE_SANDBOX=read-only` 强制要求操作系统沙箱，若机器无法满足则启动失败。
-- 配额按周计算，与 Chat、Imagine 和 Voice 共享，且没有任何命令可查询该配额：批量任务可能会在没有任何提醒的情况下消耗对话使用量。
-- 环境变量：`GROK_BIN`、`GROK_HOME`（CLI 目录，默认 `~/.grok`）、`GROK_TIMEOUT`（默认 900）、`GROK_TRANSLATE_SANDBOX`。
+- **隔离弱于 Codex。** Grok 的操作系统沙箱在许多较新的 Linux 设备上
+  无法生效（受 AppArmor、容器运行时套接字影响），无法应用的
+  配置会静默以无隔离模式启动。因此，脚本默认不请求任何配置，
+  并明确告知这一点，转而依靠 CLI 的 `--deny` 规则，包括兜底规则 `*`——这是唯一一个
+  会在无法提供保护时拒绝启动，而不是悄悄移除保护的
+  防护层。`GROK_TRANSLATE_SANDBOX=read-only` 要求使用操作系统沙箱，如果设备无法
+  满足要求，启动就会失败。
+- 配额按周计算，与 Chat、Imagine 和 Voice 共享，且没有
+  命令可以查询：批量任务可能在没有提示的情况下消耗对话
+  配额。
+- 变量：`GROK_BIN`、`GROK_HOME`（CLI 目录，默认 `~/.grok`）、
+  `GROK_TIMEOUT`（默认 900）、`GROK_TRANSLATE_SANDBOX`。
 
 ### 使用 Google 订阅：`--use_antigravity`
 
-使用 Antigravity 官方 CLI `agy` 时原理相同：对于订阅了 Google AI Pro 或 Ultra 的用户，翻译会从订阅配额中扣除，而不是按 token 计费。这是使用该配额的唯一途径：Gemini CLI 自 2026 年 6 月 18 日起不再支持这些账户（[公告](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)），且 Antigravity SDK 仅接受 API 密钥或 Google Cloud 项目。
+原理相同，使用 Antigravity 的官方 CLI `agy`：对于付费订阅 Google
+AI Pro 或 Ultra 的用户，翻译消耗订阅配额，
+而不是按 token 计费。这是使用该配额的唯一途径：自 2026 年 6 月 18 日起，Gemini CLI 不再
+支持这些账户
+（[公告](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)），
+而 Antigravity SDK 只接受 API 密钥或 Google Cloud 项目。
 
 ```bash
 # agy 1.2.11 ou plus récent : https://antigravity.google/docs/cli/install/
@@ -236,45 +331,151 @@ aipmt --use_antigravity --file README.md --target_dir . --target_lang en
 agy -p /usage --output-format json   # quota restant, sans en consommer
 ```
 
-- **杜绝任何付费途径。** agy 从您的环境中仅接收白名单中的有限变量 —— `PATH`、语言和时区、终端、身份标识、代理与证书、会话总线 —— 绝不包含任何密钥：其部分变量会在不显示任何提示的情况下切换调用方式（实测：其中一个会将文档发送至第三方网关，另一个则发送至计费的 Google Cloud 项目），且黑名单机制在每次审查时总有遗漏。在处理任何分段之前，不消耗配额的 `agy -p /config` 必须显示付费 AI 额度已禁用，且无 API 密钥或 Google Cloud 项目 —— 缺少该设置即视为拒绝 —— 否则不进行任何翻译；随后每次调用的日志必须证实使用的是订阅配额（`authMethod=consumer`），否则响应将被拒绝。
-- **隔离性。** 每次调用都在一个独立的临时主目录中运行，并配备一个不带工具的翻译代理：您的 agy 设置、规则、插件、MCP 服务器和钩子均不会带入其中，不会向您的历史记录添加任何内容，凭据保留在密钥环中，aipmt 绝不会读取该密钥环。如果未找到指定的代理，agy 会静默回退到其编码代理和工具：日志中必须包含确认正确代理的整行信息 —— 引用该消息的文档不能替代此日志验证 —— 否则将被拒绝。
-- **支持平台**：Linux（需在具有密钥环的会话中，如 D-Bus 会话总线、Secret Service）；支持 macOS，但尚未经过实测。在 Windows 下会被拒绝，因为 agy 无法读取隔离每次调用的变量；在没有会话总线的 Linux 环境下也会被拒绝 —— 例如 SSH 会话、容器、服务器：agy 会在这些环境中将其令牌保存在 `~/.gemini` 文件中，而隔离机制会将其屏蔽。拒绝会在启动前发生并提示原因，无需等待一分钟以获取登录代码。
-- **模型**：`agy models` 所提供的模型。Gemini 系列在名称中包含推理力度（`gemini-3.8-flash-medium`…）：不带后缀的名称在调用前会被拒绝，且 `--reasoning_effort` 无效。默认使用 `gemini-3.8-flash-medium`，在 `--eco` 模式下使用 `gemini-3.7-flash-low`；确定这些配置的测试系列在[详细评测](#详细评测数据)中进行了说明。Claude 和 GPT-OSS 拥有独立的配额，且额度小得多：实测每次调用约消耗 5 小时窗口的 1%，而 Flash 仅约 0.05%。
-- **配额**：按组划分，包括 5 小时窗口和每周窗口，按 token 成本比例扣除。在作者账户上的实测结果：在 `gemini-3.8-flash-medium` 下每百万源字符约消耗 5 小时窗口的 16 个点，在 `gemini-3.7-flash-medium` 下为 14 个点，在低推理力度下为 7 至 8 个点 —— 因此一份 40,000 字符的 README 消耗略高于半个点。周限制则取决于订阅档次。重试机制遵循 agy 声明为可重试的情况；否则，已用尽的窗口绝不会重试：它会导致每个文件处理失败，直到 `/usage` 显示重置时间。
-- **比 API 更慢**：在评测中使用的密集长文上，每种语言的中位时间为：`gemini-3.8-flash-medium` 下 3 分 59 秒，`gemini-3.7-flash-medium` 下 3 分 14 秒，相比之下通过 API 使用 Gemini 3.7 Flash 仅需 1 分 18 秒。
-- **中断**：Ctrl-C 或关闭终端会连同命令一起终止 agy，而不是让它继续在您的配额上运行；Codex、Grok CLI 和 OpenCode 也是如此。在 `nohup` 下，翻译会继续进行。
-- 在 CI 中被拒绝（已设置 `CI` 或 `GITHUB_ACTIONS`）：凭据保存在个人密钥环中。在 runner 上，请使用 `--use_gemini` 搭配 `GOOGLE_API_KEY`。
-- 环境变量：`AGY_BIN`（若未设置则为 `PATH`，然后是 `~/.local/bin/agy`）、`AGY_TIMEOUT`（每段秒数，包含启动时间，默认 900）。
+- **不保留任何付费调用途径。** agy 仅从您的环境中
+  接收白名单中的变量——`PATH`、语言和时区、
+  终端、身份、代理和证书、会话总线——不接收任何密钥：
+  它的多个变量会在不显示提示的情况下切换调用途径（实测：
+  其中一个会将文档发送到第三方网关，另一个会发送到按量计费的
+  Google Cloud 项目），而每次复查黑名单时都会发现遗漏。
+  在处理任何片段之前，不消耗配额的 `agy -p /config` 必须显示
+  付费 AI 点数已禁用，且没有 API 密钥或 Google Cloud 项目——
+  缺少设置也视为不符合要求——否则不执行任何翻译；随后，每次
+  调用的日志都必须证明使用了订阅（`authMethod=consumer`），否则
+  拒绝该响应。
+- **隔离。** 每次调用都在私有、临时的个人目录中运行，
+  使用不带工具的翻译代理：您的 agy 设置、规则、
+  插件、MCP 服务器和钩子都不会进入其中，历史记录不会增加，
+  登录信息保留在密钥环中，aipmt 从不读取。
+  如果找不到代理，agy 会静默回退到其编程代理
+  及其工具：日志中必须有一整行确认使用了正确的代理——
+  文档中引用该消息不能替代此确认——否则拒绝执行。
+- **平台**：Linux，且会话中有密钥环（D-Bus 会话总线、
+  Secret Service）；也接受 macOS，但尚未在其上实测。在
+  Windows 下拒绝运行，因为 agy 不读取用于隔离每次调用的变量；
+  在没有会话总线的 Linux 环境下也拒绝运行——例如 SSH 会话、容器、服务器：agy 会在这些环境中
+  将令牌存入 `~/.gemini` 下的文件，而隔离会隐藏该文件。
+  拒绝会在启动前发生，并说明原因，而不是等待一分钟
+  获取登录码。
+- **模型**：`agy models` 中的模型。Gemini 将推理强度写在名称中
+  （`gemini-3.8-flash-medium`…）：没有后缀的名称会在调用前被拒绝，
+  `--reasoning_effort` 无效。默认为 `gemini-3.8-flash-medium`，
+  使用 `--eco` 时默认为 `gemini-3.7-flash-low`；确定这些默认值的测试
+  见[详细测量](#详细测量结果)。Claude 和 GPT-OSS
+  有各自的配额，而且小得多：实测每次调用约消耗
+  5 小时窗口配额的 1 %，而 Flash 为 0,05 %。
+- **配额**：每组模型各有一个 5 小时窗口和一个周窗口，
+  按 token 成本比例消耗。在作者账户上的实测结果：每百万源字符
+  使用 `gemini-3.8-flash-medium` 时约消耗 5 小时窗口配额的
+  16 个百分点，使用 `gemini-3.7-flash-medium` 时为 14 个百分点，
+  低推理强度下为 7 至 8 个百分点——因此，一份 40 000 字符的 README 只消耗略多于
+  半个百分点。每周上限则取决于订阅档位。重试遵循
+  agy 声明的可重试条件；若无此声明，窗口配额耗尽后绝不
+  重试：每个文件都会失败，直到 `/usage`
+  显示的重置时间。
+- **比 API 更慢**：对于测量中使用的内容密集文章，每种语言
+  耗时的中位数在 `gemini-3.8-flash-medium` 下为 3 分 59 秒，在
+  `gemini-3.7-flash-medium` 下为 3 分 14 秒，而通过 API 使用 Gemini 3.7 Flash 为 1 分 18 秒。
+- **中断**：按 Ctrl-C 或关闭终端时，agy 会随命令
+  一起停止，不会继续完成本轮并消耗您的配额；
+  Codex、Grok CLI 和 OpenCode 也是如此。在 `nohup` 下，翻译会继续。
+- 在 CI 中拒绝运行（已设置 `CI` 或 `GITHUB_ACTIONS`）：登录信息保存在
+  个人密钥环中。在运行器上，请使用 `--use_gemini` 配合 `GOOGLE_API_KEY`。
+- 变量：`AGY_BIN`（否则依次查找 `PATH` 和 `~/.local/bin/agy`）、
+  `AGY_TIMEOUT`（每个片段的秒数，含启动时间，默认 900）。
 
-**使用条款：须自行承担账户风险。** [Antigravity 条款](https://antigravity.google/terms)（第 6 节）及其 [常见问题解答](https://antigravity.google/docs/faq/) 禁止使用第三方软件借助 Antigravity 登录凭据访问该服务 —— 其中提到了 Claude Code、OpenClaw 和 OpenCode —— 违者可能面临账户封禁。aipmt 既不读取也不复用该令牌：它仅在 Google 针对脚本和 CI 记录的 [无头模式 (headless)](https://antigravity.google/docs/cli/headless/) 下启动官方二进制文件。Google 团队的一位成员曾认为通过本地脚本启动 `agy -p` 用于个人工作属于“标准操作”（[官方论坛，2026 年 9 月 25 日，非合同性回复](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829)）；但尚无官方条款对类似本工具的分发形式做出明确裁定。
+**使用条款：相关责任由您的账户承担。**
+[Antigravity 条款](https://antigravity.google/terms)（第 6 节）及其
+[常见问题](https://antigravity.google/docs/faq/)禁止通过第三方软件
+使用 Antigravity 登录信息访问服务——其中点名了 Claude Code、
+OpenClaw 和 OpenCode——违规可能导致账户被停用。aipmt
+既不读取也不复用令牌：它以 Google
+为脚本和 CI 提供文档说明的[无界面模式](https://antigravity.google/docs/cli/headless/)
+启动官方可执行文件。一位 Google 员工认为，从本地脚本运行
+`agy -p` 来完成自己的工作属于“常规”用法
+（[官方论坛，2026 年 9 月 25 日，非合同性回复](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829)）；
+但没有任何条文明确界定像本工具这样公开分发的工具是否适用。
 
-**仅限公开文档。** 根据相同条款的第 5 节，交互内容 —— 提示词、响应、元数据 —— 可能会用于改进 Google 的产品和机器学习，并可能会被人工审核（即使付费订阅也是如此）。退出该机制需要通过 `enableTelemetry` 设置，但其具体效果未有文档说明，且 aipmt 不会对其进行设置；您的 agy 设置也不会继承到其隔离环境中。请切勿传输任何机密内容。
+**仅限公开文档。** 根据同一条款的第 5 节，
+交互内容——提示词、响应、元数据——可能用于改进
+Google 产品和机器学习，也可能由人工审阅，
+付费订阅同样如此。退出需通过
+`enableTelemetry` 设置完成，其具体效果没有文档说明，aipmt 也不会设置它；您的
+agy 设置不会被带入隔离环境。请勿通过它处理任何机密内容。
+### 使用 Claude 订阅：`--use_claude_code`
 
-### 关于 Claude 订阅：`--use_claude_code`
-
-在使用 Claude Code 官方 CLI 的 `claude` 并处于 `-p` 模式下也是同样的原理：对于 Claude Pro 或 Max 付费用户，翻译直接扣除订阅额度，而不是按 token 计费。请勿将其与 Anthropic 的 `--use_claude` API 混淆，后者是按量计费的。
+`claude` 采用相同原理，它是 Claude Code 的官方 CLI，以 `-p` 模式运行：对于
+付费订阅 Claude Pro 或 Max 的用户，翻译会从
+订阅配额中扣除，而不是按 token 计费。请勿将其与
+按用量计费的 Anthropic API `--use_claude` 混淆。
 
 ```bash
 claude                                   # une fois : /login avec le compte de l'abonnement
 aipmt --use_claude_code --file README.md --target_dir . --target_lang en
 ```
 
-- **不保留任何付费途径，且每次调用都会进行验证。** Claude Code 仅从您的环境中接收一个受限的变量列表——既没有 API 密钥、令牌、云提供商配置，也没有发起 aipmt 的 Claude Code 会话标识。在第一个分段之前，`claude auth status` 必须显示订阅连接，且不含 Console 密钥，而无需消耗任何额度的 `/usage` 必须对此进行证实；每次调用随后都会在其初始化事件中证实这一点，否则响应将被拒绝。
-- **请禁用“额外用量（extra usage）”**（claude.ai，设置 → 用量），以确保实现零花费：启用后，它会在窗口额度耗尽时自动接管并产生计费，且不显示任何错误。一旦调用的额度报告显示耗尽，aipmt 会立即停止翻译，但该次调用已被计入。
-- **与您的 Claude Code 会话共享配额。** 每次调用都会报告 5 小时和周窗口的使用情况；超过 80%（`AIPMT_CLAUDE_MAX_UTILIZATION`）时，将不再启动后续分段，以避免耗尽您的工作配额。
-- **环境隔离。** 每次调用均在不加载任何工具、独立的私有一次性目录中运行，处于无个性化模式：您的 `CLAUDE.md`、插件、hooks、MCP 服务器或自定义设置均不会被加载，会话也不会保留任何内容。附件功能已被切断：文档中的 `@chemin` 仍保持纯文本状态，不会打开任何文件（已实测）。
-- **模型**：默认使用 `sonnet`，思考程度为 `low`，在 `--eco` 下亦是如此：`--eco` 在此路径上没有任何改变。在相同文档上的实测表明，`haiku` 耗时慢两倍——它会在无法阻止的情况下强制进行推理——而成本仅略微降低，且 `opus` 会拒绝生物学内容（见下一项）。两者均可通过 `--model` 访问；这些别名始终指向其家族的最新模型。`fable` 和 `[1m]` 变体会被拒绝，因为它们会转入付费点数计费。`--reasoning_effort` 用于调节思考程度，翻译从中获益微乎其微：实测推理几乎为零。
-- **Opus 会拒绝某些生物学内容。** 它的安全防范机制比 Sonnet 更严格，Anthropic 的错误信息提示它们“有时可能会标记与生物学研究相关的工作（can sometimes flag biology-research-adjacent work）”。实测：一篇关于 279 个生成分子的技术简报导致该文章在全部 14 种语言中均被拒绝。未写入任何内容：aipmt 会拒绝被截断的响应，指出触发的安全机制并建议改用 `--model sonnet`。
-- 在 CI 环境中被拒绝（定义了 `CI` 或 `GITHUB_ACTIONS`）以及在 Windows 下被拒绝（未实测）。
-- 变量：`AIPMT_CLAUDE_BIN`（否则依次使用 `PATH`、`~/.local/bin/claude`）、`AIPMT_CLAUDE_TIMEOUT`（每分段秒数，默认 900）、`AIPMT_CLAUDE_MAX_UTILIZATION`（默认 0.8）、`CLAUDE_CONFIG_DIR`（Claude Code 账号，绝不从项目的 `.env` 获取）；工作目录位于 `XDG_CACHE_HOME/aipmt/claude-code`（默认 `~/.cache`）。
+- **所有付费途径均已关闭，每次调用都会提供证明。** Claude
+  Code 只能从环境中接收一组固定的变量，既没有
+  API 密钥、令牌、云服务提供商信息，也没有启动 aipmt 的 Claude Code
+  会话标记。在处理第一个片段之前，`claude auth status` 必须
+  显示通过订阅登录，且未使用 Console 密钥；不消耗
+  任何配额的 `/usage` 也必须确认这一点；每次调用还会在其
+  初始化事件中再次确认，否则响应将被拒绝。
+- **请关闭“额外用量”**（claude.ai，设置 → 用量），以
+  确保费用为零：启用后，它会在某个时间窗口的配额耗尽时接替，
+  并直接计费而不报错。只要某次调用的配额报告显示发生了这种情况，aipmt 就会停止翻译，
+  但该次调用已经计费。
+- **配额与您的 Claude Code 会话共享。** 每次调用都会报告
+  5 小时窗口和每周窗口的用量；超过 80 %
+  （`AIPMT_CLAUDE_MAX_UTILIZATION`）后，不再启动任何新片段，以免
+  耗尽您工作所需的配额。
+- **隔离。** 每次调用均在私有的
+  临时目录中运行，不使用工具，并关闭个性化：不会加载您的 `CLAUDE.md`、插件、
+  hooks、MCP 服务器或设置，也不会保留任何
+  会话内容。附件功能已关闭：文档中的 `@chemin`
+  只会作为文本处理，不会打开任何文件（已实测）。
+- **模型**：默认使用 `sonnet`，推理强度为 `low`，在 `--eco` 下也是如此：
+  `--eco` 对此途径没有影响。在相同文档上的实测中，`haiku`
+  耗时是其两倍——它会进行推理，且无法关闭——而
+  费用仅略低；`opus` 则会拒绝生物学内容（见
+  下一点）。两者仍可通过 `--model` 使用；这些别名会跟随
+  各自系列的最新模型。`fable` 和 `[1m]` 变体被拒绝，
+  因为它们会使用付费额度。`--reasoning_effort` 用于设置推理强度，
+  但翻译并不能从中受益：实测推理量为零或接近零。
+- **Opus 会拒绝某些生物学内容。** 它的防护机制比
+  Sonnet 更严格，Anthropic 的错误信息也提醒，这些机制
+  “有时会标记与生物学研究相关的工作”。实测中，一则关于
+  279 个生成分子的资讯简报导致整篇文章在十四种
+  语言中均被拒绝。不会写入任何内容：aipmt 会拒绝被中断的响应，说明触发了
+  防护机制，并建议使用 `--model sonnet`。
+- 在 CI 中（已定义 `CI` 或 `GITHUB_ACTIONS`）以及 Windows 下拒绝运行（后者未经实测）。
+- 变量：`AIPMT_CLAUDE_BIN`（否则依次使用 `PATH`、`~/.local/bin/claude`）、
+  `AIPMT_CLAUDE_TIMEOUT`（每个片段的秒数，默认 900）、
+  `AIPMT_CLAUDE_MAX_UTILIZATION`（默认 0.8）、`CLAUDE_CONFIG_DIR`（Claude Code 的
+  账户，绝不从项目的 `.env` 中获取）；工作目录位于
+  `XDG_CACHE_HOME/aipmt/claude-code` 下（默认 `~/.cache`）。
 
-**使用条款：责任由您的账户承担。** [Claude Code 法律条款页面](https://code.claude.com/docs/en/legal-and-compliance)并不禁止“最终用户使用自己的 Claude 订阅登录未修改的 Claude Code 二进制文件（an end user from signing in to the unmodified Claude Code binary with their own Claude subscription）”：这正是 aipmt 的运行方式，它启动官方二进制文件且绝不读取令牌。但 Anthropic“不允许第三方开发者代表其用户通过 Free、Pro 或 Max 计划凭据路由请求（does not permit third-party developers […] to route requests through Free, Pro, or Max plan credentials on behalf of their users）”，倾向于让第三方工具“包括开源项目（including open-source projects）”使用 API 密钥，并保留将其用量计入付费点数的权利（[Claude 帮助中心](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)）。目前尚无条文明确界定分发调用官方二进制文件的工具这一情况。
+**使用条款：承担责任的是您的账户。**
+[Claude Code 法律条款页面](https://code.claude.com/docs/en/legal-and-compliance)
+并未禁止“最终用户使用自己的 Claude 订阅登录未经修改的 Claude Code 二进制程序”：这正是 aipmt 的做法，
+它启动官方二进制程序，从不读取令牌。但 Anthropic
+“不允许第三方开发者 […] 代表其用户通过 Free、Pro 或 Max 套餐的凭据转发请求”，
+更希望第三方工具使用 API 密钥，
+“包括开源项目”，并保留将其用量从付费额度中扣除的权利
+（[Claude 帮助](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)）。
+没有任何条文明确裁定所分发的工具启动该二进制程序这一情形。
 
-**数据**：对于 Free、Pro 和 Max 账户，当隐私设置允许时，模型训练也适用于 Claude Code（[数据页面](https://code.claude.com/docs/en/data-usage)）。aipmt 不保留任何本地转录记录（`--no-session-persistence`）。请勿通过其传输任何机密内容。
+**数据**：对于 Free、Pro 和 Max 账户，如果隐私设置允许，
+模型训练同样适用于 Claude Code
+（[数据页面](https://code.claude.com/docs/en/data-usage)）。aipmt 不会保留
+任何本地会话记录（`--no-session-persistence`）。请勿通过它处理
+任何机密内容。
 
-### 连接到自选提供商：`--use_opencode`
+### 使用自选提供商：`--use_opencode`
 
-[OpenCode](https://opencode.ai) 是一个开源（MIT）代码代理，可路由至其内部配置的提供商：API 密钥、订阅、OpenCode Zen 网关（免费模型，免账户）或本地模型。此处对两条途径进行了端到端实测：Zen 和 Ollama。
+[OpenCode](https://opencode.ai) 是一个开源编码代理（MIT），
+可将请求路由到其中配置的提供商：API 密钥、订阅、
+OpenCode Zen 网关（免费模型，无需账户）或本地模型。此处
+对 Zen 和 Ollama 两条途径进行了端到端实测。
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash   # ou : npm install -g opencode-ai
@@ -289,24 +490,44 @@ aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . -
 aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir . --target_lang ja
 ```
 
-`--model` 为必填项：若无此项，OpenCode 将回退到免费模型，其交互内容可能被用于训练，而此选择不应擅自替您决定。
+必须指定 `--model`：否则，OpenCode 会回退到一个免费模型，
+其交互内容可能用于训练，而这一选择不应由工具
+替您做出。
 
-每次调用的隔离机制：
+每次调用的隔离措施：
 
-- 内联配置优先于您的本地配置，定义了一个所有工具均被拒绝（`permission: { "*": "deny" }`）的 `aipmt` 代理，会话共享已禁用，`--pure`，绝不使用 `--auto`；
-- 使用一次性空工作目录，放置了 `OPENCODE_DISABLE_PROJECT_CONFIG` 和 `OPENCODE_DISABLE_CLAUDE_CODE`——若无这些文件，OpenCode 会将当前目录的 `AGENTS.md` 以及 `~/.claude/CLAUDE.md` 注入 prompt。全局 `~/.config/opencode/AGENTS.md` 仍会被注入，OpenCode 不支持将其排除；
-- 输出契约：退出代码为 0，无 `error` 事件，无工具调用，最后一步为 `stop`，文本非空，且确实加载了 `aipmt` 代理——未知的 `--agent` 不会导致 OpenCode 报错，而是会静默回退到编码代理；
-- 除 OpenCode 自身的密钥 `OPENCODE_API_KEY` 外，不传递任何 `aipmt` 密钥。提供商应在 OpenCode 中配置，而非在 `aipmt` 的 `.env` 中配置。
+- 内联配置优先于您的配置，定义一个 `aipmt` 代理，
+  禁用其所有工具（`permission: { "*": "deny" }`），关闭会话
+  共享，使用 `--pure`，绝不使用 `--auto`；
+- 使用空的临时工作目录，并设置 `OPENCODE_DISABLE_PROJECT_CONFIG` 和
+  `OPENCODE_DISABLE_CLAUDE_CODE`；若不设置，OpenCode 会将当前目录的
+  `AGENTS.md` 和 `~/.claude/CLAUDE.md` 注入提示词。
+  全局的 `~/.config/opencode/AGENTS.md` 仍会被注入，OpenCode 不支持
+  排除它；
+- 输出约束：退出码为 0，没有 `error` 事件，没有
+  工具调用，最后一步处于 `stop`，文本非空，且确实加载了 `aipmt`
+  代理；未知的 `--agent` 不会使 OpenCode 报错，
+  它会悄悄回退到编码代理；
+- 不传递 `aipmt` 中的任何密钥，唯一例外是 OpenCode 自身的
+  密钥 `OPENCODE_API_KEY`。提供商应在 OpenCode 中配置，而不是在
+  `aipmt` 的 `.env` 中配置。
 
-须知事项：
+注意事项：
 
-- Zen 的免费模型经常变动，限制未公开记录，且交互数据可能会用于训练：适用于公开文档，不适用于私有内容。
-- 本地模型必须提供至少 16k token 的上下文，因为分段长度可达 16,000 字符。Ollama 通常默认配置为 4,096：请通过带有 `PARAMETER num_ctx 32768` 的 `Modelfile` 进行调整。
-- `--eco` 无效；`--reasoning_effort` 会原样作为 OpenCode 的 `--variant` 传递。
-- OpenCode 会将每个会话记录在 `~/.local/share/opencode/` 中。
-- 变量：`OPENCODE_BIN`（否则依次使用 `PATH`、`~/.opencode/bin/opencode`）、`OPENCODE_TIMEOUT`（每分段秒数，默认 600）。`OPENCODE_CONFIG` 会原样传递给 OpenCode。
+- Zen 的免费模型会变化，限制没有文档说明，
+  交互内容可能用于训练：适合公开文档，不适合
+  私密内容。
+- 本地模型必须提供至少 16 k tokens 的上下文，因为每个片段
+  最多可达 16 000 个字符。Ollama 通常将其配置为 4 096：请通过
+  带有 `PARAMETER num_ctx 32768` 的 `Modelfile` 调整。
+- `--eco` 不起作用；`--reasoning_effort` 会原样作为
+  OpenCode 的 `--variant` 传递。
+- OpenCode 会将每个会话记录到 `~/.local/share/opencode/`。
+- 变量：`OPENCODE_BIN`（否则依次使用 `PATH`、`~/.opencode/bin/opencode`）、
+  `OPENCODE_TIMEOUT`（每个片段的秒数，默认 600）。`OPENCODE_CONFIG`
+  会原样传递给 OpenCode。
 
-通过 Ollama 使用本地模型的示例，位于 `~/.config/opencode/opencode.json`：
+通过 Ollama 使用本地模型的示例，在 `~/.config/opencode/opencode.json` 中：
 
 ```bash
 ollama pull gpt-oss:20b
@@ -334,123 +555,225 @@ ollama create gpt-oss-20b-32k -f gpt-oss-20b-32k.Modelfile
 }
 ```
 
-`reasoningEffort: "none"` 可以关闭 Ollama 在这些模型上默认启用的思考过程，而 Modelfile 无法将其禁用。在一段六个单词的短句上实测：不加该选项时消耗 919 个思考 token 和 68 秒，加上该选项后仅消耗 9 个 token。
+`reasoningEffort: "none"` 会关闭 Ollama 在这些模型上默认启用的思考，
+而 Modelfile 无法禁用该功能。对一个六词句子的实测结果：
+不使用该选项时，产生 919 个思考 token，耗时 68 秒；使用后为 9 个 token。
 
-### 连接到 400 多个模型：`--use_openrouter`
+### 使用超过 400 个模型：`--use_openrouter`
 
-OpenRouter 是一个按量计费的路由服务，基于统一点数额度，连接由第三方托管的模型——包括此处的其他提供商均未接入的中国开源模型。
+OpenRouter 是一个按用量计费的路由服务，使用统一额度，
+连接由第三方托管的模型，其中包括此处其他提供商
+均未提供的中国开放模型。
 
 ```bash
 aipmt --use_openrouter --model z-ai/glm-5.2 --file README.md --target_dir . --target_lang en
 ```
 
-`--model` 为必填项。在产生任何计费之前运行的预检（preflight）会处理该路由机制的两项特性：
+必须指定 `--model`。在产生任何费用之前执行的预检会处理
+路由的两个特点：
 
-- **同一模型由数十家上限各异的托管商提供**——在 `z-ai/glm-5.3-flash` 上，有 23 家托管商，其中一家输出上限仅为 2,048 token。预检会读取 `/api/v1/models/{modèle}/endpoints`，排除输出低于 8,000 token 或状态处于降级的托管商，并使用 `allow_fallbacks: false` 固定其余托管商。
-- **推理按输出费率计费**——在 `z-ai/glm-5.2` 回复“OK”时消耗 107 个 token，而普通输出仅 2 个。推理功能默认关闭；强制启用推理的模型将设定为其允许的最低思考程度，因为目录默认值可能会在翻译完成前耗尽输出配额。`--reasoning_effort` 仍具有最高优先级。
+- **同一个模型可能由数十家托管商提供，且各自上限
+  不同**——`z-ai/glm-5.3-flash` 有 23 家托管商，其中一家的输出上限为
+  2 048 tokens。预检会读取 `/api/v1/models/{modèle}/endpoints`，
+  排除输出上限低于 8 000 tokens 或状态异常的托管商，
+  并通过 `allow_fallbacks: false` 固定使用其余托管商。
+- **推理按输出费率计费**——`z-ai/glm-5.2` 的一条“OK”
+  响应会消耗 107 个 token，而不是 2 个。默认关闭推理；对于
+  强制推理的模型，会设置为其接受的最低强度，因为目录中的
+  默认值可能在翻译完成前耗尽输出额度。
+  `--reasoning_effort` 仍具有最高优先级。
 
 ```
 → OpenRouter : 30 hébergeur(s) épinglé(s) sur 33, contexte 1048576 tokens,
   sortie plafonnée à 32768, raisonnement coupé
 ```
 
-- 上下文窗口取自目录数据。低于 16,400 token 的模型在调用前即被拒绝：prompt 和分段需要 8,400，输出至少需要 8,000。
-- 目录中不存在的 slug、目录无法访问或没有满足上限要求的托管商均会中止命令。
-- 输出为空的 `finish_reason=length` 表示预算被推理消耗殆尽，并非截断：错误信息对此有明确区分。
-- `--eco` 无效。
-- 变量：`OPENROUTER_API_KEY`（<https://openrouter.ai/keys>）、`OPENROUTER_BASE_URL`（默认 `https://openrouter.ai/api/v1`，必须为 `https://`）、`OPENROUTER_TIMEOUT`（默认 900）、`OPENROUTER_PREFLIGHT_TIMEOUT`（默认 30）。
+- 上下文窗口大小取自目录。低于 16 400 tokens 的模型会在
+  任何调用之前被拒绝：提示词和片段需要 8 400，输出至少
+  需要 8 000。
+- 模型标识不在目录中、目录无法访问，或没有
+  托管商满足上限要求，都会使命令停止。
+- `finish_reason=length` 且输出为空，表示预算已被
+  推理消耗，并非截断：提示信息会区分这两种情况。
+- `--eco` 不起作用。
+- 变量：`OPENROUTER_API_KEY`（<https://openrouter.ai/keys>）、
+  `OPENROUTER_BASE_URL`（默认 `https://openrouter.ai/api/v1`，必须指定 `https://`）、
+  `OPENROUTER_TIMEOUT`（默认 900）、`OPENROUTER_PREFLIGHT_TIMEOUT`
+  （默认 30）。
 
 ### 翻译说明
 
-`--add_translation_note` 会添加一条说明，位置可设为 `bottom`（默认）、`top`（位于 front matter 之后）或 `both`（`--note_position`），格式可设为 `legacy`（粗体段落，默认）或 `marker`（`--note_format`）。`marker` 格式是一个不可见的 Markdown 引用定义：`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`，后接粗体引用：既可在 GitHub 上直观阅读，也可在构建时由 remark 插件进行解析处理。
+`--add_translation_note` 会在 `bottom`（默认）、`top`（前置元数据
+之后）或 `both`（`--note_position`）处添加说明，格式为 `legacy`（加粗
+段落，默认）或 `marker`（`--note_format`）。`marker` 格式是一个
+不可见的 Markdown 引用定义，
+`[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`，
+后接加粗引用：可在 GitHub 上阅读，也可在构建时由
+remark 插件处理。
 
 ```bash
 aipmt --file article.mdx --target_lang en --add_translation_note --note_format marker --note_position top
 ```
 
-## 详细评测数据
+## 详细测量结果
 
-所有测量数据均来自使用 `aipmt` 实际执行的翻译，目标为十四种语言：en、es、de、it、pt、nl、pl、sv、ro、ja、ko、zh、ar、hi。**已写入**统计通过安全检查并成功生成的文件数；**无偏差**统计 `scripts/compare_structure.py` 未检测出任何差异的文件数——节数、子标题数、链接数、唯一下载 URL 数、代码块数、行内代码数、表格行数、引用块数和粗体词数完全一致。
+所有测量均为使用 `aipmt` 实际执行的翻译，目标为
+十四种语言：英语、西班牙语、德语、意大利语、葡萄牙语、荷兰语、波兰语、瑞典语、罗马尼亚语、日语、韩语、中文、阿拉伯语、印地语。
+**已写入**统计通过防护检查并写入的文件；**无
+差异**统计 `scripts/compare_structure.py` 未发现任何问题的文件——即章节、
+子标题、链接、不同 URL、代码块、
+内联代码、表格行、引用块和加粗词语的数量均相同。
 
-“无偏差”仅代表“未检测到差异”，并不等同于“完全相同”：比对工具只统计元素数量而不读取其具体内容。它既不会报告某个 4 级标题被删除、行内代码文本被替换、标记互换，也不会发现内部链接多生成了一个括号（如 `[texte]((#ancre))` 导致链接失效）——并且它不评估语言质量。
+“无差异”表示“未检测到问题”，并不表示“完全一致”：比较器
+只统计元素，不读取其内容。它不会指出四级标题
+被删除、内联代码的内容被替换、旗帜
+被调换，或内部链接多了一个括号，
+如 `[texte]((#ancre))`，导致链接失效——它也不评判
+语言。
 
-### 密集技术资讯文章，模式 `--news`
+### 内容密集的资讯文章，`--news` 模式
 
-选自 [jls42.org 的 AI 技术资讯](https://jls42.org/fr/news) 的一期内容：589 行，140 个链接，21 个小节，3 处受保护的英文引用。测试周期为 2026 年 9 月 4 日至 5 日。
+一期 [jls42.org 人工智能资讯](https://jls42.org/fr/news)：
+589 行，140 个链接，21 个章节，3 段受保护的英文引用。测试
+于 2026 年 9 月 4 日和 5 日进行。
 
-| 模型 | 访问方式 | 已写入 | 无偏差 | 中位数/语言 |
+| 模型                                          | 访问方式              | 已写入 | 无差异   | 每种语言耗时中位数 |
 | ----------------------------------------------- | ------------------ | ------- | ------------ | -------------- |
-| `gemini-3.7-flash` | Google API | 14/14 | ✅ **14/14** | 1 分 18 秒 |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | Google 订阅 | 14/14 | ✅ **14/14** | 3 分 59 秒 |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | Google 订阅 | 14/14 | ✅ **14/14** | 3 分 14 秒 |
-| `claude-sonnet-5-5` | Anthropic API | 14/14 | ✅ **14/14** | 3 分 37 秒 |
-| `gpt-5.6-sol` (`--use_codex`) | ChatGPT 订阅 | 14/14 | ✅ **14/14** | 11 分 28 秒 |
-| `z-ai/glm-5.2` | OpenRouter | 14/14 | ✅ **14/14** | 5 分 37 秒 |
-| `qwen/qwen3.8-flash` | OpenRouter | 14/14 | ✅ **14/14** | 26 分 23 秒 |
-| `sonnet` (`--use_claude_code`) | Claude 订阅 | 14/14 | ⚠️ 13/14 | 6 分 49 秒 |
-| `claude-sonnet-5` | Anthropic API | 14/14 | ⚠️ 11/14 | 6 分 31 秒 |
-| `haiku` (`--use_claude_code`) | Claude 订阅 | 14/14 | ⚠️ 11/14 | 15 分 54 秒 |
-| `claude-haiku-5-5` | Anthropic API | 14/14 | ⚠️ 11/14 | 2 分 54 秒 |
-| `claude-haiku-4-5` | Anthropic API | 14/14 | ⚠️ 7/14 | 6 分 00 秒 |
-| `opencode/mimo-v2.5-free` | OpenCode Zen | 13/14 | ❌ 11/14 | 9 分 27 秒 |
-| `qwen/qwen3.7-flash` | OpenRouter | 13/14 | ❌ 8/14 | 10 分 09 秒 |
-| `ollama/gpt-oss-20b-32k` | 本地 | 10/14 | ❌ 7/14 | 12 分 39 秒 |
-| `mistral-large-latest` | Mistral API | 11/14 | ❌ 5/14 | 5 分 32 秒 |
-| `deepseek/deepseek-v4-flash-0731` | OpenRouter | 4/14 | ❌ 3/14 | 37 分 27 秒 |
-| `grok-4.6` (`--use_grok_cli`) | Grok 订阅 | 1/14 | ❌ 1/14 | 23 分 11 秒 |
-| `opus` (`--use_claude_code`) | Claude 订阅 | 0/14 | ❌ 0/14 | — |
+| `gemini-3.7-flash`                              | Google API         | 14/14   | ✅ **14/14** | 1 min 18 s     |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | Google 订阅  | 14/14   | ✅ **14/14** | 3 min 59 s     |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | Google 订阅  | 14/14   | ✅ **14/14** | 3 min 14 s     |
+| `claude-sonnet-5-5`                             | Anthropic API      | 14/14   | ✅ **14/14** | 3 min 37 s     |
+| `gpt-5.6-sol` (`--use_codex`)                   | ChatGPT 订阅 | 14/14   | ✅ **14/14** | 11 min 28 s    |
+| `z-ai/glm-5.2`                                  | OpenRouter         | 14/14   | ✅ **14/14** | 5 min 37 s     |
+| `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14   | ✅ **14/14** | 26 min 23 s    |
+| `sonnet` (`--use_claude_code`)                  | Claude 订阅  | 14/14   | ⚠️ 13/14     | 6 min 49 s     |
+| `claude-sonnet-5`                               | Anthropic API      | 14/14   | ⚠️ 11/14     | 6 min 31 s     |
+| `haiku` (`--use_claude_code`)                   | Claude 订阅  | 14/14   | ⚠️ 11/14     | 15 min 54 s    |
+| `claude-haiku-5-5`                              | Anthropic API      | 14/14   | ⚠️ 11/14     | 2 min 54 s     |
+| `claude-haiku-4-5`                              | Anthropic API      | 14/14   | ⚠️ 7/14      | 6 min 00 s     |
+| `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14   | ❌ 11/14     | 9 min 27 s     |
+| `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14   | ❌ 8/14      | 10 min 09 s    |
+| `ollama/gpt-oss-20b-32k`                        | 本地              | 10/14   | ❌ 7/14      | 12 min 39 s    |
+| `mistral-large-latest`                          | Mistral API        | 11/14   | ❌ 5/14      | 5 min 32 s     |
+| `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14    | ❌ 3/14      | 37 min 27 s    |
+| `grok-4.6` (`--use_grok_cli`)                   | Grok 订阅    | 1/14    | ❌ 1/14      | 23 min 11 s    |
+| `opus` (`--use_claude_code`)                    | Claude 订阅  | 0/14    | ❌ 0/14      | —              |
 
-9 月 9 日在同系列另一期简报（356 行）上对 Grok 进行了重新测试：14 种语言中写入 9 种，8 种无偏差。表头正是采用这一数据。未计入三次中断的测试：`qwen3.5-27b`（9 种语言）和 `kimi-k2.6`（4 种）因额度不足中断，`z-ai/glm-5.3-flash` 的两次失败则是由于推理设置问题，该问题随后已被提供商修复。OpenRouter 各项数据是在路由默认设置下测得的，早于 `--use_openrouter` 的引入；使用随附提供商重新测试的 `z-ai/glm-5.2` 同样交出了 14/14 的成绩。这些数据于 9 月 10 日使用当前的比对工具重新计算：`qwen3.8-flash` 和 `qwen3.7-flash` 较首次发布时各增加了一种达标语言，其他保持不变。
+9 月 9 日使用同一资讯的另一期内容
+（356 行）重新测量了 Grok：十四种语言中写入 9 种，8 种无差异。开头表格
+采用的就是这一结果。另有三轮中断的测试未被
+记录：`qwen3.5-27b`（9 种语言）和 `kimi-k2.6`（4 种）因额度不足而中断，
+`z-ai/glm-5.3-flash` 的两次失败则源于推理设置，
+此后提供商已对此进行修正。OpenRouter 各行是在
+路由器默认设置下测得的，早于 `--use_openrouter`；`z-ai/glm-5.2`
+使用随工具提供的提供商实现重新测量后，结果仍为 14/14。数据已于
+9 月 10 日使用当前比较器重新计算：`qwen3.8-flash` 和
+`qwen3.7-flash` 相比首次发布各增加一种语言，
+其余不变。
 
-`--use_antigravity` 相关项目于 9 月 26 日在同一篇文章上进行了测试，四路并行翻译：上午测试 `gemini-3.7-flash-medium`，下午测试 `gemini-3.8-flash-medium`。在英文翻译中，两者均自行移除了引用下方的三行法文翻译，且未捏造任何标记，英文引用完好无损：回退清理机制无需介入。在 `--eco`（`gemini-3.7-flash-low`）模式下，仅针对四种语言（en、ja、ar、hi）测试：4 种全部成功写入，且全部无偏差，耗时中位数为 1 分 52 秒。同日针对 9 月 25 日更新的一期简报（438 行，2 处英文引用）进行了复测，在博客外部通过 `gemini-3.7-flash-medium` 进行翻译：14 种语言全部成功写入，全部无偏差，每种语言耗时 87 至 128 秒。
+`--use_antigravity` 各行于 9 月 26 日使用同一篇
+文章测得，同时并行进行四种语言的翻译：上午测量 `gemini-3.7-flash-medium`，
+下午测量 `gemini-3.8-flash-medium`。翻译为英语时，两者都自行删除了
+引用下方的三行法语译文，没有自行添加
+旗帜，英文引用也完整无损：回退清理无需
+执行任何操作。在 `--eco`（`gemini-3.7-flash-low`）下，仅测试四种语言
+（英语、日语、阿拉伯语、印地语）：4 种全部写入，全部无差异，耗时中位数为
+1 min 52 s。同一天还用更新一期的资讯进行了交叉验证，
+即 9 月 25 日那一期（438 行，2 段英文引用），在博客
+之外通过 `gemini-3.7-flash-medium` 翻译：十四种语言全部写入，全部无差异，每种语言耗时 87 至
+128 s。
 
-`--use_claude_code` 相关项目于 9 月 26 日在同一篇文章上进行了测试，四路并行翻译，思考程度设为 `low`。使用 `sonnet` 时，十四种语言中的英文引用均完好无损，且在英文翻译中，模型自行移除了法文翻译行，未捏造任何标记。`opus` 未能成功写入任何一种语言：在每种语言中，其安全机制均在最后一个分段截断了响应，原因是一则关于结合位点生成的 279 个分子的简报。单独发送该简报时，会被“生物（bio）”分类规则拦截拒绝；而 `sonnet` 在所有语言中均完成了翻译。`haiku` 写入了全部十四种语言；但在三种语言（en、pl、ro）中，有一个小节标题从 2 级变成了 1 级。它会在无法阻止的情况下进行推理——占其输出 token 的 61%——因此耗时比 `sonnet` 增加了一倍以上。
+`--use_claude_code` 各行于 9 月 26 日使用同一篇
+文章测得，同时并行进行四种语言的翻译，推理强度为 `low`。使用 `sonnet` 时，
+十四种语言中的英文引用均完整无损；翻译为英语时，
+模型自行删除了法语译文行，没有自行添加
+旗帜。`opus` 未写入任何语言：每种语言的响应都被其防护机制
+在最后一个片段处中止，原因是一则关于为某个结合位点生成
+279 个分子的简报。单独提交这则简报时，它因
+“生物”类别而被拒绝；`sonnet` 则将其译成了全部语言。`haiku` 写入了
+十四种语言；其中三种（英语、波兰语、罗马尼亚语）的某个章节标题从
+二级变成了一级。它会进行推理，且无法关闭——推理占其
+输出 token 的 61 %——因此耗时超过 `sonnet` 的两倍。
 
-`claude-sonnet-5-5`、`claude-haiku-5-5` 和 `claude-haiku-4-5` 于 10 月 18 日通过 Anthropic API 在同一篇文章上进行了测试，每个模型四路并行翻译。Sonnet 5.5 不允许关闭其思考过程：aipmt 向其发送所允许的最低设置，其返回的响应中不包含任何思考过程。它在无偏差且无需重译分段的情况下完成了全部十四种语言的写入；在英文翻译中，它自行移除了法文翻译行，未捏造任何标记，各处的英文引用均完好无损。Haiku 5.5 在启用自适应思考模式下进行了测试：关闭思考时，它会残留大段法文未译，导致安全检查拒绝——14 种语言中仅成功写入 3 种。两个 Haiku 模型都在同一篇简报上出现问题：Haiku 5.5 在日语、韩语和中文中更改了标题级别或出现了标题重复，Haiku 4.5 在七种语言中将其升级为 1 级标题，并在日语中将其保留为法文。针对两篇文档的十四种语言翻译，Haiku 4.5 耗费 3.67 美元，Haiku 5.5 耗费 0.57 美元，Sonnet 5.5 耗费 9.21 美元。
-
+`claude-sonnet-5-5`、`claude-haiku-5-5` 和 `claude-haiku-4-5` 各行
+于 10 月 18 日通过 Anthropic API 使用同一篇文章测得，每个模型同时
+并行进行四种语言的翻译。Sonnet 5.5 不允许关闭
+思考：aipmt 向它发送其接受的最低设置，而其
+响应中不包含任何思考内容。它写入了十四种语言，全部无差异，也无需
+重试任何片段；翻译为英语时，它自行删除了
+法语译文行，没有自行添加旗帜，所有语言中的英文引用
+均完整无损。Haiku 5.5 在启用自适应思考的情况下测量：关闭
+思考时，它会保留整段法语，被防护检查拒绝——
+十四种语言中仅写入 3 种。两个 Haiku 都在同一则简报上遇到问题：Haiku 5.5
+在日语、韩语和中文中更改标题级别或
+重复标题；Haiku 4.5 在七种语言中将标题变为一级，
+并在日语中保留了法语标题。将两份文档译成
+十四种语言，Haiku 4.5 的费用为 3,67 $，Haiku 5.5 为 0,57 $，Sonnet 5.5 为 9,21 $。
 ### 本项目的 README，标准 Markdown
 
-2026 年 9 月 9 日冻结版本：785 行，285 处行内代码，40 处代码块闭合标记，89 行表格。4 个并行翻译。
+固定于 2026 年 9 月 9 日的修订版：785 行、285 处行内代码、40
+个代码块围栏、89 行表格。四个翻译任务并行执行。
 
-| 模型 | 已写入 | 无偏差 | 中位数/语言 | 差异内容 |
+| 模型                                          | 已生成 | 无偏差 | 每种语言的中位耗时 | 差异                                                           |
 | ----------------------------------------------- | ------- | ---------- | -------------- | ------------------------------------------------------------------------ |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14 | ✅ 14/14 | 1 分 43 秒 | 无 |
-| `opus` (`--use_claude_code`) | 14/14 | ✅ 14/14 | 1 分 48 秒 | 无 |
-| `haiku` (`--use_claude_code`) | 14/14 | ✅ 14/14 | 4 分 02 秒 | 比较器无差异；内部链接重复（en） |
-| `claude-sonnet-5-5` | 14/14 | ✅ 14/14 | 1 分 18 秒 | 无 |
-| `claude-haiku-4-5` | 14/14 | ✅ 14/14 | 2 分 06 秒 | 无 |
-| `gemini-3.7-flash` | 14/14 | ⚠️ 13/14 | 36 秒 | 粗体词（ja） |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14 | ⚠️ 13/14 | 1 分 22 秒 | 粗体词（ko） |
-| `sonnet` (`--use_claude_code`) | 14/14 | ⚠️ 13/14 | 2 分 20 秒 | 表格中有一行与上一行粘连（ar） |
-| `claude-sonnet-5` | 14/14 | ⚠️ 12/14 | 2 分 56 秒 | 链接（sv），粗体词（zh） |
-| `gpt-5.6-sol` (`--use_codex`) | 14/14 | ⚠️ 12/14 | 6 分 46 秒 | 粗体词（ar, ja） |
-| `z-ai/glm-5.2` (OpenRouter) | 14/14 | ⚠️ 11/14 | 2 分 34 秒 | 粗体词（hi, ja, ko） |
-| `qwen/qwen3.7-flash` | 14/14 | ⚠️ 10/14 | 2 分 17 秒 | 阿拉伯语中添加了 40 处行内代码；粗体（hi, ja, ko） |
-| `claude-haiku-5-5` | 12/14 | ❌ 12/14 | 1 分 14 秒 | 拒绝 2 种语言（ar, hi）：返回时丢失了行内代码 |
-| `mistral-large-latest` | 14/14 | ❌ 1/14 | 2 分 44 秒 | 丢失一个章节（ar, hi, ko）；添加了代码块（ja, ko, ro, zh） |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14   | 1 min 43 s     | 无                                                                     |
+| `opus` (`--use_claude_code`)                    | 14/14   | ✅ 14/14   | 1 min 48 s     | 无                                                                     |
+| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14   | 4 min 02 s     | 比较工具未发现差异；内部链接重复（en）                   |
+| `claude-sonnet-5-5`                             | 14/14   | ✅ 14/14   | 1 min 18 s     | 无                                                                     |
+| `claude-haiku-4-5`                              | 14/14   | ✅ 14/14   | 2 min 06 s     | 无                                                                     |
+| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36 s           | 一个加粗词语（ja）                                                      |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1 min 22 s     | 一个加粗词语（ko）                                                      |
+| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14   | 2 min 20 s     | 一行表格与前一行粘连（ar）                         |
+| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | 2 min 56 s     | 一个链接（sv）、一个加粗词语（zh）                                        |
+| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6 min 46 s     | 一个加粗词语（ar, ja）                                                  |
+| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | 2 min 34 s     | 一个加粗词语（hi, ja, ko）                                              |
+| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14   | 2 min 17 s     | 阿拉伯语中新增 40 处行内代码；加粗格式（hi, ja, ko）                   |
+| `claude-haiku-5-5`                              | 12/14   | ❌ 12/14   | 1 min 14 s     | 2 种语言被拒绝（ar, hi）：返回结果中丢失了行内代码        |
+| `mistral-large-latest`                          | 14/14   | ❌ 1/14    | 2 min 44 s     | 丢失一个章节（ar, hi, ko）；新增代码块（ja, ko, ro, zh） |
 
-两次中断的测试轮次未予计入：Grok 在完成十二种语言（十一种无偏差）后 CLI 会话超时；`qwen3.8-flash` 在完成两种语言后遭遇托管方的 HTTP 429。`opencode/mimo-v2.5-free` 和 `ollama/gpt-oss-20b-32k` 未在此版本上重新测试；在 9 月 4 日至 5 日少 277 行的版本上，它们各自在 14 个翻译中完成了 9 个，其中无偏差的分别为 7 个和 1 个。
+两轮中断的测试未计入评分：Grok 的 CLI 会话在完成十二种语言后过期
+（其中十一种无偏差），而 `qwen3.8-flash` 在完成两种语言后，其托管服务商返回 HTTP 429。
+`opencode/mimo-v2.5-free` 和 `ollama/gpt-oss-20b-32k`
+未在此修订版上重新测量；在 9 月 4 日和 5 日的修订版上，
+该版本少了 277 行，它们各生成了 14 种语言中的 9 份译文，其中分别有 7 份
+和 1 份无偏差。
 
-涉及 `--use_antigravity` 和 `--use_claude_code` 的行并非在冻结版本上测得，而是在 9 月 26 日随 1.14.0 发布的版本上测得——而 `claude-sonnet-5-5`、`claude-haiku-5-5` 和 `claude-haiku-4-5` 对应的行则是在 10 月 18 日基于相同版本测得：600 行，257 处行内代码，30 处代码块闭合标记，85 行表格。该版本少了 185 行，不能直接与其他各行进行逐项比较；但这些行彼此之间具有可比性。关于比较器未校验的内部链接，`gemini-3.8-flash-medium` 在十四种语言中均保持完好，`gemini-3.7-flash-medium` 在意大利语中破坏了链接；`sonnet` 和 `opus` 在所有语言中均保持完好，`haiku` 在英语中重复了链接；`claude-sonnet-5-5` 和 `claude-haiku-4-5` 在十四种语言中均保持完好，`claude-haiku-5-5` 则在其生成的十二种语言中保持完好。
+`--use_antigravity` 和 `--use_claude_code` 两行并非在
+固定修订版上测量，而是在 9 月 26 日针对随 1.14.0 发布的版本测量；
+`claude-sonnet-5-5`、`claude-haiku-5-5` 和 `claude-haiku-4-5` 三行则于 10 月 18 日
+在同一版本上测量：600 行、257 处行内代码、30 个代码块围栏、85
+行表格。该版本
+少了 185 行，因此无法与其他行逐项比较；
+但这些行之间可以相互比较。对于比较工具不检查的内部链接，
+`gemini-3.8-flash-medium` 在十四种语言中均保持完好，
+`gemini-3.7-flash-medium` 在意大利语中破坏了链接；
+`sonnet` 和 `opus` 在所有语言中均保持完好，`haiku` 在
+英语中使链接重复；`claude-sonnet-5-5` 和 `claude-haiku-4-5` 在
+十四种语言中均保持完好，`claude-haiku-5-5` 在其生成的十二种语言中均保持完好。
 
-### 知名项目的四个 README
+### 四个知名项目的 README
 
-FastAPI、Ollama、tldr-pages 和 Vue.js，原样取自 GitHub——比前两份文档更容易。本轮测试针对的是表现欠佳的模型；Gemini 用作基准对照。
+FastAPI、Ollama、tldr-pages 和 Vue.js，直接取自 GitHub，未作修改——这些
+文档比前两份更容易处理。本轮测试针对
+表现不佳的模型；Gemini 用作比较基准。
 
-| 模型 | 范围 | 已写入 | 无偏差 |
+| 模型                    | 范围                  | 已生成 | 无偏差   |
 | ------------------------- | -------------------------- | ------- | ------------ |
-| `gemini-3.7-flash` | 4 个项目 × 14 种语言 | 56/56 | ✅ **55/56** |
-| `opencode/mimo-v2.5-free` | 4 个项目 × 14 种语言 | 55/56 | ❌ 47/56 |
-| `grok-4.6`（订阅） | 4 个项目 × ar, hi, ja, zh | 16/16 | ❌ 14/16 |
-| `ollama/gpt-oss-20b-32k` | 4 个项目 × ar, hi, ja, zh | 15/16 | ❌ 9/16 |
+| `gemini-3.7-flash`        | 4 个项目 × 14 种语言     | 56/56   | ✅ **55/56** |
+| `opencode/mimo-v2.5-free` | 4 个项目 × 14 种语言     | 55/56   | ❌ 47/56     |
+| `grok-4.6`（订阅）   | 4 个项目 × ar, hi, ja, zh | 16/16   | ❌ 14/16     |
+| `ollama/gpt-oss-20b-32k`  | 4 个项目 × ar, hi, ja, zh | 15/16   | ❌ 9/16      |
 
-### 这些测试所不能代表的
+### 这些测量结果不代表什么
 
-- **并非详尽的排名**：仅 OpenRouter 就提供了四百多个模型，此处仅测试了约十五个。
-- **耗时仅供参考**：各轮次测试采用三到六个并行翻译，且服务商的吞吐速率在一天之中会有所波动。
-- **带有时间局限性的观察**：同名模型会发生变化，且您的文档与我们的文档并不相同。
+- **并非全面排名**：仅 OpenRouter 就提供四百多个
+  模型，此处只测量了约十五个。
+- **耗时仅供参考**：不同轮次同时运行三到六个翻译任务，
+  而且供应商的吞吐量在一天内也会变化。
+- **有时间限定的观察结果**：模型即使名称不变，也会更新，而且您的
+  文档与我们的并不相同。
 
-要在您自己的文档上使用文件的冻结副本重新进行测试：
+要在您自己的文档上重新测量，请使用文件的固定副本：
 
 ```bash
 aipmt --file reference.md --target_dir out/ --source_lang fr --target_lang ja --use_gemini --force
@@ -469,9 +792,10 @@ pip install -r requirements.txt   # les dépendances, lock entièrement épingl�
 pip install -e .                  # le paquet lui-même, en mode éditable
 ```
 
-这两行都是必需的：若没有 `pip install -e .`，`python -m aipmt` 会返回 `No module named aipmt`。
+这两行缺一不可：没有 `pip install -e .`，`python -m aipmt`
+会返回 `No module named aipmt`。
 
-质量保证工具，可选但推荐：
+质量工具，可选但推荐使用：
 
 ```bash
 pipx install pre-commit               # hors venv — absent des requirements
@@ -480,11 +804,20 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # mypy, SAST, pip-audit, tests avant chaque push
 ```
 
-仓库中的 28 个翻译（README 和 CHANGELOG，共十四种语言）可通过 `./regen_translations.sh --force` 重新生成——默认在 ChatGPT 订阅上使用 Codex 和 `gpt-5.6-sol`，4 个并行任务。`REGEN_PROVIDER` 和 `REGEN_MODEL` 可更改运行路径：`antigravity` 仍使用订阅（Google 订阅），无需特许即可执行；计费 API（`openai`、`gemini`、`grok`、`openrouter`）若没有 `REGEN_ALLOW_PAID_API=1` 则会被拒绝；`REGEN_JOB_TIMEOUT` 对每个任务设置时间上限（600 秒，在 Codex 和 Antigravity 上为 1 800 秒）。关于工具的详细说明见 `CLAUDE.md`。
+仓库中的 28 份译文（README 和 CHANGELOG，各十四种语言）可通过
+`./regen_translations.sh --force` 重新生成——默认使用 ChatGPT 订阅中的 Codex 和 `gpt-6.1-sol`，
+四个任务并行。`REGEN_PROVIDER` 和
+`REGEN_MODEL` 会改变调用方式：`antigravity` 仍使用订阅，
+即 Google 的订阅，无需特别许可即可运行；按量计费的 API（`openai`、`gemini`、
+`grok`、`openrouter`）在未指定 `REGEN_ALLOW_PAID_API=1` 时会被拒绝；
+`REGEN_JOB_TIMEOUT` 限制每个任务的最长运行时间（600 秒，Codex 和
+Antigravity 为 1 800 秒）。工具详情见 `CLAUDE.md`。
 
 ## 使用此脚本的项目
 
-- **[jls42.org](https://jls42.org)** — 以 15 种语言发布的个人博客。其[每日 AI 资讯跟踪](https://jls42.org/fr/news)每天都由该工具翻译，并作为上述测试的基准文档。
+- **[jls42.org](https://jls42.org)**——以 15 种语言发布的个人博客。其
+  [每日人工智能动态](https://jls42.org/fr/news)每天由本工具
+  翻译，并用作上述测量的参考文档。
 
 ## 作者
 
@@ -493,17 +826,31 @@ Julien LE SAUX
 
 ## 许可证
 
-GNU GENERAL PUBLIC LICENSE Version 3。参见 [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE)。
+GNU GENERAL PUBLIC LICENSE 第 3 版。参见 [许可证](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE)。
 
 ## 免责声明
 
-本程序按 GPL v3 第 15 条和第 16 条的条款发布，**不附带任何担保**：按“原样”提供，不包含适销性或特定用途适用性的担保，作者对因使用本程序而导致的任何损失概不负责。许可证正文效力优先于本概述。
+本程序按 GPL v3 第 15 和第 16 条的规定，**不提供任何担保**：
+按“原样”提供，不保证适销性
+或特定用途的适用性，其作者不对
+因使用本程序而产生的损害承担责任。许可证正文
+优先于本摘要。
 
-- **发布前请仔细通读。** 保护机制涵盖代码块、行内代码、URL、锚点以及 `--news` 模式下的引用——但不涵盖标题、表格、front matter 或句子的含义。
-- **您的文档会被发送至所选的服务商**，并遵循其使用条款与数据政策。某些免费模型可能会将您的交互数据用于模型训练，而 Antigravity 的条款允许 Google 复用这些数据并进行人工审核（即使付费订阅也是如此）；本地模型是唯一不让任何数据离开您机器的方式。
-- **API 调用将向您收取费用。** 本程序不会对支出设定上限：长文档、失败重试或大量进行推理的模型均会产生更高费用。
-- **发布的测试结果均为带有时间局限性的观察**，并非保证。
+- **发布前请仔细审阅。** 保护措施涵盖代码块、
+  行内代码、URL、锚点以及 `--news` 模式中的引用——不涵盖
+  标题、表格、前置元数据，也不保证句子含义。
+- **您的文档会发送给所选供应商**，受其使用条款
+  和数据政策约束。某些免费模型可能
+  将您的对话用于训练，而 Antigravity 的条款
+  允许 Google 重用这些对话并交由人工审阅，
+  付费订阅也不例外；只有使用本地模型，才能确保
+  数据完全不离开您的计算机。
+- **API 调用费用由您承担。** 本程序不限制
+  支出：较长的文档、失败后重试或进行大量推理的模型
+  都会产生更高费用。
+- **已发布的测量结果是有时间限定的观察结果**，并非保证。
 
-所提及的产品和公司名称均为其各自所有者的财产。本项目与其中任何一家均无关联。
+文中提及的产品和公司名称归各自权利人
+所有。本项目与其中任何一方均无关联。
 
-**使用 gemini-3.8-flash-medium 从法语翻译成中文的文章。**
+**使用 gpt-6.1-sol 将文章从法语翻译为中文。**
