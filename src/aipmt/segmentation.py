@@ -15,7 +15,13 @@ DEFAULT_TOKEN_LIMIT = 128000
 
 
 MODEL_TOKEN_LIMITS = {
-    # OpenAI GPT-5.6 (génération courante). Contexte 1.05M, mais palier
+    # OpenAI GPT-6, servis par Codex sur un compte ChatGPT : fenêtres lues dans
+    # le catalogue du CLI (models_cache.json, 2026-10-19).
+    "gpt-6.1-sol": 500000,
+    "gpt-6-sol": 272000,
+    "gpt-6-astra": 272000,
+    "gpt-6-luna": 272000,
+    # OpenAI GPT-5.6. Contexte 1.05M, mais palier
     # tarifaire à 272K tokens d'input : au-delà, 2x input / 1.5x output sur
     # la requête entière.
     "gpt-5.6": 1050000,
@@ -60,7 +66,12 @@ MODEL_TOKEN_LIMITS = {
     "gpt-4o": 128000,
     "gpt-4o-mini": 128000,
     "chatgpt-4o-latest": 128000,
-    # Anthropic Claude 5
+    # Anthropic Claude 5.x — `max_input_tokens` lu sur `GET /v1/models` le
+    # 2026-10-18 : 1M pour toute la génération, Haiku 5.5 compris.
+    "claude-fable-5-1": 1000000,
+    "claude-opus-5-5": 1000000,
+    "claude-sonnet-5-5": 1000000,
+    "claude-haiku-5-5": 1000000,
     "claude-fable-5": 1000000,
     "claude-opus-5": 1000000,
     "claude-sonnet-5": 1000000,

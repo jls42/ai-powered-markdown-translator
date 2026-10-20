@@ -158,7 +158,12 @@ class TestMain(unittest.TestCase):
             self.assertEqual(ctx.exception.code, 2)
 
 
-CADENCE_DAYS = {"daily": 1, "weekly": 7, "monthly": 31}
+# Plus long écart entre deux passages de Dependabot, en jours. `daily` ne passe
+# que du lundi au vendredi : du vendredi au lundi, il s'écoule trois jours.
+CADENCE_DAYS = {"daily": 3, "weekly": 7, "monthly": 31}
+
+# Un cron dont les trois derniers champs valent `*` passe tous les jours.
+DAILY_CRON = re.compile(r"^\S+ \S+ \* \* \*$")
 
 
 class TestAlignementSurDependabot(unittest.TestCase):
@@ -170,13 +175,21 @@ class TestAlignementSurDependabot(unittest.TestCase):
             self.fail(f"{what} introuvable")
         return match.group(1)
 
+    def _cadence(self, block: str) -> int:
+        interval = self._search(r"^\s+interval: (\w+)", block, "schedule.interval (pip)")
+        if interval != "cron":
+            return CADENCE_DAYS[interval]
+        cronjob = self._search(r'^\s+cronjob: "([^"]+)"', block, "schedule.cronjob (pip)")
+        if not DAILY_CRON.match(cronjob):
+            self.fail(f"cadence du cron {cronjob!r} non calculée : seul un cron quotidien l'est")
+        return 1
+
     def test_delai_du_gate_egal_refroidissement_plus_cadence_plus_un(self) -> None:
         config = (ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8")
         pip_entry = r"- package-ecosystem: pip\n(.*?)(?=\n  - package-ecosystem:|\Z)"
         block = self._search(pip_entry, config, "entrée pip de dependabot.yml", re.S)
-        interval = self._search(r"^\s+interval: (\w+)", block, "schedule.interval (pip)")
         cooldown = self._search(r"^\s+default-days: (\d+)", block, "cooldown.default-days (pip)")
-        expected = int(cooldown) + CADENCE_DAYS[interval] + 1
+        expected = int(cooldown) + self._cadence(block) + 1
 
         script = (ROOT / "scripts" / "check-deps-fresh.sh").read_text(encoding="utf-8")
         grace = self._search(r"^GRACE_DAYS=(\d+)$", script, "GRACE_DAYS de check-deps-fresh.sh")

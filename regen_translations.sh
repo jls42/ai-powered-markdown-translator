@@ -10,7 +10,7 @@ set -euo pipefail
 #
 # RÈGLE DU PROPRIÉTAIRE — les traductions de CE dépôt ne passent JAMAIS par
 # une API facturée à l'usage. L'abonnement ChatGPT (Codex) existe pour ça :
-#   - défaut                     → Codex, gpt-5.6-sol (modèle qualité), 0 € à l'usage
+#   - défaut                     → Codex, gpt-6.1-sol (modèle qualité), 0 € à l'usage
 #   - REGEN_PROVIDER=grok_cli    → quota de l'abonnement Grok
 #   - REGEN_PROVIDER=antigravity → quota de l'abonnement Google (AI Pro ou Ultra), CLI agy
 #   - REGEN_PROVIDER=claude_code → quota de l'abonnement Claude (Pro ou Max), CLI claude -p
@@ -56,14 +56,20 @@ detect_provider() {
 
   # Décision du propriétaire, à ne pas rediscuter : les traductions de CE
   # dépôt ne passent JAMAIS par une API facturée à l'usage. L'abonnement
-  # ChatGPT (Codex) existe précisément pour ça, et gpt-5.6-sol — le modèle
-  # qualité, défaut de --use_codex sans --eco — est celui demandé pour ce
-  # travail. Aucune auto-détection de clé : le 2026-09-04, une OPENAI_API_KEY
+  # ChatGPT (Codex) existe précisément pour ça, et son modèle qualité — défaut
+  # de --use_codex sans --eco, gpt-6.1-sol depuis le 2026-10-19 après
+  # gpt-5.6-sol — est celui demandé pour ce travail. Aucune auto-détection de clé : le 2026-09-04, une OPENAI_API_KEY
   # présente dans .env a suffi à envoyer les 28 traductions sur l'API payante.
   case "${REGEN_PROVIDER:-codex}" in
     codex)
+      # Nom du modèle lu dans le module, comme pour Antigravity : écrit ici en
+      # dur, il annonçait encore gpt-5.6-sol quand le défaut est passé à
+      # gpt-6.1-sol (2026-10-19), sans que rien ne le signale.
+      local codex_model
+      codex_model=$(sed -nE 's/^DEFAULT_MODEL_CODEX(: *str)? *= *"([^"]+)".*/\2/p' \
+        "$SCRIPT_DIR/src/aipmt/providers/codex.py" 2>/dev/null || true)
       echo "--use_codex"
-      echo "[regen] Codex → --use_codex (abonnement ChatGPT, gpt-5.6-sol par défaut, aucune facturation à l'usage)" >&2
+      echo "[regen] Codex → --use_codex (abonnement ChatGPT, ${codex_model:-modèle qualité du module} par défaut, aucune facturation à l'usage)" >&2
       return
       ;;
     grok_cli)
@@ -161,7 +167,7 @@ main() {
 
   # REGEN_MODEL force un modèle précis, par-dessus le défaut du provider.
   # Utile pour monter en gamme sur un provider dont le mode --eco vise le
-  # volume (ex: REGEN_MODEL=gpt-5.6-sol avec REGEN_PROVIDER=codex).
+  # volume (ex: REGEN_MODEL=grok-4.6 avec REGEN_PROVIDER=grok_cli).
   if [[ -n "${REGEN_MODEL:-}" ]]; then
     provider_flags="$provider_flags --model ${REGEN_MODEL}"
     echo "[regen] REGEN_MODEL=${REGEN_MODEL} → override du modèle par défaut" >&2

@@ -1,41 +1,51 @@
-# Traducător de Markdown AI-Powered
+# Traducător Markdown bazat pe AI
 
-🌍 [Français](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [English](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Español](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [中文](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [Deutsch](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [日本語](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [한국어](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [العربية](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [हिन्दी](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italiano](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Nederlands](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Polski](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Português](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Română](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Svenska](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
+🌍 [Franceză](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README.md) | [Engleză](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-en.md) | [Spaniolă](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-es.md) | [Chineză](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-zh.md) | [Germană](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-de.md) | [Japoneză](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ja.md) | [Coreeană](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ko.md) | [Arabă](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ar.md) | [Hindi](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-hi.md) | [Italiană](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-it.md) | [Neerlandeză](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-nl.md) | [Poloneză](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pl.md) | [Portugheză](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-pt.md) | [Română](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-ro.md) | [Suedeză](https://github.com/jls42/ai-powered-markdown-translator/blob/main/README-sv.md)
 
 <h4 align="center">📊 Calitatea codului</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Quality Gate Status"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Security Rating"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Reliability Rating"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Maintainability Rating"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Starea pragului de calitate"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Evaluarea securității"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Evaluarea fiabilității"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Evaluarea mentenabilității"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Coverage"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilities"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Bugs"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Acoperire"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilități"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Erori"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Probleme de calitate a codului"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Duplicated Lines (%)"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Technical Debt"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Lines of Code"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Linii duplicate (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="Datorie tehnică"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="Linii de cod"></a>
 </p>
 <p align="center">
-  <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="Codacy Badge"></a>
+  <a href="https://app.codacy.com/gh/jls42/ai-powered-markdown-translator/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/ae3e86bcb20643308c5eb5e1380e3b3c" alt="Insignă Codacy"></a>
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-Traduce fișiere Markdown dintr-o limbă în alta păstrând structura: blocuri de cod, cod inline, URL-uri, ancore, tabele și front matter. Unsprezece moduri de a apela un model — cinci API-uri, patru abonamente fără facturare per utilizare, două routere — și o măsurătoare publicată a ceea ce păstrează de fapt fiecare model.
+Traduce fișiere Markdown dintr-o limbă în alta, păstrând
+structura: blocuri de cod, cod inline, URL-uri, ancore, tabele și front
+matter. Unsprezece moduri de a apela un model — cinci API-uri, patru abonamente fără
+facturare în funcție de utilizare, două routere — și o evaluare publicată a ceea ce fiecare
+model păstrează efectiv.
 
 ## Pe scurt
 
-- **Unsprezece căi de furnizor**: API-urile OpenAI, Mistral, Claude, Gemini și Grok; abonamente ChatGPT (Codex), Grok, Google (Antigravity) și Claude (Claude Code) fără facturare per utilizare; routerele OpenCode (open-source, gratuit sau local) și OpenRouter (peste 400 de modele).
-- **Nimic eronat din cauza unui token pierdut**: blocurile de cod, codul inline, URL-urile, ancorele și citatele sunt înlocuite cu tokenuri înainte de apel și verificate la întoarcere. Dacă lipsește vreunul, fișierul nu este scris.
-- **Documente lungi**: segmentare în funcție de fereastra modelului.
-- **Modul `--news`**: citate în limba engleză protejate și steaguri gestionate per limbă, pentru articole de sinteză.
+- **Unsprezece căi de acces la furnizori**: API-uri OpenAI, Mistral, Claude, Gemini și Grok;
+  abonamente ChatGPT (Codex), Grok, Google (Antigravity) și Claude (Claude
+  Code) fără facturare în funcție de utilizare; routere OpenCode (open source, gratuit sau local) și OpenRouter
+  (peste 400 de modele).
+- **Nicio eroare din cauza unui token pierdut**: blocurile de cod, codul inline,
+  URL-urile, ancorele și citatele sunt înlocuite cu tokenuri înainte de apel și
+  verificate la primirea răspunsului. Dacă lipsește unul, fișierul nu este scris.
+- **Documente lungi**: segmentare în funcție de fereastra de context a modelului.
+- **Modul `--news`**: citate în engleză protejate și drapele gestionate în funcție de
+  limbă, pentru articolele de monitorizare.
 - **Modul `--eco`**: modele rapide și mai ieftine.
-- **Notă de traducere** opțională, sus, jos sau în ambele locuri.
+- **Notă de traducere** opțională, la început, la sfârșit sau în ambele locuri.
 
 ## Instalare
 
@@ -44,17 +54,19 @@ pip install ai-powered-markdown-translator     # ou : pipx install ai-powered-ma
 aipmt --help                                   # ou : python -m aipmt --help
 ```
 
-Python 3.10 sau mai recent. Pentru instalarea din depozit, consultați [Contribuire](#contribuții).
+Python 3.10 sau mai recent. Pentru instalare din repository, consultați
+[Contribuții](#contribuții).
 
 ## Configurare
 
-Cheile sunt citite din trei locuri, de la cea mai mare prioritate la cea mai mică; fiecare completează doar ceea ce precedentul lasă necompletat.
+Cheile sunt citite din trei locuri, în ordinea descrescătoare a priorității; fiecare
+completează doar ceea ce precedentul lasă necompletat.
 
-|     | Unde                                          | Pentru ce                             |
+|     | Unde                                            | Pentru ce                             |
 | --- | --------------------------------------------- | ------------------------------------- |
-| 1   | Variabile de mediu                            | CI, containere, suprascriere punctuală|
-| 2   | `.env` din directorul curent (sau părinte) | o cheie specifică unui proiect        |
-| 3   | `~/.config/aipmt/.env`                        | instalat o singură dată, valabil peste tot |
+| 1   | Variabile de mediu                     | CI, containere, suprascriere punctuală |
+| 2   | `.env` din directorul curent (sau dintr-un director părinte) | o cheie specifică unui proiect            |
+| 3   | `~/.config/aipmt/.env`                        | configurat o singură dată, valabil peste tot       |
 
 ```bash
 mkdir -p ~/.config/aipmt
@@ -69,11 +81,30 @@ EOF
 chmod 600 ~/.config/aipmt/.env
 ```
 
-`GEMINI_API_KEY` este acceptat în locul lui `GOOGLE_API_KEY`. Fișierul utilizatorului respectă `XDG_CONFIG_HOME` (doar cale absolută) și `%APPDATA%` sub Windows. Fără nicio cheie, comanda enumeră cele trei locații.
+`GEMINI_API_KEY` este acceptat în loc de `GOOGLE_API_KEY`. Fișierul
+utilizatorului respectă `XDG_CONFIG_HOME` (doar cale absolută) și `%APPDATA%`
+sub Windows. Fără cheie, comanda enumeră cele trei locații.
 
-**Fișierul `.env` al unui proiect nu poate nici să redirecționeze apelurile, nici să aleagă programul executat.** Acesta furnizează chei, niciodată o destinație sau un binar: orice variabilă din `_BASE_URL`, `_API_BASE`, `_ENDPOINT` sau `_BIN` (`CODEX_BIN`, `GROK_BIN`, `OPENCODE_BIN`, `AGY_BIN`), `GROK_HOME`, proxy-urile (`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`), depozitele de certificate (`SSL_CERT_FILE`, `SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`) și `XDG_CONFIG_HOME` / `APPDATA` sunt ignorate în el, cu un avertisment. Un depozit clonat nu trebuie să vă poată deturna cheia și nici să vă determine să rulați propriul său program la prima traducere. Acest fișier este citit, de asemenea, fără interpolare: `NOM=${OPENAI_API_KEY}` nu copiază cheia în el. Setați aceste variabile în mediu sau în `~/.config/aipmt/.env`.
+**Fișierul `.env` al unui proiect nu poate nici să redirecționeze apelurile, nici să aleagă programul
+executat.** Acesta furnizează chei, niciodată o destinație sau un executabil: orice
+variabilă de tip `_BASE_URL`, `_API_BASE`, `_ENDPOINT` sau `_BIN` (`CODEX_BIN`,
+`GROK_BIN`, `OPENCODE_BIN`, `AGY_BIN`), `GROK_HOME`, proxy-urile (`HTTP_PROXY`,
+`HTTPS_PROXY`, `ALL_PROXY`), depozitele de certificate (`SSL_CERT_FILE`,
+`SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`) și `XDG_CONFIG_HOME` /
+`APPDATA` sunt ignorate în acest fișier, cu un avertisment. Un repository clonat nu trebuie să
+poată deturna cheia dumneavoastră și nici să vă facă să executați propriul său program la
+prima traducere. Acest fișier este citit și fără interpolare:
+`NOM=${OPENAI_API_KEY}` nu copiază cheia în el. Setați aceste variabile în
+mediu sau în `~/.config/aipmt/.env`.
 
-Variabile opționale: `XAI_BASE_URL` (implicit `https://api.x.ai/v1`), `CLAUDE_TIMEOUT` (secunde per apel, implicit 900), `CODEX_BIN`, `CODEX_TIMEOUT` (implicit 600), `GROK_BIN`, `GROK_HOME` (implicit `~/.grok`), `GROK_TIMEOUT` (implicit 900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT` (implicit 900), `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (implicit 600), `OPENROUTER_BASE_URL` (`https://` necesar), `OPENROUTER_TIMEOUT` (implicit 900), `OPENROUTER_PREFLIGHT_TIMEOUT` (implicit 30). Fiecare este detaliată în secțiunea furnizorului său.
+Variabile opționale: `XAI_BASE_URL` (implicit `https://api.x.ai/v1`),
+`CLAUDE_TIMEOUT` (secunde per apel, implicit 900), `CODEX_BIN`, `CODEX_TIMEOUT`
+(implicit 600), `GROK_BIN`, `GROK_HOME` (implicit `~/.grok`), `GROK_TIMEOUT`
+(implicit 900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT` (implicit 900),
+`OPENCODE_BIN`, `OPENCODE_TIMEOUT` (implicit 600), `OPENROUTER_BASE_URL`
+(`https://` obligatoriu), `OPENROUTER_TIMEOUT` (implicit 900),
+`OPENROUTER_PREFLIGHT_TIMEOUT` (implicit 30). Fiecare este detaliată în
+secțiunea furnizorului său.
 
 ## Primii pași
 
@@ -88,79 +119,114 @@ aipmt --source_dir content/fr --target_dir content/en --source_lang fr --target_
 aipmt --use_gemini --file document.md --target_dir out/ --target_lang ja
 ```
 
-`document.md` tradus în spaniolă produce `document-es.md` în `--target_dir`; cu `--include_model`, `document-es-gpt-5.6-terra.md`. Extensia devine întotdeauna `.md` — `article.mdx` produce `article-en.md` — cu excepția cazului în care se folosește `--keep_filename`, care păstrează numele original. O traducere deja existentă este omisă dacă nu este specificat `--force`.
+`document.md` tradus în spaniolă produce `document-es.md` în `--target_dir`;
+cu `--include_model`, `document-es-gpt-5.6-terra.md`. Extensia devine
+întotdeauna `.md` — `article.mdx` produce `article-en.md` — cu excepția cazului în care se folosește
+`--keep_filename`, care păstrează numele original. O traducere deja existentă
+este omisă dacă nu se folosește `--force`.
 
-Coduri de ieșire: `0` dacă totul a reușit sau a fost omis, `1` dacă a rămas un fișier eșuat (listat la ieșirea de eroare standard), `2` dacă problema este de configurare. Un fișier eșuat nu este scris niciodată, chiar dacă scrierea însăși eșuează: conținutul este scris alături și apoi redenumit. Este suficientă o relansare.
+Coduri de ieșire: `0` dacă totul a reușit sau a fost omis, `1` dacă mai există un fișier
+eșuat (lista este afișată la ieșirea de eroare), `2` dacă problema ține de configurare.
+Un fișier eșuat nu este niciodată scris, chiar dacă eșuează însăși scrierea:
+conținutul este scris într-un fișier alăturat, apoi redenumit. Este suficient să relansați comanda.
 
 ## Ce model să alegeți
 
-Măsurat pe două documente reale, traduse în aceleași paisprezece limbi de către fiecare model. **Cifra reprezintă numărul de limbi, din paisprezece, în care traducerea este scrisă și nimic nu diferă față de sursă.**
+Evaluare pe două documente reale, traduse în aceleași paisprezece limbi de
+fiecare model. **Cifra reprezintă numărul de limbi, din paisprezece, pentru care
+traducerea este scrisă și nimic nu diferă față de sursă.**
 
-| Model                | Cum se accesează                  | Articol dens de sinteză | Acest README | Ce diferă și în câte limbi                                                                                                                                         |
-| -------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Gemini 3.8 Flash** | abonament Google (Antigravity)    | ✅ 14/14                | ✅ 14/14     | nimic, pe niciunul dintre cele două documente                                                                                                                      |
-| **Gemini 3.7 Flash** | cheie API Google                  | ✅ 14/14                | ⚠️ 13/14     | 1 limbă din 14: un cuvânt îngroșat în plus (ja)                                                                                                                    |
-| **Gemini 3.7 Flash** | abonament Google (Antigravity)    | ✅ 14/14                | ⚠️ 13/14     | 1 limbă din 14: un cuvânt îngroșat în minus (ko)                                                                                                                   |
-| **GPT-5.6 Sol**      | abonament ChatGPT sau cheie OpenAI| ✅ 14/14                | ⚠️ 12/14     | 2 limbi din 14: un cuvânt îngroșat în minus (ar, ja)                                                                                                               |
-| **GLM-5.2**          | cheie OpenRouter                  | ✅ 14/14                | ⚠️ 11/14     | 3 limbi din 14: un cuvânt îngroșat în minus (hi, ja, ko)                                                                                                           |
-| Claude Sonnet 5      | abonament Claude (Claude Code)    | ⚠️ 13/14                | ⚠️ 13/14     | 1 limbă din 14 la articol: un cuvânt îngroșat în plus (zh); 1 la acest README: un rând de tabel lipit de precedentul, ascuns la afișare (ar)                       |
-| Claude Haiku 4.5     | abonament Claude (Claude Code)    | ⚠️ 11/14                | ✅ 14/14     | 3 limbi la articol: un titlu de secțiune trecut la nivelul 1 (en, pl, ro); la acest README, nimic pentru comparator, dar linkurile interne duplicate în engleză    |
-| Claude Sonnet 5      | cheie API Anthropic               | ⚠️ 11/14                | ⚠️ 12/14     | 3 limbi la articol: un bloc de cod apărut (es, de, hi); 2 la acest README: un link fără marcajul său (sv), un cuvânt îngroșat (zh)                                 |
-| Qwen 3.7 Flash       | cheie OpenRouter                  | ❌ 8/14                 | ⚠️ 10/14     | 1 limbă refuzată la articol, alte 5 se abat; la acest README, vreo patruzeci de cuvinte puse în `code` (ar)                                               |
-| Grok 4.6             | abonament Grok                    | ❌ 8/14                 | nenotat      | 5 limbi refuzate din 14, din lipsă de coduri inline și URL-uri returnate; olandeza diferă în totalitate                                                           |
-| GPT-OSS 20B          | model local (Ollama)              | ❌ 7/14                 | nemăsurat din nou | 4 limbi refuzate din 14: modelul lăsa pasaje în franceză, sistemul de protecție le-a oprit                                                                   |
-| MiMo v2.5 (gratuit)  | OpenCode Zen, fără cont           | ❌ 11/14                | nemăsurat din nou | 1 limbă refuzată; o secțiune pierdută în poloneză                                                                                                                  |
-| Mistral Large        | cheie API Mistral                 | ❌ 5/14                 | ❌ 1/14      | **o secțiune întreagă dispare**: 1 limbă la articol (hi), 3 la acest README (ar, hi, ko) — și 3 limbi refuzate la articol                                          |
-| DeepSeek V4 Flash    | cheie OpenRouter                  | ❌ 3/14                 | nemăsurat din nou | 10 limbi refuzate din 14; 37 de minute per limbă                                                                                                                   |
-| Claude Opus 5.5      | abonament Claude (Claude Code)    | ❌ 0/14                 | ✅ 14/14     | articolul refuzat în toate cele 14 limbi de filtrele de siguranță ale lui Opus, din cauza unei știri scurte de biologie; nimic la acest README                      |
+| Model                | Cum îl accesați                 | Articol dens de monitorizare | Acest README    | Ce diferă și în câte limbi                                                                                                                          |
+| --------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Gemini 3.8 Flash**  | abonament Google (Antigravity)   | ✅ 14/14                | ✅ 14/14     | nimic, în niciunul dintre cele două documente                                                                                                                                 |
+| **Claude Sonnet 5.5** | cheie API Anthropic                 | ✅ 14/14                | ✅ 14/14     | nimic, în niciunul dintre cele două documente                                                                                                                                 |
+| **Gemini 3.7 Flash**  | cheie API Google                    | ✅ 14/14                | ⚠️ 13/14     | 1 limbă din 14: un cuvânt în plus cu caractere aldine (ja)                                                                                                                      |
+| **Gemini 3.7 Flash**  | abonament Google (Antigravity)   | ✅ 14/14                | ⚠️ 13/14     | 1 limbă din 14: un cuvânt în minus cu caractere aldine (ko)                                                                                                                     |
+| **GPT-5.6 Sol**       | abonament ChatGPT sau cheie OpenAI | ✅ 14/14                | ⚠️ 12/14     | 2 limbi din 14: un cuvânt în minus cu caractere aldine (ar, ja)                                                                                                                |
+| **GLM-5.2**           | cheie OpenRouter                    | ✅ 14/14                | ⚠️ 11/14     | 3 limbi din 14: un cuvânt în minus cu caractere aldine (hi, ja, ko)                                                                                                            |
+| Claude Sonnet 5       | abonament Claude (Claude Code)   | ⚠️ 13/14                | ⚠️ 13/14     | 1 limbă din 14 pentru articol: un cuvânt în plus cu caractere aldine (zh); 1 pentru acest README: un rând de tabel lipit de cel precedent, ascuns la afișare (ar)            |
+| Claude Haiku 4.5      | abonament Claude (Claude Code)   | ⚠️ 11/14                | ✅ 14/14     | 3 limbi pentru articol: un titlu de secțiune trecut la nivelul 1 (en, pl, ro); pentru acest README, nimic detectat de comparator, dar linkurile interne sunt dublate în engleză |
+| Claude Sonnet 5       | cheie API Anthropic                 | ⚠️ 11/14                | ⚠️ 12/14     | 3 limbi pentru articol: un bloc de cod apărut (es, de, hi); 2 pentru acest README: un link fără marcaj (sv), un cuvânt cu caractere aldine (zh)                              |
+| Claude Haiku 4.5      | cheie API Anthropic                 | ⚠️ 7/14                 | ✅ 14/14     | 7 limbi pentru articol: un titlu de secțiune trecut la nivelul 1 — în japoneză, rămas în franceză; nimic pentru acest README                                              |
+| Claude Haiku 5.5      | cheie API Anthropic                 | ⚠️ 11/14                | ❌ 12/14     | 3 limbi pentru articol: un titlu de secțiune cu nivelul schimbat sau duplicat (ja, ko, zh); pentru acest README, 2 limbi respinse, fragmente de cod inline pierdute (ar, hi)    |
+| Qwen 3.7 Flash        | cheie OpenRouter                    | ❌ 8/14                 | ⚠️ 10/14     | 1 limbă respinsă pentru articol, alte 5 prezintă abateri; pentru acest README, aproximativ patruzeci de cuvinte puse în `code` (ar)                                                    |
+| Grok 4.6              | abonament Grok                   | ❌ 8/14                 | neevaluat     | 5 limbi respinse din 14, din cauza fragmentelor de cod inline și a URL-urilor nereturnate; neerlandeza prezintă abateri peste tot                                                               |
+| GPT-OSS 20B           | model local (Ollama)             | ❌ 7/14                 | nemăsurat din nou | 4 limbi respinse din 14: modelul lăsa pasaje în franceză, mecanismul de verificare le-a oprit                                                                  |
+| MiMo v2.5 (gratuit)   | OpenCode Zen, fără cont         | ❌ 11/14                | nemăsurat din nou | 1 limbă respinsă; o secțiune pierdută în poloneză                                                                                                                  |
+| Mistral Large         | cheie API Mistral                   | ❌ 5/14                 | ❌ 1/14      | **o secțiune întreagă dispare**: 1 limbă pentru articol (hi), 3 pentru acest README (ar, hi, ko) — și 3 limbi respinse pentru articol                                |
+| DeepSeek V4 Flash     | cheie OpenRouter                    | ❌ 3/14                 | nemăsurat din nou | 10 limbi respinse din 14; 37 de minute per limbă                                                                                                                 |
+| Claude Opus 5.5       | abonament Claude (Claude Code)   | ❌ 0/14                 | ✅ 14/14     | articolul respins în toate cele 14 limbi de mecanismele de protecție ale Opus, din cauza unei știri scurte de biologie; nimic pentru acest README                                               |
 
-|     | Ce înseamnă simbolul                                                                                                                                                                                  |
+|     | Ce indică simbolul                                                                                                                                                                                 |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✅  | toate cele paisprezece limbi traduse și nimic nu diferă față de sursă                                                                                                                                |
-| ⚠️  | toate cele paisprezece limbi traduse; ceea ce diferă ține de **marcare** — un cuvânt îngroșat, un `code`, un link care își pierde parantezele drepte. Nu lipsește niciun text, niciun URL, niciun bloc de cod, nicio secțiune |
-| ❌  | cel puțin o limbă nu a putut fi tradusă — fișierul este refuzat, nu este scris — **sau** lipsește conținut dintr-un fișier scris                                                                    |
+| ✅  | toate cele paisprezece limbi traduse și nimic nu diferă față de sursă                                                                                                                                       |
+| ⚠️  | toate cele paisprezece limbi traduse; diferențele țin de **marcaj** — un cuvânt cu caractere aldine, un `code`, un link care își pierde parantezele drepte. Nu lipsește niciun text, niciun URL, niciun bloc de cod, nicio secțiune |
+| ❌  | cel puțin o limbă nu a putut fi tradusă — fișierul este respins, nu este scris — **sau** lipsește conținut dintr-un fișier scris                                                                      |
 
 Ce trebuie reținut:
 
-- **O traducere refuzată nu este o traducere deteriorată.** Când lipsește un token la întoarcere, fișierul nu este scris, iar limba este considerată refuzată. Asta i se întâmplă lui Grok la articol: patru coduri inline și trei URL-uri pierdute încă din primul segment, pe cele cinci sisteme de scriere non-latine.
-- **Un model poate refuza un document întreg pentru o singură propoziție.** Opus 5.5 traduce acest README fără nicio abatere, dar niciun articol de sinteză: filtrele sale de siguranță opresc răspunsul din cauza unei știri scurte de biologie. Fișierul nu este scris, iar aipmt explică motivul.
-- **Această plasă de siguranță nu acoperă titlurile, tabelele, front matter-ul și nici textul.** Un model care elimină o secțiune returnează un fișier pe care instrumentul îl scrie fără ezitare — este cazul lui Mistral. Aceste elemente nu pot fi înlocuite cu un token, iar mecanismele actuale de protecție nu le verifică; `scripts/compare_structure.py` detectează o secțiune pierdută, dar abia după aceea.
-- **Grok nu are o notă pentru acest README**: sesiunea sa CLI a expirat după douăsprezece limbi, dintre care unsprezece fără abateri. O campanie întreruptă nu este notată.
-- **Densitatea documentului contează mai mult decât limba.** Grok face față unor README-uri obișnuite și cedează la un articol încărcat cu linkuri, inclusiv în neerlandeză.
+- **O traducere respinsă nu este o traducere deteriorată.** Când un token
+  lipsește din răspuns, fișierul nu este scris, iar limba este considerată
+  respinsă. Asta se întâmplă cu Grok pentru articol: patru fragmente de cod inline și
+  trei URL-uri pierdute încă de la primul segment, pentru cele cinci sisteme de scriere nelatine.
+- **Un model poate respinge un document întreg din cauza unei singure propoziții.** Opus 5.5
+  traduce acest README fără nicio abatere, dar niciun articol de monitorizare: mecanismele sale
+  de protecție opresc răspunsul la o știre scurtă de biologie. Fișierul nu este
+  scris, iar aipmt explică de ce.
+- **Această plasă de siguranță nu acoperă titlurile, tabelele, front matter sau
+  textul.** Un model care elimină o secțiune returnează un fișier pe care instrumentul îl scrie
+  fără să semnaleze nimic — acesta este cazul Mistral. Aceste elemente nu pot fi
+  înlocuite cu un token, iar mecanismele actuale de verificare nu le controlează;
+  `scripts/compare_structure.py` detectează o secțiune pierdută, dar ulterior.
+- **Grok nu are o evaluare pentru acest README**: sesiunea sa CLI a expirat după douăsprezece
+  limbi, dintre care unsprezece fără abateri. O campanie întreruptă nu este evaluată.
+- **Densitatea documentului contează mai mult decât limba.** Grok se descurcă cu
+  fișiere README obișnuite și pierde pasul la un articol încărcat cu linkuri, inclusiv în
+  neerlandeză.
 
-Date și documente: coloana „Acest README” a fost măsurată la 9 septembrie 2026 pe o revizie înghețată a acestui fișier (785 de rânduri, 285 de coduri inline, 89 de rânduri de tabel), modificată de atunci — cu excepția rândurilor Antigravity și Claude Code, măsurate la 26 septembrie pe revizia publicată odată cu 1.14.0, mai scurtă (600 de rânduri, 257 de coduri inline, 85 de rânduri de tabel). Coloana „Articol dens de sinteză” provine din campania din 4 și 5 septembrie pe un articol de 589 de rânduri, cu excepția rândului Grok, remăsurat la 9 septembrie pe o altă ediție a aceleiași sinteze, și a rândurilor Antigravity și Claude Code, măsurate la 26 septembrie pe același articol. Tabelele complete, duratele și protocolul se găsesc în [Măsurători detaliate](#măsurători-detaliate).
-
+Date și documente: coloana „Acest README” a fost măsurată la 9 septembrie 2026
+pe o revizie fixată a acestui fișier (785 de linii, 285 de fragmente de cod inline, 89 de rânduri
+de tabel), modificată de atunci — cu excepția rândurilor Antigravity și Claude Code,
+măsurate la 26 septembrie pe revizia publicată cu versiunea 1.14.0, mai scurtă
+(600 de linii, 257 de fragmente de cod inline, 85 de rânduri de tabel), și a rândurilor Claude
+Sonnet 5.5, Haiku 5.5 și Haiku 4.5 prin API, măsurate la 18 octombrie pe
+aceeași revizie. Coloana „Articol dens de monitorizare” provine din campania din
+4 și 5 septembrie pe un articol de 589 de linii, cu excepția rândului Grok, măsurat din nou la
+9 septembrie pe o altă ediție a aceleiași publicații de monitorizare, a rândurilor Antigravity și
+Claude Code, măsurate la 26 septembrie pe același articol, și a acestor trei rânduri
+Claude, la 18 octombrie. Tabelele complete, duratele și protocolul se găsesc
+în [Măsurători detaliate](#măsurători-detaliate).
 ## Toate opțiunile
 
-| Opțiune                  | Descriere                                                                                                     |
+| Opțiune                   | Descriere                                                                                                   |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `--file`                 | Fișier Markdown unic de tradus (alternativă la `--source_dir`)                                             |
-| `--source_dir`           | Director sursă care conține fișierele Markdown (implicit: `content/posts`)                                   |
-| `--target_dir`           | Director de ieșire pentru fișierele traduse (implicit: `traductions_en`)                                    |
+| `--file`                 | Un singur fișier Markdown de tradus (alternativă la `--source_dir`)                                             |
+| `--source_dir`           | Directorul sursă care conține fișierele Markdown (implicit: `content/posts`)                                   |
+| `--target_dir`           | Directorul de ieșire pentru fișierele traduse (implicit: `traductions_en`)                                    |
 | `--source_lang`          | Limba sursă (implicit: `fr`)                                                                                  |
 | `--target_lang`          | Limba țintă (implicit: `en`)                                                                                   |
-| `--model`                | Model specific de utilizat                                                                                  |
+| `--model`                | Modelul specific de utilizat                                                                                  |
 | `--eco`                  | Utilizează modelele economice                                                                              |
 | `--use_mistral`          | Utilizează API-ul Mistral AI                                                                                     |
 | `--use_claude`           | Utilizează API-ul Claude                                                                                         |
 | `--use_gemini`           | Utilizează API-ul Gemini                                                                                         |
 | `--use_grok`             | Utilizează API-ul xAI (Grok) — necesită `XAI_API_KEY`                                                           |
-| `--use_codex`            | Utilizează CLI-ul Codex pe cota abonamentului ChatGPT                                                    |
-| `--use_grok_cli`         | Utilizează CLI-ul Grok pe cota abonamentului Grok                                                        |
-| `--use_antigravity`      | Utilizează CLI-ul Antigravity (`agy`) pe cota abonamentului Google AI Pro sau Ultra                       |
-| `--use_claude_code`      | Utilizează CLI-ul Claude Code (`claude -p`) pe cota abonamentului Claude Pro sau Max                      |
-| `--use_opencode`         | Utilizează OpenCode (open source) către furnizorul configurat în OpenCode; necesită `--model provider/modèle` |
+| `--use_codex`            | Utilizează CLI-ul Codex din cota abonamentului ChatGPT                                                    |
+| `--use_grok_cli`         | Utilizează CLI-ul Grok din cota abonamentului Grok                                                        |
+| `--use_antigravity`      | Utilizează CLI-ul Antigravity (`agy`) din cota abonamentului Google AI Pro sau Ultra                       |
+| `--use_claude_code`      | Utilizează CLI-ul Claude Code (`claude -p`) din cota abonamentului Claude Pro sau Max                      |
+| `--use_opencode`         | Utilizează OpenCode (open source) cu furnizorul configurat în OpenCode; necesită `--model provider/modèle` |
 | `--use_openrouter`       | Utilizează OpenRouter — necesită `OPENROUTER_API_KEY` și `--model fournisseur/modèle`                          |
 | `--force`                | Forțează retraducerea                                                                                       |
-| `--keep_filename`        | Păstrează numele de fișier original                                                                          |
-| `--news`                 | Mod știri: protejează citatele în EN, gestionează steagurile per limbă                                      |
+| `--keep_filename`        | Păstrează numele original al fișierului                                                                          |
+| `--news`                 | Mod știri: protejează citatele EN, gestionează marcajele în funcție de limbă                                      |
 | `--add_translation_note` | Adaugă o notă de traducere                                                                                |
 | `--note_position`        | Poziția notei: `top`, `bottom` (implicit) sau `both`                                                     |
 | `--note_format`          | Formatul notei: `legacy` (implicit, paragraf aldin) sau `marker`                                            |
 | `--include_model`        | Include numele modelului în fișierul de ieșire                                                            |
 | `--reasoning_effort`     | Efort de raționament GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-Cele nouă flaguri `--use_*` se exclud reciproc: combinarea a două dintre ele este
+Cele nouă flags `--use_*` se exclud reciproc: combinarea a două dintre ele este
 refuzată.
 
 ## Furnizori
@@ -175,26 +241,26 @@ aipmt --use_gemini  --source_dir content/fr --target_dir content/ja --target_lan
 aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lang pt
 ```
 
-`--eco` comută pe nivelul economic al fiecărui furnizor.
+`--eco` comută la nivelul economic al fiecărui furnizor.
 
-| Furnizor    | Calitate (implicit)                                   | Economic (`--eco`)|
-| ----------- | ----------------------------------------------------- | ------------------------- |
-| OpenAI      | `gpt-5.6-terra`                                       | `gpt-5.6-luna`            |
-| Claude      | `claude-sonnet-5`                                     | `claude-haiku-4-5`        |
-| Mistral     | `mistral-large-latest`                                | `mistral-small-latest`    |
-| Gemini      | `gemini-3.7-flash`                                    | `gemini-3.1-flash-lite`   |
-| Codex       | `gpt-5.6-sol` (de asemenea `terra` și `luna` prin `--model`) | `gpt-5.6-luna`            |
-| Grok API    | `grok-4.6`                                            | `grok-4.3`                |
-| Grok CLI    | `grok-4.6`                                            | `grok-4.5`                |
-| Antigravity | `gemini-3.8-flash-medium`                             | `gemini-3.7-flash-low`    |
-| Claude Code | `sonnet`, efort `low`                                | idem — `--eco` fără efect |
-| OpenCode    | `--model provider/modèle` obligatoriu                 | idem — `--eco` fără efect |
-| OpenRouter  | `--model fournisseur/modèle` obligatoriu              | idem — `--eco` fără efect |
+| Furnizor    | Calitate (implicit)                                                     | Economic (`--eco`)      |
+| ----------- | -------------------------------------------------------------------- | ------------------------- |
+| OpenAI      | `gpt-5.6-terra`                                                      | `gpt-5.6-luna`            |
+| Claude      | `claude-sonnet-5-5`                                                  | `claude-haiku-5-5`        |
+| Mistral     | `mistral-large-latest`                                               | `mistral-small-latest`    |
+| Gemini      | `gemini-3.7-flash`                                                   | `gemini-3.1-flash-lite`   |
+| Codex       | `gpt-6.1-sol` (și `gpt-5.6-sol`, `terra` și `luna` prin `--model`) | `gpt-5.6-luna`            |
+| Grok API    | `grok-4.6`                                                           | `grok-4.3`                |
+| Grok CLI    | `grok-4.6`                                                           | `grok-4.5`                |
+| Antigravity | `gemini-3.8-flash-medium`                                            | `gemini-3.7-flash-low`    |
+| Claude Code | `sonnet`, efort `low`                                               | la fel — `--eco` fără efect |
+| OpenCode    | `--model provider/modèle` obligatoriu                                | la fel — `--eco` fără efect |
+| OpenRouter  | `--model fournisseur/modèle` obligatoriu                             | la fel — `--eco` fără efect |
 
-### Pe abonamentul ChatGPT: `--use_codex`
+### Prin abonamentul ChatGPT: `--use_codex`
 
 Controlează CLI-ul oficial Codex: traducerea este scăzută din cota
-abonamentului ChatGPT, fără cheie API sau facturare pe bază de consum.
+abonamentului ChatGPT, fără cheie API sau facturare în funcție de utilizare.
 
 ```bash
 pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo), ou : npm install -g @openai/codex
@@ -205,25 +271,28 @@ aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 - Binarul este căutat în `CODEX_BIN`, apoi în `PATH`, apoi în pachetul
   `openai-codex-cli-bin`. `~/.codex/auth.json` nu este citit niciodată.
 - `OPENAI_API_KEY` și `CODEX_API_KEY` sunt eliminate din mediul
-  subprocesului: o cheie prezentă nu face niciodată trecerea la API.
-- Fiecare segment costă cel puțin un „mesaj” din fereastra de 5 ore — două
-  dacă validarea sa eșuează și este reîncercat. OpenAI anunță, ca
-  estimare, 250-2.000 de mesaje/5 h pentru `gpt-5.6-luna` (`--eco`) și
+  subprocesului: prezența unei chei nu provoacă niciodată comutarea la API.
+- Fiecare segment consumă cel puțin un „mesaj” din fereastra de 5 ore — două
+  dacă validarea lui eșuează și este reîncercat. OpenAI anunță, cu titlu
+  estimativ, 250-2 000 mesaje/5 h pentru `gpt-5.6-luna` (`--eco`) și
   10-100 pentru `gpt-5.6-sol` pe un plan Plus.
-- `--model gpt-5.6-terra` și `--model gpt-5.6-luna` trec de asemenea prin
-  abonament. Un model la care contul nu are drepturi întoarce un cod 400 „model is
-  not supported when using Codex with a ChatGPT account”.
-- Mai lent decât un API, iar diferența crește odată cu dimensiunea documentului: pe acest README,
-  6 min 46 s per limbă mediană cu `gpt-5.6-sol`, față de 36 s pentru
+- `--model gpt-5.6-sol`, opțiunea implicită până la 1.16.3, `--model gpt-5.6-terra`
+  și `--model gpt-5.6-luna` folosesc, de asemenea, abonamentul.
+- Un răspuns 429 de la server nu duce la pierderea fișierului: Codex se reconectează singur,
+  aipmt așteaptă încheierea turei, iar dacă eroarea 429 persistă până la final, segmentul
+  este reluat după 30, apoi 60 de secunde. Un model la care contul nu are acces returnează un 400 „modelul nu este
+  acceptat când se utilizează Codex cu un cont ChatGPT”.
+- Mai lent decât un API, iar diferența crește odată cu documentul: pentru acest README,
+  mediana este de 6 min 46 s pe limbă cu `gpt-5.6-sol`, față de 36 s pentru
   `gemini-3.7-flash`.
-- Refuzat în CI (`CI` sau `GITHUB_ACTIONS` definit): abonamentul se autentifică
+- Refuzat în CI (`CI` sau `GITHUB_ACTIONS` definit): autentificarea abonamentului se face
   printr-un fișier de sesiune personal, care nu are ce căuta pe un runner
   partajat.
-- Variabile: `CODEX_BIN`, `CODEX_TIMEOUT` (secunde per segment, implicit 600).
+- Variabile: `CODEX_BIN`, `CODEX_TIMEOUT` (secunde pe segment, implicit 600).
 
-### Pe abonamentul Grok: `--use_grok_cli`
+### Prin abonamentul Grok: `--use_grok_cli`
 
-Același principiu cu CLI-ul oficial Grok Build, pe abonamentul SuperGrok sau
+Același principiu cu CLI-ul oficial Grok Build, prin abonamentul SuperGrok sau
 X Premium+.
 
 ```bash
@@ -232,25 +301,25 @@ grok login                                      # ou : grok login --device-code
 aipmt --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
 ```
 
-- **Izolare mai slabă decât Codex.** Sandbox-ul la nivel de sistem de operare al Grok nu se aplică
-  pe multe sisteme Linux recente (AppArmor, socket-uri de runtime pentru
-  containere), iar un profil care nu se poate aplica pornește neizolat în
-  mod silențios. Prin urmare, scriptul nu solicită niciun profil în mod implicit, îl
-  anunță și se bazează pe regulile `--deny` ale CLI-ului, inclusiv regula universală `*` — singurul
-  nivel care refuză să pornească în loc să elimine protecția fără a
-  avertiza. `GROK_TRANSLATE_SANDBOX=read-only` cere sandbox-ul OS, iar pornirea
-  eșuează dacă mașina nu îl poate respecta.
+- **Izolare mai slabă decât la Codex.** Sandbox-ul OS al Grok nu se aplică
+  pe multe sisteme Linux recente (AppArmor, socket-uri de runtime
+  pentru containere), iar un profil care nu poate fi aplicat pornește fără izolare,
+  în mod silențios. Prin urmare, scriptul nu solicită implicit niciun profil, anunță acest lucru și
+  se bazează pe regulile `--deny` ale CLI-ului, inclusiv regula catch-all `*` — singurul
+  strat care refuză să pornească în loc să elimine protecția fără să
+  anunțe. `GROK_TRANSLATE_SANDBOX=read-only` impune sandbox-ul OS, iar pornirea
+  eșuează dacă sistemul nu îl poate aplica.
 - Cota este săptămânală, partajată cu Chat, Imagine și Voice, și nicio
-  comandă nu permite citirea acesteia: un lot poate consuma din utilizarea conversațională
-  fără avertisment.
+  comandă nu permite consultarea ei: un lot poate consuma din cota pentru conversații
+  fără nicio avertizare.
 - Variabile: `GROK_BIN`, `GROK_HOME` (directorul CLI-ului, implicit `~/.grok`),
   `GROK_TIMEOUT` (implicit 900), `GROK_TRANSLATE_SANDBOX`.
 
-### Pe abonamentul Google: `--use_antigravity`
+### Prin abonamentul Google: `--use_antigravity`
 
-Același principiu cu `agy`, CLI-ul oficial al Antigravity: pentru cei care plătesc Google
-AI Pro sau Ultra, traducerea este dedusă din cota abonamentului în loc
-să fie facturată per token. Este singura cale către această cotă: Gemini CLI nu
+Același principiu cu `agy`, CLI-ul oficial Antigravity: pentru cei care plătesc Google
+AI Pro sau Ultra, traducerea este scăzută din cota abonamentului în loc
+să fie facturată per token. Aceasta este singura cale de acces la această cotă: Gemini CLI nu
 mai deservește aceste conturi din 18 iunie 2026
 ([anunț](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)),
 iar SDK-ul Antigravity acceptă doar o cheie API sau un proiect Google Cloud.
@@ -262,154 +331,153 @@ aipmt --use_antigravity --file README.md --target_dir . --target_lang en
 agy -p /usage --output-format json   # quota restant, sans en consommer
 ```
 
-- **Nicio cale plătită nu rămâne deschisă.** agy primește din mediul
-  dumneavoastră doar o listă restrânsă de variabile — `PATH`, limbă și fus orar,
-  terminal, identitate, proxy-uri și certificate, magistrală de sesiune — și nicio cheie:
-  mai multe dintre variabilele sale pot comuta un apel fără a afișa nimic (măsurat:
+- **Nicio cale cu plată nu rămâne deschisă.** agy primește din
+  mediul dumneavoastră doar o listă închisă de variabile — `PATH`, limbă și fus orar,
+  terminal, identitate, proxy-uri și certificate, magistrala de sesiune — și nicio cheie:
+  mai multe dintre variabilele sale redirecționează un apel fără să afișeze nimic (măsurat:
   una trimite documentul către un gateway terț, alta către un proiect
-  Google Cloud facturat), iar o listă de excludere omitea elemente la fiecare verificare.
-  Înainte de orice segment, `agy -p /config`, care nu consumă cotă, trebuie să arate
-  creditele IA plătite dezactivate, fără cheie API sau proiect Google Cloud — o
+  Google Cloud facturat), iar o listă de excludere omitea câte una la fiecare reverificare.
+  Înainte de orice segment, `agy -p /config`, care nu consumă nicio cotă, trebuie să arate
+  că sunt dezactivate creditele AI cu plată, fără cheie API sau proiect Google Cloud — o
   setare absentă înseamnă refuz —, altfel nu se traduce nimic; jurnalul fiecărui
-  apel trebuie apoi să ateste abonamentul (`authMethod=consumer`), altfel
+  apel trebuie apoi să confirme utilizarea abonamentului (`authMethod=consumer`), altfel
   răspunsul este refuzat.
 - **Izolare.** Fiecare apel rulează într-un director personal privat și
-  de unică folosință, cu un agent de traducere fără unelte: configurările, regulile,
-  pluginurile, serverele MCP și hook-urile dumneavoastră din agy nu intră acolo, nimic nu se adaugă la
-  istoricul dumneavoastră, iar autentificarea rămâne în portchei (keyring), pe care aipmt nu îl citește niciodată.
-  Un agent negăsit face ca agy să revină, în mod silențios, la agentul său de codare
-  și uneltele sale: o linie întreagă din jurnal trebuie să confirme agentul corect — un
-  document care citează acest mesaj nu o înlocuiește —, altfel este refuzat.
-- **Platforme**: Linux, într-o sesiune care dispune de un keyring (magistrală de sesiune
-  D-Bus, Secret Service); macOS este acceptat, fără a fi fost măsurat pe acesta. Refuzat
+  temporar, cu un agent de traducere fără instrumente: setările, regulile,
+  pluginurile, serverele MCP și hook-urile agy ale dumneavoastră nu ajung acolo, nu se adaugă nimic în
+  istoricul dumneavoastră, iar autentificarea rămâne în portchei, pe care aipmt nu îl citește niciodată.
+  Dacă un agent nu poate fi găsit, agy revine, în mod silențios, la agentul său de programare
+  și la instrumentele acestuia: o linie întreagă din jurnal trebuie să confirme agentul corect — un
+  document care citează acest mesaj nu o poate înlocui —, altfel apelul este refuzat.
+- **Platforme**: Linux, într-o sesiune care are un portchei (magistrală de sesiune
+  D-Bus, Secret Service); macOS este acceptat, fără să fi fost măsurat pe acesta. Refuzat
   pe Windows, unde agy nu citește variabilele care izolează fiecare apel, și
   pe Linux fără magistrală de sesiune — sesiune SSH, container, server: agy își
-  stochează acolo tokenul într-un fișier din `~/.gemini`, pe care izolarea îl maschează.
-  Refuzul survine înainte de orice lansare, indicând cauza, în loc de un minut
-  de așteptare pentru un cod de conectare.
-- **Modele**: cele din `agy models`. Modelele Gemini includ efortul în numele lor
+  stochează acolo tokenul într-un fișier din `~/.gemini`, pe care izolarea îl ascunde.
+  Refuzul are loc înainte de orice lansare, cu precizarea cauzei, în locul unei așteptări
+  de un minut pentru un cod de autentificare.
+- **Modele**: cele din `agy models`. Modelele Gemini includ efortul în nume
   (`gemini-3.8-flash-medium`…): un nume fără sufix este refuzat înainte de apel,
-  iar `--reasoning_effort` nu are niciun efect. Implicit `gemini-3.8-flash-medium`,
-  și `gemini-3.7-flash-low` în `--eco`; campaniile care le-au stabilit sunt
+  iar `--reasoning_effort` nu are efect. Implicit `gemini-3.8-flash-medium`,
+  și `gemini-3.7-flash-low` cu `--eco`; campaniile în urma cărora au fost stabilite sunt
   descrise în [Măsurători detaliate](#măsurători-detaliate). Claude și GPT-OSS
-  au propria cotă, mult mai mică: aproximativ 1% din fereastra de
-  5 ore per apel măsurat, față de 0,05% pentru Flash.
-- **Cotă**: per grup, o fereastră de 5 ore și una săptămânală, proporțional
-  cu costul în tokenuri. Măsurat pe contul autorului: aproximativ
-  16 puncte din fereastra de 5 ore per milion de caractere sursă în
-  `gemini-3.8-flash-medium`, 14 în `gemini-3.7-flash-medium` și 7 până la 8 la
-  efort scăzut — un README de 40.000 de caractere costă, așadar, puțin peste
-  jumătate de punct. Limita săptămânală depinde de nivelul abonamentului. Reîncercarea urmează
-  ceea ce agy declară ca fiind reîncercabil; în caz contrar, o fereastră epuizată nu este niciodată
-  reîncercată: aceasta provoacă eșecul fiecărui fișier până la resetarea
+  au propria cotă, mult mai mică: aproximativ 1 % din fereastra de
+  5 ore pentru fiecare apel măsurat, față de 0,05 % în Flash.
+- **Cotă**: pentru fiecare grup, o fereastră de 5 ore și una săptămânală,
+  proporțional cu costul în tokens. Măsurat pe contul autorului: aproximativ
+  16 puncte din fereastra de 5 ore pentru fiecare milion de caractere sursă cu
+  `gemini-3.8-flash-medium`, 14 cu `gemini-3.7-flash-medium` și 7 până la 8 la
+  efort scăzut — un README de 40 000 de caractere consumă astfel puțin peste
+  jumătate de punct. Limita săptămânală depinde însă de nivel. Reluarea urmează
+  indicațiile agy privind posibilitatea de reîncercare; în lipsa lor, o fereastră epuizată nu este niciodată
+  reîncercată: provoacă eșecul fiecărui fișier până la resetarea
   afișată de `/usage`.
-- **Mai lent decât API-ul**: pe articolul dens al măsurătorilor, o mediană de 3 min 59 s per
-  limbă în `gemini-3.8-flash-medium` și 3 min 14 s în
+- **Mai lent decât API-ul**: pentru articolul dens folosit la măsurători, mediana este de 3 min 59 s pe
+  limbă cu `gemini-3.8-flash-medium` și 3 min 14 s cu
   `gemini-3.7-flash-medium`, față de 1 min 18 s pentru Gemini 3.7 Flash prin API.
 - **Întrerupere**: Ctrl-C sau închiderea terminalului opresc agy odată cu
-  comanda, în loc să-l lase să-și termine tura consumând din cotă; același lucru
-  este valabil pentru Codex, Grok CLI și OpenCode. Sub `nohup`, traducerea continuă.
-- Refuzat în CI (`CI` sau `GITHUB_ACTIONS` definit): conectarea se află într-un
-  keyring personal. Pe un runner, `--use_gemini` cu `GOOGLE_API_KEY`.
-- Variabile: `AGY_BIN` (altfel `PATH`, apoi `~/.local/bin/agy`),
-  `AGY_TIMEOUT` (secunde per segment, pornire inclusă, implicit 900).
+  comanda, în loc să îl lase să își încheie tura consumând din cota dumneavoastră; același lucru este valabil
+  pentru Codex, Grok CLI și OpenCode. Sub `nohup`, traducerea continuă.
+- Refuzat în CI (`CI` sau `GITHUB_ACTIONS` definit): autentificarea este păstrată într-un
+  portchei personal. Pe un runner, `--use_gemini` cu `GOOGLE_API_KEY`.
+- Variabile: `AGY_BIN` (în lipsă, `PATH`, apoi `~/.local/bin/agy`),
+  `AGY_TIMEOUT` (secunde pe segment, inclusiv pornirea, implicit 900).
 
-**Termeni și condiții de utilizare: contul dumneavoastră este cel expus.** [Termenii
-și condițiile Antigravity](https://antigravity.google/terms) (secțiunea 6) și
-[FAQ-ul](https://antigravity.google/docs/faq/) său interzic accesarea serviciului
+**Condiții de utilizare: contul dumneavoastră este în joc.**
+[Condițiile Antigravity](https://antigravity.google/terms) (secțiunea 6) și
+[FAQ-ul său](https://antigravity.google/docs/faq/) interzic accesarea serviciului
 printr-un software terț folosind autentificarea Antigravity — Claude Code,
 OpenClaw și OpenCode sunt menționate acolo —, sub sancțiunea suspendării contului. aipmt
-nici nu citește, nici nu reutilizează tokenul: acesta lansează binarul oficial în
+nu citește și nici nu reutilizează tokenul: lansează binarul oficial în
 [modul headless](https://antigravity.google/docs/cli/headless/) pe care Google
-îl documentează pentru scripturi și CI. Un membru Google a considerat „standard”
-lansarea `agy -p` dintr-un script local pentru munca proprie
-([forum oficial, 25 septembrie 2026, răspuns necontractual](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829));
-niciun text nu tranșează cazul unui instrument distribuit precum acesta.
+îl documentează pentru scripturi și CI. Un membru al Google a considerat „standard”
+lansarea `agy -p` dintr-un script local pentru propria activitate
+([forum oficial, 25 septembrie 2026, răspuns fără valoare contractuală](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829));
+niciun text nu clarifică situația unui instrument distribuit precum acesta.
 
-**Doar documente publice.** Conform secțiunii 5 din aceiași termeni,
-schimburile — prompturi, răspunsuri, metadate — pot fi utilizate pentru a îmbunătăți
-produsele și învățarea automată Google și pot fi revizuite de evaluatori
-umani, inclusiv pentru abonamentele plătite. Renunțarea se face prin setarea
-`enableTelemetry`, cu efect nedocumentat, pe care aipmt nu o configurează; setările dumneavoastră
-din agy nu sunt preluate în mediul său izolat. Nu treceți nimic confidențial prin acesta.
+**Doar documente publice.** Conform secțiunii 5 din aceleași condiții,
+schimburile — prompts, răspunsuri, metadate — pot fi folosite pentru îmbunătățirea
+produselor și a învățării automate Google și pot fi examinate de
+oameni, inclusiv în cazul unui abonament cu plată. Renunțarea se face prin setarea
+`enableTelemetry`, al cărei efect nu este documentat și pe care aipmt nu o configurează; setările dumneavoastră
+agy nu sunt preluate în mediul său izolat. Nu trimiteți nimic confidențial prin acesta.
+### Prin abonamentul Claude: `--use_claude_code`
 
-### Pe abonamentul Claude: `--use_claude_code`
-
-Același principiu cu `claude`, CLI-ul oficial al Claude Code, în modul `-p`: pentru
-cine plătește Claude Pro sau Max, traducerea este dedusă din cota
+Același principiu cu `claude`, CLI-ul oficial Claude Code, în modul `-p`: pentru
+cei care plătesc Claude Pro sau Max, traducerea se scade din cota
 abonamentului în loc să fie facturată per token. A nu se confunda cu
-`--use_claude`, API-ul Anthropic, facturat pe baza utilizării.
+`--use_claude`, API-ul Anthropic, facturat în funcție de utilizare.
 
 ```bash
 claude                                   # une fois : /login avec le compte de l'abonnement
 aipmt --use_claude_code --file README.md --target_dir . --target_lang en
 ```
 
-- **Nicio cale cu plată nu rămâne deschisă, iar fiecare apel dovedește acest lucru.** Claude
-  Code primește din mediul dumneavoastră doar o listă închisă de variabile — nici
-  cheie API, nici token, nici furnizor cloud, nici marcator al sesiunii Claude Code
+- **Nicio cale cu plată nu rămâne deschisă, iar fiecare apel o dovedește.** Claude
+  Code primește din mediul vostru doar o listă închisă de variabile — fără
+  cheie API, token, furnizor cloud sau marcaj al sesiunii Claude Code
   din care ar fi lansat aipmt. Înainte de primul segment, `claude auth status` trebuie
-  să arate conexiunea abonamentului, fără cheie Console, iar `/usage`, care nu consumă
-  din cotă, trebuie să ateste acest lucru; fiecare apel îl atestă la rândul său în
-  evenimentul său de inițializare, altfel răspunsul este refuzat.
+  să arate conectarea prin abonament, fără cheie Console, iar `/usage`, care nu consumă
+  nicio cotă, trebuie să confirme acest lucru; fiecare apel îl confirmă la rândul său în
+  evenimentul de inițializare, altfel răspunsul este respins.
 - **Dezactivați „extra usage”** (claude.ai, Setări → Utilizare) pentru
-  a menține costul zero euro: odată activat, acesta preia ștafeta după o fereastră epuizată și
-  facturează fără a afișa vreo eroare. aipmt oprește traducerea de îndată ce raportul
-  de cotă al unui apel semnalează acest lucru, dar acel apel este deja contorizat.
-- **Cotă partajată cu sesiunile dumneavoastră Claude Code.** Fiecare apel raportează
-  utilizarea ferestrelor de 5 ore și a celei săptămânale; peste 80%
-  (`AIPMT_CLAUDE_MAX_UTILIZATION`), nu se mai lansează niciun segment suplimentar, pentru
-  a nu epuiza ceea ce vă este necesar pentru lucru.
+  a menține costul la zero euro: când este activat, preia automat după epuizarea unei ferestre și
+  facturează fără să afișeze vreo eroare. aipmt oprește traducerea imediat ce raportul
+  de cotă al unui apel semnalează acest lucru, dar acel apel este deja contabilizat.
+- **Cotă comună cu sesiunile voastre Claude Code.** Fiecare apel raportează
+  utilizarea ferestrelor de 5 ore și a celei săptămânale; peste 80 %
+  (`AIPMT_CLAUDE_MAX_UTILIZATION`), nu se mai lansează niciun segment, pentru a nu
+  epuiza resursele folosite pentru munca voastră.
 - **Izolare.** Fiecare apel rulează fără instrumente, într-un director privat și
-  de unică folosință, în mod fără personalizare: nici fișierele dumneavoastră `CLAUDE.md`, nici pluginurile,
-  hook-urile, serverele MCP sau setările nu sunt încărcate, și nimic nu este păstrat din
-  sesiune. Atașamentele sunt dezactivate: un `@chemin` din documentul dumneavoastră
-  rămâne text și nu deschide niciun fișier (măsurat).
-- **Modele**: `sonnet` în mod implicit, cu efortul `low`, și în `--eco` de asemenea:
+  temporar, în modul fără personalizare: nu sunt încărcate nici fișierele voastre `CLAUDE.md`, nici pluginurile,
+  hook-urile, serverele MCP sau setările, iar din sesiune
+  nu se păstrează nimic. Atașamentele sunt dezactivate: un `@chemin` din documentul vostru
+  rămâne text și nu deschide niciun fișier (verificat prin măsurători).
+- **Modele**: `sonnet` implicit, cu efortul `low`, inclusiv în `--eco`:
   `--eco` nu schimbă nimic pe această cale. Măsurat pe aceleași documente, `haiku`
-  este de două ori mai lent — raționează fără să poată fi oprit — pentru
+  este de două ori mai lent — raționează fără să poată fi împiedicat — pentru
   un cost abia mai mic, iar `opus` refuză conținuturi de biologie (punctul
-  următor). Ambele rămân accesibile prin `--model`; aceste aliasuri urmăresc cel mai
-  recent model din familia lor. `fable` și variantele `[1m]` sunt refuzate,
-  deoarece trec pe credite plătite. `--reasoning_effort` ajustează efortul,
-  din care o traducere nu câștigă nimic: raționamentul măsurat este nul sau aproape nul.
-- **Opus refuză anumite conținuturi de biologie.** Mecanismele sale de siguranță sunt mai
-  stricte decât cele ale lui Sonnet, iar mesajul de eroare de la Anthropic avertizează că acestea
-  „can sometimes flag biology-research-adjacent work”. Măsurat: o știre scurtă de
-  monitorizare despre 279 de molecule generate a dus la refuzul articolului în toate cele paisprezece
-  limbi. Nimic nu este scris: aipmt refuză răspunsul trunchiat, indică
-  mecanismele de siguranță și recomandă `--model sonnet`.
-- Refuzat în CI (`CI` sau `GITHUB_ACTIONS` definit) și sub Windows (nemăsurat).
+  următor). Ambele rămân accesibile prin `--model`; aceste aliasuri urmăresc
+  cel mai recent model din familia lor. `fable` și variantele `[1m]` sunt respinse,
+  deoarece folosesc credite cu plată. `--reasoning_effort` reglează efortul,
+  de care o traducere nu beneficiază: raționamentul măsurat este nul sau aproape nul.
+- **Opus refuză anumite conținuturi de biologie.** Mecanismele sale de protecție sunt mai
+  stricte decât cele ale Sonnet, iar mesajul de eroare Anthropic avertizează că ele
+  „pot uneori semnala activități conexe cercetării biologice”. Măsurat: o știre
+  scurtă despre 279 de molecule generate a provocat refuzul articolului în toate cele paisprezece
+  limbi. Nu se scrie nimic: aipmt respinge răspunsul întrerupt, indică
+  mecanismele de protecție și recomandă `--model sonnet`.
+- Respins în CI (cu `CI` sau `GITHUB_ACTIONS` definit) și pe Windows (nemăsurat).
 - Variabile: `AIPMT_CLAUDE_BIN` (altfel `PATH`, apoi `~/.local/bin/claude`),
   `AIPMT_CLAUDE_TIMEOUT` (secunde per segment, implicit 900),
   `AIPMT_CLAUDE_MAX_UTILIZATION` (implicit 0.8), `CLAUDE_CONFIG_DIR` (contul
-  Claude Code, niciodată preluat dintr-un `.env` de proiect); directoare de lucru sub
+  Claude Code, niciodată preluat dintr-un `.env` al proiectului); directoare de lucru în
   `XDG_CACHE_HOME/aipmt/claude-code` (implicit `~/.cache`).
 
-**Termeni de utilizare: este implicat contul dumneavoastră.** [Pagina
-juridică Claude Code](https://code.claude.com/docs/en/legal-and-compliance)
-nu interzice ca „an end user from signing in to the unmodified Claude Code binary
-with their own Claude subscription”: exact asta face aipmt, care lansează
-binarul oficial și nu citește niciodată tokenul. Însă Anthropic „does not permit
-third-party developers […] to route requests through Free, Pro, or Max plan
-credentials on behalf of their users”, preferă cheia API pentru instrumentele
-terțe, „including open-source projects”, și își rezervă dreptul de a deduce
-utilizarea acestora din creditele plătite
-([asistență Claude](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)).
-Niciun text nu tranșează cazul unui instrument distribuit care lansează binarul.
+**Condiții de utilizare: răspunderea revine contului vostru.**
+[Pagina juridică Claude Code](https://code.claude.com/docs/en/legal-and-compliance)
+nu împiedică „un utilizator final să se conecteze la binarul Claude Code nemodificat
+cu propriul abonament Claude”: asta face aipmt, care lansează
+binarul oficial și nu citește niciodată tokenul. Dar Anthropic „nu permite
+dezvoltatorilor terți […] să direcționeze cereri prin datele de autentificare ale planurilor Free, Pro sau Max
+în numele utilizatorilor lor”, preferă cheia API pentru instrumentele
+terțe, „inclusiv proiectele open source”, și își rezervă dreptul de a scădea
+utilizarea acestora din creditele cu plată
+([ajutor Claude](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)).
+Niciun text nu clarifică situația unui instrument distribuit care lansează binarul.
 
-**Date**: pe conturile Free, Pro și Max, antrenarea modelelor
+**Date**: pentru conturile Free, Pro și Max, antrenarea modelelor
 se aplică și pentru Claude Code atunci când setarea de confidențialitate o permite
-([pagina de date](https://code.claude.com/docs/en/data-usage)). aipmt nu păstrează
-nicio transcriere locală (`--no-session-persistence`). Nu trimiteți prin acesta
+([pagina despre date](https://code.claude.com/docs/en/data-usage)). aipmt nu păstrează
+nicio transcriere locală (`--no-session-persistence`). Nu transmiteți prin el
 nimic confidențial.
 
-### Către furnizorul la alegere: `--use_opencode`
+### Către furnizorul ales: `--use_opencode`
 
-[OpenCode](https://opencode.ai) este un agent de cod open source (MIT) care
-rutează către furnizorii configurați în interiorul său: cheie API, abonament,
+[OpenCode](https://opencode.ai) este un agent de programare open source (MIT) care
+direcționează cererile către furnizorii configurați în el: cheie API, abonament,
 gateway OpenCode Zen (modele gratuite, fără cont) sau model local. Două
-căi au fost măsurate cap-coadă aici, Zen și Ollama.
+căi au fost măsurate aici de la un capăt la altul, Zen și Ollama.
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash   # ou : npm install -g opencode-ai
@@ -424,44 +492,44 @@ aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . -
 aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir . --target_lang ja
 ```
 
-`--model` este obligatoriu: fără acesta, OpenCode ar reveni la un model gratuit
-ale cărui schimburi pot fi utilizate pentru antrenare, iar această alegere nu este făcută în
-locul dumneavoastră.
+`--model` este obligatoriu: fără el, OpenCode ar reveni la un model gratuit
+ale cărui schimburi pot fi folosite pentru antrenare, iar această alegere nu se face în
+locul vostru.
 
 Izolare la fiecare apel:
 
-- o configurație inline, cu prioritate față de a dumneavoastră, definește un agent `aipmt`
-  ale cărui instrumente sunt toate refuzate (`permission: { "*": "deny" }`), partajarea
-  sesiunii este dezactivată, `--pure`, niciodată `--auto`;
-- director de lucru de unică folosință și gol, cu `OPENCODE_DISABLE_PROJECT_CONFIG` și
-  `OPENCODE_DISABLE_CLAUDE_CODE` create — fără acestea, OpenCode injectează în
+- o configurație inline, cu prioritate față de a voastră, definește un agent `aipmt`
+  ale cărui instrumente sunt toate interzise (`permission: { "*": "deny" }`), cu partajarea
+  sesiunii dezactivată, `--pure`, niciodată `--auto`;
+- director de lucru temporar și gol, cu `OPENCODE_DISABLE_PROJECT_CONFIG` și
+  `OPENCODE_DISABLE_CLAUDE_CODE` setate — fără ele, OpenCode injectează în
   prompt fișierul `AGENTS.md` din directorul curent și `~/.claude/CLAUDE.md`. Fișierul
-  `~/.config/opencode/AGENTS.md` global rămâne injectat, OpenCode nepermițând
+  global `~/.config/opencode/AGENTS.md` rămâne injectat, OpenCode nu permite
   excluderea lui;
 - contract de ieșire: cod de retur 0, niciun eveniment `error`, niciun apel
   de instrument, ultimul pas în `stop`, text nevid și agentul `aipmt`
-  efectiv încărcat — un `--agent` necunoscut nu duce la eșecul OpenCode, ci
-  revine în mod silențios la agentul de codare;
-- nicio cheie de `aipmt` nu este transmisă, cu excepția `OPENCODE_API_KEY`, cheia
-  lui OpenCode însuși. Furnizorii se configurează în OpenCode, nu în
-  `.env` din `aipmt`.
+  încărcat efectiv — un `--agent` necunoscut nu provoacă eșecul OpenCode, acesta
+  revine în tăcere la agentul de programare;
+- nu se transmite nicio cheie din `aipmt`, cu excepția `OPENCODE_API_KEY`, cheia
+  OpenCode însuși. Furnizorii se configurează în OpenCode, nu în
+  `.env` al `aipmt`.
 
 De știut:
 
-- Modelele gratuite din Zen sunt variabile, au limite nedocumentate, iar
-  interacțiunile cu ele pot fi utilizate pentru antrenare: potrivite pentru o documentație
+- Modelele gratuite Zen se schimbă, au limite nedocumentate, iar
+  schimburile lor pot fi folosite pentru antrenare: potrivite pentru documentație
   publică, nu pentru conținut privat.
-- Un model local trebuie să ofere cel puțin 16 k tokeni de context, segmentele
-  având până la 16.000 de caractere. Ollama configurează adesea 4.096: treceți
-  printr-un `Modelfile` cu `PARAMETER num_ctx 32768`.
-- `--eco` nu are niciun efect; `--reasoning_effort` este transmis ca atare drept
-  `--variant` al OpenCode.
+- Un model local trebuie să ofere cel puțin 16 k tokens de context, segmentele
+  având până la 16 000 de caractere. Ollama configurează adesea 4 096: folosiți
+  un `Modelfile` cu `PARAMETER num_ctx 32768`.
+- `--eco` nu are efect; `--reasoning_effort` este transmis ca atare drept
+  `--variant` pentru OpenCode.
 - OpenCode înregistrează fiecare sesiune în `~/.local/share/opencode/`.
 - Variabile: `OPENCODE_BIN` (altfel `PATH`, apoi `~/.opencode/bin/opencode`),
   `OPENCODE_TIMEOUT` (secunde per segment, implicit 600). `OPENCODE_CONFIG`
   este transmis ca atare către OpenCode.
 
-Exemplu de model local via Ollama, în `~/.config/opencode/opencode.json`:
+Exemplu de model local prin Ollama, în `~/.config/opencode/opencode.json`:
 
 ```bash
 ollama pull gpt-oss:20b
@@ -489,32 +557,32 @@ ollama create gpt-oss-20b-32k -f gpt-oss-20b-32k.Modelfile
 }
 ```
 
-`reasoningEffort: "none"` oprește raționarea pe care Ollama o activează în mod implicit pe aceste
+`reasoningEffort: "none"` dezactivează reflecția pe care Ollama o activează implicit pentru aceste
 modele și pe care un Modelfile nu o poate dezactiva. Măsurat pe o propoziție de
-șase cuvinte: 919 tokeni de raționare și 68 de secunde fără opțiune, 9 tokeni cu ea.
+șase cuvinte: 919 tokens de reflecție și 68 de secunde fără opțiune, 9 tokens cu ea.
 
 ### Către peste 400 de modele: `--use_openrouter`
 
-OpenRouter este un ruter facturat pe baza utilizării, dintr-un credit unic, plasat în fața unor
+OpenRouter este un router facturat în funcție de utilizare, cu un sold unic de credit, care oferă acces la
 modele găzduite de terți — inclusiv modelele chinezești deschise pe care niciun
-alt furnizor nu le expune aici.
+alt provider nu le expune aici.
 
 ```bash
 aipmt --use_openrouter --model z-ai/glm-5.2 --file README.md --target_dir . --target_lang en
 ```
 
-`--model` este obligatoriu. Un preflight, executat înainte de orice facturare, rezolvă
+`--model` este obligatoriu. O verificare preliminară, executată înainte de orice facturare, tratează
 două particularități ale rutării:
 
-- **Același model este servit de zeci de gazde cu limite maxime
-  diferite** — pe `z-ai/glm-5.3-flash`, 23 de gazde, dintre care una plafonată la
-  2.048 de tokeni de ieșire. Preflight-ul citește `/api/v1/models/{modèle}/endpoints`,
-  exclude gazdele sub 8.000 de tokeni de ieșire sau cu stare degradată și
-  le fixează pe celelalte cu `allow_fallbacks: false`.
-- **Raționamentul este facturat la tariful de ieșire** — 107 tokeni față de 2 la
-  un răspuns „OK” din partea `z-ai/glm-5.2`. Acesta este dezactivat în mod implicit; modelele
-  care îl impun primesc cel mai scăzut nivel de efort pe care îl acceptă, valoarea implicită din
-  catalog putând satura ieșirea înainte de finalizarea traducerii.
+- **Același model este oferit de zeci de furnizori de găzduire cu plafoane
+  diferite** — pentru `z-ai/glm-5.3-flash`, 23 de furnizori, dintre care unul cu o limită de
+  2 048 tokens de ieșire. Verificarea preliminară citește `/api/v1/models/{modèle}/endpoints`,
+  exclude furnizorii cu mai puțin de 8 000 tokens de ieșire sau cu stare degradată și
+  îi fixează pe ceilalți prin `allow_fallbacks: false`.
+- **Raționamentul este facturat la tariful de ieșire** — 107 tokens față de 2 pentru
+  un răspuns „OK” al `z-ai/glm-5.2`. Este dezactivat implicit; modelele
+  care îl impun primesc cel mai mic efort pe care îl acceptă, valoarea implicită din
+  catalog putând epuiza ieșirea înainte de terminarea traducerii.
   `--reasoning_effort` rămâne prioritar.
 
 ```
@@ -522,14 +590,14 @@ două particularități ale rutării:
   sortie plafonnée à 32768, raisonnement coupé
 ```
 
-- Fereastra de context provine din catalog. Un model sub 16.400 de tokeni este
-  refuzat înainte de orice apel: 8.400 pentru prompt și segment, cel puțin 8.000
+- Fereastra de context provine din catalog. Un model cu mai puțin de 16 400 tokens este
+  respins înainte de orice apel: 8 400 pentru prompt și segment, minimum 8 000
   pentru ieșire.
-- Un slug absent din catalog, un catalog inaccesibil sau absența unei
-  gazde care să respecte limita maximă opresc comanda.
-- `finish_reason=length` cu o ieșire goală reprezintă un buget consumat de
-  raționament, nu o trunchiere: mesajul face această distincție.
-- `--eco` nu are niciun efect.
+- Un slug absent din catalog, un catalog inaccesibil sau absența
+  unui furnizor de găzduire care respectă plafonul opresc comanda.
+- `finish_reason=length` cu o ieșire goală înseamnă un buget consumat de
+  raționament, nu o trunchiere: mesajul face distincția.
+- `--eco` nu are efect.
 - Variabile: `OPENROUTER_API_KEY` (<https://openrouter.ai/keys>),
   `OPENROUTER_BASE_URL` (implicit `https://openrouter.ai/api/v1`, `https://`
   obligatoriu), `OPENROUTER_TIMEOUT` (implicit 900), `OPENROUTER_PREFLIGHT_TIMEOUT`
@@ -537,12 +605,12 @@ două particularități ale rutării:
 
 ### Notă de traducere
 
-`--add_translation_note` adaugă o notă, la `bottom` (implicit), `top` (după
-front matter) sau `both` (`--note_position`), în format `legacy` (paragraf
-aldin, implicit) sau `marker` (`--note_format`). Formatul `marker` este o
+`--add_translation_note` adaugă o notă, în `bottom` (implicit), `top` (după
+front matter) sau `both` (`--note_position`), în formatul `legacy` (paragraf cu
+aldine, implicit) sau `marker` (`--note_format`). Formatul `marker` este o
 definiție de referință Markdown invizibilă,
 `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`,
-urmată de un citat aldin: lizibil pe GitHub, utilizabil la build de către un
+urmată de un citat cu aldine: lizibil pe GitHub, utilizabil la build de un
 plugin remark.
 
 ```bash
@@ -551,19 +619,19 @@ aipmt --file article.mdx --target_lang en --add_translation_note --note_format m
 
 ## Măsurători detaliate
 
-Toate măsurătorile sunt traduceri executate efectiv cu `aipmt`, către
+Toate măsurătorile sunt traduceri executate efectiv cu `aipmt`, în
 paisprezece limbi: en, es, de, it, pt, nl, pl, sv, ro, ja, ko, zh, ar, hi.
-**Scrise** contorizează fișierele pe care mecanismele de protecție le-au lăsat să treacă; **Fără
-abateri** cele în care `scripts/compare_structure.py` nu detectează nimic — același număr de
+**Scrise** numără fișierele pe care verificările de protecție le-au lăsat să treacă; **Fără
+abateri**, pe cele în care `scripts/compare_structure.py` nu semnalează nimic — același număr de
 secțiuni, subtitluri, linkuri, URL-uri distincte, blocuri de cod,
-coduri inline, rânduri de tabel, blocuri de citat și cuvinte aldine.
+fragmente de cod inline, rânduri de tabel, blocuri de citat și cuvinte cu aldine.
 
 „Fără abateri” înseamnă „nimic detectat”, nu „identic”: comparatorul
-numără elemente fără a citi conținutul lor. Acesta nu semnalează niciun titlu de
-nivel 4 șters, nici textul unui cod inline înlocuit, niciun steag
-inversat, niciun link intern redat cu o paranteză în plus,
+numără elementele fără să le citească conținutul. Nu semnalează nici eliminarea unui titlu de
+nivel 4, nici înlocuirea textului unui fragment de cod inline, nici schimbarea unui
+steag, nici un link intern redat cu o paranteză în plus,
 `[texte]((#ancre))`, care nu mai duce nicăieri — și nu evaluează
-calitatea limbii.
+limba.
 
 ### Articol dens de monitorizare, modul `--news`
 
@@ -571,120 +639,143 @@ O ediție a [monitorizării IA de pe jls42.org](https://jls42.org/fr/news):
 589 de rânduri, 140 de linkuri, 21 de secțiuni, 3 citate în engleză protejate. Campanie
 din 4 și 5 septembrie 2026.
 
-| Model                                           | Acces              | Scrise  | Fără abateri | Mediană/limbă  |
+| Model                                          | Acces              | Scrise | Fără abateri   | Mediană/limbă |
 | ----------------------------------------------- | ------------------ | ------- | ------------ | -------------- |
 | `gemini-3.7-flash`                              | API Google         | 14/14   | ✅ **14/14** | 1 min 18 s     |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | abonament Google   | 14/14   | ✅ **14/14** | 3 min 59 s     |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | abonament Google   | 14/14   | ✅ **14/14** | 3 min 14 s     |
-| `gpt-5.6-sol` (`--use_codex`)                   | abonament ChatGPT  | 14/14   | ✅ **14/14** | 11 min 28 s    |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | abonament Google  | 14/14   | ✅ **14/14** | 3 min 59 s     |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | abonament Google  | 14/14   | ✅ **14/14** | 3 min 14 s     |
+| `claude-sonnet-5-5`                             | API Anthropic      | 14/14   | ✅ **14/14** | 3 min 37 s     |
+| `gpt-5.6-sol` (`--use_codex`)                   | abonament ChatGPT | 14/14   | ✅ **14/14** | 11 min 28 s    |
 | `z-ai/glm-5.2`                                  | OpenRouter         | 14/14   | ✅ **14/14** | 5 min 37 s     |
 | `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14   | ✅ **14/14** | 26 min 23 s    |
-| `sonnet` (`--use_claude_code`)                  | abonament Claude   | 14/14   | ⚠️ 13/14     | 6 min 49 s     |
+| `sonnet` (`--use_claude_code`)                  | abonament Claude  | 14/14   | ⚠️ 13/14     | 6 min 49 s     |
 | `claude-sonnet-5`                               | API Anthropic      | 14/14   | ⚠️ 11/14     | 6 min 31 s     |
-| `haiku` (`--use_claude_code`)                   | abonament Claude   | 14/14   | ⚠️ 11/14     | 15 min 54 s    |
+| `haiku` (`--use_claude_code`)                   | abonament Claude  | 14/14   | ⚠️ 11/14     | 15 min 54 s    |
+| `claude-haiku-5-5`                              | API Anthropic      | 14/14   | ⚠️ 11/14     | 2 min 54 s     |
+| `claude-haiku-4-5`                              | API Anthropic      | 14/14   | ⚠️ 7/14      | 6 min 00 s     |
 | `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14   | ❌ 11/14     | 9 min 27 s     |
 | `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14   | ❌ 8/14      | 10 min 09 s    |
 | `ollama/gpt-oss-20b-32k`                        | local              | 10/14   | ❌ 7/14      | 12 min 39 s    |
 | `mistral-large-latest`                          | API Mistral        | 11/14   | ❌ 5/14      | 5 min 32 s     |
 | `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14    | ❌ 3/14      | 37 min 27 s    |
-| `grok-4.6` (`--use_grok_cli`)                   | abonament Grok     | 1/14    | ❌ 1/14      | 23 min 11 s    |
-| `opus` (`--use_claude_code`)                    | abonament Claude   | 0/14    | ❌ 0/14      | —              |
+| `grok-4.6` (`--use_grok_cli`)                   | abonament Grok    | 1/14    | ❌ 1/14      | 23 min 11 s    |
+| `opus` (`--use_claude_code`)                    | abonament Claude  | 0/14    | ❌ 0/14      | —              |
 
-Grok a fost remăsurat pe 9 septembrie pe o altă ediție a aceleiași monitorizări
-(356 de rânduri): 9 limbi scrise din 14, 8 fără abateri. Aceasta este cifra care
-apare în tabelul principal. Trei campanii întrerupte nu sunt
-notate: `qwen3.5-27b` (9 limbi) și `kimi-k2.6` (4) din lipsă de credit,
-`z-ai/glm-5.3-flash` ale cărui două eșecuri proveneau dintr-o setare de raționament
-pe care furnizorul o corectează de atunci. Rândurile OpenRouter au fost măsurate cu
-setările implicite ale ruterului, înainte de `--use_openrouter`; `z-ai/glm-5.2`,
-remăsurat cu furnizorul livrat, oferă același rezultat de 14/14. Cifrele au fost
+Grok a fost măsurat din nou pe 9 septembrie pe o altă ediție a aceleiași monitorizări
+(356 de rânduri): 9 limbi scrise din 14, 8 fără abateri. Această cifră
+apare în tabelul de la început. Trei campanii întrerupte nu sunt
+incluse: `qwen3.5-27b` (9 limbi) și `kimi-k2.6` (4) din lipsă de credit,
+`z-ai/glm-5.3-flash`, ale cărui două eșecuri proveneau dintr-o setare de raționament
+pe care providerul o corectează de atunci. Rândurile OpenRouter au fost măsurate cu
+setările implicite ale routerului, înainte de `--use_openrouter`; `z-ai/glm-5.2`,
+măsurat din nou cu providerul livrat, obține același 14/14. Cifrele au fost
 recalculate pe 10 septembrie cu comparatorul actual: `qwen3.8-flash` și
 `qwen3.7-flash` câștigă fiecare câte o limbă față de prima
-publicare, celelalte rămânând neschimbate.
+publicare, celelalte rămân neschimbate.
 
 Rândurile `--use_antigravity` au fost măsurate pe 26 septembrie pe același
-articol, patru traduceri în paralel: `gemini-3.7-flash-medium` dimineața,
-`gemini-3.8-flash-medium` după-amiaza. În engleză, fiecare a eliminat el însuși
-cele trei rânduri de traducere în franceză de sub citate, fără a inventa vreun
+articol, cu patru traduceri în paralel: `gemini-3.7-flash-medium` dimineața,
+`gemini-3.8-flash-medium` după-amiaza. În engleză, fiecare a eliminat singur
+cele trei rânduri de traducere în franceză de sub citate, fără să inventeze vreun
 steag, iar citatele în engleză sunt intacte: curățarea de rezervă nu a
-avut nimic de făcut. În `--eco` (`gemini-3.7-flash-low`), doar pe patru limbi
-(en, ja, ar, hi): 4 scrise din 4, toate fără abateri, mediană de 1 min 52 s.
-Contraprobă în aceeași zi pe o ediție mai recentă a monitorizării,
+avut nimic de făcut. În `--eco` (`gemini-3.7-flash-low`), pentru doar patru limbi
+(en, ja, ar, hi): 4 scrise din 4, toate fără abateri, cu o mediană de
+1 min 52 s. Verificare suplimentară în aceeași zi pe o ediție mai recentă a monitorizării,
 cea din 25 septembrie (438 de rânduri, 2 citate în engleză), tradusă în afara
-blogului de `gemini-3.7-flash-medium`: 14 scrise din 14, toate fără abateri, 87 până la
+blogului de `gemini-3.7-flash-medium`: 14 scrise din 14, toate fără abateri, între 87 și
 128 s per limbă.
 
 Rândurile `--use_claude_code` au fost măsurate pe 26 septembrie pe același
-articol, patru traduceri în paralel, cu efortul `low`. Cu `sonnet`,
-citatele în engleză sunt intacte în toate cele paisprezece limbi și, în engleză,
-modelul a eliminat el însuși rândurile de traducere în franceză, fără a inventa vreun
-steag. `opus` nu a scris nicio limbă: în fiecare, mecanismele sale de siguranță au
+articol, cu patru traduceri în paralel, la efortul `low`. Cu `sonnet`,
+citatele în engleză sunt intacte în toate cele paisprezece limbi, iar în engleză
+modelul a eliminat singur rândurile de traducere în franceză, fără să inventeze vreun
+steag. `opus` nu a scris nicio limbă: în fiecare, mecanismele sale de protecție au
 oprit răspunsul la ultimul segment, din cauza unei știri scurte despre 279 de molecule
-generate pentru un situs de legare. Trimisă separat, această știre este refuzată sub
-incidența categoriei „bio”; `sonnet` a tradus-o peste tot. `haiku` scrie
+generate pentru un situs de legare. Trimisă separat, această știre este respinsă
+în categoria „bio”; `sonnet` a tradus-o în toate limbile. `haiku` scrie
 toate cele paisprezece limbi; în trei (en, pl, ro), un titlu de secțiune trece de la
-nivelul 2 la nivelul 1. Raționează fără să poată fi oprit — 61% din
-tokenii săi de ieșire —, de unde un timp mai mult decât dublu față de `sonnet`.
+nivelul 2 la nivelul 1. Raționează fără să poată fi împiedicat — 61 % din
+tokenii săi de ieșire —, de unde timpul de peste două ori mai mare decât al `sonnet`.
 
-### README-ul acestui proiect, Markdown standard
+Rândurile `claude-sonnet-5-5`, `claude-haiku-5-5` și `claude-haiku-4-5` au
+fost măsurate pe 18 octombrie prin API-ul Anthropic, pe același articol, cu patru
+traduceri în paralel per model. Sonnet 5.5 refuză dezactivarea
+reflecției: aipmt îi trimite cea mai mică setare pe care o acceptă, iar
+răspunsurile sale nu conțin deloc reflecție. Scrie toate cele paisprezece limbi fără abateri și fără
+să reia vreun segment; în engleză, a eliminat singur rândurile de
+traducere în franceză, fără să inventeze vreun steag, iar citatele în engleză sunt
+intacte peste tot. Haiku 5.5 este măsurat cu reflecția sa adaptivă: cu reflecția
+dezactivată, lăsa paragrafe întregi în franceză, pe care verificarea de protecție le respinge —
+3 limbi scrise din 14. Cele două modele Haiku se împotmolesc la aceeași știre: Haiku 5.5
+schimbă nivelul titlului sau îl dublează în japoneză, coreeană și
+chineză, Haiku 4.5 îl trece la nivelul 1 în șapte limbi și îl lasă în
+franceză în traducerea japoneză. Haiku 4.5 costă 3,67 $ pentru cele două documente în
+toate cele paisprezece limbi, Haiku 5.5 0,57 $, Sonnet 5.5 9,21 $.
+### README al acestui proiect, Markdown standard
 
-Revizie fixată la 9 septembrie 2026: 785 de linii, 285 de fragmente de cod inline, 40
-de închideri de blocuri, 89 de linii de tabel. Patru traduceri în paralel.
+Revizie fixată la 9 septembrie 2026: 785 de linii, 285 de fragmente de cod inline, 40 de
+delimitări de închidere a blocurilor, 89 de linii de tabel. Patru traduceri în paralel.
 
-| Model                                           | Scrise  | Fără abateri | Mediană/limbă  | Ce diferă                                                                |
-| ----------------------------------------------- | ------- | ------------ | -------------- | ------------------------------------------------------------------------ |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14     | 1 min 43 s     | nimic                                                                    |
-| `opus` (`--use_claude_code`)                    | 14/14   | ✅ 14/14     | 1 min 48 s     | nimic                                                                    |
-| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14     | 4 min 02 s     | nimic pentru comparator; linkuri interne duplicate (en)                 |
-| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14     | 36 s           | un cuvânt îngroșat (ja)                                                  |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14     | 1 min 22 s     | un cuvânt îngroșat (ko)                                                  |
-| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14     | 2 min 20 s     | o linie de tabel lipită de precedenta (ar)                               |
-| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14     | 2 min 56 s     | un link (sv), un cuvânt îngroșat (zh)                                    |
-| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14     | 6 min 46 s     | un cuvânt îngroșat (ar, ja)                                              |
-| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14     | 2 min 34 s     | un cuvânt îngroșat (hi, ja, ko)                                          |
-| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14     | 2 min 17 s     | 40 de fragmente de cod inline adăugate în arabă; caractere îngroșate (hi, ja, ko) |
-| `mistral-large-latest`                          | 14/14   | ❌ 1/14      | 2 min 44 s     | o secțiune pierdută (ar, hi, ko); blocuri de cod adăugate (ja, ko, ro, zh) |
+| Model                                           | Scrise  | Fără abateri | Mediană/limbă | Ce diferă                                                                |
+| ----------------------------------------------- | ------- | ---------- | -------------- | ------------------------------------------------------------------------ |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14   | 1 min 43 s     | nimic                                                                    |
+| `opus` (`--use_claude_code`)                    | 14/14   | ✅ 14/14   | 1 min 48 s     | nimic                                                                    |
+| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14   | 4 min 02 s     | nimic pentru comparator; linkuri interne dublate (en)                     |
+| `claude-sonnet-5-5`                             | 14/14   | ✅ 14/14   | 1 min 18 s     | nimic                                                                    |
+| `claude-haiku-4-5`                              | 14/14   | ✅ 14/14   | 2 min 06 s     | nimic                                                                    |
+| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36 s           | un cuvânt cu caractere aldine (ja)                                        |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1 min 22 s     | un cuvânt cu caractere aldine (ko)                                        |
+| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14   | 2 min 20 s     | o linie de tabel lipită de cea precedentă (ar)                            |
+| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | 2 min 56 s     | un link (sv), un cuvânt cu caractere aldine (zh)                          |
+| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6 min 46 s     | un cuvânt cu caractere aldine (ar, ja)                                    |
+| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | 2 min 34 s     | un cuvânt cu caractere aldine (hi, ja, ko)                                |
+| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14   | 2 min 17 s     | 40 de fragmente de cod inline adăugate în arabă; aldine (hi, ja, ko)      |
+| `claude-haiku-5-5`                              | 12/14   | ❌ 12/14   | 1 min 14 s     | 2 limbi refuzate (ar, hi): fragmente de cod inline pierdute la returnare  |
+| `mistral-large-latest`                          | 14/14   | ❌ 1/14    | 2 min 44 s     | o secțiune pierdută (ar, hi, ko); blocuri de cod adăugate (ja, ko, ro, zh) |
 
-Două campanii întrerupte nu sunt notate: Grok, sesiune CLI expirată
+Două campanii întrerupte nu sunt evaluate: Grok, sesiune CLI expirată
 după douăsprezece limbi (unsprezece fără abateri), și `qwen3.8-flash`, HTTP 429 de la
 furnizorul său de găzduire după două. `opencode/mimo-v2.5-free` și `ollama/gpt-oss-20b-32k`
-nu au fost remăsurate pe această revizie; pe cea din 4 și 5 septembrie,
-mai scurtă cu 277 de linii, fiecare scria 9 traduceri din 14, dintre care 7
-și 1 fără abateri.
+nu au fost măsurate din nou pe această revizie; pe cea din 4 și 5 septembrie,
+mai scurtă cu 277 de linii, fiecare scria 9 traduceri din 14, dintre care 7,
+respectiv 1 fără abateri.
 
-Liniile `--use_antigravity` și `--use_claude_code` nu au fost măsurate pe
-revizia fixată, ci pe 26 septembrie pe cea publicată cu 1.14.0: 600
-de linii, 257 de fragmente de cod inline, 30 de închideri de blocuri, 85 de linii de tabel. Mai
-scurtă cu 185 de linii, nu se compară termen cu termen cu celelalte linii;
-aceste linii se compară însă între ele. În privința linkurilor interne, pe care
+Rândurile `--use_antigravity` și `--use_claude_code` nu au fost măsurate pe
+revizia fixată, ci pe 26 septembrie, pe cea publicată cu 1.14.0 — iar
+rândurile `claude-sonnet-5-5`, `claude-haiku-5-5` și `claude-haiku-4-5` pe 18
+octombrie, pe aceeași: 600 de linii, 257 de fragmente de cod inline, 30 de delimitări de închidere a blocurilor, 85 de
+linii de tabel. Fiind
+mai scurtă cu 185 de linii, aceasta nu se poate compara punct cu punct cu celelalte rânduri;
+aceste rânduri însă se pot compara între ele. În privința linkurilor interne, pe care
 comparatorul nu le verifică, `gemini-3.8-flash-medium` le-a păstrat intacte în
 toate cele paisprezece limbi, `gemini-3.7-flash-medium` le-a stricat în italiană;
-`sonnet` și `opus` le-au păstrat intacte peste tot, `haiku` le-a duplicat în
-engleză.
+`sonnet` și `opus` le-au păstrat intacte peste tot, `haiku` le-a dublat în
+engleză; `claude-sonnet-5-5` și `claude-haiku-4-5` le-au păstrat intacte în
+toate cele paisprezece limbi, `claude-haiku-5-5` în cele douăsprezece în care a scris.
 
-### Patru README-uri ale unor proiecte cunoscute
+### Patru README ale unor proiecte cunoscute
 
-FastAPI, Ollama, tldr-pages și Vue.js, preluate ca atare de pe GitHub —
-documente mai ușoare decât cele două anterioare. Campania a vizat modelele
-aflate în dificultate; Gemini servește aici drept punct de comparație.
+FastAPI, Ollama, tldr-pages și Vue.js, preluate ca atare de pe GitHub — 
+documente mai ușoare decât cele două precedente. Campania a vizat modelele
+cu dificultăți; Gemini servește aici drept reper de comparație.
 
-| Model                    | Acoperire                  | Scrise  | Fără abateri |
-| ------------------------ | -------------------------- | ------- | ------------ |
-| `gemini-3.7-flash`        | 4 proiecte × 14 limbi      | 56/56   | ✅ **55/56** |
-| `opencode/mimo-v2.5-free` | 4 proiecte × 14 limbi      | 55/56   | ❌ 47/56     |
+| Model                     | Arie de acoperire          | Scrise  | Fără abateri |
+| ------------------------- | -------------------------- | ------- | ------------ |
+| `gemini-3.7-flash`        | 4 proiecte × 14 limbi     | 56/56   | ✅ **55/56** |
+| `opencode/mimo-v2.5-free` | 4 proiecte × 14 limbi     | 55/56   | ❌ 47/56     |
 | `grok-4.6` (abonament)   | 4 proiecte × ar, hi, ja, zh | 16/16   | ❌ 14/16     |
 | `ollama/gpt-oss-20b-32k`  | 4 proiecte × ar, hi, ja, zh | 15/16   | ❌ 9/16      |
 
 ### Ce nu sunt aceste măsurători
 
-- **Nu sunt un clasament exhaustiv**: doar OpenRouter oferă peste patru sute
-  de modele, aproximativ cincisprezece au fost măsurate.
-- **Sunt durate orientative**: de la trei la șase traduceri în paralel în funcție de
-  campanie, iar debitul unui furnizor variază pe parcursul zilei.
-- **Sunt observații datate**: modelele se schimbă sub același nume, iar
-  documentele dumneavoastră nu sunt ale noastre.
+- **Nu sunt un clasament exhaustiv**: doar OpenRouter oferă peste patru sute de
+  modele, iar aproximativ cincisprezece au fost măsurate.
+- **Durate orientative**: între trei și șase traduceri în paralel, în funcție de
+  campanie, iar viteza unui furnizor variază pe parcursul zilei.
+- **Observații datate**: modelele se schimbă sub același nume, iar
+  documentele voastre nu sunt ale noastre.
 
-Pentru a reface măsurătoarea pe documentele dumneavoastră, pe o copie fixată a fișierului:
+Pentru a repeta măsurarea pe documentele voastre, pe o copie fixată a fișierului:
 
 ```bash
 aipmt --file reference.md --target_dir out/ --source_lang fr --target_lang ja --use_gemini --force
@@ -706,7 +797,7 @@ pip install -e .                  # le paquet lui-même, en mode éditable
 Ambele linii sunt necesare: fără `pip install -e .`, `python -m aipmt`
 răspunde `No module named aipmt`.
 
-Instrumente de calitate, opționale, dar recomandate:
+Instrumente de verificare a calității, opționale, dar recomandate:
 
 ```bash
 pipx install pre-commit               # hors venv — absent des requirements
@@ -715,53 +806,53 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # mypy, SAST, pip-audit, tests avant chaque push
 ```
 
-Cele 28 de traduceri ale depozitului (README și CHANGELOG, paisprezece limbi) se
-regenerează cu `./regen_translations.sh --force` — Codex și `gpt-5.6-sol` pe
-abonamentul ChatGPT în mod implicit, patru în paralel. `REGEN_PROVIDER` și
-`REGEN_MODEL` schimbă calea: `antigravity` rămâne pe un abonament, cel
-al Google, și trece fără derogare; un API facturat (`openai`, `gemini`,
+Cele 28 de traduceri din depozit (README și CHANGELOG, paisprezece limbi) se
+regenerează cu `./regen_translations.sh --force` — Codex și `gpt-6.1-sol` prin
+abonamentul ChatGPT în mod implicit, câte patru în paralel. `REGEN_PROVIDER` și
+`REGEN_MODEL` schimbă calea: `antigravity` folosește în continuare un abonament, cel
+de la Google, și este permis fără derogare; un API cu plată (`openai`, `gemini`,
 `grok`, `openrouter`) este refuzat fără `REGEN_ALLOW_PAID_API=1`;
-`REGEN_JOB_TIMEOUT` plafonează fiecare sarcină (600 s, 1.800 s pe Codex și
+`REGEN_JOB_TIMEOUT` limitează durata fiecărui job (600 s, 1 800 s pentru Codex și
 Antigravity). Detaliile instrumentelor se găsesc în `CLAUDE.md`.
 
-## Proiecte care utilizează acest script
+## Proiecte care folosesc acest script
 
 - **[jls42.org](https://jls42.org)** — blog personal publicat în 15 limbi.
-  [Monitorizarea sa zilnică privind IA](https://jls42.org/fr/news) este tradusă în fiecare zi
-  de acest instrument și servește ca document de referință pentru măsurătorile de mai sus.
+  [Monitorizarea sa zilnică a noutăților despre AI](https://jls42.org/fr/news) este tradusă în fiecare zi
+  de acest instrument și servește drept document de referință pentru măsurătorile de mai sus.
 
 ## Autor
 
 Julien LE SAUX
-E-mail: contact@jls42.org
+Email: contact@jls42.org
 
 ## Licență
 
 GNU GENERAL PUBLIC LICENSE Versiunea 3. Consultați [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
 
-## Declinarea responsabilității
+## Avertisment
 
-Acest program este distribuit **fără nicio garanție**, în termenii
-secțiunilor 15 și 16 din GPL v3: furnizat „ca atare”, fără garanție de vandabilitate
-sau de conformitate cu un anumit scop, iar autorul său nu poate fi
-tras la răspundere pentru daune rezultate din utilizarea sa. Textul
+Acest program este distribuit **fără nicio garanție**, în condițiile
+secțiunilor 15 și 16 din GPL v3: furnizat „ca atare”, fără garanție de
+vandabilitate sau de adecvare la un anumit scop, iar autorul său nu poate fi
+tras la răspundere pentru prejudiciile rezultate din utilizarea sa. Textul
 licenței prevalează asupra acestui rezumat.
 
-- **Recitiți înainte de a publica.** Protecțiile acoperă blocurile de cod,
-  codul inline, URL-urile, ancorele și citatele modului `--news` — nu și
-  titlurile, tabelele, front matter-ul sau sensul frazelor dumneavoastră.
-- **Documentele dumneavoastră pleacă la furnizorul ales**, în conformitate cu termenii
-  săi de utilizare și politica sa de date. Unele modele gratuite pot
-  reutiliza schimburile dumneavoastră pentru antrenare, iar termenii Antigravity
-  îi permit Google să le reutilizeze și să le trimită spre recitire umană,
-  inclusiv în cazul abonamentului plătit; un model local este singura cale prin care
-  nicio dată nu părăsește mașina dumneavoastră.
-- **Apelurile API vă sunt facturate.** Acest program nu plafonează
+- **Recitiți înainte de publicare.** Protecțiile acoperă blocurile de cod,
+  codul inline, URL-urile, ancorele și citatele din modul `--news` — nu și
+  titlurile, tabelele, front matter sau sensul frazelor voastre.
+- **Documentele voastre sunt trimise furnizorului ales**, conform condițiilor sale
+  de utilizare și politicii sale privind datele. Unele modele gratuite pot
+  reutiliza conversațiile voastre pentru antrenare, iar condițiile Antigravity
+  permit Google să le reutilizeze și să le supună examinării de către oameni,
+  inclusiv în cazul abonamentelor cu plată; un model local este singura cale prin care
+  nicio dată nu părăsește calculatorul vostru.
+- **Apelurile API vă sunt facturate.** Acest program nu limitează
   cheltuielile: un document lung, o reluare după un eșec sau un model care raționează
   mult costă mai mult.
 - **Măsurătorile publicate sunt observații datate**, nu garanții.
 
-Numele de produse și companii menționate aparțin deținătorilor lor
+Numele produselor și companiilor menționate aparțin deținătorilor
 respectivi. Acest proiect nu este afiliat cu niciunul dintre aceștia.
 
-**Articol tradus din fr în ro cu gemini-3.8-flash-medium.**
+**Articol tradus din fr în ro cu gpt-6.1-sol.**
