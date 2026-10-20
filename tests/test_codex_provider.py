@@ -73,6 +73,11 @@ _OK_EVENTS = _jsonl(
     {"type": "turn.completed", "usage": {"input_tokens": 15731}},
 )
 
+# Avis de relance tel que `codex exec --json` 0.162.1 l'écrit, relevé dans les
+# échecs de la campagne du 2026-10-19 : « Reconnecting... n/max » puis le
+# détail de l'erreur qui a motivé la relance.
+_RECONNECT_429 = "Reconnecting... 2/5 (exceeded retry limit, last status: 429 Too Many Requests)"
+
 
 class _FakePopen:
     """Double de `subprocess.Popen` : écrit le message final là où `-o` le
@@ -203,6 +208,37 @@ class TestCodexCall(unittest.TestCase):
             codex._call_codex(client, args, "PROMPT", "SEG")
         self.assertIn("not supported when using Codex", str(ctx.exception))
 
+    def test_reconnect_notice_then_completed_turn_returns_translation(self):
+        """`codex exec --json` écrit ses avis de relance en `{"type": "error"}`,
+        puis le tour peut aboutir. Retenir le premier `error` jetait la
+        traduction que Codex venait de terminer."""
+        stdout = _jsonl(
+            {"type": "thread.started", "thread_id": "01a0"},
+            {"type": "turn.started"},
+            {"type": "error", "message": _RECONNECT_429},
+            {"type": "item.completed", "item": {"type": "agent_message", "text": "ignored"}},
+            {"type": "turn.completed", "usage": {"input_tokens": 15731}},
+        )
+        fake = _FakePopen(final_message="Translated body", stdout=stdout)
+        with patch("subprocess.Popen", fake):
+            out = codex._call_codex(_client(), _args(), "PROMPT", "SEG")
+        self.assertEqual(out, "Translated body")
+
+    def test_error_without_end_of_turn_still_raises(self):
+        """Un flux coupé avant `turn.completed` ou `turn.failed` reste un échec,
+        même en code retour 0 et avec un fichier `-o` écrit."""
+        stdout = _jsonl(
+            {"type": "thread.started", "thread_id": "01a0"},
+            {"type": "error", "message": "stream disconnected before completion"},
+        )
+        fake = _FakePopen(stdout=stdout)
+        with (
+            patch("subprocess.Popen", fake),
+            self.assertRaises(RuntimeError) as ctx,
+        ):
+            codex._call_codex(_client(), _args(), "PROMPT", "SEG")
+        self.assertIn("stream disconnected", str(ctx.exception))
+
     def test_nonzero_returncode_raises_with_stderr_tail(self):
         fake = _FakePopen(returncode=1, stdout="")
         client = _client()
@@ -275,6 +311,44 @@ class TestCodexRateLimitBackoff(unittest.TestCase):
         ):
             codex._call_codex(client, args, "PROMPT", "SEG")
         self.assertEqual(len(calls), 1)
+
+    def test_retry_limit_429_text_is_retried_then_succeeds(self):
+        """Le 429 qui a épuisé les relances du CLI n'arrive que sous forme de
+        texte, dans le `turn.failed` qui suit ses avis de relance : il est
+        reconnu, et le segment repart après une attente au lieu de perdre le
+        fichier."""
+        fail = _jsonl(
+            {"type": "turn.started"},
+            {"type": "error", "message": _RECONNECT_429},
+            {
+                "type": "turn.failed",
+                "error": {"message": "exceeded retry limit, last status: 429 Too Many Requests"},
+            },
+        )
+        attempts = []
+
+        def popen_factory(argv, **kwargs):
+            attempts.append(argv)
+            first = len(attempts) == 1
+            fake = _FakePopen(stdout=fail if first else _OK_EVENTS, final_message="Done")
+            return fake(argv, **kwargs)
+
+        with (
+            patch("subprocess.Popen", popen_factory),
+            patch("time.sleep") as sleep,
+        ):
+            out = codex._call_codex(_client(), _args(), "PROMPT", "SEG")
+        self.assertEqual(out, "Done")
+        self.assertEqual(len(attempts), 2)
+        sleep.assert_called_once()
+
+    def test_usage_limit_is_not_a_rate_limit(self):
+        """Le quota épuisé du forfait ne se rend pas en une minute : seul le
+        texte d'un 429 ressayé jusqu'à la limite du CLI relance."""
+        usage = {"message": "You've hit your usage limit for GPT-6.1-Sol. Try again later."}
+        self.assertFalse(codex._codex_is_rate_limited(usage))
+        retry_limit = {"message": "exceeded retry limit, last status: 429 Too Many Requests"}
+        self.assertTrue(codex._codex_is_rate_limited(retry_limit))
 
 
 class TestCodexInit(unittest.TestCase):

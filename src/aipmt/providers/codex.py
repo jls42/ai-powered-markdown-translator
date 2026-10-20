@@ -48,6 +48,12 @@ CODEX_TIMEOUT = int(os.getenv("CODEX_TIMEOUT", "600"))
 # when using Codex with a ChatGPT account"), sans validation locale préalable.
 CODEX_MODEL_PREFIXES = ("gpt-5.6-",)
 
+# Seul endroit où un 429 survit aux relances du CLI : le texte de
+# `RetryLimitReachedError` (« exceeded retry limit, last status: 429 Too Many
+# Requests », codex-rs/protocol/src/error.rs en rust-v0.162.1), une chaîne et
+# non un payload qui porterait `status`.
+CODEX_RETRY_LIMIT_429 = "last status: 429"
+
 
 # Variables retirées de l'env du sous-processus : sans ça, une clé API présente
 # dans .env peut faire basculer Codex en facturation à l'usage — exactement ce
@@ -160,34 +166,67 @@ def _codex_unwrap_error(payload):
     return message if isinstance(message, dict) else {"message": str(message)}
 
 
-def _codex_error_from_events(stdout):
-    """Extrait le premier événement d'échec du JSONL. Renvoie `None` si le tour
-    s'est bien terminé. Nécessaire car `codex exec` peut sortir en 0 tout en
-    ayant émis un `turn.failed`."""
+def _codex_events(stdout):
+    """Les événements JSON du flux de `codex exec --json`, lignes illisibles
+    ignorées."""
     for line in stdout.splitlines():
         line = line.strip()
         if not line.startswith("{"):
             continue
         try:
-            event = json.loads(line)
+            yield json.loads(line)
         except ValueError:
             continue
-        if event.get("type") in ("error", "turn.failed"):
-            return _codex_unwrap_error(event.get("error", event))
-    return None
+
+
+def _codex_terminal_event(stdout):
+    """L'événement qui dit comment le tour a fini : `turn.completed` ou
+    `turn.failed`, sinon le dernier `error` d'un flux interrompu avant sa fin,
+    sinon `None`.
+
+    Seule la fin du tour fait foi. `codex exec --json` écrit aussi en
+    `{"type": "error"}` ses avis de relance — « Reconnecting... 2/5 », émis juste
+    avant d'attendre puis de relancer le flux, et publiés avec `will_retry: true`
+    (rust-v0.162.1 : `core/src/responses_retry.rs`,
+    `app-server/src/bespoke_event_handling.rs`). Le tour peut ensuite aboutir :
+    retenir le premier `error`, comme avant, jetait une traduction que Codex
+    terminait."""
+    last_error = None
+    for event in _codex_events(stdout):
+        kind = event.get("type")
+        if kind in ("turn.completed", "turn.failed"):
+            return event
+        if kind == "error":
+            last_error = event
+    return last_error
+
+
+def _codex_error_from_events(stdout):
+    """Extrait l'échec du tour du JSONL. Renvoie `None` si le tour s'est bien
+    terminé. Nécessaire car `codex exec` peut sortir en 0 tout en ayant émis un
+    `turn.failed`."""
+    event = _codex_terminal_event(stdout)
+    if event is None or event.get("type") == "turn.completed":
+        return None
+    return _codex_unwrap_error(event.get("error", event))
 
 
 def _codex_is_rate_limited(error):
     """Classe sur la structure du payload, pas sur des sous-chaînes : le mot
     « quota » apparaît aussi bien dans un 429 récupérable que dans un
     `insufficient_quota` définitif, et confondre les deux rend le back-off
-    soit inatteignable, soit infini."""
+    soit inatteignable, soit infini. Une exception, bornée : le 429 qui a
+    épuisé les relances du CLI n'existe que sous forme de texte
+    (`CODEX_RETRY_LIMIT_429`) — le quota épuisé du forfait est une autre
+    erreur (`UsageLimitReachedError`), qui reste définitive."""
     if not error:
         return False
     if error.get("status") == 429:
         return True
     kind = error.get("error", {}) if isinstance(error.get("error"), dict) else {}
-    return kind.get("type") == "rate_limit_exceeded"
+    if kind.get("type") == "rate_limit_exceeded":
+        return True
+    return CODEX_RETRY_LIMIT_429 in str(error.get("message", ""))
 
 
 def _codex_describe_error(error, returncode, stderr):
