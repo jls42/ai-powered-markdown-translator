@@ -58,7 +58,8 @@ reprendre la tâche jusqu'à ce que le script passe au vert.
 
 **Décision du propriétaire, non négociable, formulée le 2026-09-04 :** les 28
 traductions (README, CHANGELOG) se font sur **l'abonnement ChatGPT via Codex**,
-avec **`gpt-5.6-sol`** (le modèle qualité). L'abonnement a été pris exprès pour
+avec son modèle qualité : **`gpt-6.1-sol`** depuis le 2026-10-19, choix du
+propriétaire ce jour-là, après `gpt-5.6-sol` (cf. § Provider Codex). L'abonnement a été pris exprès pour
 ne pas payer de coûts API. Ce jour-là, `release.sh --auto` avait envoyé les 28
 fichiers sur l'API OpenAI, puis le CHANGELOG hindi sur celle de Gemini, parce
 que le regen auto-détectait `OPENAI_API_KEY` dans `.env` et ne faisait de Codex
@@ -125,12 +126,33 @@ propriétaire, non prise à sa place.
 
 Ce que ça implique, et ce qui l'encode :
 
-- `./regen_translations.sh --force` sans variable = Codex, `gpt-5.6-sol`, 4
+- `./regen_translations.sh --force` sans variable = Codex, `gpt-6.1-sol`, 4
   jobs. Plus aucune auto-détection de clé : une clé présente ne change rien.
-  **Compter une heure** : mesuré le 2026-09-04 à 4 jobs, un README prend 3 à
+  **Compter une heure** : mesuré le 2026-09-04 à 4 jobs avec `gpt-5.6-sol`, un README prend 3 à
   4 min et un CHANGELOG 10 à 14 min (effort de raisonnement `medium`, défaut
   de Sol hors `--eco`). Le plafond par job est à 1 800 s sur Codex : à 600 s,
   13 CHANGELOG sur 14 étaient tués sans une ligne d'erreur.
+- **Avec `gpt-6.1-sol`, une campagne complète ne tient plus dans une fenêtre
+  de 5 h** (plan Plus, quota lu par `codex app-server` avant et après chaque
+  lot, cf. § Provider Codex). Mesuré la nuit du 2026-10-19 au 20, sur la
+  1.17.0 (README de 41 000 caractères, CHANGELOG de 9 segments) : un README
+  coûte 2,4 points de la fenêtre et prend 155 à 181 s à 4 jobs ; un CHANGELOG
+  environ 7 points et 464 à 599 s. Les 28 fichiers demanderaient donc quelque
+  130 points : les 14 README et 3 CHANGELOG (hi, ja, it) sont passés par
+  Codex, les 11 autres par Antigravity, le repli de la règle. La semaine n'a
+  perdu que 8 points pour toute la nuit, sondes comprises. Lancer d'abord les
+  README, courts, puis autant de CHANGELOG que la fenêtre en laisse : une
+  fenêtre épuisée en cours de route jette les segments déjà payés.
+- **Contrôler chaque traduction par `scripts/compare_structure.py`, quel que
+  soit le provider.** Le même soir, Antigravity a rendu un CHANGELOG italien
+  qui recopiait en double toute l'entrée 1.15.0 et ouvrait un bloc de code
+  jamais fermé (474 lignes pour 411, 27 titres de version pour 26) : aucune
+  garde d'aipmt ne l'a vu, et le journal était vierge. La section 4 du gate
+  l'aurait refusé, puisqu'elle compte les clôtures et les éléments de liste,
+  mais elle ne compte ni le gras ni le code en ligne : les deux gras perdus du
+  CHANGELOG coréen, le même soir, lui échappaient. `compare_structure.py` voit
+  les deux (« fences 1≠0; code 1159≠1043 », « gras 312≠314 »). L'italien a
+  été relancé sur Codex, le coréen sur Antigravity.
 - `REGEN_PROVIDER=openai|gemini|grok|openrouter` est **refusé** (exit 1, message
   qui cite cette règle) tant que `REGEN_ALLOW_PAID_API=1` n'est pas posé en plus.
   OpenRouter exige en outre un `REGEN_MODEL` : c'est un routeur, il n'a pas de
@@ -153,8 +175,8 @@ Ce que ça implique, et ce qui l'encode :
   italien, un lien interne doublé que la section 4 du gate a attrapé (cf. §
   Liens internes). Avant d'ouvrir les 28 jobs, le script valide `REGEN_MODEL` et
   lance une fois le préflight du module (version, connexion, voie de
-  facturation) : un agy déconnecté ou réglé pour facturer n'en démarre aucun. Il ne remplace pas le défaut : Codex +
-  `gpt-5.6-sol` reste le premier chemin de ces traductions, Antigravity le
+  facturation) : un agy déconnecté ou réglé pour facturer n'en démarre aucun. Il ne remplace pas le défaut : Codex et
+  son modèle qualité restent le premier chemin de ces traductions, Antigravity le
   repli quand Codex n'est pas disponible (cf. règle en tête).
 - Un fichier qui échoue sur Codex (placeholder perdu, cas connu du hindi) se
   relance **seul, sur Codex** — sur Antigravity si Codex n'est plus
@@ -424,6 +446,19 @@ de version d'une mineure avant sa fusion, et la CI n'appelle aucun provider.
 Les utilisateurs du paquet reçoivent de toute façon les derniers SDK (bornes
 `>=` de `pyproject.toml`) : le lock ne les a jamais protégés.
 
+**`main` bouge pendant qu'une PR attend, et sa CI ne le voit pas.** Les checks
+d'une PR tournent à chaque push, jamais quand `main` avance : le 2026-10-19,
+#63 (`anthropic` 1.15.0, `openai` 3.31.0, `google-genai` 2.31.0) a été fusionnée
+seule après le dernier push de la PR de la 1.17.0, restée « CLEAN » sur un
+`main` périmé, et dont l'entrée du CHANGELOG citait les versions d'avant. La
+corriger a coûté la régénération des quatorze CHANGELOG. D'où deux règles :
+
+- **jamais de numéro de version de dépendance dans le CHANGELOG** — dire
+  quels paquets ont bougé, pas jusqu'où : le lock du tag fait foi ;
+- **avant de fusionner, `git log HEAD..origin/main`** : si `main` a bougé,
+  le fusionner dans la branche et pousser, pour que la CI teste l'état qui
+  sera réellement fusionné.
+
 **Une majeure de SDK se valide par un appel réel, provider par provider.** Deux
 précédents mesurés : `anthropic` ≥ 1.0 refuse côté client un appel non-streamé
 dont le `max_tokens` laisse présager plus de 10 minutes — invisible dans la
@@ -569,7 +604,7 @@ Quand l'utilisateur demande "release", "tag", "publie cette version" :
 ./release.sh --auto
 ```
 
-Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`, Codex + `gpt-5.6-sol`, Antigravity si Codex n'est pas disponible, cf. règle en tête) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
+Effectue : pré-checks → tests `unittest` → régénération des 28 traductions (`--force`, Codex + `gpt-6.1-sol`, Antigravity si Codex n'est pas disponible, cf. règle en tête) → validation 28/28 → commit ciblé (jamais `git add -A`, `.gitignore` couvre `__pycache__/`, `venv/`, `.env` ; les fichiers suivis modifiés mais absents de la liste nominative sont **signalés** en fin d'ajout, jamais ajoutés — compléter la liste ou les ajouter à la main) → push branche → PR via `gh` (si auth OK).
 
 **Pas de tag à ce stade.** Le tag est créé en phase 2 pour qu'il pointe sur le commit de merge dans `main` (pas sur la branche feature).
 
@@ -649,7 +684,7 @@ les deux depuis l'arbre source.
 #### Régénération seule (sans release)
 
 ```bash
-./regen_translations.sh --force   # réécrit les 28 traductions — Codex, gpt-5.6-sol, 0 € à l'usage
+./regen_translations.sh --force   # réécrit les 28 traductions — Codex, gpt-6.1-sol, 0 € à l'usage
 ./regen_translations.sh           # skip celles qui existent déjà
 ```
 
@@ -839,7 +874,7 @@ démarrage compris), `OPENCODE_BIN`, `OPENCODE_TIMEOUT` (défaut 600 s),
 
 ## Recommended Usage
 
-**Pour les traductions de CE dépôt, voir la règle en tête : Codex + `gpt-5.6-sol`,
+**Pour les traductions de CE dépôt, voir la règle en tête : Codex + `gpt-6.1-sol`,
 Antigravity en repli, jamais l'API.** Ce qui suit vaut pour un usage général de l'outil sur une clé API.
 
 For batch translations (README, CHANGELOG, blog articles), use `--eco` mode:
@@ -858,7 +893,7 @@ pas facturée à l'usage.
 
 ```bash
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
-./regen_translations.sh --force                         # Codex est le défaut : gpt-5.6-sol
+./regen_translations.sh --force                         # Codex est le défaut : gpt-6.1-sol
 REGEN_MODEL=gpt-5.6-luna ./regen_translations.sh --force   # éco, si le propriétaire le demande
 ```
 
@@ -894,20 +929,49 @@ Points à connaître avant de toucher à ce code :
   (`SIG_IGN`, lancement par `nohup`, choix de l'utilisateur), et qui restaure
   `SIG_DFL` quand le gestionnaire précédent était `None` (posé hors de Python,
   impossible à reposer).
-- **Exit code 0 ne veut pas dire succès** : inspecter la sortie JSONL
-  (`turn.failed`/`error`) et l'existence du fichier `-o`.
+- **Exit code 0 ne veut pas dire succès** : inspecter la fin du tour dans la
+  sortie JSONL — `turn.completed` ou `turn.failed` — et l'existence du
+  fichier `-o`.
+- **Un événement `error` n'est pas un échec.** `codex exec --json` y écrit
+  aussi ses avis de relance, « Reconnecting... 2/5 », émis juste avant
+  d'attendre puis de relancer le flux (`will_retry: true` ; vérifié dans le
+  source de rust-v0.162.1, `core/src/responses_retry.rs` et
+  `exec/src/event_processor_with_jsonl_output.rs`), et le tour peut ensuite
+  aboutir. Jusqu'à la 1.16.3, aipmt échouait sur le premier `error` et jetait
+  la traduction terminée : 3 des 14 échecs de la campagne du 2026-10-19
+  portaient ce message. `_codex_terminal_event` ne retient plus un `error` que
+  si le flux s'arrête sans fin de tour. Le 429 qui a épuisé les relances du
+  CLI n'existe que sous forme de texte (« exceeded retry limit, last status:
+  429 Too Many Requests », `RetryLimitReachedError`) : `CODEX_RETRY_LIMIT_429`
+  le fait relancer après 30 puis 60 s. Le quota épuisé du forfait
+  (`UsageLimitReachedError`, « You've hit your usage limit ») reste définitif.
+- **Un 429 n'est pas un quota épuisé : le lire avant de conclure.** Le soir du
+  2026-10-19, les 14 CHANGELOG à 4 jobs ont échoué (429 et segments tués à
+  600 s) alors que le compte n'avait consommé que 34 % de sa fenêtre de 5 h et
+  27 % de sa semaine. La lecture ne coûte rien : `codex app-server` en JSON-RPC
+  sur stdin, `initialize` (avec `clientInfo`), puis `account/rateLimits/read`,
+  dont `rateLimits.primary` et `secondary` portent `usedPercent`, et
+  `rateLimitReachedType` la limite atteinte s'il y en a une.
 - **Les clés API sont retirées de l'env du sous-processus.** C'est la garantie
   que le mode abonnement ne bascule pas silencieusement en facturation à
   l'usage — verrouillé par `test_env_strips_api_keys`.
-- **Allowlist de modèles côté serveur** : la famille `gpt-5.6-*` est commune au
-  CLI et à l'API Platform, mais un compte ChatGPT n'y a pas forcément droit à
-  tout. Un modèle refusé donne un 400 « model is not supported when using Codex
-  with a ChatGPT account », sans validation locale préalable. Mesuré sur ce
-  compte le 2026-09-09 : `sol`, `terra` et `luna` répondent tous les trois par
-  `codex exec -m`. Le défaut reste **`sol`** — décision du propriétaire, c'est
-  le modèle qualité, et le seul mesuré à quatorze langues sans perte sur un
-  document dense. `terra` s'obtient par `--model gpt-5.6-terra` si l'on veut,
-  par l'abonnement, le modèle que l'API sert par défaut.
+- **Allowlist de modèles côté serveur** : les familles `gpt-5.6-*` et `gpt-6*`
+  sont communes au CLI et à l'API Platform, mais un compte ChatGPT n'y a pas
+  forcément droit à tout. Un modèle refusé donne un 400 « model is not
+  supported when using Codex with a ChatGPT account », sans validation locale
+  préalable — `CODEX_MODEL_PREFIXES` ne fait qu'avertir. Le catalogue servi au
+  compte se lit sans quota dans `~/.codex/models_cache.json` (slug, `priority`,
+  `context_window`). Mesuré sur ce compte le 2026-09-09 : `gpt-5.6-sol`,
+  `terra` et `luna` répondent tous les trois par `codex exec -m`.
+- **Défaut : `gpt-6.1-sol` depuis le 2026-10-19**, décision du propriétaire.
+  C'est le premier modèle du catalogue (`priority` 1, 500 000 tokens de
+  contexte), quand `gpt-5.6-sol` n'y venait plus qu'en sixième. Mesuré ce
+  soir-là, le CHANGELOG entier (9 segments) en allemand, une traduction par
+  modèle lancées en même temps : `gpt-6.1-sol` en 527 s, segments de 46 à
+  70 s, note de traduction en 3,7 s ; `gpt-5.6-sol` en 906 s, segments de 36
+  à 211 s, note en 182 s ; aucun événement d'erreur, structure identique pour
+  les deux. `gpt-5.6-sol` reste disponible
+  par `--model` ; l'éco reste `gpt-5.6-luna`, non remesuré.
 - **Quota** : un segment consomme grosso modo un « message » de la fenêtre 5 h,
   mais OpenAI ne publie AUCUNE équivalence comptable — l'assimilation vient
   d'une observation locale, pas d'un contrat. Sur Plus, les fourchettes
@@ -1191,6 +1255,13 @@ Vertex/ADC (<https://antigravity.google/docs/sdk/overview/>). Tout ce qui suit a
   relançait trois fois une fenêtre épuisée (`\b429\b` captait son code) et
   jamais un 503 `retryable: true` (revue, sur des lignes `AGY_ERROR`
   synthétiques : le format réel d'un échec n'a pas été mesuré).
+  **Format réel vu le 2026-10-20, et non relancé** : code 0, `status: ERROR`,
+  « API error (attempt 2): UNAVAILABLE (code 503): The service is currently
+  unavailable. » au segment 4/10 d'un CHANGELOG — agy avait déjà réessayé une
+  fois. aipmt l'a pris pour définitif et le fichier a échoué après avoir
+  consommé les trois premiers segments ; relancé à la main, il est passé.
+  Même trou que le 429 de Codex corrigé en 1.17.0 : à traiter dans une PR
+  séparée.
 
 - **Filtre de contenu de Google** : agy peut rendre rc 0, `status: ERROR`,
   « Your previous response was blocked by content safety filters: … sensitive
@@ -1807,7 +1878,7 @@ anglaises sont recopiées telles quelles dans les quatorze langues.
 | Claude      | `claude-sonnet-5-5`                   | `claude-haiku-5-5`      |
 | Mistral     | `mistral-large-latest`                | `mistral-small-latest`  |
 | Gemini      | `gemini-3.7-flash`                    | `gemini-3.1-flash-lite` |
-| Codex       | `gpt-5.6-sol`                         | `gpt-5.6-luna`          |
+| Codex       | `gpt-6.1-sol`                         | `gpt-5.6-luna`          |
 | Grok API    | `grok-4.6`                            | `grok-4.3`              |
 | Grok CLI    | `grok-4.6`                            | `grok-4.5`              |
 | Antigravity | `gemini-3.8-flash-medium`             | `gemini-3.7-flash-low`  |
