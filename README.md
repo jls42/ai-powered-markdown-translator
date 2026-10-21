@@ -252,7 +252,7 @@ aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lan
 | Gemini      | `gemini-3.7-flash`                                                   | `gemini-3.1-flash-lite`   |
 | Codex       | `gpt-6.1-sol` (aussi `gpt-5.6-sol`, `terra` et `luna` par `--model`) | `gpt-5.6-luna`            |
 | Grok API    | `grok-4.6`                                                           | `grok-4.3`                |
-| Grok CLI    | `grok-4.6`                                                           | `grok-4.5`                |
+| Grok CLI    | `grok-4.7`                                                           | idem — `--eco` sans effet |
 | Antigravity | `gemini-3.8-flash-medium`                                            | `gemini-3.7-flash-low`    |
 | Claude Code | `sonnet`, effort `low`                                               | idem — `--eco` sans effet |
 | OpenCode    | `--model provider/modèle` obligatoire                                | idem — `--eco` sans effet |
@@ -299,7 +299,7 @@ X Premium+.
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash
 grok login                                      # ou : grok login --device-code
-aipmt --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
+aipmt --use_grok_cli --file README.md --target_dir . --target_lang pl
 ```
 
 - **Confinement plus faible que Codex.** Le sandbox OS de Grok ne s'applique

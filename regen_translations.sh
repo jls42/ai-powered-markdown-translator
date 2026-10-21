@@ -141,6 +141,28 @@ detect_provider() {
   esac
 }
 
+# Session Grok ouverte ? `grok models` ne consomme rien, mais l'appel qui
+# rafraîchit un jeton expiré répond lui-même « You are not authenticated. », et
+# le suivant passe (mesuré le 2026-10-21) : la question est reposée une fois,
+# comme dans le préflight d'aipmt, avant de conseiller `grok login`. La sortie
+# est capturée avant d'être lue : avec pipefail, un `grep -q` qui s'arrête au
+# premier « logged in » pourrait faire mourir grok de SIGPIPE, et le contrôle
+# échouer à tort.
+grok_logged_in() {
+  local sortie
+  sortie=$("$1" models 2>/dev/null || true)
+  grep -qi "logged in" <<<"$sortie"
+}
+
+check_grok_auth() {
+  grok_logged_in "$1" && return 0
+  echo "[regen] Grok CLI se dit déconnecté : nouvelle vérification dans 5 s" >&2
+  sleep 5
+  grok_logged_in "$1" && return 0
+  echo "[regen] ERROR: Grok CLI non authentifié — lancer 'grok login'" >&2
+  return 1
+}
+
 main() {
   cd "$SCRIPT_DIR"
 
@@ -167,7 +189,8 @@ main() {
 
   # REGEN_MODEL force un modèle précis, par-dessus le défaut du provider.
   # Utile pour monter en gamme sur un provider dont le mode --eco vise le
-  # volume (ex: REGEN_MODEL=grok-4.6 avec REGEN_PROVIDER=grok_cli).
+  # volume (ex: REGEN_MODEL=grok-4.6 avec REGEN_PROVIDER=grok, dont l'éco
+  # est grok-4.3 ; le CLI Grok n'a plus que grok-4.7).
   if [[ -n "${REGEN_MODEL:-}" ]]; then
     provider_flags="$provider_flags --model ${REGEN_MODEL}"
     echo "[regen] REGEN_MODEL=${REGEN_MODEL} → override du modèle par défaut" >&2
@@ -185,10 +208,7 @@ main() {
       echo "[regen] ERROR: binaire Grok introuvable ($grok_bin) — installer le CLI ou définir GROK_BIN" >&2
       exit 1
     fi
-    if ! "$grok_bin" models 2>/dev/null | grep -qi "logged in"; then
-      echo "[regen] ERROR: Grok CLI non authentifié — lancer 'grok login'" >&2
-      exit 1
-    fi
+    check_grok_auth "$grok_bin" || exit 1
     echo "[regen] ATTENTION : le quota Grok est partagé avec Chat/Imagine/Voice et n'est pas mesurable."
     max_jobs=2
   fi

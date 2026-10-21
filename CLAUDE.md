@@ -987,7 +987,7 @@ Points à connaître avant de toucher à ce code :
 
 ```bash
 aipmt --use_grok --file README.md --target_dir . --target_lang pt      # clé XAI_API_KEY
-aipmt --use_grok_cli --eco --file README.md --target_dir . --target_lang pl
+aipmt --use_grok_cli --file README.md --target_dir . --target_lang pl
 REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
 ```
 
@@ -995,8 +995,29 @@ REGEN_PROVIDER=grok_cli ./regen_translations.sh --force
   client et `_call_openai` sont réutilisés tels quels ; seul le `base_url`
   change. Une seule adaptation a été nécessaire : xAI émet `finish_reason:
 end_turn` là où OpenAI émet `stop`.
-- **Mode CLI** : le CLI n'expose que `grok-4.6` et `grok-4.5` sur abonnement —
-  `grok-4.3`, palier éco de l'API, n'y est pas disponible.
+- **Mode CLI : `grok-4.7` seul depuis le 2026-10-21.** Le CLI 1.0.52 refuse
+  `grok-4.6` et `grok-4.5`, ses défauts jusqu'à la 1.17.0 (« Couldn't set
+  model 'grok-4.6': Invalid params: "unknown model id" », code 1, au premier
+  segment), alors que l'API les sert encore — liste lue le même jour par
+  `GET /v1/models`, gratuit ; `grok-4.3`, palier éco de l'API, n'y a jamais
+  été. Défaut et éco : `grok-4.7`, `--eco` sans effet. Le 19, `grok-4.6`
+  traduisait encore. Le catalogue servi au compte se lit sans quota par
+  `grok models`, et son cache, `~/.grok/models_cache.json`, donne la fenêtre
+  (`context_window` 256 000) et l'effort par défaut (`high`). Jeu d'essai de la
+  1.17.0 rejoué en `grok-4.7` : guide → en et brève `--news` → de, structure
+  identique ; → en, le même écart attendu que tous les fournisseurs (la ligne
+  française d'une citation, retirée, emporte son code en ligne).
+- **« You are not authenticated. » n'est pas toujours une déconnexion.**
+  L'appel de `grok models` qui rafraîchit un jeton expiré répond lui-même par
+  ce message, et le suivant passe. Vu le 2026-10-19 (`~/.grok/auth.json`
+  réécrit à la seconde de l'échec), reproduit le 2026-10-21 : appel de
+  01:23:40 refusé, `auth.json` réécrit à 01:23:41, tous les suivants « logged
+  in ». `_grok_preflight` repose donc la question après
+  `GROK_AUTH_RECHECK_DELAY` (5 s) avant de conseiller `grok login` ; un
+  `grok models` en échec, lui, échoue tout de suite. Validé de bout en bout par
+  un faux `grok` qui rend ce message au premier appel puis passe la main au
+  vrai : avis, seconde question, traduction aboutie ; le code de la 1.17.0
+  conseillait `grok login` en 2 s.
 - **`exit 0` ne prouve rien** : non authentifié, refus ou dépassement de tours
   sortent tous en 0. Le contrat de sortie exige les quatre : code retour 0, pas
   de `{"type":"error"}` sur stdout, `stopReason == end_turn`, texte non vide.
@@ -1247,21 +1268,30 @@ Vertex/ADC (<https://antigravity.google/docs/sdk/overview/>). Tout ce qui suit a
   - sinon, aucune relance si le texte contient « exhausted » : chez Google,
     `RESOURCE_EXHAUSTED` porte le même 429 qu'une limite par minute, mais une
     fenêtre de 5 h épuisée ne se rendra pas en 90 s ;
-  - sinon, relance sur « rate limit », « rate_limit », « too many requests » ou
-    `429` comme nombre, cherchés dans le détail ET dans `AGY_ERROR`. « quota »
-    seul n'est pas un marqueur.
+  - sinon, relance sur « rate limit », « rate_limit », « too many requests »,
+    `429` comme nombre, ou 502, 503 et 504 comme nombres — les pannes
+    passagères qu'agy réessaie déjà lui-même (depuis la 1.17.1, cf. ci-dessous)
+    —, cherchés dans le détail ET dans `AGY_ERROR`. « quota » seul n'est pas un
+    marqueur, et 500 n'est pas relancé.
 
   3 tentatives, 30 puis 60 s d'attente. La première version, sur sous-chaînes,
   relançait trois fois une fenêtre épuisée (`\b429\b` captait son code) et
   jamais un 503 `retryable: true` (revue, sur des lignes `AGY_ERROR`
   synthétiques : le format réel d'un échec n'a pas été mesuré).
-  **Format réel vu le 2026-10-20, et non relancé** : code 0, `status: ERROR`,
-  « API error (attempt 2): UNAVAILABLE (code 503): The service is currently
+  **Format réel vu le 2026-10-20** : code 0, `status: ERROR`, « API error
+  (attempt 2): UNAVAILABLE (code 503): The service is currently
   unavailable. » au segment 4/10 d'un CHANGELOG — agy avait déjà réessayé une
-  fois. aipmt l'a pris pour définitif et le fichier a échoué après avoir
-  consommé les trois premiers segments ; relancé à la main, il est passé.
-  Même trou que le 429 de Codex corrigé en 1.17.0 : à traiter dans une PR
-  séparée.
+  fois. Rien n'y disait l'échec réessayable : aipmt l'a pris pour définitif et
+  le fichier a échoué après avoir consommé les trois premiers segments ;
+  relancé à la main, il est passé. **Relancé depuis la 1.17.1**
+  (`_ANTIGRAVITY_HTTP_TRANSIENT_REGEX`). Validé de bout en bout par un faux agy
+  qui rend ce message, dans le champ `error` du JSON, au premier appel de
+  traduction, puis passe la main au vrai, préflight compris : relance après
+  30 s, traduction aboutie, structure identique ; le code de la 1.17.0
+  abandonnait le fichier en 8 s.
+  L'avis de relance, commun aux CLI (`_retry_on_rate_limit`), cite désormais
+  l'erreur : il annonçait « rate limit » pour tout, 503 compris, de quoi
+  chercher la cause du côté du quota.
 
 - **Filtre de contenu de Google** : agy peut rendre rc 0, `status: ERROR`,
   « Your previous response was blocked by content safety filters: … sensitive
@@ -1880,7 +1910,7 @@ anglaises sont recopiées telles quelles dans les quatorze langues.
 | Gemini      | `gemini-3.7-flash`                    | `gemini-3.1-flash-lite` |
 | Codex       | `gpt-6.1-sol`                         | `gpt-5.6-luna`          |
 | Grok API    | `grok-4.6`                            | `grok-4.3`              |
-| Grok CLI    | `grok-4.6`                            | `grok-4.5`              |
+| Grok CLI    | `grok-4.7`                            | `grok-4.7` (sans effet) |
 | Antigravity | `gemini-3.8-flash-medium`             | `gemini-3.7-flash-low`  |
 | Claude Code | `sonnet` (effort `low`)               | `sonnet` (sans effet)   |
 | OpenCode    | `--model provider/modèle` obligatoire | idem                    |

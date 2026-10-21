@@ -25,6 +25,9 @@ MODEL_TOKEN_LIMITS = {
     # tarifaire à 272K tokens d'input : au-delà, 2x input / 1.5x output sur
     # la requête entière.
     "gpt-5.6": 1050000,
+    # Seul modèle du CLI Grok depuis le 2026-10-21 : `context_window` de son
+    # catalogue (`grok models`, mis en cache dans ~/.grok/models_cache.json).
+    "grok-4.7": 256000,
     "grok-4.6": 500000,
     "grok-4.5": 500000,
     "grok-4.3": 1000000,

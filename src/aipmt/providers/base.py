@@ -4,7 +4,7 @@ Les quatre CLI agentiques (Codex, Grok et Antigravity sur abonnement, OpenCode
 en routeur) partagent le même pilote de sous-processus — groupe de processus propre,
 `SIGTERM` puis `SIGKILL` au timeout ou quand ce processus reçoit lui-même
 `SIGTERM`, stdin toujours fermé — le même filtrage des variables d'environnement
-secrètes, la même relance sur limitation de débit et la même hiérarchie
+secrètes, la même relance des échecs passagers et la même hiérarchie
 d'erreurs. Les noms `_codex_*` sont historiques : ces fonctions sont nées avec
 le provider Codex, puis ont été partagées ; elles gardent leur nom ici pour
 que ce découpage reste un déplacement pur.
@@ -268,8 +268,8 @@ class _CliCallError(RuntimeError):
     """Échec d'une invocation d'un CLI agentique, porteur du caractère
     récupérable ou non. Codex, Grok et OpenCode n'implémentent aucun retry
     interne exploitable ; agy réessaie lui-même les erreurs transitoires, puis
-    dit dans AGY_ERROR si l'échec restant est réessayable. Le back-off reste à
-    notre charge dans tous les cas."""
+    dit dans AGY_ERROR, quand il en écrit une, si l'échec restant est
+    réessayable. Le back-off reste à notre charge dans tous les cas."""
 
     def __init__(self, message, rate_limited=False):
         super().__init__(message)
@@ -277,14 +277,18 @@ class _CliCallError(RuntimeError):
 
 
 def _retry_on_rate_limit(label, client, attempt_once):
-    """Boucle de back-off commune aux quatre CLI : ne retente que sur rate
-    limit, avec un délai croissant. Sur un plan ChatGPT, chaque tour consomme
-    un « message local » de la fenêtre de 5 heures ; le quota Grok est partagé
-    avec Chat/Imagine/Voice sans être lisible ; les modèles gratuits de la
+    """Boucle de back-off commune aux CLI : ne retente que l'échec que son
+    provider déclare passager (`rate_limited`) — une limite de débit, et selon
+    le provider une panne 502, 503 ou 504 (Antigravity), une surcharge ou un
+    jeton en cours de rafraîchissement (Claude Code) —, avec un délai
+    croissant. Sur un plan ChatGPT, chaque tour consomme un « message local »
+    de la fenêtre de 5 heures ; le quota Grok est partagé avec
+    Chat/Imagine/Voice sans être lisible ; les modèles gratuits de la
     passerelle Zen n'annoncent aucune limite ; le quota Antigravity se lit,
     mais une fenêtre épuisée ne se rend pas en quelques minutes — d'où, pour
-    lui, la relance réservée aux échecs qu'agy déclare réessayables. Dans tous
-    les cas, mieux vaut attendre que perdre le fichier en cours."""
+    lui, aucune relance quand l'erreur parle d'épuisement. Dans tous les cas,
+    mieux vaut attendre que perdre le fichier en cours. L'avis cite la cause :
+    annoncer « rate limit » pour un 503 enverrait chercher du côté du quota."""
     last_error = None
     for attempt in range(1, client.max_attempts + 1):
         try:
@@ -294,9 +298,10 @@ def _retry_on_rate_limit(label, client, attempt_once):
             if not e.rate_limited or attempt == client.max_attempts:
                 raise
             delay = client.backoff_seconds * attempt
+            cause = " ".join(str(e).split())[:300]
             print(
-                f"⚠ {label} rate limit (tentative {attempt}/{client.max_attempts}) — "
-                f"nouvelle tentative dans {delay:.0f}s",
+                f"⚠ {label} : échec passager (tentative {attempt}/{client.max_attempts}) — "
+                f"nouvelle tentative dans {delay:.0f}s. Cause : {cause}",
                 file=sys.stderr,
             )
             time.sleep(delay)

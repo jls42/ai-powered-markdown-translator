@@ -80,6 +80,12 @@ _TRADUCTION = "The cat is sleeping on the rug."
 # Réponse partielle portée par le JSON d'un échec : elle ne doit jamais sortir.
 _PARTIEL = "The cat is slee"
 
+# Détail réel d'un échec, relevé le 2026-10-20 : agy sorti en 0, status ERROR,
+# après avoir réessayé lui-même une fois.
+_ERREUR_503_MESUREE = (
+    "API error (attempt 2): UNAVAILABLE (code 503): The service is currently unavailable."
+)
+
 # Retire une clé de l'objet JSON simulé.
 _ABSENT = object()
 
@@ -1054,16 +1060,22 @@ class TestAntigravityRetries(_AgyTestCase):
                 "stdout": "",
                 "stderr": 'AGY_ERROR: {"short_error":"Too many requests per minute","status":"RESOURCE_EXHAUSTED","error_code":429,"code_kind":"http","retryable":true}\n',
             },
+            # Échec réel du 2026-10-20, rejoué : code 0, status ERROR, le 503
+            # dans le seul texte. Le fichier était perdu.
+            "503 mesuré, code 0 sans AGY_ERROR": {
+                "returncode": 0,
+                "stdout": _sortie(status="ERROR", error=_ERREUR_503_MESUREE),
+            },
         }
         for nom, echec in limites.items():
             with self.subTest(nom):
-                premier = _FakePopen(returncode=3, **echec)
+                premier = _FakePopen(**{"returncode": 3, **echec})
                 second = _FakePopen(stdout=_sortie(response="Second essai\n"))
                 texte = self._traduire(_Sequence(premier, second), appels=2)
                 self.assertEqual(texte, "Second essai")
                 self.faux_sommeil.assert_called_once_with(1.0)
                 self.assertIn(
-                    "Antigravity rate limit (tentative 1/3)", self.stderr_capture.getvalue()
+                    "Antigravity : échec passager (tentative 1/3)", self.stderr_capture.getvalue()
                 )
                 self.assertNotEqual(premier.photo.base, second.photo.base)
                 self.assertFalse(os.path.exists(premier.photo.base))
@@ -1099,6 +1111,18 @@ class TestAntigravityRetries(_AgyTestCase):
                     self._traduire(fake)
                 self.assertFalse(cm.exception.rate_limited)
                 self.faux_sommeil.assert_not_called()
+
+    def test_retry_notice_names_the_cause(self):
+        """Un 503 annoncé comme « rate limit » enverrait chercher du côté du
+        quota : l'avis de relance cite le détail rendu par agy."""
+        premier = _FakePopen(
+            returncode=0, stdout=_sortie(status="ERROR", error=_ERREUR_503_MESUREE)
+        )
+        second = _FakePopen(stdout=_sortie(response="Second essai\n"))
+        self._traduire(_Sequence(premier, second), appels=2)
+        avis = self.stderr_capture.getvalue()
+        self.assertIn("UNAVAILABLE (code 503)", avis)
+        self.assertNotIn("rate limit", avis)
 
     def test_gives_up_after_the_last_attempt(self):
         echecs = [
@@ -1192,6 +1216,28 @@ class TestAntigravityRateLimitDetection(unittest.TestCase):
             with self.subTest(texte=texte):
                 self.assertTrue(antigravity._antigravity_is_rate_limited(texte))
 
+    def test_transient_service_errors_are_recognised(self):
+        """502, 503 et 504, qu'agy réessaie déjà lui-même : l'échec qui reste
+        demande seulement d'attendre plus longtemps."""
+        for texte in (
+            _ERREUR_503_MESUREE,
+            "HTTP 502 Bad Gateway",
+            "API error (attempt 2): DEADLINE_EXCEEDED (code 504): Deadline expired.",
+        ):
+            with self.subTest(texte=texte):
+                self.assertTrue(antigravity._antigravity_is_rate_limited(texte))
+
+    def test_other_server_codes_and_50x_inside_identifiers_are_not(self):
+        for texte in (
+            "API error: INTERNAL (code 500): Internal error encountered.",
+            "request req_5031 failed",
+            "error code 1503",
+            "model gemini-503x missing",
+            "503TooBusy",
+        ):
+            with self.subTest(texte=texte):
+                self.assertFalse(antigravity._antigravity_is_rate_limited(texte))
+
     def test_quota_exhaustion_and_429_inside_identifiers_are_not(self):
         for texte in (
             "Quota exceeded for this model",
@@ -1245,6 +1291,7 @@ class TestAntigravityRateLimitDetection(unittest.TestCase):
             ("HTTP 429 Too Many Requests", {"status": "RESOURCE_EXHAUSTED"}),
             ("You have exhausted your quota on this model. (429)", None),
             ("échec", {"short_error": "quota exhausted", "error_code": 429}),
+            (_ERREUR_503_MESUREE, {"status": "RESOURCE_EXHAUSTED"}),
         )
         for texte, agy_error in cas:
             with self.subTest(texte=texte, agy_error=agy_error):
