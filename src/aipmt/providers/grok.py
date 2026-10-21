@@ -12,6 +12,7 @@ import shutil
 import subprocess  # nosec B404 — pilote le CLI Grok, cf. _grok_preflight
 import sys
 import tempfile
+import time
 from dataclasses import dataclass
 
 from openai import OpenAI
@@ -29,15 +30,14 @@ from .base import (
 DEFAULT_XAI_API_KEY = "votre-cle-api-xai-par-defaut"  # pragma: allowlist secret
 
 
-# Volontairement écrit en toutes lettres ici, dans DEFAULT_MODEL_GROK_CLI et
-# dans MODEL_TOKEN_LIMITS, plutôt que factorisé (SonarCloud python:S1192).
-# Les catalogues API et CLI de Grok sont indépendants — le CLI n'expose pas
-# grok-4.3, palier éco de l'API — et la coïncidence actuelle des valeurs
-# qualité est un hasard de calendrier. Un alias ferait suivre silencieusement
-# le défaut CLI à toute évolution du défaut API. Même raisonnement pour
+# Écrit en toutes lettres, jamais en alias de DEFAULT_MODEL_GROK_CLI : les
+# catalogues API et CLI de Grok sont indépendants — le CLI n'a jamais exposé
+# grok-4.3, palier éco de l'API —, et leurs valeurs qualité n'ont coïncidé que
+# par un hasard de calendrier. Depuis le 2026-10-21, le CLI n'accepte plus que
+# grok-4.7, quand l'API sert toujours grok-4.6. Même raisonnement pour
 # ECO_MODEL_OPENAI / ECO_MODEL_CODEX, et pour les clés de MODEL_TOKEN_LIMITS,
 # qui est un catalogue destiné à être lu, pas un jeu de références.
-DEFAULT_MODEL_GROK = "grok-4.6"  # NOSONAR python:S1192
+DEFAULT_MODEL_GROK = "grok-4.6"
 
 
 # xAI n'a aucun palier mini/flash/lite : l'« éco » est une génération
@@ -47,12 +47,14 @@ DEFAULT_MODEL_GROK = "grok-4.6"  # NOSONAR python:S1192
 ECO_MODEL_GROK = "grok-4.3"
 
 
-# Le CLI d'abonnement n'expose que grok-4.6 et grok-4.5 (`grok models`) :
-# grok-4.3, le palier économique de l'API, n'y est pas disponible.
-DEFAULT_MODEL_GROK_CLI = "grok-4.6"
+# Le CLI d'abonnement n'expose plus que grok-4.7 (`grok models`, grok 1.0.52,
+# le 2026-10-21) : grok-4.6 et grok-4.5, ses défauts précédents, y sont refusés
+# (« unknown model id ») alors que l'API les sert encore. Faute d'un second
+# modèle, l'éco est le même, et `--eco` est sans effet sur ce chemin.
+DEFAULT_MODEL_GROK_CLI = "grok-4.7"
 
 
-ECO_MODEL_GROK_CLI = "grok-4.5"
+ECO_MODEL_GROK_CLI = "grok-4.7"
 
 
 # --- Provider Grok (API xAI, facturé à l'usage) -----------------------------
@@ -318,15 +320,45 @@ def _resolve_grok_binary():
     return home if os.path.isfile(home) else None
 
 
+# Délai avant de reposer la question quand `grok models` se dit déconnecté.
+# Mesuré le 2026-10-19 : un premier appel a rendu « You are not
+# authenticated. » au moment même où le CLI réécrivait ~/.grok/auth.json
+# — le rafraîchissement de son jeton —, et les appels suivants sont passés.
+# aipmt conseillait de se reconnecter quand il suffisait de relancer.
+GROK_AUTH_RECHECK_DELAY = 5
+
+
 def _grok_preflight(binary):
     """Valide binaire et authentification sans consommer un seul token.
     `grok models` sort en 0 même déconnecté, en écrivant « You are not
-    authenticated. » sur stdout : le code retour ne suffit donc pas."""
+    authenticated. » sur stdout : le code retour ne suffit donc pas. Un jeton
+    en cours de rafraîchissement donne la même réponse : la question est
+    reposée une fois avant de conclure à une déconnexion."""
     if binary is None:
         raise ValueError(
             "Binaire Grok introuvable. L'installer "
             "(`curl -fsSL https://x.ai/cli/install.sh | bash`) ou pointer GROK_BIN dessus."
         )
+    if not _grok_says_unauthenticated(binary):
+        return
+    print(
+        "⚠ Grok CLI se dit déconnecté : nouvelle vérification dans "
+        f"{GROK_AUTH_RECHECK_DELAY}s, un jeton en cours de rafraîchissement "
+        "donnant la même réponse.",
+        file=sys.stderr,
+    )
+    time.sleep(GROK_AUTH_RECHECK_DELAY)
+    if _grok_says_unauthenticated(binary):
+        raise ValueError(
+            "Grok CLI n'est pas authentifié. Lancer `grok login` (ou "
+            "`grok login --device-code`) pour utiliser --use_grok_cli sur le "
+            "quota de l'abonnement."
+        )
+
+
+def _grok_says_unauthenticated(binary):
+    """Un appel à `grok models` : vrai s'il se dit déconnecté, exception s'il
+    échoue."""
     try:
         # Liste littérale ; `binary` vient de GROK_BIN/PATH, donc d'un
         # environnement qui a déjà l'exécution de code sur cette machine.
@@ -346,12 +378,7 @@ def _grok_preflight(binary):
             f"'{binary} models' a échoué (code {result.returncode}) : "
             f"{(result.stderr or '').strip()[:200]}"
         )
-    if "not authenticated" in (result.stdout or "").lower():
-        raise ValueError(
-            "Grok CLI n'est pas authentifié. Lancer `grok login` (ou "
-            "`grok login --device-code`) pour utiliser --use_grok_cli sur le "
-            "quota de l'abonnement."
-        )
+    return "not authenticated" in (result.stdout or "").lower()
 
 
 def _grok_sandbox_profile():

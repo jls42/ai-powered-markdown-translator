@@ -16,11 +16,13 @@ Lancement : python -m unittest discover tests/ -v
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import signal
-import subprocess  # nosec B404 — la suite simule les CLI, elle n'en lance aucun
+import subprocess  # nosec B404 — CLI simulés ; seul bash tourne, avec un faux grok
 import sys
+import tempfile
 import unittest
 from argparse import Namespace
 from unittest.mock import MagicMock, patch
@@ -267,19 +269,56 @@ class TestGrokCliCall(unittest.TestCase):
 
 class TestGrokCliInit(unittest.TestCase):
     def test_preflight_detects_unauthenticated_despite_exit_zero(self):
-        """`grok models` sort en 0 même déconnecté : le code retour ne suffit pas."""
+        """`grok models` sort en 0 même déconnecté : le code retour ne suffit
+        pas. La déconnexion n'est retenue qu'à la seconde réponse."""
         result = MagicMock(returncode=0, stdout="You are not authenticated.\n", stderr="")
         with (
-            patch("subprocess.run", return_value=result),
+            patch("subprocess.run", return_value=result) as run,
+            patch("time.sleep") as sleep,
+            patch("sys.stderr", new_callable=io.StringIO),
             self.assertRaises(ValueError) as ctx,
         ):
             grok._grok_preflight("/usr/bin/grok")
         self.assertIn("grok login", str(ctx.exception))
+        self.assertEqual(run.call_count, 2)
+        sleep.assert_called_once_with(grok.GROK_AUTH_RECHECK_DELAY)
+
+    def test_preflight_asks_again_before_concluding_to_a_disconnection(self):
+        """Mesuré le 2026-10-19 : « not authenticated » au moment où le CLI
+        rafraîchissait son jeton, et les appels suivants passés. Une seconde
+        réponse authentifiée suffit : pas de `grok login` à conseiller."""
+        deconnecte = MagicMock(returncode=0, stdout="You are not authenticated.\n", stderr="")
+        connecte = MagicMock(returncode=0, stdout="You are logged in with grok.com.", stderr="")
+        with (
+            patch("subprocess.run", side_effect=[deconnecte, connecte]) as run,
+            patch("time.sleep") as sleep,
+            patch("sys.stderr", new_callable=io.StringIO) as capture,
+        ):
+            grok._grok_preflight("/usr/bin/grok")
+        self.assertEqual(run.call_count, 2)
+        sleep.assert_called_once_with(grok.GROK_AUTH_RECHECK_DELAY)
+        self.assertIn("nouvelle vérification", capture.getvalue())
 
     def test_preflight_accepts_authenticated(self):
         result = MagicMock(returncode=0, stdout="You are logged in with grok.com.", stderr="")
-        with patch("subprocess.run", return_value=result):
+        with patch("subprocess.run", return_value=result) as run, patch("time.sleep") as sleep:
             grok._grok_preflight("/usr/bin/grok")
+        run.assert_called_once()
+        sleep.assert_not_called()
+
+    def test_preflight_failure_is_not_asked_again(self):
+        """Seul « not authenticated » est reposé : un `grok models` en échec
+        échoue tout de suite, avec son code."""
+        result = MagicMock(returncode=2, stdout="", stderr="boom")
+        with (
+            patch("subprocess.run", return_value=result) as run,
+            patch("time.sleep") as sleep,
+            self.assertRaises(ValueError) as ctx,
+        ):
+            grok._grok_preflight("/usr/bin/grok")
+        self.assertIn("a échoué (code 2)", str(ctx.exception))
+        run.assert_called_once()
+        sleep.assert_not_called()
 
     def test_preflight_rejects_missing_binary(self):
         with self.assertRaises(ValueError) as ctx:
@@ -304,7 +343,8 @@ class TestGrokCliInit(unittest.TestCase):
         self.assertIn("--use_grok_cli", str(ctx.exception))
 
     def test_eco_uses_model_available_on_subscription(self):
-        """`grok models` n'expose que 4.6 et 4.5 : grok-4.3 n'est pas disponible."""
+        """`grok models` n'expose plus que grok-4.7 depuis le 2026-10-21 : 4.6
+        et 4.5 y sont refusés, et grok-4.3, l'éco de l'API, n'y a jamais été."""
         with (
             patch("aipmt.providers.grok._grok_preflight") as fake_preflight,
             patch("aipmt.providers.grok._resolve_grok_binary", return_value="/usr/bin/grok"),
@@ -313,7 +353,7 @@ class TestGrokCliInit(unittest.TestCase):
             args = _args(model=None, eco=True)
             grok._init_grok_cli_client(args)
         self.assertEqual(args.model, grok.ECO_MODEL_GROK_CLI)
-        self.assertEqual(args.model, "grok-4.5")
+        self.assertEqual(args.model, "grok-4.7")
         # Un patch mort exécuterait un vrai `grok models` : l'appel du double est exigé.
         fake_preflight.assert_called_once()
 
@@ -356,6 +396,74 @@ class TestGrokApiMode(unittest.TestCase):
         self.assertEqual(registry._resolve_provider(_args(use_grok=True)), "grok")
         self.assertEqual(registry._resolve_provider(_args(use_grok_cli=True)), "grok_cli")
         self.assertEqual(registry._resolve_provider(_args()), "openai")
+
+
+_REGEN = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "regen_translations.sh"
+)
+
+# Faux grok : la n-ième ligne de reponses.txt au n-ième appel, compté dans
+# `appels`. Jamais le vrai binaire.
+_FAUX_GROK = """#!/usr/bin/env bash
+ici="$(dirname "$0")"
+n=$(( $(cat "$ici/appels" 2>/dev/null || echo 0) + 1 ))
+echo "$n" > "$ici/appels"
+sed -n "${n}p" "$ici/reponses.txt"
+"""
+
+
+def _verifier_session_grok(*reponses):
+    """Source regen_translations.sh dans un sous-shell — le sourçage ne lance
+    pas main() — et appelle check_grok_auth sur un faux grok qui rend
+    `reponses` dans l'ordre ; `sleep` y devient une fonction qui note son
+    argument. Renvoie (code, stderr, nombre d'appels au faux grok)."""
+    with tempfile.TemporaryDirectory() as dossier:
+        faux = os.path.join(dossier, "grok")
+        with open(faux, "w", encoding="utf-8") as f:
+            f.write(_FAUX_GROK)
+        os.chmod(faux, 0o700)
+        with open(os.path.join(dossier, "reponses.txt"), "w", encoding="utf-8") as f:
+            f.write("\n".join(reponses) + "\n")
+        script = f'source "{_REGEN}"; sleep() {{ echo "sleep $*" >&2; }}; check_grok_auth "{faux}"'
+        argv = ["bash", "-c", script]
+        # nosemgrep
+        proc = subprocess.run(  # nosec B603 B607 # nosemgrep — bash local et faux grok
+            argv,  # nosemgrep
+            cwd=dossier,
+            env={"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": dossier},
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=60,
+        )
+        with open(os.path.join(dossier, "appels"), encoding="utf-8") as f:
+            appels = int(f.read().strip() or 0)
+    return proc.returncode, proc.stderr, appels
+
+
+class TestRegenGrokAuth(unittest.TestCase):
+    """check_grok_auth() de regen_translations.sh : même seconde question que
+    le préflight d'aipmt, sans quoi une campagne lancée sur un jeton expiré
+    s'arrêtait sur « lancer 'grok login' » avant d'atteindre aipmt."""
+
+    _DECONNECTE = "You are not authenticated."
+    _CONNECTE = "You are logged in with grok.com."
+
+    def test_logged_in_at_once(self):
+        rc, stderr, appels = _verifier_session_grok(self._CONNECTE)
+        self.assertEqual((rc, appels), (0, 1), stderr)
+        self.assertNotIn("sleep", stderr)
+
+    def test_asks_again_after_a_token_refresh(self):
+        rc, stderr, appels = _verifier_session_grok(self._DECONNECTE, self._CONNECTE)
+        self.assertEqual((rc, appels), (0, 2), stderr)
+        self.assertIn("sleep 5", stderr)
+        self.assertNotIn("grok login", stderr)
+
+    def test_still_disconnected_asks_to_log_in(self):
+        rc, stderr, appels = _verifier_session_grok(self._DECONNECTE, self._DECONNECTE)
+        self.assertEqual((rc, appels), (1, 2), stderr)
+        self.assertIn("lancer 'grok login'", stderr)
 
 
 if __name__ == "__main__":
