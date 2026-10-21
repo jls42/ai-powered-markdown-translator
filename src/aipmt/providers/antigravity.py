@@ -250,8 +250,17 @@ _ANTIGRAVITY_AUTH_REQUIRED_MARKERS = (
 _ANTIGRAVITY_RATE_LIMIT_MARKERS = ("rate limit", "rate_limit", "too many requests")
 
 
-# `429` comme NOMBRE, jamais en sous-chaîne (cf. _OPENCODE_HTTP_429_REGEX).
-_ANTIGRAVITY_HTTP_429_REGEX = re.compile(r"\b429\b")
+# Codes relancés, comme NOMBRES, jamais en sous-chaîne (cf.
+# _OPENCODE_HTTP_429_REGEX) : 429, une limite de débit ; 502, 503 et 504, une
+# panne passagère du service, quand agy ne dit pas lui-même l'échec
+# réessayable. Vu le 2026-10-20 : code 0, status ERROR, « API error
+# (attempt 2): UNAVAILABLE (code 503): The service is currently unavailable. »
+# au segment 4/10 d'un CHANGELOG ; le fichier était perdu, et la relance à la
+# main est passée. Ce sont les codes qu'agy réessaie déjà lui-même (son
+# changelog) : l'échec qui reste demande seulement d'attendre plus longtemps.
+# Une seule expression : un `or` de plus passait la fonction au-delà de la
+# complexité que tolère Codacy.
+_ANTIGRAVITY_HTTP_RETRY_REGEX = re.compile(r"\b(?:429|50[234])\b")
 
 
 # Même garde que _NAMESPACED_MODEL_REGEX, sans le « / » : une valeur commençant
@@ -457,9 +466,10 @@ def _antigravity_auth_required(*texts):
 
 def _antigravity_is_rate_limited(text, agy_error=None):
     """Relancer ou non. Le champ `retryable` d'AGY_ERROR décide seul quand il
-    est un booléen : c'est agy qui sait. À défaut, les marqueurs de chaîne,
-    cherchés dans le détail ET dans la ligne AGY_ERROR — sauf si l'un parle
-    d'épuisement, qui nomme une fenêtre de quota vide et non un débit."""
+    est un booléen : c'est agy qui sait. À défaut, les marqueurs d'une limite
+    de débit et les codes d'une panne passagère (502, 503, 504), cherchés dans
+    le détail ET dans la ligne AGY_ERROR — sauf si l'un parle d'épuisement, qui
+    nomme une fenêtre de quota vide et non un débit."""
     if isinstance(agy_error, dict) and isinstance(agy_error.get("retryable"), bool):
         return agy_error["retryable"]
     minuscules = f"{text or ''} {agy_error or ''}".lower()
@@ -467,7 +477,7 @@ def _antigravity_is_rate_limited(text, agy_error=None):
         return False
     if any(marker in minuscules for marker in _ANTIGRAVITY_RATE_LIMIT_MARKERS):
         return True
-    return bool(_ANTIGRAVITY_HTTP_429_REGEX.search(minuscules))
+    return bool(_ANTIGRAVITY_HTTP_RETRY_REGEX.search(minuscules))
 
 
 def _antigravity_check_exit(returncode, stdout, stderr, model):
@@ -577,7 +587,8 @@ def _antigravity_attempt(client, args, prompt, segment):
 
 
 def _call_antigravity(client, args, prompt, segment):
-    """Traduit un segment via le CLI Antigravity, avec back-off sur rate limit."""
+    """Traduit un segment via le CLI Antigravity, avec back-off sur rate limit
+    ou panne passagère du service."""
     return _retry_on_rate_limit(
         "Antigravity", client, lambda: _antigravity_attempt(client, args, prompt, segment)
     )
