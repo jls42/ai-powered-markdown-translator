@@ -1895,6 +1895,10 @@ README. En anglais, il a retiré lui-même les lignes `> 🇫🇷 _…_`, sans i
 de drapeau ni laisser travailler le nettoyage de repli, et les trois citations
 anglaises sont recopiées telles quelles dans les quatorze langues.
 
+**Version d'API `2026-10-21`** (SDK `anthropic` 2.x) : rien à adapter, mesuré
+le 2026-10-23. Avant de toucher à la requête Claude ou de monter le SDK d'une
+majeure, lire `docs/providers/claude.md`.
+
 ## Key Constants
 
 - `EXCLUDE_PATTERNS`: Paths containing these strings are skipped (`traductions_`, `venv`, `PRIVACY.md`)
