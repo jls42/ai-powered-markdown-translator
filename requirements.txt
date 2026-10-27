@@ -1,7 +1,7 @@
 annotated-types==0.8.0
-anthropic==2.1.0
+anthropic==2.3.0
 anyio==4.14.2
-certifi==2026.10.19
+certifi==2026.10.23
 cffi==2.1.1
 charset-normalizer==3.5.1
 cryptography==50.0.1
@@ -19,7 +19,7 @@ idna==3.19
 jiter==0.16.0
 jsonpath-python==1.1.6
 langdetect==1.0.9
-mistralai==3.3.0
+mistralai==3.4.0
 openai==3.37.0
 opentelemetry-api==1.45.1
 opentelemetry-semantic-conventions==0.66b1
