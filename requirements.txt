@@ -1,5 +1,5 @@
 annotated-types==0.8.0
-anthropic==2.3.0
+anthropic==2.6.0
 anyio==4.14.2
 certifi==2026.10.23
 cffi==2.1.1
@@ -20,7 +20,7 @@ jiter==0.16.0
 jsonpath-python==1.1.6
 langdetect==1.0.9
 mistralai==3.7.0
-openai==3.42.1
+openai==3.46.0
 opentelemetry-api==1.45.1
 opentelemetry-semantic-conventions==0.66b1
 pyasn1==0.6.5
