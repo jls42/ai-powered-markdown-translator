@@ -25,7 +25,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import anthropic as anthropic_sdk
-import httpx
+import httpx2
 from google.genai import errors as genai_errors
 
 # Vise `src/` et non la racine : le test importe ainsi le PAQUET, pas
@@ -539,11 +539,15 @@ class TestClaudeBlockFiltering(unittest.TestCase):
 
 
 def _claude_bad_request(message):
-    """Un 400 tel que le SDK Anthropic le lève, message de l'API compris."""
-    request = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+    """Un 400 tel que le SDK Anthropic le lève, message de l'API compris.
+
+    `httpx2` et non `httpx` : c'est le client du SDK Anthropic 2.x, et plus rien
+    n'installe `httpx` depuis que google-genai 3 en a fait un extra optionnel.
+    """
+    request = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
     return anthropic_sdk.BadRequestError(
         message,
-        response=httpx.Response(400, request=request),
+        response=httpx2.Response(400, request=request),
         body={"type": "error", "error": {"type": "invalid_request_error", "message": message}},
     )
 
