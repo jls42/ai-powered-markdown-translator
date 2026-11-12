@@ -84,8 +84,9 @@ Pour vérifier les CCN actuels : `./venv/bin/python -m lizard -l python src/`.
   planchers : le total ≥ 1000, la somme sous `src/aipmt/` ≥ 1550, et aucun module
   suivi du paquet à zéro exécution — un module sorti du `--source` disparaît du
   rapport, un module renommé n'y est plus mesuré.
-- **Matrice `tests.yml`** (3.10 / 3.11 / 3.12) : `requires-python = ">=3.10"` est une
-  promesse publique, et ce poste n'a que 3.12. La matrice installe le PAQUET (donc
+- **Matrice `tests.yml`** (3.11 à 3.15) : `requires-python = ">=3.11"` est une
+  promesse publique, du plancher (la plus ancienne version maintenue par CPython)
+  à la dernière publiée. La matrice installe le PAQUET (donc
   les bornes publiques) et non le lock, avec `fail-fast: false`.
 
 ## Gestion du baseline detect-secrets

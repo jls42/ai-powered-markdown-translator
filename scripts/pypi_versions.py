@@ -36,14 +36,11 @@ import math
 import re
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, TextIO
 
 _FINAL_VERSION = re.compile(r"^\d+(?:\.\d+)*$")
 _SECONDS_PER_DAY = 86400
-# `datetime.UTC` n'existe qu'à partir de 3.11, et la matrice de tests.yml
-# exécute scripts/tests en 3.10 : mesuré, l'import cassait toute la suite.
-_UTC = timezone.utc  # noqa: UP017
 
 
 def version_key(version: str) -> tuple[int, ...]:
@@ -73,9 +70,9 @@ def published_final_releases(payload: dict[str, Any]) -> dict[str, datetime]:
 
 
 def _parse_upload_time(raw: str) -> datetime:
-    # PyPI écrit `2026-09-15T23:13:33.164661Z`, et `fromisoformat` n'accepte le
-    # suffixe `Z` qu'à partir de 3.11.
-    return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    # PyPI écrit `2026-09-15T23:13:33.164661Z` ; `fromisoformat` lit le
+    # suffixe `Z` depuis 3.11, le plancher du projet.
+    return datetime.fromisoformat(raw)
 
 
 def _age_days(published_at: datetime, now: datetime) -> float:
@@ -151,7 +148,7 @@ def main(
     try:
         payload = json.load(stdin if stdin is not None else sys.stdin)
         releases = published_final_releases(payload)
-        verdict = classify(args.pinned, releases, now or datetime.now(_UTC), args.grace_days)
+        verdict = classify(args.pinned, releases, now or datetime.now(UTC), args.grace_days)
     except (ValueError, KeyError, TypeError, AttributeError) as exc:
         print(f"pypi_versions : {exc}", file=sys.stderr)
         return 2

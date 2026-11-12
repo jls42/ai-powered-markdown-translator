@@ -14,7 +14,7 @@ import re
 import sys
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -27,8 +27,7 @@ from scripts.pypi_versions import (
     version_key,
 )
 
-# `timezone.utc` et non `datetime.UTC` : ces tests tournent aussi en 3.10.
-NOW = datetime(2026, 9, 16, 12, 0, tzinfo=timezone.utc)  # noqa: UP017
+NOW = datetime(2026, 9, 16, 12, 0, tzinfo=UTC)
 
 
 def _file(days_ago: float, yanked: bool = False) -> dict:

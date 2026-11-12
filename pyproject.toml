@@ -15,12 +15,15 @@ name = "ai-powered-markdown-translator"
 version = "1.17.1"
 description = "Traduit des fichiers Markdown avec OpenAI, Claude, Mistral, Gemini, Grok, Codex, Antigravity, OpenCode ou OpenRouter, en préservant la mise en forme, les blocs de code et le front matter."
 readme = "README.md"
-# 3.10 et non 3.12 : aucune syntaxe postérieure à PEP 604 dans le module
-# (vérifié : ni match/case, ni except*, ni tomllib, ni type X =), et aucun des
-# 41 paquets épinglés n'exige plus que 3.10 (interrogation de leur
-# `requires_python` sur PyPI). Ce poste n'ayant que 3.12, la promesse est
-# mesurée par la matrice de .github/workflows/tests.yml — pas déduite.
-requires-python = ">=3.10"
+# Plancher = la plus ancienne version encore maintenue par CPython. 3.10 est en
+# fin de vie depuis le 2026-10-01, et google-genai 3 exige 3.11 ; au
+# 2026-11-12, 8 des 40 paquets épinglés exigent 3.11 et aucun davantage
+# (interrogation de leur `requires_python` sur PyPI). La promesse est mesurée
+# par la matrice de .github/workflows/tests.yml, du plancher à la dernière
+# version publiée — pas déduite. Ruff (`target-version`) et mypy
+# (`python_version`) visent ce même plancher : viser plus haut laisserait
+# passer une syntaxe ou une API que 3.11 refuse.
+requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 authors = [{ name = "Julien LS" }]
@@ -32,9 +35,11 @@ classifiers = [
     "Natural Language :: French",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Software Development :: Localization",
     "Topic :: Text Processing :: Markup :: Markdown",
 ]
@@ -75,7 +80,7 @@ aipmt = "aipmt:main"
 where = ["src"]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py311"
 line-length = 100
 extend-exclude = ["traductions_*", "venv", "translate.py.old", "tests/fixtures"]
 
@@ -99,7 +104,7 @@ ignore = [
 "scripts/tests/test_compare_structure.py" = ["E402", "RUF001", "RUF002", "RUF003"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.11"
 warn_return_any = false
 warn_unused_configs = true
 ignore_missing_imports = true
