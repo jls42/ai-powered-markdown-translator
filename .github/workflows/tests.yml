@@ -1,10 +1,11 @@
 name: Tests
 
-# Raison d'être : `requires-python = ">=3.10"` est une PROMESSE PUBLIQUE, et
-# rien ne l'exerçait. Le poste de développement n'a que Python 3.12 ; l'analyse
-# statique (aucune syntaxe postérieure à PEP 604 dans le module) et les
-# métadonnées des dépendances (aucun des 41 paquets épinglés n'exige plus que
-# 3.10) rendent la promesse plausible, pas mesurée. Cette matrice l'exécute.
+# Raison d'être : `requires-python = ">=3.11"` est une PROMESSE PUBLIQUE, que
+# seule l'exécution prouve. La matrice va du plancher (la plus ancienne version
+# maintenue par CPython) à la dernière version publiée ; à chaque nouvelle
+# version de Python, l'ajouter ici, dans `sonar-project.properties`, dans les
+# classifieurs de pyproject.toml, dans REQUIRED_CHECKS de
+# dependabot-auto-merge.yml et dans le ruleset de `main`.
 #
 # Sans elle, `sonar-project.properties` annonçait déjà 3.10-3.12 sans que
 # personne ne l'ait jamais vérifié — une contradiction interne que la
@@ -25,11 +26,11 @@ jobs:
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
-      # Toutes les versions vont au bout : savoir que 3.10 casse ET que 3.11
+      # Toutes les versions vont au bout : savoir que 3.11 casse ET que 3.12
       # passe vaut mieux qu'un seul échec qui annule les autres.
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

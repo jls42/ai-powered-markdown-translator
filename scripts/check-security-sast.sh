@@ -29,7 +29,7 @@ if ! command -v opengrep >/dev/null 2>&1; then
 fi
 
 # python36-compatibility-* : règles de rétro-compat Python 3.5→3.6 (arguments
-# `encoding`/`text` de subprocess, f-strings...). Le projet exige Python 3.10+
+# `encoding`/`text` de subprocess, f-strings...). Le projet exige Python 3.11+
 # (cf. pyproject.toml), ces règles ne signalent donc que du bruit — et suivre
 # leur conseil dégraderait le code (sans `encoding="utf-8"`, subprocess retombe
 # sur la locale du système, qui casse sur du Markdown accentué en locale C).

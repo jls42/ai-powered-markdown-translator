@@ -54,7 +54,7 @@ pip install ai-powered-markdown-translator     # ou : pipx install ai-powered-ma
 aipmt --help                                   # ou : python -m aipmt --help
 ```
 
-Python 3.10 ou plus récent. Pour installer depuis le dépôt, voir
+Python 3.11 ou plus récent. Pour installer depuis le dépôt, voir
 [Contribuer](#contribuer).
 
 ## Configuration

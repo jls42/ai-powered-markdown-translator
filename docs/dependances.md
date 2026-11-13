@@ -36,8 +36,8 @@ Le dispositif, en cinq pièces :
    actions GitHub, qui s'exécutent à côté du jeton OIDC de publication. Un type
    de mise à jour illisible fait échouer le job sans rien fusionner.
 
-3. **Un ruleset sur `main`** (« Checks requis ») exige `Python 3.10`,
-   `Python 3.11`, `Python 3.12`, `Résolution des dépendances` et
+3. **Un ruleset sur `main`** (« Checks requis ») exige `Python 3.11` à
+   `Python 3.15` (les cinq de la matrice), `Résolution des dépendances` et
    `Fermeture et tests du lock`, avec le rôle admin en bypass ; le réglage
    « Allow auto-merge » du dépôt est activé. **Le ruleset est indispensable** :
    sans check requis, `gh pr merge --auto` fusionne sur-le-champ, avant la fin

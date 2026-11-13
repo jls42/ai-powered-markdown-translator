@@ -4,7 +4,7 @@
 - **Recherche web**: Utiliser l'agent `web-research-specialist:web-research-specialist` pour les recherches de documentation (évite de polluer le contexte principal)
 - **Après chaque `git push`** (sur une PR, jamais main) : surveiller automatiquement les checks GitHub jusqu'à résolution.
   1. Attendre ~30-60s que SonarCloud / CodeQL terminent leur scan initial.
-  2. `gh pr checks <num>` pour lire l'état (workflows actifs : `Analyze (python)` et `Analyze (actions)` (CodeQL), `SonarQube`, `SonarCloud Code Analysis`, `Python 3.10` / `3.11` / `3.12` (tests.yml), `Résolution des dépendances` et `Fermeture et tests du lock` (deps-check.yml), `Fusion automatique Dependabot` (sauté hors PR Dependabot), `Codacy Static Code Analysis`, `CodeFactor`). Sur `main`, un ruleset rend requis les trois `Python`, `Résolution des dépendances` et `Fermeture et tests du lock` (cf. `docs/dependances.md`).
+  2. `gh pr checks <num>` pour lire l'état (workflows actifs : `Analyze (python)` et `Analyze (actions)` (CodeQL), `SonarQube`, `SonarCloud Code Analysis`, `Python 3.11` à `3.15` (tests.yml), `Résolution des dépendances` et `Fermeture et tests du lock` (deps-check.yml), `Fusion automatique Dependabot` (sauté hors PR Dependabot), `Codacy Static Code Analysis`, `CodeFactor`). Sur `main`, un ruleset rend requis les cinq `Python`, `Résolution des dépendances` et `Fermeture et tests du lock` (cf. `docs/dependances.md`).
   3. Si tous `pass` → **toujours** requêter l'API Sonar des issues ouvertes en complément (cf. piège ci-dessous), puis signaler à l'utilisateur et stop.
   4. Si un check est `pending` → re-check dans 60-90s (utiliser `ScheduleWakeup` pour ne pas bloquer le main thread, ou `gh run watch <run-id>` pour follow live).
   5. Si un check est `fail` :
