@@ -17,7 +17,7 @@ description = "Traduit des fichiers Markdown avec OpenAI, Claude, Mistral, Gemin
 readme = "README.md"
 # Plancher = la plus ancienne version encore maintenue par CPython. 3.10 est en
 # fin de vie depuis le 2026-10-01, et google-genai 3 exige 3.11 ; au
-# 2026-11-12, 8 des 40 paquets épinglés exigent 3.11 et aucun davantage
+# 2026-11-12, 7 des 40 paquets épinglés exigent 3.11 et aucun davantage
 # (interrogation de leur `requires_python` sur PyPI). La promesse est mesurée
 # par la matrice de .github/workflows/tests.yml, du plancher à la dernière
 # version publiée — pas déduite. Ruff (`target-version`) et mypy
