@@ -5,7 +5,7 @@
 <h4 align="center">📊 Calidad del código</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Estado del control de calidad"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Estado de la puerta de calidad"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="Calificación de seguridad"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="Calificación de fiabilidad"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="Calificación de mantenibilidad"></a>
@@ -14,7 +14,7 @@
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=coverage" alt="Cobertura"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=vulnerabilities" alt="Vulnerabilidades"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=bugs" alt="Errores"></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Indicios de problemas en el código"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="Code Smells"></a>
 </p>
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="Líneas duplicadas (%)"></a>
@@ -35,17 +35,17 @@ modelo preserva realmente.
 ## En pocas palabras
 
 - **Once vías de proveedor**: API de OpenAI, Mistral, Claude, Gemini y Grok;
-  suscripciones a ChatGPT (Codex), Grok, Google (Antigravity) y Claude (Claude
+  suscripciones de ChatGPT (Codex), Grok, Google (Antigravity) y Claude (Claude
   Code) sin facturación por uso; enrutadores OpenCode (open source, gratuito o local) y OpenRouter
   (más de 400 modelos).
-- **Ningún error por un token perdido**: los bloques de código, el código en línea,
+- **Sin errores por un token perdido**: los bloques de código, el código en línea,
   las URL, las anclas y las citas se sustituyen por tokens antes de la llamada y
   se verifican al recibir la respuesta. Si falta alguno, el archivo no se escribe.
 - **Documentos largos**: segmentación según la ventana del modelo.
-- **Modo `--news`**: citas en inglés protegidas e indicadores gestionados por
+- **Modo `--news`**: citas en inglés protegidas y banderas gestionadas por
   idioma, para los artículos de seguimiento.
 - **Modo `--eco`**: modelos rápidos y más baratos.
-- **Nota de traducción** opcional, al principio, al final o en ambos sitios.
+- **Nota de traducción** opcional, al principio, al final o en ambos lugares.
 
 ## Instalación
 
@@ -54,18 +54,18 @@ pip install ai-powered-markdown-translator     # ou : pipx install ai-powered-ma
 aipmt --help                                   # ou : python -m aipmt --help
 ```
 
-Python 3.10 o posterior. Para instalar desde el repositorio, consulta
+Python 3.11 o posterior. Para instalar desde el repositorio, consulta
 [Contribuir](#contribuir).
 
 ## Configuración
 
-Las claves se leen en tres lugares, de mayor a menor prioridad; cada uno solo
-completa lo que el anterior deja vacío.
+Las claves se leen en tres ubicaciones, de mayor a menor prioridad; cada una solo
+completa lo que la anterior deja vacío.
 
 |     | Dónde                                            | Para qué                             |
 | --- | --------------------------------------------- | ------------------------------------- |
 | 1   | Variables de entorno                     | CI, contenedores, anulación puntual |
-| 2   | `.env` del directorio actual (o de uno superior) | una clave propia de un proyecto            |
+| 2   | `.env` del directorio actual (o de uno superior) | una clave específica de un proyecto            |
 | 3   | `~/.config/aipmt/.env`                        | se configura una vez y sirve en todas partes       |
 
 ```bash
@@ -82,12 +82,12 @@ chmod 600 ~/.config/aipmt/.env
 ```
 
 Se acepta `GEMINI_API_KEY` en lugar de `GOOGLE_API_KEY`. El archivo
-de usuario sigue `XDG_CONFIG_HOME` (solo rutas absolutas) y `%APPDATA%`
+de usuario respeta `XDG_CONFIG_HOME` (solo rutas absolutas) y `%APPDATA%`
 en Windows. Sin clave, el comando enumera las tres ubicaciones.
 
 **El `.env` de un proyecto no puede redirigir las llamadas ni elegir el programa
-que se ejecuta.** Proporciona claves, nunca un destino ni un binario: todas las
-variables en `_BASE_URL`, `_API_BASE`, `_ENDPOINT` o `_BIN` (`CODEX_BIN`,
+que se ejecuta.** Proporciona claves, nunca un destino ni un binario: cualquier
+variable en `_BASE_URL`, `_API_BASE`, `_ENDPOINT` o `_BIN` (`CODEX_BIN`,
 `GROK_BIN`, `OPENCODE_BIN`, `AGY_BIN`), `GROK_HOME`, los proxies (`HTTP_PROXY`,
 `HTTPS_PROXY`, `ALL_PROXY`), los almacenes de certificados (`SSL_CERT_FILE`,
 `SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`) y `XDG_CONFIG_HOME` /
@@ -97,13 +97,13 @@ primera traducción. Este archivo también se lee sin interpolación:
 `NOM=${OPENAI_API_KEY}` no copia la clave en él. Define estas variables en
 el entorno o en `~/.config/aipmt/.env`.
 
-Variables opcionales: `XAI_BASE_URL` (valor predeterminado `https://api.x.ai/v1`),
-`CLAUDE_TIMEOUT` (segundos por llamada, valor predeterminado 900), `CODEX_BIN`, `CODEX_TIMEOUT`
-(valor predeterminado 600), `GROK_BIN`, `GROK_HOME` (valor predeterminado `~/.grok`), `GROK_TIMEOUT`
-(valor predeterminado 900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT` (valor predeterminado 900),
-`OPENCODE_BIN`, `OPENCODE_TIMEOUT` (valor predeterminado 600), `OPENROUTER_BASE_URL`
-(requiere `https://`), `OPENROUTER_TIMEOUT` (valor predeterminado 900),
-`OPENROUTER_PREFLIGHT_TIMEOUT` (valor predeterminado 30). Cada una se detalla en la
+Variables opcionales: `XAI_BASE_URL` (por defecto `https://api.x.ai/v1`),
+`CLAUDE_TIMEOUT` (segundos por llamada, por defecto 900), `CODEX_BIN`, `CODEX_TIMEOUT`
+(por defecto 600), `GROK_BIN`, `GROK_HOME` (por defecto `~/.grok`), `GROK_TIMEOUT`
+(por defecto 900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT` (por defecto 900),
+`OPENCODE_BIN`, `OPENCODE_TIMEOUT` (por defecto 600), `OPENROUTER_BASE_URL`
+(requiere `https://`), `OPENROUTER_TIMEOUT` (por defecto 900),
+`OPENROUTER_PREFLIGHT_TIMEOUT` (por defecto 30). Cada una se detalla en la
 sección de su proveedor.
 
 ## Primeros pasos
@@ -119,16 +119,16 @@ aipmt --source_dir content/fr --target_dir content/en --source_lang fr --target_
 aipmt --use_gemini --file document.md --target_dir out/ --target_lang ja
 ```
 
-`document.md` traducido al español genera `document-es.md` en `--target_dir`;
+`document.md` traducido al español produce `document-es.md` en `--target_dir`;
 con `--include_model`, `document-es-gpt-5.6-terra.md`. La extensión siempre pasa a ser
-`.md` —`article.mdx` genera `article-en.md`— salvo con
+`.md` —`article.mdx` produce `article-en.md`— salvo con
 `--keep_filename`, que conserva el nombre original. Una traducción ya existente
 se omite si no se usa `--force`.
 
 Códigos de salida: `0` si todo se ha completado o se ha omitido, `1` si queda algún archivo
 con errores (lista en la salida de error), `2` si el problema está en la configuración.
 Un archivo con errores nunca se escribe, incluso si falla la propia escritura:
-el contenido se escribe en un archivo contiguo y luego se renombra. Basta con volver a ejecutar el comando.
+el contenido se escribe en un archivo contiguo y después se renombra. Basta con volver a ejecutar.
 
 ## Qué modelo elegir
 
@@ -138,63 +138,63 @@ traducción se escribe y nada difiere del original.**
 
 | Modelo                | Cómo acceder                 | Artículo de seguimiento denso | Este README    | Qué difiere y en cuántos idiomas                                                                                                                          |
 | --------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Gemini 3.8 Flash**  | suscripción a Google (Antigravity)   | ✅ 14/14                | ✅ 14/14     | nada, en ninguno de los dos documentos                                                                                                                                 |
+| **Gemini 3.8 Flash**  | suscripción de Google (Antigravity)   | ✅ 14/14                | ✅ 14/14     | nada, en ninguno de los dos documentos                                                                                                                                 |
 | **Claude Sonnet 5.5** | clave API de Anthropic                 | ✅ 14/14                | ✅ 14/14     | nada, en ninguno de los dos documentos                                                                                                                                 |
-| **Gemini 3.7 Flash**  | clave API de Google                    | ✅ 14/14                | ⚠️ 13/14     | 1 idioma de 14: una palabra más en negrita (ja)                                                                                                                      |
-| **Gemini 3.7 Flash**  | suscripción a Google (Antigravity)   | ✅ 14/14                | ⚠️ 13/14     | 1 idioma de 14: una palabra menos en negrita (ko)                                                                                                                     |
-| **GPT-5.6 Sol**       | suscripción a ChatGPT o clave de OpenAI | ✅ 14/14                | ⚠️ 12/14     | 2 idiomas de 14: una palabra menos en negrita (ar, ja)                                                                                                                |
-| **GLM-5.2**           | clave de OpenRouter                    | ✅ 14/14                | ⚠️ 11/14     | 3 idiomas de 14: una palabra menos en negrita (hi, ja, ko)                                                                                                            |
-| Claude Sonnet 5       | suscripción a Claude (Claude Code)   | ⚠️ 13/14                | ⚠️ 13/14     | 1 idioma de 14 en el artículo: una palabra más en negrita (zh); 1 en este README: una fila de tabla pegada a la anterior, oculta al visualizarla (ar)            |
-| Claude Haiku 4.5      | suscripción a Claude (Claude Code)   | ⚠️ 11/14                | ✅ 14/14     | 3 idiomas en el artículo: un título de sección pasa al nivel 1 (en, pl, ro); en este README, nada para el comparador, pero los enlaces internos aparecen duplicados en inglés |
+| **Gemini 3.7 Flash**  | clave API de Google                    | ✅ 14/14                | ⚠️ 13/14     | 1 idioma de 14: una palabra en negrita de más (ja)                                                                                                                      |
+| **Gemini 3.7 Flash**  | suscripción de Google (Antigravity)   | ✅ 14/14                | ⚠️ 13/14     | 1 idioma de 14: una palabra en negrita de menos (ko)                                                                                                                     |
+| **GPT-5.6 Sol**       | suscripción de ChatGPT o clave de OpenAI | ✅ 14/14                | ⚠️ 12/14     | 2 idiomas de 14: una palabra en negrita de menos (ar, ja)                                                                                                                |
+| **GLM-5.2**           | clave de OpenRouter                    | ✅ 14/14                | ⚠️ 11/14     | 3 idiomas de 14: una palabra en negrita de menos (hi, ja, ko)                                                                                                            |
+| Claude Sonnet 5       | suscripción de Claude (Claude Code)   | ⚠️ 13/14                | ⚠️ 13/14     | 1 idioma de 14 en el artículo: una palabra en negrita de más (zh); 1 en este README: una fila de tabla pegada a la anterior, oculta al visualizarse (ar)            |
+| Claude Haiku 4.5      | suscripción de Claude (Claude Code)   | ⚠️ 11/14                | ✅ 14/14     | 3 idiomas en el artículo: un título de sección pasa al nivel 1 (en, pl, ro); en este README, nada para el comparador, pero los enlaces internos están duplicados en inglés |
 | Claude Sonnet 5       | clave API de Anthropic                 | ⚠️ 11/14                | ⚠️ 12/14     | 3 idiomas en el artículo: aparece un bloque de código (es, de, hi); 2 en este README: un enlace sin su marcado (sv), una palabra en negrita (zh)                              |
-| Claude Haiku 4.5      | clave API de Anthropic                 | ⚠️ 7/14                 | ✅ 14/14     | 7 idiomas en el artículo: un título de sección pasa al nivel 1 —en japonés, permanece en francés—; nada en este README                                              |
+| Claude Haiku 4.5      | clave API de Anthropic                 | ⚠️ 7/14                 | ✅ 14/14     | 7 idiomas en el artículo: un título de sección pasa al nivel 1 —en japonés, sigue en francés—; nada en este README                                              |
 | Claude Haiku 5.5      | clave API de Anthropic                 | ⚠️ 11/14                | ❌ 12/14     | 3 idiomas en el artículo: un título de sección cambia de nivel o se duplica (ja, ko, zh); en este README, 2 idiomas rechazados por pérdida de código en línea (ar, hi)    |
 | Qwen 3.7 Flash        | clave de OpenRouter                    | ❌ 8/14                 | ⚠️ 10/14     | 1 idioma rechazado en el artículo, otros 5 presentan diferencias; en este README, unas cuarenta palabras puestas en `code` (ar)                                                    |
-| Grok 4.6              | suscripción a Grok                   | ❌ 8/14                 | sin evaluar     | 5 idiomas rechazados de 14, por no devolver el código en línea y las URL; el neerlandés diverge en todo                                                               |
-| GPT-OSS 20B           | modelo local (Ollama)             | ❌ 7/14                 | sin volver a medir | 4 idiomas rechazados de 14: el modelo dejaba pasajes en francés y el mecanismo de protección los bloqueó                                                                  |
-| MiMo v2.5 (gratuito)   | OpenCode Zen, sin cuenta         | ❌ 11/14                | sin volver a medir | 1 idioma rechazado; una sección perdida en polaco                                                                                                                  |
-| Mistral Large         | clave API de Mistral                   | ❌ 5/14                 | ❌ 1/14      | **desaparece una sección entera**: 1 idioma en el artículo (hi), 3 en este README (ar, hi, ko), y 3 idiomas rechazados en el artículo                                |
-| DeepSeek V4 Flash     | clave de OpenRouter                    | ❌ 3/14                 | sin volver a medir | 10 idiomas rechazados de 14; 37 minutos por idioma                                                                                                                 |
-| Claude Opus 5.5       | suscripción a Claude (Claude Code)   | ❌ 0/14                 | ✅ 14/14     | el artículo fue rechazado en los 14 idiomas por los mecanismos de protección de Opus, a causa de una noticia breve de biología; nada en este README                                               |
+| Grok 4.6              | suscripción de Grok                   | ❌ 8/14                 | sin puntuación     | 5 idiomas rechazados de 14, por no devolver código en línea y URL; el neerlandés presenta diferencias en todo                                                               |
+| GPT-OSS 20B           | modelo local (Ollama)             | ❌ 7/14                 | sin nueva medición | 4 idiomas rechazados de 14: el modelo dejaba pasajes en francés y el control los bloqueó                                                                  |
+| MiMo v2.5 (gratuito)   | OpenCode Zen, sin cuenta         | ❌ 11/14                | sin nueva medición | 1 idioma rechazado; una sección perdida en polaco                                                                                                                  |
+| Mistral Large         | clave API de Mistral                   | ❌ 5/14                 | ❌ 1/14      | **desaparece una sección entera**: 1 idioma en el artículo (hi), 3 en este README (ar, hi, ko) —y 3 idiomas rechazados en el artículo—                                |
+| DeepSeek V4 Flash     | clave de OpenRouter                    | ❌ 3/14                 | sin nueva medición | 10 idiomas rechazados de 14; 37 minutos por idioma                                                                                                                 |
+| Claude Opus 5.5       | suscripción de Claude (Claude Code)   | ❌ 0/14                 | ✅ 14/14     | el artículo se rechaza en los 14 idiomas por las salvaguardas de Opus, debido a una noticia breve de biología; nada en este README                                               |
 
 |     | Qué indica el símbolo                                                                                                                                                                                 |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ✅  | los catorce idiomas traducidos y nada difiere del original                                                                                                                                       |
-| ⚠️  | los catorce idiomas traducidos; lo que difiere es el **marcado**: una palabra en negrita, un `code`, un enlace que pierde sus corchetes. No falta ningún texto, URL, bloque de código ni sección |
-| ❌  | al menos un idioma no se ha podido traducir —el archivo se rechaza y no se escribe— **o** falta contenido en un archivo escrito                                                                      |
+| ⚠️  | los catorce idiomas traducidos; lo que difiere es el **marcado** —una palabra en negrita, un `code`, un enlace que pierde sus corchetes—. No falta ningún texto, URL, bloque de código ni sección |
+| ❌  | al menos un idioma no se ha podido traducir —el archivo se rechaza, no se escribe— **o** falta contenido en un archivo escrito                                                                      |
 
-Qué conviene recordar:
+Qué se debe tener en cuenta:
 
 - **Una traducción rechazada no es una traducción dañada.** Cuando falta un token
   en la respuesta, el archivo no se escribe y el idioma cuenta como
   rechazado. Es lo que le ocurre a Grok con el artículo: cuatro fragmentos de código en línea y
-  tres URL perdidos desde el primer segmento, en los cinco sistemas de escritura no latinos.
+  tres URL perdidos desde el primer segmento, en las cinco escrituras no latinas.
 - **Un modelo puede rechazar un documento entero por una sola frase.** Opus 5.5
-  traduce este README sin ninguna desviación, pero ningún artículo de seguimiento: sus
-  mecanismos de protección detienen la respuesta ante una noticia breve de biología. El archivo no
-  se escribe y aipmt indica por qué.
+  traduce este README sin ninguna diferencia, pero ningún artículo de seguimiento: sus
+  salvaguardas detienen la respuesta por una noticia breve de biología. El archivo no
+  se escribe y aipmt explica por qué.
 - **Esta protección no cubre los títulos, las tablas, el front matter ni el
   texto.** Un modelo que elimina una sección devuelve un archivo que la herramienta escribe
-  sin objeciones: es el caso de Mistral. Estos elementos no se pueden
-  sustituir por un token y las protecciones actuales no los comprueban;
+  sin objeciones —es el caso de Mistral—. Estos elementos no se pueden
+  sustituir por un token y los controles actuales no los verifican;
   `scripts/compare_structure.py` detecta una sección perdida, pero a posteriori.
-- **Grok no tiene evaluación en este README**: su sesión CLI caducó tras doce
-  idiomas, once de ellos sin diferencias. Una campaña interrumpida no se evalúa.
-- **La densidad del documento importa más que el idioma.** Grok funciona con
-  README corrientes y falla con un artículo cargado de enlaces, incluso en
+- **Grok no tiene puntuación en este README**: su sesión CLI caducó después de doce
+  idiomas, once de ellos sin diferencias. Una campaña interrumpida no se puntúa.
+- **La densidad del documento importa más que el idioma.** Grok se mantiene en
+  README normales y falla con un artículo cargado de enlaces, incluso en
   neerlandés.
 
 Fechas y documentos: la columna «Este README» se midió el 9 de septiembre de 2026
 sobre una revisión fija de este archivo (785 líneas, 285 fragmentos de código en línea, 89 filas
-de tabla), modificada desde entonces, salvo las filas de Antigravity y Claude Code,
+de tabla), modificada desde entonces —salvo las filas de Antigravity y Claude Code,
 medidas el 26 de septiembre sobre la revisión publicada con la 1.14.0, más corta
 (600 líneas, 257 fragmentos de código en línea, 85 filas de tabla), y las filas de Claude
 Sonnet 5.5, Haiku 5.5 y Haiku 4.5 mediante la API, medidas el 18 de octubre sobre la
-misma revisión. La columna «Artículo de seguimiento denso» procede de la campaña de los
-días 4 y 5 de septiembre sobre un artículo de 589 líneas, salvo la fila de Grok, medida de nuevo el
+misma revisión—. La columna «Artículo de seguimiento denso» procede de la campaña del
+4 y 5 de septiembre sobre un artículo de 589 líneas, salvo la fila de Grok, medida de nuevo el
 9 de septiembre sobre otra edición del mismo seguimiento, las filas de Antigravity y
-Claude Code, medidas el 26 de septiembre sobre el mismo artículo, y esas tres filas de
-Claude, el 18 de octubre. Las tablas completas, los tiempos y el protocolo están
+Claude Code, medidas el 26 de septiembre sobre el mismo artículo, y esas tres filas
+de Claude, el 18 de octubre. Las tablas completas, las duraciones y el protocolo están
 en [Mediciones detalladas](#mediciones-detalladas).
 ## Todas las opciones
 
@@ -206,32 +206,32 @@ en [Mediciones detalladas](#mediciones-detalladas).
 | `--source_lang`          | Idioma de origen (por defecto: `fr`)                                                                                  |
 | `--target_lang`          | Idioma de destino (por defecto: `en`)                                                                                   |
 | `--model`                | Modelo específico que utilizar                                                                                  |
-| `--eco`                  | Utilizar los modelos económicos                                                                              |
-| `--use_mistral`          | Utilizar la API de Mistral AI                                                                                     |
-| `--use_claude`           | Utilizar la API de Claude                                                                                         |
-| `--use_gemini`           | Utilizar la API de Gemini                                                                                         |
-| `--use_grok`             | Utilizar la API de xAI (Grok) — requiere `XAI_API_KEY`                                                           |
-| `--use_codex`            | Utilizar la CLI de Codex con la cuota de la suscripción a ChatGPT                                                    |
-| `--use_grok_cli`         | Utilizar la CLI de Grok con la cuota de la suscripción a Grok                                                        |
-| `--use_antigravity`      | Utilizar la CLI de Antigravity (`agy`) con la cuota de la suscripción a Google AI Pro o Ultra                       |
-| `--use_claude_code`      | Utilizar la CLI de Claude Code (`claude -p`) con la cuota de la suscripción a Claude Pro o Max                      |
-| `--use_opencode`         | Utilizar OpenCode (open source) con el proveedor configurado en OpenCode; requiere `--model provider/modèle` |
-| `--use_openrouter`       | Utilizar OpenRouter — requiere `OPENROUTER_API_KEY` y `--model fournisseur/modèle`                          |
-| `--force`                | Forzar una nueva traducción                                                                                       |
+| `--eco`                  | Usar los modelos económicos                                                                              |
+| `--use_mistral`          | Usar la API de Mistral AI                                                                                     |
+| `--use_claude`           | Usar la API de Claude                                                                                         |
+| `--use_gemini`           | Usar la API de Gemini                                                                                         |
+| `--use_grok`             | Usar la API de xAI (Grok) — requiere `XAI_API_KEY`                                                           |
+| `--use_codex`            | Usar la CLI de Codex con la cuota de la suscripción a ChatGPT                                                    |
+| `--use_grok_cli`         | Usar la CLI de Grok con la cuota de la suscripción a Grok                                                        |
+| `--use_antigravity`      | Usar la CLI de Antigravity (`agy`) con la cuota de la suscripción a Google AI Pro o Ultra                       |
+| `--use_claude_code`      | Usar la CLI de Claude Code (`claude -p`) con la cuota de la suscripción a Claude Pro o Max                      |
+| `--use_opencode`         | Usar OpenCode (open source) con el proveedor configurado en OpenCode; requiere `--model provider/modèle` |
+| `--use_openrouter`       | Usar OpenRouter — requiere `OPENROUTER_API_KEY` y `--model fournisseur/modèle`                          |
+| `--force`                | Forzar la retraducción                                                                                       |
 | `--keep_filename`        | Conservar el nombre de archivo original                                                                          |
-| `--news`                 | Modo de noticias: protege las citas en EN y gestiona las banderas por idioma                                      |
+| `--news`                 | Modo de noticias: protege las citas EN y gestiona las banderas por idioma                                      |
 | `--add_translation_note` | Añadir una nota de traducción                                                                                |
 | `--note_position`        | Posición de la nota: `top`, `bottom` (por defecto) o `both`                                                     |
 | `--note_format`          | Formato de la nota: `legacy` (por defecto, párrafo en negrita) o `marker`                                            |
 | `--include_model`        | Incluir el nombre del modelo en el archivo de salida                                                            |
 | `--reasoning_effort`     | Esfuerzo de razonamiento de GPT-5.x: `none`/`low`/`medium`/`high`/`xhigh`                                         |
 
-Los nueve flags `--use_*` son mutuamente excluyentes: se rechaza
-combinar dos.
+Los nueve flags `--use_*` son mutuamente excluyentes: combinar dos se
+rechaza.
 
 ## Providers
 
-### Por API: OpenAI, Mistral, Claude, Gemini, Grok
+### Mediante API: OpenAI, Mistral, Claude, Gemini, Grok
 
 ```bash
 aipmt --source_dir content/fr --target_dir content/en --target_lang en             # OpenAI, défaut
@@ -268,7 +268,7 @@ codex login
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 ```
 
-- El binario se busca en `CODEX_BIN`, después en `PATH` y después en el paquete
+- El binario se busca en `CODEX_BIN`, después en el `PATH` y después en el paquete
   `openai-codex-cli-bin`. `~/.codex/auth.json` nunca se lee.
 - `OPENAI_API_KEY` y `CODEX_API_KEY` se eliminan del entorno del
   subproceso: la presencia de una clave nunca provoca el cambio a la API.
@@ -276,11 +276,11 @@ aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
   si su validación falla y se vuelve a intentar. OpenAI indica, como
   estimación, 250-2 000 mensajes/5 h para `gpt-5.6-luna` (`--eco`) y
   10-100 para `gpt-5.6-sol` en un plan Plus.
-- `--model gpt-5.6-sol`, el modelo predeterminado hasta la versión 1.16.3, `--model gpt-5.6-terra`
+- `--model gpt-5.6-sol`, el valor por defecto hasta la 1.16.3, `--model gpt-5.6-terra`
   y `--model gpt-5.6-luna` también utilizan la suscripción.
-- Un 429 del servidor no provoca la pérdida del archivo: Codex se reconecta solo,
+- Un 429 del servidor no hace que se pierda el archivo: Codex se reconecta solo,
   aipmt espera a que termine el turno y, si el 429 persiste, el segmento
-  se reintenta tras 30 y luego 60 segundos. Un modelo al que la cuenta no tiene acceso devuelve un 400 «model is
+  se vuelve a intentar tras 30 y luego 60 segundos. Un modelo al que la cuenta no tiene acceso devuelve un 400 «model is
   not supported when using Codex with a ChatGPT account».
 - Más lento que una API, y la diferencia aumenta con el documento: en este README,
   la mediana es de 6 min 46 s por idioma con `gpt-5.6-sol`, frente a 36 s con
@@ -292,7 +292,7 @@ aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 
 ### Con la suscripción a Grok: `--use_grok_cli`
 
-El mismo principio con la CLI oficial de Grok Build, con la suscripción a SuperGrok o
+El mismo principio con la CLI oficial Grok Build, con la suscripción a SuperGrok o
 X Premium+.
 
 ```bash
@@ -302,15 +302,15 @@ aipmt --use_grok_cli --file README.md --target_dir . --target_lang pl
 ```
 
 - **Aislamiento más débil que el de Codex.** El sandbox del SO de Grok no se aplica
-  en muchos equipos Linux recientes (AppArmor, sockets del runtime
-  de contenedores), y un perfil que no puede aplicarse se inicia sin aislamiento
-  y sin avisar. Por eso, el script no solicita ningún perfil por defecto, lo indica y
+  en muchos equipos Linux recientes (AppArmor, sockets del runtime de
+  contenedores), y un perfil que no puede aplicarse arranca sin aislamiento en
+  silencio. Por eso, el script no solicita ningún perfil por defecto, lo anuncia y
   se apoya en las reglas `--deny` de la CLI, incluida la regla catch-all `*` — la única
   capa que se niega a arrancar en lugar de retirar la protección sin
-  avisar. `GROK_TRANSLATE_SANDBOX=read-only` exige el sandbox del SO, y el inicio
+  avisar. `GROK_TRANSLATE_SANDBOX=read-only` exige el sandbox del SO, y el arranque
   falla si la máquina no puede aplicarlo.
 - La cuota es semanal, se comparte con Chat, Imagine y Voice, y ningún
-  comando permite consultarla: un lote puede consumir la cuota de uso conversacional
+  comando permite consultarla: un lote puede consumir el uso conversacional
   sin aviso.
 - Variables: `GROK_BIN`, `GROK_HOME` (directorio de la CLI, por defecto `~/.grok`),
   `GROK_TIMEOUT` (por defecto 900), `GROK_TRANSLATE_SANDBOX`.
@@ -334,59 +334,59 @@ agy -p /usage --output-format json   # quota restant, sans en consommer
 - **No queda abierta ninguna vía de pago.** agy solo recibe de su
   entorno una lista cerrada de variables — `PATH`, idioma y zona horaria,
   terminal, identidad, proxies y certificados, bus de sesión — y ninguna clave:
-  varias de sus variables redirigen una llamada sin mostrar nada (comprobado:
-  una envía el documento a una pasarela de terceros y otra a un proyecto
+  varias de sus variables cambian el destino de una llamada sin mostrar nada (medido:
+  una envía el documento a una pasarela de terceros, otra a un proyecto
   de Google Cloud con facturación), y una lista de exclusión dejaba alguna fuera en cada revisión.
-  Antes de cada segmento, `agy -p /config`, que no consume cuota, debe mostrar
+  Antes de cualquier segmento, `agy -p /config`, que no consume cuota, debe mostrar
   los créditos de IA de pago desactivados, sin clave API ni proyecto de Google Cloud — la
   ausencia de un ajuste implica el rechazo —; de lo contrario, no se traduce nada; el registro de cada
-  llamada debe acreditar después el uso de la suscripción (`authMethod=consumer`); de lo contrario, se
-  rechaza la respuesta.
+  llamada debe después acreditar la suscripción (`authMethod=consumer`); de lo contrario,
+  se rechaza la respuesta.
 - **Aislamiento.** Cada llamada se ejecuta en un directorio personal privado y
   desechable, con un agente de traducción sin herramientas: sus ajustes, reglas,
-  plugins, servidores MCP y hooks de agy no se incorporan, no se añade nada a su
-  historial y la conexión permanece en el llavero, que aipmt nunca lee.
-  Si no se encuentra un agente, agy recurre, sin avisar, a su agente de programación
+  plugins, servidores MCP y hooks de agy no se incluyen, no se añade nada a su
+  historial y la sesión permanece en el llavero, que aipmt nunca lee.
+  Si no se encuentra un agente, agy recurre, en silencio, a su agente de programación
   y sus herramientas: una línea completa del registro debe confirmar el agente correcto — un
   documento que cite ese mensaje no la sustituye —; de lo contrario, se rechaza.
-- **Plataformas**: Linux, en una sesión que tenga un llavero (bus de sesión
+- **Plataformas**: Linux, en una sesión con llavero (bus de sesión
   D-Bus, Secret Service); se acepta macOS, aunque no se han realizado mediciones en él. Se rechaza
   en Windows, donde agy no lee las variables que aíslan cada llamada, y
   en Linux sin bus de sesión — sesión SSH, contenedor, servidor: allí agy
   guarda su token en un archivo de `~/.gemini`, que el aislamiento oculta. El
-  rechazo se produce antes de cualquier ejecución, con su causa, en lugar de esperar un minuto
-  a que aparezca un código de inicio de sesión.
+  rechazo se produce antes de cualquier ejecución, indicando su causa, en lugar de esperar un minuto
+  por un código de inicio de sesión.
 - **Modelos**: los de `agy models`. Los Gemini incluyen el esfuerzo en su nombre
   (`gemini-3.8-flash-medium`…): un nombre sin sufijo se rechaza antes de la llamada,
-  y `--reasoning_effort` no tiene efecto. Por defecto, `gemini-3.8-flash-medium`,
-  y `gemini-3.7-flash-low` con `--eco`; las campañas con las que se establecieron se
+  y `--reasoning_effort` no tiene efecto. Por defecto `gemini-3.8-flash-medium`,
+  y `gemini-3.7-flash-low` en `--eco`; las campañas que los determinaron se
   describen en [Mediciones detalladas](#mediciones-detalladas). Claude y GPT-OSS
-  tienen su propia cuota, mucho menor: alrededor del 1 % de la ventana de
-  5 horas por llamada medida, frente al 0,05 % con Flash.
-- **Cuota**: por grupo, una ventana de 5 horas y otra semanal,
-  proporcional al coste en tokens. Medido en la cuenta del autor: alrededor de
-  16 puntos de la ventana de 5 horas por millón de caracteres de origen con
-  `gemini-3.8-flash-medium`, 14 con `gemini-3.7-flash-medium` y de 7 a 8 con
-  esfuerzo bajo — un README de 40 000 caracteres consume, por tanto, algo más de
+  tienen su propia cuota, mucho menor: aproximadamente el 1 % de la ventana de
+  5 horas por llamada medida, frente al 0,05 % en Flash.
+- **Cuota**: por grupo, una ventana de 5 horas y otra semanal, en
+  proporción al coste en tokens. Medido en la cuenta del autor: aproximadamente
+  16 puntos de la ventana de 5 horas por millón de caracteres de origen en
+  `gemini-3.8-flash-medium`, 14 en `gemini-3.7-flash-medium` y de 7 a 8 con
+  esfuerzo bajo — un README de 40 000 caracteres cuesta, por tanto, algo más de
   medio punto. El límite semanal, por su parte, depende del nivel. Los reintentos siguen
   lo que agy declara reintentable; en caso contrario, una ventana agotada nunca
-  se reintenta: hace que falle cada archivo hasta el restablecimiento
+  se reintenta: hace fallar cada archivo hasta el restablecimiento
   que muestra `/usage`.
 - **Más lento que la API**: en el artículo denso de las mediciones, la mediana es de 3 min 59 s por
-  idioma con `gemini-3.8-flash-medium` y de 3 min 14 s con
+  idioma en `gemini-3.8-flash-medium` y 3 min 14 s en
   `gemini-3.7-flash-medium`, frente a 1 min 18 s para Gemini 3.7 Flash mediante la API.
-- **Interrupción**: Ctrl-C o cerrar el terminal detienen agy junto con el
-  comando, en lugar de dejar que termine su turno consumiendo su cuota; lo mismo ocurre
-  con Codex, Grok CLI y OpenCode. Con `nohup`, la traducción continúa.
-- Se rechaza en CI (`CI` o `GITHUB_ACTIONS` definido): la conexión reside en un
+- **Interrupción**: Ctrl-C, o cerrar el terminal, detienen agy junto con el
+  comando en lugar de dejar que termine su turno consumiendo su cuota; ocurre lo
+  mismo con Codex, Grok CLI y OpenCode. Bajo `nohup`, la traducción continúa.
+- Se rechaza en CI (`CI` o `GITHUB_ACTIONS` definido): la sesión reside en un
   llavero personal. En un runner, `--use_gemini` con `GOOGLE_API_KEY`.
-- Variables: `AGY_BIN` (en su defecto, `PATH` y después `~/.local/bin/agy`),
-  `AGY_TIMEOUT` (segundos por segmento, incluido el inicio, por defecto 900).
+- Variables: `AGY_BIN` (en su defecto, el `PATH` y después `~/.local/bin/agy`),
+  `AGY_TIMEOUT` (segundos por segmento, incluido el arranque, por defecto 900).
 
 **Condiciones de uso: su cuenta está en juego.** Las
 [condiciones de Antigravity](https://antigravity.google/terms) (sección 6) y sus
 [preguntas frecuentes](https://antigravity.google/docs/faq/) prohíben acceder al servicio
-mediante software de terceros utilizando el inicio de sesión de Antigravity — se citan Claude Code,
+mediante software de terceros usando la sesión de Antigravity — se citan Claude Code,
 OpenClaw y OpenCode —, bajo pena de suspensión de la cuenta. aipmt
 no lee ni reutiliza el token: ejecuta el binario oficial en el
 [modo headless](https://antigravity.google/docs/cli/headless/) que Google
@@ -398,13 +398,13 @@ ningún texto resuelve el caso de una herramienta distribuida como esta.
 **Solo documentos públicos.** Según la sección 5 de esas mismas condiciones, los
 intercambios — prompts, respuestas, metadatos — pueden utilizarse para mejorar los
 productos y el aprendizaje automático de Google y ser revisados por
-personas, incluso con una suscripción de pago. La exclusión se realiza mediante el ajuste
-`enableTelemetry`, cuyo efecto no está documentado y que aipmt no establece; sus ajustes
-de agy no se trasladan a su entorno aislado. No envíe nada confidencial por esta vía.
-### Con la suscripción de Claude: `--use_claude_code`
+personas, incluso con una suscripción de pago. Para excluirse hay que usar el ajuste
+`enableTelemetry`, cuyo efecto no está documentado y que aipmt no configura; sus ajustes
+de agy no se trasladan al entorno aislado. No envíe nada confidencial a través de él.
+### Con la suscripción a Claude: `--use_claude_code`
 
 El mismo principio con `claude`, el CLI oficial de Claude Code, en modo `-p`: para
-quienes pagan Claude Pro o Max, la traducción se descuenta de la cuota de
+quien paga Claude Pro o Max, la traducción se descuenta de la cuota de
 la suscripción en lugar de facturarse por token. No debe confundirse con
 `--use_claude`, la API de Anthropic, facturada por uso.
 
@@ -413,71 +413,71 @@ claude                                   # une fois : /login avec le compte de l
 aipmt --use_claude_code --file README.md --target_dir . --target_lang en
 ```
 
-- **Ninguna vía de pago queda abierta, y cada llamada lo demuestra.** Claude
-  Code solo recibe de tu entorno una lista cerrada de variables: ni
+- **No queda abierta ninguna vía de pago, y cada llamada lo demuestra.** Claude
+  Code solo recibe de su entorno una lista cerrada de variables: ni
   clave API, ni token, ni proveedor cloud, ni marcador de la sesión de Claude Code
-  desde la que se lance aipmt. Antes del primer segmento, `claude auth status` debe
+  desde la que se lanzaría aipmt. Antes del primer segmento, `claude auth status` debe
   mostrar la conexión mediante suscripción, sin clave de Console, y `/usage`, que no consume
-  cuota, debe confirmarlo; cada llamada lo confirma a su vez en su
+  cuota, debe certificarlo; cada llamada lo certifica a su vez en su
   evento de inicialización; de lo contrario, se rechaza la respuesta.
-- **Desactiva el «extra usage»** (claude.ai, Configuración → Uso) para
+- **Desactive el «extra usage»** (claude.ai, Configuración → Uso) para
   mantener el coste en cero euros: si está activado, toma el relevo cuando se agota una ventana y
   factura sin mostrar ningún error. aipmt detiene la traducción en cuanto el informe
   de cuota de una llamada lo indica, pero esa llamada ya se ha contabilizado.
-- **Cuota compartida con tus sesiones de Claude Code.** Cada llamada informa
+- **Cuota compartida con sus sesiones de Claude Code.** Cada llamada informa
   del uso de las ventanas de 5 horas y de la semana; por encima del 80 %
   (`AIPMT_CLAUDE_MAX_UTILIZATION`), no se inicia ningún segmento más, para no
-  agotar lo que necesitas para tu trabajo.
+  agotar lo que necesita para su trabajo.
 - **Aislamiento.** Cada llamada se ejecuta sin herramientas, en un directorio privado y
-  desechable, en modo sin personalización: no se cargan tus `CLAUDE.md`, ni tus plugins,
+  desechable, en modo sin personalización: no se cargan sus `CLAUDE.md`, ni sus plugins,
   hooks, servidores MCP o ajustes, y no se conserva nada de la
-  sesión. Los archivos adjuntos están desactivados: un `@chemin` en tu documento
+  sesión. Los archivos adjuntos están desactivados: un `@chemin` en su documento
   sigue siendo texto y no abre ningún archivo (comprobado).
 - **Modelos**: `sonnet` por defecto, con el esfuerzo `low`, y también en `--eco`:
-  `--eco` no cambia nada en esta vía. Medido con los mismos documentos, `haiku`
+  `--eco` no cambia nada en esta vía. Medidos con los mismos documentos, `haiku`
   es el doble de lento —razona sin que se pueda impedir— por
   un coste apenas inferior, y `opus` rechaza contenidos de biología (punto
-  siguiente). Ambos siguen disponibles mediante `--model`; estos alias apuntan al
+  siguiente). Ambos siguen disponibles mediante `--model`; estos alias siguen el
   último modelo de su familia. `fable` y las variantes `[1m]` se rechazan,
-  porque consumen créditos de pago. `--reasoning_effort` regula el esfuerzo,
+  porque consumen créditos de pago. `--reasoning_effort` ajusta el esfuerzo,
   del que una traducción no obtiene ningún beneficio: el razonamiento medido es nulo o casi nulo.
 - **Opus rechaza ciertos contenidos de biología.** Sus salvaguardas son más
-  estrictas que las de Sonnet, y el mensaje de error de Anthropic advierte que
-  «a veces pueden marcar trabajos relacionados con la investigación en biología». Comprobado: una noticia breve de
+  estrictas que las de Sonnet, y el mensaje de error de Anthropic advierte de que
+  «a veces pueden marcar trabajos relacionados con la investigación biológica». Comprobado: una noticia breve de
   seguimiento sobre 279 moléculas generadas provocó el rechazo del artículo en los catorce
   idiomas. No se escribe nada: aipmt rechaza la respuesta cortada, identifica las
   salvaguardas y recomienda `--model sonnet`.
 - Se rechaza en CI (`CI` o `GITHUB_ACTIONS` definido) y en Windows (sin medir).
-- Variables: `AIPMT_CLAUDE_BIN` (en su defecto, `PATH`, después `~/.local/bin/claude`),
-  `AIPMT_CLAUDE_TIMEOUT` (segundos por segmento, por defecto 900),
-  `AIPMT_CLAUDE_MAX_UTILIZATION` (por defecto 0.8), `CLAUDE_CONFIG_DIR` (la cuenta de
-  Claude Code, nunca tomada de un `.env` del proyecto); directorios de trabajo en
-  `XDG_CACHE_HOME/aipmt/claude-code` (por defecto `~/.cache`).
+- Variables: `AIPMT_CLAUDE_BIN` (en su defecto, el `PATH`, y después `~/.local/bin/claude`),
+  `AIPMT_CLAUDE_TIMEOUT` (segundos por segmento, valor por defecto 900),
+  `AIPMT_CLAUDE_MAX_UTILIZATION` (valor por defecto 0.8), `CLAUDE_CONFIG_DIR` (la cuenta de
+  Claude Code, nunca tomada de un `.env` del proyecto); directorios de trabajo bajo
+  `XDG_CACHE_HOME/aipmt/claude-code` (valor por defecto `~/.cache`).
 
-**Condiciones de uso: es tu cuenta la que está en juego.** La
+**Condiciones de uso: es su cuenta la que está en juego.** La
 [página legal de Claude Code](https://code.claude.com/docs/en/legal-and-compliance)
-no impide que «un usuario final inicie sesión en el binario sin modificar de Claude Code
-con su propia suscripción de Claude»: eso es lo que hace aipmt, que ejecuta el
+no impide que «un usuario final inicie sesión en el binario de Claude Code sin modificar
+con su propia suscripción a Claude»: eso es lo que hace aipmt, que ejecuta el
 binario oficial y nunca lee el token. Pero Anthropic «no permite
-a desarrolladores externos […] enrutar solicitudes mediante las credenciales de los planes Free, Pro o Max
+que desarrolladores externos […] canalicen solicitudes a través de las credenciales de los planes Free, Pro o Max
 en nombre de sus usuarios», prefiere la clave API para las herramientas
-de terceros, «incluidos los proyectos open source», y se reserva el derecho a descontar su
+de terceros, «incluidos los proyectos de código abierto», y se reserva el derecho de descontar su
 uso de los créditos de pago
 ([ayuda de Claude](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)).
 Ningún texto resuelve el caso de una herramienta distribuida que ejecuta el binario.
 
-**Datos**: en las cuentas Free, Pro y Max, el entrenamiento de modelos
+**Datos**: en las cuentas Free, Pro y Max, el entrenamiento de los modelos
 también se aplica a Claude Code cuando el ajuste de privacidad lo permite
-([página de datos](https://code.claude.com/docs/en/data-usage)). aipmt no conserva
-ninguna transcripción local (`--no-session-persistence`). No lo uses para procesar
+([página sobre datos](https://code.claude.com/docs/en/data-usage)). aipmt no conserva
+ninguna transcripción local (`--no-session-persistence`). No envíe
 nada confidencial.
 
-### Hacia el proveedor que elijas: `--use_opencode`
+### Hacia el proveedor que elija: `--use_opencode`
 
 [OpenCode](https://opencode.ai) es un agente de código open source (MIT) que
 enruta hacia los proveedores configurados en él: clave API, suscripción,
 pasarela OpenCode Zen (modelos gratuitos, sin cuenta) o modelo local. Aquí se
-han medido dos vías de principio a fin, Zen y Ollama.
+han medido de principio a fin dos vías: Zen y Ollama.
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash   # ou : npm install -g opencode-ai
@@ -493,23 +493,23 @@ aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir 
 ```
 
 `--model` es obligatorio: sin él, OpenCode recurriría a un modelo gratuito
-cuyos intercambios pueden servir para el entrenamiento, y esa elección no se toma por
-ti.
+cuyos intercambios pueden utilizarse para el entrenamiento, y esa elección no se hace
+por usted.
 
 Aislamiento en cada llamada:
 
-- una configuración inline, con prioridad sobre la tuya, define un agente `aipmt`
-  con todas las herramientas denegadas (`permission: { "*": "deny" }`), el uso compartido de
+- una configuración inline, con prioridad sobre la suya, define un agente `aipmt`
+  con todas las herramientas denegadas (`permission: { "*": "deny" }`), uso compartido de
   sesiones desactivado, `--pure`, nunca `--auto`;
 - directorio de trabajo desechable y vacío, con `OPENCODE_DISABLE_PROJECT_CONFIG` y
   `OPENCODE_DISABLE_CLAUDE_CODE` establecidos: sin ellos, OpenCode inyecta en el
   prompt el `AGENTS.md` del directorio actual y `~/.claude/CLAUDE.md`. El
-  `~/.config/opencode/AGENTS.md` global sigue inyectándose, OpenCode no permite
+  `~/.config/opencode/AGENTS.md` global sigue inyectándose; OpenCode no permite
   excluirlo;
 - contrato de salida: código de retorno 0, ningún evento `error`, ninguna llamada
   a herramientas, último paso en `stop`, texto no vacío y el agente `aipmt`
-  efectivamente cargado: un `--agent` desconocido no hace fallar OpenCode,
-  que recurre silenciosamente al agente de programación;
+  efectivamente cargado: un `--agent` desconocido no hace fallar OpenCode, sino que
+  recurre silenciosamente al agente de programación;
 - no se transmite ninguna clave de `aipmt`, salvo `OPENCODE_API_KEY`, la clave
   del propio OpenCode. Los proveedores se configuran en OpenCode, no en
   el `.env` de `aipmt`.
@@ -517,16 +517,16 @@ Aislamiento en cada llamada:
 Conviene saber:
 
 - Los modelos gratuitos de Zen cambian, tienen límites no documentados y
-  sus intercambios pueden servir para el entrenamiento: para documentación
+  sus intercambios pueden utilizarse para el entrenamiento: para documentación
   pública, no para contenido privado.
 - Un modelo local debe ofrecer al menos 16 k tokens de contexto, ya que los segmentos
-  alcanzan los 16 000 caracteres. Ollama suele configurar 4 096: usa
+  alcanzan los 16 000 caracteres. Ollama suele configurar 4 096: utilice
   un `Modelfile` con `PARAMETER num_ctx 32768`.
 - `--eco` no tiene efecto; `--reasoning_effort` se transmite tal cual como
   `--variant` de OpenCode.
 - OpenCode registra cada sesión en `~/.local/share/opencode/`.
-- Variables: `OPENCODE_BIN` (en su defecto, `PATH`, después `~/.opencode/bin/opencode`),
-  `OPENCODE_TIMEOUT` (segundos por segmento, por defecto 600). `OPENCODE_CONFIG`
+- Variables: `OPENCODE_BIN` (en su defecto, el `PATH`, y después `~/.opencode/bin/opencode`),
+  `OPENCODE_TIMEOUT` (segundos por segmento, valor por defecto 600). `OPENCODE_CONFIG`
   se pasa tal cual a OpenCode.
 
 Ejemplo de un modelo local mediante Ollama, en `~/.config/opencode/opencode.json`:
@@ -571,18 +571,18 @@ otro provider ofrece aquí.
 aipmt --use_openrouter --model z-ai/glm-5.2 --file README.md --target_dir . --target_lang en
 ```
 
-`--model` es obligatorio. Una comprobación previa, ejecutada antes de cualquier facturación, resuelve
+`--model` es obligatorio. Un preflight, ejecutado antes de cualquier facturación, resuelve
 dos particularidades del enrutamiento:
 
-- **Un mismo modelo se sirve desde decenas de proveedores de alojamiento con límites
-  distintos**: para `z-ai/glm-5.3-flash`, 23 proveedores de alojamiento, uno de ellos limitado a
-  2 048 tokens de salida. La comprobación previa lee `/api/v1/models/{modèle}/endpoints`,
+- **Un mismo modelo es servido por decenas de proveedores de alojamiento con límites
+  diferentes**: en `z-ai/glm-5.3-flash`, 23 proveedores de alojamiento, uno de ellos limitado a
+  2 048 tokens de salida. El preflight lee `/api/v1/models/{modèle}/endpoints`,
   descarta los proveedores de alojamiento con menos de 8 000 tokens de salida o con un estado degradado y
-  fija los demás mediante `allow_fallbacks: false`.
-- **El razonamiento se factura a la tarifa de salida**: 107 tokens frente a 2 para
-  una respuesta «OK» de `z-ai/glm-5.2`. Está desactivado por defecto; los modelos
-  que lo imponen reciben el nivel de esfuerzo más bajo que aceptan, ya que el valor predeterminado del
-  catálogo puede agotar la salida antes de terminar la traducción.
+  fija los demás con `allow_fallbacks: false`.
+- **El razonamiento se factura a la tarifa de salida**: 107 tokens frente a 2 en
+  una respuesta «OK» de `z-ai/glm-5.2`. Se desactiva por defecto; los modelos
+  que lo imponen reciben el esfuerzo más bajo que aceptan, ya que el valor por defecto del
+  catálogo puede saturar la salida antes de terminar la traducción.
   `--reasoning_effort` sigue teniendo prioridad.
 
 ```
@@ -590,18 +590,18 @@ dos particularidades del enrutamiento:
   sortie plafonnée à 32768, raisonnement coupé
 ```
 
-- La ventana de contexto se obtiene del catálogo. Un modelo con menos de 16 400 tokens se
+- La ventana de contexto procede del catálogo. Un modelo con menos de 16 400 tokens se
   rechaza antes de cualquier llamada: 8 400 para el prompt y el segmento, 8 000 de salida
   como mínimo.
 - Un slug ausente del catálogo, un catálogo inaccesible o la ausencia
   de un proveedor de alojamiento que cumpla el límite detienen el comando.
 - `finish_reason=length` con una salida vacía indica un presupuesto consumido por el
-  razonamiento, no un truncamiento: el mensaje lo distingue.
+  razonamiento, no un truncamiento: el mensaje distingue ambos casos.
 - `--eco` no tiene efecto.
 - Variables: `OPENROUTER_API_KEY` (<https://openrouter.ai/keys>),
-  `OPENROUTER_BASE_URL` (por defecto `https://openrouter.ai/api/v1`, `https://`
-  obligatorio), `OPENROUTER_TIMEOUT` (por defecto 900), `OPENROUTER_PREFLIGHT_TIMEOUT`
-  (por defecto 30).
+  `OPENROUTER_BASE_URL` (valor por defecto `https://openrouter.ai/api/v1`, `https://`
+  obligatorio), `OPENROUTER_TIMEOUT` (valor por defecto 900), `OPENROUTER_PREFLIGHT_TIMEOUT`
+  (valor por defecto 30).
 
 ### Nota de traducción
 
@@ -610,7 +610,7 @@ front matter) o `both` (`--note_position`), en formato `legacy` (párrafo en
 negrita, por defecto) o `marker` (`--note_format`). El formato `marker` es una
 definición de referencia Markdown invisible,
 `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"`,
-seguida de una cita en negrita: legible en GitHub, utilizable durante el build por un
+seguida de una cita en negrita: legible en GitHub y utilizable durante el build por un
 plugin remark.
 
 ```bash
@@ -627,7 +627,7 @@ secciones, subtítulos, enlaces, URL distintas, bloques de código,
 códigos inline, filas de tabla, bloques de cita y palabras en negrita.
 
 «Sin diferencias» significa «nada detectado», no «idéntico»: el comparador
-cuenta elementos sin leer su contenido. No señala ni un título de
+cuenta elementos sin leer su contenido. No señala un título de
 nivel 4 eliminado, ni el texto de un código inline sustituido, ni una bandera
 cambiada, ni un enlace interno generado con un paréntesis de más,
 `[texte]((#ancre))`, que ya no lleva a ninguna parte; tampoco evalúa el
@@ -637,7 +637,7 @@ idioma.
 
 Una edición del [seguimiento de IA de jls42.org](https://jls42.org/fr/news):
 589 líneas, 140 enlaces, 21 secciones, 3 citas en inglés protegidas. Campaña
-del 4 y 5 de septiembre de 2026.
+de los días 4 y 5 de septiembre de 2026.
 
 | Modelo                                          | Acceso             | Escritas | Sin diferencias | Mediana/idioma |
 | ----------------------------------------------- | ------------------ | ------- | ------------ | -------------- |
@@ -667,50 +667,50 @@ figura en la tabla inicial. No se incluyen tres campañas interrumpidas:
 `qwen3.5-27b` (9 idiomas) y `kimi-k2.6` (4) por falta de crédito,
 `z-ai/glm-5.3-flash`, cuyos dos fallos se debían a un ajuste de razonamiento
 que el provider corrige desde entonces. Las filas de OpenRouter se midieron con
-los ajustes predeterminados del enrutador, antes de `--use_openrouter`; `z-ai/glm-5.2`,
+los ajustes por defecto del enrutador, antes de `--use_openrouter`; `z-ai/glm-5.2`,
 medido de nuevo con el provider incluido, obtiene el mismo 14/14. Las cifras se
 recalcularon el 10 de septiembre con el comparador actual: `qwen3.8-flash` y
 `qwen3.7-flash` ganan un idioma cada uno respecto a la primera
 publicación; las demás no cambian.
 
-Las filas `--use_antigravity` se midieron el 26 de septiembre con el mismo
+Las filas de `--use_antigravity` se midieron el 26 de septiembre con el mismo
 artículo, con cuatro traducciones en paralelo: `gemini-3.7-flash-medium` por la mañana,
-`gemini-3.8-flash-medium` por la tarde. En inglés, cada uno eliminó por su cuenta
+`gemini-3.8-flash-medium` por la tarde. En inglés, cada uno eliminó por sí mismo
 las tres líneas de traducción francesa bajo las citas, sin inventar ninguna
 bandera, y las citas en inglés están intactas: la limpieza de respaldo no tuvo
 que hacer nada. En `--eco` (`gemini-3.7-flash-low`), con solo cuatro idiomas
-(en, ja, ar, hi): 4 escritas de 4, todas sin diferencias, con una mediana de
-1 min 52 s. Comprobación adicional el mismo día con una edición más reciente del seguimiento,
+(en, ja, ar, hi): 4 escritas de 4, todas sin diferencias, con una mediana de 1 min 52 s.
+Prueba de contraste el mismo día con una edición más reciente del seguimiento,
 la del 25 de septiembre (438 líneas, 2 citas en inglés), traducida fuera del
-blog mediante `gemini-3.7-flash-medium`: 14 escritas de 14, todas sin diferencias, entre 87 y
+blog por `gemini-3.7-flash-medium`: 14 escritas de 14, todas sin diferencias, de 87 a
 128 s por idioma.
 
-Las filas `--use_claude_code` se midieron el 26 de septiembre con el mismo
+Las filas de `--use_claude_code` se midieron el 26 de septiembre con el mismo
 artículo, con cuatro traducciones en paralelo y el esfuerzo `low`. Con `sonnet`, las
 citas en inglés están intactas en los catorce idiomas y, en inglés, el
-modelo eliminó por su cuenta las líneas de traducción francesa, sin inventar ninguna
+modelo eliminó por sí mismo las líneas de traducción francesa, sin inventar ninguna
 bandera. `opus` no escribió ningún idioma: en todos ellos, sus salvaguardas
-detuvieron la respuesta en el último segmento, por una noticia breve sobre 279 moléculas
-generadas para un sitio de unión. Enviada por separado, esa noticia breve se rechaza
+detuvieron la respuesta en el último segmento debido a una noticia breve sobre 279 moléculas
+generadas para un sitio de unión. Enviada por separado, esta noticia se rechaza
 por la categoría «bio»; `sonnet` la tradujo en todos los idiomas. `haiku` escribe
 los catorce idiomas; en tres (en, pl, ro), un título de sección pasa del
 nivel 2 al nivel 1. Razona sin que se pueda impedir —el 61 % de
 sus tokens de salida—, de ahí que tarde más del doble que `sonnet`.
 
-Las filas `claude-sonnet-5-5`, `claude-haiku-5-5` y `claude-haiku-4-5` se
+Las filas de `claude-sonnet-5-5`, `claude-haiku-5-5` y `claude-haiku-4-5` se
 midieron el 18 de octubre mediante la API de Anthropic, con el mismo artículo y cuatro
-traducciones en paralelo por modelo. Sonnet 5.5 rechaza que se desactive su
+traducciones en paralelo por modelo. Sonnet 5.5 no permite desactivar su
 reflexión: aipmt le envía el ajuste más bajo que acepta, y sus
 respuestas no contienen ninguna. Escribe los catorce idiomas sin diferencias y sin
-repetir ningún segmento; en inglés, eliminó por su cuenta las líneas de
+repetir ningún segmento; en inglés, eliminó por sí mismo las líneas de
 traducción francesa, sin inventar ninguna bandera, y las citas en inglés están
 intactas en todos los idiomas. Haiku 5.5 se mide con su reflexión adaptativa: con la reflexión
 desactivada, dejaba párrafos enteros en francés, que la comprobación rechaza:
 3 idiomas escritos de 14. Los dos Haiku tropiezan con la misma noticia breve: Haiku 5.5
 cambia el nivel de su título o lo duplica en japonés, coreano y
 chino; Haiku 4.5 lo pasa al nivel 1 en siete idiomas y lo deja en
-francés en la traducción al japonés. Haiku 4.5 cuesta 3,67 $ para los dos documentos en los
-catorce idiomas, Haiku 5.5 0,57 $, Sonnet 5.5 9,21 $.
+francés en la traducción al japonés. Haiku 4.5 cuesta 3,67 $ por los dos documentos en los
+catorce idiomas; Haiku 5.5, 0,57 $; Sonnet 5.5, 9,21 $.
 ### README de este proyecto, Markdown estándar
 
 Revisión fijada el 9 de septiembre de 2026: 785 líneas, 285 códigos en línea, 40
@@ -733,31 +733,31 @@ cierres de bloques, 89 líneas de tabla. Cuatro traducciones en paralelo.
 | `claude-haiku-5-5`                              | 12/14   | ❌ 12/14   | 1 min 14 s     | 2 idiomas rechazados (ar, hi): códigos en línea perdidos en la respuesta        |
 | `mistral-large-latest`                          | 14/14   | ❌ 1/14    | 2 min 44 s     | una sección perdida (ar, hi, ko); bloques de código añadidos (ja, ko, ro, zh) |
 
-Dos campañas interrumpidas no se incluyen en los resultados: Grok, cuya sesión CLI caducó
+Dos campañas interrumpidas no se puntúan: Grok, cuya sesión CLI caducó
 tras doce idiomas (once sin diferencias), y `qwen3.8-flash`, con un HTTP 429 de su
 proveedor de alojamiento tras dos. `opencode/mimo-v2.5-free` y `ollama/gpt-oss-20b-32k`
 no se volvieron a medir en esta revisión; en la de los días 4 y 5 de septiembre,
-277 líneas más corta, cada uno escribía 9 traducciones de 14, de las cuales 7
+con 277 líneas menos, cada uno generaba 9 traducciones de 14, de las cuales 7
 y 1 sin diferencias.
 
 Las filas `--use_antigravity` y `--use_claude_code` no se midieron en
-la revisión fijada, sino el 26 de septiembre en la publicada con la 1.14.0 — y
-las filas `claude-sonnet-5-5`, `claude-haiku-5-5` y `claude-haiku-4-5` el 18 de
-octubre, en esa misma revisión: 600 líneas, 257 códigos en línea, 30 cierres de bloques, 85
-líneas de tabla. Al ser
-185 líneas más corta, no se puede comparar punto por punto con las demás filas;
+la revisión fijada, sino el 26 de septiembre en la publicada con la 1.14.0; y
+las filas `claude-sonnet-5-5`, `claude-haiku-5-5` y `claude-haiku-4-5` el 18
+de octubre, en la misma: 600 líneas, 257 códigos en línea, 30 cierres de bloques, 85
+líneas de tabla. Al tener
+185 líneas menos, no se puede comparar punto por punto con las demás filas;
 esas filas sí se pueden comparar entre sí. En cuanto a los enlaces internos, que el
 comparador no comprueba, `gemini-3.8-flash-medium` los mantuvo intactos en
 los catorce idiomas, `gemini-3.7-flash-medium` los rompió en italiano;
 `sonnet` y `opus` los mantuvieron intactos en todos, `haiku` los duplicó en
 inglés; `claude-sonnet-5-5` y `claude-haiku-4-5` los mantuvieron intactos en
-los catorce idiomas, `claude-haiku-5-5` en los doce que escribió.
+los catorce idiomas, `claude-haiku-5-5` en los doce en los que generó traducciones.
 
 ### Cuatro README de proyectos conocidos
 
-FastAPI, Ollama, tldr-pages y Vue.js, tomados tal cual de GitHub — unos
+FastAPI, Ollama, tldr-pages y Vue.js, tomados tal cual de GitHub: unos
 documentos más fáciles que los dos anteriores. La campaña se centraba en los modelos
-con dificultades; Gemini sirve aquí como punto de comparación.
+con dificultades; Gemini sirve como punto de comparación.
 
 | Modelo                    | Alcance                  | Escritas | Sin diferencias   |
 | ------------------------- | -------------------------- | ------- | ------------ |
@@ -766,16 +766,16 @@ con dificultades; Gemini sirve aquí como punto de comparación.
 | `grok-4.6` (suscripción)   | 4 proyectos × ar, hi, ja, zh | 16/16   | ❌ 14/16     |
 | `ollama/gpt-oss-20b-32k`  | 4 proyectos × ar, hi, ja, zh | 15/16   | ❌ 9/16      |
 
-### Qué no son estas mediciones
+### Lo que estas mediciones no son
 
-- **No son una clasificación exhaustiva**: solo OpenRouter ofrece más de cuatrocientos
+- **No es una clasificación exhaustiva**: solo OpenRouter ofrece más de cuatrocientos
   modelos; se han medido unos quince.
-- **Son duraciones orientativas**: de tres a seis traducciones en paralelo según
+- **Duraciones orientativas**: de tres a seis traducciones en paralelo según
   las campañas, y la velocidad de un proveedor varía a lo largo del día.
-- **Son observaciones fechadas**: los modelos cambian bajo el mismo nombre, y sus
+- **Observaciones fechadas**: los modelos cambian bajo el mismo nombre, y sus
   documentos no son los nuestros.
 
-Para repetir la medición con sus documentos, sobre una copia fija del archivo:
+Para repetir la medición con sus documentos, sobre una copia fijada del archivo:
 
 ```bash
 aipmt --file reference.md --target_dir out/ --source_lang fr --target_lang ja --use_gemini --force
@@ -807,13 +807,13 @@ pre-commit install --hook-type pre-push  # mypy, SAST, pip-audit, tests avant ch
 ```
 
 Las 28 traducciones del repositorio (README y CHANGELOG, catorce idiomas) se
-regeneran con `./regen_translations.sh --force` — Codex y `gpt-6.1-sol` con
-la suscripción a ChatGPT por defecto, cuatro en paralelo. `REGEN_PROVIDER` y
-`REGEN_MODEL` cambian la vía utilizada: `antigravity` sigue usando una suscripción, la
+regeneran con `./regen_translations.sh --force`: Codex y `gpt-6.1-sol` con
+la suscripción de ChatGPT por defecto, cuatro en paralelo. `REGEN_PROVIDER` y
+`REGEN_MODEL` cambian la vía: `antigravity` sigue usando una suscripción, la
 de Google, y se permite sin excepción; una API de pago (`openai`, `gemini`,
 `grok`, `openrouter`) se rechaza sin `REGEN_ALLOW_PAID_API=1`;
 `REGEN_JOB_TIMEOUT` limita la duración de cada job (600 s, 1 800 s en Codex y
-Antigravity). Los detalles de las herramientas se encuentran en `CLAUDE.md`.
+Antigravity). Los detalles de las herramientas están en `CLAUDE.md`.
 
 ## Proyectos que utilizan este script
 
@@ -828,27 +828,27 @@ Correo electrónico: contact@jls42.org
 
 ## Licencia
 
-GNU GENERAL PUBLIC LICENSE Versión 3. Consulte [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
+GNU GENERAL PUBLIC LICENSE Version 3. Véase [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE).
 
 ## Advertencia
 
-Este programa se distribuye **sin garantía alguna**, según los términos de las
+Este programa se distribuye **sin ninguna garantía**, conforme a los términos de las
 secciones 15 y 16 de la GPL v3: se proporciona «tal cual», sin garantía de
-comerciabilidad ni de adecuación para un fin particular, y su autor no puede ser
-considerado responsable de ningún daño derivado de su uso. El texto de la
+comerciabilidad ni de idoneidad para un fin determinado, y su autor no puede ser
+considerado responsable de los daños derivados de su uso. El texto de la
 licencia prevalece sobre este resumen.
 
 - **Revise antes de publicar.** Las protecciones cubren los bloques de código, el
-  código en línea, las URL, las anclas y las citas del modo `--news` — ni los
-  títulos, ni las tablas, ni el front matter, ni el sentido de sus frases.
-- **Sus documentos se envían al proveedor elegido**, conforme a sus condiciones
+  código en línea, las URL, las anclas y las citas del modo `--news`, pero no los
+  títulos, las tablas, el front matter ni el sentido de sus frases.
+- **Sus documentos se envían al proveedor elegido**, bajo sus condiciones
   de uso y su política de datos. Algunos modelos gratuitos pueden
-  reutilizar sus intercambios para el entrenamiento, y las condiciones de Antigravity
-  permiten a Google reutilizarlos y someterlos a revisión humana,
-  incluso con una suscripción de pago; un modelo local es la única vía que evita
-  que cualquier dato salga de su equipo.
+  reutilizar sus conversaciones para el entrenamiento, y las condiciones de Antigravity
+  permiten a Google reutilizarlas y someterlas a revisión humana,
+  incluso con una suscripción de pago; un modelo local es la única vía que no hace
+  salir ningún dato de su equipo.
 - **Las llamadas a la API se le facturan.** Este programa no limita el
-  gasto: un documento largo, un nuevo intento tras un fallo o un modelo que razona
+  gasto: un documento largo, un reintento tras un fallo o un modelo que razona
   mucho cuestan más.
 - **Las mediciones publicadas son observaciones fechadas**, no garantías.
 
