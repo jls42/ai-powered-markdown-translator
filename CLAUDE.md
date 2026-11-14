@@ -125,6 +125,9 @@ Les providers eux-mêmes les traduisent :
   Dependabot fusionne seul les mineures et correctifs pip, jamais les majeures.
 - **Release en deux phases** : `./release.sh --auto` avant le merge (sans tag),
   `./release.sh --tag-only --yes` après ; la GitHub Release publie sur PyPI.
+  **Dans la foulée, mettre à jour le poste**, une fois la publication
+  terminée : `pipx upgrade ai-powered-markdown-translator`, dépendances
+  comprises, puis vérifier les versions (`docs/release.md`, phase 4).
 
 ## Interdits propres à un provider
 
