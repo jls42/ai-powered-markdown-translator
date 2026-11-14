@@ -113,6 +113,7 @@ MODEL_TOKEN_LIMITS = {
     "ministral-3b-2512": 131072,
     # Google Gemini — la limite d'input exacte est 1048576, pas 1000000.
     # gemini-2.0-* et gemini-3-pro-preview ont été arrêtés en 2026.
+    "gemini-3.8-flash": 1048576,
     "gemini-3.7-flash": 1048576,
     "gemini-3.6-flash": 1048576,
     "gemini-3.5-flash": 1048576,

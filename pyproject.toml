@@ -58,11 +58,18 @@ classifiers = [
 #
 # certifi n'y figure pas : il n'est pas importé, il arrive par les SDK. Il reste
 # surveillé par check-deps-fresh.sh, où l'enjeu est le magasin de CA.
+#
+# google-genai >= 2.18.0 : c'est la première version qui réessaie un délai
+# dépassé (`_HTTPX_TRANSIENT_EXC`, absent de 2.17.0, cherché dans chaque wheel
+# le 2026-11-15) ; avant, le provider Gemini borne chaque appel à 5 minutes
+# mais n'en relance aucun. Validé le même jour sur 2.18.0, sous Python 3.11 :
+# suite complète (751 tests) et relance d'un 503 puis d'un délai dépassé par le
+# vrai SDK, sur un transport simulé.
 dependencies = [
     "openai>=1.58.1",
     "anthropic>=0.47.0",
     "mistralai>=2.0.0",
-    "google-genai>=1.51.0",
+    "google-genai>=2.18.0",
     "langdetect>=1.0.9",
     "python-dotenv>=1.2.2",
 ]

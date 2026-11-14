@@ -701,7 +701,9 @@ class TestProviderClientInit(unittest.TestCase):
             patch("aipmt.providers.gemini.genai") as mock_genai,
         ):
             gemini._init_gemini_client(args)
-            mock_genai.Client.assert_called_once_with(api_key=gemini_env["GEMINI_API_KEY"])
+            mock_genai.Client.assert_called_once_with(
+                api_key=gemini_env["GEMINI_API_KEY"], http_options=gemini.GEMINI_HTTP_OPTIONS
+            )
         self.assertEqual(args.model, gemini.ECO_MODEL_GEMINI)
 
     def test_init_openai_missing_key_raises(self):
