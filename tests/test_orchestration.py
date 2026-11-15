@@ -899,9 +899,11 @@ class TestDisplayedPaths(unittest.TestCase):
 
     def test_absolute_file_outside_source_dir_is_shown_as_given(self):
         args = _base_args(source_dir="content/posts", target_dir="out")
-        source, output = naming._resolve_relative_paths("/tmp/doc/guide.md", "/tmp/o/g-en.md", args)
-        self.assertEqual(source, "/tmp/doc/guide.md")
-        self.assertEqual(output, "/tmp/o/g-en.md")
+        source, output = naming._resolve_relative_paths(
+            "/srv/doc/guide.md", "/srv/sortie/guide-en.md", args
+        )
+        self.assertEqual(source, "/srv/doc/guide.md")
+        self.assertEqual(output, "/srv/sortie/guide-en.md")
 
     def test_file_under_source_dir_keeps_its_relative_form(self):
         args = _base_args(source_dir="content/posts", target_dir="content/en")
