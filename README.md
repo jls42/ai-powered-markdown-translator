@@ -250,7 +250,7 @@ aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lan
 | Claude      | `claude-sonnet-5-5`                                                  | `claude-haiku-5-5`        |
 | Mistral     | `mistral-large-latest`                                               | `mistral-small-latest`    |
 | Gemini      | `gemini-4-hydrogen`                                                  | `gemini-3.1-flash-lite`   |
-| Codex       | `gpt-6.1-sol` (aussi `gpt-5.6-sol`, `terra` et `luna` par `--model`) | `gpt-6-luna`              |
+| Codex       | `gpt-6.1-sol` (aussi `gpt-5.6-sol`, `terra` et `luna` par `--model`) | `gpt-5.6-luna`            |
 | Grok API    | `grok-4.7`                                                           | `grok-4.3`                |
 | Grok CLI    | `grok-4.7`                                                           | idem — `--eco` sans effet |
 | Antigravity | `gemini-3.8-flash-medium`                                            | `gemini-3.8-flash-low`    |
@@ -289,8 +289,8 @@ aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
   sous-processus : une clé présente ne fait jamais basculer vers l'API.
 - Chaque segment coûte au moins un « message » de la fenêtre de 5 heures — deux
   si sa validation échoue et qu'il est retenté. OpenAI annonce, à titre
-  d'estimation, 250-2 000 messages/5 h pour `gpt-5.6-luna`, l'éco jusqu'à la
-  1.18.0, et 10-100 pour `gpt-5.6-sol` sur un plan Plus.
+  d'estimation, 250-2 000 messages/5 h pour `gpt-5.6-luna` (`--eco`) et
+  10-100 pour `gpt-5.6-sol` sur un plan Plus.
 - `--model gpt-5.6-sol`, le défaut jusqu'à la 1.16.3, `--model gpt-5.6-terra`
   et `--model gpt-5.6-luna` passent aussi par l'abonnement.
 - Un 429 du serveur ne fait pas perdre le fichier : Codex se reconnecte seul,

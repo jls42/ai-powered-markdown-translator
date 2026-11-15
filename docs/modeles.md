@@ -26,7 +26,7 @@ This uses faster/cheaper models (gpt-6-luna) which are sufficient for documentat
 | Claude      | `claude-sonnet-5-5`                   | `claude-haiku-5-5`      |
 | Mistral     | `mistral-large-latest`                | `mistral-small-latest`  |
 | Gemini      | `gemini-4-hydrogen`                   | `gemini-3.1-flash-lite` |
-| Codex       | `gpt-6.1-sol`                         | `gpt-6-luna`            |
+| Codex       | `gpt-6.1-sol`                         | `gpt-5.6-luna`          |
 | Grok API    | `grok-4.7`                            | `grok-4.3`              |
 | Grok CLI    | `grok-4.7`                            | `grok-4.7` (sans effet) |
 | Antigravity | `gemini-3.8-flash-medium`             | `gemini-3.8-flash-low`  |
@@ -79,7 +79,7 @@ contrôlé par `scripts/compare_structure.py`.
 | Gemini éco  | `gemini-3.1-flash-lite`, inchangé                   | $0.25 / $1.50                                  | 2 sur 3 sans écart, 45 s ; `gemini-3.5-flash-lite` ($0.30 / $2.50) : 0 sur 3, cf. ci-dessous             |
 | Grok API    | `grok-4.6` → `grok-4.7`, effort `low`               | $2 / $6, inchangé                              | 1 sur 1 sans écart, 190 s à `low`, 711 s à `medium` ; `grok-4.6` à `medium` 372 s                        |
 | Grok éco    | `grok-4.3`, inchangé, effort `none`                 | $1.25 / $2.50                                  | 3 écrites sur 3, 1 sans écart (un ou deux codes en ligne en trop), 176 à 201 s ; 1.18.0 : 1 écrite sur 2 |
-| Codex éco   | `gpt-5.6-luna` → `gpt-6-luna`                       | abonnement                                     | 1 sur 1 sans écart, 301 s ; comparaison interrompue par le quota                                         |
+| Codex éco   | `gpt-5.6-luna`, rétabli par la 1.19.1               | abonnement                                     | 2 sur 2 sans écart ; `gpt-6-luna` 3 sur 4, pour trois fois plus de quota (`docs/providers/codex.md`)     |
 | Antigravity | éco `gemini-3.7-flash-low` → `gemini-3.8-flash-low` | abonnement                                     | l'ancien éco est refusé par agy ; cf. `docs/providers/antigravity.md`                                    |
 
 Inchangés, vérifiés : Claude (`claude-sonnet-5-5` et `claude-haiku-5-5` restent
@@ -105,11 +105,14 @@ Trois faits mesurés ce jour-là, qui valent au-delà des défauts :
   écart et un avec deux gras en trop, en 45 s ; `gemini-3.5-flash-lite` en
   perd deux sur des codes en ligne supprimés (segment 3 sur 4, refusés par la
   garde des jetons après une relance) et rend le troisième avec deux codes et
-  une ligne de tableau en trop. L'éco ne change donc pas. Son arrêt est
-  annoncé au plus tôt le 2027-05-07 : il reste à essayer 3.5 Flash Lite à un
-  niveau de raisonnement moins bas, ou Gemini 4 Hydrogen à `low` — ce qui
-  demande qu'aipmt sache forcer le niveau d'un Gemini, `--reasoning_effort`
-  n'étant pas lu par ce provider.
+  une ligne de tableau en trop. L'éco ne change donc pas. Plus de raisonnement
+  n'y change rien : niveau imposé à `low` puis à `medium` (cache du niveau
+  accepté rempli avant l'appel, `--reasoning_effort` n'étant pas lu par ce
+  provider), trois README chacun, un seul sans écart à chaque niveau, un
+  refusé, un avec un code ou un lien de différence. Son arrêt est annoncé au
+  plus tôt le 2027-05-07, sans remplaçant validé à ce prix : les candidats
+  restants, Gemini 3.8 Flash et Gemini 4 Hydrogen, coûtent de trois à six fois
+  plus cher. À remesurer quand Google publiera un autre Flash Lite.
 - **Un modèle plus récent n'est pas plus rapide** : `gpt-6.1-terra` met de 190
   à 245 s là où `gpt-5.6-terra` en met 116, à effort égal. Il est retenu pour son prix
   et sa structure, pas pour sa latence.
