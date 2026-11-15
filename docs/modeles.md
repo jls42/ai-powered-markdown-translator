@@ -67,4 +67,16 @@ comptait 24 requêtes sur 20 pour 3.8 Flash, et aucune ligne pour 3.7 Flash,
 alors que trois seulement avaient été adressées à 3.8 Flash. Une mesure de défaut sur
 quatorze langues ne tient donc pas dans une journée gratuite.
 
-> **Recommendation for long-form translations** : `--use_gemini` (default = `gemini-3.7-flash` at the time, `gemini-3.8-flash` since 1.18.0) preserves markdown structure reliably on non-Latin scripts (PL, JA, ZH, AR, HI), including `--news` mode where placeholder fidelity matters. Measured on this README translated to Japanese: structure identical to `gemini-3.1-pro-preview` (21 lists, 18 code fences, 13 HTML links, 13 images, all URLs preserved) at ~6x lower latency. OpenAI remains the default for backward compatibility.
+Sur ce niveau gratuit, 3.8 Flash est aussi **lent** quand Google le dit en
+« high demand ». Le 2026-11-15, un fichier de 444 octets (un segment), traduit
+par `--use_gemini` sans `--model`, structure identique les deux fois :
+
+| Heure  | Durée du fichier | Déroulé                                                                                                              |
+| ------ | ---------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 9 h 20 | 245 s            | `minimal` refusé par un 400, `low` accepté ; relances éventuelles invisibles (avis de relance pas encore écrit)      |
+| 9 h 31 | 502 s            | `minimal` refusé ; `low` coupé par « 504 DEADLINE_EXCEEDED » au bout de 298 s ; relance après 10 s, réussie en 194 s |
+
+La veille à 23 h 45, `--eco` (3.1 Flash Lite) répondait en 1,14 s. Le niveau payant
+n'est pas mesuré.
+
+> **Recommendation for long-form translations** : `--use_gemini` (default = `gemini-3.7-flash` at the time, `gemini-3.8-flash` since 1.18.0) preserves markdown structure reliably on non-Latin scripts (PL, JA, ZH, AR, HI), including `--news` mode where placeholder fidelity matters. Measured on this README translated to Japanese: structure identical to `gemini-3.1-pro-preview` (21 lists, 18 code fences, 13 HTML links, 13 images, all URLs preserved) at ~6x lower latency. That latency was measured on 3.7 Flash; on the free tier, 3.8 Flash is far slower (see above). OpenAI remains the default for backward compatibility.

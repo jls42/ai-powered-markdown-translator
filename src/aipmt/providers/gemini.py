@@ -5,7 +5,9 @@ niveau accepté est mémorisé par modèle, pour ne pas repayer la cascade de
 refus à chaque segment.
 """
 
+import logging
 import os
+import re
 import sys
 
 from google import genai
@@ -39,11 +41,15 @@ ECO_MODEL_GEMINI = "gemini-3.1-flash-lite"
 # fichier au premier 503, et un appel muet le bloquait plus de cinq minutes,
 # jusqu'à ce qu'on l'arrête. Antigravity relance déjà ces pannes depuis la 1.17.1.
 #
-# Délai : 300 s par tentative, transmis aussi au serveur (`X-Server-Timeout`).
-# Un segment de 16 000 caractères prend de l'ordre de 40 s à un Gemini Flash
-# (par Antigravity, le CHANGELOG de la 1.14.1 en hindi : 273 s pour 7 segments,
-# préflight compris) : marge de 7 fois, de quoi laisser passer un modèle plus lent
-# choisi par `--model`.
+# Délai : 300 s par tentative, transmis aussi au serveur (`X-Server-Timeout`),
+# qui l'applique : il répond « 504 DEADLINE_EXCEEDED » à l'échéance. Par
+# Antigravity, un segment de 16 000 caractères prend de l'ordre de 40 s à un
+# Gemini Flash (le CHANGELOG de la 1.14.1 en hindi : 273 s pour 7 segments).
+# Mais le niveau gratuit de l'API, en « high demand », est bien plus lent :
+# mesuré le 2026-11-15 sur 3.8 Flash avec un fichier de 444 octets, traduit
+# en 245 s à 9 h 20 ; à 9 h 31, une tentative coupée par ce plafond au bout de
+# 298 s, puis une relance réussie en 194 s. Le plafond reste à 300 s tant
+# qu'aucune mesure ne montre qu'une tentative coupée aurait abouti.
 #
 # Réessais : les codes que le SDK juge passagers (408, 429, 500, 502, 503, 504),
 # plus les délais dépassés et les connexions refusées, que le SDK réessaie
@@ -66,6 +72,57 @@ GEMINI_HTTP_OPTIONS = genai_types.HttpOptions(
         http_status_codes=list(GEMINI_RETRY_STATUS_CODES),
     ),
 )
+
+
+# Le SDK annonce chaque relance au niveau INFO de son journal, que personne
+# n'affiche : sans ce relais, une relance ne laisse aucune trace, et quatre
+# minutes d'attente sur un petit fichier ne se distinguent pas d'un blocage.
+# Le 2026-11-15, le relais a montré ce que le silence cachait : une tentative
+# coupée par un 504 au bout de 298 s, puis une relance réussie.
+#
+# Un filtre plutôt qu'un handler : ajouter un handler à ce journal priverait
+# ses avertissements du handler de dernier recours de Python, et l'avis « Both
+# GOOGLE_API_KEY and GEMINI_API_KEY are set » disparaîtrait. Le filtre laisse
+# passer exactement ce que le niveau d'avant laissait passer.
+#
+# Le motif suit le message de `tenacity.before_sleep_log` ; s'il change, le
+# test de la relance d'un 503 échoue au lieu de laisser l'avis s'éteindre.
+_GEMINI_SDK_LOGGER = "google_genai._api_client"
+_SDK_RETRY_MESSAGE = re.compile(
+    r"Retrying \S+ in (?P<delay>[\d.]+) seconds as it raised (?P<error>\w+): (?P<detail>.*)",
+    re.DOTALL,
+)
+
+
+class _GeminiRetryNotice(logging.Filter):
+    """Relaie sur stderr les relances que le SDK annonce au niveau INFO."""
+
+    def __init__(self, previous_level: int) -> None:
+        super().__init__()
+        self.previous_level = previous_level
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        match = _SDK_RETRY_MESSAGE.match(record.getMessage())
+        if match:
+            # Le corps d'erreur suit le statut (« 503 UNAVAILABLE. {…} ») : on
+            # garde le statut, le corps JSON noierait la ligne.
+            detail = match["detail"].split(". ", 1)[0].rstrip(".")[:120]
+            print(
+                f"⚠ Gemini : {match['error']}: {detail} — nouvelle tentative dans "
+                f"{float(match['delay']):.0f} s",
+                file=sys.stderr,
+            )
+        return record.levelno >= self.previous_level
+
+
+def _install_gemini_retry_notice() -> None:
+    """Branche le relais une seule fois, quel que soit le nombre de clients."""
+    logger = logging.getLogger(_GEMINI_SDK_LOGGER)
+    if any(isinstance(f, _GeminiRetryNotice) for f in logger.filters):
+        return
+    previous_level = logger.getEffectiveLevel()
+    logger.addFilter(_GeminiRetryNotice(previous_level))
+    logger.setLevel(min(previous_level, logging.INFO))
 
 
 def _gemini_config(prompt, thinking_level):
@@ -159,4 +216,5 @@ def _init_gemini_client(args):
     api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or DEFAULT_GEMINI_API_KEY
     if not api_key or api_key == DEFAULT_GEMINI_API_KEY:
         raise ValueError(_missing_key_message("Gemini", ["GOOGLE_API_KEY", "GEMINI_API_KEY"]))
+    _install_gemini_retry_notice()
     return genai.Client(api_key=api_key, http_options=GEMINI_HTTP_OPTIONS)
