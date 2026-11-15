@@ -22,8 +22,10 @@ def main():
         print("codex introuvable dans le PATH")
         return 1
     # argv fixe, sans shell ; le chemin absolu évite que le PATH choisisse le binaire.
+    argv = [codex, "app-server"]
+    # nosemgrep
     proc = subprocess.Popen(  # nosec B603
-        [codex, "app-server"],
+        argv,  # nosemgrep
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,

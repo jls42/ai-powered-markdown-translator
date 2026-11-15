@@ -121,8 +121,16 @@ def cli_path(name):
 
 def run_cli(argv, timeout):
     """Lance un CLI avec un argv fixe, sans shell, et sans les clés d'API."""
+    # argv construit dans ce fichier : un chemin rendu par shutil.which et des
+    # mots fixes, jamais une entrée extérieure.
+    # nosemgrep
     return subprocess.run(  # nosec B603
-        argv, capture_output=True, text=True, env=CLI_ENV, timeout=timeout, check=False
+        argv,  # nosemgrep
+        capture_output=True,
+        text=True,
+        env=CLI_ENV,
+        timeout=timeout,
+        check=False,
     )
 
 
