@@ -54,12 +54,14 @@ from .base import (
 DEFAULT_MODEL_ANTIGRAVITY = "gemini-3.8-flash-medium"
 
 
-# Gemini 3.7 Flash, effort bas : deux fois moins de quota que l'effort moyen
-# (1,9 point sur le même lot) et aucun raisonnement. Les deux Flash en `-low`
-# ont chacun refusé un README sur trois ce jour-là, sur un même jeton d'ancre ;
-# 3.8 low y ajoutait trois liens internes cassés en hindi et un gras perdu, là
-# où 3.7 low n'a laissé aucun écart dans ce qu'il a écrit.
-ECO_MODEL_ANTIGRAVITY = "gemini-3.7-flash-low"
+# Gemini 3.8 Flash, effort bas : le seul palier sous le défaut depuis qu'agy a
+# retiré Gemini 3.7 Flash de son catalogue. Constaté le 2026-11-15 sur agy
+# 1.5.9 : `gemini-3.7-flash-low`, l'éco jusqu'à la 1.18.0, y est refusé, et
+# `--eco` échouait avant le premier segment. Mesuré ce jour-là sur le README en
+# japonais : 0,25 point de la fenêtre de 5 h contre 0,32 à l'effort moyen,
+# structure identique. Gemini 4 Hydrogen, l'autre famille du même quota, coûte
+# plus cher à effort égal : 0,50 point en `-low`, 0,95 en `-medium`.
+ECO_MODEL_ANTIGRAVITY = "gemini-3.8-flash-low"
 
 
 # Plafond par segment, démarrage compris : agy paie de 2 à 30 s d'appels réseau
@@ -268,9 +270,10 @@ _ANTIGRAVITY_HTTP_RETRY_REGEX = re.compile(r"\b(?:429|50[234])\b")
 _ANTIGRAVITY_MODEL_REGEX = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
-# Nom de base sans effort (`gemini-3.7-flash`) : refusé par agy, qui exige le
-# suffixe -low, -medium ou -high (Pro : -low ou -high seulement).
-_ANTIGRAVITY_BARE_GEMINI_REGEX = re.compile(r"^gemini-[0-9.]+-(flash|pro)$")
+# Nom de base sans effort (`gemini-3.8-flash`, `gemini-4-hydrogen`) : refusé
+# par agy, qui exige un suffixe. `-low` et `-medium` existent pour les trois
+# familles Gemini de son catalogue (relevé du 2026-11-15, agy 1.5.9).
+_ANTIGRAVITY_BARE_GEMINI_REGEX = re.compile(r"^gemini-[0-9.]+-(?:flash|hydrogen|argon)$")
 
 
 # Répétitions bornées : `\d+` non ancré retentait à chaque position d'une
@@ -755,13 +758,11 @@ def _antigravity_check_model(model):
         raise ValueError(
             f"Modèle Antigravity invalide : {model!r} (liste des identifiants : `agy models`)."
         )
-    bare = _ANTIGRAVITY_BARE_GEMINI_REGEX.match(model)
-    if bare:
-        efforts = ("high", "low") if bare.group(1) == "pro" else ("medium", "low")
+    if _ANTIGRAVITY_BARE_GEMINI_REGEX.match(model):
         raise ValueError(
             f"Modèle Antigravity incomplet : {model!r}. Les identifiants d'agy portent "
-            f"l'effort de raisonnement, par exemple {model}-{efforts[0]} ou "
-            f"{model}-{efforts[1]} (liste : `agy models`)."
+            f"l'effort de raisonnement, par exemple {model}-medium ou "
+            f"{model}-low (liste : `agy models`)."
         )
 
 
@@ -791,7 +792,9 @@ def _antigravity_warn_options(args):
     partie de l'identifiant, et `--effort` combiné à un identifiant suffixé
     contradictoire est refusé par agy. Claude et GPT-OSS puisent dans un quota
     distinct et bien plus petit que celui des Gemini (mesuré : un appel y coûte
-    environ 1 % de la fenêtre de 5 heures, contre 0,05 % en Flash)."""
+    environ 1 % de la fenêtre de 5 heures, contre 0,05 % en Flash). Gemini 4
+    Argon a le sien, hebdomadaire seulement (mesuré le 2026-11-15 : le README
+    en japonais, 62 Ko, en a pris 1,35 %)."""
     if getattr(args, "reasoning_effort", None):
         print(
             "⚠ --reasoning_effort est sans effet avec --use_antigravity : l'effort fait "
@@ -803,6 +806,13 @@ def _antigravity_warn_options(args):
             f"⚠ {args.model} puise dans le quota « Claude and GPT models » d'Antigravity, "
             "bien plus petit que celui des Gemini : environ 1 % de la fenêtre de 5 heures "
             "par appel mesuré.",
+            file=sys.stderr,
+        )
+    if args.model.startswith("gemini-4-argon"):
+        print(
+            f"⚠ {args.model} puise dans un quota hebdomadaire propre à Gemini 4 Argon, "
+            "sans fenêtre de 5 heures : environ 1,4 % de la semaine pour un document "
+            "de 62 Ko mesuré.",
             file=sys.stderr,
         )
 

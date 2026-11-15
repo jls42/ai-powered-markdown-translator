@@ -20,13 +20,20 @@ from .base import _reason_name
 DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"  # pragma: allowlist secret
 
 
-# gemini-3.8-flash et non plus gemini-3.7-flash : Google a déprécié 3.7 Flash le
-# 2026-10-08, et son endpoint « route automatiquement » les appels vers 3.8 Flash
-# (page Deprecations de la doc, lue le 2026-11-15). Le nom 3.7 ne désignait donc
-# plus le modèle servi. Mesuré le 2026-11-14 sur le niveau gratuit : les appels
-# adressés à 3.7 Flash ont consommé le quota quotidien de 3.8 Flash. Même prix,
-# mêmes niveaux de raisonnement (`minimal` refusé, comme sur 3.7).
-DEFAULT_MODEL_GEMINI = "gemini-3.8-flash"
+# Gemini 4 Hydrogen, sorti le 2026-11-12 : le seul Gemini 4 du niveau gratuit,
+# vers lequel Google publie un guide de migration depuis 3.8 Flash, sans avoir
+# déprécié ce dernier. Choix du propriétaire
+# le 2026-11-15, sur mesure : le README en japonais, structure identique pour
+# les deux, en 72 s contre 108 s pour 3.8 Flash, à la même heure sur le niveau
+# payant. Prix : $1.50/$7.50 par million de tokens, celui que 3.8 Flash
+# prendra à la fin de sa promotion, le 2026-12-31 ($0.75/$3.75 d'ici là).
+# Mêmes niveaux de raisonnement que 3.8 Flash : `minimal` refusé par un 400.
+#
+# Le défaut précédent, gemini-3.8-flash, avait remplacé gemini-3.7-flash à la
+# 1.18.0 : Google a déprécié 3.7 Flash le 2026-10-08 et route ses appels vers
+# 3.8 Flash, dont ils consomment le quota (mesuré le 2026-11-14 sur le niveau
+# gratuit). Les deux restent acceptés par `--model`.
+DEFAULT_MODEL_GEMINI = "gemini-4-hydrogen"
 
 
 # Arrêt annoncé le 2027-05-07, remplaçant désigné : gemini-3.5-flash-lite
@@ -137,15 +144,17 @@ def _gemini_config(prompt, thinking_level):
 
 
 # Du moins coûteux au plus permissif. `minimal` n'est accepté que par une
-# partie du catalogue (flash-lite l'accepte, 3.7-flash, 3.8-flash et 3.1-pro le
-# refusent par un 400) ; `low` passe partout ; `None` = pas de thinking_config du tout,
+# partie du catalogue (flash-lite l'accepte ; 3.7-flash, 3.8-flash, 3.1-pro et
+# les trois Gemini 4 le refusent par un 400, mesuré le 2026-11-15 pour ces
+# derniers) ; `low` passe partout ; `None` = pas de thinking_config du tout,
 # dernier recours si l'API change encore.
 _GEMINI_THINKING_LEVELS = ("minimal", "low", None)
 
 
 # Niveau accepté par modèle, mémorisé au premier segment. Sans ce cache, la
 # cascade repartait de `minimal` pour CHAQUE segment de CHAQUE fichier — or le
-# modèle par défaut (gemini-3.7-flash alors, 3.8-flash depuis) refuse `minimal` : le chemin nominal
+# modèle par défaut (gemini-3.7-flash alors, Gemini 4 Hydrogen depuis) refuse
+# `minimal` : le chemin nominal
 # payait donc un aller-retour 400 par segment, et réimprimait le même
 # avertissement à chaque fois. Un warning répété des centaines de fois sur un
 # regen cesse d'être lu, et c'est ainsi qu'il devient un masque.

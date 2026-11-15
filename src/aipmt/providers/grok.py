@@ -32,18 +32,23 @@ DEFAULT_XAI_API_KEY = "votre-cle-api-xai-par-defaut"  # pragma: allowlist secret
 
 # Écrit en toutes lettres, jamais en alias de DEFAULT_MODEL_GROK_CLI : les
 # catalogues API et CLI de Grok sont indépendants — le CLI n'a jamais exposé
-# grok-4.3, palier éco de l'API —, et leurs valeurs qualité n'ont coïncidé que
-# par un hasard de calendrier. Depuis le 2026-10-21, le CLI n'accepte plus que
-# grok-4.7, quand l'API sert toujours grok-4.6. Même raisonnement pour
-# ECO_MODEL_OPENAI / ECO_MODEL_CODEX, et pour les clés de MODEL_TOKEN_LIMITS,
-# qui est un catalogue destiné à être lu, pas un jeu de références.
-DEFAULT_MODEL_GROK = "grok-4.6"
+# grok-4.3, palier éco de l'API —, et leurs valeurs qualité ne coïncident que
+# par un hasard de calendrier. Même raisonnement pour ECO_MODEL_OPENAI /
+# ECO_MODEL_CODEX, et pour les clés de MODEL_TOKEN_LIMITS, qui est un catalogue
+# destiné à être lu, pas un jeu de références.
+#
+# grok-4.7 depuis le 2026-11-15 : même prix que grok-4.6 ($2/$6 par million,
+# lu sur `GET /v1/language-models`), et à l'effort `low` qu'aipmt envoie
+# désormais à un Grok, il raisonne huit fois moins que grok-4.6 sur un même
+# segment (33 tokens contre 279).
+DEFAULT_MODEL_GROK = "grok-4.7"
 
 
 # xAI n'a aucun palier mini/flash/lite : l'« éco » est une génération
 # antérieure, pas une variante allégée. `grok-4.3` (1M ctx, $1.25/$2.50) reste
 # nettement plus cher que l'éco des autres providers — mistral-small-latest est
 # à $0.15/$0.60. Grok se choisit pour la diversité de modèle, pas pour le prix.
+# C'est le seul Grok qui accepte l'effort `none`, celui de `--eco`.
 ECO_MODEL_GROK = "grok-4.3"
 
 

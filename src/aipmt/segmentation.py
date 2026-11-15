@@ -16,8 +16,11 @@ DEFAULT_TOKEN_LIMIT = 128000
 
 MODEL_TOKEN_LIMITS = {
     # OpenAI GPT-6, servis par Codex sur un compte ChatGPT : fenêtres lues dans
-    # le catalogue du CLI (models_cache.json, 2026-10-19).
+    # le catalogue du CLI (models_cache.json, 2026-10-19 ; gpt-6.1-terra le
+    # 2026-11-15). L'API annonce 1,05M pour les mêmes modèles : la plus petite
+    # des deux valeurs est retenue, un identifiant servant aux deux chemins.
     "gpt-6.1-sol": 500000,
+    "gpt-6.1-terra": 500000,
     "gpt-6-sol": 272000,
     "gpt-6-astra": 272000,
     "gpt-6-luna": 272000,
@@ -71,6 +74,7 @@ MODEL_TOKEN_LIMITS = {
     "chatgpt-4o-latest": 128000,
     # Anthropic Claude 5.x — `max_input_tokens` lu sur `GET /v1/models` le
     # 2026-10-18 : 1M pour toute la génération, Haiku 5.5 compris.
+    "claude-fable-5-2": 1000000,
     "claude-fable-5-1": 1000000,
     "claude-opus-5-5": 1000000,
     "claude-sonnet-5-5": 1000000,
@@ -93,12 +97,15 @@ MODEL_TOKEN_LIMITS = {
     # Mistral — `max_context_length` lu sur `GET /v1/models` le 2026-09-17 :
     # 262 144 tokens (le « 256k » de la doc est arrondi), 131 072 pour
     # ministral-3b. Le même appel publie la résolution des alias :
-    # `mistral-large-latest` → `mistral-large-2512` (Large 3),
     # `mistral-medium-latest` → `mistral-medium-2604` (Medium 3.5),
-    # `mistral-small-latest` → `mistral-small-2603` (Small 4). Les IDs datés
-    # sont là pour qui veut épingler. La gamme Magistral a été retirée le
-    # 2026-07-31.
-    "mistral-large-latest": 262144,
+    # `mistral-small-latest` → `mistral-small-2603` (Small 4). Relu le
+    # 2026-11-15 : `mistral-large-latest` → `mistral-large-4` (Large 4,
+    # 1 048 576 tokens) ; Large 3 (`mistral-large-2512`) et Medium 3.5 sont
+    # dépréciés depuis le 2026-10-31, retrait annoncé au 2027-04-30. Les IDs
+    # datés sont là pour qui veut épingler. La gamme Magistral a été retirée
+    # le 2026-07-31.
+    "mistral-large-latest": 1048576,
+    "mistral-large-4": 1048576,
     "mistral-large-2512": 262144,
     "mistral-medium-latest": 262144,
     "mistral-medium-2604": 262144,
@@ -113,6 +120,10 @@ MODEL_TOKEN_LIMITS = {
     "ministral-3b-2512": 131072,
     # Google Gemini — la limite d'input exacte est 1048576, pas 1000000.
     # gemini-2.0-* et gemini-3-pro-preview ont été arrêtés en 2026.
+    # Gemini 4 : `inputTokenLimit` lu sur `GET /v1beta/models` le 2026-11-15.
+    "gemini-4-hydrogen": 1048576,
+    "gemini-4-argon": 1048576,
+    "gemini-4-carbon": 1048576,
     "gemini-3.8-flash": 1048576,
     "gemini-3.7-flash": 1048576,
     "gemini-3.6-flash": 1048576,
@@ -127,21 +138,26 @@ MODEL_TOKEN_LIMITS = {
     "gemini-2.5-flash-lite": 1048576,
     # Antigravity CLI (`agy models`, --use_antigravity) : l'effort de
     # raisonnement fait partie de l'identifiant, et un nom de base seul y est
-    # refusé (mesuré le 2026-09-26 sur agy 1.2.11). Fenêtres de chaque famille
-    # côté API ; la segmentation plafonne à 16 000 caractères, elles ne
-    # comptent qu'en dessous. `claude-sonnet-4-6` figure déjà plus haut.
+    # refusé. Catalogue relevé le 2026-11-15 sur agy 1.5.9 : Gemini 3.7 et 3.6
+    # Flash, Gemini 3.1 Pro et les Claude 4.6 en sont sortis. Fenêtres de
+    # chaque famille côté API ; la segmentation plafonne à 16 000 caractères,
+    # elles ne comptent qu'en dessous.
+    "gemini-4-hydrogen-xhigh": 1048576,
+    "gemini-4-hydrogen-high": 1048576,
+    "gemini-4-hydrogen-medium": 1048576,
+    "gemini-4-hydrogen-low": 1048576,
+    "gemini-4-argon-high": 1048576,
+    "gemini-4-argon-medium": 1048576,
+    "gemini-4-argon-low": 1048576,
     "gemini-3.8-flash-high": 1048576,
     "gemini-3.8-flash-medium": 1048576,
     "gemini-3.8-flash-low": 1048576,
-    "gemini-3.7-flash-high": 1048576,
-    "gemini-3.7-flash-medium": 1048576,
-    "gemini-3.7-flash-low": 1048576,
-    "gemini-3.6-flash-high": 1048576,
-    "gemini-3.6-flash-medium": 1048576,
-    "gemini-3.6-flash-low": 1048576,
-    "gemini-3.1-pro-high": 1048576,
-    "gemini-3.1-pro-low": 1048576,
-    "claude-opus-4-6-thinking": 1000000,
+    "claude-opus-5-5-high": 1000000,
+    "claude-opus-5-5-medium": 1000000,
+    "claude-opus-5-5-low": 1000000,
+    "claude-sonnet-5-5-high": 1000000,
+    "claude-sonnet-5-5-medium": 1000000,
+    "claude-sonnet-5-5-low": 1000000,
     "gpt-oss-120b-medium": 131072,
 }
 

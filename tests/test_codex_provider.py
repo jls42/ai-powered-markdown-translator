@@ -492,6 +492,38 @@ class TestReasoningEffortResolution(unittest.TestCase):
         args = Namespace(model="gpt-5.4-mini", eco=True, reasoning_effort=None)
         self.assertEqual(openai._openai_extra_kwargs(args, False), {"reasoning_effort": "none"})
 
+    def test_reasoning_effort_reaches_every_reasoning_family(self):
+        """Mesuré le 2026-11-15 : sans le paramètre, gpt-6-luna raisonnait en
+        `--eco`, et un Grok par clé API payait son raisonnement par défaut sur
+        chaque segment (695 tokens pour 113 de sortie sur grok-4.7)."""
+        attendu = {
+            "gpt-5.6-luna": "medium",
+            "gpt-6-luna": "medium",
+            "gpt-6.1-terra": "medium",
+            # Grok rend la même structure à `low`, près de quatre fois plus vite.
+            "grok-4.7": "low",
+            "grok-4.3": "low",
+        }
+        for model, quality_effort in attendu.items():
+            with self.subTest(model=model):
+                eco = Namespace(model=model, eco=True, reasoning_effort=None)
+                self.assertEqual(
+                    openai._openai_extra_kwargs(eco, False), {"reasoning_effort": "none"}
+                )
+                quality = Namespace(model=model, eco=False, reasoning_effort=None)
+                self.assertEqual(
+                    openai._openai_extra_kwargs(quality, False),
+                    {"reasoning_effort": quality_effort},
+                )
+                explicit = Namespace(model=model, eco=True, reasoning_effort="high")
+                self.assertEqual(
+                    openai._openai_extra_kwargs(explicit, False), {"reasoning_effort": "high"}
+                )
+        for model in ("gpt-4.1", "o3", "mistral-large-latest"):
+            with self.subTest(model=model):
+                args = Namespace(model=model, eco=True, reasoning_effort=None)
+                self.assertEqual(openai._openai_extra_kwargs(args, False), {})
+
     def test_translation_note_never_pays_for_reasoning(self):
         args = Namespace(model="gpt-5.4-mini", eco=False, reasoning_effort=None)
         self.assertEqual(openai._openai_extra_kwargs(args, True), {})
