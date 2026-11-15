@@ -17,14 +17,19 @@ import tempfile
 EXCLUDE_PATTERNS = ["traductions_", "venv", "PRIVACY.md"]
 
 
+def _display_path(path, base):
+    """Chemin à afficher : `base/relatif` pour un fichier situé sous `base`, le
+    chemin tel qu'il a été donné sinon. Avec `--file`, `--source_dir` garde son
+    défaut, et un fichier situé ailleurs s'affichait
+    « content/posts/../../README.md »."""
+    relative = os.path.relpath(path, start=base)
+    if relative == os.pardir or relative.startswith(os.pardir + os.sep):
+        return path
+    return os.path.join(base, relative)
+
+
 def _resolve_relative_paths(file_path, output_path, args):
-    relative_file_path = os.path.join(
-        args.source_dir, os.path.relpath(file_path, start=args.source_dir)
-    )
-    relative_output_path = os.path.join(
-        args.target_dir, os.path.relpath(output_path, start=args.target_dir)
-    )
-    return relative_file_path, relative_output_path
+    return _display_path(file_path, args.source_dir), _display_path(output_path, args.target_dir)
 
 
 def _write_output_file(output_path, translated_content, force, relative_output_path):

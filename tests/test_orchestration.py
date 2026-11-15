@@ -886,6 +886,39 @@ class TestOpenAIO1Series(unittest.TestCase):
         self.assertEqual(msgs[1]["role"], "user")
 
 
+class TestDisplayedPaths(unittest.TestCase):
+    """Le chemin annoncé est celui que l'utilisateur reconnaît. Avec `--file`,
+    `--source_dir` garde son défaut : un fichier situé ailleurs s'affichait
+    « content/posts/../../README.md »."""
+
+    def test_file_outside_source_dir_is_shown_as_given(self):
+        args = _base_args(source_dir="content/posts", target_dir=".")
+        source, output = naming._resolve_relative_paths("README.md", "./README-en.md", args)
+        self.assertEqual(source, "README.md")
+        self.assertEqual(output, "./README-en.md")
+
+    def test_absolute_file_outside_source_dir_is_shown_as_given(self):
+        args = _base_args(source_dir="content/posts", target_dir="out")
+        source, output = naming._resolve_relative_paths("/tmp/doc/guide.md", "/tmp/o/g-en.md", args)
+        self.assertEqual(source, "/tmp/doc/guide.md")
+        self.assertEqual(output, "/tmp/o/g-en.md")
+
+    def test_file_under_source_dir_keeps_its_relative_form(self):
+        args = _base_args(source_dir="content/posts", target_dir="content/en")
+        source, output = naming._resolve_relative_paths(
+            "content/posts/sub/a.md", "content/en/sub/a-en.md", args
+        )
+        self.assertEqual(source, os.path.join("content/posts", "sub", "a.md"))
+        self.assertEqual(output, os.path.join("content/en", "sub", "a-en.md"))
+
+    def test_sibling_directory_with_a_dotted_name_is_not_taken_for_a_parent(self):
+        """« ..brouillons » n'est pas « .. » : seul un vrai retour au parent
+        fait renoncer à la forme relative."""
+        args = _base_args(source_dir="content", target_dir="out")
+        source, _ = naming._resolve_relative_paths("content/..brouillons/a.md", "out/a.md", args)
+        self.assertEqual(source, os.path.join("content", "..brouillons", "a.md"))
+
+
 class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
     """Un reasoning_effort refusé par le SDK local ou par le serveur est rejoué
     au niveau suivant : `low` quand c'est `none` qui est refusé, puis l'appel
