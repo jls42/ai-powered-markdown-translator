@@ -12,7 +12,7 @@ name = "ai-powered-markdown-translator"
 # déplacerait la logique dans un endroit qu'aucun gate n'exerce ; ici, la
 # cohérence des deux est vérifiée par check-release-ready.sh. L'enjeu est
 # irréversible — PyPI n'autorise pas la réutilisation d'un numéro de version.
-version = "1.17.1"
+version = "1.18.0"
 description = "Traduit des fichiers Markdown avec OpenAI, Claude, Mistral, Gemini, Grok, Codex, Antigravity, OpenCode ou OpenRouter, en préservant la mise en forme, les blocs de code et le front matter."
 readme = "README.md"
 # Plancher = la plus ancienne version encore maintenue par CPython. 3.10 est en
@@ -63,8 +63,9 @@ classifiers = [
 # dépassé (`_HTTPX_TRANSIENT_EXC`, absent de 2.17.0, cherché dans chaque wheel
 # le 2026-11-15) ; avant, le provider Gemini borne chaque appel à 5 minutes
 # mais n'en relance aucun. Validé le même jour sur 2.18.0, sous Python 3.11 :
-# suite complète (751 tests) et relance d'un 503 puis d'un délai dépassé par le
-# vrai SDK, sur un transport simulé.
+# suite complète (755 tests) et relance d'un 503 puis d'un délai dépassé par le
+# vrai SDK, sur un transport simulé, avec l'avis de relance sur stderr (le SDK
+# l'annonce déjà dans son journal en 2.18.0).
 dependencies = [
     "openai>=1.58.1",
     "anthropic>=0.47.0",
