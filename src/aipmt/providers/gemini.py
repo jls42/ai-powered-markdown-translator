@@ -5,7 +5,9 @@ niveau accepté est mémorisé par modèle, pour ne pas repayer la cascade de
 refus à chaque segment.
 """
 
+import logging
 import os
+import re
 import sys
 
 from google import genai
@@ -18,10 +20,109 @@ from .base import _reason_name
 DEFAULT_GEMINI_API_KEY = "votre-cle-api-gemini-par-defaut"  # pragma: allowlist secret
 
 
-DEFAULT_MODEL_GEMINI = "gemini-3.7-flash"
+# gemini-3.8-flash et non plus gemini-3.7-flash : Google a déprécié 3.7 Flash le
+# 2026-10-08, et son endpoint « route automatiquement » les appels vers 3.8 Flash
+# (page Deprecations de la doc, lue le 2026-11-15). Le nom 3.7 ne désignait donc
+# plus le modèle servi. Mesuré le 2026-11-14 sur le niveau gratuit : les appels
+# adressés à 3.7 Flash ont consommé le quota quotidien de 3.8 Flash. Même prix,
+# mêmes niveaux de raisonnement (`minimal` refusé, comme sur 3.7).
+DEFAULT_MODEL_GEMINI = "gemini-3.8-flash"
 
 
+# Arrêt annoncé le 2027-05-07, remplaçant désigné : gemini-3.5-flash-lite
+# (même page). À mesurer avant de basculer, cf. docs/modeles.md.
 ECO_MODEL_GEMINI = "gemini-3.1-flash-lite"
+
+
+# Le SDK google-genai ne réessaie RIEN et n'attend SANS LIMITE par défaut : sans
+# `retry_options`, un seul essai ; sans `timeout`, le client HTTP est construit
+# avec `timeout=None`. Mesuré le 2026-11-14 sur le niveau gratuit, où Gemini
+# Flash répondait « 503 high demand » ou pas du tout : aipmt abandonnait le
+# fichier au premier 503, et un appel muet le bloquait plus de cinq minutes,
+# jusqu'à ce qu'on l'arrête. Antigravity relance déjà ces pannes depuis la 1.17.1.
+#
+# Délai : 300 s par tentative, transmis aussi au serveur (`X-Server-Timeout`),
+# qui l'applique : il répond « 504 DEADLINE_EXCEEDED » à l'échéance. Par
+# Antigravity, un segment de 16 000 caractères prend de l'ordre de 40 s à un
+# Gemini Flash (le CHANGELOG de la 1.14.1 en hindi : 273 s pour 7 segments).
+# Mais le niveau gratuit de l'API, en « high demand », est bien plus lent :
+# mesuré le 2026-11-15 sur 3.8 Flash avec un fichier de 444 octets, traduit
+# en 245 s à 9 h 20 ; à 9 h 31, une tentative coupée par ce plafond au bout de
+# 298 s, puis une relance réussie en 194 s. Le plafond reste à 300 s tant
+# qu'aucune mesure ne montre qu'une tentative coupée aurait abouti.
+#
+# Réessais : les codes que le SDK juge passagers (408, 429, 500, 502, 503, 504),
+# plus les délais dépassés et les connexions refusées, que le SDK réessaie
+# d'office dès que `retry_options` est fourni. Quatre tentatives, séparées de
+# 10, 20 puis 40 s (plus une gigue d'au plus 1 s) : 70 s d'attente cumulée,
+# assez pour qu'une fenêtre de débit d'une minute se libère. Un 400 (niveau de
+# raisonnement refusé, requête invalide) ou un 402 (crédit prépayé épuisé) ne
+# sont jamais réessayés. Pire cas d'un serveur muet : quatre fois 300 s, puis
+# l'erreur remonte au lieu d'attendre indéfiniment.
+GEMINI_TIMEOUT_MS = 300_000
+GEMINI_RETRY_STATUS_CODES = (408, 429, 500, 502, 503, 504)
+GEMINI_HTTP_OPTIONS = genai_types.HttpOptions(
+    timeout=GEMINI_TIMEOUT_MS,
+    retry_options=genai_types.HttpRetryOptions(
+        attempts=4,
+        initial_delay=10.0,
+        exp_base=2.0,
+        max_delay=60.0,
+        jitter=1.0,
+        http_status_codes=list(GEMINI_RETRY_STATUS_CODES),
+    ),
+)
+
+
+# Le SDK annonce chaque relance au niveau INFO de son journal, que personne
+# n'affiche : sans ce relais, une relance ne laisse aucune trace, et quatre
+# minutes d'attente sur un petit fichier ne se distinguent pas d'un blocage.
+# Le 2026-11-15, le relais a montré ce que le silence cachait : une tentative
+# coupée par un 504 au bout de 298 s, puis une relance réussie.
+#
+# Un filtre plutôt qu'un handler : ajouter un handler à ce journal priverait
+# ses avertissements du handler de dernier recours de Python, et l'avis « Both
+# GOOGLE_API_KEY and GEMINI_API_KEY are set » disparaîtrait. Le filtre laisse
+# passer exactement ce que le niveau d'avant laissait passer.
+#
+# Le motif suit le message de `tenacity.before_sleep_log` ; s'il change, le
+# test de la relance d'un 503 échoue au lieu de laisser l'avis s'éteindre.
+_GEMINI_SDK_LOGGER = "google_genai._api_client"
+_SDK_RETRY_MESSAGE = re.compile(
+    r"Retrying \S+ in (?P<delay>[\d.]+) seconds as it raised (?P<error>\w+): (?P<detail>.*)",
+    re.DOTALL,
+)
+
+
+class _GeminiRetryNotice(logging.Filter):
+    """Relaie sur stderr les relances que le SDK annonce au niveau INFO."""
+
+    def __init__(self, previous_level: int) -> None:
+        super().__init__()
+        self.previous_level = previous_level
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        match = _SDK_RETRY_MESSAGE.match(record.getMessage())
+        if match:
+            # Le corps d'erreur suit le statut (« 503 UNAVAILABLE. {…} ») : on
+            # garde le statut, le corps JSON noierait la ligne.
+            detail = match["detail"].split(". ", 1)[0].rstrip(".")[:120]
+            print(
+                f"⚠ Gemini : {match['error']}: {detail} — nouvelle tentative dans "
+                f"{float(match['delay']):.0f} s",
+                file=sys.stderr,
+            )
+        return record.levelno >= self.previous_level
+
+
+def _install_gemini_retry_notice() -> None:
+    """Branche le relais une seule fois, quel que soit le nombre de clients."""
+    logger = logging.getLogger(_GEMINI_SDK_LOGGER)
+    if any(isinstance(f, _GeminiRetryNotice) for f in logger.filters):
+        return
+    previous_level = logger.getEffectiveLevel()
+    logger.addFilter(_GeminiRetryNotice(previous_level))
+    logger.setLevel(min(previous_level, logging.INFO))
 
 
 def _gemini_config(prompt, thinking_level):
@@ -36,15 +137,15 @@ def _gemini_config(prompt, thinking_level):
 
 
 # Du moins coûteux au plus permissif. `minimal` n'est accepté que par une
-# partie du catalogue (flash-lite l'accepte, 3.7-flash et 3.1-pro le refusent
-# par un 400) ; `low` passe partout ; `None` = pas de thinking_config du tout,
+# partie du catalogue (flash-lite l'accepte, 3.7-flash, 3.8-flash et 3.1-pro le
+# refusent par un 400) ; `low` passe partout ; `None` = pas de thinking_config du tout,
 # dernier recours si l'API change encore.
 _GEMINI_THINKING_LEVELS = ("minimal", "low", None)
 
 
 # Niveau accepté par modèle, mémorisé au premier segment. Sans ce cache, la
 # cascade repartait de `minimal` pour CHAQUE segment de CHAQUE fichier — or le
-# modèle par défaut (gemini-3.7-flash) refuse `minimal` : le chemin nominal
+# modèle par défaut (gemini-3.7-flash alors, 3.8-flash depuis) refuse `minimal` : le chemin nominal
 # payait donc un aller-retour 400 par segment, et réimprimait le même
 # avertissement à chaque fois. Un warning répété des centaines de fois sur un
 # regen cesse d'être lu, et c'est ainsi qu'il devient un masque.
@@ -115,4 +216,5 @@ def _init_gemini_client(args):
     api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or DEFAULT_GEMINI_API_KEY
     if not api_key or api_key == DEFAULT_GEMINI_API_KEY:
         raise ValueError(_missing_key_message("Gemini", ["GOOGLE_API_KEY", "GEMINI_API_KEY"]))
-    return genai.Client(api_key=api_key)
+    _install_gemini_retry_notice()
+    return genai.Client(api_key=api_key, http_options=GEMINI_HTTP_OPTIONS)

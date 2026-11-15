@@ -87,6 +87,33 @@ rétroportage de sécurité a patché `tarfile` sans rétroporter la constante d
 touchée. En local, utiliser `python -m build --sdist --wheel`, qui construit
 les deux depuis l'arbre source.
 
+## Phase 4 — Mettre à jour le poste dans la foulée
+
+Demande du propriétaire (2026-11-15) : une version publiée sur PyPI doit
+servir aussitôt sur son poste. La commande `aipmt` de son terminal est une
+installation **pipx** (`~/.local/bin/aipmt`), qui ne suit ni le dépôt ni son
+venv : le 2026-11-14, elle était encore en 1.17.1, avec l'ancien SDK de
+Gemini, trois semaines après la dernière fusion. La veille d'actualité, elle,
+lance `python -m aipmt` depuis `src/` de ce dépôt : elle suit `main`, que la
+phase 2 a déjà remis à jour.
+
+```bash
+gh run list --workflow publish.yml --limit 1      # attendre « completed / success »
+pipx upgrade ai-powered-markdown-translator --pip-args='--upgrade-strategy eager'
+pipx list --short | grep ai-powered-markdown-translator   # doit afficher la version du tag
+pipx runpip ai-powered-markdown-translator list --outdated  # doit être vide
+```
+
+`--upgrade-strategy eager` monte aussi les dépendances. Sans lui, pip ne
+touche pas à un SDK qui satisfait déjà la borne basse : le 2026-11-14,
+l'installation pipx tournait avec google-genai 2.31.0 quand le lock testé
+était en 3.1.0. Règle du propriétaire : toujours la dernière version de
+chaque composant.
+
+PyPI peut mettre une minute à servir une version neuve : si `pipx upgrade`
+répond qu'il n'y a rien à faire, attendre et relancer, puis vérifier la
+version affichée plutôt que le code de retour.
+
 ## Régénération seule (sans release)
 
 ```bash

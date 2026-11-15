@@ -249,7 +249,7 @@ aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lan
 | OpenAI      | `gpt-5.6-terra`                                                      | `gpt-5.6-luna`            |
 | Claude      | `claude-sonnet-5-5`                                                  | `claude-haiku-5-5`        |
 | Mistral     | `mistral-large-latest`                                               | `mistral-small-latest`    |
-| Gemini      | `gemini-3.7-flash`                                                   | `gemini-3.1-flash-lite`   |
+| Gemini      | `gemini-3.8-flash`                                                   | `gemini-3.1-flash-lite`   |
 | Codex       | `gpt-6.1-sol` (aussi `gpt-5.6-sol`, `terra` et `luna` par `--model`) | `gpt-5.6-luna`            |
 | Grok API    | `grok-4.6`                                                           | `grok-4.3`                |
 | Grok CLI    | `grok-4.7`                                                           | idem — `--eco` sans effet |
@@ -257,6 +257,14 @@ aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lan
 | Claude Code | `sonnet`, effort `low`                                               | idem — `--eco` sans effet |
 | OpenCode    | `--model provider/modèle` obligatoire                                | idem — `--eco` sans effet |
 | OpenRouter  | `--model fournisseur/modèle` obligatoire                             | idem — `--eco` sans effet |
+
+Gemini 3.7 Flash, le défaut jusqu'à la 1.17.1, est déprécié : Google sert
+Gemini 3.8 Flash à sa place, et `--model gemini-3.7-flash` reste accepté.
+Une panne passagère de l'API Gemini (503, 429, délai dépassé) relance
+l'appel jusqu'à trois fois, après 10, 20 puis 40 secondes. Une tentative
+restée sans réponse est abandonnée au bout de 5 minutes, puis relancée de
+même : un serveur muet fait échouer le segment en une vingtaine de minutes
+au plus, au lieu de bloquer sans limite.
 
 ### Sur l'abonnement ChatGPT : `--use_codex`
 
