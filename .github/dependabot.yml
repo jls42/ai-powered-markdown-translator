@@ -55,7 +55,7 @@ updates:
     #
     # D'où une allowlist NOMMÉE, qui reprend les dépendances réellement
     # importées par le paquet src/aipmt/, plus certifi (magasin de CA, enjeu de
-    # sécurité) et les quatre outils de requirements-dev.txt. Les transitifs
+    # sécurité) et les cinq outils de requirements-dev.txt. Les transitifs
     # suivent leur parent ; leur mise à niveau passe par la régénération
     # complète du fichier, décrite dans CLAUDE.md.
     #
@@ -73,6 +73,7 @@ updates:
       - dependency-name: pip-audit
       - dependency-name: mypy
       - dependency-name: lizard
+      - dependency-name: build
     commit-message:
       prefix: "chore(deps)"
     labels:
