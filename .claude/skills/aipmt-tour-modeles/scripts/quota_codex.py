@@ -8,6 +8,7 @@ Ne lit ni n'écrit ~/.codex/auth.json : c'est le CLI qui s'authentifie.
 
 import json
 import os
+import shutil
 import subprocess  # nosec B404 — lance `codex app-server`, argv fixe
 import sys
 
@@ -16,8 +17,13 @@ ENV = {k: v for k, v in os.environ.items() if not k.endswith("_API_KEY")}
 
 
 def main():
-    proc = subprocess.Popen(
-        ["codex", "app-server"],
+    codex = shutil.which("codex")
+    if codex is None:
+        print("codex introuvable dans le PATH")
+        return 1
+    # argv fixe, sans shell ; le chemin absolu évite que le PATH choisisse le binaire.
+    proc = subprocess.Popen(  # nosec B603
+        [codex, "app-server"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,

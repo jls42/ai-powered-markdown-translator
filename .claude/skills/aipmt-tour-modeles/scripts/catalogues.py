@@ -15,6 +15,7 @@ aipmt de `src/`). Code retour 1 si un modèle par défaut n'est plus servi.
 import datetime
 import json
 import os
+import shutil
 import subprocess  # nosec B404 — lit le catalogue des CLI, argv fixes
 import sys
 import urllib.error
@@ -110,13 +111,27 @@ def api_gemini():
     }
 
 
+def cli_path(name):
+    """Chemin absolu d'un CLI : un nom nu laisserait le PATH choisir le binaire."""
+    path = shutil.which(name)
+    if path is None:
+        raise FileNotFoundError(f"{name} introuvable dans le PATH")
+    return path
+
+
+def run_cli(argv, timeout):
+    """Lance un CLI avec un argv fixe, sans shell, et sans les clés d'API."""
+    return subprocess.run(  # nosec B603
+        argv, capture_output=True, text=True, env=CLI_ENV, timeout=timeout, check=False
+    )
+
+
 def cli_agy():
     # agy se met à jour seul quand on le lance hors d'aipmt : on le lui interdit,
     # pour que la version annoncée soit celle qui a produit la liste.
-    version = subprocess.run(
-        ["agy", "--version"], capture_output=True, text=True, env=CLI_ENV, timeout=60
-    )
-    out = subprocess.run(["agy", "models"], capture_output=True, text=True, env=CLI_ENV, timeout=90)
+    agy = cli_path("agy")
+    version = run_cli([agy, "--version"], timeout=60)
+    out = run_cli([agy, "models"], timeout=90)
     served = {}
     for line in out.stdout.splitlines():
         if "\t" in line:
@@ -140,9 +155,7 @@ def cli_codex():
 
 
 def cli_grok():
-    out = subprocess.run(
-        ["grok", "models"], capture_output=True, text=True, env=CLI_ENV, timeout=90
-    )
+    out = run_cli([cli_path("grok"), "models"], timeout=90)
     text = out.stdout + out.stderr
     if "not authenticated" in text.lower():
         print("  ⚠ grok : « You are not authenticated. » — catalogue non fiable (grok login)")
