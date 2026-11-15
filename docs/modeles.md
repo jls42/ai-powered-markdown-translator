@@ -42,7 +42,7 @@ This uses faster/cheaper models (gpt-6-luna) which are sufficient for documentat
 | **2026-12-01** | Gemini 4 Argon et Carbon : prix **doublé** ($2/$10 → $4/$20). `gemini-2.5-pro` routé vers `gemini-3.8-flash`, `gemini-2.5-flash` vers `gemini-3.5-flash-lite`.             |
 | **2027-01-01** | Gemini 3.6/3.8 Flash : fin du prix d'introduction, **doublé** ($0.75/$3.75 → $1.50/$7.50), soit le prix de Gemini 4 Hydrogen, défaut d'aipmt depuis la 1.19.0.             |
 | **2027-04-30** | Mistral Large 3 (`mistral-large-2512`) et Medium 3.5 (`mistral-medium-3-5`) : **retrait**, dépréciés depuis le 2026-10-31, remplaçant Mistral Large 4.                     |
-| **2027-05-07** | `gemini-3.1-flash-lite` (`--eco` de `--use_gemini`) : **arrêt**, remplaçant désigné `gemini-3.5-flash-lite`. Mesurer celui-ci avant de basculer.                           |
+| **2027-05-07** | `gemini-3.1-flash-lite` (`--eco` de `--use_gemini`) : **arrêt**, remplaçant désigné `gemini-3.5-flash-lite`. Mesuré le 2026-11-15 : pas prêt, cf. « Tour complet ».        |
 | ~~2026-10-08~~ | `gemini-3.7-flash` **déprécié** : retiré d'AI Studio, son endpoint route vers `gemini-3.8-flash`, sans date d'arrêt. Défaut d'aipmt depuis la 1.18.0 : `gemini-3.8-flash`. |
 | —              | `claude-sonnet-5` : le tarif d'intro $2/$10 **est devenu** le prix standard ; la hausse prévue au 2026-09-01 n'aura pas lieu.                                              |
 | —              | Gemini 3.5 Pro **ne sortira jamais** (remplacé par Gemini 4) : `gemini-3.1-pro-preview` reste le seul Pro, et il est en preview depuis toujours.                           |
@@ -76,7 +76,7 @@ contrôlé par `scripts/compare_structure.py`.
 | OpenAI      | `gpt-5.6-terra` → `gpt-6.1-terra`                   | $2 / $12 → $1 / $5                             | 4 sur 4 sans écart, 190 à 245 s ; `gpt-5.6-terra` 1 sur 1, 116 s                                         |
 | OpenAI éco  | `gpt-5.6-luna` → `gpt-6-luna`                       | $0.20 / $1.20 → $0.10 / $0.50                  | 4 sur 4 sans écart, 125 s ; `gpt-5.6-luna` 5 sur 6 (un gras perdu), 118 s                                |
 | Gemini      | `gemini-3.8-flash` → `gemini-4-hydrogen`            | $0.75 / $3.75 (jusqu'au 31/12) → $1.50 / $7.50 | 1 sur 1 sans écart, 72 s ; `gemini-3.8-flash` 1 sur 1, 108 s                                             |
-| Gemini éco  | `gemini-3.1-flash-lite`, inchangé                   | $0.25 / $1.50                                  | non remesuré ; `gemini-3.5-flash-lite`, son remplaçant désigné, coûte $0.30 / $2.50                      |
+| Gemini éco  | `gemini-3.1-flash-lite`, inchangé                   | $0.25 / $1.50                                  | 2 sur 3 sans écart, 45 s ; `gemini-3.5-flash-lite` ($0.30 / $2.50) : 0 sur 3, cf. ci-dessous             |
 | Grok API    | `grok-4.6` → `grok-4.7`, effort `low`               | $2 / $6, inchangé                              | 1 sur 1 sans écart, 190 s à `low`, 711 s à `medium` ; `grok-4.6` à `medium` 372 s                        |
 | Grok éco    | `grok-4.3`, inchangé, effort `none`                 | $1.25 / $2.50                                  | 3 écrites sur 3, 1 sans écart (un ou deux codes en ligne en trop), 176 à 201 s ; 1.18.0 : 1 écrite sur 2 |
 | Codex éco   | `gpt-5.6-luna` → `gpt-6-luna`                       | abonnement                                     | 1 sur 1 sans écart, 301 s ; comparaison interrompue par le quota                                         |
@@ -99,6 +99,17 @@ Trois faits mesurés ce jour-là, qui valent au-delà des défauts :
   à `low`. Argon et Carbon, le haut de gamme ($2 / $10, puis $4 / $20 au
   2026-12-01, absents du niveau gratuit, 32 768 tokens de sortie d'après
   l'API), ne sont proposés que par `--model`.
+- **`gemini-3.5-flash-lite` n'est pas prêt à remplacer l'éco de Gemini.**
+  Mesuré le même jour après la publication de la 1.19.0, trois README en
+  japonais chacun, en `--eco` : `gemini-3.1-flash-lite` en rend deux sans
+  écart et un avec deux gras en trop, en 45 s ; `gemini-3.5-flash-lite` en
+  perd deux sur des codes en ligne supprimés (segment 3 sur 4, refusés par la
+  garde des jetons après une relance) et rend le troisième avec deux codes et
+  une ligne de tableau en trop. L'éco ne change donc pas. Son arrêt est
+  annoncé au plus tôt le 2027-05-07 : il reste à essayer 3.5 Flash Lite à un
+  niveau de raisonnement moins bas, ou Gemini 4 Hydrogen à `low` — ce qui
+  demande qu'aipmt sache forcer le niveau d'un Gemini, `--reasoning_effort`
+  n'étant pas lu par ce provider.
 - **Un modèle plus récent n'est pas plus rapide** : `gpt-6.1-terra` met de 190
   à 245 s là où `gpt-5.6-terra` en met 116, à effort égal. Il est retenu pour son prix
   et sa structure, pas pour sa latence.
