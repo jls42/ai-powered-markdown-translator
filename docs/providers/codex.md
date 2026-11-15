@@ -7,7 +7,7 @@ pas facturée à l'usage.
 ```bash
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 ./regen_translations.sh --force                         # Codex est le défaut : gpt-6.1-sol
-REGEN_MODEL=gpt-6-luna ./regen_translations.sh --force   # éco, si le propriétaire le demande
+REGEN_MODEL=gpt-5.6-luna ./regen_translations.sh --force   # éco, si le propriétaire le demande
 ```
 
 Coût réel mesuré : régénérer les 28 traductions (70 turns) avec `gpt-5.6-sol` a
@@ -85,14 +85,23 @@ Points à connaître avant de toucher à ce code :
   à 211 s, note en 182 s ; aucun événement d'erreur, structure identique pour
   les deux. `gpt-5.6-sol` reste disponible
   par `--model`.
-- **Éco : `gpt-6-luna` depuis le 2026-11-15** (`priority` 6 au catalogue,
-  272 000 tokens, quand `gpt-5.6-luna` n'y vient plus qu'en neuvième). Une
-  seule mesure sur l'abonnement : le README en japonais en 301 s, structure
-  identique. La comparaison avec `gpt-5.6-luna` s'est arrêtée sur la fenêtre de
-  5 h épuisée (« You've hit your usage limit ») ; par l'API, le même jour,
-  `gpt-6-luna` a rendu quatre README sur quatre sans écart. Validé ce jour-là
-  sur Codex 0.169.0 : guide traduit par le défaut et par les deux Luna.
-  `gpt-5.6-luna` reste disponible par `--model`.
+- **Éco : `gpt-5.6-luna`**, confirmé par mesure le 2026-11-15. La 1.19.0
+  l'avait remplacé par `gpt-6-luna` (`priority` 6 au catalogue, contre 9) sur
+  une seule traduction, la fenêtre de 5 h s'étant épuisée avant la comparaison ;
+  la 1.19.1 y revient. Comparaison du soir, le README en japonais en `--eco`,
+  sur Codex 0.169.0, quota lu avant et après chaque traduction :
+
+  | Modèle         | Sans écart              | Durée       | Fenêtre de 5 h par README |
+  | -------------- | ----------------------- | ----------- | ------------------------- |
+  | `gpt-5.6-luna` | 2 sur 2                 | 313 s       | 0 puis 1 point            |
+  | `gpt-6-luna`   | 3 sur 4 (un gras perdu) | 301 à 306 s | 3 points, deux fois       |
+
+  `usedPercent` est un entier : un point est la plus petite variation lisible.
+  À vitesse égale, `gpt-6-luna` consomme au moins trois fois plus de quota sans
+  gain de structure ; il reste disponible par `--model`. **Avant de changer un
+  défaut d'abonnement, mesurer le quota, pas seulement la structure** : par
+  l'API, où seul le prix compte, `gpt-6-luna` est le bon éco.
+
 - **Quota** : un segment consomme grosso modo un « message » de la fenêtre 5 h,
   mais OpenAI ne publie AUCUNE équivalence comptable — l'assimilation vient
   d'une observation locale, pas d'un contrat. Sur Plus, les fourchettes

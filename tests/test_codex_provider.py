@@ -370,6 +370,13 @@ class TestCodexInit(unittest.TestCase):
         # `codex login status` pour de vrai, vert ici, rouge sur une CI.
         self.assertEqual(fake_preflight.call_count, 2)
 
+    def test_eco_is_the_luna_that_spares_the_subscription_quota(self):
+        """Mesuré le 2026-11-15 sur le README en japonais : gpt-6-luna, l'éco
+        de la 1.19.0, consomme 3 points de la fenêtre de 5 h par traduction,
+        gpt-5.6-luna 0 à 1, à vitesse et structure égales. Le changer est une
+        décision, à prendre quota mesuré."""
+        self.assertEqual(codex.ECO_MODEL_CODEX, "gpt-5.6-luna")
+
     def test_gpt6_family_is_not_flagged_as_unexpected(self):
         """Le défaut, gpt-6.1-sol, et ses voisins du catalogue de Codex ne
         déclenchent pas l'avertissement réservé aux slugs d'API."""
