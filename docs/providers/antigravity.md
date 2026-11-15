@@ -15,7 +15,15 @@ gratuits depuis le 2026-06-18
 (<https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/>),
 et le SDK Python Antigravity ne s'authentifie que par `GEMINI_API_KEY` ou
 Vertex/ADC (<https://antigravity.google/docs/sdk/overview/>). Tout ce qui suit a
-été **mesuré sur agy 1.2.11 le 2026-09-26**, pas déduit de la doc :
+été **mesuré sur agy 1.2.11 le 2026-09-26**, pas déduit de la doc.
+**Revalidé le 2026-11-15 sur agy 1.5.9**, qui lance désormais ses sessions
+headless en mode Auto (changement de la 1.5.7) : le préflight passe, le défaut
+et l'éco traduisent, et l'agent reste sans outil — 519 et 540 tokens d'entrée
+sur deux sondes, agent chargé d'après le journal, un seul tour, aucune action
+refusée ; un segment qui demande de lancer `ls -la` « avec ton outil de
+terminal » revient traduit, pas exécuté. agy se met à jour seul dès qu'on le
+lance hors d'aipmt (1.4.12 → 1.5.9 pendant un `agy models`) : relire
+`agy --version` avant d'attribuer une mesure à une version.
 
 - **Binaire** : `AGY_BIN`, puis le `PATH`, puis `~/.local/bin/agy`, où il est
   installé sans que le `PATH` de la session le sache. **Jamais `antigravity`**,
@@ -272,26 +280,51 @@ Vertex/ADC (<https://antigravity.google/docs/sdk/overview/>). Tout ce qui suit a
   par `!commande`, `@fichier` ou `/commande` n'est ni exécuté, ni résolu, ni
   développé. Sans lui, un segment « /help » s'exécutait à la place d'être
   traduit.
-- **Modèles** : les identifiants d'`agy models`, effort compris —
-  `gemini-3.8-flash-{high,medium,low}`, `gemini-3.7-flash-{high,medium,low}`,
-  `gemini-3.6-flash-{high,medium,low}`, `gemini-3.1-pro-{high,low}`,
-  `claude-sonnet-4-6`, `claude-opus-4-6-thinking`, `gpt-oss-120b-medium` ; tous
-  figurent dans `MODEL_TOKEN_LIMITS`. Un nom de base seul (`gemini-3.7-flash`)
-  est refusé par agy : aipmt le refuse avant l'appel et propose les suffixes
-  qui existent — `-high` ou `-low` pour un Pro, `-medium` ou `-low` pour un
-  Flash (la première version proposait `gemini-3.1-pro-medium`, qu'agy
-  refuse). Défauts **fixés par les mesures du 2026-09-26** (ci-dessous), écrits
-  en toutes lettres et jamais alias de `DEFAULT_MODEL_GEMINI` :
-  `DEFAULT_MODEL_ANTIGRAVITY` = `gemini-3.8-flash-medium`,
-  `ECO_MODEL_ANTIGRAVITY` = `gemini-3.7-flash-low`. Le matin, le défaut était
+- **Modèles** : les identifiants d'`agy models`, effort compris. Catalogue
+  relevé le 2026-11-15 sur agy 1.5.9 : `gemini-4-hydrogen-{xhigh,high,medium,low}`,
+  `gemini-4-argon-{high,medium,low}`, `gemini-3.8-flash-{high,medium,low}`,
+  `claude-opus-5-5-{high,medium,low}`, `claude-sonnet-5-5-{high,medium,low}`,
+  `gpt-oss-120b-medium` ; tous figurent dans `MODEL_TOKEN_LIMITS`. Gemini 3.7
+  et 3.6 Flash, Gemini 3.1 Pro et les Claude 4.6, présents le 2026-09-26, en
+  sont sortis ; Gemini 4 Carbon n'y est servi qu'avec une clé API. Un nom de
+  base seul (`gemini-3.8-flash`, `gemini-4-hydrogen`) est refusé par agy :
+  aipmt le refuse avant l'appel et propose `-medium` ou `-low`, qui existent
+  pour les trois familles Gemini. Défauts écrits en toutes lettres et jamais
+  alias de `DEFAULT_MODEL_GEMINI` : `DEFAULT_MODEL_ANTIGRAVITY` =
+  `gemini-3.8-flash-medium`, fixé par les mesures du 2026-09-26 (ci-dessous) ;
+  `ECO_MODEL_ANTIGRAVITY` = `gemini-3.8-flash-low` depuis le 2026-11-15.
+  **L'éco précédent, `gemini-3.7-flash-low`, est refusé par agy** : dans la
+  1.18.0, `--use_antigravity --eco` échouait avant le premier segment, agy
+  répondant par la liste de ses modèles. Mesures du 2026-11-15 sur le README
+  (62 Ko), quota lu par `/usage` avant et après chaque traduction :
+
+  | Modèle                     | Langue | Durée | Fenêtre de 5 h | Structure |
+  | -------------------------- | ------ | ----- | -------------- | --------- |
+  | `gemini-3.8-flash-medium`  | ja     | 150 s | 0,32 point     | identique |
+  | `gemini-3.8-flash-low`     | ja     | 120 s | 0,25 point     | identique |
+  | `gemini-3.8-flash-low`     | hi     | 128 s | non relevé     | identique |
+  | `gemini-3.8-flash-low`     | en     | 102 s | non relevé     | identique |
+  | `gemini-4-hydrogen-low`    | ja     | 78 s  | 0,50 point     | identique |
+  | `gemini-4-hydrogen-medium` | ja     | 145 s | 0,95 point     | identique |
+  | `gemini-4-argon-low`       | ja     | 202 s | aucun          | identique |
+
+  Hydrogen coûte donc plus de quota que 3.8 Flash à effort égal : le défaut ne
+  change pas, Antigravity étant le repli des campagnes. `gemini-3.8-flash-low`
+  n'a pas reproduit les liens internes cassés en hindi du 2026-09-26. Gemini 4
+  Argon puise dans un quota à lui, hebdomadaire et sans fenêtre de 5 h
+  (`gemini-argon-wtu-weekly` dans `/usage`) : ce README en a pris 1,35 %,
+  avertissement. Le matin du 2026-09-26, le défaut était
   `gemini-3.7-flash-medium` et 3.8 medium écarté sur deux arguments ; la
   mesure de l'après-midi, demandée par le propriétaire, en a démenti un : les
   « 79 % de raisonnement » venaient d'une sonde isolée, et sur des documents
   3.8 medium raisonne autant que 3.7 medium (63 % contre 60 % des tokens de
   sortie). Reste qu'il est un quart plus lent. `--reasoning_effort` : sans
   effet, avertissement.
-- **Quota** : deux groupes, Gemini et « Claude and GPT models », chacun avec une
-  fenêtre de 5 h et une hebdomadaire, lisibles gratuitement par
+
+- **Quota** : trois groupes depuis Gemini 4 — « Gemini Models » (Gemini 4
+  Hydrogen et 3.8 Flash) et « Claude and GPT models », chacun avec une fenêtre
+  de 5 h et une hebdomadaire, et « Gemini 4 Argon », hebdomadaire seulement —,
+  lisibles gratuitement par
   `agy -p /usage --output-format json` (`remaining_fraction`, `reset_time`).
   Texte officiel de `/usage` : le quota se décompte proportionnellement au coût
   des tokens, et la limite hebdomadaire dépend du palier de l'abonnement. Un

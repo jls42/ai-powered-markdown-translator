@@ -120,7 +120,7 @@ aipmt --use_gemini --file document.md --target_dir out/ --target_lang ja
 ```
 
 `document.md` traduit en espagnol donne `document-es.md` dans `--target_dir` ;
-avec `--include_model`, `document-es-gpt-5.6-terra.md`. L'extension devient
+avec `--include_model`, `document-es-gpt-6.1-terra.md`. L'extension devient
 toujours `.md` — `article.mdx` donne `article-en.md` — sauf avec
 `--keep_filename`, qui conserve le nom d'origine. Une traduction déjà présente
 est sautée sans `--force`.
@@ -246,20 +246,26 @@ aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lan
 
 | Provider    | Qualité (défaut)                                                     | Économique (`--eco`)      |
 | ----------- | -------------------------------------------------------------------- | ------------------------- |
-| OpenAI      | `gpt-5.6-terra`                                                      | `gpt-5.6-luna`            |
+| OpenAI      | `gpt-6.1-terra`                                                      | `gpt-6-luna`              |
 | Claude      | `claude-sonnet-5-5`                                                  | `claude-haiku-5-5`        |
 | Mistral     | `mistral-large-latest`                                               | `mistral-small-latest`    |
-| Gemini      | `gemini-3.8-flash`                                                   | `gemini-3.1-flash-lite`   |
-| Codex       | `gpt-6.1-sol` (aussi `gpt-5.6-sol`, `terra` et `luna` par `--model`) | `gpt-5.6-luna`            |
-| Grok API    | `grok-4.6`                                                           | `grok-4.3`                |
+| Gemini      | `gemini-4-hydrogen`                                                  | `gemini-3.1-flash-lite`   |
+| Codex       | `gpt-6.1-sol` (aussi `gpt-5.6-sol`, `terra` et `luna` par `--model`) | `gpt-6-luna`              |
+| Grok API    | `grok-4.7`                                                           | `grok-4.3`                |
 | Grok CLI    | `grok-4.7`                                                           | idem — `--eco` sans effet |
-| Antigravity | `gemini-3.8-flash-medium`                                            | `gemini-3.7-flash-low`    |
+| Antigravity | `gemini-3.8-flash-medium`                                            | `gemini-3.8-flash-low`    |
 | Claude Code | `sonnet`, effort `low`                                               | idem — `--eco` sans effet |
 | OpenCode    | `--model provider/modèle` obligatoire                                | idem — `--eco` sans effet |
 | OpenRouter  | `--model fournisseur/modèle` obligatoire                             | idem — `--eco` sans effet |
 
-Gemini 3.7 Flash, le défaut jusqu'à la 1.17.1, est déprécié : Google sert
-Gemini 3.8 Flash à sa place, et `--model gemini-3.7-flash` reste accepté.
+Les défauts suivent la dernière génération de chaque fournisseur, mesurée
+avant d'être adoptée : GPT-6 chez OpenAI, Gemini 4 Hydrogen chez Google,
+Grok 4.7 chez xAI depuis la 1.19.0. Les modèles précédents restent acceptés
+par `--model` (`gpt-5.6-terra`, `gemini-3.8-flash`, `grok-4.6`…), de même que
+Gemini 4 Argon et Carbon, le haut de gamme de Google. aipmt règle lui-même
+l'effort de raisonnement des GPT et des Grok, coupé en `--eco`, et
+`--reasoning_effort` le force ; un Gemini reçoit toujours le niveau le plus
+bas qu'il accepte.
 Une panne passagère de l'API Gemini (503, 429, délai dépassé) relance
 l'appel jusqu'à trois fois, après 10, 20 puis 40 secondes. Une tentative
 restée sans réponse est abandonnée au bout de 5 minutes, puis relancée de
@@ -283,8 +289,8 @@ aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
   sous-processus : une clé présente ne fait jamais basculer vers l'API.
 - Chaque segment coûte au moins un « message » de la fenêtre de 5 heures — deux
   si sa validation échoue et qu'il est retenté. OpenAI annonce, à titre
-  d'estimation, 250-2 000 messages/5 h pour `gpt-5.6-luna` (`--eco`) et
-  10-100 pour `gpt-5.6-sol` sur un plan Plus.
+  d'estimation, 250-2 000 messages/5 h pour `gpt-5.6-luna`, l'éco jusqu'à la
+  1.18.0, et 10-100 pour `gpt-5.6-sol` sur un plan Plus.
 - `--model gpt-5.6-sol`, le défaut jusqu'à la 1.16.3, `--model gpt-5.6-terra`
   et `--model gpt-5.6-luna` passent aussi par l'abonnement.
 - Un 429 du serveur ne fait pas perdre le fichier : Codex se reconnecte seul,
@@ -368,10 +374,15 @@ agy -p /usage --output-format json   # quota restant, sans en consommer
 - **Modèles** : ceux d'`agy models`. Les Gemini portent l'effort dans leur nom
   (`gemini-3.8-flash-medium`…) : un nom sans suffixe est refusé avant l'appel,
   et `--reasoning_effort` est sans effet. Par défaut `gemini-3.8-flash-medium`,
-  et `gemini-3.7-flash-low` en `--eco` ; les campagnes qui les ont fixés sont
-  décrites dans [Mesures détaillées](#mesures-détaillées). Claude et GPT-OSS
+  et `gemini-3.8-flash-low` en `--eco`, depuis qu'agy ne sert plus Gemini 3.7
+  Flash ; la campagne qui a fixé le défaut est
+  décrite dans [Mesures détaillées](#mesures-détaillées). Gemini 4 Hydrogen
+  (`gemini-4-hydrogen-low`…) partage le quota de 3.8 Flash et en consomme
+  davantage : 0,95 point de la fenêtre de 5 heures pour ce README à l'effort
+  moyen, contre 0,32. Claude et GPT-OSS
   ont leur propre quota, bien plus petit : environ 1 % de la fenêtre de
-  5 heures par appel mesuré, contre 0,05 % en Flash.
+  5 heures par appel mesuré, contre 0,05 % en Flash. Gemini 4 Argon a le
+  sien, hebdomadaire : ce README en prend 1,35 %.
 - **Quota** : par groupe, une fenêtre de 5 heures et une hebdomadaire, au
   prorata du coût en tokens. Mesuré sur le compte de l'auteur : environ
   16 points de la fenêtre de 5 heures par million de caractères source en

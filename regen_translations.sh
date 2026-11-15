@@ -22,7 +22,7 @@ set -euo pipefail
 # .env a suffi, une fois, à envoyer 28 traductions sur l'API payante.
 #
 # REGEN_MODEL force un modèle par-dessus le défaut du provider (ex.
-# REGEN_MODEL=gpt-5.6-luna pour l'éco de Codex).
+# REGEN_MODEL=gpt-6-luna pour l'éco de Codex).
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -189,7 +189,7 @@ main() {
 
   # REGEN_MODEL force un modèle précis, par-dessus le défaut du provider.
   # Utile pour monter en gamme sur un provider dont le mode --eco vise le
-  # volume (ex: REGEN_MODEL=grok-4.6 avec REGEN_PROVIDER=grok, dont l'éco
+  # volume (ex: REGEN_MODEL=grok-4.7 avec REGEN_PROVIDER=grok, dont l'éco
   # est grok-4.3 ; le CLI Grok n'a plus que grok-4.7).
   if [[ -n "${REGEN_MODEL:-}" ]]; then
     provider_flags="$provider_flags --model ${REGEN_MODEL}"
