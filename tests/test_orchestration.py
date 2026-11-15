@@ -10,6 +10,8 @@ Lancement : python -m unittest discover tests/ -v
 
 from __future__ import annotations
 
+import contextlib
+import io
 import os
 import stat
 import sys
@@ -885,7 +887,99 @@ class TestOpenAIO1Series(unittest.TestCase):
 
 
 class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
-    """Si le SDK local ou le serveur OpenAI rejette reasoning_effort, on retry sans."""
+    """Un reasoning_effort refusé par le SDK local ou par le serveur est rejoué
+    au niveau suivant : `low` quand c'est `none` qui est refusé, puis l'appel
+    sans le paramètre. Tout autre refus remonte."""
+
+    @staticmethod
+    def _bad_request(message, body=None):
+        from openai import BadRequestError
+
+        return BadRequestError(
+            message=message, response=MagicMock(status_code=400, request=MagicMock()), body=body
+        )
+
+    def _create(self, side_effect, effort, model="gpt-6.1-sol"):
+        client = MagicMock()
+        client.chat.completions.create.side_effect = side_effect
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            out = openai._openai_create_with_fallback(
+                client,
+                _base_args(model=model),
+                [{"role": "user", "content": "x"}],
+                {"reasoning_effort": effort},
+            )
+        efforts = [
+            call.kwargs.get("reasoning_effort")
+            for call in client.chat.completions.create.call_args_list
+        ]
+        return out, efforts, stderr.getvalue()
+
+    def test_none_refused_falls_back_to_low_first(self):
+        """gpt-6.1-sol et grok-4.5 et suivants refusent `none` et acceptent
+        `low` : retomber sur l'appel sans paramètre leur rendrait leur
+        raisonnement par défaut, le plus coûteux."""
+        ok_response = _make_openai_response("Translated")
+        refus = self._bad_request("Unsupported value: 'reasoning_effort' does not support 'none'")
+        out, efforts, stderr = self._create([refus, ok_response], "none")
+        self.assertIs(out, ok_response)
+        self.assertEqual(efforts, ["none", "low"])
+        self.assertIn("reasoning_effort='none' refusé — nouvel essai avec 'low'", stderr)
+
+    def test_parameter_refused_at_every_level_ends_without_it(self):
+        ok_response = _make_openai_response("Translated")
+        refus = self._bad_request("model does not support reasoning_effort")
+        out, efforts, stderr = self._create([refus, refus, ok_response], "none")
+        self.assertIs(out, ok_response)
+        self.assertEqual(efforts, ["none", "low", None])
+        self.assertIn("reasoning_effort='low' refusé — nouvel essai sans ce paramètre", stderr)
+
+    def test_xai_refusal_is_read_in_the_error_body(self):
+        """Corps réels de l'API xAI, relevés le 2026-11-15 : son message se
+        réduit à « Error code: 400 », le motif n'est que dans le corps, sous
+        deux graphies."""
+        ok_response = _make_openai_response("Translated")
+        corps = (
+            "This model does not support `reasoning_effort` value `none`.",
+            "Model grok-4.20-0309-non-reasoning does not support parameter reasoningEffort.",
+        )
+        for body in corps:
+            with self.subTest(body=body):
+                refus = self._bad_request("Error code: 400", body=body)
+                out, efforts, _ = self._create([refus, ok_response], "medium", model="grok-4.7")
+                self.assertIs(out, ok_response)
+                self.assertEqual(efforts, ["medium", None])
+
+    def test_unrelated_bad_request_reraises_without_retry(self):
+        from openai import BadRequestError
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = self._bad_request(
+            "Error code: 400", body="Invalid request content."
+        )
+        args = _base_args(model="grok-4.7")
+        messages = [{"role": "user", "content": "x"}]
+        with self.assertRaises(BadRequestError):
+            openai._openai_create_with_fallback(
+                client, args, messages, {"reasoning_effort": "none"}
+            )
+        client.chat.completions.create.assert_called_once()
+
+    def test_last_attempt_failure_reraises(self):
+        """Sans paramètre à retirer, il n'y a rien à rejouer : le refus remonte,
+        même s'il nomme reasoning_effort."""
+        from openai import BadRequestError
+
+        client = MagicMock()
+        client.chat.completions.create.side_effect = self._bad_request(
+            "model does not support reasoning_effort"
+        )
+        args = _base_args(model="o3")
+        messages = [{"role": "user", "content": "x"}]
+        with self.assertRaises(BadRequestError):
+            openai._openai_create_with_fallback(client, args, messages, {})
+        client.chat.completions.create.assert_called_once()
 
     def test_typeerror_retries_without_reasoning_effort(self):
         client = MagicMock()

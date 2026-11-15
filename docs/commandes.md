@@ -15,10 +15,10 @@ source venv/bin/activate
 # Translate a single file
 aipmt --file 'document.md' --target_dir 'output/' --target_lang 'en'
 
-# Translate a directory with OpenAI (default: gpt-5.6-terra)
+# Translate a directory with OpenAI (default: gpt-6.1-terra)
 aipmt --source_dir 'content/fr' --target_dir 'content/en' --source_lang 'fr' --target_lang 'en'
 
-# Use economic models (--eco): gpt-5.6-luna, claude-haiku-5-5, gemini-3.1-flash-lite
+# Use economic models (--eco): gpt-6-luna, claude-haiku-5-5, gemini-3.1-flash-lite
 aipmt --eco --source_dir 'content/fr' --target_dir 'content/en'
 
 # Translate with Mistral AI

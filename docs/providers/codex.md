@@ -7,7 +7,7 @@ pas facturée à l'usage.
 ```bash
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 ./regen_translations.sh --force                         # Codex est le défaut : gpt-6.1-sol
-REGEN_MODEL=gpt-5.6-luna ./regen_translations.sh --force   # éco, si le propriétaire le demande
+REGEN_MODEL=gpt-6-luna ./regen_translations.sh --force   # éco, si le propriétaire le demande
 ```
 
 Coût réel mesuré : régénérer les 28 traductions (70 turns) avec `gpt-5.6-sol` a
@@ -84,7 +84,15 @@ Points à connaître avant de toucher à ce code :
   70 s, note de traduction en 3,7 s ; `gpt-5.6-sol` en 906 s, segments de 36
   à 211 s, note en 182 s ; aucun événement d'erreur, structure identique pour
   les deux. `gpt-5.6-sol` reste disponible
-  par `--model` ; l'éco reste `gpt-5.6-luna`, non remesuré.
+  par `--model`.
+- **Éco : `gpt-6-luna` depuis le 2026-11-15** (`priority` 6 au catalogue,
+  272 000 tokens, quand `gpt-5.6-luna` n'y vient plus qu'en neuvième). Une
+  seule mesure sur l'abonnement : le README en japonais en 301 s, structure
+  identique. La comparaison avec `gpt-5.6-luna` s'est arrêtée sur la fenêtre de
+  5 h épuisée (« You've hit your usage limit ») ; par l'API, le même jour,
+  `gpt-6-luna` a rendu quatre README sur quatre sans écart. Validé ce jour-là
+  sur Codex 0.169.0 : guide traduit par le défaut et par les deux Luna.
+  `gpt-5.6-luna` reste disponible par `--model`.
 - **Quota** : un segment consomme grosso modo un « message » de la fenêtre 5 h,
   mais OpenAI ne publie AUCUNE équivalence comptable — l'assimilation vient
   d'une observation locale, pas d'un contrat. Sur Plus, les fourchettes

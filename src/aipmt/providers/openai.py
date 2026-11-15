@@ -16,18 +16,26 @@ from .base import _reason_name
 DEFAULT_OPENAI_API_KEY = "votre-cle-api-openai-par-defaut"  # pragma: allowlist secret
 
 
-DEFAULT_MODEL_OPENAI = "gpt-5.6-terra"
+# GPT-6.1 Terra et GPT-6 Luna depuis le 2026-11-15, à moitié prix de leurs
+# aînés ($1/$5 contre $2/$12 par million pour Terra, $0,10/$0,50 contre
+# $0,20/$1,20 pour Luna). Mesuré ce jour-là sur le README en japonais, effort
+# envoyé : structure identique quatre fois sur quatre pour chacun. Terra y met
+# de 190 à 245 s, contre 116 s pour gpt-5.6-terra ; Luna 125 s, comme
+# gpt-5.6-luna, qui a perdu un gras une fois sur six. OpenAI n'annonce aucun
+# retrait des gpt-5.6, qui restent accessibles par `--model`.
+DEFAULT_MODEL_OPENAI = "gpt-6.1-terra"
 
 
-ECO_MODEL_OPENAI = "gpt-5.6-luna"  # NOSONAR python:S1192 — cf. DEFAULT_MODEL_GROK
+ECO_MODEL_OPENAI = "gpt-6-luna"  # NOSONAR python:S1192 — cf. DEFAULT_MODEL_GROK
 
 
 _O1_SERIES = ("o1", "o1-mini", "o1-preview")
 
 
-def _resolve_reasoning_effort(args, eco_default="none", floor=None):
+def _resolve_reasoning_effort(args, eco_default="none", floor=None, quality_default="medium"):
     """Effort de raisonnement effectif : la valeur explicite si l'utilisateur en
-    a passé une, sinon `eco_default` en mode --eco et `medium` autrement.
+    a passé une, sinon `eco_default` en mode --eco et `quality_default`
+    autrement.
 
     Mesuré sur le modèle éco d'alors : un `medium` implicite produit 45
     reasoning tokens et 65 tokens de sortie pour traduire une phrase de dix
@@ -39,7 +47,7 @@ def _resolve_reasoning_effort(args, eco_default="none", floor=None):
     elle est passée explicitement : le CLI Codex refuse `none`, et la valeur
     explicite contournait jusqu'ici le repli sur `low`."""
     explicit = getattr(args, "reasoning_effort", None)
-    effort = explicit or (eco_default if getattr(args, "eco", False) else "medium")
+    effort = explicit or (eco_default if getattr(args, "eco", False) else quality_default)
     if floor and effort == "none":
         if explicit:
             print(
@@ -60,34 +68,68 @@ def _build_openai_messages(args, prompt, segment):
     ]
 
 
+# Familles qui reçoivent `reasoning_effort`, avec l'effort envoyé hors `--eco`.
+# Mesuré le 2026-11-15.
+# GPT-6 : sans le paramètre, `--eco` laissait gpt-6-luna raisonner à son niveau
+# par défaut.
+# Grok par clé API : sans lui, chaque segment payait le raisonnement par défaut
+# du modèle — 695 tokens de raisonnement pour 113 de sortie sur grok-4.7, 373
+# pour 103 sur grok-4.3, le palier éco, qui n'en dépense aucun avec `none`.
+# `low` et non `medium` pour Grok : sur le README en japonais, grok-4.7 rend la
+# même structure aux deux niveaux, en 190 s à `low` contre 711 s à `medium`.
+_QUALITY_REASONING_EFFORT = {"gpt-5": "medium", "gpt-6": "medium", "grok-4": "low"}
+
+
 def _openai_extra_kwargs(args, is_translation_note):
-    # reasoning_effort sur GPT-5.x.
-    if args.model.startswith("gpt-5") and not is_translation_note:
-        return {"reasoning_effort": _resolve_reasoning_effort(args)}
+    if is_translation_note:
+        return {}
+    for family, quality_default in _QUALITY_REASONING_EFFORT.items():
+        if args.model.startswith(family):
+            effort = _resolve_reasoning_effort(args, quality_default=quality_default)
+            return {"reasoning_effort": effort}
     return {}
 
 
+def _rejects_reasoning_effort(error):
+    """Le refus porte-t-il sur `reasoning_effort` ? OpenAI nomme le paramètre
+    dans son message ; xAI réduit le sien à « Error code: 400 » et range le
+    motif dans le corps, sous deux graphies (`reasoning_effort` pour une valeur
+    refusée, `reasoningEffort` pour un modèle qui ignore le paramètre)."""
+    text = f"{error} {getattr(error, 'body', None) or ''}".lower()
+    return "reasoning_effort" in text or "reasoningeffort" in text
+
+
+def _reasoning_effort_attempts(extra_kwargs):
+    """Du réglage demandé au plus permissif. `none` refusé (grok-4.5 et
+    suivants, gpt-6.1-sol) se replie d'abord sur `low`, le niveau le plus
+    proche que ces modèles acceptent, avant l'appel sans le paramètre, qui
+    rend au modèle son raisonnement par défaut, le plus coûteux."""
+    attempts = [extra_kwargs]
+    if extra_kwargs.get("reasoning_effort") == "none":
+        attempts.append({"reasoning_effort": "low"})
+    if extra_kwargs:
+        attempts.append({})
+    return attempts
+
+
 def _openai_create_with_fallback(client, args, messages, extra_kwargs):
-    try:
-        return client.chat.completions.create(model=args.model, messages=messages, **extra_kwargs)
-    except TypeError as e:
-        # Vieille version SDK locale qui ne connaît pas reasoning_effort.
-        if "reasoning_effort" not in str(e) or not extra_kwargs:
-            raise
-        print(
-            f"⚠ OpenAI SDK rejette reasoning_effort (TypeError) — retry sans (model={args.model})",
-            file=sys.stderr,
-        )
-        return client.chat.completions.create(model=args.model, messages=messages)
-    except BadRequestError as e:
-        # Modèle qui ne supporte pas reasoning_effort côté serveur.
-        if "reasoning_effort" not in str(e) or not extra_kwargs:
-            raise
-        print(
-            f"⚠ OpenAI rejette reasoning_effort (400) — retry sans (model={args.model})",
-            file=sys.stderr,
-        )
-        return client.chat.completions.create(model=args.model, messages=messages)
+    """Un paramètre d'optimisation ne doit jamais faire échouer une traduction :
+    un `reasoning_effort` refusé par le SDK local (TypeError) ou par le serveur
+    (400) est rejoué au niveau suivant. Tout autre refus remonte tel quel."""
+    attempts = _reasoning_effort_attempts(extra_kwargs)
+    for kwargs, fallback in zip(attempts, [*attempts[1:], None], strict=True):
+        try:
+            return client.chat.completions.create(model=args.model, messages=messages, **kwargs)
+        except (TypeError, BadRequestError) as e:
+            if fallback is None or not _rejects_reasoning_effort(e):
+                raise
+            suite = f"avec {fallback['reasoning_effort']!r}" if fallback else "sans ce paramètre"
+            print(
+                f"⚠ reasoning_effort={kwargs['reasoning_effort']!r} refusé — nouvel essai "
+                f"{suite} (model={args.model})",
+                file=sys.stderr,
+            )
+    raise AssertionError("inatteignable : le dernier essai rend ou lève")  # pragma: no cover
 
 
 def _call_openai(client, args, prompt, segment, is_translation_note):

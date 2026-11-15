@@ -115,22 +115,25 @@ _TMPDIR_REEL = tempfile.gettempdir()
 # Hors CI : les runners posent CI=true, qui fait refuser toute initialisation.
 _HORS_CI = {"CI": "", "GITHUB_ACTIONS": ""}
 
-# Catalogue d'`agy models` relevé sur agy 1.2.11 le 2026-09-26 : l'effort de
+# Catalogue d'`agy models` relevé sur agy 1.5.9 le 2026-11-15 : l'effort de
 # raisonnement fait partie de l'identifiant. À tenir à jour avec le catalogue.
 _CATALOGUE_AGY = (
+    "gemini-4-argon-medium",
+    "gemini-4-argon-high",
+    "gemini-4-argon-low",
+    "gemini-4-hydrogen-high",
+    "gemini-4-hydrogen-xhigh",
+    "gemini-4-hydrogen-medium",
+    "gemini-4-hydrogen-low",
     "gemini-3.8-flash-high",
     "gemini-3.8-flash-medium",
     "gemini-3.8-flash-low",
-    "gemini-3.7-flash-high",
-    "gemini-3.7-flash-medium",
-    "gemini-3.7-flash-low",
-    "gemini-3.6-flash-high",
-    "gemini-3.6-flash-medium",
-    "gemini-3.6-flash-low",
-    "gemini-3.1-pro-high",
-    "gemini-3.1-pro-low",
-    "claude-sonnet-4-6",
-    "claude-opus-4-6-thinking",
+    "claude-opus-5-5-low",
+    "claude-opus-5-5-medium",
+    "claude-opus-5-5-high",
+    "claude-sonnet-5-5-low",
+    "claude-sonnet-5-5-medium",
+    "claude-sonnet-5-5-high",
     "gpt-oss-120b-medium",
 )
 
@@ -224,7 +227,7 @@ _ENV_ATTENDU = {**_ENV_TRANSMIS, "AGY_CLI_DISABLE_AUTO_UPDATE": "true"}
 
 def _args(**overrides):
     defaults = {
-        "model": "gemini-3.7-flash-low",
+        "model": "gemini-3.8-flash-low",
         "source_lang": "fr",
         "target_lang": "en",
         "news": False,
@@ -1667,13 +1670,12 @@ class TestAntigravityInit(unittest.TestCase):
         self.assertEqual(eco.model, antigravity.ECO_MODEL_ANTIGRAVITY)
 
     def test_defaults_are_the_campaign_choices(self):
-        """Fixés par les mesures du 2026-09-26 : 3.8 Flash medium rend la même
-        structure que 3.7 Flash medium pour un septième de quota en plus ;
-        3.7 Flash low reste le palier éco, 3.8 low cassant des liens internes
-        que 3.7 low laissait intacts. Les changer est une décision, pas un
-        détail."""
+        """Le défaut date des mesures du 2026-09-26. L'éco est 3.8 Flash low
+        depuis le 2026-11-15 : agy a retiré 3.7 Flash de son catalogue, et
+        l'éco d'alors faisait échouer `--eco`. Les changer est une décision,
+        pas un détail."""
         self.assertEqual(antigravity.DEFAULT_MODEL_ANTIGRAVITY, "gemini-3.8-flash-medium")
-        self.assertEqual(antigravity.ECO_MODEL_ANTIGRAVITY, "gemini-3.7-flash-low")
+        self.assertEqual(antigravity.ECO_MODEL_ANTIGRAVITY, "gemini-3.8-flash-low")
 
     def test_defaults_are_catalogue_identifiers_on_the_gemini_quota(self):
         """Des identifiants d'`agy models`, effort compris, hors du petit quota
@@ -1685,9 +1687,9 @@ class TestAntigravityInit(unittest.TestCase):
                 self.assertNotIn("Claude and GPT models", avertissements)
 
     def test_explicit_model_wins_over_eco(self):
-        args = _args(model="gemini-3.1-pro-high", eco=True)
+        args = _args(model="gemini-4-hydrogen-high", eco=True)
         self._init(args)
-        self.assertEqual(args.model, "gemini-3.1-pro-high")
+        self.assertEqual(args.model, "gemini-4-hydrogen-high")
 
     def test_refused_in_ci_with_the_google_fallback(self):
         for env in ({"CI": "true", "GITHUB_ACTIONS": ""}, {"CI": "", "GITHUB_ACTIONS": "true"}):
@@ -1756,12 +1758,12 @@ class TestAntigravityInit(unittest.TestCase):
         """Une valeur commençant par « - » serait relue comme un drapeau par
         le parseur d'argv d'agy."""
         for modele in (
-            "-gemini-3.7-flash-low",
+            "-gemini-3.8-flash-low",
             "--help",
-            "google/gemini-3.7-flash-low",
+            "google/gemini-3.8-flash-low",
             "gemini 3.7 flash",
             "../agy",
-            "gemini-3.7-flash-low;ls",
+            "gemini-3.8-flash-low;ls",
         ):
             with self.subTest(modele=modele):
                 message = self._refus(_args(model=modele))
@@ -1770,20 +1772,14 @@ class TestAntigravityInit(unittest.TestCase):
 
     def test_base_name_without_effort_suggests_catalogue_identifiers(self):
         """agy refuse un nom de base : l'effort fait partie de l'identifiant.
-        Les deux suggestions existent au catalogue — un Pro n'a pas d'effort
-        `-medium`, qu'agy refuserait à son tour."""
-        cas = {
-            "gemini-3.7-flash": ("-medium", "-low"),
-            "gemini-3.8-flash": ("-medium", "-low"),
-            "gemini-3.6-flash": ("-medium", "-low"),
-            "gemini-3.1-pro": ("-high", "-low"),
-        }
-        for modele, efforts in cas.items():
+        Les deux suggestions existent au catalogue, pour chacune de ses trois
+        familles Gemini."""
+        for modele in ("gemini-3.8-flash", "gemini-4-hydrogen", "gemini-4-argon"):
             with self.subTest(modele=modele):
                 message = self._refus(_args(model=modele))
                 self.assertIn("incomplet", message)
                 suggestions = re.findall(re.escape(modele) + r"-[a-z]+", message)
-                self.assertCountEqual(suggestions, [modele + effort for effort in efforts])
+                self.assertCountEqual(suggestions, [modele + "-medium", modele + "-low"])
                 for suggestion in suggestions:
                     self.assertIn(suggestion, _CATALOGUE_AGY)
 
@@ -1798,19 +1794,32 @@ class TestAntigravityInit(unittest.TestCase):
         _, avertissements = self._init(_args(reasoning_effort=None))
         self.assertNotIn("--reasoning_effort", avertissements)
         # Un Namespace construit à la main, sans l'attribut, ne casse rien.
-        _, avertissements = self._init(Namespace(model="gemini-3.7-flash-low", eco=False))
+        _, avertissements = self._init(Namespace(model="gemini-3.8-flash-low", eco=False))
         self.assertEqual(avertissements, "")
 
     def test_claude_and_gpt_models_warn_about_their_smaller_quota(self):
         """Mesuré : environ 1 % de la fenêtre de 5 heures par appel, contre
         0,05 % en Flash."""
-        for modele in ("claude-sonnet-4-6", "claude-opus-4-6-thinking", "gpt-oss-120b-medium"):
+        for modele in ("claude-sonnet-5-5-low", "claude-opus-5-5-high", "gpt-oss-120b-medium"):
             with self.subTest(modele=modele):
                 _, avertissements = self._init(_args(model=modele))
                 self.assertIn("Claude and GPT models", avertissements)
                 self.assertIn(modele, avertissements)
         _, avertissements = self._init(_args(model="gemini-3.8-flash-low"))
         self.assertNotIn("Claude and GPT models", avertissements)
+
+    def test_gemini_4_argon_warns_about_its_own_weekly_quota(self):
+        """Mesuré le 2026-11-15 : Argon ne puise pas dans le quota des Gemini,
+        mais dans un quota hebdomadaire à lui, dont un README prend 1,35 %."""
+        for modele in ("gemini-4-argon-low", "gemini-4-argon-medium", "gemini-4-argon-high"):
+            with self.subTest(modele=modele):
+                _, avertissements = self._init(_args(model=modele))
+                self.assertIn("propre à Gemini 4 Argon", avertissements)
+                self.assertIn(modele, avertissements)
+        for modele in ("gemini-4-hydrogen-low", "gemini-3.8-flash-medium"):
+            with self.subTest(modele=modele):
+                _, avertissements = self._init(_args(model=modele))
+                self.assertEqual(avertissements, "")
 
     def test_missing_binary_stops_before_any_subprocess(self):
         run = MagicMock(name="run", side_effect=_NE_DOIT_PAS_SERVIR)

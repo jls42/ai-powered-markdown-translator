@@ -33,8 +33,12 @@ DEFAULT_MODEL_CODEX = "gpt-6.1-sol"
 
 
 # Luna = modèle "fast, high-volume" du plan ChatGPT : 250-2000 messages/5h sur
-# Plus contre 10-100 pour Sol. C'est le seul choix raisonnable pour du batch.
-ECO_MODEL_CODEX = "gpt-5.6-luna"
+# Plus contre 10-100 pour Sol (chiffres annoncés pour gpt-5.6-luna). C'est le
+# seul choix raisonnable pour du batch. GPT-6 Luna depuis le 2026-11-15 : une
+# seule mesure sur l'abonnement, le README en japonais en 301 s, structure
+# identique ; la comparaison avec gpt-5.6-luna s'est arrêtée sur la fenêtre de
+# quota épuisée. Par l'API, le même jour, quatre README sur quatre.
+ECO_MODEL_CODEX = "gpt-6-luna"
 
 
 # --- Provider Codex (CLI officiel, quota d'abonnement ChatGPT) --------------
