@@ -958,12 +958,11 @@ class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
         client.chat.completions.create.side_effect = self._bad_request(
             "Error code: 400", body="Invalid request content."
         )
+        args = _base_args(model="grok-4.7")
+        messages = [{"role": "user", "content": "x"}]
         with self.assertRaises(BadRequestError):
             openai._openai_create_with_fallback(
-                client,
-                _base_args(model="grok-4.7"),
-                [{"role": "user", "content": "x"}],
-                {"reasoning_effort": "none"},
+                client, args, messages, {"reasoning_effort": "none"}
             )
         client.chat.completions.create.assert_called_once()
 
@@ -976,10 +975,10 @@ class TestOpenAIReasoningEffortFallbacks(unittest.TestCase):
         client.chat.completions.create.side_effect = self._bad_request(
             "model does not support reasoning_effort"
         )
+        args = _base_args(model="o3")
+        messages = [{"role": "user", "content": "x"}]
         with self.assertRaises(BadRequestError):
-            openai._openai_create_with_fallback(
-                client, _base_args(model="o3"), [{"role": "user", "content": "x"}], {}
-            )
+            openai._openai_create_with_fallback(client, args, messages, {})
         client.chat.completions.create.assert_called_once()
 
     def test_typeerror_retries_without_reasoning_effort(self):

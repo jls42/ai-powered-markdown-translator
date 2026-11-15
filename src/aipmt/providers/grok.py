@@ -41,7 +41,7 @@ DEFAULT_XAI_API_KEY = "votre-cle-api-xai-par-defaut"  # pragma: allowlist secret
 # lu sur `GET /v1/language-models`), et à l'effort `low` qu'aipmt envoie
 # désormais à un Grok, il raisonne huit fois moins que grok-4.6 sur un même
 # segment (33 tokens contre 279).
-DEFAULT_MODEL_GROK = "grok-4.7"
+DEFAULT_MODEL_GROK = "grok-4.7"  # NOSONAR python:S1192 — catalogues indépendants, cf. ci-dessus
 
 
 # xAI n'a aucun palier mini/flash/lite : l'« éco » est une génération
