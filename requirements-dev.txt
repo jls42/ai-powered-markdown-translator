@@ -4,3 +4,6 @@ detect-secrets>=1.5
 pip-audit>=2.10.1
 mypy>=2.4.1
 lizard>=1.26.0
+# Construit la roue que `check-release-ready.sh --full` installe et éprouve
+# (scripts/check-package-smoke.sh) : sans lui, un venv neuf échoue à ce contrôle.
+build>=1.6.1

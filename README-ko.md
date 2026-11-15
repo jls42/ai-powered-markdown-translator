@@ -5,7 +5,7 @@
 <h4 align="center">📊 코드 품질</h4>
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="Quality Gate 상태"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=alert_status" alt="품질 게이트 상태"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=security_rating" alt="보안 등급"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=reliability_rating" alt="신뢰성 등급"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_rating" alt="유지보수성 등급"></a>
@@ -17,7 +17,7 @@
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=code_smells" alt="코드 스멜"></a>
 </p>
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="중복 라인 (%)"></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=duplicated_lines_density" alt="중복 코드 라인 (%)"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=sqale_index" alt="기술 부채"></a>
   <a href="https://sonarcloud.io/summary/new_code?id=jls42_ai-powered-markdown-translator"><img src="https://sonarcloud.io/api/project_badges/measure?project=jls42_ai-powered-markdown-translator&metric=ncloc" alt="코드 라인 수"></a>
 </p>
@@ -26,25 +26,26 @@
   <a href="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator"><img src="https://www.codefactor.io/repository/github/jls42/ai-powered-markdown-translator/badge" alt="CodeFactor"></a>
 </p>
 
-코드 블록, 인라인 코드, URL, 앵커, 표, 프론트 매터 등의 구조를 보존하면서
-Markdown 파일을 한 언어에서 다른 언어로 번역합니다. 모델을 호출하는 11가지
-방식(5개의 API, 4개의 종량제 없는 구독형 서비스, 2개의 라우터)과 각 모델이
-실제로 무엇을 보존하는지에 대한 공개된 측정 결과를 제공합니다.
+코드 블록, 인라인 코드, URL, 앵커, 표, 프론트 매터(front matter) 등
+구조를 보존하면서 Markdown 파일을 한 언어에서 다른 언어로 번역합니다.
+5개의 API, 4개의 종량제 없는 정액 구독, 2개의 라우터 등 모델을 호출하는
+11가지 방법과 각 모델이 실제로 무엇을 보존하는지에 대한 공개된 측정
+결과를 제공합니다.
 
 ## 요약
 
-- **11가지 제공자 경로**: OpenAI, Mistral, Claude, Gemini, Grok API;
-  종량제 없는 ChatGPT (Codex), Grok, Google (Antigravity), Claude (Claude
-  Code) 구독; OpenCode (오픈소스, 무료 또는 로컬) 및 OpenRouter
+- **11가지 프로바이더 경로**: OpenAI, Mistral, Claude, Gemini, Grok API;
+  종량제 과금 없는 ChatGPT (Codex), Grok, Google (Antigravity), Claude (Claude
+  Code) 구독; OpenCode (오픈 소스, 무료 또는 로컬) 및 OpenRouter
   (400개 이상의 모델) 라우터.
-- **누락된 토큰으로 인한 왜곡 방지**: 호출 전에 코드 블록, 인라인 코드,
-  URL, 앵커 및 인용문이 토큰으로 대체되고 반환 시 검증됩니다.
-  하나라도 누락되면 파일이 작성되지 않습니다.
-- **긴 문서**: 모델의 컨텍스트 창에 따른 분할 처리.
-- **`--news` 모드**: 모니터링 기사를 위해 영어 인용문을 보호하고
-  언어별 플래그를 처리합니다.
-- **`--eco` 모드**: 빠르고 경제적인 모델 사용.
-- 상단, 하단 또는 양쪽 모두에 배치 가능한 선택적 **번역 참고 사항**.
+- **토큰 유실로 인한 변형 방지**: 코드 블록, 인라인 코드,
+  URL, 앵커, 인용문은 호출 전에 토큰으로 대체되며
+  반환 시 검증됩니다. 하나라도 누락되면 파일이 기록되지 않습니다.
+- **긴 문서 지원**: 모델의 컨텍스트 윈도우에 따른 분할 처리.
+- **`--news` 모드**: 모니터링/뉴스 기사를 위해 영어 인용문을 보호하고
+  언어별 국기/플래그 관리.
+- **`--eco` 모드**: 더 빠르고 저렴한 모델.
+- 상단, 하단 또는 양쪽 모두에 선택적으로 추가 가능한 **번역 안내 문구**.
 
 ## 설치
 
@@ -53,19 +54,19 @@ pip install ai-powered-markdown-translator     # ou : pipx install ai-powered-ma
 aipmt --help                                   # ou : python -m aipmt --help
 ```
 
-Python 3.11 이상. 저장소에서 직접 설치하려면
+Python 3.11 이상. 저장소에서 설치하려면
 [기여하기](#기여하기)를 참조하세요.
 
 ## 설정
 
-키는 세 곳에서 읽히며, 우선순위가 높은 곳부터 적용됩니다. 각 위치는
-이전 위치에서 비어 있는 항목만 채웁니다.
+키는 우선순위가 높은 순서대로 세 위치에서 읽히며, 각 위치는
+이전 위치에서 비어 있는 값만 채웁니다.
 
 |     | 위치                                          | 용도                                  |
 | --- | --------------------------------------------- | ------------------------------------- |
 | 1   | 환경 변수                                     | CI, 컨테이너, 일회성 재정의           |
-| 2   | 현재 디렉터리(또는 상위 디렉터리)의 `.env` | 프로젝트별 고유 키                   |
-| 3   | `~/.config/aipmt/.env`                                 | 한 번 설정하면 어디서나 적용됨        |
+| 2   | 현재 디렉터리(또는 상위 디렉터리)의 `.env` | 프로젝트 전용 키                      |
+| 3   | `~/.config/aipmt/.env`                        | 한 번 설치하면 어디서나 적용          |
 
 ```bash
 mkdir -p ~/.config/aipmt
@@ -80,28 +81,30 @@ EOF
 chmod 600 ~/.config/aipmt/.env
 ```
 
-`GOOGLE_API_KEY` 대신 `GEMINI_API_KEY`도 지원됩니다. 사용자 파일은
-`XDG_CONFIG_HOME`(절대 경로만 해당)을 따르며 Windows에서는 `%APPDATA%`을
-따릅니다. 키가 없으면 명령어가 세 위치를 모두 나열합니다.
+`GOOGLE_API_KEY` 대신 `GEMINI_API_KEY`도 사용할 수 있습니다. 사용자
+파일은 `XDG_CONFIG_HOME`(절대 경로만 해당) 및 Windows에서는 `%APPDATA%`을
+따릅니다. 키가 없으면 명령어가 세 위치를 나열합니다.
 
-**프로젝트의 `.env`은 호출을 리디렉션하거나 실행할 프로그램을 선택할 수 없습니다.**
-키만 제공할 뿐 대상이나 바이너리는 절대 제공하지 않습니다. `_BASE_URL`,
-`_API_BASE`, `_ENDPOINT`, `_BIN`(`CODEX_BIN`, `GROK_BIN`,
-`OPENCODE_BIN`, `AGY_BIN`), `GROK_HOME`로 끝나는 모든 변수,
-프록시(`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`), 인증서
-저장소(`SSL_CERT_FILE`, `SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`) 및
-`XDG_CONFIG_HOME` / `APPDATA`은 경고와 함께 무시됩니다. 복제된 저장소가 첫
-번역 실행 시 사용자의 키를 탈취하거나 자체 프로그램을 실행하도록 유도해서는 안
-되기 때문입니다. 이 파일은 보간 없이 읽히므로 `NOM=${OPENAI_API_KEY}`이 키를 복사하지
-않습니다. 이러한 변수는 환경 변수나 `~/.config/aipmt/.env`에 설정하세요.
+**프로젝트의 `.env`은 호출을 리디렉션하거나 실행되는 프로그램을 선택할 수 없습니다.**
+키만 제공할 뿐 대상(엔드포인트)이나 바이너리는 절대 제공하지 않습니다.
+`_BASE_URL`, `_API_BASE`, `_ENDPOINT` 또는 `_BIN`(`CODEX_BIN`,
+`GROK_BIN`, `OPENCODE_BIN`, `AGY_BIN`), `GROK_HOME`, 프록시(`HTTP_PROXY`,
+`HTTPS_PROXY`, `ALL_PROXY`), 인증서 저장소(`SSL_CERT_FILE`,
+`SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE`) 및 `XDG_CONFIG_HOME` /
+`APPDATA` 변수는 경고와 함께 무시됩니다. 복제된 저장소가 사용자의 키를
+가로채거나 첫 번역 시 자체 프로그램을 실행하도록 해서는 안 되기 때문입니다.
+또한 이 파일은 보간(interpolation) 없이 읽히므로,
+`NOM=${OPENAI_API_KEY}`이 키를 복사하지 않습니다. 이러한 변수들은
+환경 변수나 `~/.config/aipmt/.env`에 설정하세요.
 
-선택적 변수: `XAI_BASE_URL`(기본값 `https://api.x.ai/v1`), `CLAUDE_TIMEOUT`(호출당
-초 단위 시간, 기본값 900), `CODEX_BIN`, `CODEX_TIMEOUT`(기본값 600),
-`GROK_BIN`, `GROK_HOME`(기본값 `~/.grok`), `GROK_TIMEOUT`(기본값
-900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT`(기본값 900),
-`OPENCODE_BIN`, `OPENCODE_TIMEOUT`(기본값 600), `OPENROUTER_BASE_URL`(`https://`
-필수), `OPENROUTER_TIMEOUT`(기본값 900), `OPENROUTER_PREFLIGHT_TIMEOUT`(기본값 30). 각 변수는 해당
-제공자 섹션에 자세히 설명되어 있습니다.
+선택적 변수: `XAI_BASE_URL`(기본값 `https://api.x.ai/v1`),
+`CLAUDE_TIMEOUT`(호출당 초, 기본값 900), `CODEX_BIN`, `CODEX_TIMEOUT`
+(기본값 600), `GROK_BIN`, `GROK_HOME`(기본값 `~/.grok`), `GROK_TIMEOUT`
+(기본값 900), `GROK_TRANSLATE_SANDBOX`, `AGY_BIN`, `AGY_TIMEOUT`(기본값 900),
+`OPENCODE_BIN`, `OPENCODE_TIMEOUT`(기본값 600), `OPENROUTER_BASE_URL`
+(`https://` 필수), `OPENROUTER_TIMEOUT`(기본값 900),
+`OPENROUTER_PREFLIGHT_TIMEOUT`(기본값 30). 각 변수는 해당 프로바이더
+섹션에 자세히 설명되어 있습니다.
 
 ## 시작하기
 
@@ -116,80 +119,71 @@ aipmt --source_dir content/fr --target_dir content/en --source_lang fr --target_
 aipmt --use_gemini --file document.md --target_dir out/ --target_lang ja
 ```
 
-`document.md`을 스페인어로 번역하면 `--target_dir` 안에 `document-es.md`이
-생성됩니다. `--include_model`을 사용하면 `document-es-gpt-6.1-terra.md`이 됩니다. 원래 이름을
-유지하는 `--keep_filename`를 제외하고는 확장자가 항상 `.md`로 변경됩니다
-(`article.mdx`은 `article-en.md`이 됨). 이미 존재하는 번역본은 `--force`이
-없으면 건너뜁니다.
+`document.md`을 스페인어로 번역하면 `--target_dir`에 `document-es.md`이 생성됩니다.
+`--include_model`을 사용하면 `document-es-gpt-6.1-terra.md`이 됩니다. 원래 이름을 유지하는
+`--keep_filename`를 제외하고 확장자는 항상 `.md`가 됩니다
+(`article.mdx`은 `article-en.md`가 됨). 이미 존재하는 번역은
+`--force` 옵션이 없으면 건너뜁니다.
 
-종료 코드: 모두 성공했거나 건너뛴 경우 `0`, 실패한 파일이 남아 있는
-경우 `1`(표준 에러에 목록 출력), 설정에 문제가 있는 경우 `2`.
-쓰기 작업 자체가 실패하더라도 실패한 파일은 기록되지 않습니다. 내용은 임시 파일로
-작성된 후 이름이 변경됩니다. 다시 실행하기만 하면 됩니다.
+종료 코드: 모두 성공했거나 건너뛴 경우 `0`, 실패한 파일이 남아 있는 경우(표준 오류에 목록 출력) `1`, 설정에 문제가 있는 경우 `2`.
+실패한 파일은 쓰기 자체가 실패하더라도 절대 기록되지 않습니다.
+내용은 임시 파일에 작성된 후 이름이 변경됩니다. 다시 실행하기만 하면 됩니다.
 
-## 어떤 모델을 선택해야 할까
+## 어떤 모델을 선택해야 할까요
 
-두 개의 실제 문서를 바탕으로, 각 모델이 동일한 14개 언어로 번역하여 측정한
-결과입니다. **숫자는 14개 언어 중 번역이 정상적으로 작성되고 원본과 차이가 전혀 없는 언어의 수입니다.**
+각 모델이 동일한 14개 언어로 번역한 두 개의 실제 문서를 바탕으로
+측정했습니다. **숫자는 14개 언어 중 번역이 정상적으로 기록되고 원본과 차이가 없는 언어의 수입니다.**
 
-| 모델                  | 접근 방식                         | 조밀한 모니터링 기사   | 본 README    | 차이점 및 영향을 받은 언어 수                                                                                                                                      |
+| 모델                  | 접근 방법                         | 정보 밀도가 높은 모니터링 기사 | 이 README    | 차이점 및 발생한 언어 수                                                                                                                          |
 | --------------------- | --------------------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Gemini 3.8 Flash**  | Google 구독 (Antigravity)         | ✅ 14/14                | ✅ 14/14     | 두 문서 모두 차이 없음                                                                                                                                             |
-| **Claude Sonnet 5.5** | Anthropic API 키                  | ✅ 14/14                | ✅ 14/14     | 두 문서 모두 차이 없음                                                                                                                                             |
-| **Gemini 3.7 Flash**  | Google API 키                     | ✅ 14/14                | ⚠️ 13/14     | 14개 중 1개 언어: 굵은 글씨 단어 1개 추가됨 (ja)                                                                                                                   |
-| **Gemini 3.7 Flash**  | Google 구독 (Antigravity)         | ✅ 14/14                | ⚠️ 13/14     | 14개 중 1개 언어: 굵은 글씨 단어 1개 누락됨 (ko)                                                                                                                   |
-| **GPT-5.6 Sol**       | ChatGPT 구독 또는 OpenAI 키       | ✅ 14/14                | ⚠️ 12/14     | 14개 중 2개 언어: 굵은 글씨 단어 1개 누락됨 (ar, ja)                                                                                                              |
-| **GLM-5.2**           | OpenRouter 키                     | ✅ 14/14                | ⚠️ 11/14     | 14개 중 3개 언어: 굵은 글씨 단어 1개 누락됨 (hi, ja, ko)                                                                                                          |
-| Claude Sonnet 5       | Claude 구독 (Claude Code)         | ⚠️ 13/14                | ⚠️ 13/14     | 기사에서 14개 중 1개 언어: 굵은 글씨 단어 1개 추가됨 (zh); 본 README에서 1개 언어: 표의 한 행이 이전 행에 붙어 렌더링 시 숨겨짐 (ar)                                |
-| Claude Haiku 4.5      | Claude 구독 (Claude Code)         | ⚠️ 11/14                | ✅ 14/14     | 기사에서 14개 중 3개 언어: 섹션 제목이 레벨 1로 변경됨 (en, pl, ro); 본 README에서는 비교 도구상 차이 없으나 내부 링크가 영어로 중복됨                              |
-| Claude Sonnet 5       | Anthropic API 키                  | ⚠️ 11/14                | ⚠️ 12/14     | 기사에서 14개 중 3개 언어: 코드 블록이 새로 생김 (es, de, hi); 본 README에서 2개 언어: 마크업 없는 링크 (sv), 굵은 글씨 단어 1개 (zh)                              |
-| Claude Haiku 4.5      | Anthropic API 키                  | ⚠️ 7/14                 | ✅ 14/14     | 기사에서 14개 중 7개 언어: 섹션 제목이 레벨 1로 변경됨(일본어의 경우 프랑스어로 남음); 본 README에서는 차이 없음                                                 |
-| Claude Haiku 5.5      | Anthropic API 키                  | ⚠️ 11/14                | ❌ 12/14     | 기사에서 14개 중 3개 언어: 섹션 제목 레벨 변경 또는 중복 생성 (ja, ko, zh); 본 README에서 2개 언어 거부됨, 인라인 코드 유실 (ar, hi)                               |
-| Qwen 3.7 Flash        | OpenRouter 키                     | ❌ 8/14                 | ⚠️ 10/14     | 기사에서 1개 언어 거부됨, 다른 5개 언어에서 차이 발생; 본 README에서 약 40개 단어가 `code` 처리됨 (ar)                                                    |
-| Grok 4.6              | Grok 구독                         | ❌ 8/14                 | 미측정       | 14개 중 5개 언어 거부됨(인라인 코드 및 URL 반환 누락); 네덜란드어는 전체적으로 달라짐                                                                             |
-| GPT-OSS 20B           | 로컬 모델 (Ollama)                | ❌ 7/14                 | 재측정 안 됨 | 14개 중 4개 언어 거부됨: 모델이 프랑스어 구절을 그대로 남겨 가드에 의해 중단됨                                                                                    |
-| MiMo v2.5 (무료)      | OpenCode Zen, 계정 없음           | ❌ 11/14                | 재측정 안 됨 | 1개 언어 거부됨; 폴란드어에서 한 섹션 유실                                                                                                                          |
-| Mistral Large         | Mistral API 키                    | ❌ 5/14                 | ❌ 1/14      | **섹션 전체가 사라짐**: 기사에서 1개 언어 (hi), 본 README에서 3개 언어 (ar, hi, ko) — 기사에서 3개 언어 거부됨                                                    |
-| DeepSeek V4 Flash     | OpenRouter 키                     | ❌ 3/14                 | 재측정 안 됨 | 14개 중 10개 언어 거부됨; 언어당 37분 소요                                                                                                                         |
-| Claude Opus 5.5       | Claude 구독 (Claude Code)         | ❌ 0/14                 | ✅ 14/14     | 짧은 생물학 관련 단신 기사로 인해 Opus의 안전장치가 작동하여 14개 언어 모두 기사 번역 거부됨; 본 README에서는 차이 없음                                            |
+| **Gemini 3.8 Flash**  | Google 구독 (Antigravity)         | ✅ 14/14                | ✅ 14/14     | 두 문서 모두 차이점 없음                                                                                                                                           |
+| **Claude Sonnet 5.5** | Anthropic API 키                  | ✅ 14/14                | ✅ 14/14     | 두 문서 모두 차이점 없음                                                                                                                                           |
+| **Gemini 3.7 Flash**  | Google API 키                     | ✅ 14/14                | ⚠️ 13/14     | 14개 언어 중 1개: 굵은 글씨 단어 1개 추가 (ja)                                                                                                                     |
+| **Gemini 3.7 Flash**  | Google 구독 (Antigravity)         | ✅ 14/14                | ⚠️ 13/14     | 14개 언어 중 1개: 굵은 글씨 단어 1개 누락 (ko)                                                                                                                     |
+| **GPT-5.6 Sol**       | ChatGPT 구독 또는 OpenAI 키       | ✅ 14/14                | ⚠️ 12/14     | 14개 언어 중 2개: 굵은 글씨 단어 1개 누락 (ar, ja)                                                                                                                |
+| **GLM-5.2**           | OpenRouter 키                     | ✅ 14/14                | ⚠️ 11/14     | 14개 언어 중 3개: 굵은 글씨 단어 1개 누락 (hi, ja, ko)                                                                                                            |
+| Claude Sonnet 5       | Claude 구독 (Claude Code)         | ⚠️ 13/14                | ⚠️ 13/14     | 기사에서 14개 언어 중 1개: 굵은 글씨 단어 1개 추가 (zh); 이 README에서 1개: 표의 행이 이전 행에 붙어 화면에 숨겨짐 (ar)                                           |
+| Claude Haiku 4.5      | Claude 구독 (Claude Code)         | ⚠️ 11/14                | ✅ 14/14     | 기사에서 3개 언어: 섹션 제목이 레벨 1로 변경됨 (en, pl, ro); 이 README에서는 비교 도구상 차이 없으나 내부 링크가 영어로 중복됨                                    |
+| Claude Sonnet 5       | Anthropic API 키                  | ⚠️ 11/14                | ⚠️ 12/14     | 기사에서 3개 언어: 코드 블록이 임의로 생성됨 (es, de, hi); 이 README에서 2개: 마크업이 누락된 링크 (sv), 굵은 글씨 단어 (zh)                                     |
+| Claude Haiku 4.5      | Anthropic API 키                  | ⚠️ 7/14                 | ✅ 14/14     | 기사에서 7개 언어: 섹션 제목이 레벨 1로 변경됨 — 일본어의 경우 프랑스어로 남아 있음; 이 README에서는 차이점 없음                                                  |
+| Claude Haiku 5.5      | Anthropic API 키                  | ⚠️ 11/14                | ❌ 12/14     | 기사에서 3개 언어: 섹션 제목 레벨 변경 또는 중복 (ja, ko, zh); 이 README에서 2개 언어 거부됨, 인라인 코드 유실 (ar, hi)                                           |
+| Qwen 3.7 Flash        | OpenRouter 키                     | ❌ 8/14                 | ⚠️ 10/14     | 기사에서 1개 언어 거부됨, 5개 언어에서 편차 발생; 이 README에서 약 40개 단어가 `code` 처리됨 (ar)                                                          |
+| Grok 4.6              | Grok 구독                         | ❌ 8/14                 | 평가 안 됨   | 14개 언어 중 5개 언어 거부됨(인라인 코드 및 URL 렌더링 실패); 네덜란드어는 전반적으로 어긋남                                                                       |
+| GPT-OSS 20B           | 로컬 모델 (Ollama)                | ❌ 7/14                 | 재측정 안 됨 | 14개 언어 중 4개 언어 거부됨: 프랑스어 구문이 그대로 남아 있어 가드(guard)에 의해 차단됨                                                                           |
+| MiMo v2.5 (무료)      | OpenCode Zen, 계정 불필요         | ❌ 11/14                | 재측정 안 됨 | 1개 언어 거부됨; 폴란드어에서 한 섹션 유실                                                                                                                         |
+| Mistral Large         | Mistral API 키                    | ❌ 5/14                 | ❌ 1/14      | **섹션 전체가 사라짐**: 기사에서 1개 언어 (hi), 이 README에서 3개 언어 (ar, hi, ko) — 기사에서 3개 언어 거부됨                                                    |
+| DeepSeek V4 Flash     | OpenRouter 키                     | ❌ 3/14                 | 재측정 안 됨 | 14개 언어 중 10개 언어 거부됨; 언어당 37분 소요                                                                                                                    |
+| Claude Opus 5.5       | Claude 구독 (Claude Code)         | ❌ 0/14                 | ✅ 14/14     | 짧은 생물학 관련 단신 기사로 인해 Opus의 안전장치에 걸려 14개 언어 모두 기사 번역 거부됨; 이 README에서는 차이점 없음                                               |
 
 |     | 기호의 의미                                                                                                                                                                                           |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ✅  | 14개 언어가 모두 번역되었으며 원본과 차이가 전혀 없음                                                                                                                                                 |
-| ⚠️  | 14개 언어가 모두 번역됨. 차이점은 **마크업** 수준임(굵은 글씨 단어 1개, `code` 1개, 대괄호가 빠진 링크 등). 텍스트, URL, 코드 블록, 섹션은 전혀 누락되지 않음                              |
-| ❌  | 적어도 하나의 언어가 번역되지 못함(파일이 거부되어 작성되지 않음) **또는** 작성된 파일에서 일부 내용이 누락됨                                                                                        |
+| ✅  | 14개 언어가 모두 번역되었으며 원본과 차이가 없음                                                                                                                                                      |
+| ⚠️  | 14개 언어가 모두 번역됨; 차이점은 **마크업**(굵은 글씨 단어, `code`, 대괄호가 빠진 링크 등)에 국한됨. 텍스트, URL, 코드 블록, 섹션 누락 없음                                                |
+| ❌  | 최소 1개 이상의 언어가 번역되지 못함(파일이 거부되어 기록되지 않음) **또는** 기록된 파일에서 내용이 누락됨                                                                                           |
 
-핵심 요약:
+주요 시사점:
 
-- **거부된 번역은 손상된 번역이 아닙니다.** 반환 시 토큰이 누락되면 파일이
-  작성되지 않으며 해당 언어는 거부된 것으로 집계됩니다. 기사 번역 시 Grok에서
-  발생한 현상이 바로 이것입니다. 5개의 비라틴 문자 언어에서 첫 번째 세그먼트부터
-  4개의 인라인 코드와 3개의 URL이 유실되었습니다.
-- **모델은 단 한 문장 때문에 문서 전체를 거부할 수 있습니다.** Opus 5.5는 본
-  README를 오차 없이 번역하지만, 모니터링 기사는 전혀 번역하지 못합니다.
-  생물학 관련 단신 기사 하나 때문에 안전장치가 응답을 차단하기 때문입니다. 파일은
-  작성되지 않으며, aipmt가 그 이유를 알려줍니다.
-- **이 안전망은 제목, 표, 프론트 매터, 본문 텍스트까지는 다루지 않습니다.**
-  섹션을 삭제하는 모델이 결과를 반환하더라도 도구는 아무 문제 없이 파일을
-  작성합니다(Mistral의 경우가 이에 해당합니다). 이러한 요소들은 토큰으로 대체할 수
-  없으며 현재의 가드는 이를 검사하지 않습니다. `scripts/compare_structure.py`가 유실된 섹션을
-  감지하긴 하지만 사후에 이루어집니다.
-- **Grok은 본 README에 대한 평가 점수가 없습니다**: 12개 언어 번역 후 CLI 세션이
-  만료되었으며, 그중 11개 언어는 오차가 없었습니다. 중단된 테스트는 평가에
-  반영하지 않습니다.
-- **언어보다는 문서의 밀도가 더 중요합니다.** Grok은 일반적인 README에서는
-  안정적이지만, 네덜란드어를 포함해 링크가 많은 기사에서는 실패합니다.
+- **거부된 번역이 손상된 번역인 것은 아닙니다.** 반환 시 토큰이
+  누락되면 파일이 기록되지 않고 해당 언어는 거부된 것으로 처리됩니다.
+  Grok의 기사 번역에서 발생한 문제가 바로 이것입니다. 5개의 비라틴
+  문자권 언어에서 첫 번째 세그먼트부터 인라인 코드 4개와 URL 3개가 유실되었습니다.
+- **모델은 단 한 문장 때문에 문서 전체를 거부할 수도 있습니다.** Opus 5.5는
+  이 README를 오차 없이 번역하지만, 모니터링 기사는 전혀 번역하지 못합니다.
+  생물학 관련 단신 기사 하나 때문에 안전장치가 응답을 중단시켰기 때문입니다.
+  파일은 기록되지 않으며, aipmt가 그 이유를 알려줍니다.
+- **이 안전망은 제목, 표, 프론트 매터 또는 일반 텍스트를 감지하지는 못합니다.**
+  섹션을 삭제하는 모델이 결과를 반환하더라도 도구는 문제없이 파일을
+  기록합니다(Mistral의 경우가 이에 해당합니다). 이러한 요소들은
+  토큰으로 대체되지 않으며 현재의 가드에서는 이를 검사하지 않습니다.
+  `scripts/compare_structure.py`는 유실된 섹션을 감지할 수 있지만 사후에만 가능합니다.
+- **Grok은 이 README에 대한 평가 점수가 없습니다**: 12개 언어
+  (그중 11개는 오차 없음) 번역 후 CLI 세션이 만료되었습니다.
+  중단된 테스트는 평가 점수를 매기지 않습니다.
+- **언어보다 문서의 밀도가 더 중요합니다.** Grok은 일반적인
+  README는 잘 처리하지만, 네덜란드어를 포함하여 링크가 많은 기사에서는
+  제대로 작동하지 못합니다.
 
-측정 일자 및 문서: "본 README" 열은 2026년 9월 9일에 본 파일의 특정 고정
-리비전(785행, 인라인 코드 285개, 표 89행, 이후 수정됨)을 기준으로 측정한
-것입니다. 단, Antigravity 및 Claude Code 행은 9월 26일에 1.14.0 버전과 함께 배포된
-더 짧은 리비전(600행, 인라인 코드 257개, 표 85행)을 기준으로 측정되었으며, API를 통한
-Claude Sonnet 5.5, Haiku 5.5, Haiku 4.5 행은 10월 18일에 동일한 리비전을 기준으로
-측정되었습니다. "조밀한 모니터링 기사" 열은 589행 분량의 기사를 대상으로 9월 4일과
-5일에 진행된 테스트 결과입니다. 단, Grok 행은 9월 9일에 동일 모니터링의 다른
-에디션으로 재측정되었고, Antigravity 및 Claude Code 행은 9월 26일에 동일 기사로
-측정되었으며, 위의 Claude 3개 모델 행은 10월 18일에 측정되었습니다. 전체 표, 소요
-시간 및 프로토콜은 [상세 측정 결과](#상세-측정-결과)에서 확인할 수 있습니다.
+날짜 및 문서: "이 README" 열은 2026년 9월 9일에 이 파일의 고정 리비전(785행, 인라인 코드 285개, 표 89행, 이후 수정됨)을 기준으로 측정되었습니다. 단, Antigravity 및 Claude Code 행은 9월 26일에 1.14.0과 함께 릴리스된 더 짧은 리비전(600행, 인라인 코드 257개, 표 85행)을 기준으로 측정되었으며, API를 통한 Claude Sonnet 5.5, Haiku 5.5, Haiku 4.5 행은 10월 18일에 동일한 리비전에서 측정되었습니다. "정보 밀도가 높은 모니터링 기사" 열은 589행 기사를 대상으로 한 9월 4일 및 5일 테스트 결과이며, 단 Grok 행은 9월 9일에 동일한 모니터링 기사의 다른 판본에서 재측정되었고, Antigravity 및 Claude Code 행은 9월 26일에 동일한 기사에서, 그리고 이 세 가지 Claude 행은 10월 18일에 측정되었습니다. 전체 표, 소요 시간 및 프로토콜은 [상세 측정 결과](#상세-측정-결과)에서 확인할 수 있습니다.
 
 ## 모든 옵션
 
@@ -201,28 +195,27 @@ Claude Sonnet 5.5, Haiku 5.5, Haiku 4.5 행은 10월 18일에 동일한 리비�
 | `--source_lang`          | 소스 언어 (기본값: `fr`)                                                                            |
 | `--target_lang`          | 타겟 언어 (기본값: `en`)                                                                            |
 | `--model`                | 사용할 특정 모델                                                                                              |
-| `--eco`                  | 절약형 모델 사용                                                                                              |
+| `--eco`                  | 경제형 모델 사용                                                                                              |
 | `--use_mistral`          | Mistral AI API 사용                                                                                           |
 | `--use_claude`           | Claude API 사용                                                                                               |
 | `--use_gemini`           | Gemini API 사용                                                                                               |
-| `--use_grok`             | xAI(Grok) API 사용 — `XAI_API_KEY` 필요                                                                      |
+| `--use_grok`             | xAI (Grok) API 사용 — `XAI_API_KEY` 필요                                                                     |
 | `--use_codex`            | ChatGPT 구독 할당량으로 Codex CLI 사용                                                                        |
 | `--use_grok_cli`         | Grok 구독 할당량으로 Grok CLI 사용                                                                            |
 | `--use_antigravity`      | Google AI Pro 또는 Ultra 구독 할당량으로 Antigravity CLI(`agy`) 사용                                 |
-| `--use_claude_code`      | Claude Pro 또는 Max 구독 할당량으로 Claude Code CLI(`claude -p`) 사용                                      |
-| `--use_opencode`         | OpenCode(오픈 소스)를 OpenCode에 설정된 공급자에 맞춰 사용; `--model provider/modèle` 필요                                |
-| `--use_openrouter`       | OpenRouter 사용 — `OPENROUTER_API_KEY` 및 `--model fournisseur/modèle` 필요                                                       |
-| `--force`                | 재번역 강제 실행                                                                                              |
+| `--use_claude_code`      | Claude Pro 또는 Max 구독 할당량으로 Claude Code CLI(`claude -p`) 사용                                       |
+| `--use_opencode`         | OpenCode(오픈 소스)를 OpenCode에 구성된 프로바이더로 사용; `--model provider/modèle` 필요                                |
+| `--use_openrouter`       | OpenRouter 사용 — `OPENROUTER_API_KEY` 및 `--model fournisseur/modèle` 필요                                                        |
+| `--force`                | 강제 재번역                                                                                                   |
 | `--keep_filename`        | 원본 파일 이름 유지                                                                                           |
-| `--news`                 | 뉴스 모드: 영어 인용구 보호, 언어별 플래그 처리                                                              |
-| `--add_translation_note` | 번역 노트 추가                                                                                                |
-| `--note_position`        | 노트 위치: `top`, `bottom`(기본값) 또는 `both`                                         |
-| `--note_format`          | 노트 형식: `legacy`(기본값, 굵은 문단) 또는 `marker`                                           |
+| `--news`                 | 뉴스 모드: 영어 인용구 보호, 언어별 국기 처리                                                                 |
+| `--add_translation_note` | 번역 주석 추가                                                                                                |
+| `--note_position`        | 주석 위치: `top`, `bottom` (기본값), 또는 `both`                                      |
+| `--note_format`          | 주석 형식: `legacy` (기본값, 굵은 문단) 또는 `marker`                                           |
 | `--include_model`        | 출력 파일에 모델 이름 포함                                                                                    |
-| `--reasoning_effort`     | GPT-5.x 추론 노력: `none`/`low`/`medium`/`high`/`xhigh`             |
+| `--reasoning_effort`     | GPT-5.x 추론 노력: `none`/`low`/`medium`/`high`/`xhigh`            |
 
-9개의 `--use_*` 플래그는 상호 배타적입니다. 둘 이상을 결합하면
-거부됩니다.
+9개의 플래그 `--use_*`는 상호 배타적입니다. 둘 이상을 함께 지정할 수 없습니다.
 
 ## 프로바이더
 
@@ -236,39 +229,28 @@ aipmt --use_gemini  --source_dir content/fr --target_dir content/ja --target_lan
 aipmt --use_grok    --source_dir content/fr --target_dir content/pt --target_lang pt
 ```
 
-`--eco`은 각 공급자의 경제적인 등급으로 전환합니다.
+`--eco`는 각 프로바이더의 경제형 등급으로 전환합니다.
 
-| Provider    | 품질 (기본값)                                                        | 절약형 (`--eco`)  |
+| 프로바이더  | 품질 (기본값)                                                        | 경제형 (`--eco`)  |
 | ----------- | -------------------------------------------------------------------- | ------------------------- |
-| OpenAI      | `gpt-6.1-terra`                                                      | `gpt-6-luna`              |
-| Claude      | `claude-sonnet-5-5`                                                  | `claude-haiku-5-5`        |
-| Mistral     | `mistral-large-latest`                                               | `mistral-small-latest`    |
-| Gemini      | `gemini-4-hydrogen`                                                  | `gemini-3.1-flash-lite`   |
-| Codex       | `gpt-6.1-sol` (`--model`을 통한 `gpt-5.6-sol`, `terra`, `luna`도 지원) | `gpt-6-luna`              |
-| Grok API    | `grok-4.7`                                                           | `grok-4.3`                |
-| Grok CLI    | `grok-4.7`                                                           | 동일 — `--eco` 효과 없음 |
-| Antigravity | `gemini-3.8-flash-medium`                                            | `gemini-3.8-flash-low`    |
-| Claude Code | `sonnet`, 노력 `low`                                               | 동일 — `--eco` 효과 없음 |
-| OpenCode    | `--model provider/modèle` 필수                                | 동일 — `--eco` 효과 없음 |
-| OpenRouter  | `--model fournisseur/modèle` 필수                             | 동일 — `--eco` 효과 없음 |
+| OpenAI      | `gpt-6.1-terra`                                                      | `gpt-6-luna`           |
+| Claude      | `claude-sonnet-5-5`                                                      | `claude-haiku-5-5`           |
+| Mistral     | `mistral-large-latest`                                                      | `mistral-small-latest`           |
+| Gemini      | `gemini-4-hydrogen`                                                      | `gemini-3.1-flash-lite`           |
+| Codex       | `gpt-6.1-sol` (`--model`를 통해 `gpt-5.6-sol`, `terra`, `luna`도 가능) | `gpt-5.6-luna`           |
+| Grok API    | `grok-4.7`                                                      | `grok-4.3`           |
+| Grok CLI    | `grok-4.7`                                                      | 동일 — `--eco` 적용 안 됨 |
+| Antigravity | `gemini-3.8-flash-medium`                                                      | `gemini-3.8-flash-low`           |
+| Claude Code | `sonnet`, 노력 수준 `low`                           | 동일 — `--eco` 적용 안 됨 |
+| OpenCode    | `--model provider/modèle` 필수                                                 | 동일 — `--eco` 적용 안 됨 |
+| OpenRouter  | `--model fournisseur/modèle` 필수                                                 | 동일 — `--eco` 적용 안 됨 |
 
-기본값은 채택 전 측정 과정을 거친 각 공급자의 최신 세대를 따릅니다:
-OpenAI의 GPT-6, Google의 Gemini 4 Hydrogen, 1.19.0 버전부터 xAI의
-Grok 4.7. 이전 모델(`gpt-5.6-terra`, `gemini-3.8-flash`, `grok-4.6`…)은
-물론 Google의 최상위 라인업인 Gemini 4 Argon 및 Carbon도
-`--model`을 통해 계속 사용할 수 있습니다. aipmt는 GPT 및 Grok의
-추론 노력을 직접 조정하며, `--eco`에서는 비활성화되고,
-`--reasoning_effort`로 강제 설정할 수 있습니다. Gemini는 언제나 허용하는
-가장 낮은 수준으로 설정됩니다.
-Gemini API의 일시적인 장애(503, 429, 시간 초과) 발생 시 10초, 20초, 그 후
-40초 간격으로 최대 3회까지 호출을 재시도합니다. 응답이 없는 시도는 5분
-후에 중단된 뒤 마찬가지로 재시도되므로, 무응답 서버로 인해 무한정
-차단되는 대신 최대 20분 내에 해당 세그먼트 처리가 실패합니다.
+기본값은 실제 측정을 거쳐 채택된 각 프로바이더의 최신 세대를 따릅니다: OpenAI는 GPT-6, Google은 Gemini 4 Hydrogen, xAI는 1.19.0부터 Grok 4.7입니다. 이전 모델(`gpt-5.6-terra`, `gemini-3.8-flash`, `grok-4.6`…)뿐만 아니라 Google의 최고급 모델인 Gemini 4 Argon 및 Carbon도 `--model`를 통해 계속 지원됩니다. aipmt는 GPT 및 Grok의 추론 노력을 자체적으로 조정하며, `--eco`에서는 비활성화되고 `--reasoning_effort`로 강제 설정할 수 있습니다. Gemini는 항상 허용되는 최저 수준으로 설정됩니다.
+Gemini API의 일시적인 장애(503, 429, 타임아웃)가 발생하면 10초, 20초, 40초 대기 후 최대 3회까지 호출을 재시도합니다. 응답이 없는 시도는 5분 후에 중단되며 동일한 방식으로 재시도됩니다. 서버가 무응답 상태일 경우 무한정 대기하는 대신 최대 20분 내외로 해당 세그먼트 처리가 실패합니다.
 
 ### ChatGPT 구독 사용: `--use_codex`
 
-공식 Codex CLI를 제어합니다: API 키나 종량제 과금 없이 ChatGPT 구독
-할당량에서 번역이 차감됩니다.
+공식 Codex CLI를 제어합니다. 번역은 API 키나 종량제 청구 없이 ChatGPT 구독 할당량에서 차감됩니다.
 
 ```bash
 pip install openai-codex-cli-bin   # package officiel OpenAI (~250 Mo), ou : npm install -g @openai/codex
@@ -276,32 +258,18 @@ codex login
 aipmt --use_codex --eco --file README.md --target_dir . --target_lang it
 ```
 
-- 실행 파일은 `CODEX_BIN`, 그 다음 `PATH`, 그 다음 `openai-codex-cli-bin`
-  패키지 순으로 찾습니다. `~/.codex/auth.json`은 절대 읽지 않습니다.
-- 서브프로세스 환경에서 `OPENAI_API_KEY` 및 `CODEX_API_KEY`가 제거됩니다.
-  키가 존재하더라도 API로 전환되지 않습니다.
-- 각 세그먼트는 5시간 윈도우에서 최소 1개의 "메시지"를 소모하며, 유효성
-  검사에 실패하여 재시도하는 경우 2개가 소모됩니다. OpenAI의 추정에
-  따르면 Plus 플랜 기준 5시간당 메시지 수는 1.18.0 이전까지의 절약형 모델이었던
-  `gpt-5.6-luna`의 경우 250~2,000개, `gpt-5.6-sol`의 경우 10~100개입니다.
-- 1.16.3까지 기본값이었던 `--model gpt-5.6-sol`, 그리고 `--model gpt-5.6-terra`
-  및 `--model gpt-5.6-luna`도 구독을 통해 사용할 수 있습니다.
-- 서버의 429 오류가 발생해도 파일이 손실되지 않습니다. Codex가 자체적으로
-  재연결하고, aipmt는 턴이 끝날 때까지 대기하며, 429 오류가 지속되면 세그먼트를
-  30초 후, 그 다음 60초 후에 다시 시작합니다. 계정에 권한이 없는 모델은
-  400 "model is not supported when using Codex with a ChatGPT account"를 반환합니다.
-- API보다 느리며, 문서가 길어질수록 격차가 벌어집니다. 이 README를 기준으로
-  `gpt-5.6-sol`은 언어당 중앙값 6분 46초가 걸린 반면, `gemini-3.7-flash`은
-  36초가 걸렸습니다.
-- CI 환경(`CI` 또는 `GITHUB_ACTIONS` 정의됨)에서는 거부됩니다:
-  구독 인증에 개인 세션 파일이 사용되므로 공유 러너에 둘 수 없기
-  때문입니다.
-- 변수: `CODEX_BIN`, `CODEX_TIMEOUT`(세그먼트당 초 단위, 기본값 600).
+- 바이너리는 `CODEX_BIN`, `PATH`, 그리고 `openai-codex-cli-bin` 패키지 순으로 검색됩니다. `~/.codex/auth.json`는 절대로 읽지 않습니다.
+- 서브프로세스 환경에서 `OPENAI_API_KEY` 및 `CODEX_API_KEY`가 제거되므로 키가 존재하더라도 API로 전환되지 않습니다.
+- 각 세그먼트는 5시간 윈도우의 "메시지"를 최소 1개 소모하며, 검증에 실패하여 재시도하는 경우 2개를 소모합니다. OpenAI의 안내에 따르면 Plus 요금제 기준 `gpt-5.6-luna`(`--eco`)는 5시간당 250~2,000개, `gpt-5.6-sol`는 10~100개 메시지로 추정됩니다.
+- 1.16.3까지 기본값이었던 `--model gpt-5.6-sol`, `--model gpt-5.6-terra` 및 `--model gpt-5.6-luna` 역시 구독을 통해 실행할 수 있습니다.
+- 서버의 429 에러가 발생해도 파일이 손실되지 않습니다. Codex가 자체적으로 재연결하고, aipmt는 턴이 끝날 때까지 대기하며, 429 에러가 지속되면 30초 후, 그다음 60초 후에 세그먼트를 다시 시작합니다. 계정에 권한이 없는 모델은 400 "model is not supported when using Codex with a ChatGPT account"를 반환합니다.
+- API보다 느리며 문서가 길어질수록 격차가 커집니다. 본 README 기준으로 중앙값 기준 `gpt-5.6-sol`는 언어당 6분 46초가 소요된 반면, `gemini-3.7-flash`는 36초가 소요되었습니다.
+- CI 환경에서는 거부됩니다(`CI` 또는 `GITHUB_ACTIONS` 정의됨). 구독 인증은 개인 세션 파일을 통해 이루어지므로 공유 러너에 두어서는 안 되기 때문입니다.
+- 환경 변수: `CODEX_BIN`, `CODEX_TIMEOUT` (세그먼트당 시간(초), 기본값 600).
 
 ### Grok 구독 사용: `--use_grok_cli`
 
-SuperGrok 또는 X Premium+ 구독에서 공식 Grok Build CLI를 사용하는
-동일한 원리입니다.
+SuperGrok 또는 X Premium+ 구독을 기반으로 공식 Grok Build CLI를 사용하는 동일한 원리입니다.
 
 ```bash
 curl -fsSL https://x.ai/cli/install.sh | bash
@@ -309,27 +277,13 @@ grok login                                      # ou : grok login --device-code
 aipmt --use_grok_cli --file README.md --target_dir . --target_lang pl
 ```
 
-- **Codex보다 취약한 격리.** Grok의 OS 샌드박스는 다수의 최신 Linux
-  환경(AppArmor, 컨테이너 런타임 소켓)에서 적용되지 않으며, 적용할 수 없는
-  프로필은 경고 없이 격리되지 않은 채 조용히 시작됩니다. 따라서 스크립트는
-  기본적으로 프로필을 요청하지 않고 이를 알린 뒤, CLI의 `--deny`
-  규칙(말없이 보호를 해제하는 대신 시작을 거부하는 유일한 계층인 포괄
-  규칙 `*` 포함)에 의존합니다. `GROK_TRANSLATE_SANDBOX=read-only`은 OS 샌드박스를
-  요구하며, 머신이 이를 충족하지 못하면 시작에 실패합니다.
-- 할당량은 주간 단위이며 Chat, Imagine, Voice와 공유되고, 이를 확인할 수 있는
-  명령어가 없습니다. 따라서 배치 작업이 알림 없이 대화형 사용량을
-  잠식할 수 있습니다.
-- 변수: `GROK_BIN`, `GROK_HOME`(CLI 디렉터리, 기본값 `~/.grok`),
-  `GROK_TIMEOUT`(기본값 900), `GROK_TRANSLATE_SANDBOX`.
+- **Codex보다 취약한 격리 환경.** Grok의 OS 샌드박스는 최신 Linux 시스템의 상당수(AppArmor, 컨테이너 런타임 소켓)에서 적용되지 않으며, 적용할 수 없는 프로필은 알림 없이 격리되지 않은 상태로 시작됩니다. 따라서 스크립트는 기본적으로 프로필을 요청하지 않고 이를 고지하며, CLI의 `--deny` 규칙(알림 없이 보호를 해제하는 대신 시작을 거부하는 유일한 계층인 포괄 규칙 `*` 포함)에 의존합니다. `GROK_TRANSLATE_SANDBOX=read-only`는 OS 샌드박스를 필수로 요구하며, 머신이 이를 처리할 수 없는 경우 시작이 실패합니다.
+- 할당량은 Chat, Imagine, Voice와 공유되는 주간 단위이며, 이를 조회할 수 있는 명령어가 없습니다. 따라서 일괄 작업 시 알림 없이 일반 대화 사용량을 소모할 수 있습니다.
+- 환경 변수: `GROK_BIN`, `GROK_HOME` (CLI 디렉터리, 기본값 `~/.grok`), `GROK_TIMEOUT` (기본값 900), `GROK_TRANSLATE_SANDBOX`.
 
 ### Google 구독 사용: `--use_antigravity`
 
-Antigravity의 공식 CLI인 `agy`을 사용하는 동일한 원리입니다.
-Google AI Pro 또는 Ultra를 구독 중인 경우 토큰별로 과금되는 대신
-구독 할당량에서 번역이 차감됩니다. 이는 해당 할당량을 이용할 수 있는 유일한
-경로입니다. Gemini CLI는 2026년 6월 18일([공지](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)) 이후 이러한
-계정을 더 이상 지원하지 않으며, Antigravity SDK는 API 키 또는 Google Cloud
-프로젝트만 허용합니다.
+Antigravity의 공식 CLI인 `agy`를 사용하는 동일한 원리입니다. Google AI Pro 또는 Ultra를 구독 중인 경우 토큰별 과금 대신 구독 할당량에서 번역이 차감됩니다. Gemini CLI는 2026년 6월 18일([공지](https://developers.googleblog.com/an-important-update-transitioning-gemini-cli-to-antigravity-cli/)) 이후 해당 계정을 더 이상 지원하지 않으며 Antigravity SDK는 API 키 또는 Google Cloud 프로젝트만 허용하므로, 이 할당량에 접근할 수 있는 유일한 경로입니다.
 
 ```bash
 # agy 1.2.11 ou plus récent : https://antigravity.google/docs/cli/install/
@@ -338,106 +292,95 @@ aipmt --use_antigravity --file README.md --target_dir . --target_lang en
 agy -p /usage --output-format json   # quota restant, sans en consommer
 ```
 
-- **유료 결제 경로가 열려 있지 않습니다.** agy는 사용자 환경에서 닫힌
-  목록의 변수들(`PATH`, 언어 및 표준 시간대, 터미널, ID, 프록시 및
-  인증서, 세션 버스)만 전달받으며 키는 일절 받지 않습니다. agy의 여러
-  변수는 아무런 표시 없이 호출을 전환시킬 수 있으며(실측 결과: 하나는 문서를
-  타사 게이트웨이로 전송하고, 다른 하나는 유료 청구되는 Google Cloud 프로젝트로
-  전송함), 차단 목록 방식은 검토할 때마다 누락이 발생했습니다. 모든 세그먼트
-  실행 전, 할당량을 소모하지 않는 `agy -p /config`를 통해 API 키나 Google Cloud
-  프로젝트 없이 유료 AI 크레딧이 비활성화되어 있음을 확인해야 하며(설정이 없으면
-  거부됨), 그렇지 않으면 아무것도 번역되지 않습니다. 또한 각 호출 로그에서
-  구독 상태(`authMethod=consumer`)를 입증해야 하며, 그렇지 않으면 응답이 거부됩니다.
-- **격리.** 각 호출은 도구가 없는 번역 에이전트와 함께 일회용 프라이빗
-  개인 디렉터리에서 실행됩니다. 사용자의 agy 설정, 규칙, 플러그인, MCP 서버
-  및 훅은 여기에 유입되지 않으며, 기록에 아무것도 추가되지 않고, 인증
-  정보는 키체인에 유지되며 aipmt가 이를 읽지 않습니다. 에이전트를 찾을 수
-  없으면 agy는 경고 없이 코딩 에이전트와 해당 도구로 폴백하므로, 로그의 전체
-  라인이 올바른 에이전트임을 확인해야 하며(문서 내에서 해당 메시지를 인용한
-  것은 대체할 수 없음), 그렇지 않으면 거부됩니다.
-- **플랫폼**: 키체인이 있는 세션(D-Bus 세션 버스, Secret Service)의
-  Linux. macOS는 지원되나 측정되지는 않았습니다. Windows에서는 각 호출을
-  격리하는 변수를 agy가 읽지 못하므로 거부되며, 세션 버스가 없는 Linux(SSH
-  세션, 컨테이너, 서버)에서도 거부됩니다. 이러한 환경에서 agy는 격리로 인해
-  가려지는 `~/.gemini` 파일에 토큰을 저장하기 때문입니다. 연결 코드를
-  1분 동안 기다리는 대신 실행 전에 거부 사유와 함께 즉시 거부됩니다.
-- **모델**: `agy models`의 모델들입니다. Gemini 모델은 이름에 추론
-  노력이 포함되어 있습니다(`gemini-3.8-flash-medium`…). 접미사가 없는 이름은
-  호출 전에 거부되며, `--reasoning_effort`은 효과가 없습니다. agy가 Gemini 3.7
-  Flash를 더 이상 제공하지 않게 된 이후로 기본값은 `gemini-3.8-flash-medium`,
-  `--eco`에서는 `gemini-3.8-flash-low`입니다. 기본값을 결정한 벤치마크
-  테스트는 [상세 측정치](#상세-측정-결과)에 설명되어 있습니다. Gemini 4 Hydrogen
-  (`gemini-4-hydrogen-low`…)은 3.8 Flash와 할당량을 공유하지만 더 많이 소모합니다.
-  이 README 기준으로 중간 노력 수준에서 5시간 윈도우의 0.95포인트를
-  소모하는 반면 Flash는 0.32포인트를 소모합니다. Claude와 GPT-OSS는
-  훨씬 작은 별도의 할당량을 갖습니다. 측정된 호출당 5시간 윈도우의
-  약 1%를 소모하는 반면 Flash는 0.05%입니다. Gemini 4 Argon은 주간
-  단위의 자체 할당량이 있으며, 이 README는 1.35%를 차지합니다.
-- **할당량**: 그룹별로 5시간 윈도우와 주간 윈도우가 제공되며, 토큰 비용에
-  비례하여 차감됩니다. 작성자의 계정에서 측정한 결과: 소스 문자 백만 자당
-  5시간 윈도우에서 `gemini-3.8-flash-medium` 기준 약 16포인트, `gemini-3.7-flash-medium` 기준
-  14포인트, 낮은 노력 수준에서는 7~8포인트가 소모됩니다. 따라서 40,000자의
-  README는 0.5포인트보다 약간 더 소모됩니다. 반면 주간 한도는 요금제 등급에
-  따라 다릅니다. 재시도는 agy가 재시도 가능하다고 보고하는 경우에 따릅니다.
-  그렇지 않고 윈도우가 소진된 경우에는 절대 재시도하지 않으며, `/usage`에
-  표시되는 초기화 시점까지 각 파일 처리에 실패합니다.
-- **API보다 느림**: 측정한 고밀도 기사 기준, 언어당 중앙값으로
-  `gemini-3.8-flash-medium`에서는 3분 59초, `gemini-3.7-flash-medium`에서는 3분 14초가 걸린
-  반면, API를 통한 Gemini 3.7 Flash는 1분 18초가 걸렸습니다.
-- **중단**: Ctrl-C를 누르거나 터미널을 닫으면 agy가 할당량을 소모하며 턴을
-  끝까지 수행하도록 내버려 두는 대신 명령과 함께 agy를 중지합니다. 이는
-  Codex, Grok CLI, OpenCode도 마찬가지입니다. `nohup`에서는 번역이
-  계속 진행됩니다.
-- CI 환경(`CI` 또는 `GITHUB_ACTIONS` 정의됨)에서는 거부됩니다:
-  인증 정보가 개인 키체인에 저장되기 때문입니다. 러너에서는 `GOOGLE_API_KEY`와
-  함께 `--use_gemini`를 사용하십시오.
-- 변수: `AGY_BIN`(없는 경우 `PATH`, 그 다음 `~/.local/bin/agy`),
-  `AGY_TIMEOUT`(시작 시간 포함 세그먼트당 초 단위, 기본값 900).
+- **유료 경로가 열려 있지 않습니다.** agy는 사용자 환경에서 닫힌 변수 목록(`PATH`, 언어 및 표준시, 터미널, ID, 프록시 및 인증서, 세션 버스)만 전달받으며 어떠한 키도 전달받지 않습니다. agy의 여러 변수는 안내 없이 호출 방식을 전환할 수 있으며(테스트 결과: 하나는 문서를 서드파티 게이트웨이로 전송하고, 다른 하나는 과금되는 Google Cloud 프로젝트로 전송함), 거부 목록 방식은 검토할 때마다 누락이 발생했습니다. 모든 세그먼트 시작 전 할당량을 전혀 소모하지 않는 `agy -p /config`를 통해 API 키나 Google Cloud 프로젝트 없이 유료 AI 크레딧이 비활성화되어 있는지 확인해야 합니다(설정이 없으면 거부됨). 그렇지 않으면 아무것도 번역되지 않습니다. 또한 각 호출의 로그에서 구독(`authMethod=consumer`)이 확인되어야 하며, 그렇지 않으면 응답이 거부됩니다.
+- **격리.** 각 호출은 도구가 없는 번역 에이전트와 함께 일회용 개인 디렉터리에서 실행됩니다. 사용자의 agy 설정, 규칙, 플러그인, MCP 서버 및 훅은 여기에 포함되지 않으며, 기록에 아무것도 추가되지 않고, 로그인은 aipmt가 절대 읽지 않는 키체인에 유지됩니다. 에이전트를 찾을 수 없는 경우 agy는 알림 없이 기본 코딩 에이전트와 해당 도구로 폴백합니다. 따라서 로그의 전체 한 줄이 올바른 에이전트를 확인해야 하며(이 메시지를 인용하는 문서는 이를 대체할 수 없음), 그렇지 않으면 거부됩니다.
+- **지원 플랫폼**: 키체인이 있는 세션(D-Bus 세션 버스, Secret Service) 환경의 Linux. macOS도 지원되나 별도 측정을 거치지는 않았습니다. 각 호출을 격리하는 변수를 agy가 읽지 못하는 Windows, 그리고 SSH 세션, 컨테이너, 서버 등 세션 버스가 없는 Linux에서는 거부됩니다. 이러한 환경에서는 agy가 격리 처리에 의해 숨겨지는 `~/.gemini`의 파일에 토큰을 저장하기 때문입니다. 로그인 코드를 기다리며 1분을 낭비하는 대신, 실행 전에 원인과 함께 거부 처리가 이루어집니다.
+- **모델**: `agy models`의 모델들입니다. Gemini 모델은 이름에 노력 수준이 포함되어 있습니다(`gemini-3.8-flash-medium`…). 접미사가 없는 이름은 호출 전에 거부되며 `--reasoning_effort`는 효과가 없습니다. agy가 Gemini 3.7 Flash 지원을 중단한 이후 기본값은 `gemini-3.8-flash-medium`, `--eco`에서는 `gemini-3.8-flash-low`입니다. 기본값을 설정하게 된 측정 과정은 [상세 측정 결과](#상세-측정-결과)에 기술되어 있습니다. Gemini 4 Hydrogen(`gemini-4-hydrogen-low`…)은 3.8 Flash와 할당량을 공유하지만 더 많이 소모합니다. 본 README 기준 중간 노력 수준에서 0.32포인트 대비 5시간 윈도우의 0.95포인트를 소모합니다. Claude와 GPT-OSS는 훨씬 더 작은 별도의 할당량을 가집니다. 측정 호출당 Flash의 0.05%에 비해 5시간 윈도우의 약 1%를 소모합니다. Gemini 4 Argon은 주간 단위의 자체 할당량을 가지며, 본 README 번역 시 1.35%를 차지합니다.
+- **할당량**: 토큰 비용에 비례하여 그룹별로 5시간 윈도우 및 주간 윈도우가 적용됩니다. 작성자의 계정에서 측정한 결과: 소스 문자 백만 자당 5시간 윈도우에서 `gemini-3.8-flash-medium`는 약 16포인트, `gemini-3.7-flash-medium`는 14포인트, 낮은 노력 수준에서는 7~8포인트가 소모됩니다. 따라서 40,000자 분량의 README는 약 0.5포인트를 조금 넘게 소모합니다. 주간 한도는 등급에 따라 다릅니다. 재시도는 agy가 재시도 가능하다고 선언한 항목을 따릅니다. 그렇지 않은 경우, 소진된 윈도우는 절대 재시도되지 않고 `/usage`에 표시되는 초기화 시간까지 각 파일 작업이 실패 처리됩니다.
+- **API보다 느림**: 텍스트 밀도가 높은 벤치마크 기사 기준 중앙값으로 `gemini-3.8-flash-medium`는 언어당 3분 59초, `gemini-3.7-flash-medium`는 3분 14초가 걸린 반면, API를 통한 Gemini 3.7 Flash는 1분 18초가 걸렸습니다.
+- **중단**: Ctrl-C를 누르거나 터미널을 닫으면 사용자의 할당량을 소모하며 작업을 끝내도록 두는 대신 agy가 명령과 함께 중단됩니다. Codex, Grok CLI, OpenCode도 동일합니다. `nohup` 환경에서는 번역이 계속됩니다.
+- CI 환경에서는 거부됩니다(`CI` 또는 `GITHUB_ACTIONS` 정의됨). 로그인이 개인 키체인에 저장되기 때문입니다. 러너에서는 `GOOGLE_API_KEY`와 함께 `--use_gemini`를 사용하십시오.
+- 환경 변수: `AGY_BIN` (없을 경우 `PATH`, 그다음 `~/.local/bin/agy`), `AGY_TIMEOUT` (시작 시간 포함 세그먼트당 시간(초), 기본값 900).
 
-**이용약관: 사용자 본인의 계정에 책임이 따릅니다.** [Antigravity 이용약관](https://antigravity.google/terms)
-(섹션 6) 및 [FAQ](https://antigravity.google/docs/faq/)에서는 Antigravity 로그인 정보를 이용해 서드파티
-소프트웨어(Claude Code, OpenClaw, OpenCode 명시)로 서비스에 접근하는 것을
-금지하며, 위반 시 계정이 정지될 수 있습니다. aipmt는 토큰을 읽거나 재사용하지
-않으며, Google이 스크립트 및 CI용으로 문서화한 [헤드리스 모드](https://antigravity.google/docs/cli/headless/)로
-공식 바이너리를 실행합니다. Google 직원은 개인 작업을 위해 로컬 스크립트에서
-`agy -p`를 실행하는 것을 "표준적"이라고 평가했으나
-([공식 포럼, 2026년 9월 25일, 비구속적 답변](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829)),
-이와 같이 배포된 도구에 대한 명확한 공식 입장은 없습니다.
+**이용약관: 귀하의 계정에 책임이 따릅니다.** [Antigravity 이용약관](https://antigravity.google/terms)(섹션 6) 및 [FAQ](https://antigravity.google/docs/faq/)에서는 Antigravity 로그인을 사용하여 서드파티 소프트웨어로 서비스에 접근하는 행위(Claude Code, OpenClaw, OpenCode 명시)를 금지하고 있으며, 위반 시 계정이 정지될 수 있습니다. aipmt는 토큰을 읽거나 재사용하지 않으며, Google이 스크립트 및 CI용으로 문서화한 [헤드리스 모드](https://antigravity.google/docs/cli/headless/)로 공식 바이너리를 실행합니다. 한 Google 관계자는 개인 작업을 위해 로컬 스크립트에서 `agy -p`를 실행하는 것을 "표준적(standard)"이라고 평가한 바 있으나([공식 포럼, 2026년 9월 25일, 비구속적 답변](https://discuss.ai.google.dev/t/is-using-the-official-agy-cli-through-a-local-mcp-server-with-third-party-ai-agents-permitted/184829)), 본 도구와 같이 배포되는 도구의 사례에 대해 명확히 결론을 내린 조항은 없습니다.
 
-**공개 문서 전용.** 동일한 이용약관의 섹션 5에 따르면, 프롬프트, 응답,
-메타데이터를 포함한 상호작용 내용은 유료 구독을 포함하여 Google 제품
-개선 및 머신러닝 학습에 사용될 수 있으며 담당자가 검토할 수 있습니다.
-수집 거부는 문서화되지 않은 효과의 `enableTelemetry` 설정을 통해 이루어지며,
-aipmt는 이를 설정하지 않습니다. 또한 사용자의 agy 설정은 격리 환경으로
-전달되지 않습니다. 기밀 문서는 절대 처리하지 마십시오.
+**공개 문서 전용.** 동일한 이용약관의 섹션 5에 따르면 프롬프트, 응답, 메타데이터를 포함한 대화 내용은 유료 구독을 포함하여 Google의 제품 및 머신러닝 개선에 사용될 수 있으며 사람에 의해 검토될 수 있습니다. 이를 거부하려면 문서화되지 않은 효과를 가진 `enableTelemetry` 설정을 사용해야 하며, aipmt는 이를 설정하지 않습니다. 또한 사용자의 agy 설정은 격리 환경으로 전달되지 않습니다. 기밀 문서는 일절 전달하지 마십시오.
 
-### Claude 구독 이용: `--use_claude_code`
+### Claude 구독 플랜 이용: `--use_claude_code`
 
-Claude Code의 공식 CLI인 `claude`의 `-p` 모드에서도 동일한 원리가 적용됩니다. Claude Pro 또는 Max 구독자의 경우, 토큰당 요금이 청구되는 대신 구독 할당량에서 번역이 차감됩니다. 사용량 기반으로 과금되는 Anthropic의 API인 `--use_claude`와 혼동하지 마세요.
+Claude Code의 공식 CLI인 `claude`를 `-p` 모드로 사용할 때도 동일한 원리가 적용됩니다. Claude Pro 또는 Max 구독자라면 토큰별로 과금되는 대신 구독 할당량에서 번역량이 차감됩니다. 사용량 기반으로 과금되는 Anthropic API인 `--use_claude`와 혼동하지 마세요.
 
 ```bash
 claude                                   # une fois : /login avec le compte de l'abonnement
 aipmt --use_claude_code --file README.md --target_dir . --target_lang en
 ```
 
-- **유료 경로가 전혀 열려 있지 않으며, 각 호출이 이를 증명합니다.** Claude Code는 귀하의 환경으로부터 제한된 변수 목록만 받습니다. API 키, 토큰, 클라우드 제공자, aipmt가 실행된 Claude Code 세션의 식별자 등은 일절 전달되지 않습니다. 첫 번째 세그먼트 전, `claude auth status`에서 Console 키 없이 구독 연결 상태임이 표시되어야 하며, 할당량을 소비하지 않는 `/usage`가 이를 증명해야 합니다. 또한 각 호출의 초기화 이벤트에서도 이를 확인하며, 그렇지 않으면 응답이 거부됩니다.
-- **0유로/달러 유지를 위해 "extra usage"를 비활성화하세요** (claude.ai, 설정 → 사용량). 활성화된 경우 할당량 창이 소진되었을 때 오류를 표시하지 않고 초과 사용량으로 넘어가 유료 과금됩니다. aipmt는 호출의 할당량 보고가 이를 감지하는 즉시 번역을 중단하지만, 해당 호출은 이미 카운트됩니다.
-- **Claude Code 세션과 할당량 공유.** 각 호출은 5시간 창 및 주간 창의 사용량을 보고합니다. 80%(`AIPMT_CLAUDE_MAX_UTILIZATION`)를 초과하면 업무에 사용할 할당량을 보존하기 위해 추가 세그먼트를 실행하지 않습니다.
-- **격리 환경(Confinement).** 각 호출은 도구 없이, 일회용 비공개 디렉터리에서 커스텀 설정이 없는 모드로 실행됩니다. 귀하의 `CLAUDE.md`, 플러그인, 훅(hook), MCP 서버, 개인 설정 등은 일절 로드되지 않으며 세션의 어떤 내용도 유지되지 않습니다. 첨부 파일은 차단됩니다. 문서 내의 `@chemin`는 텍스트로만 유지되며 어떤 파일도 열지 않습니다(측정 완료).
-- **모델**: 기본값은 `sonnet`, 추론 노력(effort)은 `low`이며, `--eco`에서도 마찬가지입니다. 이 경로에서는 `--eco`가 영향을 주지 않습니다. 동일한 문서에서 측정한 결과, `haiku`는 막을 수 없는 추론 기능이 작동하여 속도가 두 배 느리고 비용 절감 효과는 거의 없었으며, `opus`는 생물학 관련 콘텐츠를 거부했습니다(다음 항목 참조). 둘 다 `--model`를 통해 계속 접근할 수 있으며, 이 별칭들은 해당 패밀리의 최신 모델을 따릅니다. `fable` 및 `[1m]` 변형은 유료 크레딧을 소비하므로 거부됩니다. `--reasoning_effort`는 추론 노력을 조절하지만, 번역 작업에서는 얻는 이점이 없어 측정된 추론량이 거의 0에 가깝습니다.
-- **Opus는 특정 생물학 콘텐츠를 거부합니다.** Opus의 가드레일은 Sonnet보다 엄격하며, Anthropic의 오류 메시지에는 "생물학 연구 관련 작업에 플래그가 지정될 수 있다(can sometimes flag biology-research-adjacent work)"고 경고합니다. 실제로 결합 부위를 위해 생성된 279개 분자에 관한 동향 단신 하나 때문에 14개 언어 모두에서 기사 번역이 거부되는 현상이 측정되었습니다. 어떠한 내용도 기록되지 않습니다. aipmt는 중단된 응답을 거부하고, 가드레일을 명시하며 `--model sonnet` 사용을 권장합니다.
-- CI(`CI` 또는 `GITHUB_ACTIONS` 정의됨) 환경 및 Windows(측정되지 않음)에서는 실행이 거부됩니다.
-- 변수: `AIPMT_CLAUDE_BIN`(없을 경우 `PATH`, 그다음 `~/.local/bin/claude`), `AIPMT_CLAUDE_TIMEOUT`(세그먼트당 초, 기본값 900), `AIPMT_CLAUDE_MAX_UTILIZATION`(기본값 0.8), `CLAUDE_CONFIG_DIR`(Claude Code 계정, 프로젝트 `.env`에서는 절대 가져오지 않음), 작업 디렉터리는 `XDG_CACHE_HOME/aipmt/claude-code` 하위(기본값 `~/.cache`).
+- **어떠한 유료 경로도 열려 있지 않으며, 각 호출이 이를 증명합니다.** Claude
+  Code는 사용자의 환경에서 엄격히 제한된 변수 목록만 전달받습니다. API 키,
+  토큰, 클라우드 제공자, aipmt가 실행된 Claude Code 세션 식별자 등은 일절
+  전달되지 않습니다. 첫 번째 세그먼트 전, `claude auth status`는 Console 키 없이
+  구독 연결 상태를 보여주어야 하며, 할당량을 소모하지 않는 `/usage`가
+  이를 확인해야 합니다. 각 호출 역시 초기화 이벤트에서 이를 순차적으로 확인하며,
+  그렇지 않으면 응답이 거부됩니다.
+- 0원의 비용을 유지하려면 **« extra usage »(추가 사용량)를 비활성화하세요**
+  (claude.ai, 설정 → 사용량). 활성화된 경우 할당량 창이 소진되면 자동으로
+  전환되어 오류 표시 없이 요금이 청구됩니다. aipmt는 호출 시 할당량 확인 결과
+  이를 감지하는 즉시 번역을 중단하지만, 해당 호출은 이미 청구된 상태입니다.
+- **Claude Code 세션과 할당량 공유.** 각 호출은 5시간 및 주간 윈도우
+  사용량을 보고합니다. 본 업무에 필요한 할당량을 소진하지 않도록 80%
+  (`AIPMT_CLAUDE_MAX_UTILIZATION`)를 초과하면 추가 세그먼트가 실행되지 않습니다.
+- **격리 환경(Confinement).** 각 호출은 도구 없이, 비공개 임시 디렉터리에서
+  사용자 맞춤 설정이 배제된 상태로 실행됩니다. 사용자의 `CLAUDE.md`도, 플러그인,
+  훅(hooks), MCP 서버나 설정도 로드되지 않으며 세션 내용은 전혀 보관되지 않습니다.
+  첨부 파일은 차단됩니다. 문서 내의 `@chemin`는 텍스트로만 유지되며
+  어떤 파일도 열지 않습니다(측정 완료).
+- **모델**: 기본값은 `sonnet`이며 노력 수준은 `low`입니다(`--eco`에서도 동일).
+  이 경로에서는 `--eco`가 아무런 영향을 주지 않습니다. 동일한 문서를 기준으로
+  측정했을 때, `haiku`는 비용이 거의 차이 나지 않으면서도 비활성화할 수 없는
+  추론 기능 때문에 두 배 더 느렸으며, `opus`는 생물학 관련 콘텐츠를
+  거부했습니다(다음 항목 참조). 두 모델 모두 `--model`를 통해 계속 접근할 수
+  있으며, 이 별칭들은 해당 패밀리의 최신 모델을 따릅니다. `fable` 및
+  `[1m]` 변형 모델은 유료 크레딧으로 처리되므로 거부됩니다. `--reasoning_effort`는
+  노력 수준을 조절하지만 번역 작업에는 전혀 득이 되지 않으며, 측정된 추론량은
+  거의 0에 가깝습니다.
+- **Opus는 특정 생물학 관련 콘텐츠를 거부합니다.** Opus의 안전 가드레일은
+  Sonnet보다 엄격하며, Anthropic의 오류 메시지는 가드레일이 « can sometimes
+  flag biology-research-adjacent work »(생물학 연구와 관련된 작업을 감지할 수
+  있음)이라고 경고합니다. 측정 결과: 생성된 279개 분자에 관한 단신 기사로 인해
+  14개 언어 모두에서 문서 처리가 거부되었습니다. 아무것도 작성되지 않습니다.
+  aipmt는 중단된 응답을 거부하고, 작동한 가드레일을 명시하며 `--model sonnet`
+  사용을 권장합니다.
+- CI 환경(`CI` 또는 `GITHUB_ACTIONS` 정의 시) 및 Windows(측정되지 않음)에서는
+  실행이 거부됩니다.
+- 환경 변수: `AIPMT_CLAUDE_BIN`(미지정 시 `PATH`, 그 다음 `~/.local/bin/claude`),
+  `AIPMT_CLAUDE_TIMEOUT`(세그먼트당 초 단위, 기본값 900),
+  `AIPMT_CLAUDE_MAX_UTILIZATION`(기본값 0.8), `CLAUDE_CONFIG_DIR`(Claude Code 계정,
+  프로젝트의 `.env`에서는 절대 가져오지 않음), 작업 디렉터리는
+  `XDG_CACHE_HOME/aipmt/claude-code` 하위(기본값 `~/.cache`).
 
-**이용 약관: 귀하의 계정에 책임이 따릅니다.**
-[Claude Code 법적 고지 페이지](https://code.claude.com/docs/en/legal-and-compliance)에서는
-"최종 사용자가 수정되지 않은 Claude Code 바이너리에 자신의 Claude 구독으로 로그인하는 것(an end user from signing in to the unmodified Claude Code binary with their own Claude subscription)"을 금지하지 않습니다. aipmt가 수행하는 작업이 바로 이것이며, 공식 바이너리를 실행하고 토큰을 절대 읽지 않습니다. 그러나 Anthropic은 "타사 개발자가 사용자를 대신하여 Free, Pro 또는 Max 요금제 자격 증명을 통해 요청을 라우팅하는 것을 허용하지 않으며(does not permit third-party developers […] to route requests through Free, Pro, or Max plan credentials on behalf of their users)", 오픈 소스 프로젝트를 포함한 타사 도구에는 API 키 사용을 선호하며([aide Claude](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)), 유료 크레딧에서 사용량을 차감할 권리를 보유합니다. 바이너리를 실행하는 배포형 도구에 대한 명확한 유권해석은 아직 없습니다.
+**이용약관: 사용자의 계정에 책임이 귀속됩니다.** [Claude Code 법적 고지 페이지](https://code.claude.com/docs/en/legal-and-compliance)는
+« an end user from signing in to the unmodified Claude Code binary with their own
+Claude subscription »(최종 사용자가 수정되지 않은 Claude Code 바이너리에 자신의
+Claude 구독으로 로그인하는 것)을 금지하지 않습니다. aipmt 역시 공식 바이너리를
+실행하며 토큰을 절대 읽지 않으므로 여기에 해당합니다. 그러나 Anthropic은 « does not
+permit third-party developers […] to route requests through Free, Pro, or Max plan
+credentials on behalf of their users »(서드파티 개발자가 사용자를 대신해 Free, Pro
+또는 Max 플랜 자격 증명을 통해 요청을 라우팅하는 것을 허용하지 않음)라 명시하고 있으며,
+« including open-source projects »(오픈 소스 프로젝트 포함) 서드파티 도구에
+대해서는 API 키 사용을 선호하고, 해당 사용량을 유료 크레딧에서 차감할 권리를 보유합니다
+([Claude 도움말](https://support.claude.com/en/articles/13189465-logging-in-to-your-claude-account)).
+배포된 도구가 바이너리를 직접 실행하는 경우에 대해서는 명확한 규정이 없습니다.
 
-**데이터**: Free, Pro, Max 계정의 경우 개인정보 보호 설정에서 허용한 경우 모델 학습이 Claude Code에도 적용됩니다([데이터 페이지](https://code.claude.com/docs/en/data-usage)). aipmt는 로컬 기록을 남기지 않습니다(`--no-session-persistence`). 기밀 내용은 전달하지 마세요.
+**데이터**: Free, Pro, Max 계정의 경우 개인정보 설정에서 허용된 경우 모델
+학습이 Claude Code에도 적용됩니다([데이터 정책 페이지](https://code.claude.com/docs/en/data-usage)). aipmt는
+로컬에 어떤 트랜스크립트도 보관하지 않습니다(`--no-session-persistence`). 기밀 정보를
+전송하지 마세요.
 
-### 원하는 제공자 연결: `--use_opencode`
+### 원하는 제공자로 연결: `--use_opencode`
 
-[OpenCode](https://opencode.ai)는 내부에 설정된 공급자(API 키, 구독, 계정이 필요 없는 무료 모델용 OpenCode Zen 게이트웨이 또는 로컬 모델)로 라우팅하는 오픈 소스(MIT) 코드 에이전트입니다. 여기서는 Zen과 Ollama 두 가지 경로를 엔드투엔드로 측정했습니다.
+[OpenCode](https://opencode.ai)는 내부 설정된 제공자(API 키, 구독, 계정 없는 무료 모델인
+OpenCode Zen 게이트웨이 또는 로컬 모델)로 라우팅하는 오픈 소스(MIT) 코드
+에이전트입니다. 여기서는 Zen과 Ollama 두 가지 경로를 처음부터 끝까지 측정했습니다.
 
 ```bash
 curl -fsSL https://opencode.ai/install | bash   # ou : npm install -g opencode-ai
@@ -452,24 +395,42 @@ aipmt --use_opencode --model ollama/qwen2.5:7b --file README.md --target_dir . -
 aipmt --use_opencode --model github-copilot/gpt-5 --file README.md --target_dir . --target_lang ja
 ```
 
-`--model`는 필수입니다. 이 옵션이 없으면 OpenCode는 대화 내용이 학습에 사용될 수 있는 무료 모델로 대체되며, 이 선택은 사용자를 대신하여 임의로 이루어지지 않습니다.
+`--model`는 필수입니다. 이 옵션이 없으면 OpenCode가 대화 내용이 학습에
+사용될 수 있는 무료 모델로 대체 실행될 수 있으며, 이러한 선택을 임의로 대신
+결정하지 않습니다.
 
 각 호출 시 격리 환경:
 
-- 사용자 설정보다 우선 적용되는 인라인 설정이 `aipmt` 에이전트를 정의하며, 모든 도구가 거부되고(`permission: { "*": "deny" }`), 세션 공유가 비활성화되며, `--pure`, `--auto`는 사용되지 않습니다.
-- 비어 있는 일회용 작업 디렉터리가 생성되고 `OPENCODE_DISABLE_PROJECT_CONFIG` 및 `OPENCODE_DISABLE_CLAUDE_CODE`가 배치됩니다. 이 파일들이 없으면 OpenCode가 현재 디렉터리의 `AGENTS.md`와 `~/.claude/CLAUDE.md`를 프롬프트에 주입합니다. 단, 전역 `~/.config/opencode/AGENTS.md`는 계속 주입되며 OpenCode는 이를 배제하는 방법을 제공하지 않습니다.
-- 출력 계약: 반환 코드 0, `error` 이벤트 없음, 도구 호출 없음, 마지막 단계는 `stop`, 텍스트가 비어 있지 않아야 하며, `aipmt` 에이전트가 정상적으로 로드되어야 합니다. 알 수 없는 `--agent`가 지정되어도 OpenCode는 오류를 내지 않고 코딩 에이전트로 조용히 대체됩니다.
-- OpenCode 자체의 키인 `OPENCODE_API_KEY`를 제외하고는 `aipmt` 키가 전달되지 않습니다. 제공자 설정은 `aipmt`의 `.env`가 아니라 OpenCode 내부에서 이루어집니다.
+- 사용자 설정보다 우선하는 인라인 구성이 도구가 모두 비활성화된(`permission: { "*": "deny" }`)
+  `aipmt` 에이전트를 정의하며, 세션 공유 비활성화, `--pure`,
+  `--auto` 절대 사용 안 함;
+- 비어 있는 일회용 작업 디렉터리, `OPENCODE_DISABLE_PROJECT_CONFIG` 및 `OPENCODE_DISABLE_CLAUDE_CODE`
+  배치 — 이것이 없으면 OpenCode가 현재 디렉터리의 `AGENTS.md`와
+  `~/.claude/CLAUDE.md`를 프롬프트에 주입합니다. 전역 `~/.config/opencode/AGENTS.md`는 계속
+  주입되며, OpenCode에서는 이를 제외할 수 없습니다;
+- 출력 계약: 반환 코드 0, `error` 이벤트 없음, 도구 호출 없음,
+  마지막 단계는 `stop`, 비어 있지 않은 텍스트, `aipmt` 에이전트가
+  실제로 로드됨 — 알 수 없는 `--agent`를 전달해도 OpenCode는 실패하지 않고
+  코딩 에이전트로 조용히 폴백합니다;
+- OpenCode 자체의 키인 `OPENCODE_API_KEY`를 제외하고는 `aipmt` 키가
+  전달되지 않습니다. 제공자는 `aipmt`의 `.env`가 아닌
+  OpenCode 내에서 구성됩니다.
 
-참고사항:
+참고 사항:
 
-- Zen의 무료 모델은 변동이 잦고 문서화되지 않은 제한이 있으며 대화 내용이 학습에 사용될 수 있으므로, 비공개 콘텐츠가 아닌 공개 문서 번역에만 적합합니다.
-- 세그먼트 길이가 최대 16,000자에 달하므로 로컬 모델은 최소 16k 토큰의 컨텍스트를 제공해야 합니다. Ollama는 기본 설정이 4,096인 경우가 많으므로 `PARAMETER num_ctx 32768`가 포함된 `Modelfile`를 사용해야 합니다.
-- `--eco`는 효과가 없습니다. `--reasoning_effort`는 OpenCode의 `--variant`로 그대로 전달됩니다.
+- Zen의 무료 모델은 수시로 변경되고 한도가 문서화되어 있지 않으며 대화 내용이
+  학습에 사용될 수 있으므로, 비공개 콘텐츠가 아닌 공개 문서 번역에만 적합합니다.
+- 로컬 모델은 세그먼트 길이가 최대 16,000자에 달하므로 최소 16k 토큰의 컨텍스트를
+  제공해야 합니다. Ollama는 기본적으로 4,096으로 설정되는 경우가 많으므로
+  `PARAMETER num_ctx 32768`가 포함된 `Modelfile`를 사용하세요.
+- `--eco`는 효과가 없으며, `--reasoning_effort`는 OpenCode의
+  `--variant`로 그대로 전달됩니다.
 - OpenCode는 각 세션을 `~/.local/share/opencode/`에 기록합니다.
-- 변수: `OPENCODE_BIN`(없을 경우 `PATH`, 그다음 `~/.opencode/bin/opencode`), `OPENCODE_TIMEOUT`(세그먼트당 초, 기본값 600). `OPENCODE_CONFIG`는 OpenCode로 그대로 전달됩니다.
+- 환경 변수: `OPENCODE_BIN`(미지정 시 `PATH`, 그 다음 `~/.opencode/bin/opencode`),
+  `OPENCODE_TIMEOUT`(세그먼트당 초 단위, 기본값 600). `OPENCODE_CONFIG`는
+  OpenCode로 그대로 전달됩니다.
 
-`~/.config/opencode/opencode.json`에서 Ollama를 통한 로컬 모델 예시:
+`~/.config/opencode/opencode.json`에서 Ollama를 통한 로컬 모델 사용 예시:
 
 ```bash
 ollama pull gpt-oss:20b
@@ -497,35 +458,56 @@ ollama create gpt-oss-20b-32k -f gpt-oss-20b-32k.Modelfile
 }
 ```
 
-`reasoningEffort: "none"`는 Ollama가 이들 모델에서 기본적으로 활성화하고 Modelfile로는 비활성화할 수 없는 사고(thinking) 과정을 차단합니다. 6단어 문장으로 측정한 결과: 옵션이 없을 때는 919개의 사고 토큰과 68초가 소요되었으나, 옵션을 사용하면 9개 토큰만 소요되었습니다.
+`reasoningEffort: "none"`는 Ollama가 이들 모델에서 기본으로 활성화하며 Modelfile로
+비활성화할 수 없는 추론 기능을 차단합니다. 6개 단어로 된 문장으로 측정한 결과:
+옵션이 없을 때는 919 추론 토큰과 68초가 소요되었으나, 옵션을 적용했을 때는
+9 토큰만 사용되었습니다.
 
-### 400개 이상의 모델 지원: `--use_openrouter`
+### 400개 이상의 모델로 연결: `--use_openrouter`
 
-OpenRouter는 다른 어떤 제공자도 제공하지 않는 개방형 중국 모델을 포함하여, 제3자가 호스팅하는 모델들을 단일 크레딧 기반의 사용량 정산 방식으로 연결하는 라우터입니다.
+OpenRouter는 타사가 호스팅하는 모델(여기서 다른 제공자가 지원하지 않는 오픈형 중국
+모델 포함)을 단일 크레딧 기반의 사용량 요금제로 연결해 주는 라우터입니다.
 
 ```bash
 aipmt --use_openrouter --model z-ai/glm-5.2 --file README.md --target_dir . --target_lang en
 ```
 
-`--model`는 필수입니다. 실제 요금이 청구되기 전에 실행되는 사전 검사(preflight)는 라우팅의 두 가지 특이사항을 조정합니다:
+`--model`는 필수입니다. 과금이 발생하기 전에 실행되는 사전 검사(preflight)는
+라우팅의 두 가지 특성을 조절합니다:
 
-- **동일한 모델이라도 최대 한도가 서로 다른 수십 개의 호스팅 업체에서 제공됩니다.** 예를 들어 `z-ai/glm-5.3-flash`의 경우 23개 호스팅 업체가 있으며 그중 하나는 출력 한도가 2,048 토큰에 불과합니다. 사전 검사는 `/api/v1/models/{modèle}/endpoints`를 읽어 출력 한도가 8,000 토큰 미만이거나 상태가 저하된 업체를 제외하고 나머지를 `allow_fallbacks: false`로 고정합니다.
-- **사고(추론) 과정은 출력 요율로 청구됩니다.** `z-ai/glm-5.2`의 "OK" 응답 시 일반 2토큰 대비 사고 토큰은 107토큰이 청구됩니다. 기본적으로 사고 기능은 꺼져 있습니다. 이를 강제하는 모델에는 허용되는 최저 노력이 전달됩니다. 카탈로그 기본값을 그대로 두면 번역이 완료되기 전에 출력이 포화 상태에 이를 수 있기 때문입니다. `--reasoning_effort` 설정이 항상 우선 적용됩니다.
+- **동일한 모델이라도 호스팅 업체마다 최대 한도가 다릅니다.** `z-ai/glm-5.3-flash`의 경우
+  23개 호스팅 업체가 있으며 그중 한 곳은 출력 토큰이 2,048개로 제한되어 있습니다.
+  사전 검사는 `/api/v1/models/{modèle}/endpoints`를 조회하여 출력 토큰이 8,000개 미만이거나 성능
+  저하 상태인 호스팅 업체를 제외하고, 나머지 업체를 `allow_fallbacks: false`로 고정합니다.
+- **추론 토큰은 출력 토큰 요율로 청구됩니다.** `z-ai/glm-5.2`의 « OK » 응답에서
+  2토큰 대신 107토큰이 청구된 사례가 있습니다. 추론은 기본적으로 비활성화됩니다.
+  추론이 강제되는 모델에는 허용되는 최저 노력 수준이 전달되며, 카탈로그 기본값은
+  번역이 끝나기 전에 출력을 포화시킬 위험이 있습니다. `--reasoning_effort`가 항상 우선합니다.
 
 ```
 → OpenRouter : 30 hébergeur(s) épinglé(s) sur 33, contexte 1048576 tokens,
   sortie plafonnée à 32768, raisonnement coupé
 ```
 
-- 컨텍스트 창 크기는 카탈로그에서 가져옵니다. 프롬프트와 세그먼트용 8,400 토큰, 최소 출력 8,000 토큰을 합쳐 16,400 토큰 미만인 모델은 호출 전에 즉시 거부됩니다.
-- 카탈로그에 없는 슬러그이거나 카탈로그에 연결할 수 없거나 한도를 충족하는 호스팅 업체가 없는 경우 명령이 중단됩니다.
-- 출력이 비어 있는 `finish_reason=length` 오류는 잘림(truncation)이 아니라 추론에 예산이 소진된 것을 의미하며, 메시지에서 이를 구분하여 알려줍니다.
+- 컨텍스트 윈도우 정보는 카탈로그에서 가져옵니다. 16,400 토큰 미만인 모델은
+  호출 전에 거부됩니다(프롬프트 및 세그먼트용 8,400 토큰, 최소 출력 8,000 토큰).
+- 카탈로그에 없는 슬러그이거나 카탈로그에 연결할 수 없는 경우, 또는 한도를
+  충족하는 호스팅 업체가 없으면 명령이 중단됩니다.
+- 출력이 비어 있는 `finish_reason=length`는 텍스트 잘림이 아니라 추론에 예산이
+  소진된 경우이며, 메시지에서 이를 구분해 표시합니다.
 - `--eco`는 효과가 없습니다.
-- 변수: `OPENROUTER_API_KEY` (<https://openrouter.ai/keys>), `OPENROUTER_BASE_URL`(기본값 `https://openrouter.ai/api/v1`, `https://` 필수), `OPENROUTER_TIMEOUT`(기본값 900), `OPENROUTER_PREFLIGHT_TIMEOUT`(기본값 30).
+- 환경 변수: `OPENROUTER_API_KEY`(<https://openrouter.ai/keys>),
+  `OPENROUTER_BASE_URL`(기본값 `https://openrouter.ai/api/v1`, `https://`
+  필수), `OPENROUTER_TIMEOUT`(기본값 900), `OPENROUTER_PREFLIGHT_TIMEOUT`
+  (기본값 30).
 
 ### 번역 노트
 
-`--add_translation_note`는 노트를 추가하며, 위치는 `bottom`(기본값), `top`(front matter 다음) 또는 `both`(`--note_position`)이고, 형식은 `legacy`(굵은 글씨 단락, 기본값) 또는 `marker`(`--note_format`)입니다. `marker` 형식은 보이지 않는 Markdown 참조 정의인 `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"` 뒤에 굵은 글씨 인용구가 이어지는 형태입니다. GitHub에서 읽기 쉬우며 remark 플러그인을 통해 빌드 시 활용할 수 있습니다.
+`--add_translation_note`는 `bottom`(기본값), `top`(front matter 뒤) 또는
+`both`(`--note_position`) 위치에 `legacy`(굵은 단락, 기본값) 또는
+`marker`(`--note_format`) 형식으로 노트를 추가합니다. `marker` 형식은
+보이지 않는 Markdown 참조 정의인 `[ai-translation-note-<placement>]: <> "v=1 source=… target=… model=… date=…"` 뒤에 굵은 인용문이 이어지는 형태입니다.
+GitHub에서 읽을 수 있으며 빌드 시 remark 플러그인에서 활용할 수 있습니다.
 
 ```bash
 aipmt --file article.mdx --target_lang en --add_translation_note --note_format marker --note_position top
@@ -533,87 +515,134 @@ aipmt --file article.mdx --target_lang en --add_translation_note --note_format m
 
 ## 상세 측정 결과
 
-모든 측정은 `aipmt`를 사용하여 14개 언어(en, es, de, it, pt, nl, pl, sv, ro, ja, ko, zh, ar, hi)로 실제로 실행된 번역입니다. **작성 완료**는 가드레일을 통과한 파일 수를 나타내며, **차이 없음**은 `scripts/compare_structure.py`에서 감지된 이상이 없는 파일 수(섹션, 소제목, 링크, 고유 URL, 코드 블록, 인라인 코드, 표 행, 블록 인용구 및 굵은 단어의 수가 동일함)를 나타냅니다.
+모든 측정치는 en, es, de, it, pt, nl, pl, sv, ro, ja, ko, zh, ar, hi의
+14개 언어로 `aipmt`를 사용해 실제로 수행한 번역 결과입니다.
+**생성 완료**는 안전 가드를 통과한 파일 수를 나타내며, **불일치 없음**은
+`scripts/compare_structure.py`에서 아무런 차이가 감지되지 않은 파일(섹션, 서브타이틀, 링크,
+고유 URL, 코드 블록, 인라인 코드, 표 행, 인용 블록, 굵은 글씨 단어 수가
+일치)의 수를 나타냅니다.
 
-"차이 없음"은 "감지된 이상이 없음"을 의미할 뿐 "완벽히 동일함"을 의미하지는 않습니다. 비교기는 내용을 읽지 않고 요소의 개수만 셉니다. 레벨 4 제목 삭제, 인라인 코드 텍스트 교체, 언어 플래그 뒤바뀜, 더 이상 연결되지 않는 괄호가 하나 더 붙은 내부 링크(`[texte]((#ancre))`) 등을 감지하지 않으며, 언어의 품질을 평가하지도 않습니다.
+«불일치 없음»은 «동일함»이 아니라 «감지된 차이 없음»을 의미합니다. 비교기는
+내용을 읽지 않고 요소의 개수만 셉니다. 삭제된 4단계 제목이나 변경된 인라인
+코드 텍스트, 뒤바뀐 플래그, 괄호가 하나 더 들어가 어디로도 연결되지 않는 내부 링크
+(`[texte]((#ancre))`) 등은 감지하지 않으며 언어 자체를 평가하지도 않습니다.
 
-### 고밀도 동향 분석 기사, `--news` 모드
+### 고밀도 모니터링 기사, `--news` 모드
 
-[jls42.org의 AI 동향 보고서](https://jls42.org/fr/news) 한 호: 589행, 140개 링크, 21개 섹션, 3개의 보호된 영어 인용구. 2026년 9월 4일 및 5일 측정 캠페인.
+[jls42.org의 AI 모니터링](https://jls42.org/fr/news) 기사 한 호:
+589행, 140개 링크, 21개 섹션, 보호된 영어 인용문 3개. 2026년 9월 4일 및 5일 테스트.
 
-| 모델 | 접근 방식 | 작성 완료 | 차이 없음 | 언어별 중앙값 |
-| --- | --- | --- | --- | --- |
-| `gemini-3.7-flash` | Google API | 14/14 | ✅ **14/14** | 1분 18초 |
-| `gemini-3.8-flash-medium` (`--use_antigravity`) | Google 구독 | 14/14 | ✅ **14/14** | 3분 59초 |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | Google 구독 | 14/14 | ✅ **14/14** | 3분 14초 |
-| `claude-sonnet-5-5` | Anthropic API | 14/14 | ✅ **14/14** | 3분 37초 |
-| `gpt-5.6-sol` (`--use_codex`) | ChatGPT 구독 | 14/14 | ✅ **14/14** | 11분 28초 |
-| `z-ai/glm-5.2` | OpenRouter | 14/14 | ✅ **14/14** | 5분 37초 |
-| `qwen/qwen3.8-flash` | OpenRouter | 14/14 | ✅ **14/14** | 26분 23초 |
-| `sonnet` (`--use_claude_code`) | Claude 구독 | 14/14 | ⚠️ 13/14 | 6분 49초 |
-| `claude-sonnet-5` | Anthropic API | 14/14 | ⚠️ 11/14 | 6분 31초 |
-| `haiku` (`--use_claude_code`) | Claude 구독 | 14/14 | ⚠️ 11/14 | 15분 54초 |
-| `claude-haiku-5-5` | Anthropic API | 14/14 | ⚠️ 11/14 | 2분 54초 |
-| `claude-haiku-4-5` | Anthropic API | 14/14 | ⚠️ 7/14 | 6분 00초 |
-| `opencode/mimo-v2.5-free` | OpenCode Zen | 13/14 | ❌ 11/14 | 9분 27초 |
-| `qwen/qwen3.7-flash` | OpenRouter | 13/14 | ❌ 8/14 | 10분 09초 |
-| `ollama/gpt-oss-20b-32k` | 로컬 | 10/14 | ❌ 7/14 | 12분 39초 |
-| `mistral-large-latest` | Mistral API | 11/14 | ❌ 5/14 | 5분 32초 |
-| `deepseek/deepseek-v4-flash-0731` | OpenRouter | 4/14 | ❌ 3/14 | 37분 27초 |
-| `grok-4.6` (`--use_grok_cli`) | Grok 구독 | 1/14 | ❌ 1/14 | 23분 11초 |
-| `opus` (`--use_claude_code`) | Claude 구독 | 0/14 | ❌ 0/14 | — |
+| 모델 | 접근 방식 | 생성 완료 | 불일치 없음 | 언어별 중앙값 |
+| ----------------------------------------------- | ------------------ | ------- | ------------ | -------------- |
+| `gemini-3.7-flash`                              | Google API         | 14/14   | ✅ **14/14** | 1분 18초       |
+| `gemini-3.8-flash-medium` (`--use_antigravity`) | Google 구독        | 14/14   | ✅ **14/14** | 3분 59초       |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | Google 구독        | 14/14   | ✅ **14/14** | 3분 14초       |
+| `claude-sonnet-5-5`                             | Anthropic API      | 14/14   | ✅ **14/14** | 3분 37초       |
+| `gpt-5.6-sol` (`--use_codex`)                   | ChatGPT 구독       | 14/14   | ✅ **14/14** | 11분 28초      |
+| `z-ai/glm-5.2`                                  | OpenRouter         | 14/14   | ✅ **14/14** | 5분 37초       |
+| `qwen/qwen3.8-flash`                            | OpenRouter         | 14/14   | ✅ **14/14** | 26분 23초      |
+| `sonnet` (`--use_claude_code`)                  | Claude 구독        | 14/14   | ⚠️ 13/14     | 6분 49초       |
+| `claude-sonnet-5`                               | Anthropic API      | 14/14   | ⚠️ 11/14     | 6분 31초       |
+| `haiku` (`--use_claude_code`)                   | Claude 구독        | 14/14   | ⚠️ 11/14     | 15분 54초      |
+| `claude-haiku-5-5`                              | Anthropic API      | 14/14   | ⚠️ 11/14     | 2분 54초       |
+| `claude-haiku-4-5`                              | Anthropic API      | 14/14   | ⚠️ 7/14      | 6분 00초       |
+| `opencode/mimo-v2.5-free`                       | OpenCode Zen       | 13/14   | ❌ 11/14     | 9분 27초       |
+| `qwen/qwen3.7-flash`                            | OpenRouter         | 13/14   | ❌ 8/14      | 10분 09초      |
+| `ollama/gpt-oss-20b-32k`                        | 로컬               | 10/14   | ❌ 7/14      | 12분 39초      |
+| `mistral-large-latest`                          | Mistral API        | 11/14   | ❌ 5/14      | 5분 32초       |
+| `deepseek/deepseek-v4-flash-0731`               | OpenRouter         | 4/14    | ❌ 3/14      | 37분 27초      |
+| `grok-4.6` (`--use_grok_cli`)                   | Grok 구독          | 1/14    | ❌ 1/14      | 23분 11초      |
+| `opus` (`--use_claude_code`)                    | Claude 구독        | 0/14    | ❌ 0/14      | —              |
 
-Grok은 9월 9일 동일한 동향 보고서의 다른 판본(356행)으로 다시 측정되었습니다. 14개 언어 중 9개 작성 완료, 8개 차이 없음이 기록되었습니다. 상단 표에 나와 있는 수치가 바로 이것입니다. 도중에 중단된 3개의 캠페인은 표에 기록되지 않았습니다. 크레딧 부족으로 중단된 `qwen3.5-27b`(9개 언어) 및 `kimi-k2.6`(4개 언어), 그리고 두 차례의 실패가 제공자 측에서 이후 수정한 추론 설정 문제 때문이었던 `z-ai/glm-5.3-flash`입니다. OpenRouter 항목들은 `--use_openrouter` 적용 전 라우터의 기본 설정으로 측정되었습니다. 제공된 provider로 다시 측정한 `z-ai/glm-5.2`는 동일하게 14/14를 기록했습니다. 수치는 9월 10일 현재 비교기로 다시 계산되었습니다. `qwen3.8-flash`와 `qwen3.7-flash`는 초기 발표치보다 각각 1개 언어씩 더 통과하였으며 나머지는 변경되지 않았습니다.
+Grok은 9월 9일 동일 모니터링 기사의 다른 호(356행)로 다시 측정되었습니다:
+14개 언어 중 9개가 생성 완료되었고, 8개는 불일치가 없었습니다. 상단 표에 표시된
+수치가 바로 이 결과입니다. 중단된 세 차례의 테스트는 기재되지 않았습니다: 크레딧
+부족으로 중단된 `qwen3.5-27b`(9개 언어) 및 `kimi-k2.6`(4개 언어), 그리고 두 차례의
+실패 원인이 공급자 측에서 현재 수정된 추론 설정 때문이었던 `z-ai/glm-5.3-flash`입니다.
+OpenRouter 행은 `--use_openrouter` 적용 전 라우터 기본 설정으로 측정되었습니다.
+제공된 provider로 다시 측정한 `z-ai/glm-5.2`는 동일하게 14/14를 기록했습니다.
+수치는 9월 10일 현재의 비교기로 재계산되었습니다: `qwen3.8-flash`과
+`qwen3.7-flash`는 최초 발표 대비 각각 1개 언어가 늘어났으며 다른 항목은 변동이 없습니다.
 
-`--use_antigravity` 행은 9월 26일 동일한 기사를 대상으로 모델당 4개의 번역을 병렬로 실행하여 측정되었습니다. 오전에는 `gemini-3.7-flash-medium`, 오후에는 `gemini-3.8-flash-medium`를 실행했습니다. 영어 번역에서는 두 모델 모두 인용구 아래의 3개 프랑스어 번역 행을 가짜 플래그를 생성하지 않고 스스로 제거했으며, 영어 인용구는 온전히 유지되어 대체 정리(fallback cleanup) 단계가 필요하지 않았습니다. 4개 언어(en, ja, ar, hi)만을 대상으로 한 `--eco`(`gemini-3.7-flash-low`)에서는 4개 중 4개 작성 완료, 모두 차이 없음, 중앙값 1분 52초를 기록했습니다. 같은 날 블로그 외부에서 `gemini-3.7-flash-medium`로 번역된 9월 25일 자 최신 동향 보고서(438행, 영어 인용구 2개)로 교차 검증을 진행한 결과: 14개 중 14개 작성 완료, 모두 차이 없음, 언어당 87~128초가 소요되었습니다.
+`--use_antigravity` 행은 9월 26일 동일 기사를 대상으로 4개 번역을 병렬 실행하여
+측정되었습니다: 오전에 `gemini-3.7-flash-medium`, 오후에 `gemini-3.8-flash-medium`가 실행되었습니다.
+영어 번역에서는 두 모델 모두 플래그를 임의로 추가하지 않고 인용문 아래의
+프랑스어 번역 3줄을 스스로 제거했으며 영어 인용문도 온전하게 유지되어, 대체 정리
+(fallback cleanup) 기능이 개입할 필요가 없었습니다. 4개 언어(en, ja, ar, hi)만
+테스트한 `--eco`(`gemini-3.7-flash-low`)의 경우: 4개 중 4개가 생성 완료되었고
+모두 불일치가 없었으며 중앙값은 1분 52초였습니다. 같은 날 더 최근 발행된 9월 25일 자
+모니터링 기사(438행, 영어 인용문 2개)를 `gemini-3.7-flash-medium`를 통해 블로그 외부에서 번역하여
+교차 검증을 진행했습니다: 14개 중 14개가 생성 완료되었고, 모두 불일치가 없었으며
+언어당 87~128초가 소요되었습니다.
 
-`--use_claude_code` 행은 9월 26일 동일한 기사에서 추론 노력 `low`로 4개의 번역을 병렬 실행하여 측정되었습니다. `sonnet`의 경우 14개 언어 모두에서 영어 인용구가 온전히 유지되었으며, 영어 번역에서는 모델이 가짜 플래그를 생성하지 않고 프랑스어 번역 행을 스스로 제거했습니다. `opus`는 단 하나의 언어도 작성하지 못했습니다. 모든 언어에서 결합 부위를 위해 생성된 279개 분자에 관한 단신으로 인해 마지막 세그먼트에서 가드레일이 응답을 중단시켰습니다. 해당 단신만 단독으로 전송했을 때도 "bio" 카테고리로 거부되었습니다. 반면 `sonnet`는 모든 언어에서 이를 번역했습니다. `haiku`는 14개 언어를 모두 작성했으나, 3개 언어(en, pl, ro)에서 섹션 제목의 레벨이 2에서 1로 변경되었습니다. 또한 비활성화할 수 없는 사고 기능이 작동하여(출력 토큰의 61%), `sonnet` 대비 두 배 이상의 시간이 걸렸습니다.
+`--use_claude_code` 행은 9월 26일 동일 기사를 대상으로 `low` 노력 수준에서
+4개 번역을 병렬 실행하여 측정되었습니다. `sonnet`의 경우 14개 언어 모두에서
+영어 인용문이 그대로 유지되었고, 영어 번역에서는 모델이 플래그를 임의로 추가하지 않고
+프랑스어 번역 줄을 스스로 제거했습니다. `opus`는 단 하나의 언어도 생성하지
+못했습니다: 결합 부위를 위해 생성된 279개 분자에 관한 단신 기사 때문에 모든 언어의
+마지막 세그먼트에서 가드레일이 응답을 중단시켰습니다. 이 단신 기사만 따로 보냈을 때도
+«bio» 범주에 걸려 거부되었습니다. 반면 `sonnet`는 모든 언어에서 이를 번역했습니다.
+`haiku`는 14개 언어를 모두 생성했으나, 세 개 언어(en, pl, ro)에서 섹션 제목
+레벨이 2단계에서 1단계로 변경되었습니다. 또한 비활성화할 수 없는 추론 기능(출력 토큰의 61%)
+때문에 `sonnet`에 비해 두 배 이상의 시간이 걸렸습니다.
 
-`claude-sonnet-5-5`, `claude-haiku-5-5`, `claude-haiku-4-5` 행은 10월 18일 Anthropic API를 통해 동일한 기사에서 모델당 4개의 번역을 병렬 실행하여 측정되었습니다. Sonnet 5.5는 사고(thinking) 기능 비활성화를 거부하므로 aipmt는 허용되는 가장 낮은 설정을 전달하며, 그 결과 응답에는 사고 내용이 포함되지 않습니다. 14개 언어 모두에서 차이 없이 세그먼트 재시도 없이 작성 완료되었습니다. 영어 번역에서는 가짜 플래그를 생성하지 않고 프랑스어 번역 행을 스스로 제거했으며, 영어 인용구는 모든 언어에서 온전히 유지되었습니다. Haiku 5.5는 적응형 사고(adaptive thinking) 기능을 켠 상태로 측정되었습니다. 사고 기능을 끄면 가드레일에 의해 거부되는 프랑스어 단락이 통째로 남아 14개 언어 중 3개만 작성되었습니다. 두 Haiku 모델 모두 동일한 단신에서 문제를 겪었습니다. Haiku 5.5는 일본어, 한국어, 중국어에서 제목 레벨을 변경하거나 중복 생성했고, Haiku 4.5는 7개 언어에서 레벨 1로 변경했으며 일본어에서는 프랑스어 그대로 남겨두었습니다. 14개 언어로 두 문서를 번역하는 데 든 비용은 Haiku 4.5가 $3.67, Haiku 5.5가 $0.57, Sonnet 5.5가 $9.21였습니다.
+`claude-sonnet-5-5`, `claude-haiku-5-5`, `claude-haiku-4-5` 행은 10월 18일 Anthropic
+API를 통해 동일 기사를 대상으로 모델당 4개 번역을 병렬 실행하여 측정되었습니다.
+Sonnet 5.5는 추론 기능 차단을 허용하지 않으므로, aipmt는 허용되는 가장 낮은 설정을
+전달하며 실제 응답에는 추론 내용이 포함되지 않습니다. 이 모델은 세그먼트 재시도 없이
+14개 언어를 모두 불일치 없이 생성했습니다. 영어 번역에서는 플래그를 임의로 추가하지 않고
+프랑스어 번역 줄을 스스로 제거했으며 영어 인용문도 전 언어에서 온전하게 유지되었습니다.
+Haiku 5.5는 적응형 추론(adaptive thinking) 상태로 측정되었습니다. 추론을 차단했을 때는
+프랑스어로 된 문단 전체를 그대로 남겨 안전 가드가 거부했습니다(14개 언어 중 3개만 생성 완료).
+두 Haiku 모델 모두 동일한 단신 기사에서 문제를 보였습니다: Haiku 5.5는 일본어, 한국어,
+중국어에서 제목 레벨을 변경하거나 제목을 중복 생성했고, Haiku 4.5는 7개 언어에서
+레벨 1로 변경했으며 일본어에서는 프랑스어로 그대로 남겨 두었습니다. 14개 언어에 대해
+두 문서를 번역하는 데 든 비용은 Haiku 4.5가 3.67달러, Haiku 5.5가 0.57달러,
+Sonnet 5.5가 9.21달러였습니다.
 
 ### 이 프로젝트의 README, 표준 Markdown
 
-2026년 9월 9일 고정 리비전: 785행, 인라인 코드 285개, 코드 블록 종료 40개, 표 89행. 4개 병렬 번역.
+2026년 9월 9일 고정 리비전: 785행, 인라인 코드 285개, 블록 구분 기호 40개, 표 89행. 4개 병렬 번역.
 
-| 모델                                            | 작성 완료 | 오차 없음  | 중앙값/언어    | 차이점                                                                   |
+| 모델                                            | 작성됨  | 불일치 없음 | 중앙값/언어    | 차이점                                                                   |
 | ----------------------------------------------- | ------- | ---------- | -------------- | ------------------------------------------------------------------------ |
 | `gemini-3.8-flash-medium` (`--use_antigravity`) | 14/14   | ✅ 14/14   | 1분 43초       | 없음                                                                     |
 | `opus` (`--use_claude_code`)                    | 14/14   | ✅ 14/14   | 1분 48초       | 없음                                                                     |
-| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14   | 4분 02초       | 비교기 기준 없음; 내부 링크 중복 (en)                                   |
+| `haiku` (`--use_claude_code`)                   | 14/14   | ✅ 14/14   | 4분 02초       | 비교기 기준 없음; 내부 링크 중복(en)                                     |
 | `claude-sonnet-5-5`                             | 14/14   | ✅ 14/14   | 1분 18초       | 없음                                                                     |
 | `claude-haiku-4-5`                              | 14/14   | ✅ 14/14   | 2분 06초       | 없음                                                                     |
-| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36초           | 굵은 글씨 단어 1개 (ja)                                                  |
-| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1분 22초       | 굵은 글씨 단어 1개 (ko)                                                  |
-| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14   | 2분 20초       | 표 행 하나가 이전 행에 붙음 (ar)                                         |
-| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | 2분 56초       | 링크 1개 (sv), 굵은 글씨 단어 1개 (zh)                                   |
-| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6분 46초       | 굵은 글씨 단어 1개 (ar, ja)                                              |
-| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | 2분 34초       | 굵은 글씨 단어 1개 (hi, ja, ko)                                          |
-| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14   | 2분 17초       | 아랍어에서 인라인 코드 40개 추가됨; 굵은 글씨 (hi, ja, ko)               |
-| `claude-haiku-5-5`                              | 12/14   | ❌ 12/14   | 1분 14초       | 2개 언어 거부됨 (ar, hi): 반환 시 인라인 코드 유실                       |
-| `mistral-large-latest`                          | 14/14   | ❌ 1/14    | 2분 44초       | 섹션 1개 유실 (ar, hi, ko); 코드 블록 추가됨 (ja, ko, ro, zh)            |
+| `gemini-3.7-flash`                              | 14/14   | ⚠️ 13/14   | 36초           | 굵은 글씨 단어 1개(ja)                                                   |
+| `gemini-3.7-flash-medium` (`--use_antigravity`) | 14/14   | ⚠️ 13/14   | 1분 22초       | 굵은 글씨 단어 1개(ko)                                                   |
+| `sonnet` (`--use_claude_code`)                  | 14/14   | ⚠️ 13/14   | 2분 20초       | 이전 행에 붙은 표 1행(ar)                                                |
+| `claude-sonnet-5`                               | 14/14   | ⚠️ 12/14   | 2분 56초       | 링크 1개(sv), 굵은 글씨 단어 1개(zh)                                     |
+| `gpt-5.6-sol` (`--use_codex`)                   | 14/14   | ⚠️ 12/14   | 6분 46초       | 굵은 글씨 단어 1개(ar, ja)                                               |
+| `z-ai/glm-5.2` (OpenRouter)                     | 14/14   | ⚠️ 11/14   | 2분 34초       | 굵은 글씨 단어 1개(hi, ja, ko)                                           |
+| `qwen/qwen3.7-flash`                            | 14/14   | ⚠️ 10/14   | 2분 17초       | 아랍어에서 인라인 코드 40개 추가; 굵은 글씨(hi, ja, ko)                   |
+| `claude-haiku-5-5`                              | 12/14   | ❌ 12/14   | 1분 14초       | 2개 언어 거부됨(ar, hi): 반환 시 인라인 코드 누락                        |
+| `mistral-large-latest`                          | 14/14   | ❌ 1/14    | 2분 44초       | 섹션 1개 누락(ar, hi, ko); 코드 블록 추가됨(ja, ko, ro, zh)              |
 
-중단된 두 번의 캠페인은 기록되지 않았습니다: Grok은 12개 언어(11개 오차 없음) 후 CLI 세션 만료, `qwen3.8-flash`는 2개 언어 후 호스팅 업체로부터 HTTP 429를 수신했습니다. `opencode/mimo-v2.5-free` 및 `ollama/gpt-oss-20b-32k`는 이 리비전에서 다시 측정되지 않았습니다. 277행 더 짧았던 9월 4일과 5일 리비전에서는 각각 14개 중 9개의 번역을 작성했으며, 그중 오차가 없었던 것은 각각 7개와 1개였습니다.
+중단된 두 차례의 실행은 기재되지 않았습니다. Grok은 12개 언어(11개 불일치 없음) 후 CLI 세션 만료, `qwen3.8-flash`은 호스팅 제공업체에서 2개 언어 후 HTTP 429가 발생했습니다. `opencode/mimo-v2.5-free` 및 `ollama/gpt-oss-20b-32k`은 이 리비전에서 재측정되지 않았습니다. 277행 더 짧았던 9월 4일과 5일 리비전에서는 각각 14개 중 9개의 번역을 작성했으며, 그중 불일치가 없었던 것은 각각 7개와 1개였습니다.
 
-`--use_antigravity` 및 `--use_claude_code` 행은 고정 리비전에서 측정된 것이 아니라, 9월 26일에 1.14.0과 함께 배포된 리비전에서 측정되었으며, `claude-sonnet-5-5`, `claude-haiku-5-5`, `claude-haiku-4-5` 행은 10월 18일에 동일한 리비전(600행, 인라인 코드 257개, 코드 블록 종료 30개, 표 85행)에서 측정되었습니다. 185행 더 짧기 때문에 다른 행들과 1:1로 직접 비교할 수는 없지만, 해당 행들끼리는 상호 비교가 가능합니다. 비교기가 검사하지 않는 내부 링크의 경우, `gemini-3.8-flash-medium`는 14개 언어 모두에서 온전하게 유지했고, `gemini-3.7-flash-medium`는 이탈리아어에서 깨뜨렸습니다. `sonnet`와 `opus`는 모든 곳에서 온전하게 유지했고, `haiku`는 영어에서 중복 생성했습니다. `claude-sonnet-5-5`와 `claude-haiku-4-5`는 14개 언어 모두에서 온전하게 유지했고, `claude-haiku-5-5`는 작성한 12개 언어에서 온전하게 유지했습니다.
+`--use_antigravity` 및 `--use_claude_code` 행은 고정 리비전에서 측정되지 않았으며, 9월 26일 1.14.0과 함께 릴리스된 리비전에서 측정되었습니다. 또한 `claude-sonnet-5-5`, `claude-haiku-5-5`, `claude-haiku-4-5` 행은 10월 18일 동일 리비전에서 측정되었습니다(600행, 인라인 코드 257개, 블록 구분 기호 30개, 표 85행). 185행이 더 짧아 다른 행들과 1:1로 직접 비교할 수는 없지만, 이 행들 상호 간에는 비교가 가능합니다. 비교기가 검사하지 않는 내부 링크의 경우, `gemini-3.8-flash-medium`은 14개 언어 모두에서 온전하게 유지했고, `gemini-3.7-flash-medium`은 이탈리아어에서 링크를 손상시켰습니다. `sonnet` 및 `opus`은 모든 곳에서 온전하게 유지했으며, `haiku`은 영어에서 중복 생성했습니다. `claude-sonnet-5-5` 및 `claude-haiku-4-5`은 14개 언어 모두에서 온전하게 유지했고, `claude-haiku-5-5`은 작성한 12개 언어에서 온전하게 유지했습니다.
 
-### 잘 알려진 프로젝트 4개의 README
+### 잘 알려진 프로젝트의 README 4개
 
-GitHub에서 있는 그대로 가져온 FastAPI, Ollama, tldr-pages, Vue.js — 이전 두 문서보다 수월한 문서들입니다. 이 캠페인은 어려움을 겪는 모델들을 대상으로 진행되었으며, Gemini가 비교 기준으로 사용되었습니다.
+GitHub에서 있는 그대로 가져온 FastAPI, Ollama, tldr-pages 및 Vue.js 문서로, 앞의 두 문서보다 더 평이한 문서들입니다. 이 테스트는 어려움을 겪는 모델들을 대상으로 했으며, Gemini가 비교 기준으로 사용되었습니다.
 
-| 모델                       | 범위                       | 작성 완료 | 오차 없음    |
-| -------------------------- | -------------------------- | ------- | ------------ |
+| 모델                      | 범위                       | 작성됨  | 불일치 없음  |
+| ------------------------- | -------------------------- | ------- | ------------ |
 | `gemini-3.7-flash`        | 4개 프로젝트 × 14개 언어   | 56/56   | ✅ **55/56** |
 | `opencode/mimo-v2.5-free` | 4개 프로젝트 × 14개 언어   | 55/56   | ❌ 47/56     |
-| `grok-4.6` (구독)     | 4개 프로젝트 × ar, hi, ja, zh | 16/16   | ❌ 14/16     |
+| `grok-4.6` (구독)   | 4개 프로젝트 × ar, hi, ja, zh | 16/16   | ❌ 14/16     |
 | `ollama/gpt-oss-20b-32k`  | 4개 프로젝트 × ar, hi, ja, zh | 15/16   | ❌ 9/16      |
 
-### 이러한 측정 결과에 해당하지 않는 것
+### 이 측정 결과에 해당하지 않는 것
 
-- **완전한 순위가 아님**: OpenRouter만 해도 400개 이상의 모델을 제공하며, 측정된 것은 15개 남짓에 불과합니다.
-- **참고용 소요 시간**: 캠페인에 따라 3~6개의 번역을 병렬로 진행했으며, 공급자의 처리 속도는 하루 중에도 변동합니다.
-- **특정 시점의 관측 결과**: 동일한 이름 아래에서도 모델은 변경되며, 여러분의 문서는 저희의 문서와 다릅니다.
+- **포괄적인 순위가 아님**: OpenRouter만 해도 400개 이상의 모델을 제공하며, 측정된 것은 15개 남짓에 불과합니다.
+- **참고용 소요 시간**: 실행에 따라 3개에서 6개의 병렬 번역으로 진행되었으며, 제공업체의 처리량은 시간대에 따라 달라집니다.
+- **특정 시점의 관측 결과**: 동일한 이름이라도 모델이 변경될 수 있으며, 귀하의 문서는 당사의 문서와 다릅니다.
 
-고정된 파일 사본을 바탕으로 여러분의 문서에서 측정을 재현하려면:
+본인의 문서에서 파일의 고정 복사본을 대상으로 측정을 다시 실행하려면:
 
 ```bash
 aipmt --file reference.md --target_dir out/ --source_lang fr --target_lang ja --use_gemini --force
@@ -632,9 +661,9 @@ pip install -r requirements.txt   # les dépendances, lock entièrement épingl�
 pip install -e .                  # le paquet lui-même, en mode éditable
 ```
 
-두 줄 모두 필요합니다. `pip install -e .`가 없으면 `python -m aipmt`가 `No module named aipmt`(으)로 응답합니다.
+두 줄 모두 필요합니다. `pip install -e .`이 없으면 `python -m aipmt`이 `No module named aipmt`(으)로 응답합니다.
 
-품질 관리 도구(선택 사항이지만 권장됨):
+품질 관련 도구(선택 사항이지만 권장됨):
 
 ```bash
 pipx install pre-commit               # hors venv — absent des requirements
@@ -643,11 +672,11 @@ pre-commit install                    # hooks rapides à chaque commit
 pre-commit install --hook-type pre-push  # mypy, SAST, pip-audit, tests avant chaque push
 ```
 
-저장소의 28개 번역(README 및 CHANGELOG, 14개 언어)은 `./regen_translations.sh --force`로 다시 생성됩니다. 기본값은 ChatGPT 구독 기반의 Codex 및 `gpt-6.1-sol`이며, 4개 병렬로 실행됩니다. `REGEN_PROVIDER` 및 `REGEN_MODEL`는 경로를 변경합니다. `antigravity`는 Google 구독 기반으로 유지되며 예외 승인 없이 통과합니다. 유료 종량제 API(`openai`, `gemini`, `grok`, `openrouter`)는 `REGEN_ALLOW_PAID_API=1` 없이는 거부됩니다. `REGEN_JOB_TIMEOUT`는 각 작업의 상한 시간을 제한합니다(Codex 및 Antigravity의 경우 600초, 1,800초). 도구에 관한 자세한 내용은 `CLAUDE.md`에 나와 있습니다.
+저장소의 28개 번역(README 및 CHANGELOG, 14개 언어)은 `./regen_translations.sh --force`을 통해 재생성됩니다. 기본적으로 ChatGPT 구독 기반의 Codex 및 `gpt-6.1-sol`을 사용하여 4개 병렬로 실행됩니다. `REGEN_PROVIDER` 및 `REGEN_MODEL`은 경로를 변경합니다. `antigravity`은 구독(Google 구독)을 그대로 유지하며 예외 허용 없이 통과합니다. 유료 과금 API(`openai`, `gemini`, `grok`, `openrouter`)는 `REGEN_ALLOW_PAID_API=1` 없이는 거부됩니다. `REGEN_JOB_TIMEOUT`은 각 작업의 제한 시간을 설정합니다(기본 600초, Codex 및 Antigravity에서는 1,800초). 도구에 대한 자세한 내용은 `CLAUDE.md`에 있습니다.
 
 ## 이 스크립트를 사용하는 프로젝트
 
-- **[jls42.org](https://jls42.org)** — 15개 언어로 발행되는 개인 블로그. 이 블로그의 [일일 AI 브리핑](https://jls42.org/fr/news)은 매일 이 도구로 번역되며, 위 측정의 기준 문서로 사용됩니다.
+- **[jls42.org](https://jls42.org)** — 15개 언어로 발행되는 개인 블로그입니다. 해당 블로그의 [일간 AI 모니터링](https://jls42.org/fr/news) 기사는 매일 이 도구로 번역되며, 위 측정의 기준 문서로 사용됩니다.
 
 ## 작성자
 
@@ -656,17 +685,17 @@ Julien LE SAUX
 
 ## 라이선스
 
-GNU GENERAL PUBLIC LICENSE 버전 3. [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE)를 참조하세요.
+GNU GENERAL PUBLIC LICENSE Version 3. [LICENSE](https://github.com/jls42/ai-powered-markdown-translator/blob/main/LICENSE)를 참조하십시오.
 
 ## 면책 조항
 
-이 프로그램은 GPL v3의 제15조 및 제16조의 조건에 따라 **어떠한 보증도 없이** 배포됩니다. 상품성이나 특정 목적에의 적합성에 대한 보증 없이 "있는 그대로" 제공되며, 작성자는 프로그램 사용으로 인해 발생하는 손해에 대해 책임을 지지 않습니다. 이 요약보다 라이선스 본문이 우선합니다.
+이 프로그램은 GPL v3 제15조 및 제16조의 조건에 따라 **어떠한 보증도 없이** 배포됩니다. 상품성 또는 특정 목적에의 적합성에 대한 보증 없이 "있는 그대로" 제공되며, 작성자는 사용으로 인해 발생하는 손해에 대해 책임을 지지 않습니다. 라이선스 전문이 본 요약보다 우선합니다.
 
-- **게시하기 전에 다시 검토하십시오.** 보호 장치는 코드 블록, 인라인 코드, URL, 앵커 및 `--news` 모드의 인용문에 적용되며, 제목, 표, 프론트 매터, 문장의 의미는 보호하지 않습니다.
-- **문서는 선택한 공급업체로 전송되며**, 해당 업체의 이용약관 및 데이터 정책이 적용됩니다. 일부 무료 모델은 대화 내용을 학습에 재사용할 수 있으며, Antigravity의 이용약관은 유료 구독을 포함하여 Google이 데이터를 재사용하고 사람이 검토할 수 있도록 허용합니다. 로컬 모델만이 데이터를 사용자의 머신 외부로 유출하지 않는 유일한 방법입니다.
-- **API 호출 비용이 청구됩니다.** 이 프로그램은 지출 한도를 제한하지 않습니다. 긴 문서, 실패 후 재시도, 추론을 많이 하는 모델일수록 비용이 더 많이 발생합니다.
-- **게시된 측정 결과는 특정 시점의 관측치일 뿐**, 보증이 아닙니다.
+- **게시하기 전에 검토하십시오.** 보호 장치는 코드 블록, 인라인 코드, URL, 앵커 및 `--news` 모드의 인용문을 보호하지만, 제목, 표, 프런트매터 또는 문장의 의미는 보호하지 않습니다.
+- **문서는 선택한 제공업체로 전송되며**, 해당 제공업체의 이용 약관 및 데이터 정책이 적용됩니다. 일부 무료 모델은 대화 내용을 모델 학습에 재사용할 수 있으며, Antigravity 약관은 유료 구독을 포함하여 Google이 데이터를 재사용하고 사람 검토자에게 검토하도록 허용합니다. 로컬 모델만이 머신 외부로 데이터를 전혀 유출하지 않는 유일한 방법입니다.
+- **API 호출 요금이 청구됩니다.** 이 프로그램은 비용 한도를 제한하지 않으므로, 문서가 길거나 실패 후 재시도하거나 추론을 많이 수행하는 모델일수록 더 많은 비용이 발생합니다.
+- **게시된 측정치는 특정 시점의 관측 결과이며**, 보증 사항이 아닙니다.
 
-언급된 제품 및 회사 이름은 해당 소유자의 자산입니다. 이 프로젝트는 이들과 아무런 제휴 관계가 없습니다.
+언급된 제품 및 회사 이름은 각 해당 소유자의 자산입니다. 이 프로젝트는 이들 중 어느 곳과도 제휴되어 있지 않습니다.
 
 **gemini-3.8-flash-medium으로 프랑스어에서 한국어로 번역된 기사.**

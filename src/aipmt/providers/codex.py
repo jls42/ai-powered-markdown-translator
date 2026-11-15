@@ -33,12 +33,15 @@ DEFAULT_MODEL_CODEX = "gpt-6.1-sol"
 
 
 # Luna = modèle "fast, high-volume" du plan ChatGPT : 250-2000 messages/5h sur
-# Plus contre 10-100 pour Sol (chiffres annoncés pour gpt-5.6-luna). C'est le
-# seul choix raisonnable pour du batch. GPT-6 Luna depuis le 2026-11-15 : une
-# seule mesure sur l'abonnement, le README en japonais en 301 s, structure
-# identique ; la comparaison avec gpt-5.6-luna s'est arrêtée sur la fenêtre de
-# quota épuisée. Par l'API, le même jour, quatre README sur quatre.
-ECO_MODEL_CODEX = "gpt-6-luna"
+# Plus contre 10-100 pour Sol. C'est le seul choix raisonnable pour du batch.
+# GPT-5.6 Luna et non GPT-6 Luna, qui l'a remplacé le temps de la 1.19.0 sur
+# une seule mesure. Comparés le 2026-11-15 sur le README en japonais, quota lu
+# par `account/rateLimits/read` avant et après chaque traduction : gpt-5.6-luna,
+# deux sur deux sans écart, 313 s, 0 puis 1 point de la fenêtre de 5 h ;
+# gpt-6-luna, trois sur quatre sans écart, 301 à 306 s, 3 points à chacune des
+# deux traductions mesurées. Par l'API, où le quota ne compte pas, gpt-6-luna
+# reste l'éco d'OpenAI.
+ECO_MODEL_CODEX = "gpt-5.6-luna"
 
 
 # --- Provider Codex (CLI officiel, quota d'abonnement ChatGPT) --------------

@@ -22,7 +22,7 @@ set -euo pipefail
 # .env a suffi, une fois, à envoyer 28 traductions sur l'API payante.
 #
 # REGEN_MODEL force un modèle par-dessus le défaut du provider (ex.
-# REGEN_MODEL=gpt-6-luna pour l'éco de Codex).
+# REGEN_MODEL=gpt-5.6-luna pour l'éco de Codex).
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

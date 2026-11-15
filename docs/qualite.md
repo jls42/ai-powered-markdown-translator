@@ -6,7 +6,7 @@ Le projet utilise le framework [`pre-commit`](https://pre-commit.com) avec un se
 
 ```bash
 source venv/bin/activate
-pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard
+pip install -r requirements-dev.txt   # detect-secrets, pip-audit, mypy, lizard, build
 pre-commit install                    # hooks pre-commit (rapides)
 pre-commit install --hook-type pre-push  # hooks pre-push (mypy, SAST, audit, tests)
 ```
