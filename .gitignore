@@ -19,8 +19,10 @@ env/
 .vscode/
 *.swp
 
-# Local IDE / tooling state (Claude Code, Codex, etc.)
-.claude/
+# Local IDE / tooling state (Claude Code, Codex, etc.). Les skills du projet
+# sont suivis ; l'état de session et les réglages locaux restent ignorés.
+.claude/*
+!.claude/skills/
 .codex
 
 # Quality tooling caches

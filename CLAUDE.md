@@ -171,6 +171,7 @@ compris ; seuls les renvois d'une section à l'autre y sont devenus des chemins.
 | déplacer du code ou ajouter un module au paquet                                 | `docs/architecture.md`          |
 | ajouter une variable d'environnement ou toucher à `config.py`                   | `docs/environnement.md`         |
 | changer ou citer un modèle par défaut, suivre une échéance de modèle            | `docs/modeles.md`               |
+| faire le tour des modèles et des outils, intégrer un modèle qui vient de sortir | skill `aipmt-tour-modeles`      |
 | toucher à Codex ou diagnostiquer un 429 de campagne                             | `docs/providers/codex.md`       |
 | toucher à Grok, par l'API ou par le CLI                                         | `docs/providers/grok.md`        |
 | toucher à Antigravity (isolation, facturation, CGU)                             | `docs/providers/antigravity.md` |
